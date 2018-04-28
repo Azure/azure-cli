@@ -1,4 +1,4 @@
-supported_service_level_objectives# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -66,13 +66,6 @@ def _any_sku_values_specified(sku):
     return any(val for key, val in sku.__dict__.items())
 
 
-# If kwargs['sku'] has all none/empty properties, delete it so that
-# we don't get "sku.name is null" error
-def _delete_sku_if_empty(kwargs):
-    if not _any_sku_values_specified(kwargs['sku']):
-        del kwargs['sku']
-
-
 def _get_default_capability(capabilities):
     return next((c for c in capabilities if c.status == CapabilityStatus.default), None) or next(c for c in capabilities)
 
@@ -103,34 +96,34 @@ def _find_edition_capability(
         return _get_default_capability(supported_editions)
 
 
-def _find_service_objective_capability(
+def _find_performance_level_capability(
         sku,
         supported_service_level_objectives):
 
     if sku.capacity:
-    # Find requested service objective based on capacity & family.
-    # Note that for non-vcore editions, family is None.
-    try:
-        return next(
-                slo for slo in supported_service_level_objectives
-                if slo.sku.family == sku.family
-                    and int(slo.sku.capacity) == int(sku.capacity))
-    except StopIteration:
-        raise CLIError(
-            "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
-            " Supported skus for '{tier}' are: {skus}".format(
-                tier = sku.tier,
-                family = sku.family,
-                capacity = sku.capacity,
-                skus = [(slo.sku.family, slo.sku.capacity)
-                        for slo in supported_service_level_objectives]
-            ))
+        # Find requested service objective based on capacity & family.
+        # Note that for non-vcore editions, family is None.
+        try:
+            return next(
+                    slo for slo in supported_service_level_objectives
+                    if slo.sku.family == sku.family
+                        and int(slo.sku.capacity) == int(sku.capacity))
+        except StopIteration:
+            raise CLIError(
+                "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
+                " Supported skus for '{tier}' are: {skus}".format(
+                    tier = sku.tier,
+                    family = sku.family,
+                    capacity = sku.capacity,
+                    skus = [(slo.sku.family, slo.sku.capacity)
+                            for slo in supported_service_level_objectives]
+                ))
     elif sku.family:
         # Error - cannot find based on family alone.
         raise CLIError('If --family is specified, --capacity must also be specified.')
     else:
         # Find default service objective
-        return _get_default_capability(edition_capability.supported_service_level_objectives)
+        return _get_default_capability(supported_service_level_objectives)
 
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -279,38 +272,34 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
             quote(self.database_name))
 
 
-# Maps from DB sku tiers to sku names
-def _get_db_sku_name(tier):
-    # Vcore-based tiers have abbreviated sku names. Other tiers
-    # have same sku name as tier name.
-    #
-    # Tier name        | Sku name
-    # ---------------- | --------
-    # GeneralPurpose   | GP
-    # BusinessCritical | BC
-    # Basic            | Basic
-    # Standard         | Standard
-    # Premium          | Premium
-    return {
-        'GeneralPurpose': 'GP',
-        'BusinessCritical': 'BC'
-    }.get(tier, tier)  # 2nd arg is value to return if key not found in dictionary
+def _find_db_sku_from_capabilities(cli_ctx, location, sku):
 
+    logger.debug('_find_db_sku_from_capabilities input: %s', sku)
 
-def _find_db_sku_from_capabilities(cli_ctx, sku):
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out.
+        # Server side will pick a default.
+        logger.debug('_find_db_sku_from_capabilities return None')
+        return None
+
+    # Some properties of sku are specified, but not name. Use the requested properties
+    # to find a matching capability and copy the sku from there.
+
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    capabilities = capabilities_client.list_by_location(kwargs['location'], CapabilityGroup.supported_editions)
+    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_editions)
     server_version_capability = _get_default_capability(capabilities.supported_server_versions)
 
     # Find edition capability, based on requested sku properties
-    edition_capability = _find_edition_capability(sku, server_version_capability.supported_editions
+    edition_capability = _find_edition_capability(sku, server_version_capability.supported_editions)
 
-    # Find service objective capability, based on requested sku properties
-    service_objective_capability = _find_service_objective_capability(sku, edition_capability.supported_service_level_objectives)
+    # Find performance level capability, based on requested sku properties
+    performance_level_capability = _find_performance_level_capability(sku, edition_capability.supported_service_level_objectives)
 
-    # Copy sku object from capability
-    return service_objective_capability.sku
+    # Grab sku object from capability
+    result = performance_level_capability.sku
+    logger.debug('_find_db_sku_from_capabilities return: %s', result)
+    return result
 
 
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
@@ -321,7 +310,8 @@ def _db_dw_create(
         source_db,
         dest_db,
         no_wait,
-        kwargs):
+        sku=None,
+        **kwargs):
 
     # Determine server location
     kwargs['location'] = _get_server_location(
@@ -333,24 +323,9 @@ def _db_dw_create(
     if source_db:
         kwargs['source_database_id'] = source_db.id()
 
-    # If all sku properties are none/empty, delete sku
-    _delete_sku_if_empty(kwargs)
-
-    # Ensure that sku name is not None.
-    # If sku name is not specified, find the sku in capabilities (because sku name is not allowed to be None).
-    sku = kwargs['sku']
-    logger.debug('_db_dw_create input sku: %s', sku)
-
-    if not _any_sku_values_specified(sku):
-        # User did not request any properties of sku, so just wipe it out
-        del kwargs['sku']
-        logger.debug('_db_dw_create removed empty sku')
-
-    elif not kwargs['sku'].name:
-        # Some properties of sku are specified, but not name. Use the requested properties
-        # to find a matching capability and copy the sku from there.
-        kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, sku)
-        logger.debug('_db_dw_create copied sku from capability: %s', kwargs['sku'])
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, kwargs['location'], sku)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -377,7 +352,7 @@ def db_create(
         None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
-        kwargs)
+        **kwargs)
 
 
 def _use_source_db_tier(
@@ -428,7 +403,7 @@ def db_copy(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
         no_wait,
-        kwargs)
+        **kwargs)
 
 
 # Copies a replica. Wrapper function to make create mode more convenient.
@@ -467,7 +442,7 @@ def db_create_replica(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
         no_wait,
-        kwargs)
+        **kwargs)
 
 
 # Renames a database.
@@ -527,7 +502,7 @@ def db_restore(
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
         no_wait,
-        kwargs)
+        **kwargs)
 
 
 # Fails over a database. Wrapper function which uses the server location so that the user doesn't
@@ -766,6 +741,7 @@ def db_list(
 
 # Update database. Custom update function to apply parameters to instance.
 def db_update(
+        cmd,
         instance,
         elastic_pool_id=None,
         max_size_bytes=None,
@@ -805,26 +781,27 @@ def db_update(
     # Set tier
     if tier:
         if not service_objective:
-            # Wipe out sku name so that it does not conflict with new tier
+            # Wipe out old sku name so that it does not conflict with new tier
             instance.sku.name = None
         instance.sku.tier = tier
 
     # Set family
     if family:
         if not service_objective:
-            # Wipe out sku name so that it does not conflict with new family
+            # Wipe out old sku name so that it does not conflict with new family
             instance.sku.name = None
         instance.sku.family = family
-
-    # If sku name was wiped out by any of the above, then fill in sku name based on sku tier
-    if not instance.sku.name:
-        instance.sku.name = _get_db_sku_name(sku.tier)
 
     # Set capacity
     if capacity:
         instance.sku.capacity = capacity
 
-    # TODO Temporary workaround for elastic pool sku issue
+    # If sku name was wiped out by any of the above, resolve the requested sku name
+    # using capabilities.
+    if not instance.sku.name:
+        instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, instance.location, instance.sku)
+
+    # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
         instance.sku = None
 
@@ -1071,7 +1048,7 @@ def dw_create(
         None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
-        kwargs)
+        **kwargs)
 
 
 # Lists databases in a server or elastic pool.
@@ -1110,22 +1087,34 @@ def dw_update(
 ###############################################
 
 
-# Maps from elastic pool sku tiers to sku names
-def _get_elastic_pool_sku_name(tier):
-    # Vcore-based tiers have abbreviated sku names. Other tiers
-    # have same sku name as tier name.
-    #
-    # Tier name        | Sku name
-    # ---------------- | --------
-    # GeneralPurpose   | GP
-    # BusinessCritical | BC
-    # Basic            | BasicPool
-    # Standard         | StandardPool
-    # Premium          | PremiumPool
-    return {
-        'GeneralPurpose': 'GP',
-        'BusinessCritical': 'BC'
-    }.get(tier, tier + 'Pool')  # 2nd arg is value to return if key not found in dictionary
+def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
+
+    logger.debug('_find_elastic_pool_sku_from_capabilities input: %s', sku)
+
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out.
+        # Server side will pick a default.
+        logger.debug('_find_elastic_pool_sku_from_capabilities return None')
+        return None
+
+    # Some properties of sku are specified, but not name. Use the requested properties
+    # to find a matching capability and copy the sku from there.
+
+    # Get default server version capability
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
+    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
+
+    # Find performance level capability, based on requested sku properties
+    performance_level_capability = _find_performance_level_capability(sku, edition_capability.supported_elastic_pool_performance_levels)
+
+    # Copy sku object from capability
+    result = performance_level_capability.sku
+    logger.debug('_find_elastic_pool_sku_from_capabilities return: %s', result)
+    return result
 
 
 # Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
@@ -1136,6 +1125,7 @@ def elastic_pool_create(
         server_name,
         resource_group_name,
         elastic_pool_name,
+        sku=None,
         **kwargs):
 
     # Determine server location
@@ -1144,15 +1134,9 @@ def elastic_pool_create(
         server_name=server_name,
         resource_group_name=resource_group_name)
 
-    # If all sku properties are none/empty, delete sku
-    _delete_sku_if_empty(kwargs)
-
-    # If sku is specified, name must not be None.
-    if 'sku' in kwargs:
-        sku = kwargs['sku']
-        if sku.tier and not sku.name:
-            # Fill in sku name based on sku tier
-            sku.name = _get_elastic_pool_sku_name(sku.tier)
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
 
     # Create
     return client.create_or_update(
@@ -1164,19 +1148,50 @@ def elastic_pool_create(
 
 # Update elastic pool. Custom update function to apply parameters to instance.
 def elastic_pool_update(
+        cmd,
         instance,
-        database_dtu_max=None,
-        database_dtu_min=None,
-        dtu=None,
-        storage_mb=None,
-        zone_redundant=None):
+        max_capacity=None,
+        min_capacity=None,
+        max_size_bytes=None,
+        zone_redundant=None,
+        tier=None,
+        family=None,
+        capacity=None):
 
     # Apply params to instance
-    instance.database_dtu_max = database_dtu_max or instance.database_dtu_max
-    instance.database_dtu_min = database_dtu_min or instance.database_dtu_min
-    instance.dtu = dtu or instance.dtu
-    instance.storage_mb = storage_mb or instance.storage_mb
+    if max_capacity:
+        instance.per_database_settings.max_capacity = max_capacity
+
+    if min_capacity:
+        instance.per_database_settings.max_capacity = max_capacity
+
+    if max_size_bytes:
+        instance.max_size_bytes = max_size_bytes
+
     instance.zone_redundant = zone_redundant
+
+    # Set tier
+    if tier:
+        if not service_objective:
+            # Wipe out old sku name so that it does not conflict with new tier
+            instance.sku.name = None
+        instance.sku.tier = tier
+
+    # Set family
+    if family:
+        if not service_objective:
+            # Wipe out old sku name so that it does not conflict with new family
+            instance.sku.name = None
+        instance.sku.family = family
+
+    # Set capacity
+    if capacity:
+        instance.sku.capacity = capacity
+
+    # If sku name was wiped out by any of the above, resolve the requested sku name
+    # using capabilities.
+    if not instance.sku.name:
+        instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, instance.location, instance.sku)
 
     return instance
 
