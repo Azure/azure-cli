@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=trailing-whitespace
+
 from knack.help_files import helps
 
 
@@ -63,9 +65,53 @@ helps['keyvault storage'] = """
     short-summary: Manage storage accounts.
 """
 
+helps['keyvault storage add'] = """
+    type: command
+    examples:
+        - name: Create a storage account and setup a vault to manage its keys
+          text: >
+            $id = az storage account create -g resourcegroup -n storageacct --query id
+
+
+            # assign the Azure Key Vault service the "Storage Account Key Operator Service Role" role.
+            az role assignment create --role "Storage Account Key Operator Service Role" --scope $id \\
+            --assignee cfa8b339-82a2-471a-a3c9-0fc0be7a4093
+
+
+            az keyvault storage add --vault-name vault -n storageacct --active-key-name key1    \\
+            --auto-regenerate-key --regeneration-period P90D  --resource-id $id
+"""
+
 helps['keyvault storage sas-definition'] = """
     type: group
     short-summary: Manage storage account SAS definitions.
+"""
+
+helps['keyvault storage sas-definition create'] = """
+    type: command
+    examples:
+        - name: Add a sas-definition for an account sas-token
+          text: >
+
+            $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw \\
+            --resource-types sco --services bfqt --https-only --account-name storageacct     \\
+            --account-key 00000000
+
+
+            az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
+            -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
+        - name: Add a sas-definition for a blob sas-token
+          text: >
+
+            $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\
+            -c container1 -n blob1 --https-only --permissions rw
+
+
+            $url = az storage blob url --account-name storageacct -c container1 -n blob1
+
+
+            az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
+            -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
 """
 
 helps['keyvault network-rule'] = """
