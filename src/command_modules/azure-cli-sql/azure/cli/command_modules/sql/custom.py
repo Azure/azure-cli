@@ -554,7 +554,6 @@ def db_list_capabilities(
         location,
         edition=None,
         service_objective=None,
-        sku=None,
         dtu=None,
         vcores=None,
         show_details=None,
@@ -580,13 +579,6 @@ def db_list_capabilities(
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.name.lower() == service_objective.lower()]
-
-    # Filter by sku name
-    if sku:
-        for e in editions:
-            e.supported_service_level_objectives = [
-                slo for slo in e.supported_service_level_objectives
-                if slo.sku.name.lower() == sku.lower()]
 
     # Filter by dtu
     if dtu:
@@ -1207,7 +1199,6 @@ def elastic_pool_list_capabilities(
         client,
         location,
         edition=None,
-        sku=None,
         dtu=None,
         vcores=None,
         show_details=None,
@@ -1228,13 +1219,6 @@ def elastic_pool_list_capabilities(
     # Filter by edition
     if edition:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
-
-    # Filter by sku name
-    if sku:
-        for e in editions:
-            e.supported_elastic_pool_performance_levels = [
-                pl for pl in e.supported_elastic_pool_performance_levels
-                if pl.sku.name.lower() == sku.lower()]
 
     # Filter by dtu
     if dtu:

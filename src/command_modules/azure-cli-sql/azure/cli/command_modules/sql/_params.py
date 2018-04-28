@@ -362,9 +362,6 @@ def load_arguments(self, _):
         c.argument('service_objective',
                    arg_group=search_arg_group,
                    help='Service objective to search for. If unspecified, all service objectives are shown.')
-        c.argument('sku',
-                   arg_group=search_arg_group,
-                   help='Sku name to search for. If unspecified, all skus are shown.')
         c.argument('dtu',
                    arg_group=search_arg_group,
                    help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
