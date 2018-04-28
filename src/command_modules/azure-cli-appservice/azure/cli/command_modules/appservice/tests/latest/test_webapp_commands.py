@@ -139,6 +139,25 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', 'false'),
         ]))
 
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_create(self):
+        resource_group = 'yili-cus-stage-01'
+        plan = 'yili-cus-stage-02'
+        webapp_name = 'lukasz-cli-test-14'
+        config_file = 'https://raw.githubusercontent.com/LukaszStem/spewlogs/master/randomconfig.yml'
+
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file {} "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-linux-cd'
