@@ -431,7 +431,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
     def setter(vm, external_identities=external_identities):
         vm_patch = None
-        if cmd.supported_api_version(min_api='2017-12-01'):
+        if VirtualMachineUpdate:
             vm_patch = VirtualMachineUpdate()
         if vm.identity and vm.identity.identity_ids:
             for i in vm.identity.identity_ids:
@@ -451,16 +451,13 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
-            temp = set(external_identities)
-            external_identities.clear()
-            external_identities.extend(temp)
+            external_identities[::] = set(external_identities)
             vm.identity.identity_ids = external_identities
-        
+
         if vm_patch:
             vm_patch.identity = vm.identity
             return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
-        else:
-            return set_vm(cmd, vm)
+        return set_vm(cmd, vm)
 
     vm = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
                                 identity_scope=identity_scope)
@@ -1241,11 +1238,20 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
             resource.identity.type = ResourceIdentityType.none
         else:  # has to be 'system_assigned_user_assigned'
             resource.identity.type = ResourceIdentityType.system_assigned
-    return setter(cmd, resource)
+
+    return setter(resource_group_name, name, resource)
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
-    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, set_vm)
+    def setter(resource_group_name, vm_name, vm):
+        client = _compute_client_factory(cmd.cli_ctx)
+        VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
+        if VirtualMachineUpdate:
+            vm_update = VirtualMachineUpdate(identity=vm.identity)
+            return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
+        return client.virtual_machines.create_or_update(resource_group_name, vm_name, vm)
+
+    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
 # endregion
 
 
@@ -1698,8 +1704,8 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 # region VirtualMachineScaleSets
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role='Contributor',
                          identity_role_id=None, identity_scope=None):
-    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType = cmd.get_models(
-        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType')
+    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
+        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -1707,7 +1713,10 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
     def getter():
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
-    def setter(vmss):
+    def setter(vmss, external_identities=external_identities):
+        vmss_patch = None
+        if VirtualMachineScaleSetUpdate:
+            vmss_patch = VirtualMachineScaleSetUpdate()
         if vmss.identity and vmss.identity.identity_ids:
             for i in vmss.identity.identity_ids:
                 external_identities.append(i)
@@ -1725,9 +1734,13 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             identity_types = ResourceIdentityType.system_assigned
         vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
         if external_identities:
+            external_identities[::] = set(external_identities)
             vmss.identity.identity_ids = external_identities
-
-        poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        if vmss_patch:
+            vmss_patch.identity = vmss.identity
+            poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
+        else:
+            poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     vmss = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
@@ -2377,6 +2390,12 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
     def _set_vmss(_, vmss_instance):
+        VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
+                                                      operation_group='virtual_machine_scale_sets')
+        if VirtualMachineScaleSetUpdate:
+            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
+            return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
+
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                                   vmss_name, vmss_instance)
 
