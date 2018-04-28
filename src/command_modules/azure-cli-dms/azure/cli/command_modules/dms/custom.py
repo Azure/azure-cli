@@ -180,10 +180,10 @@ def create_task(client,
 
 
 def list_tasks(client, resource_group_name, service_name, project_name, task_type=None):
-    return list(client.tasks.list(group_name=resource_group_name,
-                                  service_name=service_name,
-                                  project_name=project_name,
-                                  task_type=task_type))
+    return client.tasks.list(group_name=resource_group_name,
+                             service_name=service_name,
+                             project_name=project_name,
+                             task_type=task_type)
 
 # endregion
 
