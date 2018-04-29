@@ -682,17 +682,14 @@ def set_properties(instance, expression):
             throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
-            origin_name = name
-            name = make_snake_case(name)
-            if hasattr(instance, name):
-                setattr(instance, name, value)
+            if hasattr(instance, make_snake_case(name)):
+                setattr(instance, make_snake_case(name), value)
             else:
-                if origin_name in getattr(instance, 'additional_properties', {}):
-                    instance.additional_properties[origin_name] = value
-                    instance.enable_additional_properties_sending()   # TODO: yugangw ensure it is set everywhere
-                else:
-                    logger.warning(
-                        "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
+                instance.additional_properties[name] = value
+                instance.enable_additional_properties_sending()
+                logger.warning(
+                        "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
+
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
@@ -830,7 +827,6 @@ def _update_instance(instance, part, path):
 
         if index and '=' in index.group(1):
             key, value = index.group(1).split('=', 1)
-            origin_key = key
             try:
                 value = shell_safe_json_parse(value)
             except:  # pylint: disable=bare-except
@@ -840,8 +836,8 @@ def _update_instance(instance, part, path):
                 if isinstance(x, dict) and x.get(key, None) == value:
                     matches.append(x)
                 elif not isinstance(x, dict):
-                    key = make_snake_case(key)
-                    if hasattr(x, key) and getattr(x, key, None) == value:
+                    snake_key = make_snake_case(key)
+                    if hasattr(x, snake_key) and getattr(x, snake_key, None) == value:
                         matches.append(x)
 
             if len(matches) == 1:
@@ -850,8 +846,8 @@ def _update_instance(instance, part, path):
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
             else:
-                if hasattr(instance, 'additional_properties') and origin_key in instance.additional_properties:
-                    return instance.additional_properties[origin_key]
+                if key in getattr(instance, 'additional_properties', {}):
+                    return instance.additional_properties[key]
                 raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
         if index:
@@ -864,10 +860,12 @@ def _update_instance(instance, part, path):
         if isinstance(instance, dict):
             return instance[part]
 
-        r = getattr(instance, make_snake_case(part), None)
-        if not r and hasattr(instance, 'additional_properties'):
-            r = instance.additional_properties[part]
-        return r
+        if hasattr(instance, make_snake_case(part)):
+            return getattr(instance, make_snake_case(part), None)
+        elif hasattr(instance, 'additional_properties'):
+            return instance.additional_properties.get(part, None)
+        else:
+            raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
 
