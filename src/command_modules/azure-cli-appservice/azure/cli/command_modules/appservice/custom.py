@@ -87,11 +87,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name,
-                                                                        name, multicontainer_config_file)
+                                                                                     name, multicontainer_config_file)
             site_config.linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif runtime:  # windows webapp with runtime specified
-        if startup_file or deployment_container_image_name or multicontainer_config_file or multicontainer_config_type:
+        if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
             raise CLIError("usage error: --startup-file or --deployment-container-image-name or "
                            "--multicontainer-config-type and --multicontainer-config-file is "
                            "only appliable on linux webapp")
@@ -425,35 +425,34 @@ def url_validator(url):
     try:
         result = urlparse(url)
         return all([result.scheme, result.netloc, result.path])
-    except:
+    except ValueError:
         return False
 
 
 def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slot=None):
     from base64 import b64decode
-    linux_fx_version = _get_linux_fx_version(cmd,resource_group_namenameslot)
-    if not any([linux_fx_version.startswith(s for s in MULTI_CONTAINER_TYPES)]):
+    linux_fx_version = _get_linux_fx_version(cmd, resource_group_name, name, slot)
+    if not any([linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES]):
         raise CLIError("Cannot decode config that is not one of the"
-                       " following types: {}".form    (','(MULTI_CONTAINER_TYPES)))
+                       " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
     try:
-        return b64decode(linux_fx_version.spl('|'[1].encode('utf-8')))
+        return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))
     except:
         raise CLIError('Could not decode config')
 
 
 def _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name, name, file_name, slot=None):
-     from base64 import b64encode
-     config_file_bytes = None
-     if url_validator(file_name):
-         from urllib.request import urlopen
-         response = urlopen(file_name, context=_ssl_context())
-         config_file_bytes = response.read()
-     else:
-         with open(file_name) as f:
-             file_contents = f.read()
-             config_file_bytes = file_contents.encode('utf-8')
-     # Decode base64 encoded byte array into string
-     return b64encode(config_file_bytes).decode('utf-8')
+    from base64 import b64encode
+    config_file_bytes = None
+    if url_validator(file_name):
+        from urllib.request import urlopen
+        response = urlopen(file_name, context=_ssl_context())
+        config_file_bytes = response.read()
+    else:
+        with open(file_name, 'rb') as f:
+            config_file_bytes = f.read()
+    # Decode base64 encoded byte array into string
+    return b64encode(config_file_bytes).decode('utf-8')
 
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -618,13 +617,13 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
-    if bool(multicontainer_config_file) and bool(multicontainer_config_type):
-        encoded_config_file = _get_linux_multicontainer_config_file(cmd, resource_group_name,
+    if multicontainer_config_file and multicontainer_config_type:
+        encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name,
                                                                     name, multicontainer_config_file)
         linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
         update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version)
     else:
-        raise CLIError('Must use --multicontainer-config-file FILE --multicontainer-config-type TYPE')
+        logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings))
 

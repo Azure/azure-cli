@@ -143,7 +143,7 @@ class WebappQuickCreateTest(ScenarioTest):
     def test_linux_webapp_multicontainer_create(self):
         resource_group = 'yili-cus-stage-01'
         plan = 'yili-cus-stage-02'
-        webapp_name = 'lukasz-cli-test-14'
+        webapp_name = 'lukasz-cli-test-17'
         config_file = 'https://raw.githubusercontent.com/LukaszStem/spewlogs/master/randomconfig.yml'
 
         self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file {} "
