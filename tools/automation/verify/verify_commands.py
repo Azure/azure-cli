@@ -3,10 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import logging
-import multiprocessing
 import subprocess
 import sys
+import asyncio
+from itertools import islice
 
 
 def init(root):
@@ -52,21 +54,54 @@ def run_commands(args):
         sys.exit(0)
 
     commands = ['az {} --help'.format(each) for each in table]
-    results = []
+    print('{} commands to test.'.format(len(commands)))
 
-    pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    for i, res in enumerate(pool.imap_unordered(run_single_command, commands, 10), 1):
-        sys.stderr.write('{:.2f}% \n'.format(float(i) * 100 / len(commands)))
-        sys.stderr.flush()
-        results.append(res)
-    pool.close()
-    pool.join()
+    loop = asyncio.get_event_loop()
+    failures = loop.run_until_complete(
+        run_commands_in_parallel(
+            (run_one_command(c) for c in commands),
+            parallism=os.cpu_count() * 4
+        )
+    )
 
-    if not all(results):
-        sys.stderr.write('Error running --help on commands.\n')
+    if failures:
+        for command, exit_code in failures:
+            print('Failed command {}. Exit code: {}.'.format(command, exit_code, stdout))
         sys.exit(1)
 
     print('Done')
+
+
+async def run_commands_in_parallel(coroutines, parallism=10):
+    futures = [asyncio.ensure_future(c) for c in islice(coroutines, 0, parallism)]
+    async def return_while_run():
+        while True:
+            await asyncio.sleep(0)
+            for f in futures:
+                if f.done():
+                    futures.remove(f)
+                    try:
+                        futures.append(asyncio.ensure_future(next(coroutines)))
+                    except StopIteration:
+                        pass
+                    return f.result()
+    failures = []
+    while futures:
+        c, e = await return_while_run()
+        sys.stdout.write('{} {}\n'.format('PASS' if e == 0 else 'FAIL', c))
+        sys.stdout.flush()
+        if e != 0:
+            failures.append((c, e))
+
+    return failures
+
+
+async def run_one_command(command):
+    process = await asyncio.create_subprocess_shell(command,
+                                                    stdout=asyncio.subprocess.PIPE,
+                                                    stderr=asyncio.subprocess.STDOUT)
+    await process.wait()
+    return command, process.returncode
 
 
 def print_command_info(command):
@@ -92,19 +127,3 @@ def print_command_info(command):
 
     print(tabulate(attributes, tablefmt='plain'))
     print('<<<<')
-
-
-def run_single_command(command):
-    execution_error = None
-    for i in range(3):  # retry the command 3 times
-        try:
-            subprocess.check_output(command.split(), stderr=subprocess.STDOUT, universal_newlines=True)
-            return True
-        except subprocess.CalledProcessError as error:
-            execution_error = error
-            continue
-
-    if execution_error:
-        sys.stderr.write('Failed {} -> \n{} / {} \n'.format(command, execution_error.output, str(execution_error)))
-
-    return False
