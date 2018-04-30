@@ -68,6 +68,7 @@ DEPENDENCIES = [
     'azure-cli-cosmosdb',
     'azure-cli-dla',
     'azure-cli-dls',
+    'azure-cli-dms',
     'azure-cli-eventgrid',
     'azure-cli-extension',
     'azure-cli-feedback',

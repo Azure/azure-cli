@@ -14,7 +14,9 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.32"
+VERSION = "0.0.1"
+# The full list of classifiers is available at
+# https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -30,15 +32,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-datamigration==0.1.0',
     'azure-cli-core',
-    'azure-mgmt-web==0.35.0',
-    'azure-mgmt-containerregistry==2.0.0',
-    # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
-    'urllib3[secure]>=1.18',
-    'xmltodict',
-    'pyOpenSSL',
-    'six',
-    'vsts-cd-manager<1.1.0',
+    'pyOpenSSL'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -47,9 +43,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-appservice',
+    name='azure-cli-dms',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools AppService Command Module',
+    description='Microsoft Azure Command-Line Tools for the Data Migration Service (DMS) Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -60,7 +56,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.appservice'
+        'azure.cli.command_modules.dms'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

@@ -223,7 +223,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = TestCli()
 
-        registry = Registry(location='westus', sku=Sku('Standard'))
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
         registry.login_server = 'testregistry.azurecr.io'
         mock_get_registry_by_name.return_value = registry, None
 

@@ -9,7 +9,6 @@ __version__ = "2.0.32"
 import os
 import sys
 import timeit
-from pkg_resources import parse_version
 
 from knack.arguments import ArgumentsContext
 from knack.cli import CLI
@@ -258,6 +257,7 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
         self.recommend_remove = recommend_remove
 
     def handle_suppress(self, ext):
+        from pkg_resources import parse_version
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
             parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
         if should_suppress:
