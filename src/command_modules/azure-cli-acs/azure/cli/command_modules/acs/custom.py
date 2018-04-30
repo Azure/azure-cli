@@ -1431,68 +1431,57 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     """
 
     vsce_tool = 'Visual Studio Connected Development Services'
-    vsce_cli = 'vsce'
-    install_vsce = False
+    should_install_vsce = False
     system = platform.system()
-    if system == 'Linux':
-        # Linux
-        raise CLIError('Linux is not supported yet.')
-    elif system == 'Windows':
+    if system == 'Windows':
         # Windows
         # Dev Connect Install Path (WinX)
-        vsce_cli = "C:\\Program Files\\Microsoft SDKs\\Azure\\Visual Studio Connected Environment CLI\\vsce.exe"
-        setup_file = 'vsce-winx-setup.exe'
+        vsce_cli = os.path.join(os.environ["ProgramFiles"],
+                                "Microsoft SDKs", "Azure",
+                                "Visual Studio Connected Environment CLI", "vsce.exe")
+        setup_file = os.path.join(_create_tmp_dir(), 'vsce-winx-setup.exe')
         setup_url = "https://aka.ms/get-vsce-windows-az"
         setup_args = [setup_file]
     elif system == 'Darwin':
         # OSX
-        setup_file = 'vsce-osx-setup.sh'
+        vsce_cli = 'vsce'
+        setup_file = os.path.join(_create_tmp_dir(), 'vsce-osx-setup.sh')
         setup_url = "https://aka.ms/get-vsce-osx-az"
         setup_args = ['bash', setup_file]
+    else:
+        raise CLIError('Platform not supported: {}.'.format(system))
 
-    try:
-        _ensure_dev_connected_installed(vsce_cli)
-    except OSError:
-        install_vsce = True
+    should_install_vsce = not _is_dev_connected_installed(vsce_cli)
 
-    if install_vsce:
+    if should_install_vsce:
         # Install VSCE
         logger.info('Installing Dev Connect commands...')
-        import urllib.request
-        urllib.request.urlretrieve(setup_url, setup_file)
+        from six.moves.urllib.request import urlretrieve
+        urlretrieve(setup_url, setup_file)
         try:
             subprocess.call(
                 setup_args, universal_newlines=True, stdin=None, stdout=None, stderr=None, shell=False)
+        except PermissionError as ex:
+            raise CLIError('Installing {} tooling needs permissions: {}'.format(vsce_tool, ex))
+        finally:
             os.remove(setup_file)
-        except subprocess.CalledProcessError as err:
-            raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
-        except PermissionError:
-            raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
-        try:
-            _ensure_dev_connected_installed(vsce_cli)
-        except OSError:
-            raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' commands for \
-            connected development.".format(vsce_tool))
+        if not _is_dev_connected_installed(vsce_cli):
+            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-vsce' \
+            for connected development.".format(vsce_tool))
 
-    create_dev = False
-    try:
-        from subprocess import PIPE
-        retCode = subprocess.call(
-            [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
-            stderr=PIPE)
-        if retCode == 1:
-            create_dev = True
-    except subprocess.CalledProcessError as err:
-        create_dev = True
+    should_create_dev = False
+    from subprocess import PIPE
+    retCode = subprocess.call(
+        [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
+        stderr=PIPE)
+    if retCode == 1:
+        should_create_dev = True
 
-    if create_dev:
-        try:
-            subprocess.call(
-                [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', 
-                resource_group_name], 
-                universal_newlines=True)
-        except subprocess.CalledProcessError as err:
-            raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
+    if should_create_dev:
+        subprocess.call(
+            [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group',
+             resource_group_name],
+            universal_newlines=True)
 
 
 def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False):  # pylint: disable=line-too-long
@@ -1508,30 +1497,45 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
     """
 
     vsce_tool = 'Visual Studio Connected Development Services'
-    vsce_cli = 'vsce'
+    system = platform.system()
+    if system == 'Windows':
+        # Windows
+        vsce_cli = os.path.join(os.environ["ProgramFiles"],
+                                "Microsoft SDKs", "Azure",
+                                "Visual Studio Connected Environment CLI", "vsce.exe")
+    elif system == 'Darwin':
+        # OSX
+        vsce_cli = 'vsce'
+    else:
+        raise CLIError('Platform not supported: {}.'.format(system))
 
-    try:
-        _ensure_dev_connected_installed(vsce_cli)
-    except OSError:
-        raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' \
+    if not _is_dev_connected_installed(vsce_cli):
+        raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' \
         commands for connected development.".format(vsce_tool))
 
-    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', 
-                                cluster_name, '--resource-group', 
+    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name',
+                                cluster_name, '--resource-group',
                                 resource_group_name]
 
     if prompt:
         remove_command_arguments.append('-f')
+
+    subprocess.call(
+        remove_command_arguments, universal_newlines=True)
+
+
+def _create_tmp_dir():
+    tmp_dir = tempfile.mkdtemp()
+    return tmp_dir
+
+
+def _is_dev_connected_installed(vsce_cli):
     try:
-        subprocess.call(
-            remove_command_arguments, universal_newlines=True)
-    except subprocess.CalledProcessError as err:
-        raise CLIError('{} deletion failure: {}.'.format(vsce_tool, err))
-
-
-def _ensure_dev_connected_installed(vsce_cli):
-    from subprocess import PIPE, Popen
-    Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
+        from subprocess import PIPE, Popen
+        Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
+    except OSError:
+        return False
+    return True
 
 
 def _ensure_aks_service_principal(cli_ctx,
