@@ -9,13 +9,13 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
 import json
 import ssl
 import sys
 import OpenSSL.crypto
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
