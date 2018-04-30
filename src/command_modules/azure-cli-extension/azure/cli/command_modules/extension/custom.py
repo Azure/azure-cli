@@ -216,7 +216,7 @@ def remove_extension(extension_name):
         get_extension(extension_name)
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name)
-        shutil.rmtree(get_extension_path(extension_name))
+        shutil.rmtree(get_extension_path(extension_name), ignore_errors=True)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
