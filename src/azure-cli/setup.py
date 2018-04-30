@@ -52,6 +52,7 @@ DEPENDENCIES = [
     'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-advisor',
+    'azure-cli-ams',
     'azure-cli-appservice',
     'azure-cli-batch',
     'azure-cli-batchai',

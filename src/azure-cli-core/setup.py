@@ -63,12 +63,12 @@ DEPENDENCIES = [
     'pip',
     'pygments',
     'PyJWT',
-    'pyopenssl>=16.2',  # https://github.com/pyca/pyopenssl/issues/568
+    'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'pyyaml',
     'requests',
     'six',
     'tabulate>=0.7.7,<=0.8.2',
-    'wheel',
+    'wheel==0.30.0',
 ]
 
 if sys.version_info < (3, 4):

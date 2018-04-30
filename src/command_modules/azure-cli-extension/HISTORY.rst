@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.13
+++++++
+* Pin version of `wheel` so extensions can get metadata shown again.
+
 0.0.12
 ++++++
 * Linux distro check message should be output to debug instead of warning.

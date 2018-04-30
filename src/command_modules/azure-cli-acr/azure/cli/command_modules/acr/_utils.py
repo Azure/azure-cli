@@ -31,9 +31,16 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     elements = [item for item in result if item.name.lower() == resource_name.lower()]
 
     if not elements:
-        raise CLIError(
-            "No resource with type '{}' can be found with name '{}'.".format(
-                resource_type, resource_name))
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cli_ctx)
+        message = "The resource with name '{}' and type '{}' could not be found".format(
+            resource_name, resource_type)
+        try:
+            subscription = profile.get_subscription()
+            raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
+        except (KeyError, TypeError):
+            raise CLIError("{} in the current subscription.".format(message))
+
     elif len(elements) == 1:
         return elements[0]
     else:
@@ -82,39 +89,6 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     client = get_acr_service_client(cli_ctx).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
-
-
-def arm_deploy_template_managed_storage(cli_ctx,
-                                        resource_group_name,
-                                        registry_name,
-                                        location,
-                                        sku,
-                                        admin_user_enabled,
-                                        deployment_name=None):
-    """Deploys ARM template to create a container registry with managed storage account.
-    :param str resource_group_name: The name of resource group
-    :param str registry_name: The name of container registry
-    :param str location: The name of location
-    :param str sku: The SKU of the container registry
-    :param bool admin_user_enabled: Enable admin user
-    :param str deployment_name: The name of the deployment
-    """
-    from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core.util import get_file_json
-    import os
-
-    parameters = _parameters(
-        registry_name=registry_name,
-        location=location,
-        sku=sku,
-        admin_user_enabled=admin_user_enabled)
-
-    file_path = os.path.join(os.path.dirname(__file__), 'template.json')
-    template = get_file_json(file_path)
-    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    return _arm_deploy_template(
-        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
 
 
 def arm_deploy_template_new_storage(cli_ctx,

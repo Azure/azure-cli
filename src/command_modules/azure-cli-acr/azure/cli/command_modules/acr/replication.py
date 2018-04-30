@@ -35,13 +35,18 @@ def acr_replication_create(cmd,
     normalized_location = "".join(location.split()).lower()
     if registry.location == normalized_location:
         raise CLIError('Replication could not be created in the same location as the registry.')
-    return client.create(
-        resource_group_name=resource_group_name,
-        registry_name=registry_name,
-        replication_name=replication_name or normalized_location,
-        location=location,
-        tags=tags
-    )
+
+    from msrest.exceptions import ValidationError
+    try:
+        return client.create(
+            resource_group_name=resource_group_name,
+            registry_name=registry_name,
+            replication_name=replication_name or normalized_location,
+            location=location,
+            tags=tags
+        )
+    except ValidationError as e:
+        raise CLIError(e)
 
 
 def acr_replication_delete(cmd,

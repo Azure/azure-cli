@@ -520,6 +520,8 @@ class WebappSlotScenarioTest(ScenarioTest):
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+        # try another way to delete a slot and exercise all options
+        self.cmd('webapp delete -g {} -n {} --slot {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp, slot2))
 
 
 class WebappSlotTrafficRouting(ScenarioTest):
@@ -770,7 +772,6 @@ class WebappAuthenticationTest(ScenarioTest):
             JMESPathCheck('defaultProvider', None),
             JMESPathCheck('enabled', False),
             JMESPathCheck('tokenStoreEnabled', None),
-            JMESPathCheck('runtimeVersion', None),
             JMESPathCheck('allowedExternalRedirectUrls', None),
             JMESPathCheck('tokenRefreshExtensionHours', None),
             JMESPathCheck('clientId', None),
@@ -784,7 +785,7 @@ class WebappAuthenticationTest(ScenarioTest):
 
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
-                          '--token-store false --runtime-version v5.0 --token-refresh-extension-hours 7.2 '
+                          '--token-store false --token-refresh-extension-hours 7.2 '
                           '--aad-client-id aad_client_id --aad-client-secret aad_secret '
                           '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
@@ -794,7 +795,6 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('defaultProvider', 'Facebook'),
                               JMESPathCheck('enabled', True),
                               JMESPathCheck('tokenStoreEnabled', False),
-                              JMESPathCheck('runtimeVersion', 'v5.0'),
                               JMESPathCheck('tokenRefreshExtensionHours', 7.2),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),

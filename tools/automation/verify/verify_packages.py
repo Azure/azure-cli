@@ -10,6 +10,7 @@ import os.path
 import subprocess
 import imp
 import glob
+import filecmp
 import zipfile
 import logging
 import unittest
@@ -30,13 +31,20 @@ class PackageVerifyTests(unittest.TestCase):
         super(PackageVerifyTests, self).__init__(method_name)
         self.test_data = kwargs
 
-    def test_azure_cli_module_manifest(self):
+    def test_azure_cli_module_manifest_and_azure_bdist(self):
         path = self.test_data['module_path']
         self.assertTrue(os.path.isdir(path), msg='Path {} does not exist'.format(path))
 
         manifest_file = os.path.join(path, 'MANIFEST.in')
         self.assertTrue(os.path.isfile(manifest_file), msg='Manifest file {} missing'.format(manifest_file))
 
+        # Check azure_bdist_wheel.py file for module.
+        # Assumption is that core has the correct file always so compare against that.
+        core_azure_bdist_wheel = os.path.join(automation_path.get_repo_root(), 'src', 'azure-cli-core', 'azure_bdist_wheel.py')
+        mod_azure_bdist_wheel = os.path.join(path, 'azure_bdist_wheel.py')
+        if os.path.isfile(mod_azure_bdist_wheel):
+            self.assertTrue(filecmp.cmp(core_azure_bdist_wheel, mod_azure_bdist_wheel), "Make sure {} is correct. It should look like {}".format(mod_azure_bdist_wheel, core_azure_bdist_wheel))
+        
     def test_azure_cli_installation(self):
         az_output = subprocess.check_output(['az', '--debug'], stderr=subprocess.STDOUT, universal_newlines=True)
         self.assertNotIn('Error loading command module', az_output, msg='Module loading error message showed up.')
@@ -89,7 +97,7 @@ def run_verifications(args):
     suite.addTest(PackageVerifyTests('test_azure_cli_installation'))
     suite.addTest(PackageVerifyTests('test_azure_cli_module_installation'))
     for _, path in automation_path.get_all_module_paths():
-        suite.addTest(PackageVerifyTests('test_azure_cli_module_manifest', module_path=path))
+        suite.addTest(PackageVerifyTests('test_azure_cli_module_manifest_and_azure_bdist', module_path=path))
     for each in glob.glob(os.path.join(args.build_folder, '*.whl')):
         suite.addTest(PackageVerifyTests('test_azure_cli_module_wheel', wheel_path=each))
     runner = unittest.TextTestRunner(verbosity=2)

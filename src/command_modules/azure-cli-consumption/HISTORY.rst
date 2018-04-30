@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.3.1
++++++
+* Added new commands for budget API.
+
 0.3.0
 +++++
 * Added commands `marketplace`.

@@ -18,7 +18,15 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class CompletionTest(unittest.TestCase):
-    """ tests the completion generator """
+    def __init__(self, methodName):
+        super(CompletionTest, self).__init__(methodName)
+        with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
+            with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
+                shell_ctx = AzInteractiveShell(TestCli(), None)
+                self.completer = shell_ctx.completer
+                self.shell_ctx = shell_ctx
+
+    # tests the completion generator
     def verify_completions(self, generated_completions, expected_completions, start_position,
                            all_completions_expected=True, unexpected_completions=None):
         for completion in generated_completions:
@@ -33,16 +41,7 @@ class CompletionTest(unittest.TestCase):
             self.assertEqual(completion.start_position, start_position)
         self.assertFalse(expected_completions)
 
-    def init_completer(self):
-        with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
-            with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
-                shell_ctx = AzInteractiveShell(TestCli(), None)
-                self.completer = shell_ctx.completer
-
     def test_command_completion(self):
-        # tests some azure commands
-        self.init_completer()
-
         # initial completions
         doc = Document(u' ')
         gen = self.completer.get_completions(doc, None)
@@ -80,9 +79,6 @@ class CompletionTest(unittest.TestCase):
         self.verify_completions(gen, completions, 0)
 
     def test_param_completion(self):
-        # tests some azure params
-        self.init_completer()
-
         # 'az -h'
         doc = Document(u'-')
         gen = self.completer.get_completions(doc, None)
@@ -120,6 +116,12 @@ class CompletionTest(unittest.TestCase):
         completions = set(['--subnet', '--subnet-address-prefix'])
         self.verify_completions(gen, completions, -8)
 
+        # test params with no help
+        doc = Document(u'vmss create --upgrade-policy-mo')
+        gen = self.completer.get_completions(doc, None)
+        completions = set(['--upgrade-policy-mode'])
+        self.verify_completions(gen, completions, -19)
+
         # test duplicated parameters
         expected = set()
         doc = Document(u'vmss create --name Bob --n')
@@ -128,10 +130,10 @@ class CompletionTest(unittest.TestCase):
         self.verify_completions(gen, expected, -3, all_completions_expected=False, unexpected_completions=not_expected)
 
         # test duplicated parameter alias
-        doc = Document(u'vmss create --name Bob -n')
+        doc = Document(u'vmss create --name Bob -')
         gen = self.completer.get_completions(doc, None)
         not_expected = set(['-n'])
-        self.verify_completions(gen, expected, -2, all_completions_expected=False, unexpected_completions=not_expected)
+        self.verify_completions(gen, expected, -1, all_completions_expected=False, unexpected_completions=not_expected)
 
         # test displayed help
         doc = Document(u'vm create -g')

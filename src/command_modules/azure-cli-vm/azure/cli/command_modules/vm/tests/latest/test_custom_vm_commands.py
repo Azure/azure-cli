@@ -290,12 +290,6 @@ class TestVmCustom(unittest.TestCase):
 
         self.assertTrue("Only Data disks can have encryption disabled in a Linux VM." in str(context.exception))
 
-        # throw on disabling encryption on data disk, but os disk is also encrypted
-        with self.assertRaises(CLIError) as context:
-            decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
-
-        self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
-
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
         decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
@@ -336,9 +330,9 @@ class TestVmCustom(unittest.TestCase):
         result, msg = _check_encrypt_is_supported(image, 'all')
         self.assertFalse(result)
         self.assertEqual(msg,
-                         "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
+                         "The distro is not in CLI's known supported list. Use https://aka.ms/adelinux to cross check")
 
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='6.7')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
 
@@ -455,6 +449,11 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
         self.location = 'westus'
+        ext = mock.MagicMock()
+        ext.publisher, ext.virtual_machine_extension_type = 'Microsoft.Azure.Security', 'AzureDiskEncryptionForLinux'
+        self.resources = [ext]
+        self.instance_view = mock.MagicMock()
+        self.instance_view.extensions = [ext]
 
 
 class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
