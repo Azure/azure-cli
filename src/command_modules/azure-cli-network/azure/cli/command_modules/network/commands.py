@@ -33,7 +33,7 @@ from azure.cli.command_modules.network._format import (
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table)
+    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -488,8 +488,8 @@ def load_command_table(self, _):
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
         g.command('delete', 'delete')
-        g.command('show', 'get', exception_handler=empty_on_404)
-        g.command('list', 'list')
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_nsg_rule_table_output)
+        g.command('list', 'list', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
         g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
                                  custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')

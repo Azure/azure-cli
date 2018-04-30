@@ -62,6 +62,9 @@ _COMMON_TENANT = 'common'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
+_SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
+_USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+
 
 def _authentication_context_factory(cli_ctx, tenant, cache):
     import re
@@ -267,7 +270,7 @@ class Profile(object):
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = 'userAssignedIdentity' if identity_id else 'systemAssignedIdentity'
+        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:
@@ -426,10 +429,12 @@ class Profile(object):
         return access_token
 
     @staticmethod
-    def _try_parse_msi_account_name(subscription_name):
-        parts = subscription_name.split('-', 1)
-        if parts[0] in MsiAccountTypes.valid_msi_account_types():
-            return parts[0], (None if len(parts) <= 1 else parts[1])
+    def _try_parse_msi_account_name(account):
+        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            parts = subscription_name.split('-', 1)
+            if parts[0] in MsiAccountTypes.valid_msi_account_types():
+                return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
     def get_login_credentials(self, resource=None,
@@ -439,7 +444,7 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type is None:
             def _retrieve_token():
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -480,7 +485,7 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             msi_creds.set_token()
@@ -808,7 +813,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("No matched service principal found")
         cred = matched[0]
-        return cred[_ACCESS_TOKEN]
+        return cred.get(_ACCESS_TOKEN, None)
 
     @property
     def adal_token_cache(self):
@@ -831,10 +836,10 @@ class CredsCache(object):
         state_changed = False
         if matched:
             # pylint: disable=line-too-long
-            if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
+            if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
                 self._service_principal_creds.remove(matched[0])
-                self._service_principal_creds.append(matched[0])
+                self._service_principal_creds.append(sp_entry)
                 state_changed = True
         else:
             self._service_principal_creds.append(sp_entry)

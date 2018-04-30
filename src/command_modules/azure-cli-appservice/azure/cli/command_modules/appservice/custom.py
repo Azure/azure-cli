@@ -272,7 +272,7 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
 
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
                          client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
-                         runtime_version=None, token_refresh_extension_hours=None,  # pylint: disable=unused-argument
+                         token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
@@ -325,11 +325,16 @@ def delete_function_app(cmd, resource_group_name, name, slot=None):
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
                   keep_dns_registration=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    delete_method = getattr(client.web_apps, 'delete' if slot is None else 'delete_slot')
-    delete_method(resource_group_name, name,
-                  delete_metrics=False if keep_metrics else None,
-                  delete_empty_server_farm=False if keep_empty_plan else None,
-                  skip_dns_registration=False if keep_dns_registration else None)
+    if slot:
+        client.web_apps.delete_slot(resource_group_name, name, slot,
+                                    delete_metrics=False if keep_metrics else None,
+                                    delete_empty_server_farm=False if keep_empty_plan else None,
+                                    skip_dns_registration=False if keep_dns_registration else None)
+    else:
+        client.web_apps.delete(resource_group_name, name,
+                               delete_metrics=False if keep_metrics else None,
+                               delete_empty_server_farm=False if keep_empty_plan else None,
+                               skip_dns_registration=False if keep_dns_registration else None)
 
 
 def stop_webapp(cmd, resource_group_name, name, slot=None):
@@ -1626,7 +1631,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
     for e in ['blob', 'queue', 'table']:
         if not getattr(endpoints, e, None):
-            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e, storage_account)   # pylint: disable=line-too-long
+            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(storage_account, e)   # pylint: disable=line-too-long
     if sku not in allowed_storage_types:
         error_message += 'Storage type {} is not allowed'.format(sku)
 
