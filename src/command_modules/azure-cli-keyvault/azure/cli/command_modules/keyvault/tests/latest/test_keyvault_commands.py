@@ -862,7 +862,6 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
             'b': 'blob1',
             'f': os.path.join(TEST_DIR, 'test_secret.txt')
         })
-        print(acct_sas_token)
         self.cmd('storage container create -n {c} --account-name {sa} --sas-token {acct_sas}',
                  checks=[self.check('created', True)])
 
@@ -872,10 +871,8 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         # create a service sas token for the accessing the blob
         blob_sas_template = self.cmd('storage blob generate-sas -c {c} -n {b} --account-name {sa}'
                                      ' --account-key 00000000 --permissions r').output[1:-2]
-        print('blob_sas_template', blob_sas_template)
         blob_url = self.cmd('storage blob url -c {c} -n {b} --account-name {sa}').output[1:-2]
 
-        print('url', blob_url)
         blob_temp = '{}?{}'.format(blob_url, blob_sas_template)
         print('blob_temp', blob_temp)
         self.kwargs.update({
@@ -889,6 +886,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'blob_sas_sid': sas_def['secretId'],
+            'blob_sas_id': sas_def['id']
         })
 
         # use the blob sas token to read the blob
@@ -906,9 +904,9 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
         # show a sas definition by (vault, account-name, name) and by id
         self.cmd('keyvault storage sas-definition show --vault-name {kv} --account-name {sa} -n {blob_sas_name}',
-                 checks=[self.check('templateUri', '{blob_temp}')])
+                 checks=[self.check('id', '{blob_sas_id}')])
         self.cmd('keyvault storage sas-definition show --id {acct_sas_id}',
-                 checks=[self.check('templateUri', '{acct_temp}')])
+                 checks=[self.check('id', '{acct_sas_id}')])
 
         # delete a sas definition by (vault, account-name, name) and by id
         self.cmd('keyvault storage sas-definition delete --vault-name {kv} --account-name {sa} -n {blob_sas_name}')
