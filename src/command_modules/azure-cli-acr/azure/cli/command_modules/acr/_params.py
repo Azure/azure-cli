@@ -7,6 +7,13 @@
 import argparse
 from argcomplete.completers import FilesCompleter
 
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
+    BuildTaskStatus,
+    OsType,
+    BaseImageTriggerType,
+    BuildStatus
+)
+
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_location_type,
@@ -108,8 +115,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # build task parameters
         c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task.', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
         c.argument('alias', help='The alternative name for build task. Default to the build task name.')
-        c.argument('status', help='The current status of build task.', choices=['Enabled', 'Disabled'])
-        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', choices=['Linux', 'Windows'])
+        c.argument('status', help='The current status of build task.', choices=[BuildTaskStatus.enabled.value, BuildTaskStatus.disabled.value])
+        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', choices=[OsType.linux.value, OsType.windows.value])
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the build.')
         c.argument('timeout', type=int, help='Build timeout in seconds.')
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
@@ -119,11 +126,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('step_name', help='The name of the build step.', completer=get_resource_name_completion_list(BUILD_STEP_RESOURCE_TYPE))
         c.argument('branch', help="The source control branch name.")
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
-        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", choices=['All', 'Runtime', 'None'])
+        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", choices=[BaseImageTriggerType.all.value,
+                                                                                                                          BaseImageTriggerType.runtime.value,
+                                                                                                                          BaseImageTriggerType.none.value])
         # build parameters
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')
-        c.argument('build_status', help='The current status of build.', choices=['Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Canceled', 'Error', 'Timeout'])
+        c.argument('build_status', help='The current status of build.', choices=[BuildStatus.queued.value,
+                                                                                 BuildStatus.started.value,
+                                                                                 BuildStatus.running.value,
+                                                                                 BuildStatus.succeeded.value,
+                                                                                 BuildStatus.failed.value,
+                                                                                 BuildStatus.canceled.value,
+                                                                                 BuildStatus.error.value,
+                                                                                 BuildStatus.timeout.value])
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
