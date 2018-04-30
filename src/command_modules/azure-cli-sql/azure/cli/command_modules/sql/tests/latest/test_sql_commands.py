@@ -281,7 +281,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = 'East US 2'
+        loc_display = 'eastus2'
 
         # test sql db commands
         db1 = self.cmd('sql db create -g {} --server {} --name {}'
@@ -457,6 +457,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2')
+    @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
                          server1, server2):
@@ -465,7 +466,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'S1'
 
         rg = resource_group_1
-        loc_display = 'West US'
+        loc_display = 'westus'
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -528,6 +529,7 @@ def _create_db_wait_for_first_backup(test, rg, server, database_name):
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
+    @AllowLargeResponse()
     def test_sql_db_restore(self, resource_group, resource_group_location, server):
         rg = resource_group
         database_name = 'cliautomationdb01'
@@ -575,6 +577,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
+    @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         rg = resource_group
         database_name = 'cliautomationdb01'
@@ -777,6 +780,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
     @ResourceGroupPreparer()
     @SqlServerPreparer()
+    @AllowLargeResponse()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
 
@@ -785,7 +789,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = 'West US'
+        loc_display = 'westus'
 
         # test sql db commands
         dw = self.cmd('sql dw create -g {} --server {} --name {}'
@@ -1014,6 +1018,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1")
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2")
+    @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
                                  resource_group_2, resource_group_location_2,
@@ -1167,6 +1172,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
+    @AllowLargeResponse()
     def test_sql_elastic_pools_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb02"
         pool_name2 = "cliautomationpool02"
@@ -1187,7 +1193,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         db_service_objective = 'S1'
 
         rg = resource_group
-        loc_display = 'East US 2'
+        loc_display = 'eastus2'
 
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
@@ -1389,6 +1395,7 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='southeastasia')
     @SqlServerPreparer(location='southeastasia')
+    @AllowLargeResponse()
     def test_sql_elastic_pool_operation_mgmt(self, resource_group, resource_group_location, server):
         edition = 'Premium'
         dtu = 125
@@ -1479,11 +1486,11 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                          JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
                          JMESPathCheck("length([].supportedServiceLevelObjectives[] | [?name != 'S0'])", 0)])
 
-        pool_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedMaxSizes[])'
-        pool_db_max_dtu_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[])'
-        pool_db_min_dtu_length_jmespath = ('length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[]'
-                                           '.supportedPerDatabaseMinDtus[])')
-        pool_db_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxSizes[])'
+        pool_max_size_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedMaxSizes[])'
+        pool_db_max_dtu_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxPerformanceLevels[])'
+        pool_db_min_dtu_length_jmespath = ('length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxPerformanceLevels[]'
+                                           '.supportedPerDatabaseMinPerformanceLevels[])')
+        pool_db_max_size_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxSizes[])'
 
         # Get all elastic pool capabilities
         self.cmd('sql elastic-pool list-editions -l {}'.format(location),
@@ -1503,8 +1510,8 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
-                     JMESPathCheckGreaterThan('length([].supportedElasticPoolDtus[?limit == `100`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolDtus[?limit != `100`][])', 0)])
+                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?limit == `100`][])', 0),
+                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?limit != `100`][])', 0)])
 
         # Get all db capabilities with pool max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
@@ -1548,7 +1555,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     @StorageAccountPreparer()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'West US'
+        location_long_name = 'westus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -1998,6 +2005,7 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 class SqlZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
+    @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
         database_name_2 = "createZonedUpdateToUnzonedDb"
@@ -2097,6 +2105,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
+    @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
         pool_name_2 = "createZonedUpdateToUnzonedPool"

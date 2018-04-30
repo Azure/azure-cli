@@ -828,8 +828,7 @@ def db_list(
         return client.list_by_elastic_pool(
             server_name=server_name,
             resource_group_name=resource_group_name,
-            elastic_pool_name=elastic_pool_name,
-            filter=filter)
+            elastic_pool_name=elastic_pool_name)
 
         # List all databases in the server
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
@@ -1173,11 +1172,12 @@ def dw_list(
     Lists data warehouses in a server or elastic pool.
     '''
 
-    return client.list_by_server(
+    dbs = client.list_by_server(
         resource_group_name=resource_group_name,
-        server_name=server_name,
-        # OData filter to include only DW's
-        filter="properties/edition eq '{}'".format(DatabaseEdition.data_warehouse.value))
+        server_name=server_name)
+
+    # Include only DW's
+    return [db for db in dbs if db.sku.tier == DatabaseEdition.data_warehouse.value]
 
 
 def dw_update(
