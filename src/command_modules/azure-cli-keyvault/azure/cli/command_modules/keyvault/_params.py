@@ -22,7 +22,8 @@ from ._validators import (
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_vault_id)
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
+    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
 
 
 # CUSTOM CHOICE LISTS
@@ -34,7 +35,7 @@ certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     from azure.keyvault.models import JsonWebKeyOperation
-    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes, JsonWebKeyType, JsonWebKeyCurveName
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType, SasDefinitionAttributes
     from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
         SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
 
@@ -159,12 +160,21 @@ def load_arguments(self, _):
 
     # region KeyVault Storage Account
 
-    with self.argument_context('keyvault storage') as c:
+    with self.argument_context('keyvault storage', arg_group='Id') as c:
         c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
         c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
-    with self.argument_context('keyvault storage add') as c:
-        c.attributes_argument('storage_account', StorageAccountAttributes, create=True)
+    for scope in ['keyvault storage add', 'keyvault storage update']:
+        with self.argument_context(scope) as c:
+            c.extra('disabled', arg_type=get_three_state_flag(), help='Add the storage account in a disabled state.', validator=validate_storage_disabled_attribute('storage_account_attributes', StorageAccountAttributes))
+            c.ignore('storage_account_attributes')
+            c.argument('auto_regenerate_key', arg_type=get_three_state_flag(), required=False)
+            c.argument('regeneration_period', help='The key regeneration time duration specified in ISO-8601 format, such as "P30D" for rotation every 30 days.')
+    for scope in ['backup', 'show', 'update', 'remove']:
+        with self.argument_context('keyvault storage ' + scope, arg_group='Id') as c:
+            c.extra('identifier', options_list=['--id'], help='Id of the SAS definition.  If specified all other \'Id\' arguments should be omitted.', validator=validate_storage_account_id)
+            c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
+            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
 
     with self.argument_context('keyvault storage backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store storage account backup.')
@@ -172,6 +182,25 @@ def load_arguments(self, _):
     with self.argument_context('keyvault storagerestore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore storage account.')
 
+    with self.argument_context('keyvault storage sas-definition', arg_group='Id') as c:
+        c.argument('storage_account_name', options_list=['--account-name'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
+        c.argument('sas_definition_name', options_list=['--name', '-n'], help='Name to identify the SAS definition in the vault.', id_part='child_name_2')
+
+    for scope in ['keyvault storage sas-definition create', 'keyvault storage sas-definition update']:
+        with self.argument_context(scope) as c:
+            c.extra('disabled', arg_type=get_three_state_flag(), help='Add the storage account in a disabled state.', validator=validate_storage_disabled_attribute('sas_definition_attributes', SasDefinitionAttributes))
+            c.ignore('sas_definition_attributes')
+            c.argument('sas_type', arg_type=get_enum_type(SasTokenType))
+            c.argument('template_uri', help='The SAS definition token template signed with the key 00000000.  In the case of an account token this is only the sas token itself, for service tokens, the full service endpoint url along with the sas token.  Tokens created according to the SAS definition will have the same properties as the template.')
+            c.argument('validity_period', help='The validity period of SAS tokens created according to the SAS definition in ISO-8601, such as "PT12H" for 12 hour tokens.')
+            c.argument('auto_regenerate_key', arg_type=get_three_state_flag())
+
+    for scope in ['keyvault storage sas-definition delete', 'keyvault storage sas-definition show', 'keyvault storage sas-definition update']:
+        with self.argument_context(scope, arg_group='Id') as c:
+            c.extra('identifier', options_list=['--id'], help='Id of the SAS definition.  If specified all other \'Id\' arguments should be omitted.', validator=validate_sas_definition_id)
+            c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
+            c.argument('sas_definition_name', required=False, help='Name to identify the SAS definition in the vault. Required if --id is not specified.')
+            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
     # endregion
 
     # KeyVault Certificate
