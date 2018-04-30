@@ -37,6 +37,7 @@ DEPENDENCIES = [
     'urllib3[secure]>=1.18',
     'xmltodict',
     'pyOpenSSL',
+    'six',
     'vsts-cd-manager<1.1.0',
 ]
 

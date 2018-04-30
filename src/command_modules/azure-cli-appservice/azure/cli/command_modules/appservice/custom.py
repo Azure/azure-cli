@@ -9,12 +9,13 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
 import json
-import OpenSSL.crypto
 import ssl
 import sys
+import OpenSSL.crypto
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -86,8 +87,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
             site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
         elif multicontainer_config_type and multicontainer_config_file:
-            encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name,
-                                                                                     name, multicontainer_config_file)
+            encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif runtime:  # windows webapp with runtime specified
@@ -435,17 +435,13 @@ def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slo
     if not any([linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES]):
         raise CLIError("Cannot decode config that is not one of the"
                        " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
-    try:
-        return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))
-    except:
-        raise CLIError('Could not decode config')
+    return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))
 
 
-def _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name, name, file_name, slot=None):
+def _get_linux_multicontainer_encoded_config_from_file(file_name):
     from base64 import b64encode
     config_file_bytes = None
     if url_validator(file_name):
-        from urllib.request import urlopen
         response = urlopen(file_name, context=_ssl_context())
         config_file_bytes = response.read()
     else:
@@ -511,7 +507,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+    if sys.version_info < (3, 4) or (in_cloud_console() and sys.platform.system() == 'Windows'):
         try:
             return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
         except AttributeError:
@@ -618,11 +614,10 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
     if multicontainer_config_file and multicontainer_config_type:
-        encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(cmd, resource_group_name,
-                                                                    name, multicontainer_config_file)
+        encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
         linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
         update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version)
-    else:
+    elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings))
@@ -656,10 +651,12 @@ def delete_container_settings(cmd, resource_group_name, name, slot=None):
 
 def show_container_settings(cmd, resource_group_name, name, show_multicontainer_config=None, slot=None):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings, show_multicontainer_config, slot))
+    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
+                                                                          show_multicontainer_config, slot))
 
 
-def _filter_for_container_settings(cmd, resource_group_name, name, settings, show_multicontainer_config=None, slot=None):
+def _filter_for_container_settings(cmd, resource_group_name, name, settings,
+                                   show_multicontainer_config=None, slot=None):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
     fx_version = _get_linux_fx_version(cmd, resource_group_name, name, slot).strip()
     if fx_version:
@@ -1189,7 +1186,6 @@ def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
 
 
 def _open_page_in_browser(url):
-    import sys
     if sys.platform.lower() == 'darwin':
         # handle 2 things:
         # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
@@ -1362,7 +1358,6 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 
 def _get_log(url, user_name, password, log_file=None):
-    import sys
     import certifi
     import urllib3
     try:
