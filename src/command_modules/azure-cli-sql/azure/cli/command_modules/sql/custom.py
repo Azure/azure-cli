@@ -10,6 +10,8 @@ import re
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
+from knack.log import get_logger
+
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
@@ -38,8 +40,6 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
-from knack.log import get_logger
-
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations
@@ -54,6 +54,9 @@ logger = get_logger(__name__)
 
 # Determines server location
 def _get_server_location(cli_ctx, server_name, resource_group_name):
+    '''
+    Returns the location (i.e. Azure region) that the specified server is in.
+    '''
 
     server_client = get_sql_servers_operations(cli_ctx, None)
     # pylint: disable=no-member
@@ -63,24 +66,51 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
 
 
 def _any_sku_values_specified(sku):
+    '''
+    Returns True if the sku object has any properties that are specified
+    (i.e. not None).
+    '''
+
     return any(val for key, val in sku.__dict__.items())
 
 
 def _get_default_capability(capabilities):
-    return next((c for c in capabilities if c.status == CapabilityStatus.default), None) or next(c for c in capabilities)
+    '''
+    Gets the first capability in the collection that has 'default' status.
+    If none have 'default' status, gets the first capability that has 'available' status.
+    '''
+
+    return (next((c for c in capabilities if c.status == CapabilityStatus.default), None)
+            or next(c for c in capabilities if c.status == CapabilityStatus.available))
 
 
 def is_available(status):
+    '''
+    Returns True if the capability status is available (including default).
+    '''
+
     return status != CapabilityStatus.visible and status != CapabilityStatus.visible.value
 
 
 def _filter_available(capabilities):
+    '''
+    Filters out the capabilities by removing values that are not available.
+    '''
+
     return [c for c in capabilities if is_available(c.status)]
 
 
 def _find_edition_capability(
         sku,
         supported_editions):
+    '''
+    Finds the DB edition capability in the collection of supported editions
+    that matches the requested sku.
+
+    If the sku has no edition specified, returns the default edition.
+
+    (Note: tier and edition mean the same thing.)
+    '''
 
     if sku.tier:
         # Find requested edition capability
@@ -99,24 +129,31 @@ def _find_edition_capability(
 def _find_performance_level_capability(
         sku,
         supported_service_level_objectives):
+    '''
+    Finds the DB performance level (i.e. service objective) in the collection
+    of supported service objectives that matches the requested sku's
+    family and capacity.
+
+    If the sku has no capacity or family specified, returns the default service
+    objective.
+    '''
 
     if sku.capacity:
         # Find requested service objective based on capacity & family.
         # Note that for non-vcore editions, family is None.
         try:
-            return next(
-                    slo for slo in supported_service_level_objectives
-                    if slo.sku.family == sku.family
+            return next(slo for slo in supported_service_level_objectives
+                        if slo.sku.family == sku.family
                         and int(slo.sku.capacity) == int(sku.capacity))
         except StopIteration:
             raise CLIError(
                 "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
                 " Supported skus for '{tier}' are: {skus}".format(
-                    tier = sku.tier,
-                    family = sku.family,
-                    capacity = sku.capacity,
-                    skus = [(slo.sku.family, slo.sku.capacity)
-                            for slo in supported_service_level_objectives]
+                    tier=sku.tier,
+                    family=sku.family,
+                    capacity=sku.capacity,
+                    skus=[(slo.sku.family, slo.sku.capacity)
+                          for slo in supported_service_level_objectives]
                 ))
     elif sku.family:
         # Error - cannot find based on family alone.
@@ -135,6 +172,10 @@ _DEFAULT_SERVER_VERSION = "12.0"
 
 # pylint: disable=too-few-public-methods
 class ClientType(Enum):
+    '''
+    Types of SQL clients whose connection strings we can generate.
+    '''
+
     ado_net = 'ado.net'
     sqlcmd = 'sqlcmd'
     jdbc = 'jdbc'
@@ -144,12 +185,20 @@ class ClientType(Enum):
 
 
 class ClientAuthenticationType(Enum):
+    '''
+    Types of SQL client authentication mechanisms for connection strings
+    that we can generate.
+    '''
+
     sql_password = 'SqlPassword'
     active_directory_password = 'ADPassword'
     active_directory_integrated = 'ADIntegrated'
 
 
 def _get_server_dns_suffx(cli_ctx):
+    '''
+    Gets the DNS suffix for servers in this Azure environment.
+    '''
 
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
@@ -162,6 +211,9 @@ def db_show_conn_str(
         database_name='<databasename>',
         server_name='<servername>',
         auth_type=ClientAuthenticationType.sql_password.value):
+    '''
+    Builds a SQL connection string for a specified client provider.
+    '''
 
     server_suffix = _get_server_dns_suffx(cmd.cli_ctx)
 
@@ -253,8 +305,11 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-# Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
+    '''
+    Helper class to bundle up database identity properties and generate
+    database resource id.
+    '''
 
     def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
 
@@ -273,6 +328,11 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
 
 
 def _find_db_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Given a requested sku which may have some properties filled in
+    (e.g. tier and capacity), finds the canonical matching sku
+    from the given location's capabilities.
+    '''
 
     logger.debug('_find_db_sku_from_capabilities input: %s', sku)
 
@@ -302,8 +362,6 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku):
     return result
 
 
-# Creates a database or datawarehouse. Wrapper function which uses the server location so that
-# the user doesn't need to specify location.
 def _db_dw_create(
         cli_ctx,
         client,
@@ -312,6 +370,10 @@ def _db_dw_create(
         no_wait,
         sku=None,
         **kwargs):
+    '''
+    Creates a DB (with any create mode) or DW.
+    Handles common concerns such as setting location and sku properties.
+    '''
 
     # Determine server location
     kwargs['location'] = _get_server_location(
@@ -335,8 +397,6 @@ def _db_dw_create(
                        parameters=kwargs)
 
 
-# Creates a database. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
 def db_create(
         cmd,
         client,
@@ -345,6 +405,9 @@ def db_create(
         resource_group_name,
         no_wait=False,
         **kwargs):
+    '''
+    Creates a DB (with 'Default' create mode.)
+    '''
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -361,13 +424,15 @@ def _use_source_db_tier(
         server_name,
         resource_group_name,
         kwargs):
+    '''
+    Gets the specified db and copies its sku tier into kwargs.
+    '''
 
     if _any_sku_values_specified(kwargs['sku']):
         source = client.get(resource_group_name, server_name, database_name)
         kwargs['sku'].tier = source.sku.tier
 
 
-# Copies a database. Wrapper function to make create mode more convenient.
 def db_copy(
         cmd,
         client,
@@ -379,6 +444,9 @@ def db_copy(
         dest_resource_group_name=None,
         no_wait=False,
         **kwargs):
+    '''
+    Copies a DB (i.e. create with 'Copy' create mode.)
+    '''
 
     # Determine optional values
     dest_server_name = dest_server_name or server_name
@@ -406,7 +474,6 @@ def db_copy(
         **kwargs)
 
 
-# Copies a replica. Wrapper function to make create mode more convenient.
 def db_create_replica(
         cmd,
         client,
@@ -418,6 +485,11 @@ def db_create_replica(
         partner_resource_group_name=None,
         no_wait=False,
         **kwargs):
+    '''
+    Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
+
+    Custom function makes create mode more convenient.
+    '''
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
@@ -453,6 +525,9 @@ def db_rename(
         server_name,
         resource_group_name,
         new_name):
+    '''
+    Renames a DB.
+    '''
 
     client.rename(
         resource_group_name,
@@ -471,8 +546,6 @@ def db_rename(
         new_name)
 
 
-# Creates a database from a database point in time backup or deleted database backup.
-# Wrapper function to make create mode more convenient.
 def db_restore(
         cmd,
         client,
@@ -484,6 +557,12 @@ def db_restore(
         source_database_deletion_date=None,
         no_wait=False,
         **kwargs):
+    '''
+    Restores an existing or deleted DB (i.e. create with 'Restore'
+    or 'PointInTimeRestore' create mode.)
+
+    Custom function makes create mode more convenient.
+    '''
 
     if not (restore_point_in_time or source_database_deletion_date):
         raise CLIError('Either --time or --deleted-time must be specified.')
@@ -493,7 +572,7 @@ def db_restore(
 
     kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['source_database_deletion_date'] = source_database_deletion_date
-    kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
+    kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -505,8 +584,6 @@ def db_restore(
         **kwargs)
 
 
-# Fails over a database. Wrapper function which uses the server location so that the user doesn't
-# need to specify replication link id.
 # pylint: disable=inconsistent-return-statements
 def db_failover(
         client,
@@ -514,6 +591,12 @@ def db_failover(
         server_name,
         resource_group_name,
         allow_data_loss=False):
+    '''
+    Fails over a database by setting the specified database as the new primary.
+
+    Wrapper function which uses the server location so that the user doesn't
+    need to specify replication link id.
+    '''
 
     # List replication links
     links = list(client.list_by_database(
@@ -546,6 +629,10 @@ def db_failover(
 
 
 class DatabaseCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    '''
+    Additional details that may be optionally included when getting db capabilities.
+    '''
+
     max_size = 'max-size'
 
 
@@ -558,6 +645,9 @@ def db_list_capabilities(
         vcores=None,
         show_details=None,
         available=False):
+    '''
+    Gets database capabilities and optionally applies the specified filters.
+    '''
 
     # Fixup parameters
     if not show_details:
@@ -630,6 +720,9 @@ def db_delete_replica_link(
         # expliclty specify it with default value here (e.g. `yes=None` or `yes=True`), receiving
         # it in kwargs seems to work.
         **kwargs):  # pylint: disable=unused-argument
+    '''
+    Deletes a replication link.
+    '''
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
@@ -662,8 +755,11 @@ def db_export(
         storage_key_type,
         storage_key,
         **kwargs):
+    '''
+    Exports a database to a bacpac file.
+    '''
 
-    storage_key = pad_sas_key(storage_key_type, storage_key)
+    storage_key = _pad_sas_key(storage_key_type, storage_key)
 
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
@@ -685,8 +781,11 @@ def db_import(
         storage_key_type,
         storage_key,
         **kwargs):
+    '''
+    Imports a bacpac file into an existing database.
+    '''
 
-    storage_key = pad_sas_key(storage_key_type, storage_key)
+    storage_key = _pad_sas_key(storage_key_type, storage_key)
 
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
@@ -700,24 +799,28 @@ def db_import(
         parameters=kwargs)
 
 
-def pad_sas_key(
+def _pad_sas_key(
         storage_key_type,
         storage_key):
+    '''
+    Import/Export API requires that "?" precede SAS key as an argument.
+    Adds ? prefix if it wasn't included.
+    '''
 
-    # Import/Export API requires that "?" precede SAS key as an argument.
-    # Add ? prefix if it wasn't included.
     if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():  # pylint: disable=no-member
         if storage_key[0] != '?':
             storage_key = '?' + storage_key
     return storage_key
 
 
-# Lists databases in a server or elastic pool.
 def db_list(
         client,
         server_name,
         resource_group_name,
         elastic_pool_name=None):
+    '''
+    Lists databases in a server or elastic pool.
+    '''
 
     if elastic_pool_name:
         # List all databases in the elastic pool
@@ -731,7 +834,6 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-# Update database. Custom update function to apply parameters to instance.
 def db_update(
         cmd,
         instance,
@@ -742,6 +844,9 @@ def db_update(
         tier=None,
         family=None,
         capacity=None):
+    '''
+    Applies requested parameters to a db resource instance for a DB update.
+    '''
 
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
@@ -810,13 +915,16 @@ def db_update(
 #####
 
 
-# Finds a storage account's resource group by querying ARM resource cache.
-# Why do we have to do this: so we know the resource group in order to later query the storage API
-# to determine the account's keys and endpoint. Why isn't this just a command line parameter:
-# because if it was a command line parameter then the customer would need to specify storage
-# resource group just to update some unrelated property, which is annoying and makes no sense to
-# the customer.
 def _find_storage_account_resource_group(cli_ctx, name):
+    '''
+    Finds a storage account's resource group by querying ARM resource cache.
+
+    Why do we have to do this: so we know the resource group in order to later query the storage API
+    to determine the account's keys and endpoint. Why isn't this just a command line parameter:
+    because if it was a command line parameter then the customer would need to specify storage
+    resource group just to update some unrelated property, which is annoying and makes no sense to
+    the customer.
+    '''
 
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
@@ -842,18 +950,22 @@ def _find_storage_account_resource_group(cli_ctx, name):
     return resources[0].id.split('/')[4]
 
 
-# Determines storage account name from endpoint url string.
-# e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
 def _get_storage_account_name(storage_endpoint):
+    '''
+    Determines storage account name from endpoint url string.
+    e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
+    '''
 
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
 
-# Gets storage account key by querying storage ARM API.
 def _get_storage_endpoint(
         cli_ctx,
         storage_account,
         resource_group_name):
+    '''
+    Gets storage account endpoint by querying storage ARM API.
+    '''
 
     # Get storage account
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -871,12 +983,14 @@ def _get_storage_endpoint(
                        " different storage account.".format(account.name, account.id))
 
 
-# Gets storage account key by querying storage ARM API.
 def _get_storage_key(
         cli_ctx,
         storage_account,
         resource_group_name,
         use_secondary_key):
+    '''
+    Gets storage account key by querying storage ARM API.
+    '''
 
     # Get storage keys
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -889,7 +1003,6 @@ def _get_storage_key(
     return keys.keys[index].value  # pylint: disable=no-member
 
 
-# Common code for updating audit and threat detection policy
 def _db_security_policy_update(
         cli_ctx,
         instance,
@@ -898,6 +1011,9 @@ def _db_security_policy_update(
         storage_endpoint,
         storage_account_access_key,
         use_secondary_key):
+    '''
+    Common code for updating audit and threat detection policy.
+    '''
 
     # Validate storage endpoint arguments
     if storage_endpoint and storage_account:
@@ -934,7 +1050,6 @@ def _db_security_policy_update(
             use_secondary_key)
 
 
-# Update audit policy. Custom update function to apply parameters to instance.
 def db_audit_policy_update(
         cmd,
         instance,
@@ -944,6 +1059,9 @@ def db_audit_policy_update(
         storage_account_access_key=None,
         audit_actions_and_groups=None,
         retention_days=None):
+    '''
+    Updates an audit policy. Custom update function to apply parameters to instance.
+    '''
 
     # Apply state
     if state:
@@ -970,7 +1088,6 @@ def db_audit_policy_update(
     return instance
 
 
-# Update threat detection policy. Custom update function to apply parameters to instance.
 def db_threat_detection_policy_update(
         cmd,
         instance,
@@ -982,6 +1099,9 @@ def db_threat_detection_policy_update(
         email_addresses=None,
         disabled_alerts=None,
         email_account_admins=None):
+    '''
+    Updates a threat detection policy. Custom update function to apply parameters to instance.
+    '''
 
     # Apply state
     if state:
@@ -1019,8 +1139,6 @@ def db_threat_detection_policy_update(
 ###############################################
 
 
-# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
 def dw_create(
         cmd,
         client,
@@ -1029,6 +1147,9 @@ def dw_create(
         resource_group_name,
         no_wait=False,
         **kwargs):
+    '''
+    Creates a datawarehouse.
+    '''
 
     # Set edition
     kwargs['sku']['tier'] = DatabaseEdition.data_warehouse.value
@@ -1043,11 +1164,13 @@ def dw_create(
         **kwargs)
 
 
-# Lists databases in a server or elastic pool.
 def dw_list(
         client,
         server_name,
         resource_group_name):
+    '''
+    Lists data warehouses in a server or elastic pool.
+    '''
 
     return client.list_by_server(
         resource_group_name=resource_group_name,
@@ -1056,11 +1179,13 @@ def dw_list(
         filter="properties/edition eq '{}'".format(DatabaseEdition.data_warehouse.value))
 
 
-# Update data warehouse. Custom update function to apply parameters to instance.
 def dw_update(
         instance,
         max_size_bytes=None,
         requested_service_objective_name=None):
+    '''
+    Updates a data warehouse. Custom update function to apply parameters to instance.
+    '''
 
     # Null out requested_service_objective_id, because if requested_service_objective_id is
     # specified then requested_service_objective_name is ignored.
@@ -1080,6 +1205,11 @@ def dw_update(
 
 
 def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Given a requested sku which may have some properties filled in
+    (e.g. tier and capacity), finds the canonical matching sku
+    from the given location's capabilities.
+    '''
 
     logger.debug('_find_elastic_pool_sku_from_capabilities input: %s', sku)
 
@@ -1109,8 +1239,6 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
     return result
 
 
-# Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
 def elastic_pool_create(
         cmd,
         client,
@@ -1119,6 +1247,9 @@ def elastic_pool_create(
         elastic_pool_name,
         sku=None,
         **kwargs):
+    '''
+    Creates an elastic pool.
+    '''
 
     # Determine server location
     kwargs['location'] = _get_server_location(
@@ -1138,7 +1269,6 @@ def elastic_pool_create(
         parameters=kwargs)
 
 
-# Update elastic pool. Custom update function to apply parameters to instance.
 def elastic_pool_update(
         cmd,
         instance,
@@ -1149,6 +1279,9 @@ def elastic_pool_update(
         tier=None,
         family=None,
         capacity=None):
+    '''
+    Updates an elastic pool. Custom update function to apply parameters to instance.
+    '''
 
     # Apply params to instance
     if max_capacity:
@@ -1164,16 +1297,14 @@ def elastic_pool_update(
 
     # Set tier
     if tier:
-        if not service_objective:
-            # Wipe out old sku name so that it does not conflict with new tier
-            instance.sku.name = None
+        # Wipe out old sku name so that it does not conflict with new tier
+        instance.sku.name = None
         instance.sku.tier = tier
 
     # Set family
     if family:
-        if not service_objective:
-            # Wipe out old sku name so that it does not conflict with new family
-            instance.sku.name = None
+        # Wipe out old sku name so that it does not conflict with new family
+        instance.sku.name = None
         instance.sku.family = family
 
     # Set capacity
@@ -1189,6 +1320,10 @@ def elastic_pool_update(
 
 
 class ElasticPoolCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    '''
+    Additional details that may be optionally included when getting elastic pool capabilities.
+    '''
+
     max_size = 'max-size'
     db_min_dtu = 'db-min-dtu'
     db_max_dtu = 'db-max-dtu'
@@ -1203,6 +1338,9 @@ def elastic_pool_list_capabilities(
         vcores=None,
         show_details=None,
         available=False):
+    '''
+    Gets elastic pool capabilities and optionally applies the specified filters.
+    '''
 
     # Fixup parameters
     if not show_details:
@@ -1279,6 +1417,9 @@ def server_create(
         server_name,
         assign_identity=False,
         **kwargs):
+    '''
+    Creates a server.
+    '''
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
@@ -1290,10 +1431,12 @@ def server_create(
         parameters=kwargs)
 
 
-# Lists servers in a resource group or subscription
 def server_list(
         client,
         resource_group_name=None):
+    '''
+    Lists servers in a resource group or subscription
+    '''
 
     if resource_group_name:
         # List all servers in the resource group
@@ -1303,11 +1446,13 @@ def server_list(
     return client.list()
 
 
-# Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
         administrator_login_password=None,
         assign_identity=False):
+    '''
+    Updates a server. Custom update function to apply parameters to instance.
+    '''
 
     # Once assigned, the identity cannot be removed
     if instance.identity is None and assign_identity:
@@ -1331,6 +1476,9 @@ def server_ad_admin_set(
         resource_group_name,
         server_name,
         **kwargs):
+    '''
+    Sets a server's AD admin.
+    '''
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     sub = profile.get_subscription()
@@ -1342,12 +1490,14 @@ def server_ad_admin_set(
         properties=kwargs)
 
 
-# Update server AD admin. Custom update function to apply parameters to instance.
 def server_ad_admin_update(
         instance,
         login=None,
         sid=None,
         tenant_id=None):
+    '''
+    Updates a server' AD admin.
+    '''
 
     # Apply params to instance
     instance.login = login or instance.login
@@ -1362,12 +1512,14 @@ def server_ad_admin_update(
 #####
 
 
-# Creates a firewall rule with special start/end ip address value
-# that represents all azure ips.
 def firewall_rule_allow_all_azure_ips(
         client,
         server_name,
         resource_group_name):
+    '''
+    Creates a firewall rule with special start/end ip address value
+    that represents all azure ips.
+    '''
 
     # Name of the rule that will be created
     rule_name = 'AllowAllAzureIPs'
@@ -1383,8 +1535,6 @@ def firewall_rule_allow_all_azure_ips(
         end_ip_address=azure_ip_addr)
 
 
-# Update firewall rule. Custom update function is required,
-# see https://github.com/Azure/azure-cli/issues/2264
 def firewall_rule_update(
         client,
         firewall_rule_name,
@@ -1392,6 +1542,9 @@ def firewall_rule_update(
         resource_group_name,
         start_ip_address=None,
         end_ip_address=None):
+    '''
+    Updates a firewall rule.
+    '''
 
     # Get existing instance
     instance = client.get(
@@ -1418,6 +1571,9 @@ def server_key_create(
         resource_group_name,
         server_name,
         kid=None):
+    '''
+    Creates a server key.
+    '''
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -1437,6 +1593,9 @@ def server_key_get(
         resource_group_name,
         server_name,
         kid):
+    '''
+    Gets a server key.
+    '''
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -1451,6 +1610,9 @@ def server_key_delete(
         resource_group_name,
         server_name,
         kid):
+    '''
+    Deletes a server key.
+    '''
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -1460,9 +1622,14 @@ def server_key_delete(
         key_name=key_name)
 
 
-# The SQL server key API requires that the server key has a specific name
-# based on the vault, key and key version.
+
 def _get_server_key_name_from_uri(uri):
+    '''
+    Gets the key's name to use as a SQL server key.
+
+    The SQL server key API requires that the server key has a specific name
+    based on the vault, key and key version.
+    '''
 
     match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
 
@@ -1490,6 +1657,9 @@ def server_dns_alias_set(
         original_server_name,
         original_subscription_id=None,
         original_resource_group_name=None):
+    '''
+    Sets a server DNS alias.
+    '''
 
     # Build the old alias id
     old_alias_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/dnsAliases/{}".format(
@@ -1516,6 +1686,9 @@ def encryption_protector_update(
         server_name,
         server_key_type,
         kid=None):
+    '''
+    Updates a server encryption protector.
+    '''
 
     if server_key_type == ServerKeyType.service_managed.value:
         key_name = 'ServiceManaged'
