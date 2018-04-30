@@ -19,8 +19,9 @@ echo '=== Begin testing'
 unset AZURE_CLI_DIAGNOSTICS_TELEMETRY
 azdev verify package $share_folder/build/
 
-echo '= Verify Commands with -h'
-azdev verify commands
+# TODO Reintroduce this
+# echo '= Verify Commands with -h'
+# azdev verify commands
 
 echo '= Verify Dependencies'
 azdev verify dependencies
