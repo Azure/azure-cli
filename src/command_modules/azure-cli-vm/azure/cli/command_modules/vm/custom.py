@@ -1239,7 +1239,8 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         else:  # has to be 'system_assigned_user_assigned'
             resource.identity.type = ResourceIdentityType.system_assigned
 
-    return setter(resource_group_name, name, resource)
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+    return result.identity
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
@@ -1738,6 +1739,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             vmss.identity.identity_ids = external_identities
         if vmss_patch:
             vmss_patch.identity = vmss.identity
+            vmss_patch.sku = vmss.sku
             poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
         else:
             poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
@@ -2389,11 +2391,11 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
     def _get_vmss(_, resource_group_name, vmss_name):
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
-    def _set_vmss(_, vmss_instance):
+    def _set_vmss(resource_group_name, name, vmss_instance):
         VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
                                                       operation_group='virtual_machine_scale_sets')
         if VirtualMachineScaleSetUpdate:
-            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
+            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity, sku=vmss_instance.sku)
             return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
 
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
