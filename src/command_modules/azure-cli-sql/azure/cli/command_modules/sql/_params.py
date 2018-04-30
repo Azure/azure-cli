@@ -25,7 +25,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
-    DatabaseReadScale,
+    # DatabaseReadScale,
     ElasticPoolLicenseType,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
@@ -266,14 +266,16 @@ def load_arguments(self, _):
 
         # Needs testing
         c.ignore('read_scale')
-        #c.argument('read_scale',
-        #           arg_type=get_three_state_flag(DatabaseReadScale.enabled.value, DatabaseReadScale.disabled.value, return_label=True))
+        # c.argument('read_scale',
+        #            arg_type=get_three_state_flag(DatabaseReadScale.enabled.value,
+        #                                         DatabaseReadScale.disabled.value,
+        #                                         return_label=True))
 
         c.argument('zone_redundant', arg_type=zone_redundant_param_type)
 
         c.argument('tier',
                    arg_type=tier_param_type,
-                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
+                   help='The edition component of the sku. Allowed values include: Basic, Standard, '
                    'Premium, GeneralPurpose, BusinessCritical.')
 
         c.argument('capacity',

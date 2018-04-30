@@ -39,8 +39,6 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
 )
 from ._validators import (
-    validate_create_db,
-    validate_create_elastic_pool,
     validate_subnet
 )
 

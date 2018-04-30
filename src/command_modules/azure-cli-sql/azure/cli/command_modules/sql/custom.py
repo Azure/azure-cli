@@ -80,8 +80,8 @@ def _get_default_capability(capabilities):
     If none have 'default' status, gets the first capability that has 'available' status.
     '''
 
-    return (next((c for c in capabilities if c.status == CapabilityStatus.default), None)
-            or next(c for c in capabilities if c.status == CapabilityStatus.available))
+    return (next((c for c in capabilities if c.status == CapabilityStatus.default), None) or
+            next(c for c in capabilities if c.status == CapabilityStatus.available))
 
 
 def is_available(status):
@@ -143,8 +143,8 @@ def _find_performance_level_capability(
         # Note that for non-vcore editions, family is None.
         try:
             return next(slo for slo in supported_service_level_objectives
-                        if slo.sku.family == sku.family
-                        and int(slo.sku.capacity) == int(sku.capacity))
+                        if slo.sku.family == sku.family and
+                        int(slo.sku.capacity) == int(sku.capacity))
         except StopIteration:
             raise CLIError(
                 "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
@@ -354,7 +354,8 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku):
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_editions)
 
     # Find performance level capability, based on requested sku properties
-    performance_level_capability = _find_performance_level_capability(sku, edition_capability.supported_service_level_objectives)
+    performance_level_capability = _find_performance_level_capability(
+        sku, edition_capability.supported_service_level_objectives)
 
     # Grab sku object from capability
     result = performance_level_capability.sku
@@ -1231,7 +1232,8 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
 
     # Find performance level capability, based on requested sku properties
-    performance_level_capability = _find_performance_level_capability(sku, edition_capability.supported_elastic_pool_performance_levels)
+    performance_level_capability = _find_performance_level_capability(
+        sku, edition_capability.supported_elastic_pool_performance_levels)
 
     # Copy sku object from capability
     result = performance_level_capability.sku
@@ -1620,7 +1622,6 @@ def server_key_delete(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name)
-
 
 
 def _get_server_key_name_from_uri(uri):

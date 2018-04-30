@@ -3,18 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from .custom import is_available
-
 from collections import OrderedDict
 
-class DbEditionTableRow(object):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, edition, sku, status):
-
-        self.edition = edition
-        self.sku = sku
-        self.status = status
-
+from .custom import is_available
 
 ###############################################
 #                sql db                       #
@@ -22,16 +13,26 @@ class DbEditionTableRow(object):  # pylint: disable=too-few-public-methods
 
 
 def db_list_table_format(results):
-    """"Format a list of daabases as summary results for display with "-o table"."""
+    '''
+    Formats a list of databases as summary results for display with "-o table".
+    '''
+
     return [_db_table_format(r) for r in results]
 
 
 def db_show_table_format(result):
-    """Format a database as summary results for display with "-o table"."""
+    '''
+    Formats a database as summary results for display with "-o table".
+    '''
+
     return [_db_table_format(result)]
 
 
 def _db_table_format(result):
+    '''
+    Formats a database as summary results for display with "-o table".
+    '''
+
     return OrderedDict([
         ('name', result['name']),
         ('tier', result['sku']['tier']),
@@ -43,11 +44,18 @@ def _db_table_format(result):
 
 
 def db_edition_list_table_format(editions):
-    """"Format a list of editions as summary results for display with "-o table"."""
+    '''
+    Formats a list of database editions as summary results for display with "-o table".
+    '''
+
     return list(_db_edition_list_table_format(editions))
 
 
 def _db_edition_list_table_format(editions):
+    '''
+    Formats a database edition as summary results for display with "-o table".
+    '''
+
     for e in editions:
         for slo in e['supportedServiceLevelObjectives']:
             sku = slo['sku']
@@ -68,16 +76,26 @@ def _db_edition_list_table_format(editions):
 ###############################################
 
 def elastic_pool_list_table_format(results):
-    """"Format a list of daabases as summary results for display with "-o table"."""
+    '''
+    Formats a list of elastic pools as summary results for display with "-o table".
+    '''
+
     return [_elastic_pool_table_format(r) for r in results]
 
 
 def elastic_pool_show_table_format(result):
-    """Format a database as summary results for display with "-o table"."""
+    '''
+    Formats an elastic pool as summary results for display with "-o table".
+    '''
+
     return [_elastic_pool_table_format(result)]
 
 
 def _elastic_pool_table_format(result):
+    '''
+    Formats an elastic pool as summary results for display with "-o table".
+    '''
+
     return OrderedDict([
         ('name', result['name']),
         ('tier', result['sku']['tier']),
@@ -88,11 +106,18 @@ def _elastic_pool_table_format(result):
 
 
 def elastic_pool_edition_list_table_format(editions):
-    """"Format a list of editions as summary results for display with "-o table"."""
+    '''
+    Formats a list of elastic pool editions as summary results for display with "-o table".
+    '''
+
     return list(_elastic_pool_edition_list_table_format(editions))
 
 
 def _elastic_pool_edition_list_table_format(editions):
+    '''
+    Formats an elastic pool editions as summary results for display with "-o table".
+    '''
+
     for e in editions:
         for slo in e['supportedElasticPoolPerformanceLevels']:
             sku = slo['sku']
