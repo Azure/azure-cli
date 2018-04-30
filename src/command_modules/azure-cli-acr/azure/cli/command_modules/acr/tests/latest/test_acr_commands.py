@@ -277,7 +277,7 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': '951e1b580e29345269d46e42908c840ff4eeb232',
+            'git_access_token': 'e815be6cbd5fe8f6edaaf34f75a4e4c345b9573f',
             'context': 'https://github.com/djyou/BuildTest',
             'image1': 'repo1:tag1',
             'image2': 'repo2:tag2',
@@ -358,6 +358,10 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr build-task run -n {build_task_name1} -r {registry_name} --no-logs',
                  checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
                          self.check('status', 'Queued')])
+
+        # list all builds from the build task
+        self.cmd('acr build-task list-builds -n {build_task_name1} -r {registry_name}',
+                 checks=[self.check('[0].type', 'Microsoft.ContainerRegistry/registries/builds')])
 
         self.cmd('acr build-task show -n {build_task_name1} -r {registry_name}',
                  checks=[self.check('name', '{build_task_name1}')])

@@ -123,6 +123,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # build parameters
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')
+        c.argument('build_status', help='The current status of build.', choices=['Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Canceled', 'Error', 'Timeout'])
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)

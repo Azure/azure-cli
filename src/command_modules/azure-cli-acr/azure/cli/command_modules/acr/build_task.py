@@ -296,15 +296,24 @@ def acr_build_task_list_builds(cmd,
                                registry_name,
                                top=15,
                                build_task_name=None,
+                               build_status=None,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
-    if build_task_name:
-        filter_str = "BuildTaskName eq '{}'".format(build_task_name)
-        return client.list(resource_group_name, registry_name, filter=filter_str, top=top)
+    filter_str = None
+    filter_str = _add_build_filter(filter_str, 'BuildTaskName', build_task_name)
+    filter_str = _add_build_filter(filter_str, 'Status', build_status)
 
-    return client.list(resource_group_name, registry_name, top=top)
+    return client.list(resource_group_name, registry_name, filter=filter_str, top=top)
+
+
+def _add_build_filter(orig_filter, name, value):
+    if not value:
+        return orig_filter
+
+    new_filter_str = "{} eq '{}'".format(name, value)
+    return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 
 
 def acr_build_task_logs(cmd,
@@ -318,7 +327,8 @@ def acr_build_task_logs(cmd,
 
     if not build_id:
         # show logs for the last build
-        paged_builds = acr_build_task_list_builds(cmd, client, registry_name, build_task_name)
+        paged_builds = acr_build_task_list_builds(cmd, client, registry_name,
+                                                  top=None, build_task_name=build_task_name)
         try:
             build_id = paged_builds.get(0)[0].build_id
             print("Showing logs for the last updated build")
