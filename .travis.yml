@@ -16,6 +16,10 @@ cache: pip
 jobs:
   include:
     - stage: precheck
+      env: PURPOSE='CheckPRBranchNotMaster'
+      # Do not accept PRs to master branch
+      script: [[ '$TRAVIS_PULL_REQUEST' != 'false' && '$TRAVIS_BRANCH' != 'master' ]]
+    - stage: precheck
       env: PURPOSE='PEP8'
       script: ./scripts/ci/precheck_pep8.sh
       python: 3.6
