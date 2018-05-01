@@ -5,11 +5,34 @@
 
 from collections import OrderedDict
 
+# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
+
 from .custom import is_available
+
+
+def _last_segment(resource_id):
+    return resource_id.split('/')[-1] if resource_id else None
+
 
 ###############################################
 #                sql db                       #
 ###############################################
+
+
+def db_list_transform(results):
+    return [db_show_transform(r) for r in results]
+
+
+def db_show_transform(result):
+    '''
+    Transforms the json response for a database.
+    '''
+
+    # Add properties in order to improve backcompat compared to api-version 2014-04-01
+    result.edition = result.sku.tier
+
+    return result
 
 
 def db_list_table_format(results):
@@ -39,7 +62,7 @@ def _db_table_format(result):
         ('family', result['sku']['family'] or ' '),
         ('capacity', result['sku']['capacity'] or ' '),
         ('maxSizeBytes', result['maxSizeBytes']),
-        ('elasticPool', result['elasticPoolId'].split('/')[-1] if result['elasticPoolId'] else ' '),
+        ('elasticPool', _last_segment(result['elasticPoolId']) or ' '),
     ])
 
 
@@ -74,6 +97,22 @@ def _db_edition_list_table_format(editions):
 ###############################################
 #                sql elastic-pool             #
 ###############################################
+
+
+def elastic_pool_list_transform(results):
+    return [elastic_pool_show_transform(r) for r in results]
+
+
+def elastic_pool_show_transform(result):
+    '''
+    Transforms the json response for an elastic pool.
+    '''
+
+    # Add properties in order to improve backcompat compared to api-version 2014-04-01
+    result.edition = result.sku.tier
+
+    return result
+
 
 def elastic_pool_list_table_format(results):
     '''
