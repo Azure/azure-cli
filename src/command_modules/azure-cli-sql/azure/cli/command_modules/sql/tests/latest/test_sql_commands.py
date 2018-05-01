@@ -798,7 +798,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                           JMESPathCheck('resourceGroup', rg),
                           JMESPathCheck('name', database_name),
                           JMESPathCheck('location', loc_display),
-                          JMESPathCheck('edition', 'DataWarehouse'),
+                          JMESPathCheck('sku.tier', 'DataWarehouse'),
                           JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         # Sanity check that the default max size is not equal to the size that we will update to
@@ -1209,7 +1209,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                       JMESPathCheck('dtu', dtu),
                                       JMESPathCheck('databaseDtuMin', db_dtu_min),
                                       JMESPathCheck('databaseDtuMax', db_dtu_max),
-                                      JMESPathCheck('edition', edition),
+                                      JMESPathCheck('sku.tier', edition),
                                       JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
@@ -1220,7 +1220,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('databaseDtuMin', db_dtu_min),
                      JMESPathCheck('databaseDtuMax', db_dtu_max),
-                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('storageMb', storage_mb),
                      JMESPathCheck('zoneRedundant', False)])
 
@@ -1232,7 +1232,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('databaseDtuMin', db_dtu_min),
                      JMESPathCheck('databaseDtuMax', db_dtu_max),
-                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('storageMb', storage_mb)])
 
         self.cmd('sql elastic-pool list -g {} --server {}'
@@ -1255,7 +1255,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('dtu', updated_dtu),
-                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('databaseDtuMin', db_dtu_min),
                      JMESPathCheck('databaseDtuMax', db_dtu_max),
                      JMESPathCheck('storageMb', updated_storage_mb),
@@ -1415,7 +1415,7 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', self.pool_name),
-                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('dtu', dtu),
                      JMESPathCheck('databaseDtuMin', db_dtu_min),
@@ -2023,7 +2023,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular database with zone resilience set to true.  Expect zone resilience to update to true.
@@ -2045,7 +2045,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name_2),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned database with zone resilience set to false.  Expect zone resilience to update to false
@@ -2067,7 +2067,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name_3),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular database with no zone resilience set.  Expect zone resilience to stay false.
@@ -2089,7 +2089,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name_4),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned database with no zone resilience set.  Expect zone resilience to stay true.
@@ -2124,7 +2124,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular pool with zone resilience set to true.  Expect zone resilience to update to true
@@ -2148,7 +2148,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', pool_name_2),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned pool with zone resilience set to false.  Expect zone resilience to update to false
@@ -2172,7 +2172,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', pool_name_3),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular pool with no zone resilience set.  Expect zone resilience to stay false
@@ -2197,7 +2197,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', pool_name_4),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned pool with no zone resilience set.  Expect zone resilience to stay true

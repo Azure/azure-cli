@@ -336,6 +336,11 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku):
 
     logger.debug('_find_db_sku_from_capabilities input: %s', sku)
 
+    if sku.name:
+        # User specified sku.name, so nothing else needs to be resolved.
+        logger.debug('_find_db_sku_from_capabilities return sku as is')
+        return sku
+
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
         # Server side will pick a default.
@@ -357,8 +362,10 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku):
     performance_level_capability = _find_performance_level_capability(
         sku, edition_capability.supported_service_level_objectives)
 
-    # Grab sku object from capability
-    result = performance_level_capability.sku
+    # Ideally, we would return the sku object from capability (`return performance_level_capability.sku`).
+    # However not all db create modes support using `capacity` to find slo, so instead we put
+    # the slo name into the sku name property.
+    result = Sku(name=performance_level_capability.name)
     logger.debug('_find_db_sku_from_capabilities return: %s', result)
     return result
 
@@ -1152,7 +1159,7 @@ def dw_create(
     '''
 
     # Set edition
-    kwargs['sku']['tier'] = DatabaseEdition.data_warehouse.value
+    kwargs['sku'].tier = DatabaseEdition.data_warehouse.value
 
     # Create
     return _db_dw_create(
@@ -1213,6 +1220,11 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
     '''
 
     logger.debug('_find_elastic_pool_sku_from_capabilities input: %s', sku)
+
+    if sku.name:
+        # User specified sku.name, so nothing else needs to be resolved.
+        logger.debug('_find_elastic_pool_sku_from_capabilities return sku as is')
+        return sku
 
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
