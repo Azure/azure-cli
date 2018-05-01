@@ -726,7 +726,7 @@ def add_properties(instance, argument_values):
             # attempt to convert anything else to JSON and fallback to string if error
             try:
                 argument = shell_safe_json_parse(argument)
-            except ValueError:
+            except (ValueError, CLIError):
                 pass
             list_to_add_to.append(argument)
 
@@ -747,12 +747,13 @@ def remove_properties(instance, argument_values):
         pass
 
     if not list_index:
-        _find_property(instance, list_attribute_path)
+        property_val = _find_property(instance, list_attribute_path)
         parent_to_remove_from = _find_property(instance, list_attribute_path[:-1])
         if isinstance(parent_to_remove_from, dict):
             del parent_to_remove_from[list_attribute_path[-1]]
         elif hasattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1])):
-            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]), None)
+            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]),
+                    [] if isinstance(property_val, list) else None)
         else:
             raise ValueError
     else:
