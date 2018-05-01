@@ -1510,8 +1510,8 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
-                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?limit == `100`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?limit != `100`][])', 0)])
+                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `100`][])', 0),
+                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `100`][])', 0)])
 
         # Get all db capabilities with pool max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
@@ -2013,7 +2013,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         database_name_4 = "updateNoParamForZonedDb"
 
         rg = resource_group
-        loc_display = "East US 2"
+        loc_display = "eastus2"
 
         # Test creating database with zone resilience set to false.  Expect regular database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'

@@ -1397,10 +1397,10 @@ def elastic_pool_list_capabilities(
             # so only hide max dtus if both min and max should be hidden.
             if ElasticPoolCapabilitiesAdditionalDetails.db_min_dtu.value not in show_details:
                 if ElasticPoolCapabilitiesAdditionalDetails.db_max_dtu.value not in show_details:
-                    d.supported_per_database_max_dtus = []
+                    d.supported_per_database_max_performance_levels = []
 
-                for md in d.supported_per_database_max_dtus:
-                    md.supported_per_database_min_dtus = []
+                for md in d.supported_per_database_max_performance_levels:
+                    md.supported_per_database_min_performance_levels = []
 
             # Optionally hide supported per db max sizes
             if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in show_details:
