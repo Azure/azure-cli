@@ -40,7 +40,7 @@ WELCOME_MESSAGE = r"""
 
 Welcome to the cool new Azure CLI!
 
-Use `az --version` to display the current version of the cli and modules.
+Use `az --version` to display the current version.
 Here are the base commands:
 """
 
