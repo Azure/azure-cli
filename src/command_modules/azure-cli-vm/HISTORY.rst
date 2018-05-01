@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.32
+++++++
+* vm/vmss: use PATCH for updating identities
+
 2.0.31
 ++++++
 * vm: fix an invalid detection logic on unmanaged blob uri
