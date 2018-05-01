@@ -1739,7 +1739,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             vmss.identity.identity_ids = external_identities
         if vmss_patch:
             vmss_patch.identity = vmss.identity
-            vmss_patch.sku = vmss.sku
+            vmss_patch.sku = vmss.sku  # workaround https://github.com/Azure/azure-cli/issues/6262
             poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
         else:
             poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
