@@ -451,6 +451,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
+            # do in-place update, so the outer method can display the same data
             external_identities[::] = set(external_identities)
             vm.identity.identity_ids = external_identities
 
@@ -1735,6 +1736,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             identity_types = ResourceIdentityType.system_assigned
         vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
         if external_identities:
+            # do in-place update, so the outer method can display the same data
             external_identities[::] = set(external_identities)
             vmss.identity.identity_ids = external_identities
         if vmss_patch:
