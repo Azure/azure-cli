@@ -520,7 +520,9 @@ def _create_db_wait_for_first_backup(test, rg, server, database_name):
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
     # 10 minutes. Unforunately there's no way to speed this up.
     earliest_restore_date = _get_earliest_restore_date(db)
+    print('Earliest restore date', earliest_restore_date)
     while datetime.utcnow() <= earliest_restore_date:
+        print('Now', datetime.utcnow())
         sleep(10)  # seconds
 
     return db
@@ -1193,7 +1195,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         db_service_objective = 'S1'
 
         rg = resource_group
-        loc_display = 'eastus2'
+        loc_display = 'East US 2'
 
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
