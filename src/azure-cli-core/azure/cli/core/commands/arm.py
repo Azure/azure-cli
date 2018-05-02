@@ -654,7 +654,6 @@ def _split_key_value_pair(expression):
 
 
 def set_properties(instance, expression):
-    instance.enable_additional_properties_sending()
     key, value = _split_key_value_pair(expression)
 
     try:
@@ -687,6 +686,7 @@ def set_properties(instance, expression):
                 setattr(instance, make_snake_case(name), value)
             else:
                 instance.additional_properties[name] = value
+                instance.enable_additional_properties_sending()
                 logger.warning(
                     "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
 
@@ -697,7 +697,6 @@ def set_properties(instance, expression):
 
 
 def add_properties(instance, argument_values):
-    instance.enable_additional_properties_sending()
     # The first argument indicates the path to the collection to add to.
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
@@ -737,7 +736,6 @@ def add_properties(instance, argument_values):
 
 
 def remove_properties(instance, argument_values):
-    instance.enable_additional_properties_sending()
     # The first argument indicates the path to the collection to add to.
     argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
 
@@ -850,6 +848,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
                                .format(key, path[-2]))
             else:
                 if key in getattr(instance, 'additional_properties', {}):
+                    instance.enable_additional_properties_sending()
                     return instance.additional_properties[key]
                 raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
@@ -866,6 +865,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
         if hasattr(instance, make_snake_case(part)):
             return getattr(instance, make_snake_case(part), None)
         elif hasattr(instance, 'additional_properties'):
+            instance.enable_additional_properties_sending()
             return instance.additional_properties.get(part, None)
         raise AttributeError()
     except (AttributeError, KeyError):
