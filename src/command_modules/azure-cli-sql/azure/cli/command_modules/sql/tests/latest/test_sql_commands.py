@@ -1199,7 +1199,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                                   '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
-                                  '--storage {}MB'
+                                  '--storage {}'
                                   .format(rg, server, self.pool_name, dtu,
                                           edition, db_dtu_min, db_dtu_max, storage),
                                   checks=[
