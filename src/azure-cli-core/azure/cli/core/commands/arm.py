@@ -688,7 +688,7 @@ def set_properties(instance, expression):
                 instance.additional_properties[name] = value
                 instance.enable_additional_properties_sending()
                 logger.warning(
-                        "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
+                    "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
 
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
