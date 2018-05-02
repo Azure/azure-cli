@@ -290,7 +290,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('resourceGroup', rg),
                            JMESPathCheck('name', database_name),
                            JMESPathCheck('location', loc_display),
-                           JMESPathCheck('elasticPoolName', None),
+                           JMESPathCheck('elasticPoolId', None),
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
@@ -475,7 +475,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online')])
 
         # copy database to same server (min parameters)
@@ -563,7 +563,8 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                                    restore_service_objective),
                      JMESPathCheck('status', 'Online')])
 
-        # Restore to db into pool
+        # Restore to db into pool. Note that 'elasticPoolName' is populated
+        # in transform func which only runs after `show`/`list` commands.
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --elastic-pool {}'
                  .format(rg, server, database_name, datetime.utcnow().isoformat(),
@@ -571,8 +572,15 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', restore_pool_database_name),
-                     JMESPathCheck('elasticPoolName', elastic_pool),
                      JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(rg, server, restore_pool_database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_pool_database_name),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('elasticPoolName', elastic_pool)])
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
@@ -799,7 +807,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                           JMESPathCheck('resourceGroup', rg),
                           JMESPathCheck('name', database_name),
                           JMESPathCheck('location', loc_display),
-                          JMESPathCheck('edition', 'DataWarehouse'),
+                          JMESPathCheck('sku.tier', 'DataWarehouse'),
                           JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         # Sanity check that the default max size is not equal to the size that we will update to
@@ -1208,9 +1216,9 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                       JMESPathCheck('location', loc_display),
                                       JMESPathCheck('state', 'Ready'),
                                       JMESPathCheck('dtu', dtu),
-                                      JMESPathCheck('databaseDtuMin', db_dtu_min),
-                                      JMESPathCheck('databaseDtuMax', db_dtu_max),
-                                      JMESPathCheck('edition', edition),
+                                      JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
+                                      JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
+                                      JMESPathCheck('sku.tier', edition),
                                       JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
@@ -1256,9 +1264,9 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('dtu', updated_dtu),
-                     JMESPathCheck('edition', edition),
-                     JMESPathCheck('databaseDtuMin', db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
+                     JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
                      JMESPathCheck('storageMb', updated_storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
@@ -1272,8 +1280,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('dtu', dtu),
-                     JMESPathCheck('databaseDtuMin', updated_db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', updated_db_dtu_max),
+                     JMESPathCheck('perDatabaseSettings.minCapacity', updated_db_dtu_min),
+                     JMESPathCheck('perDatabaseSettings.maxCapacity', updated_db_dtu_max),
                      JMESPathCheck('storageMb', storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
@@ -1298,27 +1306,37 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, server),
                  checks=[JMESPathCheck('length(@)', 2)])
 
-        # Create a database directly in an Azure sql elastic pool
+        # Create a database directly in an Azure sql elastic pool.
+        # Note that 'elasticPoolName' is populated in transform
+        # func which only runs after `show`/`list` commands.
         self.cmd('sql db create -g {} --server {} --name {} '
                  '--elastic-pool {}'
                  .format(rg, server, database_name, self.pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(rg, server, database_name, self.pool_name),
+                 checks=[JMESPathCheck('elasticPoolName', self.pool_name)])
+
         # Move database to second pool. Specify service objective just for fun
+        # Note that 'elasticPoolName' is populated in transform
+        # func which only runs after `show`/`list` commands.
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
                  ' --service-objective ElasticPool'
                  .format(rg, server, database_name, pool_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('elasticPoolName', pool_name2),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(rg, server, database_name, pool_name2),
+                 checks=[JMESPathCheck('elasticPoolName', pool_name2)])
 
         # Remove database from pool
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
@@ -1326,14 +1344,24 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online')])
 
         # Move database back into pool
+        # Note that 'elasticPoolName' is populated in transform
+        # func which only runs after `show`/`list` commands.
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
                  ' --service-objective ElasticPool'
                  .format(rg, server, database_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
@@ -1358,20 +1386,6 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].elasticPoolName', self.pool_name)])
-
-        # self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
-        #          .format(rg, server, pool_name),
-        #          checks=[
-        #              JMESPathCheck('length(@)', 1),
-        #              JMESPathCheck('[0].resourceGroup', rg),
-        #              JMESPathCheck('[0].serverName', server),
-        #              JMESPathCheck('[0].currentElasticPoolName', pool_name)])
-
-        # activities = self.cmd('sql elastic-pools db show-activity -g {} '
-        #                       '--server-name {} --elastic-pool-name {}'
-        #                       .format(rg, server, pool_name),
-        #                       checks=[JMESPathCheck('type(@)', 'array')])
-        # self.verify_activities(activities, resource_group)
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server {} --name {} --yes'
@@ -1416,11 +1430,11 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', self.pool_name),
-                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', dtu),
-                     JMESPathCheck('databaseDtuMin', db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('sku.capacity', dtu),
+                     JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
+                     JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
                      JMESPathCheck('storageMb', storage_mb)])
 
         # Update elastic pool
@@ -1587,7 +1601,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -1595,7 +1609,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name2),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -1603,7 +1617,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name3),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
         # get storage account endpoint
@@ -2023,8 +2037,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular database with zone resilience set to true.  Expect zone resilience to update to true.
@@ -2033,7 +2047,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('requestedServiceObjectiveName', 'P1'),
                      JMESPathCheck('zoneRedundant', True)])
@@ -2045,8 +2059,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_2),
                      JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned database with zone resilience set to false.  Expect zone resilience to update to false
@@ -2055,7 +2069,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_2),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('requestedServiceObjectiveName', 'P1'),
                      JMESPathCheck('zoneRedundant', False)])
@@ -2067,8 +2081,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_3),
                      JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular database with no zone resilience set.  Expect zone resilience to stay false.
@@ -2077,7 +2091,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_3),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', False)])
@@ -2089,8 +2103,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_4),
                      JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned database with no zone resilience set.  Expect zone resilience to stay true.
@@ -2099,7 +2113,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_4),
-                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
