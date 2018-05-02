@@ -205,6 +205,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file)
                                                           raw=True)
     return resource.output
 
+
 # pylint: disable=inconsistent-return-statements
 def _create_resource_requirements(cpu, memory):
     """Create resource requirements. """

@@ -65,7 +65,7 @@ helps['container export'] = """
     type: command
     short-summary: Export a container group in yaml format.
     examples:
-        - name: Export a container group in yaml. 
+        - name: Export a container group in yaml.
           text: az container export -g MyResourceGroup --name mynginx -f output.yaml
 """
 
