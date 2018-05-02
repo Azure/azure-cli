@@ -813,7 +813,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                      checks=[self.check('scope', storageacct['id'])])
         return storageacct
 
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sa')
     def test_keyvault_storage_account(self, resource_group):
 
         self.kwargs.update({
@@ -888,6 +888,18 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
             'blob_sas_sid': sas_def['secretId'],
             'blob_sas_id': sas_def['id']
         })
+
+        # use the blob sas token to read the blob
+        blob_sas_token = self.cmd('keyvault secret show --id {blob_sas_sid} --query value').output
+        self.kwargs.update({
+            'blob_sas': blob_sas_token
+        })
+
+        self.cmd('storage blob show -c {c} -n {b} --account-name {sa} --sas-token {blob_sas}',
+                 checks=[self.check('name', '{b}')])
+
+        # regenerate the storage account key
+        self.cmd('keyvault storage regenerate-key --id {sa_id} --key-name key1')
 
         # use the blob sas token to read the blob
         blob_sas_token = self.cmd('keyvault secret show --id {blob_sas_sid} --query value').output
