@@ -354,7 +354,7 @@ class AzCliCommandInvoker(CommandInvoker):
             kwargs['ns'] = ns
         return kwargs
 
-    @staticmethod 
+    @staticmethod
     def remove_additional_prop_layer(obj, converted_dic):
         from msrest.serialization import Model
         if isinstance(obj, Model):
