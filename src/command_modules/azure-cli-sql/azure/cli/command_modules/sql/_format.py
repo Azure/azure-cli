@@ -9,6 +9,7 @@ from azure.mgmt.sql.models import ElasticPoolEdition
 
 from .custom import is_available
 
+
 def _last_segment(resource_id):
     return resource_id.split('/')[-1] if resource_id else None
 
