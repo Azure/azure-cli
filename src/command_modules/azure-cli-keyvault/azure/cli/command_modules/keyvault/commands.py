@@ -133,6 +133,7 @@ def load_command_table(self, _):
         g.keyvault_command('remove', 'delete_storage_account')
         g.keyvault_command('purge', 'purge_deleted_storage_account')
         g.keyvault_command('recover', 'recover_deleted_storage_account')
+        g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
         g.keyvault_custom('backup',
                           'backup_storage_account',
                           doc_string_source=_data_sdk_path('backup_storage_account'))

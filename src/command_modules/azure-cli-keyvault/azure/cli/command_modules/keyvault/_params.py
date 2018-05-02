@@ -170,9 +170,9 @@ def load_arguments(self, _):
             c.ignore('storage_account_attributes')
             c.argument('auto_regenerate_key', arg_type=get_three_state_flag(), required=False)
             c.argument('regeneration_period', help='The key regeneration time duration specified in ISO-8601 format, such as "P30D" for rotation every 30 days.')
-    for scope in ['backup', 'show', 'update', 'remove']:
+    for scope in ['backup', 'show', 'update', 'remove', 'regenerate-key']:
         with self.argument_context('keyvault storage ' + scope, arg_group='Id') as c:
-            c.extra('identifier', options_list=['--id'], help='Id of the SAS definition.  If specified all other \'Id\' arguments should be omitted.', validator=validate_storage_account_id)
+            c.extra('identifier', options_list=['--id'], help='Id of the storage account.  If specified all other \'Id\' arguments should be omitted.', validator=validate_storage_account_id)
             c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
             c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
 
