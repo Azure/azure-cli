@@ -102,8 +102,8 @@ def load_command_table(self, _):
         g.command('show', 'get', transform=db_show_transform)
         g.custom_command('list', 'dw_list', transform=db_list_transform)
         g.command('delete', 'delete', confirmation=True)
-        g.command('pause', 'pause')
-        g.command('resume', 'resume')
+        g.custom_command('pause', 'dw_pause')
+        g.custom_command('resume', 'dw_resume')
         g.generic_update_command('update', custom_func_name='dw_update', supports_no_wait=True)
 
     database_operations_operations = CliCommandType(

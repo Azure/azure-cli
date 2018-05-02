@@ -133,6 +133,10 @@ zone_redundant_param_type = CLIArgumentType(
     arg_type=get_three_state_flag())
 
 
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
+dw_service_objective_examples = 'DW100, DW1000c'
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -186,8 +190,8 @@ def _configure_db_create_params(
                      options_list=['--service-objective'],
                      arg_group=sku_arg_group,
                      required=False,
-                     help='The service objective for the new database. For example: Basic, S0, P1, '
-                     'GP_Gen4_1, BC_Gen5_2.')
+                     help='The service objective for the new database. For example: ' +
+                     (db_service_objective_examples if engine == Engine.db else dw_service_objective_examples))
 
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type,
@@ -578,8 +582,9 @@ def load_arguments(self, _):
 
         c.argument('max_size_bytes', arg_type=max_size_bytes_param_type)
 
-        c.argument('sku',
-                   help='The sku of the data warehouse.')
+        c.argument('service_objective',
+                   help='The service objective of the data warehouse. For example: ' +
+                   dw_service_objective_examples)
 
         c.argument('collation',
                    help='The collation of the data warehouse.')

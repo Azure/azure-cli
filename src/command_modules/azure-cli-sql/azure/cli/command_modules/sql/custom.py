@@ -1192,21 +1192,53 @@ def dw_list(
 def dw_update(
         instance,
         max_size_bytes=None,
-        requested_service_objective_name=None):
+        service_objective=None):
     '''
     Updates a data warehouse. Custom update function to apply parameters to instance.
     '''
 
-    # Null out requested_service_objective_id, because if requested_service_objective_id is
-    # specified then requested_service_objective_name is ignored.
-    instance.requested_service_objective_id = None
-
     # Apply param values to instance
-    instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
-    instance.requested_service_objective_name = (
-        requested_service_objective_name or requested_service_objective_name)
+    if max_size_bytes:
+        instance.max_size_bytes = max_size_bytes
+
+    if service_objective:
+        instance.sku = Sku(name=service_objective)
 
     return instance
+
+
+def dw_pause(
+        client,
+        database_name,
+        server_name,
+        resource_group_name):
+    '''
+    Pauses a datawarehouse.
+    '''
+
+    # Pause, but DO NOT return the result. Long-running POST operation
+    # results are not returned correctly by SDK.
+    client.pause(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=database_name).wait()
+
+
+def dw_resume(
+        client,
+        database_name,
+        server_name,
+        resource_group_name):
+    '''
+    Resumes a datawarehouse.
+    '''
+
+    # Resume, but DO NOT return the result. Long-running POST operation
+    # results are not returned correctly by SDK.
+    client.resume(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=database_name).wait()
 
 
 ###############################################

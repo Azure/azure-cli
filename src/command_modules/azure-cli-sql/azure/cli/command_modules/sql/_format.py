@@ -3,14 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.sql.models import ElasticPoolEdition
 from collections import OrderedDict
 
-# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
+from azure.mgmt.sql.models import ElasticPoolEdition
 
 from .custom import is_available
-
 
 def _last_segment(resource_id):
     return resource_id.split('/')[-1] if resource_id else None
@@ -112,18 +109,16 @@ def elastic_pool_show_transform(result):
 
     # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
-    result.storageMb = result.maxSizeBytes / 1024 / 1024
+    result.storageMb = result.max_size_bytes / 1024 / 1024
 
     is_dtu = result.sku.tier in (
-            ElasticPoolEdition.basic.value,
-            ElasticPoolEdition.standard.value,
-            ElasticPoolEdition.premium.value)
+        ElasticPoolEdition.basic.value,
+        ElasticPoolEdition.standard.value,
+        ElasticPoolEdition.premium.value)
 
     result.dtu = result.sku.capacity if is_dtu else None
     result.database_dtu_min = int(result.per_database_settings.min_capacity) if is_dtu else None
     result.database_dtu_max = int(result.per_database_settings.max_capacity) if is_dtu else None
-
-
 
     return result
 

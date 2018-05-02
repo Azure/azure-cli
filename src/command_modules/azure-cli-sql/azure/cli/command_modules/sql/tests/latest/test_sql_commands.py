@@ -845,6 +845,10 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         # pause/resume
         self.cmd('sql dw pause -g {} --server {} --name {}'
                  .format(rg, server, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql dw show --id {}'
+                 .format(dw['id']),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -852,6 +856,10 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
 
         self.cmd('sql dw resume -g {} --server {} --name {}'
                  .format(rg, server, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql dw show --id {}'
+                 .format(dw['id']),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -1207,7 +1215,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                       JMESPathCheck('name', self.pool_name),
                                       JMESPathCheck('location', loc_display),
                                       JMESPathCheck('state', 'Ready'),
-                                      JMESPathCheck('dtu', dtu),
+                                      JMESPathCheck('sku.capacity', dtu),
                                       JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
                                       JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
                                       JMESPathCheck('sku.tier', edition)]).get_output_in_json()
@@ -1254,7 +1262,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', updated_dtu),
+                     JMESPathCheck('sku.capacity', updated_dtu),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
@@ -1270,7 +1278,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', dtu),
+                     JMESPathCheck('sku.capacity', dtu),
                      JMESPathCheck('perDatabaseSettings.minCapacity', updated_db_dtu_min),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', updated_db_dtu_max),
                      JMESPathCheck('maxSizeBytes', storage_mb * 1024 * 1024),
