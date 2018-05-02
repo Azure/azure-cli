@@ -2554,6 +2554,42 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
+
+
+class VMGenericUpdate(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_generic_update(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'id': 'id',
+            'id2': 'id2'
+        })
+
+        self.cmd('identity create -g {rg} -n {id}')
+        result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
+        id_path = result['id'].rsplit('/', 1)[0]
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2')
+        self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
+            self.check('systemAssignedIdentity', ''),
+            self.check('length(userAssignedIdentities)', 2)
+        ])
+
+        # we will try all kinds of generic updates we can
+        self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned, UserAssigned"', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ])
+
+        left = self.cmd('vm update -g {rg} -n {vm} --remove identity.identityIds 1', checks=[
+            self.check('length(identity.identityIds)', 1)
+        ]).get_output_in_json()['identity']['identityIds'][0].rsplit('/', 1)[-1]
+        removed = id_path + '/' + ('id2' if left == 'id' else 'id')
+        self.cmd('vm update -g {rg} -n {vm} --add identity.identityIds ' + removed, checks=[
+            self.check('length(identity.identityIds)', 2)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --remove storageProfile.dataDisks', checks=[
+            self.check('storageProfile.dataDisks', [])
+        ])
+
 # endregion
 
 
