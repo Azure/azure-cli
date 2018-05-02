@@ -910,9 +910,11 @@ def db_update(
         instance.sku = None
 
     # Set other properties
-    instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+    if max_size_bytes:
+        instance.max_size_bytes = max_size_bytes
 
-    instance.zone_redundant = zone_redundant
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 

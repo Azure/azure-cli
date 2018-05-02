@@ -30,7 +30,7 @@ def db_show_transform(result):
     Transforms the json response for a database.
     '''
 
-    # Add properties in order to improve backcompat compared to api-version 2014-04-01
+    # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
 
     return result
@@ -109,8 +109,9 @@ def elastic_pool_show_transform(result):
     Transforms the json response for an elastic pool.
     '''
 
-    # Add properties in order to improve backcompat compared to api-version 2014-04-01
+    # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
+    result.storageMb = result.maxSizeBytes / 1024 / 1024
 
     is_dtu = result.sku.tier in (
             ElasticPoolEdition.basic.value,

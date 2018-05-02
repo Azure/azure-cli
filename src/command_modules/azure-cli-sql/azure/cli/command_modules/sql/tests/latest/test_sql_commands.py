@@ -845,20 +845,12 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         # pause/resume
         self.cmd('sql dw pause -g {} --server {} --name {}'
                  .format(rg, server, database_name),
-                 checks=[NoneCheck()])
-
-        self.cmd('sql dw show --id {}'
-                 .format(dw['id']),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('status', 'Paused')])
 
         self.cmd('sql dw resume -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[NoneCheck()])
-
-        self.cmd('sql dw show -g {} --server {} --name {}'
                  .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
@@ -1207,7 +1199,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                                   '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
-                                  '--storage {}'
+                                  '--storage {}MB'
                                   .format(rg, server, self.pool_name, dtu,
                                           edition, db_dtu_min, db_dtu_max, storage),
                                   checks=[
@@ -1218,8 +1210,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                       JMESPathCheck('dtu', dtu),
                                       JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
                                       JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
-                                      JMESPathCheck('sku.tier', edition),
-                                      JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
+                                      JMESPathCheck('sku.tier', edition)]).get_output_in_json()
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
@@ -1267,7 +1258,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
-                     JMESPathCheck('storageMb', updated_storage_mb),
+                     JMESPathCheck('maxSizeBytes', updated_storage_mb * 1024 * 1024),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update --id {} '
@@ -1282,7 +1273,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', dtu),
                      JMESPathCheck('perDatabaseSettings.minCapacity', updated_db_dtu_min),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', updated_db_dtu_max),
-                     JMESPathCheck('storageMb', storage_mb),
+                     JMESPathCheck('maxSizeBytes', storage_mb * 1024 * 1024),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
@@ -1435,7 +1426,7 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', dtu),
                      JMESPathCheck('perDatabaseSettings.minCapacity', db_dtu_min),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max),
-                     JMESPathCheck('storageMb', storage_mb)])
+                     JMESPathCheck('maxSizeBytes', storage_mb * 1024 * 1024)])
 
         # Update elastic pool
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
