@@ -384,10 +384,10 @@ helps['aks upgrade-connector'] = """
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
 """
 
-helps['aks use-dev-connect'] = """
+helps['aks use-dev-spaces'] = """
     type: command
-    short-summary: (PREVIEW) Use Azure Dev Connect with a managed Kubernetes cluster.
-    long-summary: "If needed, a Dev Connect service will be created and connected to the target cluster, and Dev Connect commands will be installed on this machine."
+    short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+    long-summary: "If needed, a Dev Spaces resource will be created and connected to the target cluster, and Dev Spaces commands will be installed on this machine."
     parameters:
         - name: --cluster-name -n
           type: string
@@ -400,9 +400,9 @@ helps['aks use-dev-connect'] = """
           short-summary: The isolated space in the cluster to develop in.
 """
 
-helps['aks remove-dev-connect'] = """
+helps['aks remove-dev-spaces'] = """
     type: command
-    short-summary: (PREVIEW) Remove Azure Dev Connect from a managed Kubernetes cluster.
+    short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
     parameters:
         - name: --cluster-name -n
           type: string

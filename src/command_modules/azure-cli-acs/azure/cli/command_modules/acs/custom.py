@@ -1418,9 +1418,9 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_name='default'):  # pylint: disable=line-too-long
+def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_name='default'):  # pylint: disable=line-too-long
     """
-    Use Azure Dev Connect with a managed Kubernetes cluster.
+    Use Azure Dev Spaces with a managed Kubernetes cluster.
 
     :param cluster_name: Name of the target AKS cluster.
     :type cluster_name: String
@@ -1430,7 +1430,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     :type space_name: String
     """
 
-    vsce_tool = 'Visual Studio Connected Development Services'
+    vsce_tool = 'Azure Dev Spaces CLI'
     should_install_vsce = False
     system = platform.system()
     if system == 'Windows':
@@ -1438,7 +1438,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
         # Dev Connect Install Path (WinX)
         vsce_cli = os.path.join(os.environ["ProgramFiles"],
                                 "Microsoft SDKs", "Azure",
-                                "Visual Studio Connected Environment CLI", "vsce.exe")
+                                "Azure Dev Spaces CLI (Preview)", "vsce.exe")
         setup_file = os.path.join(_create_tmp_dir(), 'vsce-winx-setup.exe')
         setup_url = "https://aka.ms/get-vsce-windows-az"
         setup_args = [setup_file]
@@ -1451,11 +1451,11 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     else:
         raise CLIError('Platform not supported: {}.'.format(system))
 
-    should_install_vsce = not _is_dev_connected_installed(vsce_cli)
+    should_install_vsce = not _is_dev_connect_installed(vsce_cli)
 
     if should_install_vsce:
         # Install VSCE
-        logger.info('Installing Dev Connect commands...')
+        logger.info('Installing Dev Spaces commands...')
         from six.moves.urllib.request import urlretrieve
         urlretrieve(setup_url, setup_file)
         try:
@@ -1465,28 +1465,28 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             raise CLIError('Installing {} tooling needs permissions: {}'.format(vsce_tool, ex))
         finally:
             os.remove(setup_file)
-        if not _is_dev_connected_installed(vsce_cli):
+        if not _is_dev_connect_installed(vsce_cli):
             raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-vsce' \
-            for connected development.".format(vsce_tool))
+            for Azure Dev Spaces.".format(vsce_tool))
 
     should_create_dev = False
     from subprocess import PIPE
     retCode = subprocess.call(
-        [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
+        [vsce_cli, 'resource', 'select', '-n', cluster_name, '-g', resource_group_name],
         stderr=PIPE)
     if retCode == 1:
         should_create_dev = True
 
     if should_create_dev:
         subprocess.call(
-            [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group',
+            [vsce_cli, 'resource', 'create', '--aks-name', cluster_name, '--aks-resource-group',
              resource_group_name],
             universal_newlines=True)
 
 
-def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False):  # pylint: disable=line-too-long
+def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt=False):  # pylint: disable=line-too-long
     """
-    Remove Azure Dev Connect from a managed Kubernetes cluster.
+    Remove Azure Dev Spaces from a managed Kubernetes cluster.
 
     :param cluster_name: Name of the target AKS cluster.
     :type cluster_name: String
@@ -1496,24 +1496,24 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
     :type prompt: bool
     """
 
-    vsce_tool = 'Visual Studio Connected Development Services'
+    vsce_tool = 'Azure Dev Spaces CLI'
     system = platform.system()
     if system == 'Windows':
         # Windows
         vsce_cli = os.path.join(os.environ["ProgramFiles"],
                                 "Microsoft SDKs", "Azure",
-                                "Visual Studio Connected Environment CLI", "vsce.exe")
+                                "Azure Dev Spaces CLI (Preview)", "vsce.exe")
     elif system == 'Darwin':
         # OSX
         vsce_cli = 'vsce'
     else:
         raise CLIError('Platform not supported: {}.'.format(system))
 
-    if not _is_dev_connected_installed(vsce_cli):
-        raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' \
-        commands for connected development.".format(vsce_tool))
+    if not _is_dev_connect_installed(vsce_cli):
+        raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' \
+        commands for Azure Dev Spaces.".format(vsce_tool))
 
-    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name',
+    remove_command_arguments = [vsce_cli, 'resource', 'rm', '--name',
                                 cluster_name, '--resource-group',
                                 resource_group_name]
 
@@ -1529,7 +1529,7 @@ def _create_tmp_dir():
     return tmp_dir
 
 
-def _is_dev_connected_installed(vsce_cli):
+def _is_dev_connect_installed(vsce_cli):
     try:
         from subprocess import PIPE, Popen
         Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
