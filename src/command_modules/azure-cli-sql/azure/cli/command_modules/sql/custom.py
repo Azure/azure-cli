@@ -1341,7 +1341,8 @@ def elastic_pool_update(
     if max_size_bytes:
         instance.max_size_bytes = max_size_bytes
 
-    instance.zone_redundant = zone_redundant
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     # Set tier
     if tier:
