@@ -63,6 +63,11 @@ class TestObject(object):
         self.empty_dict_of_dicts = {'dict': {'dict2': None}}
         self.empty_dict = {'dict3': None}
 
+        self.additional_properties = {'additional1': 'addition value #1'}
+
+    def enable_additional_properties_sending(self):
+        pass
+
 
 def _prepare_test_loader():
 
@@ -126,6 +131,9 @@ class GenericUpdateTest(unittest.TestCase):
         self.assertEqual(my_obj.my_dict['my_snake_key'], 'success',
                          'set simple dict element with snake case key')
 
+        cli.invoke('genupdate --set additional1=v1'.split())
+        self.assertEqual(my_obj.additional_properties['additional1'], 'v1')
+
         # Test the different ways of indexing into a list of objects or dictionaries by filter
         cli.invoke('genupdate --set myListOfCamelDicts[myKey=value_2].myKey="foo=bar"'.split())
         self.assertEqual(my_obj.my_list_of_camel_dicts[1]['myKey'],
@@ -174,6 +182,10 @@ class GenericUpdateTest(unittest.TestCase):
 
         # Test various --add to lists
         cli.invoke('genupdate --set myList=[]'.split())
+        cli.invoke(shlex.split('genupdate --add myList value1'))
+        self.assertEqual(my_obj.my_list[0], 'value1', 'add a value to an array')
+
+        cli.invoke('genupdate --set myList=[]'.split())
         cli.invoke(shlex.split(
             'genupdate --add myList key1=value1 key2=value2 foo "string in quotes" [] {} foo=bar'))
         self.assertEqual(my_obj.my_list[0]['key1'], 'value1', 'add a value to a dictionary')
@@ -192,10 +204,13 @@ class GenericUpdateTest(unittest.TestCase):
         cli.invoke('genupdate --remove myList -2'.split())
         self.assertEqual(len(my_obj.my_list), 5, 'verify one item removed')
         self.assertEqual(my_obj.my_list[4]['foo'], 'bar', 'verify correct item removed')
-
         self.assertEqual('key1' in my_obj.my_list[0], True, 'verify dict item exists')
+
         cli.invoke('genupdate --remove myList[0].key1'.split())
         self.assertEqual('key1' not in my_obj.my_list[0], True, 'verify dict entry can be removed')
+
+        cli.invoke('genupdate --remove myList'.split())
+        self.assertEqual(my_obj.my_list, [])
 
     def test_generic_update_errors(self):  # pylint: disable=no-self-use
 

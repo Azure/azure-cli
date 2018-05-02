@@ -654,6 +654,7 @@ def _split_key_value_pair(expression):
 
 
 def set_properties(instance, expression):
+    instance.enable_additional_properties_sending()
     key, value = _split_key_value_pair(expression)
 
     try:
@@ -686,7 +687,6 @@ def set_properties(instance, expression):
                 setattr(instance, make_snake_case(name), value)
             else:
                 instance.additional_properties[name] = value
-                instance.enable_additional_properties_sending()
                 logger.warning(
                     "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
 
@@ -697,6 +697,7 @@ def set_properties(instance, expression):
 
 
 def add_properties(instance, argument_values):
+    instance.enable_additional_properties_sending()
     # The first argument indicates the path to the collection to add to.
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
@@ -736,6 +737,7 @@ def add_properties(instance, argument_values):
 
 
 def remove_properties(instance, argument_values):
+    instance.enable_additional_properties_sending()
     # The first argument indicates the path to the collection to add to.
     argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
 
