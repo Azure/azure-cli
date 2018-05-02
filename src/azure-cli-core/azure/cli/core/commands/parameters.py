@@ -386,7 +386,7 @@ class AzArgumentContext(ArgumentsContext):
         # registered for this command.
         command_args = self.command_loader.argument_registry.arguments[self.scope]
         positional_args = {k: v for k, v in command_args.items() if v.settings.get('options_list') == []}
-        if positional_args:
+        if positional_args and dest not in positional_args:
             raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
                            "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
 

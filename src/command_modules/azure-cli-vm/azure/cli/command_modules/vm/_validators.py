@@ -6,6 +6,10 @@
 # pylint:disable=too-many-lines
 
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -198,15 +202,11 @@ def _parse_image_argument(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     import re
 
-    # 1 - easy check for URI
-    if namespace.image.lower().endswith('.vhd'):
-        return 'uri'
-
-    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    # 1 - check if a fully-qualified ID (assumes it is an image ID)
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    # 3 - attempt to match an URN pattern
+    # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
         namespace.os_publisher = urn_match.group(1)
@@ -222,6 +222,10 @@ def _parse_image_argument(cmd, namespace):
                 namespace.plan_publisher = image_plan.publisher
 
         return 'urn'
+
+    # 3 - unmanaged vhd based images?
+    if urlparse(namespace.image).scheme:
+        return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
@@ -1145,15 +1149,10 @@ def process_image_create_namespace(cmd, namespace):
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     from msrestazure.azure_exceptions import CloudError
-    try:
-        from urllib.parse import urlparse
-    except ImportError:
-        from urlparse import urlparse  # pylint: disable=import-error
-
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if urlparse(source).scheme:  # an exiting scheme means a blob uri, as ':' isn't allowed in a disk name
+    if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
