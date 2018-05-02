@@ -820,7 +820,7 @@ def _get_name_path(path):
     return pathlist.pop(), pathlist
 
 
-def _update_instance(instance, part, path):
+def _update_instance(instance, part, path):  # pylint: disable=too-many-return-statements, inconsistent-return-statements
     try:
         index = index_or_filter_regex.match(part)
         if index and not isinstance(instance, list):
@@ -865,8 +865,7 @@ def _update_instance(instance, part, path):
             return getattr(instance, make_snake_case(part), None)
         elif hasattr(instance, 'additional_properties'):
             return instance.additional_properties.get(part, None)
-        else:
-            raise AttributeError()
+        raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
 
