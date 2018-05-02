@@ -83,28 +83,28 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
     with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create', supports_no_wait=True, transform=db_show_transform)
-        g.custom_command('copy', 'db_copy', supports_no_wait=True, transform=db_show_transform)
-        g.custom_command('restore', 'db_restore', supports_no_wait=True, transform=db_show_transform)
+        g.custom_command('create', 'db_create', supports_no_wait=True)
+        g.custom_command('copy', 'db_copy', supports_no_wait=True)
+        g.custom_command('restore', 'db_restore', supports_no_wait=True)
         g.custom_command('rename', 'db_rename')
         g.command('show', 'get', transform=db_show_transform, table_transformer=db_show_table_format)
         g.custom_command('list', 'db_list', transform=db_list_transform, table_transformer=db_list_table_format)
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='db_update', supports_no_wait=True, transform=db_show_transform)
+        g.generic_update_command('update', custom_func_name='db_update', supports_no_wait=True)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
     with self.command_group('sql db replica', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create_replica', supports_no_wait=True, transform=db_show_transform)
+        g.custom_command('create', 'db_create_replica', supports_no_wait=True)
 
     with self.command_group('sql dw', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'dw_create', supports_no_wait=True, transform=db_show_transform)
+        g.custom_command('create', 'dw_create', supports_no_wait=True)
         g.command('show', 'get', transform=db_show_transform)
         g.custom_command('list', 'dw_list', transform=db_list_transform)
         g.command('delete', 'delete', confirmation=True)
-        g.command('pause', 'pause', transform=db_show_transform)
-        g.command('resume', 'resume', transform=db_show_transform)
-        g.generic_update_command('update', custom_func_name='dw_update', supports_no_wait=True, transform=db_show_transform)
+        g.command('pause', 'pause')
+        g.command('resume', 'resume')
+        g.generic_update_command('update', custom_func_name='dw_update', supports_no_wait=True)
 
     database_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',
@@ -168,11 +168,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
         client_factory=get_sql_elastic_pools_operations)
     with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
-        g.custom_command('create', 'elastic_pool_create', transform=elastic_pool_show_transform)
+        g.custom_command('create', 'elastic_pool_create')
         g.command('delete', 'delete')
         g.command('show', 'get', transform=elastic_pool_show_transform, table_transformer=elastic_pool_show_table_format)
         g.command('list', 'list_by_server', transform=elastic_pool_list_transform, table_transformer=elastic_pool_list_table_format)
-        g.generic_update_command('update', transform=elastic_pool_show_transform, custom_func_name='elastic_pool_update')
+        g.generic_update_command('update', custom_func_name='elastic_pool_update')
 
     with self.command_group('sql elastic-pool', database_operations) as g:
         g.command('list-dbs', 'list_by_elastic_pool', transform=db_list_transform, table_transformer=db_list_table_format)
