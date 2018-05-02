@@ -520,7 +520,10 @@ def _create_db_wait_for_first_backup(test, rg, server, database_name):
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
     # 10 minutes. Unforunately there's no way to speed this up.
     earliest_restore_date = _get_earliest_restore_date(db)
-    print('Waiting until earliest restore date', earliest_restore_date)
+
+    if datetime.utcnow() <= earliest_restore_date:
+        print('Waiting until earliest restore date', earliest_restore_date)
+
     while datetime.utcnow() <= earliest_restore_date:
         sleep(10)  # seconds
 
@@ -2017,8 +2020,8 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2')
-    @SqlServerPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='centralus')
+    @SqlServerPreparer(location='centralus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -2027,7 +2030,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         database_name_4 = "updateNoParamForZonedDb"
 
         rg = resource_group
-        loc_display = "eastus2"
+        loc_display = "centralus"
 
         # Test creating database with zone resilience set to false.  Expect regular database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
@@ -2117,8 +2120,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2')
-    @SqlServerPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='centralus')
+    @SqlServerPreparer(location='centralus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
