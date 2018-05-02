@@ -860,6 +860,10 @@ def db_update(
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
+    #####
+    # Set sku-related properties
+    #####
+
     # Verify that elastic_pool_name and requested_service_objective_name param values are not
     # totally inconsistent. If elastic pool and service objective name are both specified, and
     # they are inconsistent (i.e. service objective is not 'ElasticPool'), then the service
@@ -909,7 +913,10 @@ def db_update(
     if instance.elastic_pool_id:
         instance.sku = None
 
-    # Set other properties
+    #####
+    # Set other (non-sku related) properties
+    #####
+
     if max_size_bytes:
         instance.max_size_bytes = max_size_bytes
 
@@ -1331,19 +1338,9 @@ def elastic_pool_update(
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
 
-    # Apply params to instance
-    if max_capacity:
-        instance.per_database_settings.max_capacity = max_capacity
-
-    if min_capacity:
-        instance.per_database_settings.max_capacity = max_capacity
-
-    if max_size_bytes:
-        instance.max_size_bytes = max_size_bytes
-
-    if zone_redundant is not None:
-        instance.zone_redundant = zone_redundant
-
+    #####
+    # Set sku-related properties
+    #####
     # Set tier
     if tier:
         # Wipe out old sku name so that it does not conflict with new tier
@@ -1364,6 +1361,22 @@ def elastic_pool_update(
     # using capabilities.
     if not instance.sku.name:
         instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, instance.location, instance.sku)
+
+    #####
+    # Set other properties
+    #####
+
+    if max_capacity:
+        instance.per_database_settings.max_capacity = max_capacity
+
+    if min_capacity:
+        instance.per_database_settings.max_capacity = max_capacity
+
+    if max_size_bytes:
+        instance.max_size_bytes = max_size_bytes
+
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 
