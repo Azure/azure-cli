@@ -7,7 +7,7 @@ import logging
 import unittest
 import shlex
 import sys
-
+from msrest.serialization import Model
 from azure.cli.core import AzCommandsLoader
 
 from azure.cli.testsdk import TestCli
@@ -35,7 +35,7 @@ class ObjectTestObject(object):
         self.my_bool = bool(bool_val)
 
 
-class TestObject(object):
+class TestObject(Model):
 
     def __init__(self):
         self.my_prop = 'my_value'
@@ -64,9 +64,6 @@ class TestObject(object):
         self.empty_dict = {'dict3': None}
 
         self.additional_properties = {'additional1': 'addition value #1'}
-
-    def enable_additional_properties_sending(self):
-        pass
 
 
 def _prepare_test_loader():
@@ -230,7 +227,7 @@ class GenericUpdateTest(unittest.TestCase):
                 raise ex
             raise AssertionError("exception not raised for ''".format(message))
 
-        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp']"
+        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['additional1', 'emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp']"
         _execute_with_error('genupdate --remove doesntExist',
                             missing_remove_message,
                             'remove non-existent property by name')

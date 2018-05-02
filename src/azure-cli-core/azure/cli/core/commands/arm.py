@@ -766,7 +766,10 @@ def remove_properties(instance, argument_values):
 
 
 def throw_and_show_options(instance, part, path):
+    from msrest.serialization import Model
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
+    if isinstance(instance, Model) and isinstance(getattr(instance, 'additional_properties', None), dict):
+        options.update(options.pop('additional_properties'))
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
     if isinstance(options, dict):
@@ -864,9 +867,9 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
 
         if hasattr(instance, make_snake_case(part)):
             return getattr(instance, make_snake_case(part), None)
-        elif hasattr(instance, 'additional_properties'):
+        elif hasattr(instance, 'additional_properties') and (part in instance.additional_properties):
             instance.enable_additional_properties_sending()
-            return instance.additional_properties.get(part, None)
+            return instance.additional_properties.get[part]
         raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
