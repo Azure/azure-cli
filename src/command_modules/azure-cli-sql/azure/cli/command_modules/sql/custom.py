@@ -176,6 +176,59 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
         return _get_default_capability(supported_service_level_objectives)
 
 
+def _db_elastic_pool_update_sku(
+        cmd,
+        instance,
+        service_objective,
+        tier,
+        family,
+        capacity,
+        find_sku_from_capabilities_func):
+    '''
+    Updates the sku of a DB or elastic pool.
+    '''
+
+    # Set sku name
+    if service_objective:
+        instance.sku = Sku(name=service_objective)
+
+    # Set tier
+    allow_reset_family = False
+    if tier:
+        if not service_objective:
+            # Wipe out old sku name so that it does not conflict with new tier
+            instance.sku.name = None
+
+        instance.sku.tier = tier
+
+        if instance.sku.family and not family:
+            # If we are changing tier and old sku has family but
+            # new family is unspecified, allow sku search to wipe out family.
+            #
+            # This is needed so that tier can be successfully changed from
+            # a tier that has family (e.g. GeneralPurpose) to a tier that has
+            # no family (e.g. Standard).
+            allow_reset_family = True
+
+    # Set family
+    if family:
+        if not service_objective:
+            # Wipe out old sku name so that it does not conflict with new family
+            instance.sku.name = None
+        instance.sku.family = family
+
+    # Set capacity
+    if capacity:
+        instance.sku.capacity = capacity
+
+    # If sku name was wiped out by any of the above, resolve the requested sku name
+    # using capabilities.
+    if not instance.sku.name:
+        instance.sku = find_sku_from_capabilities_func(
+            cmd.cli_ctx, instance.location, instance.sku,
+            allow_reset_family=allow_reset_family)
+
+
 _DEFAULT_SERVER_VERSION = "12.0"
 
 ###############################################
@@ -897,45 +950,15 @@ def db_update(
     # pool.
     instance.elastic_pool_id = elastic_pool_id
 
-    # Set sku. The service will choose correct edition based on sku name and elastic pool.
-    if service_objective:
-        instance.sku = Sku(name=service_objective)
-
-    # Set tier
-    allow_reset_family = False
-    if tier:
-        if not service_objective:
-            # Wipe out old sku name so that it does not conflict with new tier
-            instance.sku.name = None
-
-        instance.sku.tier = tier
-
-        if instance.sku.family and not family:
-            # If we are changing tier and old sku has family but
-            # new family is unspecified, allow sku search to wipe out family.
-            #
-            # This is needed so that tier can be successfully changed from
-            # a tier that has family (e.g. GeneralPurpose) to a tier that has
-            # no family (e.g. Standard).
-            allow_reset_family = True
-
-    # Set family
-    if family:
-        if not service_objective:
-            # Wipe out old sku name so that it does not conflict with new family
-            instance.sku.name = None
-        instance.sku.family = family
-
-    # Set capacity
-    if capacity:
-        instance.sku.capacity = capacity
-
-    # If sku name was wiped out by any of the above, resolve the requested sku name
-    # using capabilities.
-    if not instance.sku.name:
-        instance.sku = _find_db_sku_from_capabilities(
-            cmd.cli_ctx, instance.location, instance.sku,
-            allow_reset_family=allow_reset_family)
+    # Update sku
+    _db_elastic_pool_update_sku(
+        cmd,
+        instance,
+        service_objective,
+        tier,
+        family,
+        capacity,
+        find_sku_from_capabilities_func=_find_db_sku_from_capabilities)
 
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
@@ -1370,39 +1393,15 @@ def elastic_pool_update(
     # Set sku-related properties
     #####
 
-    # Set tier
-    allow_reset_family = False
-    if tier:
-        # Wipe out old sku name so that it does not conflict with new tier
-        instance.sku.name = None
-
-        instance.sku.tier = tier
-
-        if instance.sku.family and not family:
-            # If we are changing tier and old sku has family but
-            # new family is unspecified, allow sku search to wipe out family.
-            #
-            # This is needed so that tier can be successfully changed from
-            # a tier that has family (e.g. GeneralPurpose) to a tier that has
-            # no family (e.g. Standard).
-            allow_reset_family = True
-
-    # Set family
-    if family:
-        # Wipe out old sku name so that it does not conflict with new family
-        instance.sku.name = None
-        instance.sku.family = family
-
-    # Set capacity
-    if capacity:
-        instance.sku.capacity = capacity
-
-    # If sku name was wiped out by any of the above, resolve the requested sku name
-    # using capabilities.
-    if not instance.sku.name:
-        instance.sku = _find_db_sku_from_capabilities(
-            cmd.cli_ctx, instance.location, instance.sku,
-            allow_reset_family=allow_reset_family)
+    # Update sku
+    _db_elastic_pool_update_sku(
+        cmd,
+        instance,
+        None,  # service_objective
+        tier,
+        family,
+        capacity,
+        find_sku_from_capabilities_func=_find_db_sku_from_capabilities)
 
     #####
     # Set other properties

@@ -14,6 +14,22 @@ def _last_segment(resource_id):
     return resource_id.split('/')[-1] if resource_id else None
 
 
+_units = [(1024 * 1024 * 1024 * 1024, 'TB'),
+          (1024 * 1024 * 1024, 'GB'),
+          (1024 * 1024, 'MB'),
+          (1024, 'kB'),
+          (1, 'B')]
+
+
+def _bytes_to_friendly_string(bytes):
+
+    # Find the largest unit that evenly divides the input
+    unit = next(u for u in _units if (bytes % u[0]) == 0)
+
+    # Format the value with the chosen unit
+    return str((bytes // unit[0])) + unit[1]
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -61,7 +77,7 @@ def _db_table_format(result):
         ('tier', result['sku']['tier']),
         ('family', result['sku']['family'] or ' '),
         ('capacity', result['sku']['capacity'] or ' '),
-        ('maxSizeBytes', result['maxSizeBytes']),
+        ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes'])),
         ('elasticPool', _last_segment(result['elasticPoolId']) or ' '),
     ])
 
@@ -150,7 +166,7 @@ def _elastic_pool_table_format(result):
         ('tier', result['sku']['tier']),
         ('family', result['sku']['family'] or ' '),
         ('capacity', result['sku']['capacity'] or ' '),
-        ('maxSizeBytes', result['maxSizeBytes'])
+        ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes']))
     ])
 
 
