@@ -886,7 +886,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -906,6 +906,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if disk_caching is not None:
         update_disk_caching(vm.storage_profile, disk_caching)
+
+    if license_type is not None:
+        vm.license_type = license_type
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -2178,11 +2181,6 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
-def set_vmss(cmd, resource_group_name, name, no_wait=False, **kwargs):
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
-                       resource_group_name, name, **kwargs)
-
-
 def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
@@ -2214,6 +2212,15 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
+
+
+def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, **kwargs):
+    vmss = kwargs['parameters']
+    if license_type is not None:
+        vmss.virtual_machine_profile.license_type = license_type
+
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 # endregion
 
 

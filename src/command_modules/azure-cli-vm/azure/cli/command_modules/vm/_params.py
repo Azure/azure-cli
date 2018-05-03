@@ -380,7 +380,6 @@ def load_arguments(self, _):
             c.argument('image', completer=get_urn_aliases_completion_list)
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
-            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client']))
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
@@ -464,4 +463,9 @@ def load_arguments(self, _):
             c.argument('version', help='Extension version')
             c.argument('orderby', help="the $orderby odata query option")
             c.argument('top', help='the $top odata query option')
+
+    for scope in ['vm create', 'vm update', 'vmss create', 'vmss update']:
+        with self.argument_context(scope) as c:
+            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+
     # endregion

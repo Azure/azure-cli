@@ -283,7 +283,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True)
-        g.generic_update_command('update', getter_name='get_vmss', setter_name='set_vmss', supports_no_wait=True, command_type=compute_custom)
+        g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.generic_wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
 
