@@ -194,7 +194,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
-        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
+        columns = next(l for l in result.output.splitlines() if '1,2,3' in l).split()
+        self.assertEqual(columns[3], '1,2,3')
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -790,7 +791,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Tier', 'Size'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size'])
         # spot check the first 3 entries
         fd_found, ud_found, size_found = False, False, False
         for l in lines[1:]:
@@ -2554,6 +2555,42 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
+
+
+class VMGenericUpdate(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_generic_update(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'id': 'id',
+            'id2': 'id2'
+        })
+
+        self.cmd('identity create -g {rg} -n {id}')
+        result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
+        id_path = result['id'].rsplit('/', 1)[0]
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2')
+        self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
+            self.check('systemAssignedIdentity', ''),
+            self.check('length(userAssignedIdentities)', 2)
+        ])
+
+        # we will try all kinds of generic updates we can
+        self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned, UserAssigned"', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ])
+
+        left = self.cmd('vm update -g {rg} -n {vm} --remove identity.identityIds 1', checks=[
+            self.check('length(identity.identityIds)', 1)
+        ]).get_output_in_json()['identity']['identityIds'][0].rsplit('/', 1)[-1]
+        removed = id_path + '/' + ('id2' if left == 'id' else 'id')
+        self.cmd('vm update -g {rg} -n {vm} --add identity.identityIds ' + removed, checks=[
+            self.check('length(identity.identityIds)', 2)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --remove storageProfile.dataDisks', checks=[
+            self.check('storageProfile.dataDisks', [])
+        ])
+
 # endregion
 
 
