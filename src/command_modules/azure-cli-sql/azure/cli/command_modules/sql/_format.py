@@ -21,17 +21,17 @@ _units = [(1024 * 1024 * 1024 * 1024, 'TB'),
           (1, 'B')]
 
 
-def _bytes_to_friendly_string(bytes):
+def _bytes_to_friendly_string(b):
     '''
     Formats the specified integer count of bytes as a friendly string
     with units, e.g. 1024 -> "1kB"
     '''
 
     # Find the largest unit that evenly divides the input
-    unit = next(u for u in _units if (bytes % u[0]) == 0)
+    unit = next(u for u in _units if (b % u[0]) == 0)
 
     # Format the value with the chosen unit
-    return str((bytes // unit[0])) + unit[1]
+    return str((b // unit[0])) + unit[1]
 
 
 ###############################################

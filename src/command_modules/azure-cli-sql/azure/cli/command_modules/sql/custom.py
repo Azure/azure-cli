@@ -151,8 +151,6 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
                     " Supported capacities for '{tier}' are: {capacities}."
                     " Please specify one of these supported values for capacity.".format(
                         tier=sku.tier,
-                        family=sku.family,
-                        or_none=(' or None' if allow_reset_family else ''),
                         capacity=sku.capacity,
                         capacities=[slo.sku.capacity for slo in supported_service_level_objectives]
                     ))
@@ -163,10 +161,9 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
                     " supported combinations of family and capacity.".format(
                         tier=sku.tier,
                         family=sku.family,
-                        or_none=(' or None' if allow_reset_family else ''),
                         capacity=sku.capacity,
                         skus=[(slo.sku.family, slo.sku.capacity)
-                                for slo in supported_service_level_objectives]
+                              for slo in supported_service_level_objectives]
                     ))
     elif sku.family:
         # Error - cannot find based on family alone.
@@ -1304,7 +1301,7 @@ def dw_resume(
 ###############################################
 
 
-def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
+def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and capacity), finds the canonical matching sku
@@ -1337,7 +1334,8 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku):
 
     # Find performance level capability, based on requested sku properties
     performance_level_capability = _find_performance_level_capability(
-        sku, edition_capability.supported_elastic_pool_performance_levels)
+        sku, edition_capability.supported_elastic_pool_performance_levels,
+        allow_reset_family=allow_reset_family)
 
     # Copy sku object from capability
     result = performance_level_capability.sku
