@@ -194,7 +194,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
-        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
+        columns = next(l for l in result.output.splitlines() if '1,2,3' in l).split()
+        self.assertEqual(columns[3], '1,2,3')
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -790,7 +791,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Tier', 'Size'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size'])
         # spot check the first 3 entries
         fd_found, ud_found, size_found = False, False, False
         for l in lines[1:]:
