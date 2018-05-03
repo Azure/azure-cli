@@ -269,7 +269,7 @@ class VMGeneralizeScenarioTest(ScenarioTest):
 class VMVMSSWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
-    def test_windows_vm_vmss_license_type(self, resource_group):
+    def test_vm_vmss_windows_license_type(self, resource_group):
 
         self.kwargs.update({
             'vm': 'winvm',
@@ -279,9 +279,15 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('licenseType', 'Windows_Server')
         ])
+        self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
+            self.check('licenseType', 'None')
+        ])
         self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.licenseType', 'Windows_Server')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
+            self.check('virtualMachineProfile.licenseType', 'None')
         ])
 
 
