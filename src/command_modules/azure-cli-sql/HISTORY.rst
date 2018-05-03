@@ -2,6 +2,13 @@
 
 Release History
 ===============
+
+2.0.26
+++++++
+* BREAKING CHANGES: Updated database, data warehouse, and elastic pool commands to use Azure-standard SKU properties for configuring performance level. This has resulted in some changes to the respose objects returned from db, dw, and elastic-pool commands.
+* Database, data warehouse, and elastic pool create and update commands now accept parameters to set the family (i.e. compute generation) and capacity (i.e. scale) aspects of performance level. Capacity can be used to set the scale of DTU-based editions (e.g. Basic, Standard, Premium), and family & capacity can be used to set the scale of vcore-based editions (e.g. GeneralPurpose and BusinessCritical).
+* Database, data warehouse, and elastic pool commands now have table formatters (for use with `-o table`) which provide a more compact view of their major properties.
+
 2.0.25
 ++++++
 * Use new release azure-mgmt-sql 0.8.6 SDK Python package
@@ -18,7 +25,7 @@ Release History
 
 2.0.22
 ++++++
-* Added zone redundancy support for databases and elastic pools on creation and update. 
+* Added zone redundancy support for databases and elastic pools on creation and update.
 
 2.0.21
 ++++++
