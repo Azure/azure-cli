@@ -6,6 +6,15 @@ Release History
 2.0.26
 ++++++
 * BREAKING CHANGES: Updated database, data warehouse, and elastic pool commands to use Azure-standard SKU properties for configuring performance level. This has resulted in some changes to the respose objects returned from db, dw, and elastic-pool commands.
+  - Database & data warehouse:
+    - "serviceLevelObjective" renamed to "currentServiceObjectiveName"
+    - "currentServiceObjectiveId" and "requestedServiceObjectiveId" removed
+    - "requestedServiceObjectiveName" is now readonly. To update service objective, use --service-objective parameter or set sku.name property.
+    - "edition" is now readonly. To update edition, use --edition parameter or set sku.tier property.
+    - "elasticPoolName" is now readonly. To update elastic pool, use --elastic-pool parameter or set elasticPoolId property.
+    - "maxSizeBytes" is now an integer value instead of a string.
+  - Elastic pool:
+    - "edition", "dtu", "databaseDtuMin", and "databaseDtuMax" are now readonly. To update, use --edition, --capacity, --db-max-capacity, and --db-min-capacity parameters respectively.
 * Database, data warehouse, and elastic pool create and update commands now accept parameters to set the family (i.e. compute generation) and capacity (i.e. scale) aspects of performance level. Capacity can be used to set the scale of DTU-based editions (e.g. Basic, Standard, Premium), and family & capacity can be used to set the scale of vcore-based editions (e.g. GeneralPurpose and BusinessCritical).
 * Database, data warehouse, and elastic pool commands now have table formatters (for use with `-o table`) which provide a more compact view of their major properties.
 
