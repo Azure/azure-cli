@@ -100,9 +100,7 @@ def _filter_available(capabilities):
     return [c for c in capabilities if is_available(c.status)]
 
 
-def _find_edition_capability(
-        sku,
-        supported_editions):
+def _find_edition_capability(sku, supported_editions):
     '''
     Finds the DB edition capability in the collection of supported editions
     that matches the requested sku.
@@ -126,35 +124,50 @@ def _find_edition_capability(
         return _get_default_capability(supported_editions)
 
 
-def _find_performance_level_capability(
-        sku,
-        supported_service_level_objectives):
+def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family):
     '''
-    Finds the DB performance level (i.e. service objective) in the collection
-    of supported service objectives that matches the requested sku's
+    Finds the DB or elastic pool performance level (i.e. service objective) in the
+    collection of supported service objectives that matches the requested sku's
     family and capacity.
 
     If the sku has no capacity or family specified, returns the default service
     objective.
     '''
 
+    logger.debug('_find_performance_level_capability input: %s, allow_reset_family: %s', sku, allow_reset_family)
+
     if sku.capacity:
-        # Find requested service objective based on capacity & family.
-        # Note that for non-vcore editions, family is None.
         try:
+            # Find requested service objective based on capacity & family.
+            # Note that for non-vcore editions, family is None.
             return next(slo for slo in supported_service_level_objectives
-                        if slo.sku.family == sku.family and
+                        if ((slo.sku.family == sku.family) or
+                            (slo.sku.family is None and allow_reset_family)) and
                         int(slo.sku.capacity) == int(sku.capacity))
         except StopIteration:
-            raise CLIError(
-                "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
-                " Supported skus for '{tier}' are: {skus}".format(
-                    tier=sku.tier,
-                    family=sku.family,
-                    capacity=sku.capacity,
-                    skus=[(slo.sku.family, slo.sku.capacity)
-                          for slo in supported_service_level_objectives]
-                ))
+            if allow_reset_family:
+                raise CLIError(
+                    "Could not find sku in tier '{tier}' with capacity {capacity}."
+                    " Supported capacities for '{tier}' are: {capacities}."
+                    " Please specify one of these supported values for capacity.".format(
+                        tier=sku.tier,
+                        family=sku.family,
+                        or_none=(' or None' if allow_reset_family else ''),
+                        capacity=sku.capacity,
+                        capacities=[slo.sku.capacity for slo in supported_service_level_objectives]
+                    ))
+            else:
+                raise CLIError(
+                    "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
+                    " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
+                    " supported combinations of family and capacity.".format(
+                        tier=sku.tier,
+                        family=sku.family,
+                        or_none=(' or None' if allow_reset_family else ''),
+                        capacity=sku.capacity,
+                        skus=[(slo.sku.family, slo.sku.capacity)
+                                for slo in supported_service_level_objectives]
+                    ))
     elif sku.family:
         # Error - cannot find based on family alone.
         raise CLIError('If --family is specified, --capacity must also be specified.')
@@ -327,7 +340,7 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
             quote(self.database_name))
 
 
-def _find_db_sku_from_capabilities(cli_ctx, location, sku):
+def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and capacity), finds the canonical matching sku
@@ -356,11 +369,13 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku):
     server_version_capability = _get_default_capability(capabilities.supported_server_versions)
 
     # Find edition capability, based on requested sku properties
-    edition_capability = _find_edition_capability(sku, server_version_capability.supported_editions)
+    edition_capability = _find_edition_capability(
+        sku, server_version_capability.supported_editions)
 
     # Find performance level capability, based on requested sku properties
     performance_level_capability = _find_performance_level_capability(
-        sku, edition_capability.supported_service_level_objectives)
+        sku, edition_capability.supported_service_level_objectives,
+        allow_reset_family=allow_reset_family)
 
     # Ideally, we would return the sku object from capability (`return performance_level_capability.sku`).
     # However not all db create modes support using `capacity` to find slo, so instead we put
@@ -887,11 +902,22 @@ def db_update(
         instance.sku = Sku(name=service_objective)
 
     # Set tier
+    allow_reset_family = False
     if tier:
         if not service_objective:
             # Wipe out old sku name so that it does not conflict with new tier
             instance.sku.name = None
+
         instance.sku.tier = tier
+
+        if instance.sku.family and not family:
+            # If we are changing tier and old sku has family but
+            # new family is unspecified, allow sku search to wipe out family.
+            #
+            # This is needed so that tier can be successfully changed from
+            # a tier that has family (e.g. GeneralPurpose) to a tier that has
+            # no family (e.g. Standard).
+            allow_reset_family = True
 
     # Set family
     if family:
@@ -907,7 +933,9 @@ def db_update(
     # If sku name was wiped out by any of the above, resolve the requested sku name
     # using capabilities.
     if not instance.sku.name:
-        instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, instance.location, instance.sku)
+        instance.sku = _find_db_sku_from_capabilities(
+            cmd.cli_ctx, instance.location, instance.sku,
+            allow_reset_family=allow_reset_family)
 
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
@@ -1341,11 +1369,23 @@ def elastic_pool_update(
     #####
     # Set sku-related properties
     #####
+
     # Set tier
+    allow_reset_family = False
     if tier:
         # Wipe out old sku name so that it does not conflict with new tier
         instance.sku.name = None
+
         instance.sku.tier = tier
+
+        if instance.sku.family and not family:
+            # If we are changing tier and old sku has family but
+            # new family is unspecified, allow sku search to wipe out family.
+            #
+            # This is needed so that tier can be successfully changed from
+            # a tier that has family (e.g. GeneralPurpose) to a tier that has
+            # no family (e.g. Standard).
+            allow_reset_family = True
 
     # Set family
     if family:
@@ -1360,7 +1400,9 @@ def elastic_pool_update(
     # If sku name was wiped out by any of the above, resolve the requested sku name
     # using capabilities.
     if not instance.sku.name:
-        instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, instance.location, instance.sku)
+        instance.sku = _find_db_sku_from_capabilities(
+            cmd.cli_ctx, instance.location, instance.sku,
+            allow_reset_family=allow_reset_family)
 
     #####
     # Set other properties
