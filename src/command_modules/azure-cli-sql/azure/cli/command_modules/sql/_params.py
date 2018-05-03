@@ -624,8 +624,12 @@ def load_arguments(self, _):
         # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
         # consistent with other az sql commands, but the original can't be removed due to
         # compatibility.
-        c.argument('max_capacity', options_list=['--db-dtu-max', '--db-max-dtu', '--db-max-capacity'])
-        c.argument('min_capacity', options_list=['--db-dtu-min', '--db-min-dtu', '--db-min-capacity'])
+        c.argument('max_capacity',
+                   options_list=['--db-dtu-max', '--db-max-dtu', '--db-max-capacity'],
+                   help='The maximum capacity (in DTUs or vcores) any one database can consume.')
+        c.argument('min_capacity',
+                   options_list=['--db-dtu-min', '--db-min-dtu', '--db-min-capacity'],
+                   help='The minumum capacity (in DTUs or vcores) each database is guaranteed.')
 
         # --storage was the original param name, which is consistent with the underlying REST API.
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
