@@ -90,7 +90,7 @@ def load_command_table(self, _):
         g.command('show', 'get', transform=db_show_transform, table_transformer=db_show_table_format)
         g.custom_command('list', 'db_list', transform=db_list_transform, table_transformer=db_list_table_format)
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', setter_name='update', custom_func_name='db_update', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='db_update', supports_no_wait=True)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
