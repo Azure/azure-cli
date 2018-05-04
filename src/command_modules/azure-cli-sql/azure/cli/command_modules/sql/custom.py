@@ -1399,7 +1399,7 @@ def elastic_pool_update(
         tier,
         family,
         capacity,
-        find_sku_from_capabilities_func=_find_db_sku_from_capabilities)
+        find_sku_from_capabilities_func=_find_elastic_pool_sku_from_capabilities)
 
     #####
     # Set other properties
@@ -1409,7 +1409,7 @@ def elastic_pool_update(
         instance.per_database_settings.max_capacity = max_capacity
 
     if min_capacity:
-        instance.per_database_settings.max_capacity = max_capacity
+        instance.per_database_settings.min_capacity = min_capacity
 
     if max_size_bytes:
         instance.max_size_bytes = max_size_bytes
