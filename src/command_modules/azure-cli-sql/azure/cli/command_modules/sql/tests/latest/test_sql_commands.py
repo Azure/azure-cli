@@ -1579,6 +1579,22 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                      JMESPathCheckExists("[?name == 'Standard']"),
                      JMESPathCheck("length([?name != 'Standard'])", 0)])
 
+        # Search for dtus
+        self.cmd('sql db list-editions -l {} --dtu 100'.format(location),
+                 checks=[
+                     # All results have 100 dtu
+                     JMESPathCheckGreaterThan('length([].supportedServiceLevelObjectives[?performanceLevel.value == `100`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.value != `100`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `DTU`][])', 0)])
+
+        # Search for vcores
+        self.cmd('sql db list-editions -l {} --vcore 2'.format(location),
+                 checks=[
+                     # All results have 2 vcores
+                     JMESPathCheckGreaterThan('length([].supportedServiceLevelObjectives[?performanceLevel.value == `2`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.value != `2`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])', 0)])
+
         # Search for db service objective - note that it's case insensitive
         # Checked items:
         #   * Standard edition exists, other editions don't
@@ -1609,12 +1625,21 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  checks=[JMESPathCheckExists("[?name == 'Standard']"),  # Standard edition exists, other editions don't
                          JMESPathCheck("length([?name != 'Standard'])", 0)])
 
-        # Search for dtu limit
+        # Search for dtus
         self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
                      JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `100`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `100`][])', 0)])
+                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `100`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `DTU`][])', 0)])
+
+        # Search for vcores
+        self.cmd('sql elastic-pool list-editions -l {} --vcore 2'.format(location),
+                 checks=[
+                     # All results have 2 vcores
+                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `2`][])', 0),
+                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `2`][])', 0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])', 0)])
 
         # Get all db capabilities with pool max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
