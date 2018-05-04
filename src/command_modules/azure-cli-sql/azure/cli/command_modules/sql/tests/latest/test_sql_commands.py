@@ -366,6 +366,92 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  .format(db3['id']),
                  checks=[NoneCheck()])
 
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_vcore_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, database_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+        # Update database to dtu edition
+        dtu_edition = 'Standard'
+        dtu_capacity = 10
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --capacity {} --max-size 250GB'
+                 .format(resource_group, server, database_name, dtu_edition, dtu_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', dtu_edition),
+                     JMESPathCheck('sku.capacity', dtu_capacity)])
+
+        # Update database back to vcore edition
+        vcore_family = 'Gen5'
+        vcore_capacity = 4
+        self.cmd('sql db update -g {} --server {} --name {} -e {} -c {} -f {}'
+                 .format(resource_group, server, database_name, vcore_edition,
+                         vcore_capacity, vcore_family),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vcore_capacity),
+                     JMESPathCheck('sku.family', vcore_family)])
+
+        # Update only family
+        vcore_family_updated = 'Gen4'
+        self.cmd('sql db update -g {} -s {} -n {} --family {}'
+                 .format(resource_group, server, database_name, vcore_family_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vcore_capacity),
+                     JMESPathCheck('sku.family', vcore_family_updated)])
+
+        # Update only capacity
+        vcore_capacity_updated = 8
+        self.cmd('sql db update -g {} -s {} -n {} --capacity {}'
+                 .format(resource_group, server, database_name, vcore_capacity_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vcore_capacity_updated),
+                     JMESPathCheck('sku.family', vcore_family_updated)])
+
+        # Update only edition
+        vcore_edition_updated = 'BusinessCritical'
+        self.cmd('sql db update -g {} -s {} -n {} --tier {}'
+                 .format(resource_group, server, database_name, vcore_edition_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('sku.tier', vcore_edition_updated),
+                     JMESPathCheck('sku.capacity', vcore_capacity_updated),
+                     JMESPathCheck('sku.family', vcore_family_updated)])
+
+        # Create database with vcore edition and all sku properties specified
+        database_name_2 = 'cliautomationdb02'
+        vcore_edition = 'GeneralPurpose'
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {}'
+                 .format(resource_group, server, database_name_2,
+                         vcore_edition_updated, vcore_capacity_updated,
+                         vcore_family_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('sku.tier', vcore_edition_updated),
+                     JMESPathCheck('sku.capacity', vcore_capacity_updated),
+                     JMESPathCheck('sku.family', vcore_family_updated)])
+
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='southeastasia')
