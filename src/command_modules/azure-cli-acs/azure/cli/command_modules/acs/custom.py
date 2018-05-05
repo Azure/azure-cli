@@ -1430,28 +1430,28 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
     :type space_name: String
     """
 
-    vsce_tool = 'Azure Dev Spaces CLI'
+    azds_tool = 'Azure Dev Spaces CLI'
     should_install_vsce = False
     system = platform.system()
     if system == 'Windows':
         # Windows
         # Dev Connect Install Path (WinX)
-        vsce_cli = os.path.join(os.environ["ProgramFiles"],
+        azds_cli = os.path.join(os.environ["ProgramFiles"],
                                 "Microsoft SDKs", "Azure",
-                                "Azure Dev Spaces CLI (Preview)", "vsce.exe")
-        setup_file = os.path.join(_create_tmp_dir(), 'vsce-winx-setup.exe')
-        setup_url = "https://aka.ms/get-vsce-windows-az"
+                                "Azure Dev Spaces CLI (Preview)", "azds.exe")
+        setup_file = os.path.join(_create_tmp_dir(), 'azds-winx-setup.exe')
+        setup_url = "https://aka.ms/get-azds-windows-az"
         setup_args = [setup_file]
     elif system == 'Darwin':
         # OSX
-        vsce_cli = 'vsce'
-        setup_file = os.path.join(_create_tmp_dir(), 'vsce-osx-setup.sh')
-        setup_url = "https://aka.ms/get-vsce-osx-az"
+        azds_cli = 'azds'
+        setup_file = os.path.join(_create_tmp_dir(), 'azds-osx-setup.sh')
+        setup_url = "https://aka.ms/get-azds-osx-az"
         setup_args = ['bash', setup_file]
     else:
         raise CLIError('Platform not supported: {}.'.format(system))
 
-    should_install_vsce = not _is_dev_connect_installed(vsce_cli)
+    should_install_vsce = not _is_dev_connect_installed(azds_cli)
 
     if should_install_vsce:
         # Install VSCE
@@ -1462,24 +1462,24 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
             subprocess.call(
                 setup_args, universal_newlines=True, stdin=None, stdout=None, stderr=None, shell=False)
         except PermissionError as ex:
-            raise CLIError('Installing {} tooling needs permissions: {}'.format(vsce_tool, ex))
+            raise CLIError('Installing {} tooling needs permissions: {}'.format(azds_tool, ex))
         finally:
             os.remove(setup_file)
-        if not _is_dev_connect_installed(vsce_cli):
-            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-vsce' \
-            for Azure Dev Spaces.".format(vsce_tool))
+        if not _is_dev_connect_installed(azds_cli):
+            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-azds' \
+            for Azure Dev Spaces.".format(azds_tool))
 
     should_create_dev = False
     from subprocess import PIPE
     retCode = subprocess.call(
-        [vsce_cli, 'resource', 'select', '-n', cluster_name, '-g', resource_group_name],
+        [azds_cli, 'resource', 'select', '-n', cluster_name, '-g', resource_group_name],
         stderr=PIPE)
     if retCode == 1:
         should_create_dev = True
 
     if should_create_dev:
         subprocess.call(
-            [vsce_cli, 'resource', 'create', '--aks-name', cluster_name, '--aks-resource-group',
+            [azds_cli, 'resource', 'create', '--aks-name', cluster_name, '--aks-resource-group',
              resource_group_name],
             universal_newlines=True)
 
@@ -1496,30 +1496,28 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
     :type prompt: bool
     """
 
-    vsce_tool = 'Azure Dev Spaces CLI'
+    azds_tool = 'Azure Dev Spaces CLI'
     system = platform.system()
     if system == 'Windows':
         # Windows
-        vsce_cli = os.path.join(os.environ["ProgramFiles"],
+        azds_cli = os.path.join(os.environ["ProgramFiles"],
                                 "Microsoft SDKs", "Azure",
-                                "Azure Dev Spaces CLI (Preview)", "vsce.exe")
+                                "Azure Dev Spaces CLI (Preview)", "azds.exe")
     elif system == 'Darwin':
         # OSX
-        vsce_cli = 'vsce'
+        azds_cli = 'azds'
     else:
         raise CLIError('Platform not supported: {}.'.format(system))
 
-    if not _is_dev_connect_installed(vsce_cli):
+    if not _is_dev_connect_installed(azds_cli):
         raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' \
-        commands for Azure Dev Spaces.".format(vsce_tool))
+        commands for Azure Dev Spaces.".format(azds_tool))
 
-    remove_command_arguments = [vsce_cli, 'resource', 'rm', '--name',
+    remove_command_arguments = [azds_cli, 'resource', 'rm', '--name',
                                 cluster_name, '--resource-group',
                                 resource_group_name]
-
     if prompt:
         remove_command_arguments.append('-f')
-
     subprocess.call(
         remove_command_arguments, universal_newlines=True)
 
