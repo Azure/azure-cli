@@ -264,7 +264,7 @@ def update_webapp(cmd, resource_group_name, name, slot=None,
 def update_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
     if 'function' not in instance.kind:
-        raise CLIError('Not a function app t update')
+        raise CLIError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.create_or_update(resource_group_name=resource_group_name, name=name, site_envelope=instance)
 
