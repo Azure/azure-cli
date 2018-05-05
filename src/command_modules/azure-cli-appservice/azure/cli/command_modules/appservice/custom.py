@@ -243,7 +243,8 @@ def update_webapp(cmd, resource_group_name, name, slot=None,
                   skip_dns_registration=None, skip_custom_domain_verification=None, force_dns_registration=None,
                   ttl_in_seconds=None, client_affinity_enabled=None, https_only=None, **kwargs):
     instance = kwargs['parameters']
-
+    if 'function' in instance.kind:
+        raise CLIError("please use 'az functionapp update' to update this function app")
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
