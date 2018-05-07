@@ -37,7 +37,7 @@ helps['extension list-available'] = """
     - name: List all publicly available extensions
       text: az extension list-available
     - name: List details on a particular extension
-      text: az extension list-available --query anextension
+      text: az extension list-available --show-details --query anextension
 """
 
 helps['extension show'] = """

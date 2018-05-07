@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.14
+++++++
+* Minor fixes
+
 0.0.13
 ++++++
 * Pin version of `wheel` so extensions can get metadata shown again.
