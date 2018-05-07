@@ -80,7 +80,7 @@ def load_command_table(self, _):
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity show', 'show_identity')
-        g.generic_update_command('update', getter_name='get_app', setter_name='update_webapp', command_type=appservice_custom)
+        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -183,7 +183,7 @@ def load_command_table(self, _):
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity show', 'show_identity')
-        g.generic_update_command('update', getter_name='get_app', setter_name='update_functionapp', command_type=appservice_custom)
+        g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

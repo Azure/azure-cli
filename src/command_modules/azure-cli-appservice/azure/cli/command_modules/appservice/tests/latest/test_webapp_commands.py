@@ -726,7 +726,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage), checks=[
-            JMESPathCheck('state', 'test_functionapp_consumption_e2eRunning'),
+            JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
