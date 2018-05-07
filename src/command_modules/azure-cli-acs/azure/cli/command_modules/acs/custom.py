@@ -1466,8 +1466,7 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
         finally:
             os.remove(setup_file)
         if not _is_dev_connect_installed(azds_cli):
-            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-azds' \
-            for Azure Dev Spaces.".format(azds_tool))
+            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-azds' for Azure Dev Spaces.".format(azds_tool))
 
     should_create_dev = False
     from subprocess import PIPE
@@ -1510,8 +1509,7 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
         raise CLIError('Platform not supported: {}.'.format(system))
 
     if not _is_dev_connect_installed(azds_cli):
-        raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' \
-        commands for Azure Dev Spaces.".format(azds_tool))
+        raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' commands for Azure Dev Spaces.".format(azds_tool))
 
     remove_command_arguments = [azds_cli, 'resource', 'rm', '--name',
                                 cluster_name, '--resource-group',
