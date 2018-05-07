@@ -1436,7 +1436,7 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
     if system == 'Windows':
         # Windows
         # Dev Connect Install Path (WinX)
-        azds_cli = os.path.join(os.environ["ProgramFiles"],
+        azds_cli = os.path.join(os.environ["ProgramW6432"],
                                 "Microsoft SDKs", "Azure",
                                 "Azure Dev Spaces CLI (Preview)", "azds.exe")
         setup_file = os.path.join(_create_tmp_dir(), 'azds-winx-setup.exe')
@@ -1500,7 +1500,7 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
     system = platform.system()
     if system == 'Windows':
         # Windows
-        azds_cli = os.path.join(os.environ["ProgramFiles"],
+        azds_cli = os.path.join(os.environ["ProgramW6432"],
                                 "Microsoft SDKs", "Azure",
                                 "Azure Dev Spaces CLI (Preview)", "azds.exe")
     elif system == 'Darwin':
