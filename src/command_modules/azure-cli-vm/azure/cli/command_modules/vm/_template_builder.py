@@ -243,7 +243,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
-        disk_info=None):
+        disk_info=None, boot_diagnostics_storage_uri=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -356,6 +356,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disks:
             profile['dataDisks'] = data_disks
+
         return profile
 
     vm_properties = {
@@ -373,6 +374,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
     if license_type:
         vm_properties['licenseType'] = license_type
+
+    if boot_diagnostics_storage_uri:
+        vm_properties['diagnosticsProfile'] = {
+            'bootDiagnostics': {
+                "enabled": True,
+                "storageUri": boot_diagnostics_storage_uri
+            }
+        }
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
