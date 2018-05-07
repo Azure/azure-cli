@@ -3,12 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-
-from azure.mgmt.sql.models import ElasticPoolEdition
-
-from .custom import is_available
-
 
 def _last_segment(resource_id):
     return resource_id.split('/')[-1] if resource_id else None
@@ -75,6 +69,7 @@ def _db_table_format(result):
     '''
     Formats a database as summary results for display with "-o table".
     '''
+    from collections import OrderedDict
 
     return OrderedDict([
         ('name', result['name']),
@@ -98,6 +93,8 @@ def _db_edition_list_table_format(editions):
     '''
     Formats a database edition as summary results for display with "-o table".
     '''
+    from .custom import is_available
+    from collections import OrderedDict
 
     for e in editions:
         for slo in e['supportedServiceLevelObjectives']:
@@ -127,6 +124,7 @@ def elastic_pool_show_transform(result):
     '''
     Transforms the json response for an elastic pool.
     '''
+    from azure.mgmt.sql.models import ElasticPoolEdition
 
     # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
@@ -164,6 +162,7 @@ def _elastic_pool_table_format(result):
     '''
     Formats an elastic pool as summary results for display with "-o table".
     '''
+    from collections import OrderedDict
 
     return OrderedDict([
         ('name', result['name']),
@@ -186,6 +185,8 @@ def _elastic_pool_edition_list_table_format(editions):
     '''
     Formats an elastic pool editions as summary results for display with "-o table".
     '''
+    from collections import OrderedDict
+    from .custom import is_available
 
     for e in editions:
         for slo in e['supportedElasticPoolPerformanceLevels']:
