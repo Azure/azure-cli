@@ -10,7 +10,7 @@ from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 def load_command_table(self, _):
     mgmt_type = CliCommandType(
-        operations_tmpl='azure.mgmt.locationbasedservices.operations.accounts_operations#AccountsOperations.{}',
+        operations_tmpl='azure.mgmt.maps.operations.accounts_operations#AccountsOperations.{}',
         client_factory=cf_accounts)
 
     with self.command_group('maps account', mgmt_type) as g:
@@ -20,7 +20,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  getter_name='get',
-                                 setter_arg_name='location_based_services_account_create_parameters',
+                                 setter_arg_name='maps_account_create_parameters',
                                  custom_func_name='generic_update_account')
 
     with self.command_group('maps account keys', mgmt_type) as g:
