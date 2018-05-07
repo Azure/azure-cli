@@ -1510,14 +1510,14 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         dtu_capacity = 100
         db_dtu_max = 10
         self.cmd('sql elastic-pool update -g {} --server {} --name {} --edition {} --capacity {} --max-size 250GB '
-                 '--db-max-dtu 10'
-                 .format(resource_group, server, pool_name, dtu_edition, dtu_capacity),
+                 '--db-max-dtu {}'
+                 .format(resource_group, server, pool_name, dtu_edition, dtu_capacity, db_dtu_max),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', pool_name),
                      JMESPathCheck('sku.tier', dtu_edition),
                      JMESPathCheck('sku.capacity', dtu_capacity),
-                     JMESPathCheck('perDatabaseSettings.maxCapacity', 10)])
+                     JMESPathCheck('perDatabaseSettings.maxCapacity', db_dtu_max)])
 
         # Update pool back to vcore edition
         vcore_family = 'Gen5'
