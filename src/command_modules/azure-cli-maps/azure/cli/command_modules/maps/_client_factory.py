@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-def cf_locationbasedservices(cli_ctx, *_):
+def cf_maps(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.locationbasedservices import LocationBasedServicesManagementClient
     return get_mgmt_service_client(cli_ctx, LocationBasedServicesManagementClient)
 
 
 def cf_accounts(cli_ctx, *_):
-    return cf_locationbasedservices(cli_ctx).accounts
+    return cf_maps(cli_ctx).accounts

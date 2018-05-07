@@ -1,0 +1,62 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from knack.help_files import helps
+
+helps['maps'] = """
+    type: group
+    short-summary: Manage Azure Maps accounts.
+"""
+
+helps['maps account'] = """
+    type: group
+    short-summary: Manage Azure Maps accounts.
+"""
+
+helps['maps account keys'] = """
+    type: group
+    short-summary: Manage Azure Maps account keys.
+"""
+
+helps['maps account show'] = """
+    type: command
+    short-summary: Show the details of a Maps account.
+"""
+
+helps['maps account list'] = """
+    type: command
+    short-summary: Show all Maps accounts in a Subscription or in a Resource Group.
+"""
+
+helps['maps account create'] = """
+    type: command
+    short-summary: Create a Maps account.
+    long-summary: |
+        Create a Maps account. A Maps account holds the keys which allow access to the Maps REST APIs.
+"""
+
+helps['maps account update'] = """
+    type: command
+    short-summary: Update the properties of a Maps account.
+"""
+
+helps['maps account delete'] = """
+    type: command
+    short-summary: Delete a Maps account.
+"""
+
+helps['maps account keys list'] = """
+    type: command
+    short-summary: List the keys to use with the Maps APIs.
+    long-summary: |
+        List the keys to use with the Maps APIs. A key is used to authenticate and authorize access to the Maps REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration.
+"""
+
+helps['maps account keys renew'] = """
+    type: command
+    short-summary: Renew either the primary or secondary key for use with the Maps APIs.
+    long-summary: |
+        Renew either the primary or secondary key for use with the Maps APIs. The old key will stop working immediately.
+"""

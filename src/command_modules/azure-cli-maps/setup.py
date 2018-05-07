@@ -41,9 +41,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-locationbasedservices',
+    name='azure-cli-maps',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Location Based Services Command Module',
+    description='Microsoft Azure Command-Line Tools Maps Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -54,7 +54,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.locationbasedservices'
+        'azure.cli.command_modules.maps'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

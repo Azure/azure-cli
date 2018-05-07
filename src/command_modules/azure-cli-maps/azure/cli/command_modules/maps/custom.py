@@ -17,8 +17,8 @@ logger = get_logger(__name__)
 # pylint: disable=line-too-long
 def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None):
     sku = Sku(sku_name)
-    lbs_account_create_params = LocationBasedServicesAccountCreateParameters(ACCOUNT_LOCATION, sku, tags)
-    return client.create_or_update(resource_group_name, account_name, lbs_account_create_params)
+    maps_account_create_params = LocationBasedServicesAccountCreateParameters(ACCOUNT_LOCATION, sku, tags)
+    return client.create_or_update(resource_group_name, account_name, maps_account_create_params)
 
 
 def list_accounts(client, resource_group_name=None):
@@ -31,11 +31,11 @@ def list_accounts(client, resource_group_name=None):
 
 def generic_update_account(instance, sku_name=None, tags=None):
     # Pre-populate with old instance
-    lbs_account_create_params = LocationBasedServicesAccountCreateParameters(ACCOUNT_LOCATION, instance.sku,
-                                                                             instance.tags)
+    maps_account_create_params = LocationBasedServicesAccountCreateParameters(ACCOUNT_LOCATION, instance.sku,
+                                                                              instance.tags)
     # Update fields with new parameter values
     if sku_name:
-        lbs_account_create_params.sku.name = sku_name
+        maps_account_create_params.sku.name = sku_name
     if tags:
-        lbs_account_create_params.tags = tags
-    return lbs_account_create_params
+        maps_account_create_params.tags = tags
+    return maps_account_create_params

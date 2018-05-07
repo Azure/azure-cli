@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.locationbasedservices._client_factory import cf_accounts
+from azure.cli.core.util import empty_on_404
+from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 
 def load_command_table(self, _):
@@ -12,8 +13,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.locationbasedservices.operations.accounts_operations#AccountsOperations.{}',
         client_factory=cf_accounts)
 
-    with self.command_group('locationbasedservices account', mgmt_type) as g:
-        g.command('show', 'get')
+    with self.command_group('maps account', mgmt_type) as g:
+        g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('list', 'list_accounts')
         g.custom_command('create', 'create_account')
         g.command('delete', 'delete')
@@ -22,6 +23,6 @@ def load_command_table(self, _):
                                  setter_arg_name='location_based_services_account_create_parameters',
                                  custom_func_name='generic_update_account')
 
-    with self.command_group('locationbasedservices account keys', mgmt_type) as g:
+    with self.command_group('maps account keys', mgmt_type) as g:
         g.command('renew', 'regenerate_keys')
         g.command('list', 'list_keys')

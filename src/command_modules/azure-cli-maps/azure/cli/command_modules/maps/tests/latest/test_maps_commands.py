@@ -9,11 +9,11 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.mgmt.locationbasedservices.models.location_based_services_management_client_enums import KeyType
 
 
-class LocationBasedServicesScenarioTests(ScenarioTest):
+class MapsScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(key='rg')
     @ResourceGroupPreparer(key='rg1')
-    def test_create_locationbasedservices_account(self, resource_group):
+    def test_create_maps_account(self, resource_group):
         tag_key = self.create_random_name(prefix='key-', length=10)
         tag_value = self.create_random_name(prefix='val-', length=10)
 
@@ -27,9 +27,9 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             'key_type_secondary': KeyType.secondary.value
         })
 
-        # Test 'az locationbasedservices account create'.
-        # Test to create a LocationBasedServices account.
-        account = self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku}',
+        # Test 'az maps account create'.
+        # Test to create a Maps account.
+        account = self.cmd('az maps account create -n {name} -g {rg} --sku {sku}',
                            checks=[
                                self.check('name', '{name}'),
                                self.check('resourceGroup', '{rg}'),
@@ -39,12 +39,12 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
 
         # Call create again, expect to get the same account.
         account_duplicated = self.cmd(
-            'az locationbasedservices account create -n {name} -g {rg} --sku {sku}').get_output_in_json()
+            'az maps account create -n {name} -g {rg} --sku {sku}').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
-        # Test 'az locationbasedservices account update'
+        # Test 'az maps account update'
         # Test to add a new tag to an existing account.
-        self.cmd('az locationbasedservices account update -n {name} -g {rg} --sku {sku} --tags {tags}',
+        self.cmd('az maps account update -n {name} -g {rg} --sku {sku} --tags {tags}',
                  checks=[
                      self.check('id', account['id']),
                      self.check('name', '{name}'),
@@ -53,16 +53,16 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
                      self.check('tags', {tag_key: tag_value})
                  ])
 
-        # Test 'az locationbasedservices account show'.
-        # Test to get information on LocationBasedServices account.
-        self.cmd('az locationbasedservices account show -n {name} -g {rg}', checks=[
+        # Test 'az maps account show'.
+        # Test to get information on Maps account.
+        self.cmd('az maps account show -n {name} -g {rg}', checks=[
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sku.name', '{sku}')
         ])
         # Search by id
-        self.cmd('az locationbasedservices account show --ids ' + account['id'], checks=[
+        self.cmd('az maps account show --ids ' + account['id'], checks=[
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
@@ -70,9 +70,9 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check('tags', {tag_key: tag_value})
         ])
 
-        # Test 'az locationbasedservices account list'.
-        # Test to list all LocationBasedServices accounts under a resource group.
-        self.cmd('az locationbasedservices account list -g {rg}', checks=[
+        # Test 'az maps account list'.
+        # Test to list all Maps accounts under a resource group.
+        self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('type(@)', 'array'),
             self.check('[0].id', account['id']),
@@ -83,10 +83,10 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         ])
 
         # Create two new accounts (One in separate resource group).
-        self.cmd('az locationbasedservices account create -n {name1} -g {rg1} --sku {sku}')
-        self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku}')
+        self.cmd('az maps account create -n {name1} -g {rg1} --sku {sku}')
+        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku}')
         # Check that list command now shows two accounts in one resource group, and one in another.
-        self.cmd('az locationbasedservices account list -g {rg}', checks=[
+        self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 2),
             self.check('type(@)', 'array'),
             self.check("length([?name == '{name}'])", 1),
@@ -95,7 +95,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check("length([?resourceGroup == '{rg}'])", 2),
             self.check("length([?resourceGroup == '{rg1}'])", 0)
         ])
-        self.cmd('az locationbasedservices account list -g {rg1}', checks=[
+        self.cmd('az maps account list -g {rg1}', checks=[
             self.check('length(@)', 1),
             self.check('type(@)', 'array'),
             self.check("length([?name == '{name}'])", 0),
@@ -105,9 +105,9 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check("length([?resourceGroup == '{rg1}'])", 1)
         ])
 
-        # Test 'az locationbasedservices account key list'.
-        # Test to list keys for an LocationBasedServices account.
-        account_key_list = self.cmd('az locationbasedservices account keys list -n {name} -g {rg}', checks=[
+        # Test 'az maps account key list'.
+        # Test to list keys for a Maps account.
+        account_key_list = self.cmd('az maps account keys list -n {name} -g {rg}', checks=[
             self.check('id', account['id']),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
@@ -118,10 +118,10 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         self.assertTrue(re.match('^[a-zA-Z0-9_-]+$', primary_key_old))
         self.assertTrue(re.match('^[a-zA-Z0-9_-]+$', secondary_key_old))
 
-        # Test 'az locationbasedservices account key regenerate'.
-        # Test to change primary and secondary keys for an LocationBasedServices account.
+        # Test 'az maps account key regenerate'.
+        # Test to change primary and secondary keys for a Maps account.
         key_regenerated = self.cmd(
-            'az locationbasedservices account keys renew -n {name} -g {rg} --key {key_type_primary}', checks=[
+            'az maps account keys renew -n {name} -g {rg} --key {key_type_primary}', checks=[
                 self.check('id', account['id']),
                 self.check('resourceGroup', '{rg}')
             ]).get_output_in_json()
@@ -133,22 +133,22 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Save the new primary key, and regenerate the secondary key.
         primary_key_old = key_regenerated['primaryKey']
         key_regenerated = self.cmd(
-            'az locationbasedservices account keys renew -n {name} -g {rg} --key {key_type_secondary}') \
+            'az maps account keys renew -n {name} -g {rg} --key {key_type_secondary}') \
             .get_output_in_json()
         self.assertEqual(primary_key_old, key_regenerated['primaryKey'])
         self.assertNotEqual(secondary_key_old, key_regenerated['secondaryKey'])
 
-        # Test 'az locationbasedservices account delete'.
-        # Test to remove an LocationBasedServices account.
-        self.cmd('az locationbasedservices account delete -n {name} -g {rg}', checks=self.is_empty())
-        self.cmd('az locationbasedservices account list -g {rg}', checks=[
+        # Test 'az maps account delete'.
+        # Test to remove a Maps account.
+        self.cmd('az maps account delete -n {name} -g {rg}', checks=self.is_empty())
+        self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check("length([?name == '{name}'])", 0)
         ])
 
-        # Remove the rest of LocationBasedServices accounts.
-        exit_code = self.cmd('az locationbasedservices account delete -n {name1} -g {rg1}').exit_code
+        # Remove the rest of Maps accounts.
+        exit_code = self.cmd('az maps account delete -n {name1} -g {rg1}').exit_code
         self.assertEqual(exit_code, 0)
-        self.cmd('az locationbasedservices account delete -n {name2} -g {rg}')
-        self.cmd('az locationbasedservices account list -g {rg}', checks=self.is_empty())
-        self.cmd('az locationbasedservices account list -g {rg1}', checks=self.is_empty())
+        self.cmd('az maps account delete -n {name2} -g {rg}')
+        self.cmd('az maps account list -g {rg}', checks=self.is_empty())
+        self.cmd('az maps account list -g {rg1}', checks=self.is_empty())
