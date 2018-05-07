@@ -212,7 +212,7 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
 
 def remove_extension(extension_name):
     def log_err(func, path, exc_info):
-        logger.debug("Error occurred attempting to delete a file from the extension '%s'", extension_name)
+        logger.debug("Error occurred attempting to delete item from the extension '%s'.", extension_name)
         logger.debug("%s: %s - %s", func, path, exc_info)
 
     try:
