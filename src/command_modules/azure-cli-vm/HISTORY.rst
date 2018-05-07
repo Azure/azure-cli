@@ -2,8 +2,15 @@
 
 Release History
 ===============
+2.0.32
+++++++
+* vm/vmss update: expose `--license-type`
+* vm/vmss: use PATCH for updating identities
+
 2.0.31
 ++++++
+* vm: fix an invalid detection logic on unmanaged blob uri
+* vm: support disk encryption w/o user provided service principals 
 * BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
 * vmss: support eviction policy
 * BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,

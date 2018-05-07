@@ -194,7 +194,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
-        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
+        columns = next(l for l in result.output.splitlines() if '1,2,3' in l).split()
+        self.assertEqual(columns[3], '1,2,3')
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -268,7 +269,7 @@ class VMGeneralizeScenarioTest(ScenarioTest):
 class VMVMSSWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
-    def test_windows_vm_vmss_license_type(self, resource_group):
+    def test_vm_vmss_windows_license_type(self, resource_group):
 
         self.kwargs.update({
             'vm': 'winvm',
@@ -278,9 +279,15 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('licenseType', 'Windows_Server')
         ])
+        self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
+            self.check('licenseType', 'None')
+        ])
         self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.licenseType', 'Windows_Server')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
+            self.check('virtualMachineProfile.licenseType', 'None')
         ])
 
 
@@ -790,7 +797,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Tier', 'Size'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size'])
         # spot check the first 3 entries
         fd_found, ud_found, size_found = False, False, False
         for l in lines[1:]:
@@ -2328,17 +2335,17 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
-# TOOD: FAIL no KeyVault commands!
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
-class VMSSDiskEncryptionTest(ScenarioTest):
+class VMDiskEncryptionTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='eastus2euap')  # the feature is only available in canary, should rollout to public soon
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vault': self.create_random_name('vault', 10),
             'vmss': 'vmss1'
         })
         self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
+        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
@@ -2354,6 +2361,19 @@ class VMSSDiskEncryptionTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
+    def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vault': self.create_random_name('vault', 10),
+            'vm': 'vm1'
+        })
+        self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
+        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
+        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789!')
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        self.cmd('vm encryption disable -g {rg} -n {vm}')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -2541,6 +2561,42 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
+
+
+class VMGenericUpdate(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_generic_update(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'id': 'id',
+            'id2': 'id2'
+        })
+
+        self.cmd('identity create -g {rg} -n {id}')
+        result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
+        id_path = result['id'].rsplit('/', 1)[0]
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2')
+        self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
+            self.check('systemAssignedIdentity', ''),
+            self.check('length(userAssignedIdentities)', 2)
+        ])
+
+        # we will try all kinds of generic updates we can
+        self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned, UserAssigned"', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ])
+
+        left = self.cmd('vm update -g {rg} -n {vm} --remove identity.identityIds 1', checks=[
+            self.check('length(identity.identityIds)', 1)
+        ]).get_output_in_json()['identity']['identityIds'][0].rsplit('/', 1)[-1]
+        removed = id_path + '/' + ('id2' if left == 'id' else 'id')
+        self.cmd('vm update -g {rg} -n {vm} --add identity.identityIds ' + removed, checks=[
+            self.check('length(identity.identityIds)', 2)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --remove storageProfile.dataDisks', checks=[
+            self.check('storageProfile.dataDisks', [])
+        ])
+
 # endregion
 
 

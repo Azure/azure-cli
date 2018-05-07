@@ -205,8 +205,6 @@ helps['monitor log-profiles create'] = """
             parameters:
                 - name: --name -n
                   short-summary: The name of the log profile.
-                - name: --location -l
-                  short-summary:
                 - name: --locations
                   short-summary: Space-separated list of regions for which Activity Log events should be stored.
                 - name: --categories

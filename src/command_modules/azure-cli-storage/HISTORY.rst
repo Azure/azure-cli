@@ -9,6 +9,7 @@ Release History
 * Expose --socket-timeout for blob uploads and downloads.
 * Treat blob names that start with path separators as relative paths.
 * `storage blob copy` Allow --source-sas with starting query char, '?'
+* `storage entity query` Fix --marker to accept list of key=values.
 
 2.0.31
 ++++++

@@ -139,6 +139,25 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', 'false'),
         ]))
 
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_create(self):
+        resource_group = 'yili-cus-stage-01'
+        plan = 'yili-cus-stage-02'
+        webapp_name = 'lukasz-cli-test-17'
+        config_file = 'https://raw.githubusercontent.com/LukaszStem/spewlogs/master/randomconfig.yml'
+
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file {} "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-linux-cd'
@@ -520,6 +539,8 @@ class WebappSlotScenarioTest(ScenarioTest):
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+        # try another way to delete a slot and exercise all options
+        self.cmd('webapp delete -g {} -n {} --slot {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp, slot2))
 
 
 class WebappSlotTrafficRouting(ScenarioTest):

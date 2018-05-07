@@ -12,7 +12,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
                           validate_table_payload_format, validate_key, add_progress_callback,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
-                          get_char_options_validator, validate_bypass, validate_encryption_source)
+                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -699,3 +699,4 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('accept', default='minimal', validator=validate_table_payload_format,
                    arg_type=get_enum_type(['none', 'minimal', 'full']),
                    help='Specifies how much metadata to include in the response payload.')
+        c.argument('marker', validator=validate_marker, nargs='+')

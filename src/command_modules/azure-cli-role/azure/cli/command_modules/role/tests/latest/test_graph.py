@@ -67,16 +67,16 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             ])
         }
         result = self.cmd("ad app create --display-name {native_app_name} --native-app --required-resource-accesses '{required_access}'", checks=[
-            self.check('additionalProperties.publicClient', True),
-            self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+            self.check('publicClient', True),
+            self.check('requiredResourceAccess|[0].resourceAccess|[0].id',
                        '5778995a-e1bf-45b8-affa-663a9f3f4d04')
         ]).get_output_in_json()
         self.kwargs['id'] = result['appId']
         try:
             self.cmd("ad app update --id {id} --required-resource-accesses '{required_access2}'")
             self.cmd('ad app show --id {id}', checks=[
-                self.check('additionalProperties.publicClient', True),
-                self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+                self.check('publicClient', True),
+                self.check('requiredResourceAccess|[0].resourceAccess|[0].id',
                            '311a71cc-e848-46a1-bdf8-97ff7156d8e6')
             ])
         except Exception:

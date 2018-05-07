@@ -682,11 +682,14 @@ def set_properties(instance, expression):
             throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
-            name = make_snake_case(name)
-            if not hasattr(instance, name):
+            if hasattr(instance, make_snake_case(name)):
+                setattr(instance, make_snake_case(name), value)
+            else:
+                instance.additional_properties[name] = value
+                instance.enable_additional_properties_sending()
                 logger.warning(
-                    "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
-            setattr(instance, name, value)
+                    "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
+
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
@@ -723,7 +726,7 @@ def add_properties(instance, argument_values):
             # attempt to convert anything else to JSON and fallback to string if error
             try:
                 argument = shell_safe_json_parse(argument)
-            except ValueError:
+            except (ValueError, CLIError):
                 pass
             list_to_add_to.append(argument)
 
@@ -744,12 +747,13 @@ def remove_properties(instance, argument_values):
         pass
 
     if not list_index:
-        _find_property(instance, list_attribute_path)
+        property_val = _find_property(instance, list_attribute_path)
         parent_to_remove_from = _find_property(instance, list_attribute_path[:-1])
         if isinstance(parent_to_remove_from, dict):
             del parent_to_remove_from[list_attribute_path[-1]]
         elif hasattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1])):
-            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]), None)
+            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]),
+                    [] if isinstance(property_val, list) else None)
         else:
             raise ValueError
     else:
@@ -762,7 +766,10 @@ def remove_properties(instance, argument_values):
 
 
 def throw_and_show_options(instance, part, path):
+    from msrest.serialization import Model
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
+    if isinstance(instance, Model) and isinstance(getattr(instance, 'additional_properties', None), dict):
+        options.update(options.pop('additional_properties'))
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
     if isinstance(options, dict):
@@ -816,7 +823,7 @@ def _get_name_path(path):
     return pathlist.pop(), pathlist
 
 
-def _update_instance(instance, part, path):
+def _update_instance(instance, part, path):  # pylint: disable=too-many-return-statements, inconsistent-return-statements
     try:
         index = index_or_filter_regex.match(part)
         if index and not isinstance(instance, list):
@@ -833,8 +840,8 @@ def _update_instance(instance, part, path):
                 if isinstance(x, dict) and x.get(key, None) == value:
                     matches.append(x)
                 elif not isinstance(x, dict):
-                    key = make_snake_case(key)
-                    if hasattr(x, key) and getattr(x, key, None) == value:
+                    snake_key = make_snake_case(key)
+                    if hasattr(x, snake_key) and getattr(x, snake_key, None) == value:
                         matches.append(x)
 
             if len(matches) == 1:
@@ -843,6 +850,9 @@ def _update_instance(instance, part, path):
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
             else:
+                if key in getattr(instance, 'additional_properties', {}):
+                    instance.enable_additional_properties_sending()
+                    return instance.additional_properties[key]
                 raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
         if index:
@@ -855,7 +865,12 @@ def _update_instance(instance, part, path):
         if isinstance(instance, dict):
             return instance[part]
 
-        return getattr(instance, make_snake_case(part))
+        if hasattr(instance, make_snake_case(part)):
+            return getattr(instance, make_snake_case(part), None)
+        elif hasattr(instance, 'additional_properties') and (part in instance.additional_properties):
+            instance.enable_additional_properties_sending()
+            return instance.additional_properties.get[part]
+        raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
 

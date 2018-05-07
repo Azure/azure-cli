@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Integrated Terminal/Console",
+            "name": "Azure CLI Debug (Integrated Console)",
             "type": "python",
             "request": "launch",
             "pythonPath": "${config:python.pythonPath}",
@@ -19,40 +19,7 @@
             ]
         },
         {
-            "name": "Scripts",
-            "type": "python",
-            "request": "launch",
-            "pythonPath": "${config:python.pythonPath}",
-            "program": "${workspaceRoot}/tools/automation/__main__.py",
-            "cwd": "${workspaceRoot}",
-            "args": [
-                "-h"
-            ],
-            "console": "integratedTerminal",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ]
-        },
-        {
-            "name": "Azure CLI Tests",
-            "type": "python",
-            "request": "launch",
-            "pythonPath": "${config:python.pythonPath}",
-            "program": "${workspaceRoot}/tools/automation/tests/run.py",
-            "cwd": "${workspaceRoot}",
-            "args": [
-            ],
-            "console": "integratedTerminal",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ]
-        },
-        {
-            "name": "External Terminal/Console",
+            "name": "Azure CLI Debug (External Console)",
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
@@ -66,6 +33,23 @@
             "debugOptions": [
                 "WaitOnAbnormalExit",
                 "WaitOnNormalExit"
+            ]
+        },
+        {
+            "name": "Azdev Scripts",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/tools/automation/__main__.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--help"
+            ],
+            "console": "integratedTerminal",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
             ]
         }
     ]

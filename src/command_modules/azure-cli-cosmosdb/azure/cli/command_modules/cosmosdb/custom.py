@@ -51,12 +51,15 @@ def cli_cosmosdb_create(cmd, client,
                         max_interval=5,
                         ip_range_filter=None,
                         enable_automatic_failover=None,
-                        capabilities=None):
+                        capabilities=None,
+                        enable_virtual_network=None,
+                        virtual_network_rules=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
-                                               max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
+                                               max_staleness_prefix=max_staleness_prefix,
+                                               max_interval_in_seconds=max_interval)
 
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -68,14 +71,16 @@ def cli_cosmosdb_create(cmd, client,
         locations.append(Location(location_name=resource_group_location, failover_priority=0))
 
     params = DatabaseAccountCreateUpdateParameters(
-        resource_group_location,
-        locations,
+        location=resource_group_location,
+        locations=locations,
         tags=tags,
         kind=kind,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter,
+        is_virtual_network_filter_enabled=enable_virtual_network,
         enable_automatic_failover=enable_automatic_failover,
-        capabilities=capabilities)
+        capabilities=capabilities,
+        virtual_network_rules=virtual_network_rules)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -93,7 +98,9 @@ def cli_cosmosdb_update(client,
                         max_interval=None,
                         ip_range_filter=None,
                         enable_automatic_failover=None,
-                        capabilities=None):
+                        capabilities=None,
+                        enable_virtual_network=None,
+                        virtual_network_rules=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -105,7 +112,9 @@ def cli_cosmosdb_update(client,
            max_staleness_prefix is not None or \
            max_interval is not None or \
            ip_range_filter is not None or \
-           enable_automatic_failover is not None:
+           enable_automatic_failover is not None or \
+           enable_virtual_network is not None or \
+           virtual_network_rules is not None:
             raise CLIError("Cannot set capabilities and update properties at the same time. {0}".format(locations))
 
         else:
@@ -122,7 +131,9 @@ def cli_cosmosdb_update(client,
            max_staleness_prefix is None and\
            max_interval is None and\
            ip_range_filter is None and\
-           enable_automatic_failover is None:
+           enable_automatic_failover is None and\
+           enable_virtual_network is None and\
+           virtual_network_rules is None:
 
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
@@ -146,8 +157,9 @@ def cli_cosmosdb_update(client,
 
     consistency_policy = None
     if update_consistency_policy:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
-                                               max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
+                                               max_staleness_prefix=max_staleness_prefix,
+                                               max_interval_in_seconds=max_interval)
     else:
         consistency_policy = existing.consistency_policy
 
@@ -162,18 +174,26 @@ def cli_cosmosdb_update(client,
     if enable_automatic_failover is None:
         enable_automatic_failover = existing.enable_automatic_failover
 
+    if enable_virtual_network is None:
+        enable_virtual_network = existing.is_virtual_network_filter_enabled
+
+    if virtual_network_rules is None:
+        virtual_network_rules = existing.virtual_network_rules
+
     if tags is None:
         tags = existing.tags
 
     params = DatabaseAccountCreateUpdateParameters(
-        existing.location,
-        locations,
+        location=existing.location,
+        locations=locations,
         tags=tags,
         kind=existing.kind,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter,
         enable_automatic_failover=enable_automatic_failover,
-        capabilities=existing.capabilities)
+        capabilities=existing.capabilities,
+        is_virtual_network_filter_enabled=enable_virtual_network,
+        virtual_network_rules=virtual_network_rules)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
