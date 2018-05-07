@@ -812,7 +812,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
         location = namespace.location
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
-        watcher = next((x for x in network_client.list_all() if x.location == location), None)
+        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
         if not watcher:
             raise CLIError("network watcher is not enabled for region '{}'.".format(location))
         id_parts = parse_resource_id(watcher.id)
