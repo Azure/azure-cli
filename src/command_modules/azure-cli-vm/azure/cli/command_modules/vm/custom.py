@@ -419,7 +419,9 @@ def show_vmss_identity(cmd, resource_group_name, vm_name):
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None):
-    VirtualMachineIdentity, ResourceIdentityType = cmd.get_models('VirtualMachineIdentity', 'ResourceIdentityType')
+    VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
+                                                                                        'ResourceIdentityType',
+                                                                                        'VirtualMachineUpdate')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -427,7 +429,10 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     def getter():
         return client.virtual_machines.get(resource_group_name, vm_name)
 
-    def setter(vm):
+    def setter(vm, external_identities=external_identities):
+        vm_patch = None
+        if VirtualMachineUpdate:
+            vm_patch = VirtualMachineUpdate()
         if vm.identity and vm.identity.identity_ids:
             for i in vm.identity.identity_ids:
                 external_identities.append(i)
@@ -446,12 +451,17 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
+            # do in-place update, so the outer method can display the same data
+            external_identities[::] = set(external_identities)
             vm.identity.identity_ids = external_identities
+
+        if vm_patch:
+            vm_patch.identity = vm.identity
+            return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
         return set_vm(cmd, vm)
 
     vm = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
                                 identity_scope=identity_scope)
-
     return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id, external_identities)
 
 
@@ -491,7 +501,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None):
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
+              boot_diagnostics_storage=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -607,7 +618,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_name=os_disk_name, custom_image_os_type=os_type, storage_sku=storage_sku,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
-        license_type=license_type, zone=zone, disk_info=disk_info)
+        license_type=license_type, zone=zone, disk_info=disk_info,
+        boot_diagnostics_storage_uri=boot_diagnostics_storage)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -864,13 +876,19 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def patch_vm(cmd, resource_group_name, vm_name, vm):
+    client = _compute_client_factory(cmd.cli_ctx)
+    poller = client.virtual_machines.update(resource_group_name, vm_name, vm)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def show_vm(cmd, resource_group_name, vm_name, show_details=False):
     return get_vm_details(cmd, resource_group_name, vm_name) if show_details \
         else get_vm(cmd, resource_group_name, vm_name)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -890,6 +908,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if disk_caching is not None:
         update_disk_caching(vm.storage_profile, disk_caching)
+
+    if license_type is not None:
+        vm.license_type = license_type
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -976,25 +997,15 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
     if not (diag_profile and diag_profile.boot_diagnostics and diag_profile.boot_diagnostics.enabled):
         return
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
 
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
+    from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
     vm = get_vm(cmd, resource_group_name, vm_name)
-    if urlparse(storage).scheme:
-        storage_uri = storage
-    else:
-        storage_mgmt_client = _get_storage_management_client(cmd.cli_ctx)
-        storage_accounts = storage_mgmt_client.storage_accounts.list()
-        storage_account = next((a for a in list(storage_accounts)
-                                if a.name.lower() == storage.lower()), None)
-        if storage_account is None:
-            raise CLIError('{} does\'t exist.'.format(storage))
-        storage_uri = storage_account.primary_endpoints.blob
+    storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
 
     if (vm.diagnostics_profile and
             vm.diagnostics_profile.boot_diagnostics and
@@ -1011,8 +1022,6 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     else:
         vm.diagnostics_profile.boot_diagnostics = boot_diag
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
@@ -1223,11 +1232,21 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
             resource.identity.type = ResourceIdentityType.none
         else:  # has to be 'system_assigned_user_assigned'
             resource.identity.type = ResourceIdentityType.system_assigned
-    return setter(cmd, resource)
+
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+    return result.identity
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
-    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, set_vm)
+    def setter(resource_group_name, vm_name, vm):
+        client = _compute_client_factory(cmd.cli_ctx)
+        VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
+        if VirtualMachineUpdate:
+            vm_update = VirtualMachineUpdate(identity=vm.identity)
+            return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
+        return client.virtual_machines.create_or_update(resource_group_name, vm_name, vm)
+
+    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
 # endregion
 
 
@@ -1680,8 +1699,8 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 # region VirtualMachineScaleSets
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role='Contributor',
                          identity_role_id=None, identity_scope=None):
-    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType = cmd.get_models(
-        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType')
+    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
+        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -1689,7 +1708,10 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
     def getter():
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
-    def setter(vmss):
+    def setter(vmss, external_identities=external_identities):
+        vmss_patch = None
+        if VirtualMachineScaleSetUpdate:
+            vmss_patch = VirtualMachineScaleSetUpdate()
         if vmss.identity and vmss.identity.identity_ids:
             for i in vmss.identity.identity_ids:
                 external_identities.append(i)
@@ -1707,9 +1729,15 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             identity_types = ResourceIdentityType.system_assigned
         vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
         if external_identities:
+            # do in-place update, so the outer method can display the same data
+            external_identities[::] = set(external_identities)
             vmss.identity.identity_ids = external_identities
-
-        poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        if vmss_patch:
+            vmss_patch.identity = vmss.identity
+            vmss_patch.sku = vmss.sku  # workaround https://github.com/Azure/azure-cli/issues/6262
+            poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
+        else:
+            poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     vmss = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
@@ -2143,11 +2171,6 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
-def set_vmss(cmd, resource_group_name, name, no_wait=False, **kwargs):
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
-                       resource_group_name, name, **kwargs)
-
-
 def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
@@ -2179,6 +2202,15 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
+
+
+def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, **kwargs):
+    vmss = kwargs['parameters']
+    if license_type is not None:
+        vmss.virtual_machine_profile.license_type = license_type
+
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 # endregion
 
 
@@ -2358,7 +2390,13 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
     def _get_vmss(_, resource_group_name, vmss_name):
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
-    def _set_vmss(_, vmss_instance):
+    def _set_vmss(resource_group_name, name, vmss_instance):
+        VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
+                                                      operation_group='virtual_machine_scale_sets')
+        if VirtualMachineScaleSetUpdate:
+            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity, sku=vmss_instance.sku)
+            return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
+
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                                   vmss_name, vmss_instance)
 
