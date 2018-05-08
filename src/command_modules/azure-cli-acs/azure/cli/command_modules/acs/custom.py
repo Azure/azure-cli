@@ -57,6 +57,7 @@ from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTyp
 from azure.mgmt.containerservice.models import ManagedCluster
 
 from ._client_factory import cf_container_services
+from ._client_factory import cf_providers
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
@@ -81,6 +82,34 @@ def which(binary):
             return bin_path
 
     return None
+
+
+def register_providers(cli_ctx):
+    """Registers the required Azure resource providers for AKS, if necessary."""
+
+    providers = cf_providers(cli_ctx)
+
+    def is_registered(namespace):
+        state = providers.get(resource_provider_namespace=namespace)
+        return state.registration_state == 'Registered'
+
+    # register any provider namespaces that aren't already registered
+    registering = []
+    for namespace in ['Microsoft.Compute', 'Microsoft.ContainerService', 'Microsoft.Network', 'Microsoft.Storage']:
+        if not is_registered(namespace):
+            logger.warning('registering provider %s', namespace)
+            providers.register(resource_provider_namespace=namespace)
+            registering.append(namespace)
+
+    # poll and sleep until all providers report "Registered"
+    while registering:
+        for namespace in registering[:]:
+            if is_registered(namespace):
+                logger.info('registered %s', namespace)
+                registering.remove(namespace)
+            else:
+                logger.info('waiting for %s to be registered', namespace)
+                time.sleep(3)
 
 
 def wait_then_open(url):
@@ -662,7 +691,7 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,too-many-statements
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None, admin_username="azureuser", api_version=None, master_profile=None,
                master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1, master_vnet_subnet_id="",
@@ -750,6 +779,8 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
+
+    register_providers(cmd.cli_ctx)
 
     groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
@@ -1313,6 +1344,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
+
+    register_providers(cmd.cli_ctx)
 
     groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
