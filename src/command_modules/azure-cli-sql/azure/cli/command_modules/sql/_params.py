@@ -8,7 +8,6 @@ from enum import Enum
 
 from knack.arguments import CLIArgumentType, ignore_type
 
-from azure.cli.core.commands import patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models import (
     Database,
     ElasticPool,
@@ -19,6 +18,7 @@ from azure.mgmt.sql.models import (
     ServerAzureADAdministrator,
     Sku
 )
+
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
@@ -51,7 +51,7 @@ from .custom import (
 )
 
 from ._validators import (
-    expand,
+    create_args_for_complex_type,
     validate_elastic_pool_id
 )
 
@@ -185,29 +185,31 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
-    # Set up validator which will build Database object from the specified arguments
-    expand(arg_ctx, 'parameters', Database, [
-        'catalog_collation',
-        'collation',
-        'elastic_pool_id',
-        'license_type',
-        'max_size_bytes',
-        'name',
-        'restore_point_in_time',
-        'sample_name',
-        'sku',
-        'source_database_deletion_date',
-        'tags',
-        'zone_redundant',
-    ])
+    # Create args that will be used to build up the Database object
+    create_args_for_complex_type(
+        arg_ctx, 'parameters', Database, [
+            'catalog_collation',
+            'collation',
+            'elastic_pool_id',
+            'license_type',
+            'max_size_bytes',
+            'name',
+            'restore_point_in_time',
+            'sample_name',
+            'sku',
+            'source_database_deletion_date',
+            'tags',
+            'zone_redundant',
+        ])
 
-    # Set up validator which will build Sku object from the specified arguments
-    expand(arg_ctx, 'sku', Sku, [
-        'capacity',
-        'family',
-        'name',
-        'tier',
-    ])
+    # Create args that will be used to build up the Database's Sku object
+    create_args_for_complex_type(
+        arg_ctx, 'sku', Sku, [
+            'capacity',
+            'family',
+            'name',
+            'tier',
+        ])
 
     arg_ctx.argument('name',
                      options_list=['--service-objective'],
@@ -271,16 +273,23 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes', arg_type=max_size_bytes_param_type)
+        c.argument('max_size_bytes',
+                   arg_type=max_size_bytes_param_type)
 
         creation_arg_group = 'Creation'
 
-        c.argument('collation', arg_group=creation_arg_group)
-        c.argument('catalog_collation', arg_group=creation_arg_group,
-                   arg_type=get_enum_type(CatalogCollationType))
-        c.argument('sample_name', arg_group=creation_arg_group)
+        c.argument('collation',
+                   arg_group=creation_arg_group)
 
-        c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
+        c.argument('catalog_collation',
+                   arg_group=creation_arg_group,
+                   arg_type=get_enum_type(CatalogCollationType))
+
+        c.argument('sample_name',
+                   arg_group=creation_arg_group)
+
+        c.argument('license_type',
+                   arg_type=get_enum_type(DatabaseLicenseType))
 
         # Needs testing
         c.ignore('read_scale')
@@ -289,7 +298,8 @@ def load_arguments(self, _):
         #                                         DatabaseReadScale.disabled.value,
         #                                         return_label=True))
 
-        c.argument('zone_redundant', arg_type=zone_redundant_param_type)
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
 
         c.argument('tier',
                    arg_type=tier_param_type,
@@ -379,12 +389,15 @@ def load_arguments(self, _):
                    arg_type=tier_param_type,
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
+
         c.argument('service_objective',
                    arg_group=search_arg_group,
                    help='Service objective to search for. If unspecified, all service objectives are shown.')
+
         c.argument('dtu',
                    arg_group=search_arg_group,
                    help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
+
         c.argument('vcores',
                    arg_group=search_arg_group,
                    help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
@@ -404,23 +417,33 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
-        expand(c, 'parameters', ExportRequest, [
-            'administrator_login',
-            'administrator_login_password',
-            'authentication_type',
-            'storage_key',
-            'storage_key_type',
-            'storage_uri',
-        ])
+        # Create args that will be used to build up the ExportRequest object
+        create_args_for_complex_type(
+            c, 'parameters', ExportRequest, [
+                'administrator_login',
+                'administrator_login_password',
+                'authentication_type',
+                'storage_key',
+                'storage_key_type',
+                'storage_uri',
+            ])
 
-        c.argument('administrator_login', options_list=['--admin-user', '-u'])
-        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
-        c.argument('authentication_type', options_list=['--auth-type', '-a'],
+        c.argument('administrator_login',
+                   options_list=['--admin-user', '-u'])
+
+        c.argument('administrator_login_password',
+                   options_list=['--admin-password', '-p'])
+
+        c.argument('authentication_type',
+                   options_list=['--auth-type', '-a'],
                    arg_type=get_enum_type(AuthenticationType))
-        c.argument('storage_key_type', arg_type=get_enum_type(StorageKeyType))
+
+        c.argument('storage_key_type',
+                   arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        expand(c, 'parameters', ImportExtensionRequest, [
+        # Create args that will be used to build up the ImportExtensionRequest object
+        create_args_for_complex_type(c, 'parameters', ImportExtensionRequest, [
             'administrator_login',
             'administrator_login_password',
             'authentication_type',
@@ -428,13 +451,19 @@ def load_arguments(self, _):
             'storage_key_type',
             'storage_uri'
         ])
-        c.argument('administrator_login', options_list=['--admin-user', '-u'])
-        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
-        c.argument('authentication_type', options_list=['--auth-type', '-a'],
-                   arg_type=get_enum_type(AuthenticationType))
-        c.argument('storage_key_type', arg_type=get_enum_type(StorageKeyType))
 
-        c.ignore('type')
+        c.argument('administrator_login',
+                   options_list=['--admin-user', '-u'])
+
+        c.argument('administrator_login_password',
+                   options_list=['--admin-password', '-p'])
+
+        c.argument('authentication_type',
+                   options_list=['--auth-type', '-a'],
+                   arg_type=get_enum_type(AuthenticationType))
+
+        c.argument('storage_key_type',
+                   arg_type=get_enum_type(StorageKeyType))
 
         # The parameter name '--name' is used for 'database_name', so we need to give a different name
         # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
@@ -485,13 +514,17 @@ def load_arguments(self, _):
                    help='Name of the server to create the new replica in.')
 
     with self.argument_context('sql db replica set-primary') as c:
-        c.argument('database_name', help='Name of the database to fail over.')
+        c.argument('database_name',
+                   help='Name of the database to fail over.')
+
         c.argument('server_name',
                    help='Name of the server containing the secondary replica that will become'
                    ' the new primary.')
+
         c.argument('resource_group_name',
                    help='Name of the resource group containing the secondary replica that'
                    ' will become the new primary.')
+
         c.argument('allow_data_loss',
                    help='If specified, the failover operation will allow data loss.')
 
@@ -499,6 +532,7 @@ def load_arguments(self, _):
         c.argument('partner_server_name',
                    options_list=['--partner-server'],
                    help='Name of the server that the other replica is in.')
+
         c.argument('partner_resource_group_name',
                    options_list=['--partner-resource-group'],
                    help='Name of the resource group that the other replica is in. If unspecified,'
@@ -604,12 +638,14 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=name is 1st name in uri
                    id_part='name')
 
-        c.argument('database_name', options_list=['--name', '-n'],
+        c.argument('database_name',
+                   options_list=['--name', '-n'],
                    help='Name of the data warehouse.',
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes', arg_type=max_size_bytes_param_type)
+        c.argument('max_size_bytes',
+                   arg_type=max_size_bytes_param_type)
 
         c.argument('service_objective',
                    help='The service objective of the data warehouse. For example: ' +
@@ -656,6 +692,7 @@ def load_arguments(self, _):
         c.argument('max_capacity',
                    options_list=['--db-dtu-max', '--db-max-dtu', '--db-max-capacity'],
                    help='The maximum capacity (in DTUs or vcores) any one database can consume.')
+
         c.argument('min_capacity',
                    options_list=['--db-dtu-min', '--db-min-dtu', '--db-min-capacity'],
                    help='The minumum capacity (in DTUs or vcores) each database is guaranteed.')
@@ -667,9 +704,11 @@ def load_arguments(self, _):
                    arg_type=max_size_bytes_param_type,
                    options_list=['--max-size', '--storage'])
 
-        c.argument('license_type', arg_type=get_enum_type(ElasticPoolLicenseType))
+        c.argument('license_type',
+                   arg_type=get_enum_type(ElasticPoolLicenseType))
 
-        c.argument('zone_redundant', arg_type=zone_redundant_param_type)
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
 
         c.argument('tier',
                    arg_type=tier_param_type,
@@ -686,27 +725,32 @@ def load_arguments(self, _):
                    'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql elastic-pool create') as c:
-        expand(c, 'parameters', ElasticPool, [
-            'license_type',
-            'max_size_bytes',
-            'name',
-            'per_database_settings',
-            'tags',
-            'zone_redundant',
-        ])
+        # Create args that will be used to build up the ElasticPool object
+        create_args_for_complex_type(
+            c, 'parameters', ElasticPool, [
+                'license_type',
+                'max_size_bytes',
+                'name',
+                'per_database_settings',
+                'tags',
+                'zone_redundant',
+            ])
 
-        expand(c, 'per_database_settings', ElasticPoolPerDatabaseSettings, [
-            'max_capacity',
-            'min_capacity',
-        ])
+        # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
+        create_args_for_complex_type(
+            c, 'per_database_settings', ElasticPoolPerDatabaseSettings, [
+                'max_capacity',
+                'min_capacity',
+            ])
 
-        # Set up validator which will build Sku object from the specified arguments
-        expand(c, 'sku', Sku, [
-            'capacity',
-            'family',
-            'name',
-            'tier',
-        ])
+        # Create args that will be used to build up the ElasticPool Sku object
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'capacity',
+                'family',
+                'name',
+                'tier',
+            ])
 
         c.ignore('name')  # Hide sku name
 
@@ -719,7 +763,8 @@ def load_arguments(self, _):
                    nargs='+',
                    arg_type=get_enum_type(ElasticPoolCapabilitiesAdditionalDetails))
 
-        c.argument('available', arg_type=available_param_type)
+        c.argument('available',
+                   arg_type=available_param_type)
 
         search_arg_group = 'Search'
 
@@ -730,17 +775,24 @@ def load_arguments(self, _):
                    arg_type=tier_param_type,
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
+
         c.argument('dtu',
                    arg_group=search_arg_group,
                    help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
+
         c.argument('vcores',
                    arg_group=search_arg_group,
                    help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql elastic-pool update') as c:
-        c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
-        c.argument('database_dtu_min', help='The minimum DTU all databases are guaranteed.')
-        c.argument('storage_mb', help='Storage limit for the elastic pool in MB.')
+        c.argument('database_dtu_max',
+                   help='The maximum DTU any one database can consume.')
+
+        c.argument('database_dtu_min',
+                   help='The minimum DTU all databases are guaranteed.')
+
+        c.argument('storage_mb',
+                   help='Storage limit for the elastic pool in MB.')
 
     #####
     #           sql elastic-pool op
@@ -763,79 +815,98 @@ def load_arguments(self, _):
                    options_list=['--name', '-n'],
                    # Allow --ids command line argument. id_part=name is 1st name in uri
                    id_part='name')
-        c.argument('administrator_login', options_list=['--admin-user', '-u'])
-        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
+
+        c.argument('administrator_login',
+                   options_list=['--admin-user', '-u'])
+
+        c.argument('administrator_login_password',
+                   options_list=['--admin-password', '-p'])
+
+        c.argument('assign_identity',
+                   options_list=['--assign_identity', '-i'],
+                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server create') as c:
-        # Both administrator_login and administrator_login_password are required for server creation.
-        # However these two parameters are given default value in the create_or_update function
-        # signature, therefore, they can't be automatically converted to requirement arguments.
-        expand(c, 'parameters', Server, [
-            'administrator_login',
-            'administrator_login_password',
-            'location'
-        ])
+        # Create args that will be used to build up the Server object
+        create_args_for_complex_type(
+            c, 'parameters', Server, [
+                'administrator_login',
+                'administrator_login_password',
+                'location'
+            ])
 
-        c.argument('administrator_login', required=True)
-        c.argument('administrator_login_password', required=True)
+        c.argument('administrator_login',
+                   required=True)
+
+        c.argument('administrator_login_password',
+                   required=True)
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
-        # 12.0 is the only server version allowed and it's already the default.
-        c.ignore('version')
-
-        # Identity will be handled with its own parameter.
-        c.ignore('identity')
-
     with self.argument_context('sql server update') as c:
-        c.argument('administrator_login_password', help='The administrator login password.')
-        c.argument('assign_identity',
-                   options_list=['--assign_identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
-                   'for use with key management services like Azure KeyVault.')
+        c.argument('administrator_login_password',
+                   help='The administrator login password.')
 
     #####
     #           sql server ad-admin
     ######
     with self.argument_context('sql server ad-admin') as c:
-        c.argument('server_name', options_list=['--server-name', '-s'],
+        c.argument('server_name',
+                   options_list=['--server-name', '-s'],
                    help='The name of the SQL Server')
-        c.argument('login', options_list=['--display-name', '-u'],
+
+        c.argument('login',
+                   options_list=['--display-name', '-u'],
                    help='Display name of the Azure AD administrator user or group.')
-        c.argument('sid', options_list=['--object-id', '-i'],
+
+        c.argument('sid',
+                   options_list=['--object-id', '-i'],
                    help='The unique ID of the Azure AD administrator ')
+
         c.ignore('tenant_id')
 
     with self.argument_context('sql server ad-admin create') as c:
-        expand(c, 'properties', ServerAzureADAdministrator, [
-            'login',
-            'sid',
-            'tenant_id'
-        ])
-
-        c.argument('tenant_id', required=False)
+        # Create args that will be used to build up the ServerAzureADAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ServerAzureADAdministrator, [
+                'login',
+                'sid',
+            ])
 
     #####
     #           sql server conn-policy
     #####
     with self.argument_context('sql server conn-policy') as c:
-        c.argument('server_name', arg_type=server_param_type)
-        c.argument('connection_type', options_list=['--connection-type', '-t'],
+        c.argument('server_name',
+                   arg_type=server_param_type)
+
+        c.argument('connection_type',
+                   options_list=['--connection-type', '-t'],
                    arg_type=get_enum_type(ServerConnectionType))
 
     #####
     #           sql server dns-alias
     #####
     with self.argument_context('sql server dns-alias') as c:
-        c.argument('server_name', arg_type=server_param_type)
-        c.argument('dns_alias_name', options_list=('--name', '-n'))
-        c.argument('original_server_name', options_list=('--original-server'),
+        c.argument('server_name',
+                   arg_type=server_param_type)
+
+        c.argument('dns_alias_name',
+                   options_list=('--name', '-n'))
+
+        c.argument('original_server_name',
+                   options_list=('--original-server'),
                    help='The name of the server to which alias is currently pointing')
-        c.argument('original_resource_group_name', options_list=('--original-resource-group'))
-        c.argument('original_subscription_id', options_list=('--original-subscription-id'))
+
+        c.argument('original_resource_group_name',
+                   options_list=('--original-resource-group'))
+
+        c.argument('original_subscription_id',
+                   options_list=('--original-subscription-id'))
 
     #####
     #           sql server firewall-rule
@@ -868,8 +939,12 @@ def load_arguments(self, _):
     #           sql server key
     #####
     with self.argument_context('sql server key') as c:
-        c.argument('server_name', arg_type=server_param_type)
-        c.argument('key_name', options_list=['--name', '-n'])
+        c.argument('server_name',
+                   arg_type=server_param_type)
+
+        c.argument('key_name',
+                   options_list=['--name', '-n'])
+
         c.argument('kid',
                    options_list=['--kid', '-k'],
                    required=True,
@@ -880,7 +955,8 @@ def load_arguments(self, _):
     #           sql server tde-key
     #####
     with self.argument_context('sql server tde-key') as c:
-        c.argument('server_name', arg_type=server_param_type)
+        c.argument('server_name',
+                   arg_type=server_param_type)
 
     with self.argument_context('sql server tde-key set') as c:
         c.argument('kid',
@@ -888,6 +964,7 @@ def load_arguments(self, _):
                    help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
                    'An example key identifier is '
                    '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
         c.argument('server_key_type',
                    options_list=['--server-key-type', '-t'],
                    help='The type of the server key',
