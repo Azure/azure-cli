@@ -26,6 +26,10 @@ from .utilities import find_recording_dir
 logger = logging.getLogger('azure.cli.testsdk')
 
 
+ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
+COVERAGE_FILE = 'az_command_coverage.txt'
+
+
 class CheckerMixin(object):
 
     def _apply_kwargs(self, val):
@@ -73,7 +77,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.cli_ctx = TestCli()
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
-
+        self.test_guid_count = 0
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -131,6 +135,21 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
         return moniker
 
+    # Use this helper to make playback work when guids are created and used in request urls, e.g. role assignment or AAD
+    # service principals. For usages, in test code, patch the "guid-gen" routine to this one, e.g.
+    # with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid)
+    def create_guid(self):
+        import uuid
+        self.test_guid_count += 1
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+
+        if self.in_recording:
+            name = uuid.uuid4()
+            self.name_replacer.register_name_pair(str(name), moniker)
+            return name
+
+        return uuid.UUID(moniker)
+
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
@@ -165,6 +184,12 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+
+        if os.environ.get(ENV_COMMAND_COVERAGE, None):
+            with open(COVERAGE_FILE, 'a') as coverage_file:
+                if command.startswith('az '):
+                    command = command[3:]
+                coverage_file.write(command + '\n')
 
         self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 

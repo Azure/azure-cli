@@ -38,10 +38,11 @@ password_offset = 33
 password_length = 15
 
 
-def create_vault(client, vault_name, region, resource_group_name):
+def create_vault(client, vault_name, resource_group_name, location):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
-    vault = Vault(region, sku=vault_sku, properties=vault_properties)
+
+    vault = Vault(location, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
@@ -63,7 +64,7 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
             disable_protection(cmd, item_client, resource_group_name, vault_name,
-                               container.name, item_name, delete_backup_data=True)
+                               container_name, item_name, delete_backup_data=True)
     # now delete the vault
     vault_client.delete(resource_group_name, vault_name)
 
@@ -127,6 +128,16 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
+def check_protection_enabled_for_vm(cmd, vm_id):
+    vaults = list_vaults(vaults_cf(cmd.cli_ctx))
+    for vault in vaults:
+        vault_rg = _get_resource_group_from_id(vault.id)
+        items = list_items(cmd, backup_protected_items_cf(cmd.cli_ctx), vault_rg, vault.name)
+        if any(vm_id.lower() == item.properties.virtual_machine_id.lower() for item in items):
+            return vault.id
+    return None
+
+
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name):
     vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
@@ -178,7 +189,12 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
               item_type="VM"):
     items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type)
 
-    return _get_none_one_or_many([item for item in items if item.properties.friendly_name == name])
+    if _is_native_name(name):
+        filtered_items = [item for item in items if item.name == name]
+    else:
+        filtered_items = [item for item in items if item.properties.friendly_name == name]
+
+    return _get_none_one_or_many(filtered_items)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, container_name=None, container_type="AzureIaasVM",
@@ -189,12 +205,18 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
 
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = _get_list_from_paged_response(items)
-    if container_name is not None:
-        container = show_container(backup_protection_containers_cf(cmd.cli_ctx), container_name, resource_group_name,
-                                   vault_name, container_type)
-        _validate_container(container)
+    if container_name:
+        if _is_native_name(container_name):
+            container_uri = container_name
+        else:
+            container = show_container(backup_protection_containers_cf(cmd.cli_ctx),
+                                       container_name, resource_group_name, vault_name,
+                                       container_type)
+            _validate_container(container)
+            container_uri = container.name
 
-        return [item for item in paged_items if item.properties.container_name.lower() in container.name.lower()]
+        return [item for item in paged_items if
+                _get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
     return paged_items
 
 
@@ -471,17 +493,27 @@ def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
 # Client Utilities
 
 
+def _is_native_name(name):
+    return ";" in name
+
+
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
     filter_dict = {
         'backupManagementType': container_type,
         'status': status
     }
-    if container_name:
+
+    if container_name and not _is_native_name(container_name):
         filter_dict['friendlyName'] = container_name
     filter_string = _get_filter_string(filter_dict)
 
-    containers = client.list(vault_name, resource_group_name, filter_string)
-    return _get_list_from_paged_response(containers)
+    paged_containers = client.list(vault_name, resource_group_name, filter_string)
+    containers = _get_list_from_paged_response(paged_containers)
+
+    if container_name and _is_native_name(container_name):
+        return [container for container in containers if container.name == container_name]
+
+    return containers
 
 
 def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):

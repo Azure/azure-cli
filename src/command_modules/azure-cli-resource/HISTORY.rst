@@ -2,6 +2,19 @@
 
 Release History
 ===============
+2.0.28
+++++++
+* Minor changes
+
+2.0.27
+++++++
+* `policy definition create`: Add support for `--metadata`.
+* `policy definition update`: Add support for `--metadata`, `--set`, `--add`, `--remove`.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.26
+++++++
+provider operation list/show: (breaking change)`api-version` is no longer required to run the command
 
 2.0.25
 ++++++

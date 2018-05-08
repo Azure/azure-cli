@@ -3,10 +3,34 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* fix typo in help message
+
+2.0.32
+++++++
+* remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
+2.0.31
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.30
+++++++
+* Minor fixes
+* aks created spn will be valid for 5 years
+
+2.0.29
+++++++
+* fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
+
 2.0.28
 ++++++
 * Support Autorest 3.0 based SDKs
 * warn the user that `az aks browse` won't work in Azure Cloud Shell
+* add `aks upgrade-connector` command to upgrade an existing connector
+* `kubectl` config files are more readable block-style YAML
 
 2.0.27
 ++++++

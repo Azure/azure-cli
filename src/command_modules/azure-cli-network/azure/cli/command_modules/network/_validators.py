@@ -18,6 +18,7 @@ from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
 
 # PARAMETER VALIDATORS
+# pylint: disable=too-many-lines
 
 
 def get_asg_validator(loader, dest):
@@ -60,7 +61,7 @@ def get_vnet_validator(dest):
         ids = []
 
         if names_or_ids == [""] or not names_or_ids:
-            return
+            names_or_ids = []
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
@@ -74,6 +75,19 @@ def get_vnet_validator(dest):
         setattr(namespace, dest, ids)
 
     return _validate_vnet_name_or_id
+
+
+def validate_ddos_name_or_id(cmd, namespace):
+
+    if namespace.ddos_protection_plan:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        if not is_valid_resource_id(namespace.ddos_protection_plan):
+            namespace.ddos_protection_plan = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network', type='ddosProtectionPlans',
+                name=namespace.ddos_protection_plan
+            )
 
 
 # pylint: disable=inconsistent-return-statements
@@ -438,6 +452,11 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
     if namespace.probe and not is_valid_resource_id(namespace.probe):
         namespace.probe = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'probes', namespace.probe)
+    if namespace.auth_certs:
+        def _validate_name_or_id(val):
+            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'authenticationCertificates', val)
+        namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -520,6 +539,8 @@ def process_ag_create_namespace(cmd, namespace):
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
 
     validate_cert(namespace)
+
+    validate_tags(namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -663,6 +684,7 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
 def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_ddos_name_or_id(cmd, namespace)
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
@@ -701,6 +723,7 @@ def process_vnet_gateway_update_namespace(cmd, namespace):
     ns = namespace
     get_virtual_network_validator()(cmd, ns)
     get_public_ip_validator()(cmd, ns)
+    validate_tags(ns)
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '
@@ -789,7 +812,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
         location = namespace.location
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
-        watcher = next((x for x in network_client.list_all() if x.location == location), None)
+        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
         if not watcher:
             raise CLIError("network watcher is not enabled for region '{}'.".format(location))
         id_parts = parse_resource_id(watcher.id)
@@ -800,6 +823,37 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
             del namespace.location
 
     return _validator
+
+
+def process_nw_cm_create_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+
+    validate_tags(namespace)
+
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
+    vm_name = parse_resource_id(namespace.source_resource)['name']
+    rg = namespace.resource_group_name or parse_resource_id(namespace.source_resource).get('resource_group', None)
+    if not rg:
+        raise CLIError('usage error: --source-resource ID | --source-resource NAME --resource-group NAME')
+    vm = compute_client.get(rg, vm_name)
+    namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location()(cmd, namespace)
+
+    if namespace.source_resource and not is_valid_resource_id(namespace.source_resource):
+        namespace.source_resource = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.source_resource)
+
+    if namespace.dest_resource and not is_valid_resource_id(namespace.dest_resource):
+        namespace.dest_resource = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.dest_resource)
 
 
 def process_nw_test_connectivity_namespace(cmd, namespace):
@@ -865,11 +919,72 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
 
 
 def process_nw_topology_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+    SubResource = cmd.get_models('SubResource')
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     location = namespace.location
+    rg = namespace.target_resource_group_name
+    vnet = namespace.target_vnet
+    subnet = namespace.target_subnet
+
+    vnet_id = vnet if is_valid_resource_id(vnet) else None
+    subnet_id = subnet if is_valid_resource_id(subnet) else None
+
+    if rg and not vnet and not subnet:
+        # targeting resource group - OK
+        pass
+    elif subnet:
+        subnet_usage = CLIError('usage error: --subnet ID | --subnet NAME --resource-group NAME --vnet NAME')
+        # targeting subnet - OK
+        if subnet_id and (vnet or rg):
+            raise subnet_usage
+        elif not subnet_id and (not rg or not vnet or vnet_id):
+            raise subnet_usage
+        if subnet_id:
+            rg = parse_resource_id(subnet_id)['resource_group']
+            namespace.target_subnet = SubResource(subnet)
+        else:
+            subnet_id = subnet_id or resource_id(
+                subscription=subscription_id,
+                resource_group=rg,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=vnet,
+                child_type_1='subnets',
+                child_name_1=subnet
+            )
+            namespace.target_resource_group_name = None
+            namespace.target_vnet = None
+            namespace.target_subnet = SubResource(subnet_id)
+    elif vnet:
+        # targeting vnet - OK
+        vnet_usage = CLIError('usage error: --vnet ID | --vnet NAME --resource-group NAME')
+        if vnet_id and (subnet or rg):
+            raise vnet_usage
+        elif not vnet_id and not rg or subnet:
+            raise vnet_usage
+        if vnet_id:
+            rg = parse_resource_id(vnet_id)['resource_group']
+            namespace.target_vnet = SubResource(vnet)
+        else:
+            vnet_id = vnet_id or resource_id(
+                subscription=subscription_id,
+                resource_group=rg,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=vnet
+            )
+            namespace.target_resource_group_name = None
+            namespace.target_vnet = SubResource(vnet_id)
+    else:
+        raise CLIError('usage error: --resource-group NAME | --vnet NAME_OR_ID | --subnet NAME_OR_ID')
+
+    # retrieve location from resource group
     if not location:
         resource_client = \
             get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
-        resource_group = resource_client.get(namespace.target_resource_group_name)
+        resource_group = resource_client.get(rg)
         namespace.location = resource_group.location  # pylint: disable=no-member
 
     get_network_watcher_from_location(

@@ -31,17 +31,18 @@ COPY . /azure-cli
 # bash gcc make openssl-dev libffi-dev musl-dev - dependencies required for CLI
 # openssh - included for ssh-keygen
 # ca-certificates
-# wget - required for installing jp
+
+# curl - required for installing jp
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
 # 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
-RUN apk add --no-cache bash openssh ca-certificates jq wget openssl git \
+RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev \
  && update-ca-certificates \
- && wget https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -qO /usr/local/bin/jp \
+ && curl https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
  && pip install --no-cache-dir --upgrade jmespath-terminal \
  && /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \

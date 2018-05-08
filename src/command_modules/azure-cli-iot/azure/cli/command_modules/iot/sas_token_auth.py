@@ -34,12 +34,12 @@ class SasTokenAuthentication(Authentication):
         else:
             self.expiry = expiry
 
-    def signed_session(self):
+    def signed_session(self, session=None):
         """Create requests session with SAS auth headers.
 
         :rtype: requests.Session.
         """
-        session = super(SasTokenAuthentication, self).signed_session()
+        session = session or super(SasTokenAuthentication, self).signed_session()
         session.headers['Authorization'] = self.generate_sas_token()
         return session
 

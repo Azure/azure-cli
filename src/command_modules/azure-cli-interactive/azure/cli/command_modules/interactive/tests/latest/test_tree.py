@@ -3,57 +3,73 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import six
-from azclishell.command_tree import CommandBranch, CommandHead, CommandTree, in_tree
+
+import os
 import unittest
+import mock
+
+from azure.cli.testsdk import TestCli
+from azure.cli.command_modules.interactive.azclishell.configuration import Configuration
+from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
 
 
-class TreeTest(unittest.TestCase):
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-    def test_basic_children(self):
-        tree = CommandTree(data=None)
-        self.assertFalse(tree.has_child(""))
-        with self.assertRaises(ValueError):
-            tree.get_child("nothing", tree.children)
-        tree.add_child(CommandBranch("Kid1"))
-        self.assertTrue(tree.has_child("Kid1"))
-        self.assertFalse(tree.has_child("Kid2"))
-        self.assertFalse(
-            isinstance(tree.get_child("Kid1", tree.children), six.string_types)
-        )
-        self.assertTrue(
-            isinstance(tree.get_child("Kid1", tree.children), CommandTree)
-        )
 
-    def test_subbranch(self):
-        tree3 = CommandBranch("Again")
-        tree2 = CommandBranch("World")
-        tree2.add_child(tree3)
-        tree1 = CommandBranch("Hello")
-        tree1.add_child(tree2)
-        tree = CommandHead()
-        tree.add_child(tree1)
-        self.assertEqual(tree.get_subbranch("Hello"), ["World", "Again"])
+class CommandTreeTest(unittest.TestCase):
+    """ tests the completion generator """
+
+    def init_tree(self):
+        with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
+            with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
+                shell_ctx = AzInteractiveShell(TestCli(), None)
+                self.command_tree = shell_ctx.completer.command_tree
 
     def test_in_tree(self):
-        # tests in tree
-        tree4 = CommandBranch("CB1")
-        tree3 = CommandBranch("Again")
-        tree2 = CommandBranch("World")
-        tree2.add_child(tree3)
-        tree2.add_child(tree4)
-        tree1 = CommandBranch("Hello")
-        tree1.add_child(tree2)
-        tree = CommandHead()
-        tree.add_child(tree1)
-        self.assertTrue(in_tree(tree3, 'Again'))
-        self.assertTrue(in_tree(tree2, 'World Again'))
-        self.assertTrue(in_tree(tree1, 'Hello World Again'))
-        self.assertTrue(in_tree(tree1, 'Hello World CB1'))
+        self.init_tree()
 
-        self.assertFalse(in_tree(tree1, 'World Hello CB1'))
-        self.assertFalse(in_tree(tree, 'World Hello CB1'))
-        self.assertFalse(in_tree(tree, 'Hello World Again CB1'))
+        self.assertTrue(self.command_tree.in_tree(['storage']))
+        self.assertTrue(self.command_tree.in_tree(['storage', 'account']))
+        self.assertTrue(self.command_tree.in_tree(['storage', 'account', 'create']))
+        self.assertTrue(self.command_tree.in_tree(['storage', 'account', 'check-name']))
+
+        self.assertTrue(self.command_tree.in_tree(['vm']))
+        self.assertTrue(self.command_tree.in_tree(['vmss']))
+        self.assertTrue(self.command_tree.in_tree(['vm', 'create']))
+        self.assertTrue(self.command_tree.in_tree(['vmss', 'create']))
+
+        self.assertFalse(self.command_tree.in_tree(['']))
+        self.assertFalse(self.command_tree.in_tree(['vms']))
+        self.assertFalse(self.command_tree.in_tree(['create']))
+        self.assertFalse(self.command_tree.in_tree(['vm', 'blah']))
+        self.assertFalse(self.command_tree.in_tree(['vm', 'create', 'blah']))
+
+    def test_sub_tree(self):
+        self.init_tree()
+
+        tree, current_command, leftover_args = self.command_tree.get_sub_tree([])
+        self.assertEqual(tree, self.command_tree)
+        self.assertEqual(current_command, '')
+        self.assertEqual(leftover_args, [])
+
+        tree, current_command, leftover_args = tree.get_sub_tree(['storage', 'account'])
+        self.assertEqual(tree.data, 'account')
+        self.assertEqual(current_command, 'storage account')
+        self.assertIn('create', tree.children)
+        self.assertIn('check-name', tree.children)
+        self.assertEqual(leftover_args, [])
+
+        tree, current_command, leftover_args = tree.get_sub_tree(['create'])
+        self.assertEqual(tree.data, 'create')
+        self.assertFalse(tree.children)
+        self.assertEqual(current_command, 'create')
+        self.assertEqual(leftover_args, [])
+
+        tree, current_command, leftover_args = self.command_tree.get_sub_tree(
+            ['storage', 'account', 'create', '--name', 'MyStorageAccount'])
+        self.assertEqual(tree.data, 'create')
+        self.assertEqual(current_command, 'storage account create')
+        self.assertEqual(leftover_args, ['--name', 'MyStorageAccount'])
 
 
 if __name__ == '__main__':

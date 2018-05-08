@@ -10,15 +10,18 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from collections import OrderedDict
+
 import requests
 from wheel.install import WHEEL_INFO_RE
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from pkg_resources import parse_version
 
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
-                                      get_extension, ext_compat_with_cli,
+                                      get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
                                       WheelExtension, ExtensionNotInstalledException)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -32,6 +35,10 @@ OUT_KEY_NAME = 'name'
 OUT_KEY_VERSION = 'version'
 OUT_KEY_TYPE = 'extensionType'
 OUT_KEY_METADATA = 'metadata'
+
+IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
+LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
+LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args):
@@ -136,6 +143,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     except CLIError as e:
         raise e
     logger.debug('Validation successful on %s', ext_file)
+    # Check for distro consistency
+    check_distro_consistency()
     # Install with pip
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -194,15 +203,24 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
+    try:
+        if extension_name and get_extension(extension_name).preview:
+            logger.warning("The installed extension '%s' is in preview.", extension_name)
+    except ExtensionNotInstalledException:
+        pass
 
 
 def remove_extension(extension_name):
+    def log_err(func, path, exc_info):
+        logger.debug("Error occurred attempting to delete item from the extension '%s'.", extension_name)
+        logger.debug("%s: %s - %s", func, path, exc_info)
+
     try:
         # Get the extension and it will raise an error if it doesn't exist
         get_extension(extension_name)
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name)
-        shutil.rmtree(get_extension_path(extension_name))
+        shutil.rmtree(get_extension_path(extension_name), onerror=log_err)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -257,5 +275,68 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
         raise CLIError(e)
 
 
-def list_available_extensions(index_url=None):
-    return get_index_extensions(index_url=index_url)
+def list_available_extensions(index_url=None, show_details=False):
+    index_data = get_index_extensions(index_url=index_url)
+    if show_details:
+        return index_data
+    installed_extensions = get_extensions()
+    installed_extension_names = [e.name for e in installed_extensions]
+    results = []
+    for name, items in OrderedDict(sorted(index_data.items())).items():
+        latest = sorted(items, key=lambda c: parse_version(c['metadata']['version']), reverse=True)[0]
+        installed = False
+        if name in installed_extension_names:
+            installed = True
+            ext_version = get_extension(name).version
+            if ext_version and parse_version(latest['metadata']['version']) > parse_version(ext_version):
+                installed = str(True) + ' (upgrade available)'
+        results.append({
+            'name': name,
+            'version': latest['metadata']['version'],
+            'summary': latest['metadata']['summary'],
+            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'installed': installed
+        })
+    return results
+
+
+def get_lsb_release():
+    try:
+        with open(LSB_RELEASE_FILE, 'r') as lr:
+            lsb = lr.readlines()
+            desc = lsb[2]
+            desc_split = desc.split('=')
+            rel = desc_split[1]
+            return rel.strip()
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
+def check_distro_consistency():
+    if IS_WINDOWS:
+        return
+
+    try:
+        logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
+
+        with open(LIST_FILE_PATH, 'r') as list_file:
+            package_source = list_file.read()
+            stored_linux_dist_name = package_source.split(" ")[3]
+            logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
+            current_linux_dist_name = get_lsb_release()
+            logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
+
+    except Exception as err:  # pylint: disable=broad-except
+        current_linux_dist_name = None
+        stored_linux_dist_name = None
+        logger.debug('Linux distro check: An error occurred while checking '
+                     'linux distribution version source list consistency.')
+        logger.debug(err)
+
+    if current_linux_dist_name != stored_linux_dist_name:
+        logger.debug("Linux distro check: Mismatch distribution "
+                     "name in %s file", LIST_FILE_PATH)
+        logger.debug("Linux distro check: If command fails, install the appropriate package "
+                     "for your distribution or change the above file accordingly.")
+        logger.debug("Linux distro check: %s has '%s', current distro is '%s'",
+                     LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)

@@ -3,6 +3,26 @@
 Release History
 ===============
 
+0.0.22
+++++++
+* Fix regression from knack conversion that replaced table_transformers with transforms.
+
+0.0.21
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
+0.0.20
+++++++
+* Fixed create enviorment.
+
+0.0.19
+++++++
+* Minor fixes.
+
+0.0.18
+++++++
+* Minor fixes.
+
 0.0.17
 ++++++
 * Minor fixes.

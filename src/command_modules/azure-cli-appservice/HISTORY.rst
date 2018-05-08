@@ -2,6 +2,28 @@
 
 Release History
 ===============
+0.1.32
+++++++
+* webapp: fix a bug in `az webapp delete` when `--slot` is provided
+* webapp: remove `--runtime-version` from `az webapp auth update` as it's not very public ready
+* webapp: az webapp config set support for min_tls_version & https2.0
+* webapp: az webapp create support for multicontainers
+
+0.1.31
+++++++
+* (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago
+* webapp: capture the unhandled exception if the appservice plan doesn't exist
+* `sdist` is now compatible with wheel 0.31.0
+
+0.1.30
+++++++
+* webapp: az webapp update supports httpsOnly
+* webapp/functionapp:  slot support for identity assign & identity show
+
+0.1.29
+++++++
+* webapp/functionapp: author managed identity commands `identity assign/show`, and deprecate `assign-identity`
+
 0.1.28
 ++++++
 * webapp: updating tests/code for sdk update

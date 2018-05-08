@@ -12,7 +12,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
                           validate_table_payload_format, validate_key, add_progress_callback,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
-                          get_char_options_validator, validate_bypass)
+                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -57,6 +57,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
+    socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
+                                          type=int)
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
@@ -113,6 +115,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
 
+    with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
+        c.extra('encryption_key_name', help='The name of the KeyVault key', )
+        c.extra('encryption_key_vault', help='The Uri of the KeyVault')
+        c.extra('encryption_key_version', help='The version of the KeyVault key')
+        c.argument('encryption_key_source',
+                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault'], 'Microsoft.Storage'),
+                   help='The default encryption service',
+                   validator=validate_encryption_source)
+        c.ignore('encryption_key_vault_properties')
+
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
                                    arg_group='Network Rule') as c:
@@ -146,6 +158,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+        c.argument('action', help='The action of virtual network rule.')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -239,6 +252,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(get_blob_types()))
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
         # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
         # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
         #                              help=argparse.SUPPRESS)
@@ -256,11 +270,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', type=int)
+        c.argument('max_connections', type=int,
+                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
@@ -269,6 +285,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
         from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
@@ -277,7 +294,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
         c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
+        c.extra('socket_timeout', socket_timeout_type)
+        c.argument('max_connections', type=int,
+                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
@@ -288,7 +307,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.ignore('source_container_name')
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
+                   help='Required if the blob has associated snapshots.')
+        c.argument('lease_id', help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob lease') as c:
         c.argument('lease_duration', type=int)
@@ -678,3 +699,4 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('accept', default='minimal', validator=validate_table_payload_format,
                    arg_type=get_enum_type(['none', 'minimal', 'full']),
                    help='Specifies how much metadata to include in the response payload.')
+        c.argument('marker', validator=validate_marker, nargs='+')

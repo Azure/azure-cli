@@ -16,7 +16,7 @@ helps['storage entity insert'] = """
           short-summary: The name of the table to insert the entity into.
         - name: --entity -e
           type: list
-          short-summary: A space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
+          short-summary: Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
           long-summary: The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key,
                         convert it to a fixed-width string which can be canonically sorted.
                         For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
@@ -419,13 +419,14 @@ helps['storage cors add'] = """
         - name: --max-age
           short-summary: The maximum number of seconds the client/browser should cache a preflight response.
         - name: --origins
-          short-summary: List of origin domains that will be allowed via CORS, or '*' to allow all domains.
+          short-summary: Space-separated list of origin domains that will be allowed via CORS, or '*' to allow all
+                         domains.
         - name: --methods
-          short-summary: List of HTTP methods allowed to be executed by the origin.
+          short-summary: Space-separated list of HTTP methods allowed to be executed by the origin.
         - name: --allowed-headers
-          short-summary: List of response headers allowed to be part of the cross-origin request.
+          short-summary: Space-separated list of response headers allowed to be part of the cross-origin request.
         - name: --exposed-headers
-          short-summary: List of response headers to expose to CORS clients.
+          short-summary: Space-separated list of response headers to expose to CORS clients.
 """
 
 helps['storage cors clear'] = """
@@ -476,6 +477,15 @@ helps['storage entity'] = """
 helps['storage entity query'] = """
     type: command
     short-summary: List entities which satisfy a query.
+    parameters:
+        - name: --marker
+          type: list
+          short-summary: Space-separated list of key=value pairs. Must contain a nextpartitionkey and a nextrowkey.
+          long-summary: This value can be retrieved from the
+                        next_marker field of a previous generator object if max_results was
+                        specified and that generator has finished enumerating results. If
+                        specified, this generator will begin returning results from the
+                        point where the previous generator stopped.
 """
 
 helps['storage file'] = """

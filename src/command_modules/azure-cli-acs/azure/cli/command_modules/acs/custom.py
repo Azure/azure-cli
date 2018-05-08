@@ -24,15 +24,14 @@ import threading
 import time
 import uuid
 import webbrowser
-import yaml
-import dateutil.parser
-from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+import yaml
+import dateutil.parser
+from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -47,7 +46,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from azure.mgmt.authorization.models import RoleAssignmentProperties
+from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -234,8 +233,11 @@ def acs_install_cli(cmd, client, resource_group, name, install_location=None, cl
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4):
-        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
     return ssl.create_default_context()
 
@@ -314,6 +316,22 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
+    _k8s_install_or_upgrade_connector("install", cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group)
+
+
+def k8s_upgrade_connector(cmd, client, name, resource_group_name, connector_name,
+                          location=None, service_principal=None, client_secret=None,
+                          chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
+    _k8s_install_or_upgrade_connector("upgrade", cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group)
+
+
+def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group):
     from subprocess import PIPE, Popen
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
@@ -330,10 +348,8 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
         raise CLIError('--client-secret must be specified when --service-principal is specified')
     # Validate if the RG exists
     groups = cf_resource_groups(cmd.cli_ctx)
-    if aci_resource_group is None:
-        aci_resource_group = resource_group_name
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(aci_resource_group)
+    rgkaci = groups.get(aci_resource_group or resource_group_name)
     # Auto assign the location
     if location is None:
         location = rgkaci.location  # pylint:disable=no-member
@@ -348,27 +364,26 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the linux connector
     if os_type.lower() in ['linux', 'both']:
-        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
-                                    subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-linux', 'Linux')
+        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                               client_secret, subscription_id, tenant_id, aci_resource_group, location,
+                                               node_prefix + '-linux', 'Linux')
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
-        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
-                                    subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-win', 'Windows')
+        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                               client_secret, subscription_id, tenant_id, aci_resource_group, location,
+                                               node_prefix + '-win', 'Windows')
 
 
-def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal,
-                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                aci_region, node_name, os_type):
+def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                           client_secret, subscription_id, tenant_id, aci_resource_group,
+                                           aci_region, node_name, os_type):
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + "-" + os_type.lower()
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = ('env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},' +
-                  'env.aciResourceGroup={},env.aciRegion={}').format(
-                      node_name, node_taint, os_type, image_tag, aci_resource_group, aci_region)
+        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={}'.format(
+            node_name, node_taint, os_type, image_tag)
 
         if service_principal:
             values += ",env.azureClientId=" + service_principal
@@ -378,8 +393,15 @@ def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_pr
             values += ",env.azureSubscriptionId=" + subscription_id
         if tenant_id:
             values += ",env.azureTenantId=" + tenant_id
+        if aci_resource_group:
+            values += ",env.aciResourceGroup=" + aci_resource_group
+        if aci_region:
+            values += ",env.aciRegion=" + aci_region
 
-        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
+        if helm_cmd == "install":
+            subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
+        elif helm_cmd == "upgrade":
+            subprocess.call(["helm", "upgrade", helm_release_name, url_chart, "--set", values])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
 
@@ -448,7 +470,11 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     hook = cli_ctx.get_progress_controller(True)
     hook.add(messsage='Creating service principal', value=0, total_val=1.0)
     logger.info('Creating service principal')
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret)
+    # always create application with 5 years expiration
+    start_date = datetime.datetime.utcnow()
+    end_date = start_date + relativedelta(years=5)
+    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
@@ -970,7 +996,7 @@ def merge_kubernetes_configurations(existing_file, addition_file):
         existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
-        yaml.dump(existing, stream, default_flow_style=True)
+        yaml.dump(existing, stream, default_flow_style=False)
 
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(current_context, existing_file)
@@ -1121,9 +1147,11 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
+                                             key_id=str(uuid.uuid4()), value=password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date, value=key_value,
+                                   key_id=str(uuid.uuid4()), usage=key_usage, type=key_type)]
 
     return (password_creds, key_creds)
 
@@ -1162,10 +1190,10 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    properties = RoleAssignmentProperties(role_id, object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):

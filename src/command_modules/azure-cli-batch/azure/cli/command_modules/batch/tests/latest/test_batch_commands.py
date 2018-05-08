@@ -193,23 +193,20 @@ class TestBatchParser(unittest.TestCase):
 
         model.__doc__ = """
         :param pool_get_options: Additional parameters for the operation
-        :type pool_get_options: :class:`PoolGetOptions
-         <azure.batch.models.PoolGetOptions>`
+        :type pool_get_options: ~azure.batch.models.PoolGetOptions
         :param dict custom_headers: headers that will be added to the request
 """
         self.assertEqual(_command_type.find_param_type(model, 'pool_get_options'),
-                         ':class:`PoolGetOptions<azure.batch.models.PoolGetOptions>`')
+                         '~azure.batch.models.PoolGetOptions')
 
         model.__doc__ = '''
     :param node_fill_type: How tasks should be distributed across compute
      nodes. Possible values include: 'spread', 'pack', 'unmapped'
-    :type node_fill_type: str or :class:`ComputeNodeFillType
-     <azure.batch.models.ComputeNodeFillType>`
+    :type node_fill_type: str or ~azure.batch.models.ComputeNodeFillType
     """
 '''
         self.assertEqual(_command_type.find_param_type(model, 'node_fill_type'),
-                         'str or :class:`ComputeNodeFillType' +
-                         '<azure.batch.models.ComputeNodeFillType>`')
+                         'str or ~azure.batch.models.ComputeNodeFillType')
 
         model.__doc__ = """
     :param name: The name of the environment variable.
@@ -224,8 +221,7 @@ class TestBatchParser(unittest.TestCase):
         :param pool_id: The id of the pool to get.
         :type pool_id: str
         :param pool_get_options: Additional parameters for the operation
-        :type pool_get_options: :class:`PoolGetOptions
-         <azure.batch.models.PoolGetOptions>`
+        :type pool_get_options: ~azure.batch.models.PoolGetOptions
 """
         self.assertEqual(_command_type.find_param_help(model, 'pool_id'),
                          'The id of the pool to get.')
@@ -234,21 +230,19 @@ class TestBatchParser(unittest.TestCase):
 
         model.__doc__ = """
     :param node_fill_type: How tasks should be distributed across compute
-     nodes. Possible values include: 'spread', 'pack', 'unmapped'
-    :type node_fill_type: str or :class:`ComputeNodeFillType
-     <azure.batch.models.ComputeNodeFillType>`
+     nodes. Possible values include: 'spread', 'pack'
+    :type node_fill_type: str or ~azure.batch.models.ComputeNodeFillType
 """
         self.assertEqual(_command_type.find_param_help(model, 'node_fill_type'),
                          "How tasks should be distributed across compute nodes. " +
-                         "Possible values include: 'spread', 'pack', 'unmapped'")
+                         "Possible values include: 'spread', 'pack'")
 
     def test_batch_find_return_type(self):
         model = TestObj()
         model.__doc__ = """
     :param node_fill_type: How tasks should be distributed across compute
-     nodes. Possible values include: 'spread', 'pack', 'unmapped'
-    :type node_fill_type: str or :class:`ComputeNodeFillType
-     <azure.batch.models.ComputeNodeFillType>`
+     nodes. Possible values include: 'spread', 'pack'
+    :type node_fill_type: str or ~azure.batch.models.ComputeNodeFillType
 """
         self.assertIsNone(_command_type.find_return_type(model))
 
@@ -257,16 +251,16 @@ class TestBatchParser(unittest.TestCase):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :rtype: Generator or
-         :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
+         ~msrest.pipeline.ClientRawResponse
 """
         self.assertEqual(_command_type.find_return_type(model), 'Generator')
 
     def test_batch_class_name(self):
-        type_str = ":class:`ComputeNodeFillType<azure.batch.models.ComputeNodeFillType>`"
+        type_str = "~azure.batch.models.ComputeNodeFillType"
         self.assertEqual(_command_type.class_name(type_str),
                          "azure.batch.models.ComputeNodeFillType")
 
-        type_str = "str or :class:`ComputeNodeFillType<azure.batch.models.ComputeNodeFillType>`"
+        type_str = "str or ~azure.batch.models.ComputeNodeFillType"
         self.assertEqual(_command_type.class_name(type_str),
                          "azure.batch.models.ComputeNodeFillType")
 
@@ -453,42 +447,34 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
         self.command_pool = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_pool',
             'azure.batch.operations.pool_operations#PoolOperations.add',
             operations.pool_operations.PoolOperations.add,
             client_factory=get_client)
         self.command_node = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_node',
             'azure.batch.operations.compute_node_operations#ComputeNodeOperations.reboot',
             operations.compute_node_operations.ComputeNodeOperations.reboot,
             client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             operations.job_operations.JobOperations.add,
             client_factory=get_client)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_task',
             'azure.batch.operations.task_operations#TaskOperations.add',
             operations.task_operations.TaskOperations.add,
             client_factory=get_client, flatten=1)
         self.command_file = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_file',
             'azure.batch.operations.file_operations#FileOperations.get_from_task',
             operations.file_operations.FileOperations.get_from_task,
             client_factory=get_client)
         self.command_list = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_list',
             'azure.batch.operations.job_operations#JobOperations.list',
             operations.job_operations.JobOperations.list,
             client_factory=get_client)
         self.command_delete = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_delete',
             'azure.batch.operations.pool_operations#PoolOperations.delete',
             operations.pool_operations.PoolOperations.delete,
             client_factory=get_client)
         self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_conflicts',
             'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
             operations.job_schedule_operations.JobScheduleOperations.add,
             client_factory=get_client, flatten=4)
@@ -531,7 +517,8 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             operations.pool_operations.PoolOperations.delete)
         self.assertIsInstance(self.command_delete._options_model, models.PoolDeleteOptions)
         self.assertEqual(sorted(self.command_delete._options_attrs),
-                         ['client_request_id',
+                         ['additional_properties',
+                          'client_request_id',
                           'if_match',
                           'if_modified_since',
                           'if_none_match',

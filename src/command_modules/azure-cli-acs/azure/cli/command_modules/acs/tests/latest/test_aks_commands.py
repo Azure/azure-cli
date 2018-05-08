@@ -9,6 +9,7 @@ import unittest
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import StringContainCheck
 
 # flake8: noqa
@@ -150,6 +151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
+    @AllowLargeResponse()
     def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         self.kwargs.update({
@@ -161,7 +163,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'k8s_version': '1.7.12'
+            'k8s_version': '1.8.10'
         })
 
         # show k8s versions
@@ -206,7 +208,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = '1.8.7'
+        k8s_upgrade_version = '1.9.6'
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
