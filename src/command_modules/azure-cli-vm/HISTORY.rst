@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.33
+++++++
+* Minor fixes.
+
 2.0.32
 ++++++
 * vm create: expose `--boot-diagnostics-storage` to capture boot log

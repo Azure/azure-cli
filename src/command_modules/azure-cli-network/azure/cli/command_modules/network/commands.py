@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import deployment_validate_table_format
+from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
@@ -218,7 +218,7 @@ def load_command_table(self, _):
 
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace)
+        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete', supports_no_wait=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('list', 'list_application_gateways')
@@ -385,7 +385,7 @@ def load_command_table(self, _):
     # region LoadBalancers
     with self.command_group('network lb', network_lb_sdk) as g:
         g.command('show', 'get', exception_handler=empty_on_404)
-        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace)
+        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_lbs')
         g.generic_update_command('update')
@@ -666,7 +666,7 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGatewayConnections
     with self.command_group('network vpn-connection', network_vpn_sdk) as g:
-        g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace)
+        g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404, transform=transform_vpn_connection)
         g.command('list', 'list', transform=transform_vpn_connection_list)
