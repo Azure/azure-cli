@@ -3,10 +3,26 @@
 Release History
 ===============
 
+0.3.20
+++++++
+* Allow interactive completers to function with positional arguments.
+* More user-friendly output when users type '\'.
+* Fix completions for parameters with no help.
+* Fix descriptions for command-groups.
+
+0.3.19
+++++++
+* Stops completions upon unrecognized commands.
+* Add event hooks before and after command subtree is created.
+* Allow completions for --ids parameters.
+* `sdist` is now compatible with wheel 0.31.0
+
 0.3.18
 ++++++
 * Completions kick in as soon as command table loading is done.
 * Fix bug with using `--style` parameter.
+* Interactive lexer instantiated after command table dump if missing.
+* Improvements to completer support.
 
 0.3.17
 ++++++

@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,15 +20,16 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 17:59:34 GMT']
+      date: ['Mon, 26 Mar 2018 21:26:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"sku": {"name": "Standard_LRS"}, "location": "ukwest", "kind": "Storage",
-      "properties": {"supportsHttpsTrafficOnly": false}}'
+    body: '{"kind": "Storage", "properties": {"supportsHttpsTrafficOnly": false},
+      "sku": {"name": "Standard_LRS"}, "location": "ukwest"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -36,8 +37,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7?api-version=2017-10-01
@@ -46,13 +47,16 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 17:59:38 GMT']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Mon, 26 Mar 2018 21:26:06 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/f9b6a13e-276c-48bb-bad8-1751f2c9eb2b?monitor=true&api-version=2017-10-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/5e29a13d-e4f4-4f57-8cf5-5711c93ac299?monitor=true&api-version=2017-10-01']
       pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -62,26 +66,54 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/f9b6a13e-276c-48bb-bad8-1751f2c9eb2b?monitor=true&api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/5e29a13d-e4f4-4f57-8cf5-5711c93ac299?monitor=true&api-version=2017-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","kind":"Storage","location":"ukwest","name":"clibatchteststorage7","properties":{"creationTime":"2017-12-19T17:59:38.8545285Z","encryption":{"keySource":"Microsoft.Storage","services":{"blob":{"enabled":true,"lastEnabledTime":"2017-12-19T17:59:38.8565244Z"},"file":{"enabled":true,"lastEnabledTime":"2017-12-19T17:59:38.8565244Z"}}},"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/"},"primaryLocation":"ukwest","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
-
-        '}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
-      content-length: ['1146']
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Mon, 26 Mar 2018 21:26:24 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/5e29a13d-e4f4-4f57-8cf5-5711c93ac299?monitor=true&api-version=2017-10-01']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/5e29a13d-e4f4-4f57-8cf5-5711c93ac299?monitor=true&api-version=2017-10-01
+  response:
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["72f988bf-86f1-41af-91ab-2d7cd011db47"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-26T21:26:06.1474372Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-26T21:26:06.1474372Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-26T21:26:06.1161721Z","primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1207']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 17:59:56 GMT']
+      date: ['Mon, 26 Mar 2018 21:26:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -91,30 +123,30 @@ interactions:
       CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7?api-version=2017-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","kind":"Storage","location":"ukwest","name":"clibatchteststorage7","properties":{"creationTime":"2017-12-19T17:59:38.8545285Z","encryption":{"keySource":"Microsoft.Storage","services":{"blob":{"enabled":true,"lastEnabledTime":"2017-12-19T17:59:38.8565244Z"},"file":{"enabled":true,"lastEnabledTime":"2017-12-19T17:59:38.8565244Z"}}},"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/"},"primaryLocation":"ukwest","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
-
-        '}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["72f988bf-86f1-41af-91ab-2d7cd011db47"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-26T21:26:06.1474372Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-26T21:26:06.1474372Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-26T21:26:06.1161721Z","primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1146']
+      content-length: ['1207']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 17:59:57 GMT']
+      date: ['Mon, 26 Mar 2018 21:26:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"location": "ukwest", "properties": {"autoStorage": {"storageAccountId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7"}}}'''
+    body: 'b''{"properties": {"autoStorage": {"storageAccountId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7"}},
+      "location": "ukwest"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -122,8 +154,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['286']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
@@ -132,14 +164,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      date: ['Mon, 26 Mar 2018 21:26:50 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/ba22af40-fda4-48b6-ac80-a10cb669f809?api-version=2017-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/fa51f925-8d75-4c60-acd0-876edfca3fb5?api-version=2017-05-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -149,21 +181,21 @@ interactions:
       CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/ba22af40-fda4-48b6-ac80-a10cb669f809?api-version=2017-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/fa51f925-8d75-4c60-acd0-876edfca3fb5?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:19 GMT']
-      etag: ['"0x8D5470A5DF15B47"']
+      date: ['Mon, 26 Mar 2018 21:27:06 GMT']
+      etag: ['"0x8D5936053B589BF"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:19 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:07 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -179,21 +211,21 @@ interactions:
       CommandName: [batch application create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:20 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:08 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -210,8 +242,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['22']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2017-05-01
@@ -221,7 +253,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['50']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:22 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -237,21 +269,21 @@ interactions:
       CommandName: [batch application list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:24 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:12 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -267,8 +299,8 @@ interactions:
       CommandName: [batch application list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2017-05-01
@@ -278,7 +310,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['62']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:24 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -295,21 +327,21 @@ interactions:
       CommandName: [batch application package create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:25 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:15 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -325,8 +357,8 @@ interactions:
       CommandName: [batch application package create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2017-05-01
@@ -336,10 +368,10 @@ interactions:
       cache-control: [no-cache]
       content-length: ['50']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:26 GMT']
-      etag: ['"0x8D5470A5FF694D8"']
+      date: ['Mon, 26 Mar 2018 21:27:16 GMT']
+      etag: ['"0x8D593605607D2C2"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:22 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:11 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -356,47 +388,47 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2017-05-01
   response:
-    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-692f87a9-fc81-4d86-9abf-3261d55ce6ee?sv=2015-04-05&sr=b&sig=DuvL%2B8Lh%2B%2FRUo8mkPe3nOCWLXahUJSgP%2Fe7zTK4TFhU%3D&st=2017-12-19T17%3A55%3A29Z&se=2017-12-19T22%3A00%3A29Z&sp=rw","storageUrlExpiry":"2017-12-19T22:00:29.0305668Z","state":"pending"}'}
+    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-2ed4d258-0206-4e30-8016-2410ff094769?sv=2015-04-05&sr=b&sig=BBl5gGgkUSmpvZ16b5KT1o%2Bx4yfC2J5mh5Ff3Ek3HkE%3D&st=2018-03-26T21%3A22%3A19Z&se=2018-03-27T01%3A27%3A19Z&sp=rw","storageUrlExpiry":"2018-03-27T01:27:19.0302346Z","state":"pending"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['408']
+      content-length: ['402']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:28 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: storage blob test sample file
     headers:
       Connection: [keep-alive]
       Content-Length: ['29']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.5.3; Windows 10)]
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.5.3; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Tue, 19 Dec 2017 18:00:29 GMT']
-      x-ms-version: ['2017-04-17']
+      x-ms-date: ['Mon, 26 Mar 2018 21:27:19 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
-    uri: https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-692f87a9-fc81-4d86-9abf-3261d55ce6ee?sv=2015-04-05&sr=b&sig=DuvL%2B8Lh%2B%2FRUo8mkPe3nOCWLXahUJSgP%2Fe7zTK4TFhU%3D&st=2017-12-19T17%3A55%3A29Z&se=2017-12-19T22%3A00%3A29Z&sp=rw
+    uri: https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-2ed4d258-0206-4e30-8016-2410ff094769?sv=2015-04-05&sr=b&sig=BBl5gGgkUSmpvZ16b5KT1o%2Bx4yfC2J5mh5Ff3Ek3HkE%3D&st=2018-03-26T21%3A22%3A19Z&se=2018-03-27T01%3A27%3A19Z&sp=rw
   response:
     body: {string: ''}
     headers:
       content-md5: [JeBon6PeparxrbCKMR+6hw==]
-      date: ['Tue, 19 Dec 2017 18:00:30 GMT']
-      etag: ['"0x8D5470A64A199E9"']
-      last-modified: ['Tue, 19 Dec 2017 18:00:30 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:19 GMT']
+      etag: ['"0x8D593605B32538A"']
+      last-modified: ['Mon, 26 Mar 2018 21:27:19 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: '{"format": "zip"}'
@@ -407,8 +439,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['17']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2017-05-01
@@ -416,15 +448,15 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Tue, 19 Dec 2017 18:00:31 GMT']
-      etag: ['"0x8D5470A63E2685E"']
+      date: ['Mon, 26 Mar 2018 21:27:20 GMT']
+      etag: ['"0x8D593605AADA25F"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:29 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:19 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1150']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -434,21 +466,21 @@ interactions:
       CommandName: [batch application package create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2017-05-01
   response:
-    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-692f87a9-fc81-4d86-9abf-3261d55ce6ee?sv=2015-04-05&sr=b&sig=G%2B381Zg2IdNSIdN9eni7BrXTeOH1T5vlnaBMagei49g%3D&st=2017-12-19T17%3A55%3A32Z&se=2017-12-19T22%3A00%3A32Z&sp=rw","storageUrlExpiry":"2017-12-19T22:00:32.3088752Z","state":"active","format":"zip","lastActivationTime":"2017-12-19T18:00:31.7688481Z"}'}
+    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-2ed4d258-0206-4e30-8016-2410ff094769?sv=2015-04-05&sr=b&sig=cEEBi4478k1Rlk50%2BlaZ4aoVZN%2BVlxKM2JL9hr9FxLI%3D&st=2018-03-26T21%3A22%3A22Z&se=2018-03-27T01%3A27%3A22Z&sp=rw","storageUrlExpiry":"2018-03-27T01:27:22.8391976Z","state":"active","format":"zip","lastActivationTime":"2018-03-26T21:27:21.3741859Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['468']
+      content-length: ['470']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:31 GMT']
-      etag: ['"0x8D5470A6517EC5D"']
+      date: ['Mon, 26 Mar 2018 21:27:22 GMT']
+      etag: ['"0x8D593605C133FD1"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:31 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:21 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -464,21 +496,21 @@ interactions:
       CommandName: [batch application package activate]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:33 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:23 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -495,8 +527,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['17']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2017-05-01
@@ -504,15 +536,15 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Tue, 19 Dec 2017 18:00:34 GMT']
-      etag: ['"0x8D5470A6517EC5D"']
+      date: ['Mon, 26 Mar 2018 21:27:25 GMT']
+      etag: ['"0x8D593605C133FD1"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:31 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:21 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -522,21 +554,21 @@ interactions:
       CommandName: [batch application package show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:36 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:27 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -552,21 +584,21 @@ interactions:
       CommandName: [batch application package show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2017-05-01
   response:
-    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-692f87a9-fc81-4d86-9abf-3261d55ce6ee?sv=2015-04-05&sr=b&sig=eI93d6diAxMfxNjTxkkuIEayn6JS5itZaVrIRRHLAzE%3D&st=2017-12-19T17%3A55%3A36Z&se=2017-12-19T22%3A00%3A36Z&sp=rw","storageUrlExpiry":"2017-12-19T22:00:36.8810644Z","state":"active","format":"zip","lastActivationTime":"2017-12-19T18:00:35.3993817Z"}'}
+    body: {string: '{"id":"testapp","version":"1.0","storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-4a19557dc1b96c20dfa19772af36624f6913ae44/testapp-1.0-2ed4d258-0206-4e30-8016-2410ff094769?sv=2015-04-05&sr=b&sig=SLN5IWMMptEgzJ7VgqVG9jIfnf2HXva7rx85BDpmD4E%3D&st=2018-03-26T21%3A22%3A29Z&se=2018-03-27T01%3A27%3A29Z&sp=rw","storageUrlExpiry":"2018-03-27T01:27:29.3378412Z","state":"active","format":"zip","lastActivationTime":"2018-03-26T21:27:25.939378Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['466']
+      content-length: ['465']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:37 GMT']
-      etag: ['"0x8D5470A6744F5BA"']
+      date: ['Mon, 26 Mar 2018 21:27:29 GMT']
+      etag: ['"0x8D593605ECBB2AE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:35 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:25 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -582,21 +614,21 @@ interactions:
       CommandName: [batch application set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:38 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:30 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -613,8 +645,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['25']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2017-05-01
@@ -622,15 +654,15 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Tue, 19 Dec 2017 18:00:39 GMT']
-      etag: ['"0x8D5470A5FF694D8"']
+      date: ['Mon, 26 Mar 2018 21:27:32 GMT']
+      etag: ['"0x8D593605607D2C2"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:22 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:11 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -640,21 +672,21 @@ interactions:
       CommandName: [batch application show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:40 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:33 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -670,21 +702,21 @@ interactions:
       CommandName: [batch application show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2017-05-01
   response:
-    body: {string: '{"id":"testapp","packages":[{"version":"1.0","state":"active","lastActivationTime":"2017-12-19T18:00:35.3993817Z","format":"zip"}],"allowUpdates":true,"defaultVersion":"1.0"}'}
+    body: {string: '{"id":"testapp","packages":[{"version":"1.0","state":"active","lastActivationTime":"2018-03-26T21:27:25.939378Z","format":"zip"}],"allowUpdates":true,"defaultVersion":"1.0"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['174']
+      content-length: ['173']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:40 GMT']
-      etag: ['"0x8D5470A6A1ED940"']
+      date: ['Mon, 26 Mar 2018 21:27:35 GMT']
+      etag: ['"0x8D5936062CD0E03"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:39 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:32 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -700,21 +732,21 @@ interactions:
       CommandName: [batch application package delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:41 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:37 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -731,8 +763,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2017-05-01
@@ -740,13 +772,13 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Tue, 19 Dec 2017 18:00:42 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -756,21 +788,21 @@ interactions:
       CommandName: [batch application delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:42 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:40 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -787,8 +819,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2017-05-01
@@ -796,13 +828,13 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Tue, 19 Dec 2017 18:00:44 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -812,21 +844,21 @@ interactions:
       CommandName: [batch application list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":24,"lowPriorityCoreQuota":24,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2017-12-19T18:00:03.6331328Z"},"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2018-03-26T21:26:50.7241438Z"},"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:46 GMT']
-      etag: ['"0x8D5470A54896F40"']
+      date: ['Mon, 26 Mar 2018 21:27:44 GMT']
+      etag: ['"0x8D5936049CF07DE"']
       expires: ['-1']
-      last-modified: ['Tue, 19 Dec 2017 18:00:03 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:26:50 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -842,8 +874,8 @@ interactions:
       CommandName: [batch application list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2017-05-01
@@ -853,7 +885,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 18:00:46 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -871,8 +903,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7?api-version=2017-10-01
@@ -881,11 +913,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 18:00:51 GMT']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Mon, 26 Mar 2018 21:27:51 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
@@ -897,9 +932,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -908,11 +943,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 18:00:54 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:54 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDMk5ZWUoyRUtXUUtXNUFHUFVNQkMyQTRaTTJBVDJCRVRCTXw1NTgxRjJERkM5NEM5Njk4LVVLV0VTVCIsImpvYkxvY2F0aW9uIjoidWt3ZXN0In0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdZWUpERlNNRlgzQkhKVDNRWjM0NjNaSlpBTjJBQ1JXWkJYUnw5MEY5RkE2NDhBMkQwRkIwLVVLV0VTVCIsImpvYkxvY2F0aW9uIjoidWt3ZXN0In0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 version: 1

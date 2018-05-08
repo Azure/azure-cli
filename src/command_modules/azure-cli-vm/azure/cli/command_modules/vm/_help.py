@@ -12,9 +12,34 @@ vm_ids_example = """        - name: {0}
             az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 """
 
+helps['vm secret'] = """
+    type: group
+    short-summary: Manage VM secrets.
+"""
+
+helps['vm secret add'] = """
+    type: command
+    short-summary: Add a secret to a VM.
+"""
+
+helps['vm secret list'] = """
+    type: command
+    short-summary: List secrets on a VM.
+"""
+
+helps['vm secret remove'] = """
+    type: command
+    short-summary: Remove a secret from a VM.
+"""
+
 helps['vm secret format'] = """
     type: command
     short-summary: Transform secrets into a form that can be used by VMs and VMSSes.
+    parameters:
+        - name: --secrets -s
+          long-summary: >
+            The command will attempt to resolve the vault ID for each secret. If it is unable to do so,
+            specify the vault ID to use for *all* secrets using: --keyvault NAME --resource-group NAME | --keyvault ID.
     examples:
         - name: Create a self-signed certificate with the default policy, and add it to a virtual machine.
           text: >
@@ -197,7 +222,7 @@ helps['vm extension set'] = """
 """
 
 helps['vm availability-set delete'] = """
-    type: command'
+    type: command
     short-summary: Delete an availability set.
     examples:
         - name: Delete an availability set.
@@ -1203,16 +1228,6 @@ helps['vm identity show'] = """
     short-summary: display VM's managed identity info.
 """
 
-helps['vm assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vm identity assign')
-"""
-
-helps['vm remove-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vm identity remove')
-"""
-
 helps['vm run-command'] = """
     type: group
     short-summary: Manage run commands on a Virtual Machine
@@ -1253,16 +1268,6 @@ helps['vmss identity remove'] = """
 helps['vmss identity show'] = """
     type: command
     short-summary: display VM scaleset's managed identity info.
-"""
-
-helps['vmss assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vmss identity assign')
-"""
-
-helps['vmss remove-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vmss identity remove')
 """
 
 helps['disk'] = """

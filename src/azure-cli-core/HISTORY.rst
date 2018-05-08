@@ -3,10 +3,30 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Minor fixes
+
+2.0.32
+++++++
+* auth: fix a unhandled exception when retrieve secrets from a service principal account with cert
+* auth: improve the logic of detecting msi based account
+* Added limited support for positional arguments.
+* Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)
+* Improves piping scenarios from commands when using `--ids`. Supports `-o tsv` with a query specified or `-o json`
+  without specifying a query.
+* Display command suggestions on error if users have typo in their commands
+* More friendly error when users type `az ''`
+* Support custom resource types for command modules and extensions
+
+2.0.31
+++++++
+* Allow other sources to add additional tab completion choices via event hook
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.30
 ++++++
-* Minor fixes
+* Show message for extensions marked as preview on -h.
 
 2.0.29
 ++++++

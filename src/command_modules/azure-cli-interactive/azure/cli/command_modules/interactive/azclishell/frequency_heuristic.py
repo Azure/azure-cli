@@ -19,7 +19,7 @@ def day_format(now):
 
 def update_frequency(shell_ctx):
     """ updates the frequency from files """
-    frequency_path = os.path.join(shell_ctx.config.config_dir, shell_ctx.config.get_frequency())
+    frequency_path = os.path.join(shell_ctx.config.get_config_dir(), shell_ctx.config.get_frequency())
     if os.path.exists(frequency_path):
         with open(frequency_path, 'r') as freq:
             try:

@@ -1,0 +1,574 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-04-18T18:21:43Z"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-18T18:21:43Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 18 Apr 2018 18:21:45 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1175']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus",
+      "properties": {"supportsHttpsTrafficOnly": false}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      Content-Length: ['125']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Wed, 18 Apr 2018 18:21:47 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5444bd77-e1e9-437e-a4a3-6a990fb2fdfd?monitor=true&api-version=2017-10-01']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1179']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5444bd77-e1e9-437e-a4a3-6a990fb2fdfd?monitor=true&api-version=2017-10-01
+  response:
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["479473dc-cfef-474c-ba12-cba2854af0f6"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-04-18T18:21:48.0725244Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-04-18T18:21:48.0725244Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-04-18T18:21:47.9943917Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1231']
+      content-type: [application/json]
+      date: ['Wed, 18 Apr 2018 18:22:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account keys list]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
+  response:
+    body: {string: '{"keys":[{"keyName":"key1","value":"InJ0Ir4OJZAmcQo/7BiO9VVnA2zn6TNNg2ZsrwB1xKRQC5iFcna3L77m8OZ5CPbKOJ6QF7gtHfLGUyerj0i4+Q==","permissions":"FULL"},{"keyName":"key2","value":"IZuKbjA6pDYdLvP1xFH004tbT/wUxakZ80Rh6zFpr1yCYFzYoZovjU9hBpk2VsEgiXPiPTThZy2qsax/3xh6ww==","permissions":"FULL"}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['288']
+      content-type: [application/json]
+      date: ['Wed, 18 Apr 2018 18:22:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''b\''{"location": "westus2", "properties": {"storageAccounts": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}]}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams account create]
+      Connection: [keep-alive]
+      Content-Length: ['302']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\"\
+        ,\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West US 2\",\"\
+        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"3ecb7c5a-ef39-4f5b-a2bc-1702ebfdb226\"\
+        ,\"storageAccounts\":[\r\n      {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
+        ,\"type\":\"Primary\"\r\n      }\r\n    ]\r\n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['677']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:13 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"outputs": [{"preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
+      "presetName": "AACGoodQualityAudio"}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform create]
+      Connection: [keep-alive]
+      Content-Length: ['144']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:15.91612Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AACGoodQualityAudio\"\r\n        }\r\n      }\r\n    ]\r\
+        \n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:15 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1181']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:15.91612Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AACGoodQualityAudio\"\r\n        }\r\n      }\r\n    ]\r\
+        \n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:16 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:15.91612Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AACGoodQualityAudio\"\r\n        }\r\n      }\r\n    ]\r\
+        \n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:18 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"description": "mydesc", "outputs": [{"preset": {"@odata.type":
+      "#Microsoft.Media.BuiltInStandardEncoderPreset", "presetName": "H264MultipleBitrate720p"}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform update]
+      Connection: [keep-alive]
+      Content-Length: ['173']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":\"mydesc\"\
+        ,\"lastModified\":\"2018-04-18T18:22:20.1167179Z\",\"outputs\":[\r\n     \
+        \ {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\"\
+        ,\"preset\":{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n        }\r\n      }\r\n  \
+        \  ]\r\n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['673']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:19 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1178']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform output add]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":\"mydesc\"\
+        ,\"lastModified\":\"2018-04-18T18:22:20.1167179Z\",\"outputs\":[\r\n     \
+        \ {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\"\
+        ,\"preset\":{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n        }\r\n      }\r\n  \
+        \  ]\r\n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['673']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:21 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"outputs": [{"onError": "StopProcessingJob", "relativePriority":
+      "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
+      "presetName": "H264MultipleBitrate720p"}}, {"preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
+      "presetName": "AdaptiveStreaming"}}, {"preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
+      "presetName": "AACGoodQualityAudio"}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform output add]
+      Connection: [keep-alive]
+      Content-Length: ['438']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:25.0886145Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n        }\r\n      },{\r\n\
+        \        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\"\
+        ,\"preset\":{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AdaptiveStreaming\"\r\n        }\r\n      },{\r\n      \
+        \  \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\"\
+        :{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AACGoodQualityAudio\"\r\n        }\r\n      }\r\n    ]\r\
+        \n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1083']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:24 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1178']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform output remove]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:25.0886145Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n        }\r\n      },{\r\n\
+        \        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\"\
+        ,\"preset\":{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AdaptiveStreaming\"\r\n        }\r\n      },{\r\n      \
+        \  \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\"\
+        :{\r\n          \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"AACGoodQualityAudio\"\r\n        }\r\n      }\r\n    ]\r\
+        \n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1083']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:25 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"outputs": [{"onError": "StopProcessingJob", "relativePriority":
+      "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
+      "presetName": "H264MultipleBitrate720p"}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform output remove]
+      Connection: [keep-alive]
+      Content-Length: ['210']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \    \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"lastModified\"\
+        :\"2018-04-18T18:22:28.5924949Z\",\"outputs\":[\r\n      {\r\n        \"onError\"\
+        :\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n  \
+        \        \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n        }\r\n      }\r\n  \
+        \  ]\r\n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['669']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:28 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms?api-version=2018-03-30-preview
+  response:
+    body: {string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"tra000004\",\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\"\
+        ,\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n\
+        \        \"created\":\"2018-04-18T18:22:15.91612Z\",\"description\":null,\"\
+        lastModified\":\"2018-04-18T18:22:28.5924949Z\",\"outputs\":[\r\n        \
+        \  {\r\n            \"onError\":\"StopProcessingJob\",\"relativePriority\"\
+        :\"Normal\",\"preset\":{\r\n              \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\"\
+        ,\"presetName\":\"H264MultipleBitrate720p\"\r\n            }\r\n         \
+        \ }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['737']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Wed, 18 Apr 2018 18:22:28 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-03-30-preview
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 18 Apr 2018 18:22:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1175']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.26 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.32]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 18 Apr 2018 18:22:34 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdYTUc0M1hCNkZTUVBSUE1OSzRTTTZWVk9VSExRQlZTQlJKTXw3MEZGNTdGRTYxMDlEMUE0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1177']
+    status: {code: 202, message: Accepted}
+version: 1

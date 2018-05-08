@@ -129,7 +129,7 @@ helps['cdn endpoint load'] = """
 """
 
 helps['cdn endpoint purge'] = """
-    type: comman
+    type: command
     short-summary: Purge pre-loaded content for a CDN endpoint.
     examples:
         - name: Purge pre-loaded Javascript and CSS content.

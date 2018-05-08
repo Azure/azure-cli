@@ -3,9 +3,23 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* fix typo in help message
+
+2.0.32
+++++++
+* remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
+2.0.31
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
 2.0.30
 ++++++
 * Minor fixes
+* aks created spn will be valid for 5 years
 
 2.0.29
 ++++++

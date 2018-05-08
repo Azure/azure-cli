@@ -368,8 +368,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
     def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         update_service_objective = 'S1'
@@ -418,7 +418,8 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
                      checks=[JMESPathCheck('connectionType', type)])
 
 
-class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+class AzureActiveDirectoryAdministratorScenarioTest(LiveScenarioTest):
+    #  convert to ScenarioTest and re-record when ISSUE #6011 is fixed
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_aad_admin(self, resource_group, server):
@@ -1381,6 +1382,58 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
+    def __init__(self, method_name):
+        super(SqlElasticPoolOperationMgmtScenarioTest, self).__init__(method_name)
+        self.pool_name = "operationtestep1"
+
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
+    def test_sql_elastic_pool_operation_mgmt(self, resource_group, resource_group_location, server):
+        edition = 'Premium'
+        dtu = 125
+        db_dtu_min = 0
+        db_dtu_max = 50
+        storage = '50GB'
+        storage_mb = 51200
+
+        update_dtu = 250
+        update_db_dtu_min = 50
+        update_db_dtu_max = 250
+
+        # Create elastic pool
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} --storage {}'
+                 .format(resource_group, server, self.pool_name, dtu, edition, db_dtu_min, db_dtu_max, storage),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('dtu', dtu),
+                     JMESPathCheck('databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('storageMb', storage_mb)])
+
+        # Update elastic pool
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} '
+                 '--dtu {} --db-dtu-min {} --db-dtu-max {}'
+                 .format(resource_group, server, self.pool_name, update_dtu, update_db_dtu_min, update_db_dtu_max))
+
+        # List operations on the elastic pool
+        ops = list(self.cmd('sql elastic-pool op list -g {} --server {} --elastic-pool {}'
+                            .format(resource_group, server, self.pool_name)).get_output_in_json())
+
+        # Cancel operation
+        try:
+            self.cmd('sql elastic-pool op cancel -g {} --server {} --elastic-pool {} --name {}'
+                     .format(resource_group, server, self.pool_name, ops[0]['name']))
+        except Exception as e:
+            expectedmessage = "Cannot cancel management operation {} in current state.".format(ops[0]['name'])
+            if expectedmessage in str(e):
+                pass
+
+
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_capabilities(self):
@@ -1763,7 +1816,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # create vault and acl server identity
         vault_name = self.create_random_name(resource_prefix, 24)
-        self.cmd('keyvault create -g {} -n {}'
+        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true'
                  .format(resource_group, vault_name))
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, server_identity))

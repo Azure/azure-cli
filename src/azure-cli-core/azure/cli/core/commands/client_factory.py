@@ -12,7 +12,7 @@ from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
-from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
@@ -46,13 +46,13 @@ def resolve_client_arg_name(operation, kwargs):
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
     sdk_profile = None
-    if isinstance(client_or_resource_type, ResourceType):
+    if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
         api_version = api_version or get_api_version(cli_ctx, client_or_resource_type, as_sdk_profile=True)
         if isinstance(api_version, SDKProfile):
             sdk_profile = api_version.profile
-            api_version = api_version.default_api_version
+            api_version = None
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
@@ -132,13 +132,15 @@ def _get_mgmt_service_client(cli_ctx,
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, endpoint_suffix=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
                          'sas_token': sas_token}
+        if socket_timeout:
+            client_kwargs['socket_timeout'] = socket_timeout
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)

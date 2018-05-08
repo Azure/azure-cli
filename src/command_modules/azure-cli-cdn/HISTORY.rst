@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.0.14
+++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
+
 0.0.13
 ++++++
 * Add `cdn custom-domain enable/disable-https` commands.

@@ -245,7 +245,7 @@ helps['eventhubs eventhub authorization-rule keys list'] = """
     short-summary: Shows the connection strings of Authorizationrule for the Eventhub.
     examples:
         - name: Shows the connection strings of Authorizationrule for the eventhub.
-          text: az eventhubs eventhub authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
+          text: az eventhubs eventhub authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
 """
 
 helps['eventhubs eventhub authorization-rule keys renew'] = """
@@ -269,7 +269,7 @@ helps['eventhubs eventhub consumer-group create'] = """
     short-summary: Creates the EventHub ConsumerGroup
     examples:
         - name: Create EventHub ConsumerGroup.
-          text: az eventhubs consumer-group create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
+          text: az eventhubs eventhub consumer-group create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
 """
 
 helps['eventhubs eventhub consumer-group update'] = """
@@ -277,7 +277,7 @@ helps['eventhubs eventhub consumer-group update'] = """
     short-summary: Updates the EventHub ConsumerGroup
     examples:
         - name: Updates a ConsumerGroup.
-          text: az eventhubs consumer-group update --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup --user-metadata MyUserMetadata
+          text: az eventhubs eventhub consumer-group update --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup --user-metadata MyUserMetadata
 """
 
 helps['eventhubs eventhub consumer-group show'] = """
@@ -285,7 +285,7 @@ helps['eventhubs eventhub consumer-group show'] = """
     short-summary: Shows the ConsumerGroup Details
     examples:
         - name: Shows the ConsumerGroup details.
-          text: az eventhubs consumer-group show --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
+          text: az eventhubs eventhub consumer-group show --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
 """
 
 helps['eventhubs eventhub consumer-group list'] = """
@@ -293,7 +293,7 @@ helps['eventhubs eventhub consumer-group list'] = """
     short-summary: List the ConsumerGroup by Eventhub
     examples:
         - name: Shows the ConsumerGroup by Eventhub.
-          text: az eventhubs consumer-group get --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
+          text: az eventhubs eventhub consumer-group get --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
 """
 
 helps['eventhubs eventhub consumer-group delete'] = """
@@ -301,7 +301,7 @@ helps['eventhubs eventhub consumer-group delete'] = """
     short-summary: Deletes the ConsumerGroup
     examples:
         - name: Deletes the ConsumerGroup
-          text: az eventhubs consumer-group delete --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
+          text: az eventhubs eventhub consumer-group delete --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myconsumergroup
 """
 
 helps['eventhubs georecovery-alias exists'] = """

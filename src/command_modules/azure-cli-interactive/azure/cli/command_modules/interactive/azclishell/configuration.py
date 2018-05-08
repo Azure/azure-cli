@@ -80,6 +80,9 @@ class Configuration(object):
                 self.config.readfp(config_file)  # pylint: disable=deprecated-method
                 self.update()
 
+    def get_config_dir(self):
+        return self.config_dir
+
     def get_history(self):
         """ returns the history """
         return self.config.get('Help Files', 'history')

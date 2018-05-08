@@ -56,33 +56,15 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
 
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
-    sp_id, refresh, access, tenant = profile.get_refresh_token()
+    creds, _, tenant = profile.get_raw_token()
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    if not sp_id:
-        if not refresh:
-            content = {
-                'grant_type': 'access_token',
-                'service': params['service'],
-                'tenant': tenant,
-                'access_token': access
-            }
-        else:
-            content = {
-                'grant_type': 'access_token_refresh_token',
-                'service': params['service'],
-                'tenant': tenant,
-                'access_token': access,
-                'refresh_token': refresh
-            }
-    else:
-        content = {
-            'grant_type': 'spn',
-            'service': params['service'],
-            'tenant': tenant,
-            'username': sp_id,
-            'password': refresh
-        }
+    content = {
+        'grant_type': 'access_token',
+        'service': params['service'],
+        'tenant': tenant,
+        'access_token': creds[1]
+    }
 
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
