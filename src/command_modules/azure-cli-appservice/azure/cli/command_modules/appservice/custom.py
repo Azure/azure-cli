@@ -234,12 +234,44 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
+# for generic updater
+def get_webapp(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,
+               skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):
+    instance = kwargs['parameters']
+    client = web_client_factory(cmd.cli_ctx)
+    updater = client.web_apps.create_or_update_slot if slot else client.web_apps.create_or_update
+    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance,
+                  skip_dns_registration=skip_dns_registration,
+                  skip_custom_domain_verification=skip_custom_domain_verification,
+                  force_dns_registration=force_dns_registration,
+                  ttl_in_seconds=ttl_in_seconds)
+    if slot:
+        kwargs['slot'] = slot
+
+    return updater(**kwargs)
+
+
 def update_webapp(instance, client_affinity_enabled=None, https_only=None):
+    if 'function' in instance.kind:
+        raise CLIError("please use 'az functionapp update' to update this function app")
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
         instance.https_only = https_only == 'true'
+
     return instance
+
+
+def set_functionapp(cmd, resource_group_name, name, **kwargs):
+    instance = kwargs['parameters']
+    if 'function' not in instance.kind:
+        raise CLIError('Not a function app to update')
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.create_or_update(resource_group_name, name, site_envelope=instance)
 
 
 def list_webapp(cmd, resource_group_name=None):
