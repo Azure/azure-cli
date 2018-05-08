@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import LongRunningOperation
+
 
 def _last_segment(resource_id):
     return resource_id.split('/')[-1] if resource_id else None
@@ -28,12 +30,47 @@ def _bytes_to_friendly_string(b):
     return str((b // unit[0])) + unit[1]
 
 
+class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+    '''
+    Long-running operation poller that also transforms the json response.
+    '''
+    def __init__(self, cli_ctx, transform_func):
+        super(LongRunningOperationResultTransform, self).__init__(cli_ctx)
+        self._transform_func = transform_func
+
+    def __call__(self, result):
+        '''
+        Function call operator which will do polling (if necessary)
+        and then transforms the result.
+        '''
+
+        if result is None:
+            return None
+
+        from azure.cli.core.util import poller_classes
+        if isinstance(result, poller_classes()):
+            # Poll for long-running operation result result by calling base class
+            result = super(LongRunningOperationResultTransform, self).__call__(result)
+
+        # Apply transform function
+        return self._transform_func(result)
+
+
 ###############################################
 #                sql db                       #
 ###############################################
 
 
+#####
+#           sql db transformers for json
+#####
+
+
 def db_list_transform(results):
+    '''
+    Transforms the json response for a list of databases.
+    '''
+
     return [db_show_transform(r) for r in results]
 
 
@@ -47,6 +84,11 @@ def db_show_transform(result):
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
 
     return result
+
+
+#####
+#           sql db table formatters
+#####
 
 
 def db_list_table_format(results):
@@ -116,6 +158,11 @@ def _db_edition_list_table_format(editions):
 ###############################################
 
 
+#####
+#           sql elastic-pool transformers for json
+#####
+
+
 def elastic_pool_list_transform(results):
     return [elastic_pool_show_transform(r) for r in results]
 
@@ -140,6 +187,11 @@ def elastic_pool_show_transform(result):
     result.database_dtu_max = int(result.per_database_settings.max_capacity) if is_dtu else None
 
     return result
+
+
+#####
+#           sql elastic-pool table formatters
+#####
 
 
 def elastic_pool_list_table_format(results):
