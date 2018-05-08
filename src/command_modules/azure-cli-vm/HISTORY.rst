@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.33
+++++++
+* Minor fixes.
+
 2.0.32
 ++++++
 * vm/vmss update: expose `--license-type`
