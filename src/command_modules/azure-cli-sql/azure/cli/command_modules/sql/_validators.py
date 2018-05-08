@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 
 # Important note: if cmd validator exists, then individual param validators will not be
@@ -80,6 +79,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
 
 def validate_elastic_pool_id(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
     # If elastic_pool_id is specified but it is not a valid resource id,
     # then assume that user specified elastic pool name which we need to
@@ -103,6 +103,7 @@ def validate_elastic_pool_id(cmd, namespace):
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)

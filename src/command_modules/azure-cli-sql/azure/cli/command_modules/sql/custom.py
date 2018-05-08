@@ -5,45 +5,38 @@
 
 # pylint: disable=C0302
 from enum import Enum
-import re
-
-# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 from knack.log import get_logger
 
-from azure.cli.core._profile import Profile
-from azure.cli.core.commands.client_factory import (
-    get_mgmt_service_client,
-    get_subscription_id)
-from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.mgmt.sql.models import (
-    EncryptionProtector,
-    ResourceIdentity,
-    ServerKey,
-    Sku
+from azure.cli.core.util import (
+    CLIError,
+    sdk_no_wait,
 )
-from azure.mgmt.sql.models.sql_management_client_enums import (
+
+from azure.mgmt.sql.models import (
     BlobAuditingPolicyState,
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
     DatabaseEdition,
+    EncryptionProtector,
     IdentityType,
     PerformanceLevelUnit,
     ReplicationRole,
+    ResourceIdentity,
     SecurityAlertPolicyState,
+    ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
-    StorageKeyType
+    Sku,
+    StorageKeyType,
 )
-from azure.mgmt.resource import ResourceManagementClient
-from azure.mgmt.storage import StorageManagementClient
 
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations
 )
+
 
 logger = get_logger(__name__)
 
@@ -382,6 +375,9 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
         self.cli_ctx = cli_ctx
 
     def id(self):
+        # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+        from six.moves.urllib.parse import quote  # pylint: disable=import-error
+        from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
             quote(get_subscription_id(self.cli_ctx)),
@@ -989,6 +985,8 @@ def _find_storage_account_resource_group(cli_ctx, name):
     resource group just to update some unrelated property, which is annoying and makes no sense to
     the customer.
     '''
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
@@ -1019,6 +1017,8 @@ def _get_storage_account_name(storage_endpoint):
     Determines storage account name from endpoint url string.
     e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
     '''
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
@@ -1030,6 +1030,8 @@ def _get_storage_endpoint(
     '''
     Gets storage account endpoint by querying storage ARM API.
     '''
+    from azure.mgmt.storage import StorageManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage account
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1055,6 +1057,8 @@ def _get_storage_key(
     '''
     Gets storage account key by querying storage ARM API.
     '''
+    from azure.mgmt.storage import StorageManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage keys
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1580,6 +1584,7 @@ def server_ad_admin_set(
     '''
     Sets a server's AD admin.
     '''
+    from azure.cli.core._profile import Profile
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     sub = profile.get_subscription()
@@ -1730,6 +1735,7 @@ def _get_server_key_name_from_uri(uri):
     The SQL server key API requires that the server key has a specific name
     based on the vault, key and key version.
     '''
+    import re
 
     match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
 
@@ -1760,6 +1766,9 @@ def server_dns_alias_set(
     '''
     Sets a server DNS alias.
     '''
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Build the old alias id
     old_alias_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/dnsAliases/{}".format(
