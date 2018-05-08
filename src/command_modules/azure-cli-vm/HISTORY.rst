@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.32
 ++++++
+* vm create: expose `--boot-diagnostics-storage` to capture boot log
 * vm/vmss update: expose `--license-type`
 * vm/vmss: use PATCH for updating identities
 

@@ -1005,7 +1005,8 @@ class VMBootDiagnostics(ScenarioTest):
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
         self.kwargs.update({
-            'vm': 'myvm'
+            'vm': 'myvm',
+            'vm2': 'myvm2'
         })
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
@@ -1023,6 +1024,13 @@ class VMBootDiagnostics(ScenarioTest):
         self.cmd('vm boot-diagnostics disable -g {rg} -n {vm}')
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
+
+        # try enable it at the create
+        self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa}')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
+            self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
+        ])
 
 
 class VMSSExtensionInstallTest(ScenarioTest):

@@ -501,7 +501,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None):
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
+              boot_diagnostics_storage=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -617,7 +618,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_name=os_disk_name, custom_image_os_type=os_type, storage_sku=storage_sku,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
-        license_type=license_type, zone=zone, disk_info=disk_info)
+        license_type=license_type, zone=zone, disk_info=disk_info,
+        boot_diagnostics_storage_uri=boot_diagnostics_storage)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -995,25 +997,15 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
     if not (diag_profile and diag_profile.boot_diagnostics and diag_profile.boot_diagnostics.enabled):
         return
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
 
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
+    from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
     vm = get_vm(cmd, resource_group_name, vm_name)
-    if urlparse(storage).scheme:
-        storage_uri = storage
-    else:
-        storage_mgmt_client = _get_storage_management_client(cmd.cli_ctx)
-        storage_accounts = storage_mgmt_client.storage_accounts.list()
-        storage_account = next((a for a in list(storage_accounts)
-                                if a.name.lower() == storage.lower()), None)
-        if storage_account is None:
-            raise CLIError('{} does\'t exist.'.format(storage))
-        storage_uri = storage_account.primary_endpoints.blob
+    storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
 
     if (vm.diagnostics_profile and
             vm.diagnostics_profile.boot_diagnostics and
@@ -1030,8 +1022,6 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     else:
         vm.diagnostics_profile.boot_diagnostics = boot_diag
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
