@@ -237,7 +237,6 @@ def load_arguments(self, _):
         c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     with self.argument_context('vm unmanaged-disk') as c:
-        c.argument('vm_name', arg_type=existing_vm_name)
         c.argument('disk_size', help='Size of disk (GiB)', default=1023, type=int)
         c.argument('new', action='store_true', help='Create a new disk.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
@@ -254,7 +253,7 @@ def load_arguments(self, _):
             c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
     with self.argument_context('vm unmanaged-disk list') as c:
-        c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
+        c.argument('vm_name',  options_list=['--vm-name', '--name', '-n'], arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm user') as c:
         c.argument('username', options_list=['--username', '-u'], help='The user name')
