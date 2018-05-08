@@ -211,7 +211,7 @@ def _configure_db_create_params(
             'tier',
         ])
 
-    arg_ctx.argument('name',
+    arg_ctx.argument('name',  # Note: this is sku name, not database name
                      options_list=['--service-objective'],
                      arg_group=sku_arg_group,
                      required=False,
@@ -251,6 +251,12 @@ def _configure_db_create_params(
 
         # License types do not yet exist for DataWarehouse
         arg_ctx.ignore('license_type')
+
+        # Family is not applicable to DataWarehouse
+        arg_ctx.ignore('family')
+
+        # Provisioning with capacity is not applicable to DataWarehouse
+        arg_ctx.ignore('capacity')
 
 
 # pylint: disable=too-many-statements
@@ -994,4 +1000,6 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag())
 
     with self.argument_context('sql server vnet-rule create') as c:
-        c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name')
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name')
