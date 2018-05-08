@@ -55,6 +55,7 @@ def load_arguments(self, _):
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secrets', secrets_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
+        c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')
@@ -76,6 +77,9 @@ def load_arguments(self, _):
     with self.argument_context('container logs') as c:
         c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
         c.argument('follow', help='Indicate to stream the tailing logs', action='store_true')
+
+    with self.argument_context('container export') as c:
+        c.argument('file', options_list=['--file', '-f'], help="The file path to export the container group.")
 
     with self.argument_context('container exec') as c:
         c.argument('container_name', help='The container name where to execute the command. Can be ommitted for container groups with only one container.')

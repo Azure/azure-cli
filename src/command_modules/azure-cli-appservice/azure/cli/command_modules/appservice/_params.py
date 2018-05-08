@@ -22,6 +22,8 @@ AUTH_TYPES = {
     'LoginWithMicrosoftAccount': BuiltInAuthenticationProvider.microsoft_account,
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
+MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
+
 # pylint: disable=too-many-statements
 
 
@@ -73,6 +75,8 @@ def load_arguments(self, _):
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -199,6 +203,9 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
         c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
+        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
+        c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
 
     with self.argument_context('webapp config set') as c:
         c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
