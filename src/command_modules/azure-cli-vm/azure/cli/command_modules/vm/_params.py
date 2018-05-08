@@ -253,7 +253,7 @@ def load_arguments(self, _):
             c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
     with self.argument_context('vm unmanaged-disk list') as c:
-        c.argument('vm_name',  options_list=['--vm-name', '--name', '-n'], arg_type=existing_vm_name, id_part=None)
+        c.argument('vm_name', options_list=['--vm-name', '--name', '-n'], arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm user') as c:
         c.argument('username', options_list=['--username', '-u'], help='The user name')
