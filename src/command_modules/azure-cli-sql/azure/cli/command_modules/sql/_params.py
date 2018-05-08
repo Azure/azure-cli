@@ -35,9 +35,14 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     TransparentDataEncryptionStatus
 )
 
-from azure.cli.core.commands.parameters import (get_three_state_flag, get_enum_type,
-                                                get_resource_name_completion_list,
-                                                get_location_type)
+from azure.cli.core.commands.parameters import (
+    get_three_state_flag,
+    get_enum_type,
+    get_resource_name_completion_list,
+    get_location_type,
+    tags_type
+)
+
 from .custom import (
     ClientAuthenticationType,
     ClientType,
@@ -46,6 +51,7 @@ from .custom import (
 )
 
 from ._validators import (
+    expand,
     validate_elastic_pool_id
 )
 
@@ -179,12 +185,29 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
-    # Include all Database params as a starting point. We will filter from there.
-    arg_ctx.expand('parameters', Database)
+    # Set up validator which will build Database object from the specified arguments
+    expand(arg_ctx, 'parameters', Database, [
+        'catalog_collation',
+        'collation',
+        'elastic_pool_id',
+        'license_type',
+        'max_size_bytes',
+        'name',
+        'restore_point_in_time',
+        'sample_name',
+        'sku',
+        'source_database_deletion_date',
+        'tags',
+        'zone_redundant',
+    ])
 
-    # Include Sku params
-    arg_ctx.expand('sku', Sku)
-    arg_ctx.ignore('size')
+    # Set up validator which will build Sku object from the specified arguments
+    expand(arg_ctx, 'sku', Sku, [
+        'capacity',
+        'family',
+        'name',
+        'tier',
+    ])
 
     arg_ctx.argument('name',
                      options_list=['--service-objective'],
@@ -197,10 +220,6 @@ def _configure_db_create_params(
                      arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
 
-    # The following params are always ignored because their values are filled in by wrapper
-    # functions in custom.py
-    arg_ctx.ignore('location', 'create_mode', 'source_database_id')
-
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
@@ -210,12 +229,6 @@ def _configure_db_create_params(
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         arg_ctx.ignore('restore_point_in_time', 'source_database_deletion_date')
-
-    # Various restore-related params whose restore mode are not yet supported
-    arg_ctx.ignore('recoverable_database_id',
-                   'recovery_services_recovery_point_id',
-                   'restorable_dropped_database_id',
-                   'long_term_retention_backup_resource_id')
 
     # 'collation', 'tier', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
@@ -244,6 +257,7 @@ def load_arguments(self, _):
     with self.argument_context('sql') as c:
         c.argument('location_name', arg_type=get_location_type(self.cli_ctx))
         c.argument('usage_name', options_list=['--usage', '-u'])
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sql db') as c:
         c.argument('server_name',
@@ -390,7 +404,15 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
-        c.expand('parameters', ExportRequest)
+        expand(c, 'parameters', ExportRequest, [
+            'administrator_login',
+            'administrator_login_password',
+            'authentication_type',
+            'storage_key',
+            'storage_key_type',
+            'storage_uri',
+        ])
+
         c.argument('administrator_login', options_list=['--admin-user', '-u'])
         c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
         c.argument('authentication_type', options_list=['--auth-type', '-a'],
@@ -398,7 +420,14 @@ def load_arguments(self, _):
         c.argument('storage_key_type', arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        c.expand('parameters', ImportExtensionRequest)
+        expand(c, 'parameters', ImportExtensionRequest, [
+            'administrator_login',
+            'administrator_login_password',
+            'authentication_type',
+            'storage_key',
+            'storage_key_type',
+            'storage_uri'
+        ])
         c.argument('administrator_login', options_list=['--admin-user', '-u'])
         c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
         c.argument('authentication_type', options_list=['--auth-type', '-a'],
@@ -657,15 +686,29 @@ def load_arguments(self, _):
                    'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql elastic-pool create') as c:
-        c.expand('parameters', ElasticPool)
-        c.expand('per_database_settings', ElasticPoolPerDatabaseSettings)
-        c.expand('sku', Sku)
-        c.ignore('size')
-        c.ignore('name')
+        expand(c, 'parameters', ElasticPool, [
+            'license_type',
+            'max_size_bytes',
+            'name',
+            'per_database_settings',
+            'tags',
+            'zone_redundant',
+        ])
 
-        # We have a wrapper function that determines server location so user doesn't need to specify
-        # it as param.
-        c.ignore('location')
+        expand(c, 'per_database_settings', ElasticPoolPerDatabaseSettings, [
+            'max_capacity',
+            'min_capacity',
+        ])
+
+        # Set up validator which will build Sku object from the specified arguments
+        expand(c, 'sku', Sku, [
+            'capacity',
+            'family',
+            'name',
+            'tier',
+        ])
+
+        c.ignore('name')  # Hide sku name
 
     with self.argument_context('sql elastic-pool list-editions') as c:
         # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
@@ -715,7 +758,9 @@ def load_arguments(self, _):
     #                sql server                   #
     ###############################################
     with self.argument_context('sql server') as c:
-        c.argument('server_name', options_list=['--name', '-n'],
+        c.argument('server_name',
+                   help='The server name',
+                   options_list=['--name', '-n'],
                    # Allow --ids command line argument. id_part=name is 1st name in uri
                    id_part='name')
         c.argument('administrator_login', options_list=['--admin-user', '-u'])
@@ -725,10 +770,14 @@ def load_arguments(self, _):
         # Both administrator_login and administrator_login_password are required for server creation.
         # However these two parameters are given default value in the create_or_update function
         # signature, therefore, they can't be automatically converted to requirement arguments.
-        c.expand('parameters', Server, patches={
-            'administrator_login': patch_arg_make_required,
-            'administrator_login_password': patch_arg_make_required
-        })
+        expand(c, 'parameters', Server, [
+            'administrator_login',
+            'administrator_login_password',
+            'location'
+        ])
+
+        c.argument('administrator_login', required=True)
+        c.argument('administrator_login_password', required=True)
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
@@ -761,8 +810,13 @@ def load_arguments(self, _):
         c.ignore('tenant_id')
 
     with self.argument_context('sql server ad-admin create') as c:
-        c.expand('properties', ServerAzureADAdministrator, patches={
-            'tenant_id': patch_arg_make_optional})
+        expand(c, 'properties', ServerAzureADAdministrator, [
+            'login',
+            'sid',
+            'tenant_id'
+        ])
+
+        c.argument('tenant_id', required=False)
 
     #####
     #           sql server conn-policy

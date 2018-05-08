@@ -10,6 +10,56 @@ from azure.cli.core.util import CLIError
 # executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
 
 
+def expand(arg_ctx, dest, model_type, arguments):
+    # TODO:
+    # two privates symbols are imported here. they should be made public or this utility class
+    # should be moved into azure.cli.core
+    from knack.arguments import CLIArgumentType, ignore_type
+    from knack.introspection import option_descriptions
+
+    # fetch the documentation for model parameters first. for models, which are the classes
+    # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
+    # document of their properties are attached to the classes instead of constructors.
+    parameter_docs = option_descriptions(model_type)
+
+    def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type):
+        """
+        Return a validator which will aggregate multiple arguments to one complex argument.
+        """
+
+        def _expansion_validator_impl(namespace):
+            """
+            The validator create a argument of a given type from a specific set of arguments from CLI
+            command.
+            :param namespace: The argparse namespace represents the CLI arguments.
+            :return: The argument of specific type.
+            """
+            ns = vars(namespace)
+            kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+            setattr(namespace, assigned_arg, model_type(**kwargs))
+
+        return _expansion_validator_impl
+
+    for name in arguments:
+        validation = model_type._validation.get(name, None)
+        required = validation.get('required', False) if validation else False
+        options_list = ['--' + name.replace('_', '-')]
+        help = parameter_docs.get(name, None)
+
+        arg_ctx.extra(
+            name,
+            required=required,
+            options_list=options_list,
+            help=help)
+
+    dest_option = ['--__{}'.format(dest.upper())]
+
+    arg_ctx.argument(dest,
+                  arg_type=ignore_type,
+                  options_list=dest_option,
+                  validator=get_complex_argument_processor(arguments, dest, model_type))
+
+
 ###############################################
 #                sql db                       #
 ###############################################
