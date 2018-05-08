@@ -168,11 +168,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
         client_factory=get_sql_elastic_pools_operations)
     with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
-        g.custom_command('create', 'elastic_pool_create')
+        g.custom_command('create', 'elastic_pool_create', supports_no_wait=True)
         g.command('delete', 'delete')
         g.command('show', 'get', transform=elastic_pool_show_transform, table_transformer=elastic_pool_show_table_format)
         g.command('list', 'list_by_server', transform=elastic_pool_list_transform, table_transformer=elastic_pool_list_table_format)
-        g.generic_update_command('update', custom_func_name='elastic_pool_update')
+        g.generic_update_command('update', custom_func_name='elastic_pool_update', supports_no_wait=True)
 
     with self.command_group('sql elastic-pool', database_operations) as g:
         g.command('list-dbs', 'list_by_elastic_pool', transform=db_list_transform, table_transformer=db_list_table_format)
