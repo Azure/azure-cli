@@ -18,7 +18,7 @@ def load_arguments(self, _):
     # Argument Definition
     maps_name_type = CLIArgumentType(options_list=['--name', '-n'],
                                      completer=get_resource_name_completion_list('Microsoft.Maps/accounts'),
-                                     help='The name of the Maps Account')
+                                     help='The name of the maps account')
 
     # Parameter Registration
     with self.argument_context('maps') as c:
@@ -33,7 +33,7 @@ def load_arguments(self, _):
     with self.argument_context('maps account') as c:
         c.argument('sku_name',
                    options_list=['--sku', '-s'],
-                   help='The name of the SKU, in standard format (such as S0).',
+                   help='The name of the SKU.',
                    arg_type=get_enum_type(['S0']))
         c.argument('tags',
                    arg_type=tags_type)
