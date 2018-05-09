@@ -1418,19 +1418,23 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_name='default'):  # pylint: disable=line-too-long
+def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_name='default', parent_space_name=None):  # pylint: disable=line-too-long
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
-    :param cluster_name: Name of the target AKS cluster.
+    :param cluster_name: Name of the managed cluster.
     :type cluster_name: String
-    :param resource_group_name: Name of the target AKS cluster's resource group.
+    :param resource_group_name: Name of resource group. You can configure the default group. \
+    Using `az configure –defaults group=<name>`.
     :type resource_group_name: String
-    :param space_name: The isolated space in the cluster to develop in.
+    :param space_name: Name of the dev space to use.
     :type space_name: String
+    :param parent_space_name: Name of a parent dev space to inherit from when creating a new dev space. \
+    By default, if there is already a single dev space with no parent, the new space inherits from this one.
+    :type parent_space_name: String
     """
 
-    azds_tool = 'Azure Dev Spaces CLI'
+    azds_tool = 'Azure Dev Spaces CLI (Preview)'
     should_install_vsce = False
     system = platform.system()
     if system == 'Windows':
@@ -1455,7 +1459,7 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
 
     if should_install_vsce:
         # Install VSCE
-        logger.info('Installing Dev Spaces commands...')
+        logger.info('Installing Dev Spaces (Preview) commands...')
         from six.moves.urllib.request import urlretrieve
         urlretrieve(setup_url, setup_file)
         try:
@@ -1466,20 +1470,36 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
         finally:
             os.remove(setup_file)
         if not _is_dev_connect_installed(azds_cli):
-            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-azds' for Azure Dev Spaces.".format(azds_tool))
+            raise CLIError("{} not installed properly. Visit 'https://aka.ms/get-azds' for Azure Dev Spaces."
+                           .format(azds_tool))
 
-    should_create_dev = False
     from subprocess import PIPE
+    should_create_resource = False
     retCode = subprocess.call(
         [azds_cli, 'resource', 'select', '-n', cluster_name, '-g', resource_group_name],
         stderr=PIPE)
     if retCode == 1:
-        should_create_dev = True
+        should_create_resource = True
 
-    if should_create_dev:
+    if should_create_resource:
         subprocess.call(
             [azds_cli, 'resource', 'create', '--aks-name', cluster_name, '--aks-resource-group',
-             resource_group_name],
+             resource_group_name, '--name', cluster_name, '--resource-group', resource_group_name],
+            universal_newlines=True)
+
+    should_create_spaces = False
+    create_space_arguments = [azds_cli, 'space', 'select', '--name', space_name]
+    if parent_space_name is not None:
+        create_space_arguments.append('--parent')
+        create_space_arguments.append(parent_space_name)
+    retCode = subprocess.call(
+        create_space_arguments, stderr=PIPE)
+    if retCode == 1:
+        should_create_spaces = True
+
+    if should_create_spaces:
+        subprocess.call(
+            [azds_cli, 'space', 'create', '--name', space_name],
             universal_newlines=True)
 
 
@@ -1487,9 +1507,10 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
     """
     Remove Azure Dev Spaces from a managed Kubernetes cluster.
 
-    :param cluster_name: Name of the target AKS cluster.
+    :param cluster_name: Name of the managed cluster.
     :type cluster_name: String
-    :param resource_group_name: Name of the target AKS cluster's resource group.
+    :param resource_group_name: Name of resource group. You can configure the default group. \
+    Using `az configure –defaults group=<name>`.
     :type resource_group_name: String
     :param prompt: Do not prompt for confirmation.
     :type prompt: bool
@@ -1509,13 +1530,13 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
         raise CLIError('Platform not supported: {}.'.format(system))
 
     if not _is_dev_connect_installed(azds_cli):
-        raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' commands for Azure Dev Spaces.".format(azds_tool))
+        raise CLIError("{} not installed properly. Use 'az aks use-dev-spaces' commands for Azure Dev Spaces."
+                       .format(azds_tool))
 
     remove_command_arguments = [azds_cli, 'resource', 'rm', '--name',
-                                cluster_name, '--resource-group',
-                                resource_group_name]
+                                cluster_name, '--resource-group', resource_group_name]
     if prompt:
-        remove_command_arguments.append('-f')
+        remove_command_arguments.append('-y')
     subprocess.call(
         remove_command_arguments, universal_newlines=True)
 
