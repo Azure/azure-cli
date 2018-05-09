@@ -14,7 +14,6 @@ ACCOUNT_LOCATION = 'global'
 logger = get_logger(__name__)
 
 
-# pylint: disable=line-too-long
 def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None):
     sku = Sku(name=sku_name)
     maps_account_create_params = MapsAccountCreateParameters(location=ACCOUNT_LOCATION, sku=sku, tags=tags)
