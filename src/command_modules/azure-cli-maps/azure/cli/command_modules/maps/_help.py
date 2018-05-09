@@ -7,6 +7,11 @@ from knack.help_files import helps
 
 helps['maps'] = """
     type: group
+    short-summary: Manage Azure Maps.
+"""
+
+helps['maps account'] = """
+    type: group
     short-summary: Manage Azure Maps accounts.
 """
 
