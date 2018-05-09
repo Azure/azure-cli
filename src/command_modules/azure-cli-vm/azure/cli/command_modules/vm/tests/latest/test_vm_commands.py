@@ -16,12 +16,11 @@ import uuid
 import six
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
     StorageAccountPreparer)
-
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -594,6 +593,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):
 
+    @record_only()  # this test requires M series of VM with 64+ cores. Being in live-run is not feasible due to quota limit
     @ResourceGroupPreparer(name_prefix='cli_vm_write_accel', location='westus2')
     def test_vm_write_accelerator_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -2163,9 +2163,11 @@ class VMLiveScenarioTest(LiveScenarioTest):
         lines = content.splitlines()
         for l in lines:
             self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
-        # spot check we do have relevant messages coming out
-        self.assertTrue('Succeeded: {vm}VMNic (Microsoft.Network/networkInterfaces)'.format(**self.kwargs) in lines)
-        self.assertTrue('Succeeded: {vm} (Microsoft.Compute/virtualMachines)'.format(**self.kwargs) in lines)
+        # spot check we do have some relevant progress messages coming out
+        # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
+        # This has the consequence that it can't promise each resource's result wil be displayed)
+        self.assertTrue('Accepted:'.format(**self.kwargs) in lines)
+        self.assertTrue('Succeeded:'.format(**self.kwargs) in lines)
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -2550,7 +2552,7 @@ class VMOsDiskSwap(ScenarioTest):
             'vm': 'vm1',
             'backupDisk': 'disk1',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123')
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123 --generate-ssh-keys')
         res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
         backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']
@@ -2575,7 +2577,7 @@ class VMGenericUpdate(ScenarioTest):
         self.cmd('identity create -g {rg} -n {id}')
         result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
         id_path = result['id'].rsplit('/', 1)[0]
-        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys')
         self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
             self.check('systemAssignedIdentity', ''),
             self.check('length(userAssignedIdentities)', 2)
