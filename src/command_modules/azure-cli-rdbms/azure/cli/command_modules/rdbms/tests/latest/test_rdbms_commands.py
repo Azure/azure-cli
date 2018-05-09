@@ -27,7 +27,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='koreasouth',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='southcentralus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -90,11 +90,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
         new_cu = 4
         family = 'Gen5'
         skuname = '{}_{}_{}'.format("GP", family, old_cu)
-        loc = 'koreasouth'
+        loc = 'southcentralus'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'koreasouth'
+        geoloc = 'southcentralus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -141,8 +141,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], new_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -163,8 +163,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test update server per property
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], old_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
