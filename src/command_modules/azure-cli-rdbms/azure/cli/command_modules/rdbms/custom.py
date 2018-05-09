@@ -146,7 +146,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 
 def _server_update_custom_func(instance,
-                               capacity=None,
+                               sku_name=None,
                                storage_mb=None,
                                backup_retention_days=None,
                                administrator_login_password=None,
@@ -158,9 +158,11 @@ def _server_update_custom_func(instance,
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
-    if capacity is not None:
-        instance.sku.name = _get_sku_name(instance.sku.tier, instance.sku.family, capacity)
-        instance.sku.capacity = capacity
+    if sku_name is not None:
+        instance.sku.name = sku_name
+        instance.sku.capacity = None
+        instance.sku.family = None
+        instance.sku.tier = None
     else:
         instance.sku = None
 
