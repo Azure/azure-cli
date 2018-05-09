@@ -43,6 +43,8 @@ def keyvault_exception_handler(ex):
                            'The vault may not exist or you may need to flush your DNS cache '
                            'and try again later.')
         raise CLIError(ex)
+    else:
+        raise ex
 
 
 class KeyVaultCommandGroup(AzCommandGroup):
