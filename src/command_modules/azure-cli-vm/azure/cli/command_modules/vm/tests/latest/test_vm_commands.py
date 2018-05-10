@@ -1034,7 +1034,7 @@ class VMBootDiagnostics(ScenarioTest):
 
 
 class VMSSExtensionInstallTest(ScenarioTest):
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension')
     def test_vmss_extension(self):
 
