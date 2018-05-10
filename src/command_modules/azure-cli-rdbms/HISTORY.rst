@@ -5,7 +5,7 @@ Release History
 
 0.2.3
 +++++
-* Added missing help for `server wait` commands.
+* Minor fixes.
 
 0.2.2
 +++++

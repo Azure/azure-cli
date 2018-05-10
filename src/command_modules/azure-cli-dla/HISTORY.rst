@@ -3,9 +3,9 @@
 Release History
 ===============
 
-0.0.20
-++++++
-* Added missing help for `dla account blob-storage add/update`.
+0.1.0
++++++
+* Minor fixes.
 
 0.0.19
 ++++++

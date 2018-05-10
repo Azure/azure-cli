@@ -5,7 +5,7 @@ Release History
 
 2.0.24
 ++++++
-* Added missing help for some commands.
+* Minor fixes.
 
 2.0.23
 ++++++
