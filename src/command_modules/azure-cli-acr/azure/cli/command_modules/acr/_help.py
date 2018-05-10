@@ -36,6 +36,11 @@ helps['acr build-task'] = """
     short-summary: Manage build definitions, which can be triggered by git commits or base image updates.
     """
 
+helps['acr image'] = """
+    type: group
+    short-summary: Manage image for registries.
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if a container registry name is valid and available for use.
@@ -428,4 +433,9 @@ helps['acr build'] = """
         - name: Queue a local context, validating the build is successful, without pushing to the registry.
           text: >
             az acr build -r MyRegistry .
+"""
+
+helps['acr image import'] = """
+    type: command
+    short-summary: Copies an image to the container registry from the specified container registry.
 """
