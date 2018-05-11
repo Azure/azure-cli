@@ -3,18 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=unused-import
+
+from azure.cli.command_modules.policyinsights._help import helps
 from azure.cli.core import AzCommandsLoader
-from azure.cli.command_modules.policyinsights._help import helps  # pylint: disable=unused-import
 
 class PolicyInsightsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from ._exception_handler import policyinsights_exception_handler
+        from ._exception_handler import policy_insights_exception_handler
 
         policyinsights_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.policyinsights.custom#{}',
-            exception_handler=policyinsights_exception_handler)
+            exception_handler=policy_insights_exception_handler)
 
         super(PolicyInsightsCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
@@ -31,6 +33,5 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
         from ._params import load_arguments
 
         load_arguments(self, command)
-
 
 COMMAND_LOADER_CLS = PolicyInsightsCommandsLoader

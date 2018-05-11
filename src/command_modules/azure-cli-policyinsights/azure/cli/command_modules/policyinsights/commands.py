@@ -5,17 +5,17 @@
 
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (policy_events_operations, policy_states_operations)
-from ._exception_handler import policyinsights_exception_handler
+from ._exception_handler import policy_insights_exception_handler
 
 def load_command_table(self, _):
     policy_events_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.policyinsights.operations.policy_events_operations#PolicyEventsOperations.{}',
-        exception_handler=policyinsights_exception_handler
+        exception_handler=policy_insights_exception_handler
     )
 
     policy_states_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.policyinsights.operations.policy_states_operations#PolicyStatesOperations.{}',
-        exception_handler=policyinsights_exception_handler
+        exception_handler=policy_insights_exception_handler
     )
 
     with self.command_group('policyinsights event', policy_events_sdk, client_factory=policy_events_operations) as g:

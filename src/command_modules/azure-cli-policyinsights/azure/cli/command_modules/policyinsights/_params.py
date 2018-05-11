@@ -8,5 +8,5 @@ from azure.cli.core.commands.parameters import name_type
 
 def load_arguments(self, _):
 
-    with self.argument_context('example') as c:
+    with self.argument_context('policyinsights') as c:
         c.argument('example_name', arg_type=name_type, help='The name of the example.')

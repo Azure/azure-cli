@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 def list_policy_events(
@@ -42,21 +40,43 @@ def list_policy_events(
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
-            events = client.list_query_results_for_resource_group_level_policy_assignment(default_subscription_id, resource_group_name, policy_assignment_name, query_options)
+            events = client.list_query_results_for_resource_group_level_policy_assignment(
+                default_subscription_id,
+                resource_group_name,
+                policy_assignment_name,
+                query_options)
         else:
-            events = client.list_query_results_for_subscription_level_policy_assignment(default_subscription_id, policy_assignment_name, query_options)
+            events = client.list_query_results_for_subscription_level_policy_assignment(
+                default_subscription_id,
+                policy_assignment_name,
+                query_options)
     elif policy_definition_name is not None:
-        events = client.list_query_results_for_policy_definition(default_subscription_id, policy_definition_name, query_options)
+        events = client.list_query_results_for_policy_definition(
+            default_subscription_id,
+            policy_definition_name,
+            query_options)
     elif policy_set_definition_name is not None:
-        events = client.list_query_results_for_policy_set_definition(default_subscription_id, policy_set_definition_name, query_options)
+        events = client.list_query_results_for_policy_set_definition(
+            default_subscription_id,
+            policy_set_definition_name,
+            query_options)
     elif resource_id is not None:
-        events = client.list_query_results_for_resource(resource_id, query_options)
+        events = client.list_query_results_for_resource(
+            resource_id,
+            query_options)
     elif resource_group_name is not None:
-        events = client.list_query_results_for_resource_group(default_subscription_id, resource_group_name, query_options)
+        events = client.list_query_results_for_resource_group(
+            default_subscription_id,
+            resource_group_name,
+            query_options)
     elif management_group_name is not None:
-        events = client.list_query_results_for_management_group(management_group_name, query_options)
+        events = client.list_query_results_for_management_group(
+            management_group_name,
+            query_options)
     else:
-        events = client.list_query_results_for_subscription(default_subscription_id, query_options)
+        events = client.list_query_results_for_subscription(
+            default_subscription_id,
+            query_options)
 
     return events
 
@@ -100,21 +120,51 @@ def list_policy_states(
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
-            states = client.list_query_results_for_resource_group_level_policy_assignment(policy_states_resource, default_subscription_id, resource_group_name, policy_assignment_name, query_options)
+            states = client.list_query_results_for_resource_group_level_policy_assignment(
+                policy_states_resource,
+                default_subscription_id,
+                resource_group_name,
+                policy_assignment_name,
+                query_options)
         else:
-            states = client.list_query_results_for_subscription_level_policy_assignment(policy_states_resource, default_subscription_id, policy_assignment_name, query_options)
+            states = client.list_query_results_for_subscription_level_policy_assignment(
+                policy_states_resource,
+                default_subscription_id,
+                policy_assignment_name,
+                query_options)
     elif policy_definition_name is not None:
-        states = client.list_query_results_for_policy_definition(policy_states_resource, default_subscription_id, policy_definition_name, query_options)
+        states = client.list_query_results_for_policy_definition(
+            policy_states_resource,
+            default_subscription_id,
+            policy_definition_name,
+            query_options)
     elif policy_set_definition_name is not None:
-        states = client.list_query_results_for_policy_set_definition(policy_states_resource, default_subscription_id, policy_set_definition_name, query_options)
+        states = client.list_query_results_for_policy_set_definition(
+            policy_states_resource,
+            default_subscription_id,
+            policy_set_definition_name,
+            query_options)
     elif resource_id is not None:
-        states = client.list_query_results_for_resource(policy_states_resource, resource_id, query_options)
+        states = client.list_query_results_for_resource(
+            policy_states_resource,
+            resource_id,
+            query_options)
     elif resource_group_name is not None:
-        states = client.list_query_results_for_resource_group(policy_states_resource, default_subscription_id, resource_group_name, query_options)
+        states = client.list_query_results_for_resource_group(
+            policy_states_resource,
+            default_subscription_id,
+            resource_group_name,
+            query_options)
     elif management_group_name is not None:
-        states = client.list_query_results_for_management_group(policy_states_resource, management_group_name, query_options)
+        states = client.list_query_results_for_management_group(
+            policy_states_resource,
+            management_group_name,
+            query_options)
     else:
-        states = client.list_query_results_for_subscription(policy_states_resource, default_subscription_id, query_options)
+        states = client.list_query_results_for_subscription(
+            policy_states_resource,
+            default_subscription_id,
+            query_options)
 
     return states
 
@@ -147,20 +197,42 @@ def summarize_policy_states(
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
-            summary = client.summarize_for_resource_group_level_policy_assignment(default_subscription_id, resource_group_name, policy_assignment_name, query_options)
+            summary = client.summarize_for_resource_group_level_policy_assignment(
+                default_subscription_id,
+                resource_group_name,
+                policy_assignment_name,
+                query_options)
         else:
-            summary = client.summarize_for_subscription_level_policy_assignment(default_subscription_id, policy_assignment_name, query_options)
+            summary = client.summarize_for_subscription_level_policy_assignment(
+                default_subscription_id,
+                policy_assignment_name,
+                query_options)
     elif policy_definition_name is not None:
-        summary = client.summarize_for_policy_definition(default_subscription_id, policy_definition_name, query_options)
+        summary = client.summarize_for_policy_definition(
+            default_subscription_id,
+            policy_definition_name,
+            query_options)
     elif policy_set_definition_name is not None:
-        summary = client.summarize_for_policy_set_definition(default_subscription_id, policy_set_definition_name, query_options)
+        summary = client.summarize_for_policy_set_definition(
+            default_subscription_id,
+            policy_set_definition_name,
+            query_options)
     elif resource_id is not None:
-        summary = client.summarize_for_resource(resource_id, query_options)
+        summary = client.summarize_for_resource(
+            resource_id,
+            query_options)
     elif resource_group_name is not None:
-        summary = client.summarize_for_resource_group(default_subscription_id, resource_group_name, query_options)
+        summary = client.summarize_for_resource_group(
+            default_subscription_id,
+            resource_group_name,
+            query_options)
     elif management_group_name is not None:
-        summary = client.summarize_for_management_group(management_group_name, query_options)
+        summary = client.summarize_for_management_group(
+            management_group_name,
+            query_options)
     else:
-        summary = client.summarize_for_subscription(default_subscription_id, query_options)
+        summary = client.summarize_for_subscription(
+            default_subscription_id,
+            query_options)
 
     return summary
