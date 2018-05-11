@@ -293,6 +293,16 @@ helps['dla account blob-storage'] = """
     short-summary: (PREVIEW) Manage links between Data Lake Analytics accounts and Azure Storage.
 """
 
+helps['dla account blob-storage add'] = """
+    type: command
+    short-summary: Links an Azure Storage account to the specified Data Lake Analytics account.
+"""
+
+helps['dla account blob-storage update'] = """
+    type: command
+    short-summary: Updates an Azure Storage account linked to the specified Data Lake Analytics account.
+"""
+
 helps['dla account data-lake-store'] = """
     type: group
     short-summary: (PREVIEW) Manage links between Data Lake Analytics and Data Lake Store accounts.

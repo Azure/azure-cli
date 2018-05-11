@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.33
+++++++
+* webapp/functionapp: improve generic update commands
+
 0.1.32
 ++++++
 * webapp: fix a bug in `az webapp delete` when `--slot` is provided

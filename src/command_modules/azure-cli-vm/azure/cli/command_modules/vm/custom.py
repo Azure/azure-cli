@@ -204,10 +204,9 @@ def _normalize_extension_version(cli_ctx, publisher, vm_extension_name, version,
 
     if not version:
         result = load_extension_images_thru_services(cli_ctx, publisher, vm_extension_name, None, location,
-                                                     show_latest=True)
+                                                     show_latest=True, partial_match=False)
         if not result:
             raise CLIError('Failed to find the latest version for the extension "{}"'.format(vm_extension_name))
-
         # with 'show_latest' enabled, we will only get one result.
         version = result[0]['version']
 

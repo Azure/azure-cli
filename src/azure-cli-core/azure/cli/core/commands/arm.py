@@ -91,6 +91,13 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.parameters))
 
 
+def handle_template_based_exception(ex):
+    try:
+        raise CLIError(ex.inner_exception.error.message)
+    except AttributeError:
+        raise CLIError(ex)
+
+
 def handle_long_running_operation_exception(ex):
     import azure.cli.core.telemetry as telemetry
 
