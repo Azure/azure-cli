@@ -79,7 +79,8 @@ class Linter(object):
 
 
 class LinterManager(object):
-    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions=None):
+    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions=None,
+            rule_inclusions=None):
         self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
         self._exclusions = exclusions or {}
         self._rules = {
@@ -89,6 +90,7 @@ class LinterManager(object):
             'params': {}
         }
         self._ci_exclusions = {}
+        self._rule_inclusions = rule_inclusions
         self._loaded_help = loaded_help
         self._command_table = command_table
         self._help_file_entries = help_file_entries
@@ -96,7 +98,8 @@ class LinterManager(object):
         self._ci = False
 
     def add_rule(self, rule_type, rule_name, rule_callable):
-        if rule_type in self._rules:
+        include_rule = self._rule_inclusions and rule_name in self._rule_inclusions
+        if rule_type in self._rules and include_rule:
             def get_linter():
                 if rule_name in self._ci_exclusions and self._ci:
                     mod_exclusions = self._ci_exclusions[rule_name]
