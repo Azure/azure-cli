@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.2.3
+0.2.4
 +++++
 * Minor fix allowing elastic server update using skuname.
 
