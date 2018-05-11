@@ -32,7 +32,12 @@ cp -R $dp0/a01/* artifacts/
 
 #############################################
 # Move privates for docker
-if [ -d privates ]; then cp -R privates artifacts/privates; fi
+if [ -d privates ]; then 
+    cp -R privates artifacts/privates
+else
+    mkdir -p artifacts/privates
+    echo 'placeholder' > artifacts/privates/placeholder
+fi
 
 #############################################
 # for travis repo slug, remove the suffix to reveal the owner
