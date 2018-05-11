@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.34
+++++++
+* automatically register supporting Azure providers in `az aks create`
+
 2.0.33
 ++++++
 * fix typo in help message

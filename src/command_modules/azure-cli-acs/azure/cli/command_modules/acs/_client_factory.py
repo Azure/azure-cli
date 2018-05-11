@@ -19,8 +19,12 @@ def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
 
 
+def cf_providers(cli_ctx, *_):
+    return get_resource_provider_client(cli_ctx).providers
+
+
 def cf_resource_groups(cli_ctx, *_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
+    return get_resource_provider_client(cli_ctx).resource_groups
 
 
 def get_auth_management_client(cli_ctx, scope=None, **_):
@@ -40,6 +44,10 @@ def get_container_service_client(cli_ctx, **_):
     from azure.mgmt.containerservice import ContainerServiceClient
 
     return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
+
+
+def get_resource_provider_client(cli_ctx, **_):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):
