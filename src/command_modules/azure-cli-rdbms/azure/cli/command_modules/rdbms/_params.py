@@ -32,7 +32,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
-            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
+            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
