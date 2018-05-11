@@ -566,6 +566,11 @@ helps['functionapp create'] = """
             az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
 """
 
+helps['functionapp update'] = """
+    type: command
+    short-summary: Update a function app.
+"""
+
 helps['functionapp delete'] = """
     type: command
     short-summary: Delete a function app.

@@ -754,6 +754,10 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
         ])
+        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name), checks=[
+            self.check('clientAffinityEnabled', True)
+        ])
+
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -841,6 +845,12 @@ class WebappUpdateTest(ScenarioTest):
                      JMESPathCheck('name', webapp_name),
                      JMESPathCheck('tags.foo', 'bar'),
                      JMESPathCheck('clientAffinityEnabled', False)])
+
+        # try out on slots
+        self.cmd('webapp deployment slot create -g {} -n {} -s s1'.format(resource_group, webapp_name))
+        self.cmd('webapp update -g {} -n {} -s s1 --client-affinity-enabled true'.format(resource_group, webapp_name), checks=[
+            self.check('clientAffinityEnabled', True)
+        ])
 
 
 class WebappZipDeployScenarioTest(ScenarioTest):

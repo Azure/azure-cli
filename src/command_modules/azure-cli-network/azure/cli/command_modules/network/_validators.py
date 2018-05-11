@@ -812,7 +812,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
         location = namespace.location
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
-        watcher = next((x for x in network_client.list_all() if x.location == location), None)
+        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
         if not watcher:
             raise CLIError("network watcher is not enabled for region '{}'.".format(location))
         id_parts = parse_resource_id(watcher.id)
@@ -943,7 +943,7 @@ def process_nw_topology_namespace(cmd, namespace):
             raise subnet_usage
         if subnet_id:
             rg = parse_resource_id(subnet_id)['resource_group']
-            namespace.target_subnet = SubResource(subnet)
+            namespace.target_subnet = SubResource(id=subnet)
         else:
             subnet_id = subnet_id or resource_id(
                 subscription=subscription_id,
@@ -956,7 +956,7 @@ def process_nw_topology_namespace(cmd, namespace):
             )
             namespace.target_resource_group_name = None
             namespace.target_vnet = None
-            namespace.target_subnet = SubResource(subnet_id)
+            namespace.target_subnet = SubResource(id=subnet_id)
     elif vnet:
         # targeting vnet - OK
         vnet_usage = CLIError('usage error: --vnet ID | --vnet NAME --resource-group NAME')
@@ -966,7 +966,7 @@ def process_nw_topology_namespace(cmd, namespace):
             raise vnet_usage
         if vnet_id:
             rg = parse_resource_id(vnet_id)['resource_group']
-            namespace.target_vnet = SubResource(vnet)
+            namespace.target_vnet = SubResource(id=vnet)
         else:
             vnet_id = vnet_id or resource_id(
                 subscription=subscription_id,
@@ -976,7 +976,7 @@ def process_nw_topology_namespace(cmd, namespace):
                 name=vnet
             )
             namespace.target_resource_group_name = None
-            namespace.target_vnet = SubResource(vnet_id)
+            namespace.target_vnet = SubResource(id=vnet_id)
     else:
         raise CLIError('usage error: --resource-group NAME | --vnet NAME_OR_ID | --subnet NAME_OR_ID')
 

@@ -16,12 +16,11 @@ import uuid
 import six
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
     StorageAccountPreparer)
-
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -594,12 +593,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):
 
+    @record_only()  # this test requires M series of VM with 64+ cores. Being in live-run is not feasible due to quota limit
     @ResourceGroupPreparer(name_prefix='cli_vm_write_accel', location='westus2')
     def test_vm_write_accelerator_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --write-accelerator 0=true --data-disk-sizes-gb 1 --image centos --size Standard_M64ms')
+        self.cmd('vm create -g {rg} -n {vm} --write-accelerator 0=true --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
             self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
@@ -1005,7 +1005,8 @@ class VMBootDiagnostics(ScenarioTest):
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
         self.kwargs.update({
-            'vm': 'myvm'
+            'vm': 'myvm',
+            'vm2': 'myvm2'
         })
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
@@ -1024,6 +1025,13 @@ class VMBootDiagnostics(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
 
+        # try enable it at the create
+        self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa}')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
+            self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
+        ])
+
 
 class VMSSExtensionInstallTest(ScenarioTest):
 
@@ -1035,19 +1043,20 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'pub': 'Microsoft.OSTCExtensions',
-            'ext': 'VMAccessForLinux',
+            'pub': 'Microsoft.Azure.NetworkWatcher',
+            'ext': 'NetworkWatcherAgentLinux',
             'username': username,
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0')
+        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
         try:
             self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}"')
             self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
                 self.check('type(@)', 'object'),
-                self.check('name', '{ext}')
+                self.check('name', '{ext}'),
+                self.check('publisher', '{pub}')
             ])
         finally:
             os.remove(config_file)
@@ -2163,9 +2172,11 @@ class VMLiveScenarioTest(LiveScenarioTest):
         lines = content.splitlines()
         for l in lines:
             self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
-        # spot check we do have relevant messages coming out
-        self.assertTrue('Succeeded: {vm}VMNic (Microsoft.Network/networkInterfaces)'.format(**self.kwargs) in lines)
-        self.assertTrue('Succeeded: {vm} (Microsoft.Compute/virtualMachines)'.format(**self.kwargs) in lines)
+        # spot check we do have some relevant progress messages coming out
+        # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
+        # This has the consequence that it can't promise each resource's result wil be displayed)
+        self.assertTrue('Accepted:'.format(**self.kwargs) in lines)
+        self.assertTrue('Succeeded:'.format(**self.kwargs) in lines)
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -2550,7 +2561,7 @@ class VMOsDiskSwap(ScenarioTest):
             'vm': 'vm1',
             'backupDisk': 'disk1',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123')
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123 --generate-ssh-keys')
         res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
         backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']
@@ -2575,7 +2586,7 @@ class VMGenericUpdate(ScenarioTest):
         self.cmd('identity create -g {rg} -n {id}')
         result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
         id_path = result['id'].rsplit('/', 1)[0]
-        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys')
         self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
             self.check('systemAssignedIdentity', ''),
             self.check('length(userAssignedIdentities)', 2)
