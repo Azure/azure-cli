@@ -79,6 +79,14 @@ def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
     return arm_resource.id
 
 
+def get_resource_id_by_registry_name(cli_ctx, registry_name):
+    """Returns the resource id for the registry.
+    :param str registry_name: The name of the registry
+    """
+    arm_resource = _arm_get_resource_by_name(cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
+    return arm_resource.id
+
+
 def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """Returns a tuple of Registry object and resource group name.
     :param str registry_name: The name of container registry
