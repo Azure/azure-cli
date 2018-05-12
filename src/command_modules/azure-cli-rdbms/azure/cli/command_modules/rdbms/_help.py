@@ -64,6 +64,10 @@ def add_helps(command_group, server_type):
                     - name: Update a server's tags.
                       text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
                 """.format(command_group)
+    helps['{} server wait'.format(command_group)] = """
+                type: command
+                short-summary: Wait for server to satisfy certain conditions.
+                """
     helps['{} server delete'.format(command_group)] = """
                 type: command
                 short-summary: Delete a server.
