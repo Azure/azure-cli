@@ -36,6 +36,11 @@ helps['acr build-task'] = """
     short-summary: Manage build definitions, which can be triggered by git commits or base image updates.
     """
 
+helps['acr image'] = """
+    type: group
+    short-summary: Manage container images for Azure Container Registries.
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if a container registry name is valid and available for use.
