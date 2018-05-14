@@ -5,6 +5,10 @@
 
 import json
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -253,3 +257,19 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
             lun = lun.lower()
             lun = int(lun) if lun != 'os' else lun
             _update(model, lun, value.lower() == 'true')
+
+
+def get_storage_blob_uri(cli_ctx, storage):
+    from azure.cli.core.profiles._shared import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    if urlparse(storage).scheme:
+        storage_uri = storage
+    else:
+        storage_mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+        storage_accounts = storage_mgmt_client.storage_accounts.list()
+        storage_account = next((a for a in list(storage_accounts)
+                                if a.name.lower() == storage.lower()), None)
+        if storage_account is None:
+            raise CLIError('{} does\'t exist.'.format(storage))
+        storage_uri = storage_account.primary_endpoints.blob
+    return storage_uri
