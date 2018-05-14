@@ -78,7 +78,7 @@ def _expand_file_prefixed_files(args):
         elif ix == 0:
             try:
                 return _load_file(poss_file)
-            except FileNotFoundError:
+            except IOError:
                 logger.debug("Failed to load @'%s', assume not a file", arg)
                 return arg
 
