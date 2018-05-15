@@ -438,6 +438,8 @@ def validate_entity(namespace):
 def validate_marker(namespace):
     """ Converts a list of key value pairs into a dictionary. Ensures that required
     nextrowkey and nextpartitionkey are included. """
+    if not namespace.marker:
+        return
     marker = dict(x.split('=', 1) for x in namespace.marker)
     expected_keys = {'nextrowkey', 'nextpartitionkey'}
 

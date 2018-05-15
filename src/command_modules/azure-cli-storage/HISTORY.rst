@@ -6,6 +6,7 @@ Release History
 2.0.33
 ++++++
 * Added completer for `--account-name` argument.
+* Fixed problem with `storage entity query`.
 
 2.0.32
 ++++++
