@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Added completer for `--account-name` argument.
+
 2.0.32
 ++++++
 * Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.
