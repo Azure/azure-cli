@@ -884,7 +884,6 @@ def create_service_principal_for_rbac(
         scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
-    import pytz
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
@@ -904,7 +903,7 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    app_start_date = datetime.datetime.now(pytz.utc)
+    app_start_date = datetime.datetime.utcnow()
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     app_display_name = app_display_name or ('azure-cli-' +
@@ -1146,7 +1145,6 @@ def _get_public(x509):
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
                                        cert=None, years=None, keyvault=None, append=False):
-    import pytz
     client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
@@ -1164,7 +1162,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             'app id guid, or app id uri')
     app = show_application(client.applications, aad_sps[0].app_id)
 
-    app_start_date = datetime.datetime.now(pytz.utc)
+    app_start_date = datetime.datetime.utcnow()
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     # build a new password/cert credential and patch it
