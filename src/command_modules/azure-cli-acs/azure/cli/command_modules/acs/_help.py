@@ -255,8 +255,7 @@ helps['aks install-connector'] = """
     examples:
         - name: Install the ACI Connector for Linux to a managed Kubernetes cluster.
           text: |-
-            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-              --connector-name aci-connector
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
         - name: Install the ACI Connector for Windows to a managed Kubernetes cluster.
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
@@ -274,7 +273,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
-""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
+"""
 
 helps['aks list'] = """
     type: command
