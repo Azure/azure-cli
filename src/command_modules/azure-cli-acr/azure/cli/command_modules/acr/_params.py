@@ -63,11 +63,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
 
     with self.argument_context('acr image') as c:
-        c.argument('resource_id', help='The resource identifier of the target Azure Container Registry.')
-        c.argument('source_image', help='Repository name of the source image.')
-        c.argument('target_tags', help='List of strings of the form repo[:tag]. When tag is ommitted the source will be used.', action='append')
-        c.argument('untagged_target_repositories', help='List of strings of repository names to do a manifest only copy.', action='append')
-        c.argument('mode', help='Possible values include \'NoForce\', \'Force\'.')
+        c.argument('resource_id', help='The ARM resource ID of the source container registry.')
+        c.argument('source_image', help='A fully qualified image identifier.')
+        c.argument('target', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format where tag is optional.", action='append')
+        c.argument('repository', help='The repository names to do a manifest only copy.', action='append')
+        c.argument('force', help='Overwrite the existing target tag of the image to be imported.', action='store_true')
 
     with self.argument_context('acr repository delete') as c:
         c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
