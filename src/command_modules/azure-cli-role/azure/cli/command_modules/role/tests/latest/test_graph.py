@@ -110,7 +110,7 @@ class ApplicationSetScenarioTest(ScenarioTest):
         self.cmd('ad app show --id {app}',
                  checks=self.check('replyUrls[0]', '{reply_uri}'))
 
-        # update through generic --additional-properties
+        # invoke generic update
         self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
         self.cmd('ad app show --id {app}',
                  checks=self.check('oauth2AllowUrlPathMatching', True))

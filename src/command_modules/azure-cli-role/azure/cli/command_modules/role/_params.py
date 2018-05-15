@@ -45,9 +45,6 @@ def load_arguments(self, _):
     with self.argument_context('ad sp create') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
-    with self.argument_context('ad app update') as c:
-        c.ignore('object_id')
-
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
