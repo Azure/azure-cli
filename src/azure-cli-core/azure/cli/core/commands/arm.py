@@ -807,7 +807,7 @@ def make_snake_case(s):
 def make_camel_case(s):
     if isinstance(s, str):
         parts = s.split('_')
-        return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
+        return (parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])) if len(parts) > 1 else s
     return s
 
 
