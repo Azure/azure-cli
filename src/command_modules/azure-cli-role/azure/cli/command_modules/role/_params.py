@@ -46,7 +46,7 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
     with self.argument_context('ad app update') as c:
-        c.argument('additional_properties', nargs='+', help="space separated '<name>=<value>' pairs representing random properties not captured by explicit arguments")
+        c.ignore('object_id')
 
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('scopes', nargs='+')

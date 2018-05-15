@@ -603,12 +603,10 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
-def update_application(client, identifier, display_name=None, homepage=None,
+def update_application(cmd, instance, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, additional_properties=None):
-    object_id = _resolve_application(client, identifier)
-
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
@@ -626,20 +624,14 @@ def update_application(client, identifier, display_name=None, homepage=None,
                                                   available_to_other_tenants=available_to_other_tenants,
                                                   required_resource_access=required_accesses,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
-    if additional_properties:
-        app_patch_param.enable_additional_properties_sending()
-        if app_patch_param.additional_properties is None:
-            app_patch_param.additional_properties = {}
 
-        for p in additional_properties:
-            name, value = p.split('=')
-            try:
-                value = shell_safe_json_parse(value)  # see whether it is a json
-            except CLIError:
-                pass
-            app_patch_param.additional_properties[name] = value
+    return app_patch_param
 
-    return client.patch(object_id, app_patch_param)
+
+def patch_application(cmd, identifier, parameters):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_application(graph_client.applications, identifier)
+    return graph_client.applications.patch(object_id, parameters)
 
 
 def _build_application_accesses(required_resource_accesses):
