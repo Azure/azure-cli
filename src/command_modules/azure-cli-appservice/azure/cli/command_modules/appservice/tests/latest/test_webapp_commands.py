@@ -129,7 +129,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = self.create_random_name(prefix='plan-quick-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(resource_group, webapp_name, plan))
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
@@ -140,13 +140,13 @@ class WebappQuickCreateTest(ScenarioTest):
         ]))
 
     @ResourceGroupPreparer()
-    def test_linux_webapp_multicontainer_create(self):
-        resource_group = 'yili-cus-stage-01'
-        plan = 'yili-cus-stage-02'
-        webapp_name = 'lukasz-cli-test-17'
-        config_file = 'https://raw.githubusercontent.com/LukaszStem/spewlogs/master/randomconfig.yml'
+    def test_linux_webapp_multicontainer_create(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
+        plan = self.create_random_name(prefix='plan-linux-multi', length=24)
+        config_file = os.path.join(TEST_DIR, 'sample-compose.yml')
 
-        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file {} "
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
                  "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
 
         last_number_seen = 99999999
@@ -207,7 +207,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(resource_group, webapp_name, plan))
         # load the site to produce a few traces
         requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
 
