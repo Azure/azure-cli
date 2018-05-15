@@ -39,7 +39,7 @@ from azure.cli.core.util import in_cloud_console
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
-from ._appservice_utils import _generic_site_operation
+from ._appservice_utils import _generic_site_operation, _check_deployment_status
 
 
 logger = get_logger(__name__)
@@ -167,7 +167,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-    zip_url = scm_url + '/api/zipdeploy'
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+    deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
@@ -179,14 +180,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        r = requests.post(zip_url, data=zip_content, headers=headers)
-        if r.status_code != 200:
-            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
-                zip_url, r.status_code, r.text))
-
-    # on successful deployment navigate to the app, display the latest deployment json response
-    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
-    return response.json()
+        requests.post(zip_url, data=zip_content, headers=headers)
+    # check the status of async deployment
+    response = requests.get(deployment_status_url, headers=authorization)
+    res = _check_deployment_status(deployment_url, authorization)
+    return res
 
 
 def get_sku_name(tier):
@@ -205,12 +203,6 @@ def get_sku_name(tier):
         return 'PREMIUMV2'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
-
-
-# deprecated, do not use
-def _get_sku_name(tier):
-    return get_sku_name(tier)
-# endregion
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
