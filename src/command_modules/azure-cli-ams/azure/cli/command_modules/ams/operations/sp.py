@@ -9,7 +9,6 @@ import time
 
 import re
 from dateutil.relativedelta import relativedelta
-import pytz
 
 from knack.util import CLIError, todict
 from knack.log import get_logger
@@ -202,7 +201,7 @@ def _get_application_object_id(client, identifier):
 def _build_password_credential(password, years):
     years = years or 1
 
-    start_date = datetime.datetime.now(pytz.utc)
+    start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=years)
 
     from azure.graphrbac.models import PasswordCredential
