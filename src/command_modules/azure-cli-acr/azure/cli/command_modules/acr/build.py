@@ -13,7 +13,6 @@ import tempfile
 import tarfile
 import requests
 import colorama
-import pytz
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
@@ -162,7 +161,7 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
         # modified date and the last modified date has timed out, exit
         if ((last_modified is not None and _blob_is_not_complete(metadata)) or start < available):
 
-            delta = datetime.utcnow().replace(tzinfo=pytz.utc) - last_modified
+            delta = datetime.utcnow() - last_modified
 
             if delta.seconds > timeout_in_seconds:
                 # Flush anything remaining in the buffer - this would be the case
