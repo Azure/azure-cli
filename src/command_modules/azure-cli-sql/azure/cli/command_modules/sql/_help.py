@@ -17,14 +17,27 @@ helps['sql db'] = """
 helps['sql db copy'] = """
     type: command
     short-summary: Create a copy of a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The copy destination database must have the same edition as the source database, but you can change the edition
+                  after the copy has completed.
+    examples:
+        - name: Create a database with performance level S0 as a copy of an existing Standard database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a copy of an existing GeneralPurpose database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb -f Gen4 -c 1
     """
 helps['sql db create'] = """
     type: command
     short-summary: Create a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
     examples:
-        - name: Create database with zone redundancy enabled
+        - name: Create a Standard S0 database.
+          text: az sql db create -g mygroup -s myserver -n mydb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware and 1 vcore
+          text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+        - name: Create a database with zone redundancy enabled
           text: az sql db create -g mygroup -s myserver -n mydb -z
-        - name: Create database with zone redundancy explicitly disabled
+        - name: Create a database with zone redundancy explicitly disabled
           text: az sql db create -g mygroup -s myserver -n mydb -z false
     """
 helps['sql db delete'] = """
@@ -128,6 +141,13 @@ helps['sql db replica'] = """
 helps['sql db replica create'] = """
     type: command
     short-summary: Create a database as a readable secondary replica of an existing database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The secondary database must have the same edition as the primary database.
+    examples:
+        - name: Create a database with performance level S0 as a secondary replica of an existing Standard database.
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a secondary replica of an existing GeneralPurpose database
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb -f Gen4 -c 1
     """
 helps['sql db replica set-primary'] = """
     type: command
@@ -260,6 +280,10 @@ helps['sql elastic-pool create'] = """
           text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z
         - name: Create elastic pool with zone redundancy explicitly disabled
           text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z false
+        - name: Create a Standard 100 DTU elastic pool.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
+        - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
     """
 helps['sql elastic-pool list-editions'] = """
     type: command
