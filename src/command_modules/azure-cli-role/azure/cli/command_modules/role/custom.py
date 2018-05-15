@@ -603,7 +603,7 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
-def update_application(cmd, instance, display_name=None, homepage=None,
+def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):

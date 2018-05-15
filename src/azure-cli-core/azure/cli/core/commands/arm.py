@@ -692,6 +692,8 @@ def set_properties(instance, expression):
             if hasattr(instance, make_snake_case(name)):
                 setattr(instance, make_snake_case(name), value)
             else:
+                if instance.additional_properties is None:
+                    instance.additional_properties = {}
                 instance.additional_properties[name] = value
                 instance.enable_additional_properties_sending()
                 logger.warning(
@@ -874,9 +876,9 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
 
         if hasattr(instance, make_snake_case(part)):
             return getattr(instance, make_snake_case(part), None)
-        elif hasattr(instance, 'additional_properties') and (part in instance.additional_properties):
+        elif part in getattr(instance, 'additional_properties', {}):
             instance.enable_additional_properties_sending()
-            return instance.additional_properties.get[part]
+            return instance.additional_properties[part]
         raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
