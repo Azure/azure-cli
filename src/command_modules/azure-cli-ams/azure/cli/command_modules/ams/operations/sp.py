@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 
 from knack.util import CLIError, todict
 from knack.log import get_logger
-
+from azure.cli.core.util import get_utc_now_with_tz
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.graphrbac.models import (ApplicationCreateParameters,
@@ -201,7 +201,7 @@ def _get_application_object_id(client, identifier):
 def _build_password_credential(password, years):
     years = years or 1
 
-    start_date = datetime.datetime.utcnow()
+    start_date = get_utc_now_with_tz()
     end_date = start_date + relativedelta(years=years)
 
     from azure.graphrbac.models import PasswordCredential

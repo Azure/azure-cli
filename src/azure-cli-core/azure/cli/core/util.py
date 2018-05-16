@@ -252,3 +252,10 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'raw': True, 'polling': False})
     return func(*args, **kwargs)
+
+def get_utc_now_with_tz():
+    import datetime
+    if getattr(datetime, 'timezone', None):
+        return datetime.datetime.now(datetime.timezone.utc)
+    else:
+        return datetime.datetime.now().replace(tzinfo=pytz.utc)

@@ -19,7 +19,7 @@ from knack.util import CLIError, todict
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models.graph_error import GraphErrorException
 
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_utc_now_with_tz
 
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
 
@@ -903,7 +903,7 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    app_start_date = datetime.datetime.utcnow()
+    app_start_date = get_utc_now_with_tz()
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     app_display_name = app_display_name or ('azure-cli-' +
@@ -1162,7 +1162,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             'app id guid, or app id uri')
     app = show_application(client.applications, aad_sps[0].app_id)
 
-    app_start_date = datetime.datetime.utcnow()
+    app_start_date = get_utc_now_with_tz()
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     # build a new password/cert credential and patch it

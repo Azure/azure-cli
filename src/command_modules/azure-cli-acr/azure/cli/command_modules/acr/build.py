@@ -18,6 +18,7 @@ from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 from azure.common import AzureHttpError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import get_utc_now_with_tz
 from azure.storage.blob import (
     BlockBlobService,
     AppendBlobService,
@@ -161,7 +162,7 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
         # modified date and the last modified date has timed out, exit
         if ((last_modified is not None and _blob_is_not_complete(metadata)) or start < available):
 
-            delta = datetime.utcnow() - last_modified
+            delta = get_utc_now_with_tz() - last_modified
 
             if delta.seconds > timeout_in_seconds:
                 # Flush anything remaining in the buffer - this would be the case
