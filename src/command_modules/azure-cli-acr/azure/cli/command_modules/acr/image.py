@@ -40,7 +40,7 @@ def acr_image_import(cmd,
     if not source_registry_login_server:
         raise CLIError(INVALID_SOURCE_IMAGE)
 
-    registry_from_login_server = get_registry_by_login_server(client, source_registry_login_server)
+    registry_from_login_server = get_registry_by_login_server(cmd.cli_ctx, source_registry_login_server)
 
     if registry_from_login_server:
         if resource_id and registry_from_login_server.id != resource_id:

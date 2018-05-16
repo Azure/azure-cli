@@ -91,14 +91,18 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     return client.get(resource_group_name, registry_name), resource_group_name
 
 
-def get_registry_by_login_server(client, login_server):
-    """Returns the resource ID for the container registry.
+def get_registry_by_login_server(cli_ctx, login_server):
+    """Returns a Registry object for the specified login server.
     :param str login_server: The login server of the container registry.
     """
-    registry_list = client.list()
-    elements = [item for item in registry_list if item.login_server.lower() == login_server.lower()]
+    login_server_lower = login_server.lower()
 
-    if not elements or len(elements) != 1:
+    client = get_acr_service_client(cli_ctx).registries
+    registry_list = client.list()
+
+    elements = [item for item in registry_list if item.login_server.lower() == login_server_lower]
+
+    if len(elements) != 1:
         return None
     return elements[0]
 
