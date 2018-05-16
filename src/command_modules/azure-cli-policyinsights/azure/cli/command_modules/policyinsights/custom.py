@@ -78,7 +78,7 @@ def list_policy_events(
             default_subscription_id,
             query_options)
 
-    return events
+    return events.value
 
 def list_policy_states(
         cmd,
@@ -166,7 +166,7 @@ def list_policy_states(
             default_subscription_id,
             query_options)
 
-    return states
+    return states.value
 
 def summarize_policy_states(
         cmd,
@@ -235,4 +235,4 @@ def summarize_policy_states(
             default_subscription_id,
             query_options)
 
-    return summary
+    return summary.value[0]
