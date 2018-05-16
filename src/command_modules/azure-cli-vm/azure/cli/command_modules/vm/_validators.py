@@ -428,7 +428,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
-    #attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
+    # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
