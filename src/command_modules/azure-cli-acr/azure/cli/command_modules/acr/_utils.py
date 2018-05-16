@@ -79,14 +79,6 @@ def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
     return arm_resource.id
 
 
-def get_resource_id_by_registry_name(cli_ctx, registry_name):
-    """Returns the resource id for the registry.
-    :param str registry_name: The name of the registry
-    """
-    arm_resource = _arm_get_resource_by_name(cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
-    return arm_resource.id
-
-
 def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """Returns a tuple of Registry object and resource group name.
     :param str registry_name: The name of container registry
@@ -97,6 +89,18 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     client = get_acr_service_client(cli_ctx).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
+
+
+def get_registry_by_login_server(client, login_server):
+    """Returns the resource ID for the container registry.
+    :param str login_server: The login server of the container registry.
+    """
+    registry_list = client.list()
+    elements = [item for item in registry_list if item.login_server.lower() == login_server.lower()]
+
+    if not elements or len(elements) != 1:
+        return None
+    return elements[0]
 
 
 def arm_deploy_template_new_storage(cli_ctx,
