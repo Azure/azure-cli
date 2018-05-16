@@ -20,7 +20,7 @@ THRESHOLDS = {
     'vm': 25,
     'batch': 25,
     'storage': 50,
-    'sql': 30,
+    'servicefabric': 30,
     TOTAL: 300
 }
 
