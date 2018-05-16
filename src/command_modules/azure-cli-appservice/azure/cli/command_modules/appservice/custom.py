@@ -1761,26 +1761,22 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     full_sku = get_sku_name(sku)
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
+
 def _check_zip_deployment_status(deployment_status_url, authorization):
     import requests
     num_trials = 1
-    r = None
     while num_trials < 200:
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
         num_trials = num_trials + 1
         if res_dict['status'] == 5:
-            logger.warning("Zip deployment failed status {}".format(
-                res_dict['status_text']
-            ))
+            logger.warning("Zip deployment failed status %s", res_dict['status_text'])
             break
         elif res_dict['status'] == 4:
             break
         logger.warning(res_dict['progress'])
-        r = res_dict
     # if the deployment is taking longer than expected
-    if(res_dict['status'] != 4):
-        logger.warning("""Deployment is taking longer than expected. Please verify status at '{}'
-            beforing launching the app""".format(deployment_status_url))
+    if res_dict['status'] != 4:
+        logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
+            beforing launching the app""", deployment_status_url)
     return res_dict
-

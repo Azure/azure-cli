@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from ._client_factory import web_client_factory
-from knack.log import get_logger
-logger = get_logger(__name__)
 
 
 def _generic_site_operation(cli_ctx, resource_group_name, name, operation_name, slot=None,
