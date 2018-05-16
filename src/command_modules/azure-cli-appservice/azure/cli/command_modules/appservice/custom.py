@@ -1764,8 +1764,10 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def _check_zip_deployment_status(deployment_status_url, authorization):
     import requests
+    import time
     num_trials = 1
     while num_trials < 200:
+        time.sleep(45)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
         num_trials = num_trials + 1
