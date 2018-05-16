@@ -18,9 +18,9 @@ def load_command_table(self, _):
         exception_handler=policy_insights_exception_handler
     )
 
-    with self.command_group('policyinsights event', policy_events_sdk, client_factory=policy_events_operations) as g:
+    with self.command_group('policy event', policy_events_sdk, client_factory=policy_events_operations) as g:
         g.custom_command('list', 'list_policy_events')
 
-    with self.command_group('policyinsights state', policy_states_sdk, client_factory=policy_states_operations) as g:
+    with self.command_group('policy state', policy_states_sdk, client_factory=policy_states_operations) as g:
         g.custom_command('list', 'list_policy_states')
         g.custom_command('summarize', 'summarize_policy_states')
