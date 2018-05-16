@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-import datetime
 import time
 
 import re
@@ -12,11 +11,11 @@ from dateutil.relativedelta import relativedelta
 
 from knack.util import CLIError, todict
 from knack.log import get_logger
-from azure.cli.core.util import get_utc_now_with_tz
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters)
+from azure.cli.core.util import get_utc_now_with_tz
 
 from azure.cli.command_modules.ams._client_factory import (_graph_client_factory, _auth_client_factory)
 from azure.cli.command_modules.ams._utils import (_gen_guid, _is_guid)
