@@ -5,7 +5,7 @@ Release History
 
 2.0.24
 ++++++
-* ad app update: allow setting random properties
+* ad app update: add generic update support
 
 2.0.23
 ++++++
