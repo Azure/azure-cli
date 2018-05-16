@@ -39,7 +39,7 @@ from azure.cli.core.util import in_cloud_console
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
-from ._appservice_utils import _generic_site_operation, _check_deployment_status
+from ._appservice_utils import _generic_site_operation
 
 
 logger = get_logger(__name__)
@@ -183,8 +183,10 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
     response = requests.get(deployment_status_url, headers=authorization)
-    res = _check_deployment_status(deployment_url, authorization)
-    return res
+    if response.json()['status'] != 4:
+        logger.warning(response.json()['progress'])
+        response = _check_zip_deployment_status(deployment_status_url, authorization)
+    return response
 
 
 def get_sku_name(tier):
@@ -1758,3 +1760,27 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
     return client.list_geo_regions(full_sku, linux_workers_enabled)
+
+def _check_zip_deployment_status(deployment_status_url, authorization):
+    import requests
+    num_trials = 1
+    r = None
+    while num_trials < 200:
+        response = requests.get(deployment_status_url, headers=authorization)
+        res_dict = response.json()
+        num_trials = num_trials + 1
+        if res_dict['status'] == 5:
+            logger.warning("Zip deployment failed status {}".format(
+                res_dict['status_text']
+            ))
+            break
+        elif res_dict['status'] == 4:
+            break
+        logger.warning(res_dict['progress'])
+        r = res_dict
+    # if the deployment is taking longer than expected
+    if(res_dict['status'] != 4):
+        logger.warning("""Deployment is taking longer than expected. Please verify status at '{}'
+            beforing launching the app""".format(deployment_status_url))
+    return res_dict
+
