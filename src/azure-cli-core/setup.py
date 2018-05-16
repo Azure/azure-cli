@@ -73,9 +73,6 @@ DEPENDENCIES = [
 if sys.version_info < (3, 4):
     DEPENDENCIES.append('enum34')
 
-if sys.version_info < (3, 2):
-    DEPENDENCIES.append('pytz')
-
 if sys.version_info < (2, 7, 9):
     DEPENDENCIES.append('pyopenssl')
     DEPENDENCIES.append('ndg-httpsclient')

@@ -7,6 +7,7 @@ import re
 import time
 import os
 from random import uniform
+from datetime import datetime
 from io import BytesIO
 import tempfile
 import tarfile
@@ -14,10 +15,10 @@ import requests
 import colorama
 from knack.log import get_logger
 from knack.util import CLIError
+from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.common import AzureHttpError
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import get_utc_now_with_tz
 from azure.storage.blob import (
     BlockBlobService,
     AppendBlobService,
@@ -161,7 +162,7 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
         # modified date and the last modified date has timed out, exit
         if ((last_modified is not None and _blob_is_not_complete(metadata)) or start < available):
 
-            delta = get_utc_now_with_tz() - last_modified
+            delta = datetime.utcnow().replace(tzinfo=TZ_UTC) - last_modified
 
             if delta.seconds > timeout_in_seconds:
                 # Flush anything remaining in the buffer - this would be the case
