@@ -20,3 +20,7 @@ def job_client_factory(cli_ctx, _):
 
 def file_server_client_factory(cli_ctx, _):
     return batchai_client_factory(cli_ctx).file_servers
+
+
+def usage_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).usage

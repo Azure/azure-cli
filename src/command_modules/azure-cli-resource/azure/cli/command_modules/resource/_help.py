@@ -173,7 +173,7 @@ helps['policy definition create'] = """
                     az policy definition create -n readOnlyStorage --rules '{
                             "if":
                             {
-                                "source": "action",
+                                "field": "type",
                                 "equals": "Microsoft.Storage/storageAccounts/write"
                             },
                             "then":
@@ -407,6 +407,16 @@ helps['feature'] = """
     short-summary: Manage resource provider features.
 """
 
+helps['feature list'] = """
+    type: command
+    short-summary: List preview features.
+"""
+
+helps['feature register'] = """
+    type: command
+    short-summary: register a preview feature.
+"""
+
 helps['group'] = """
     type: group
     short-summary: Manage resource groups and template deployments.
@@ -599,7 +609,7 @@ helps['resource link'] = """
 helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Create a link from {SourceID} to {ResourceID} with notes
           text: >
@@ -608,7 +618,7 @@ helps['resource link create'] = """
 helps['resource link update'] = """
     type: command
     short-summary: Update link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Update the notes for {LinkID} notes "some notes to explain this link"
           text: >
@@ -617,7 +627,7 @@ helps['resource link update'] = """
 helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Delete link {LinkID}
           text: >
@@ -637,7 +647,7 @@ helps['resource link list'] = """
 helps['resource link show'] = """
     type: command
     short-summary: Get details for a resource link.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 """
 helps['resource lock'] = """
     type: group

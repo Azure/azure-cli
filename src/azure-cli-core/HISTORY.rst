@@ -3,8 +3,50 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* core: ignore FileNotFoundError error on expanding `@`
+
+2.0.32
+++++++
+* auth: fix a unhandled exception when retrieve secrets from a service principal account with cert
+* auth: improve the logic of detecting msi based account
+* Added limited support for positional arguments.
+* Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)
+* Improves piping scenarios from commands when using `--ids`. Supports `-o tsv` with a query specified or `-o json`
+  without specifying a query.
+* Display command suggestions on error if users have typo in their commands
+* More friendly error when users type `az ''`
+* Support custom resource types for command modules and extensions
+
+2.0.31
+++++++
+* Allow other sources to add additional tab completion choices via event hook
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.30
+++++++
+* Show message for extensions marked as preview on -h.
+
+2.0.29
+++++++
+* Support Autorest 3.0 based SDKs
+* Support mechanism for a command module to suppress the loading of particular extensions.
+
+2.0.28
+++++++
+* Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
+* Allow extensions to send telemetry with custom instrumentation key
+* Enable HTTP logging with --debug
+
+2.0.27
+++++++
+* auth: key on both subscription id and name on msi login
+* Add events module in core for EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+
 2.0.26
 ++++++
+* Support raw token retrival in MSI context
 * Remove polling indicator string after finishing LRO on Windows cmd.exe
 * Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
 * Add a progress indicator for wait command

@@ -6,14 +6,22 @@
 # AZURE CLI RBAC TEST DEFINITIONS
 import json
 import os
-import uuid
 import tempfile
 import time
-import unittest
+import datetime
 import mock
+import unittest
+
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
-from .role_scenario_test import RoleScenarioTest
+
+
+class RoleScenarioTest(ScenarioTest):
+
+    def run_under_service_principal(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        return account_info['user']['type'] == 'servicePrincipal'
 
 
 class RbacSPSecretScenarioTest(RoleScenarioTest):
@@ -37,10 +45,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         })
 
         try:
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D41300', '88DAAF5A-EA86-4A68-9D45-477538D41301',
-                     '88DAAF5A-EA86-4A68-9D45-477538D41302', '88DAAF5A-EA86-4A68-9D45-477538D41303',
-                     '88DAAF5A-EA86-4A68-9D45-477538D41304', '88DAAF5A-EA86-4A68-9D45-477538D41305']
-            with self.get_guid_gen_patch(guids):
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg}',
                          checks=self.check('name', '{sp}'))
                 self.cmd('role assignment list --assignee {sp} --scope {scope}',
@@ -67,15 +72,12 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
         })
 
         try:
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D61400', '88DAAF5A-EA86-4A68-9D45-477538D61401', '88DAAF5A-EA86-4A68-9D45-477538D61402',
-                     '88DAAF5A-EA86-4A68-9D45-477538D61403', '88DAAF5A-EA86-4A68-9D45-477538D61404', '88DAAF5A-EA86-4A68-9D45-477538D61405',
-                     '88DAAF5A-EA86-4A68-9D45-477538D61406', '88DAAF5A-EA86-4A68-9D45-477538D61407', '88DAAF5A-EA86-4A68-9D45-477538D61408']
-            with self.get_guid_gen_patch(guids):
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 result = self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
                                   checks=self.check('name', '{sp}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
-                result = self.cmd('ad sp reset-credentials -n {sp} --create-cert',
+                result = self.cmd('ad sp credential reset -n {sp} --create-cert',
                                   checks=self.check('name', '{sp}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
@@ -84,12 +86,11 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
+class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-
-        import time
+        from azure.keyvault.models import KeyVaultErrorException
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -99,15 +100,20 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'cert': 'cert1',
             'kv': key_vault
         })
-        time.sleep(5)
+
+        time.sleep(5)  # to avoid 504(too many requests) on a newly created vault
 
         try:
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D42500', '88DAAF5A-EA86-4A68-9D45-477538D42501', '88DAAF5A-EA86-4A68-9D45-477538D42502',
-                     '88DAAF5A-EA86-4A68-9D45-477538D42503', '88DAAF5A-EA86-4A68-9D45-477538D42504', '88DAAF5A-EA86-4A68-9D45-477538D42505']
-            with self.get_guid_gen_patch(guids):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+                try:
+                    self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
+                except KeyVaultErrorException:
+                    if not self.is_live and not self.in_recording:
+                        pass  # temporary workaround for keyvault challenge handling was ignored under playback
+                    else:
+                        raise
                 cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
-                self.cmd('ad sp reset-credentials -n {sp} --create-cert --keyvault {kv} --cert {cert}')
+                self.cmd('ad sp credential reset -n {sp} --create-cert --keyvault {kv} --cert {cert}')
                 cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
                 self.assertTrue(cer1 != cer2)
         finally:
@@ -127,17 +133,15 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'cert': 'cert1',
             'kv': key_vault
         })
-        time.sleep(5)
+        time.sleep(5)  # to avoid 504(too many requests) on a newly created vault
 
         # test with valid length cert
         try:
             self.kwargs['policy'] = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D43600', '88DAAF5A-EA86-4A68-9D45-477538D43601', '88DAAF5A-EA86-4A68-9D45-477538D43602',
-                     '88DAAF5A-EA86-4A68-9D45-477538D43603', '88DAAF5A-EA86-4A68-9D45-477538D43604', '88DAAF5A-EA86-4A68-9D45-477538D43605']
-            with self.get_guid_gen_patch(guids):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
-            self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+                self.cmd('ad sp create-for-rbac -n {sp} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
+            self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
 
@@ -145,17 +149,17 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
         try:
             self.kwargs['sp'] = '{}2'.format(self.kwargs['sp'])
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D42700', '88DAAF5A-EA86-4A68-9D45-477538D42701', '88DAAF5A-EA86-4A68-9D45-477538D42702',
-                     '88DAAF5A-EA86-4A68-9D45-477538D42700', '88DAAF5A-EA86-4A68-9D45-477538D42701', '88DAAF5A-EA86-4A68-9D45-477538D42702']
-            with self.get_guid_gen_patch(guids):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
-            self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+                self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
+            self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
 
 
 class RoleCreateScenarioTest(RoleScenarioTest):
 
+    @record_only()  # workaround https://github.com/Azure/azure-cli/issues/3187
+    @AllowLargeResponse()
     def test_role_create_scenario(self):
         subscription_id = self.get_subscription_id()
         role_name = self.create_random_name('cli-test-role', 20)
@@ -172,6 +176,12 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"],
+            "DataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+            ],
+            "NotDataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+            ],
             "AssignableScopes": ["/subscriptions/{}".format(subscription_id)]
         }
         _, temp_file = tempfile.mkstemp()
@@ -183,11 +193,14 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
-        with self.get_guid_gen_patch(['88DAAF5A-EA86-4A68-9D45-477538D41738']):
-            self.cmd('role definition create --role-definition {template}')
-            time.sleep(60)
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role definition create --role-definition {template}', checks=[
+                self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
+                self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
+            ])
+            time.sleep(180)
             self.cmd('role definition list -n {role}',
-                     checks=self.check('[0].properties.roleName', '{role}'))
+                     checks=self.check('[0].roleName', '{role}'))
             self.cmd('role definition delete -n {role}',
                      checks=self.is_empty())
             time.sleep(60)
@@ -198,22 +211,21 @@ class RoleCreateScenarioTest(RoleScenarioTest):
 class RoleAssignmentScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
     def test_role_assignment_e2e(self, resource_group):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        self.enable_large_payload()
-        user = self.create_random_name('testuser', 15)
-        self.kwargs.update({
-            'upn': user + '@azuresdkteam.onmicrosoft.com',
-            'nsg': 'nsg1'
-        })
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'nsg': 'nsg1'
+            })
 
-        self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-        guids = ['88DAAF5A-EA86-4A68-9D45-477538D41100', '88DAAF5A-EA86-4A68-9D45-477538D41101', '88DAAF5A-EA86-4A68-9D45-477538D41102']
-        with self.get_guid_gen_patch(guids):
             try:
                 self.cmd('network nsg create -n {nsg} -g {rg}')
                 result = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()
@@ -255,20 +267,55 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    @ResourceGroupPreparer(name_prefix='cli_role_audit')
+    @AllowLargeResponse()
+    def test_role_assignment_audits(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
 
-class RoleAssignmentListScenarioTest(RoleScenarioTest):
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+            })
+
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            try:
+                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+
+                if self.is_live or self.in_recording:
+                    now = datetime.datetime.utcnow()
+                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
+                                                             now.minute, now.second)
+                    time.sleep(60)
+                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
+                else:
+                    # NOTE: get the time range from the recording file and use them below for playback
+                    start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
+                    result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
+                                      start_time, end_time)).get_output_in_json()
+
+                self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                       x['principalName'] == self.kwargs['upn'])])
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+
+class RoleAssignmentListScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
+    @AllowLargeResponse()
     def test_assignments_for_co_admins(self, resource_group):
-        self.enable_large_payload()
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
+        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
         self.cmd('role assignment list -g {}'.format(resource_group), checks=[
             self.check("length([])", 0)
         ])
         result = self.cmd('role assignment list -g {} --include-classic-administrator'.format(resource_group)).get_output_in_json()
-        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
+        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
 if __name__ == '__main__':

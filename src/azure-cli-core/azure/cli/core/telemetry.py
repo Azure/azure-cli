@@ -12,6 +12,8 @@ import re
 import sys
 import traceback
 import uuid
+import subprocess
+from collections import defaultdict
 from functools import wraps
 
 import azure.cli.core.decorators as decorators
@@ -20,27 +22,41 @@ import azure.cli.core.telemetry_upload as telemetry_core
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
+DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
+CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
-    start_time = None
-    end_time = None
-    application = None
-    arg_complete_env_name = None
-    correlation_id = str(uuid.uuid4())
-    command = 'execute-unknown-command'
-    output_type = 'none'
-    parameters = []
-    result = 'None'
-    result_summary = None
-    payload_properties = None
-    exceptions = []
-    module_correlation = None
-    extension_name = 'None'
+    def __init__(self, correlation_id=None, application=None):
+        self.start_time = None
+        self.end_time = None
+        self.application = application
+        self.arg_complete_env_name = None
+        self.correlation_id = correlation_id or str(uuid.uuid4())
+        self.command = 'execute-unknown-command'
+        self.output_type = 'none'
+        self.parameters = []
+        self.result = 'None'
+        self.result_summary = None
+        self.payload_properties = None
+        self.exceptions = []
+        self.module_correlation = None
+        self.extension_name = None
+        self.extension_version = None
+        self.feedback = None
+        self.extension_management_detail = None
+        self.raw_command = None
+        # A dictionary with the application insight instrumentation key
+        # as the key and an array of telemetry events as value
+        self.events = defaultdict(list)
+        # stops generate_payload() from adding new azurecli/command event
+        # used for interactive to send new custom event upon exit
+        self.suppress_new_event = False
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
@@ -48,33 +64,40 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace())
+            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
+            AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
-        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
-        fault_name = '{}/commands/{}'.format(PRODUCT_NAME, fault_type.lower())
+
+        fault_name = '{}/fault'.format(PRODUCT_NAME)
 
         self.exceptions.append((fault_name, details))
 
     @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
     def generate_payload(self):
-        events = []
-        base = self._get_base_properties()
-        cli = self._get_azure_cli_properties()
+        if not self.suppress_new_event:
+            base = self._get_base_properties()
+            cli = self._get_azure_cli_properties()
 
-        user_task = self._get_user_task_properties()
-        user_task.update(base)
-        user_task.update(cli)
+            user_task = self._get_user_task_properties()
+            user_task.update(base)
+            user_task.update(cli)
 
-        events.append({'name': self.event_name, 'properties': user_task})
+            self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+                'name': '{}/command'.format(PRODUCT_NAME),
+                'properties': user_task
+            })
 
-        for name, props in self.exceptions:
-            props.update(base)
-            props.update(cli)
-            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
-                          'Reserved.EventId': str(uuid.uuid4())})
-            events.append({'name': name, 'properties': props})
+            for name, props in self.exceptions:
+                props.update(base)
+                props.update(cli)
+                props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
+                              'Reserved.EventId': str(uuid.uuid4())})
+                self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+                    'name': name,
+                    'properties': props
+                })
 
-        payload = json.dumps(events)
+        payload = json.dumps(self.events)
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
@@ -91,7 +114,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.ProductName': PRODUCT_NAME,
             'Reserved.DataModel.FeatureName': self.feature_name,
             'Reserved.DataModel.EntityName': self.command_name,
-            'Reserved.DataModel.CorrelationId': self.correlation_id,
+            CORRELATION_ID_PROP_NAME: self.correlation_id,
 
             'Context.Default.VS.Core.ExeName': PRODUCT_NAME,
             'Context.Default.VS.Core.ExeVersion': '{}@{}'.format(
@@ -120,30 +143,37 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return result
 
     def _get_azure_cli_properties(self):
-        source = 'az' if self.arg_complete_env_name not in os.environ else 'completer'
+        if self.arg_complete_env_name and self.arg_complete_env_name in os.environ:
+            source = 'completer'
+        else:
+            source = 'az'
         result = {}
-        self.set_custom_properties(result, 'Source', source)
-        self.set_custom_properties(result,
-                                   'ClientRequestId',
-                                   lambda: self.application.data['headers'][
-                                       'x-ms-client-request-id'])
-        self.set_custom_properties(result, 'CoreVersion', _get_core_version)
-        self.set_custom_properties(result, 'InstallationId', _get_installation_id)
-        self.set_custom_properties(result, 'ShellType', _get_shell_type)
-        self.set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
-        self.set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
-        self.set_custom_properties(result, 'DefaultOutputType',
-                                   lambda: _get_config().get('core', 'output', fallback='unknown'))
-        self.set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
-        self.set_custom_properties(result, 'Locale',
-                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
-        self.set_custom_properties(result, 'StartTime', str(self.start_time))
-        self.set_custom_properties(result, 'EndTime', str(self.end_time))
-        self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
-        self.set_custom_properties(result, 'PythonVersion', platform.python_version())
-        self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
-        self.set_custom_properties(result, 'ExtensionName', self.extension_name)
+        ext_info = '{}@{}'.format(self.extension_name, self.extension_version) if self.extension_name else None
+        set_custom_properties(result, 'Source', source)
+        set_custom_properties(result,
+                              'ClientRequestId',
+                              lambda: self.application.data['headers'][
+                                  'x-ms-client-request-id'])
+        set_custom_properties(result, 'CoreVersion', _get_core_version)
+        set_custom_properties(result, 'InstallationId', _get_installation_id)
+        set_custom_properties(result, 'ShellType', _get_shell_type)
+        set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
+        set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
+        set_custom_properties(result, 'DefaultOutputType',
+                              lambda: _get_config().get('core', 'output', fallback='unknown'))
+        set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
+        set_custom_properties(result, 'Locale',
+                              lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
+        set_custom_properties(result, 'StartTime', str(self.start_time))
+        set_custom_properties(result, 'EndTime', str(self.end_time))
+        set_custom_properties(result, 'OutputType', self.output_type)
+        set_custom_properties(result, 'RawCommand', self.raw_command)
+        set_custom_properties(result, 'Params', ','.join(self.parameters or []))
+        set_custom_properties(result, 'PythonVersion', platform.python_version())
+        set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
+        set_custom_properties(result, 'ExtensionName', ext_info)
+        set_custom_properties(result, 'Feedback', self.feedback)
+        set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
 
         return result
 
@@ -152,16 +182,12 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return self.command.lower().replace('-', '').replace(' ', '-')
 
     @property
-    def event_name(self):
-        return '{}/{}/{}'.format(PRODUCT_NAME, self.feature_name, self.command_name)
-
-    @property
     def feature_name(self):
         # The feature name is used to created the event name. The feature name should be eventually
         # the module name. However, it takes time to resolve the actual module name using pip
         # module. Therefore, a hard coded replacement is used before a better solution is
         # implemented
-        return 'commands'
+        return 'command'
 
     @property
     def module_version(self):
@@ -171,13 +197,6 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     @property
     def product_version(self):
         return _get_core_version()
-
-    @classmethod
-    @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-    def set_custom_properties(cls, prop, name, value):
-        actual_value = value() if hasattr(value, '__call__') else value
-        if actual_value:
-            prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
 _session = TelemetrySession()
@@ -192,23 +211,50 @@ def _user_agrees_to_telemetry(func):
 
     return _wrapper
 
+
 # public api
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def start():
-    _session.start_time = datetime.datetime.now()
+    _session.start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def flush():
+    # flush out current information
+    _session.end_time = datetime.datetime.utcnow()
+
+    payload = _session.generate_payload()
+    if payload:
+
+        subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+    # reset session fields, retaining correlation id and application
+    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
 
 
 @_user_agrees_to_telemetry
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def conclude():
-    _session.end_time = datetime.datetime.now()
+    _session.end_time = datetime.datetime.utcnow()
 
     payload = _session.generate_payload()
     if payload:
-        import subprocess
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def suppress_new_events(unsuppress=False):
+    _session.suppress_new_event = not unsuppress
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_custom_properties(prop, name, value):
+    actual_value = value() if hasattr(value, '__call__') else value
+
+    if actual_value is not None:
+        prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
@@ -255,16 +301,60 @@ def set_application(application, arg_complete_env_name):
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def set_command_details(command, output_type=None, parameters=None, extension_name=None):
+def set_feedback(feedback):
+    """ This method is used for modules in which user feedback is collected. The data can be an arbitrary string but it
+    will be truncated at 512 characters to avoid abusing the telemetry."""
+    _session.feedback = feedback[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_extension_management_detail(ext_name, ext_version):
+    content = '{}@{}'.format(ext_name, ext_version)
+    _session.extension_management_detail = content[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_command_details(command, output_type=None, parameters=None, extension_name=None, extension_version=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
-    _session.extension_name = extension_name or 'None'
+    _session.extension_name = extension_name
+    _session.extension_version = extension_version
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def set_module_correlation_data(correlation_data):
     _session.module_correlation = correlation_data[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_raw_command_name(command):
+    # the raw command name user inputs
+    _session.raw_command = command
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    set_custom_properties(properties, 'ExtensionName', extension_name)
+    _add_event('extension', properties, instrumentation_key=instrumentation_key)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def add_interactive_event(properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    _add_event('interactive', properties, instrumentation_key=instrumentation_key)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    # Inject correlation ID into the new event
+    properties.update({
+        CORRELATION_ID_PROP_NAME: _session.correlation_id,
+    })
+
+    _session.events[instrumentation_key].append({
+        'name': '{}/{}'.format(PRODUCT_NAME, event_name),
+        'properties': properties
+    })
 
 
 # definitions

@@ -43,7 +43,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_account_custom_type) as g:
         g.command('check-name', 'check_name_availability')
         g.custom_command('create', 'create_storage_account', min_api='2016-01-01')
-        g.custom_command('create', 'create_storage_account_with_account_type', max_api='2015-06-15')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get_properties', exception_handler=g.get_handler_suppress_404())
         g.custom_command('list', 'list_storage_accounts')
@@ -104,6 +103,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('delete', 'delete_blob', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
+        g.storage_command('undelete', 'undelete_blob', transform=create_boolean_result_output_transformer('undeleted'),
+                          table_transformer=transform_boolean_for_table, min_api='2017-07-29')
 
         g.storage_custom_command('set-tier', 'set_blob_tier')
         g.storage_custom_command('upload', 'upload_blob',
@@ -138,6 +139,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             resource_type=ResourceType.DATA_STORAGE,
                             min_api='2016-05-31') as g:
         g.storage_command('cancel', 'abort_copy_blob')
+
+    with self.command_group('storage blob service-properties delete-policy', command_type=base_blob_sdk,
+                            min_api='2017-07-29',
+                            custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
+        g.storage_command('show', 'get_blob_service_properties',
+                          transform=lambda x: getattr(x, 'delete_retention_policy', x),
+                          exception_handler=g.get_handler_suppress_404())
+        g.storage_custom_command('update', 'set_delete_policy')
 
     with self.command_group('storage blob service-properties', command_type=base_blob_sdk) as g:
         g.storage_command('show', 'get_blob_service_properties', exception_handler=g.get_handler_suppress_404())

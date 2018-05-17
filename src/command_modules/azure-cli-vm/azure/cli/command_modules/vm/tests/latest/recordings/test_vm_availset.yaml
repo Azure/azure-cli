@@ -1,30 +1,32 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-03-30T20:43:23Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:43:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:22:38 GMT']
+      date: ['Fri, 30 Mar 2018 20:43:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,30 +36,32 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:43:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:22:39 GMT']
+      date: ['Fri, 30 Mar 2018 20:43:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "variables": {}, "outputs": {}, "resources": [{"properties": {"platformFaultDomainCount":
-      2}, "tags": {}, "sku": {"name": "Aligned"}, "location": "westus", "apiVersion":
-      "2017-12-01", "name": "availset-test", "type": "Microsoft.Compute/availabilitySets"}],
-      "contentVersion": "1.0.0.0", "parameters": {}}, "parameters": {}, "mode": "Incremental"}}'
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Compute/availabilitySets", "name": "availset-test", "location":
+      "westus", "tags": {}, "apiVersion": "2017-12-01", "properties": {"platformFaultDomainCount":
+      2}, "sku": {"name": "Aligned"}}], "outputs": {}}, "parameters": {}, "mode":
+      "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -65,24 +69,25 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['469']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_iYgpMw1L6KdRWhfO4cbZqPIsyhYcZtGM","name":"av_set_deploy_iYgpMw1L6KdRWhfO4cbZqPIsyhYcZtGM","properties":{"templateHash":"18053998867092713116","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-19T04:22:41.4064192Z","duration":"PT0.4130627S","correlationId":"383d6b7b-2e65-4c47-8b45-cc547fe157c2","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_u8zYYntVDJN2zeKyroBQC0oDNZmH8gsG","name":"av_set_deploy_u8zYYntVDJN2zeKyroBQC0oDNZmH8gsG","properties":{"templateHash":"18053998867092713116","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2018-03-30T20:43:29.4476314Z","duration":"PT0.6107896S","correlationId":"c7321149-9f45-4f79-8aa8-0a951dae5415","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_iYgpMw1L6KdRWhfO4cbZqPIsyhYcZtGM/operationStatuses/08586879495244842557?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_u8zYYntVDJN2zeKyroBQC0oDNZmH8gsG/operationStatuses/08586791642766407651?api-version=2017-05-10']
       cache-control: [no-cache]
       content-length: ['684']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:22:41 GMT']
+      date: ['Fri, 30 Mar 2018 20:43:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -92,23 +97,24 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586879495244842557?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586791642766407651?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:11 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -118,23 +124,24 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_iYgpMw1L6KdRWhfO4cbZqPIsyhYcZtGM","name":"av_set_deploy_iYgpMw1L6KdRWhfO4cbZqPIsyhYcZtGM","properties":{"templateHash":"18053998867092713116","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:22:46.8882269Z","duration":"PT5.8948704S","correlationId":"383d6b7b-2e65-4c47-8b45-cc547fe157c2","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_u8zYYntVDJN2zeKyroBQC0oDNZmH8gsG","name":"av_set_deploy_u8zYYntVDJN2zeKyroBQC0oDNZmH8gsG","properties":{"templateHash":"18053998867092713116","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-03-30T20:43:38.3292514Z","duration":"PT9.4924096S","correlationId":"c7321149-9f45-4f79-8aa8-0a951dae5415","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test"}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['929']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:12 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -144,9 +151,9 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-12-01
@@ -161,14 +168,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['500']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:12 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4999,Microsoft.Compute/LowCostGet30Min;39999']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4198,Microsoft.Compute/LowCostGet30Min;33592']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -178,30 +186,31 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:43:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:14 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "variables": {}, "outputs": {}, "resources": [{"properties": {"platformFaultDomainCount":
-      2, "platformUpdateDomainCount": 2}, "tags": {}, "sku": {"name": "Aligned"},
-      "location": "westus", "apiVersion": "2017-12-01", "name": "avset2", "type":
-      "Microsoft.Compute/availabilitySets"}], "contentVersion": "1.0.0.0", "parameters":
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Compute/availabilitySets", "name": "avset2", "location":
+      "westus", "tags": {}, "apiVersion": "2017-12-01", "properties": {"platformFaultDomainCount":
+      2, "platformUpdateDomainCount": 2}, "sku": {"name": "Aligned"}}], "outputs":
       {}}, "parameters": {}, "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
@@ -210,24 +219,25 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['494']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7eDp7PEkfprrcGxOicWzpk59FSgyra7P","name":"av_set_deploy_7eDp7PEkfprrcGxOicWzpk59FSgyra7P","properties":{"templateHash":"14528985267643616373","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-19T04:23:16.5843347Z","duration":"PT0.4219954S","correlationId":"e924421a-90db-4f17-9535-c2e4e270e180","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_dDx2oPec3imKJfIarVCrAVWgVaenbIqo","name":"av_set_deploy_dDx2oPec3imKJfIarVCrAVWgVaenbIqo","properties":{"templateHash":"14528985267643616373","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2018-03-30T20:44:05.2078592Z","duration":"PT0.6477051S","correlationId":"be8c430a-43a8-45f1-94dd-440f9f791f71","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7eDp7PEkfprrcGxOicWzpk59FSgyra7P/operationStatuses/08586879494893152726?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_dDx2oPec3imKJfIarVCrAVWgVaenbIqo/operationStatuses/08586791642409174612?api-version=2017-05-10']
       cache-control: [no-cache]
       content-length: ['684']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:16 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -237,23 +247,24 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586879494893152726?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586791642409174612?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:47 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -263,23 +274,24 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7eDp7PEkfprrcGxOicWzpk59FSgyra7P","name":"av_set_deploy_7eDp7PEkfprrcGxOicWzpk59FSgyra7P","properties":{"templateHash":"14528985267643616373","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:23:22.2280805Z","duration":"PT6.0657412S","correlationId":"e924421a-90db-4f17-9535-c2e4e270e180","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_dDx2oPec3imKJfIarVCrAVWgVaenbIqo","name":"av_set_deploy_dDx2oPec3imKJfIarVCrAVWgVaenbIqo","properties":{"templateHash":"14528985267643616373","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-03-30T20:44:21.7705302Z","duration":"PT17.2103761S","correlationId":"be8c430a-43a8-45f1-94dd-440f9f791f71","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2"}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['922']
+      content-length: ['923']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:47 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -289,9 +301,9 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-12-01
@@ -306,14 +318,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['486']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:47 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4996,Microsoft.Compute/LowCostGet30Min;39996']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4197,Microsoft.Compute/LowCostGet30Min;33591']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -324,9 +337,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-12-01
@@ -335,12 +348,13 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:23:48 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;299,Microsoft.Compute/DeleteVM30Min;1499']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;239,Microsoft.Compute/DeleteVM30Min;1198']
       x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
@@ -351,9 +365,9 @@ interactions:
       CommandName: [vm availability-set update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-12-01
@@ -368,18 +382,19 @@ interactions:
       cache-control: [no-cache]
       content-length: ['500']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:49 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4995,Microsoft.Compute/LowCostGet30Min;39995']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4196,Microsoft.Compute/LowCostGet30Min;33590']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"platformFaultDomainCount": 2, "virtualMachines": [], "platformUpdateDomainCount":
-      5}, "sku": {"name": "Aligned"}, "location": "westus", "tags": {"test": "success"}}'
+    body: '{"location": "westus", "tags": {"test": "success"}, "properties": {"platformUpdateDomainCount":
+      5, "platformFaultDomainCount": 2, "virtualMachines": []}, "sku": {"name": "Aligned"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -387,9 +402,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['181']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-12-01
@@ -404,15 +419,16 @@ interactions:
       cache-control: [no-cache]
       content-length: ['499']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:50 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/CreateUpdateVM3Min;288,Microsoft.Compute/CreateUpdateVM30Min;1488']
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/PutVM3Min;234,Microsoft.Compute/PutVM30Min;1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -422,9 +438,9 @@ interactions:
       CommandName: [vm availability-set list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets?api-version=2017-12-01
@@ -441,14 +457,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['620']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:51 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4994,Microsoft.Compute/LowCostGet30Min;39994']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4194,Microsoft.Compute/LowCostGet30Min;33588']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -458,14 +475,32 @@ interactions:
       CommandName: [vm availability-set list-sizes]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test/vmSizes?api-version=2017-12-01
   response:
-    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Standard_DS1_v2\"\
+    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Standard_B1ms\"\
+        ,\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 4096,\r\n      \"memoryInMB\": 2048,\r\n\
+        \      \"maxDataDiskCount\": 2\r\n    },\r\n    {\r\n      \"name\": \"Standard_B1s\"\
+        ,\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 2048,\r\n      \"memoryInMB\": 1024,\r\n\
+        \      \"maxDataDiskCount\": 2\r\n    },\r\n    {\r\n      \"name\": \"Standard_B2ms\"\
+        ,\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 16384,\r\n      \"memoryInMB\": 8192,\r\n\
+        \      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\": \"Standard_B2s\"\
+        ,\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 8192,\r\n      \"memoryInMB\": 4096,\r\n\
+        \      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\": \"Standard_B4ms\"\
+        ,\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 32768,\r\n      \"memoryInMB\": 16384,\r\n\
+        \      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\": \"Standard_B8ms\"\
+        ,\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 65536,\r\n      \"memoryInMB\": 32768,\r\n\
+        \      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS1_v2\"\
         ,\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
         \      \"resourceDiskSizeInMB\": 7168,\r\n      \"memoryInMB\": 3584,\r\n\
         \      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS2_v2\"\
@@ -481,16 +516,25 @@ interactions:
         ,\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
         \      \"resourceDiskSizeInMB\": 114688,\r\n      \"memoryInMB\": 57344,\r\
         \n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"name\": \"\
-        Standard_DS11_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
+        Standard_DS11-1_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 28672,\r\n      \"memoryInMB\"\
         : 14336,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_DS12_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
+        : \"Standard_DS11_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 28672,\r\n      \"memoryInMB\"\
+        : 14336,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
+        : \"Standard_DS12-1_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 57344,\r\n      \"memoryInMB\"\
         : 28672,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_DS13-2_v2\",\r\n      \"numberOfCores\": 8,\r\n      \"\
-        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 114688,\r\n\
-        \      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
-        \n    {\r\n      \"name\": \"Standard_DS13-4_v2\",\r\n      \"numberOfCores\"\
+        name\": \"Standard_DS12-2_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"\
+        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 57344,\r\n \
+        \     \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_DS12_v2\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 57344,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_DS13-2_v2\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 114688,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 32\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_DS13-4_v2\",\r\n      \"numberOfCores\"\
         : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 114688,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 32\r\
         \n    },\r\n    {\r\n      \"name\": \"Standard_DS13_v2\",\r\n      \"numberOfCores\"\
@@ -549,89 +593,105 @@ interactions:
         name\": \"Standard_F16s\",\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 65536,\r\n      \"memoryInMB\"\
         : 32768,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_A0\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 20480,\r\n      \"memoryInMB\"\
-        : 768,\r\n      \"maxDataDiskCount\": 1\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A1\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 71680,\r\n      \"memoryInMB\"\
-        : 1792,\r\n      \"maxDataDiskCount\": 2\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 138240,\r\n      \"memoryInMB\"\
-        : 3584,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A3\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 291840,\r\n      \"memoryInMB\"\
-        : 7168,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A5\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 138240,\r\n      \"memoryInMB\"\
-        : 14336,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A4\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 619520,\r\n      \"memoryInMB\"\
-        : 14336,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_A6\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 291840,\r\n      \"memoryInMB\"\
-        : 28672,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_A7\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 619520,\r\n      \"memoryInMB\"\
-        : 57344,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Basic_A0\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 20480,\r\n      \"memoryInMB\"\
-        : 768,\r\n      \"maxDataDiskCount\": 1\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Basic_A1\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 40960,\r\n      \"memoryInMB\"\
-        : 1792,\r\n      \"maxDataDiskCount\": 2\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Basic_A2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 61440,\r\n      \"memoryInMB\"\
-        : 3584,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Basic_A3\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 122880,\r\n      \"memoryInMB\"\
-        : 7168,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Basic_A4\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 245760,\r\n      \"memoryInMB\"\
-        : 14336,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D1_v2\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 51200,\r\n      \"memoryInMB\"\
-        : 3584,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_D2_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 102400,\r\n      \"memoryInMB\"\
-        : 7168,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_D3_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 204800,\r\n      \"memoryInMB\"\
-        : 14336,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D4_v2\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 409600,\r\n      \"memoryInMB\"\
-        : 28672,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D5_v2\",\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 819200,\r\n      \"memoryInMB\"\
-        : 57344,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D11_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 102400,\r\n      \"memoryInMB\"\
-        : 14336,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_D12_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 204800,\r\n      \"memoryInMB\"\
-        : 28672,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D13_v2\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 409600,\r\n      \"memoryInMB\"\
-        : 57344,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D14_v2\",\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 819200,\r\n      \"memoryInMB\"\
-        : 114688,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D15_v2\",\r\n      \"numberOfCores\": 20,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 286720,\r\n      \"memoryInMB\"\
-        : 143360,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_D2_v2_Promo\",\r\n      \"numberOfCores\": 2,\r\n     \
-        \ \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 102400,\r\
-        \n      \"memoryInMB\": 7168,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\
-        \n    {\r\n      \"name\": \"Standard_D3_v2_Promo\",\r\n      \"numberOfCores\"\
+        name\": \"Standard_D2s_v3\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 16384,\r\n      \"memoryInMB\"\
+        : 8192,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
+        : \"Standard_D4s_v3\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 32768,\r\n      \"memoryInMB\"\
+        : 16384,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
+        : \"Standard_D8s_v3\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 65536,\r\n      \"memoryInMB\"\
+        : 32768,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
+        name\": \"Standard_D16s_v3\",\r\n      \"numberOfCores\": 16,\r\n      \"\
+        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 131072,\r\n\
+        \      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_D32s_v3\",\r\n      \"numberOfCores\"\
+        : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 262144,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\":\
+        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_A0\",\r\n      \"numberOfCores\"\
+        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 20480,\r\n      \"memoryInMB\": 768,\r\n      \"maxDataDiskCount\": 1\r\n\
+        \    },\r\n    {\r\n      \"name\": \"Standard_A1\",\r\n      \"numberOfCores\"\
+        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 71680,\r\n      \"memoryInMB\": 1792,\r\n      \"maxDataDiskCount\": 2\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A2\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 138240,\r\n      \"memoryInMB\": 3584,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A3\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 291840,\r\n      \"memoryInMB\": 7168,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A5\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 138240,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A4\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 619520,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A6\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 291840,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_A7\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 619520,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Basic_A0\",\r\n      \"numberOfCores\"\
+        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 20480,\r\n      \"memoryInMB\": 768,\r\n      \"maxDataDiskCount\": 1\r\n\
+        \    },\r\n    {\r\n      \"name\": \"Basic_A1\",\r\n      \"numberOfCores\"\
+        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 40960,\r\n      \"memoryInMB\": 1792,\r\n      \"maxDataDiskCount\": 2\r\
+        \n    },\r\n    {\r\n      \"name\": \"Basic_A2\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 61440,\r\n      \"memoryInMB\": 3584,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Basic_A3\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 122880,\r\n      \"memoryInMB\": 7168,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Basic_A4\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 245760,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D1_v2\",\r\n      \"numberOfCores\"\
+        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 51200,\r\n      \"memoryInMB\": 3584,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D2_v2\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 102400,\r\n      \"memoryInMB\": 7168,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D3_v2\",\r\n      \"numberOfCores\"\
         : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 204800,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D4_v2_Promo\",\r\n      \"\
-        numberOfCores\": 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D4_v2\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 409600,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 32\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D5_v2_Promo\",\r\n      \"\
-        numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D5_v2\",\r\n      \"numberOfCores\"\
+        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 819200,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 64\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D11_v2_Promo\",\r\n      \"\
-        numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D11_v2\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 102400,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D12_v2\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 204800,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D13_v2\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 409600,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 32\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D14_v2\",\r\n      \"numberOfCores\"\
+        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 819200,\r\n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\":\
+        \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_D15_v2\",\r\n      \"\
+        numberOfCores\": 20,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 286720,\r\n      \"memoryInMB\": 143360,\r\n      \"maxDataDiskCount\":\
+        \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_D2_v2_Promo\",\r\n \
+        \     \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n    \
+        \  \"resourceDiskSizeInMB\": 102400,\r\n      \"memoryInMB\": 7168,\r\n  \
+        \    \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\": \"Standard_D3_v2_Promo\"\
+        ,\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 204800,\r\n      \"memoryInMB\": 14336,\r\
+        \n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"name\": \"\
+        Standard_D4_v2_Promo\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 409600,\r\n      \"memoryInMB\"\
+        : 28672,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
+        name\": \"Standard_D5_v2_Promo\",\r\n      \"numberOfCores\": 16,\r\n    \
+        \  \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 819200,\r\
+        \n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_D11_v2_Promo\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 102400,\r\n      \"memoryInMB\": 14336,\r\n      \"maxDataDiskCount\": 8\r\
         \n    },\r\n    {\r\n      \"name\": \"Standard_D12_v2_Promo\",\r\n      \"\
         numberOfCores\": 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
@@ -678,7 +738,22 @@ interactions:
         \n    },\r\n    {\r\n      \"name\": \"Standard_A8_v2\",\r\n      \"numberOfCores\"\
         : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 81920,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D1\",\r\n      \"numberOfCores\"\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D2_v3\",\r\n      \"numberOfCores\"\
+        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 51200,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D4_v3\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 102400,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D8_v3\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 204800,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D16_v3\",\r\n      \"numberOfCores\"\
+        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 409600,\r\n      \"memoryInMB\": 65636,\r\n      \"maxDataDiskCount\": 32\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_D32_v3\",\r\n      \"numberOfCores\"\
+        : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 819200,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\":\
+        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_D1\",\r\n      \"numberOfCores\"\
         : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 51200,\r\n      \"memoryInMB\": 3584,\r\n      \"maxDataDiskCount\": 4\r\
         \n    },\r\n    {\r\n      \"name\": \"Standard_D2\",\r\n      \"numberOfCores\"\
@@ -726,58 +801,10 @@ interactions:
         \n    },\r\n    {\r\n      \"name\": \"Standard_DS14\",\r\n      \"numberOfCores\"\
         : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 229376,\r\n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\":\
-        \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_B1ms\",\r\n      \"\
-        numberOfCores\": 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 4096,\r\n      \"memoryInMB\": 2048,\r\n      \"maxDataDiskCount\": 2\r\n\
-        \    },\r\n    {\r\n      \"name\": \"Standard_B1s\",\r\n      \"numberOfCores\"\
-        : 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 2048,\r\n      \"memoryInMB\": 1024,\r\n      \"maxDataDiskCount\": 2\r\n\
-        \    },\r\n    {\r\n      \"name\": \"Standard_B2ms\",\r\n      \"numberOfCores\"\
-        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 16384,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_B2s\",\r\n      \"numberOfCores\"\
-        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 8192,\r\n      \"memoryInMB\": 4096,\r\n      \"maxDataDiskCount\": 4\r\n\
-        \    },\r\n    {\r\n      \"name\": \"Standard_B4ms\",\r\n      \"numberOfCores\"\
-        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 32768,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 8\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_B8ms\",\r\n      \"numberOfCores\"\
-        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 65536,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D2_v3\",\r\n      \"numberOfCores\"\
-        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 51200,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D4_v3\",\r\n      \"numberOfCores\"\
-        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 102400,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 8\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D8_v3\",\r\n      \"numberOfCores\"\
-        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 204800,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D16_v3\",\r\n      \"numberOfCores\"\
-        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 409600,\r\n      \"memoryInMB\": 65636,\r\n      \"maxDataDiskCount\": 32\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D32_v3\",\r\n      \"numberOfCores\"\
-        : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 819200,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\":\
-        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_D64_v3\",\r\n      \"\
+        \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_D64_v3\",\r\n      \"\
         numberOfCores\": 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 1638400,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\"\
-        : 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_D2s_v3\",\r\n      \"\
-        numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 16384,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D4s_v3\",\r\n      \"numberOfCores\"\
-        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 32768,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 8\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D8s_v3\",\r\n      \"numberOfCores\"\
-        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 65536,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D16s_v3\",\r\n      \"numberOfCores\"\
-        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 131072,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 32\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_D32s_v3\",\r\n      \"numberOfCores\"\
-        : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 262144,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\":\
-        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_D64s_v3\",\r\n     \
+        : 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_D64s_v3\",\r\n     \
         \ \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"\
         resourceDiskSizeInMB\": 524288,\r\n      \"memoryInMB\": 262144,\r\n     \
         \ \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E2_v3\"\
@@ -796,69 +823,91 @@ interactions:
         name\": \"Standard_E32_v3\",\r\n      \"numberOfCores\": 32,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 819200,\r\n      \"memoryInMB\"\
         : 262144,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_E64_v3\",\r\n      \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 1638400,\r\n      \"memoryInMB\"\
-        : 442368,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_E2s_v3\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 32768,\r\n      \"memoryInMB\"\
-        : 16384,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_E4s_v3\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 65536,\r\n      \"memoryInMB\"\
-        : 32768,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
-        : \"Standard_E8s_v3\",\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\"\
-        : 1047552,\r\n      \"resourceDiskSizeInMB\": 131072,\r\n      \"memoryInMB\"\
-        : 65536,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_E16s_v3\",\r\n      \"numberOfCores\": 16,\r\n      \"\
-        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 262144,\r\n\
-        \      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
-        \n    {\r\n      \"name\": \"Standard_E32-8s_v3\",\r\n      \"numberOfCores\"\
+        name\": \"Standard_E64i_v3\",\r\n      \"numberOfCores\": 64,\r\n      \"\
+        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 1638400,\r\n\
+        \      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_E64_v3\",\r\n      \"numberOfCores\"\
+        : 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 1638400,\r\n      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\"\
+        : 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E2s_v3\",\r\n      \"\
+        numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 32768,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E4-2s_v3\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 65536,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E4s_v3\",\r\n      \"numberOfCores\"\
+        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 65536,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 8\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E8-2s_v3\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 131072,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E8-4s_v3\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 131072,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E8s_v3\",\r\n      \"numberOfCores\"\
+        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 131072,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 16\r\
+        \n    },\r\n    {\r\n      \"name\": \"Standard_E16-4s_v3\",\r\n      \"numberOfCores\"\
+        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
+        : 262144,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\":\
+        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E16-8s_v3\",\r\n   \
+        \   \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n     \
+        \ \"resourceDiskSizeInMB\": 262144,\r\n      \"memoryInMB\": 131072,\r\n \
+        \     \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E16s_v3\"\
+        ,\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 262144,\r\n      \"memoryInMB\": 131072,\r\
+        \n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"\
+        Standard_E32-8s_v3\",\r\n      \"numberOfCores\": 32,\r\n      \"osDiskSizeInMB\"\
+        : 1047552,\r\n      \"resourceDiskSizeInMB\": 524288,\r\n      \"memoryInMB\"\
+        : 262144,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
+        name\": \"Standard_E32-16s_v3\",\r\n      \"numberOfCores\": 32,\r\n     \
+        \ \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 524288,\r\
+        \n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_E32s_v3\",\r\n      \"numberOfCores\"\
         : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 524288,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\":\
-        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E32-16s_v3\",\r\n  \
-        \    \"numberOfCores\": 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n    \
-        \  \"resourceDiskSizeInMB\": 524288,\r\n      \"memoryInMB\": 262144,\r\n\
-        \      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E32s_v3\"\
-        ,\r\n      \"numberOfCores\": 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
-        \      \"resourceDiskSizeInMB\": 524288,\r\n      \"memoryInMB\": 262144,\r\
+        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E64-16s_v3\",\r\n  \
+        \    \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n    \
+        \  \"resourceDiskSizeInMB\": 884736,\r\n      \"memoryInMB\": 442368,\r\n\
+        \      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_E64-32s_v3\"\
+        ,\r\n      \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 884736,\r\n      \"memoryInMB\": 442368,\r\
         \n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"\
-        Standard_E64-16s_v3\",\r\n      \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\"\
+        Standard_E64is_v3\",\r\n      \"numberOfCores\": 64,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 884736,\r\n      \"memoryInMB\"\
         : 442368,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"\
-        name\": \"Standard_E64-32s_v3\",\r\n      \"numberOfCores\": 64,\r\n     \
-        \ \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 884736,\r\
-        \n      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
-        \n    {\r\n      \"name\": \"Standard_E64s_v3\",\r\n      \"numberOfCores\"\
-        : 64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 884736,\r\n      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\":\
-        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_G1\",\r\n      \"numberOfCores\"\
-        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 393216,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 8\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_G2\",\r\n      \"numberOfCores\"\
-        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 786432,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_G3\",\r\n      \"numberOfCores\"\
-        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 1572864,\r\n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\"\
-        : 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_G4\",\r\n      \"numberOfCores\"\
+        name\": \"Standard_E64s_v3\",\r\n      \"numberOfCores\": 64,\r\n      \"\
+        osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 884736,\r\n\
+        \      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_G1\",\r\n      \"numberOfCores\": 2,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 393216,\r\
+        \n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_G2\",\r\n      \"numberOfCores\": 4,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 786432,\r\
+        \n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_G3\",\r\n      \"numberOfCores\": 8,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 1572864,\r\
+        \n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_G4\",\r\n      \"numberOfCores\": 16,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 3145728,\r\
+        \n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_G5\",\r\n      \"numberOfCores\": 32,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 6291456,\r\
+        \n      \"memoryInMB\": 458752,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_GS1\",\r\n      \"numberOfCores\": 2,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 57344,\r\
+        \n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_GS2\",\r\n      \"numberOfCores\": 4,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 114688,\r\
+        \n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 16\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_GS3\",\r\n      \"numberOfCores\": 8,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 229376,\r\
+        \n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\": 32\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_GS4\",\r\n      \"numberOfCores\": 16,\r\
+        \n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\": 458752,\r\
+        \n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\
+        \n    {\r\n      \"name\": \"Standard_GS4-4\",\r\n      \"numberOfCores\"\
         : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 3145728,\r\n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\"\
-        : 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_G5\",\r\n      \"numberOfCores\"\
-        : 32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 6291456,\r\n      \"memoryInMB\": 458752,\r\n      \"maxDataDiskCount\"\
-        : 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_GS1\",\r\n      \"numberOfCores\"\
-        : 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 57344,\r\n      \"memoryInMB\": 28672,\r\n      \"maxDataDiskCount\": 8\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_GS2\",\r\n      \"numberOfCores\"\
-        : 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 114688,\r\n      \"memoryInMB\": 57344,\r\n      \"maxDataDiskCount\": 16\r\
-        \n    },\r\n    {\r\n      \"name\": \"Standard_GS3\",\r\n      \"numberOfCores\"\
-        : 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 229376,\r\n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\":\
-        \ 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_GS4\",\r\n      \"numberOfCores\"\
-        : 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
-        : 458752,\r\n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\":\
-        \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_GS4-4\",\r\n      \"\
-        numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
         : 458752,\r\n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\":\
         \ 64\r\n    },\r\n    {\r\n      \"name\": \"Standard_GS4-8\",\r\n      \"\
         numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\"\
@@ -917,16 +966,17 @@ interactions:
         : 64\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['30498']
+      content-length: ['32595']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:52 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4993,Microsoft.Compute/LowCostGet30Min;39993']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4193,Microsoft.Compute/LowCostGet30Min;33587']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -936,9 +986,9 @@ interactions:
       CommandName: [vm availability-set show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-12-01
@@ -954,14 +1004,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['527']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:52 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4992,Microsoft.Compute/LowCostGet30Min;39992']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4192,Microsoft.Compute/LowCostGet30Min;33586']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -972,9 +1023,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-12-01
@@ -983,13 +1034,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:23:54 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;298,Microsoft.Compute/DeleteVM30Min;1498']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;238,Microsoft.Compute/DeleteVM30Min;1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -999,9 +1051,9 @@ interactions:
       CommandName: [vm availability-set list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 computemanagementclient/4.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets?api-version=2017-12-01
@@ -1011,11 +1063,12 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:23:55 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1026,9 +1079,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -1037,11 +1090,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:23:56 GMT']
+      date: ['Fri, 30 Mar 2018 20:44:47 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdSUEhNT1lSVUxXQkdFQ0tHUFZUTkhEWENUU09BNkFKT1RXS3w5MUI5Mzc5RDI0NTM4RjdDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdaQlFFSkI2WURINDY1MzdXQ0RaNktIQ1g1NE5FSDJaNVFEV3wxQjNBOThFQ0Q3RkY3NzRGLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 202, message: Accepted}
 version: 1

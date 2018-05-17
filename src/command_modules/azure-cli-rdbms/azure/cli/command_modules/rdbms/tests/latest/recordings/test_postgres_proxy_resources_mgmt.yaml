@@ -1,61 +1,64 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-04-03T23:31:35Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-03T23:31:35Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:12:04 GMT']
+      date: ['Tue, 03 Apr 2018 23:31:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: !!python/unicode '{"properties": {"createMode": "Default", "administratorLogin":
-      "cloudsa", "administratorLoginPassword": "SecretPassword123"}, "location": "westeurope"}'
+    body: '{"sku": {"name": "GP_Gen5_2"}, "properties": {"storageProfile": {}, "createMode":
+      "Default", "administratorLogin": "cloudsa", "administratorLoginPassword": "SecretPassword123"},
+      "location": "koreasouth"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
-      Content-Length: ['151']
+      Content-Length: ['203']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServer","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"operation":"UpsertElasticServer","startTime":"2018-04-03T23:31:38.12Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/ed8528bc-1839-40aa-aa11-0d12c5aded9e?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['74']
+      content-length: ['73']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:12:07 GMT']
+      date: ['Tue, 03 Apr 2018 23:31:38 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/ed8528bc-1839-40aa-aa11-0d12c5aded9e?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -64,82 +67,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/ed8528bc-1839-40aa-aa11-0d12c5aded9e?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"InProgress","startTime":"2017-12-26T23:12:05.583Z"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['108']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:13:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"InProgress","startTime":"2017-12-26T23:12:05.583Z"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['108']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:14:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"Succeeded","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"name":"ed8528bc-1839-40aa-aa11-0d12c5aded9e","status":"InProgress","startTime":"2018-04-03T23:31:38.12Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:11 GMT']
+      date: ['Tue, 03 Apr 2018 23:32:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -148,30 +93,53 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/ed8528bc-1839-40aa-aa11-0d12c5aded9e?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"sku":{"name":"PGSQLB100","tier":"Basic","capacity":100},"properties":{"administratorLogin":"cloudsa","storageMB":51200,"version":"9.6","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2017-12-26T23:22:05.99+00:00"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'}
+    body: {string: '{"name":"ed8528bc-1839-40aa-aa11-0d12c5aded9e","status":"Succeeded","startTime":"2018-04-03T23:31:38.12Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['764']
+      content-length: ['106']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:11 GMT']
+      date: ['Tue, 03 Apr 2018 23:33:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress":
-      "0.0.0.0"}}'
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body: {string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"version":"9.6","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2018-04-03T23:41:38.433+00:00","replicationRole":"","primaryServerId":""},"location":"koreasouth","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['904']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 03 Apr 2018 23:33:40 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -179,26 +147,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['80']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:14.167Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-04-03T23:33:43.443Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/32078138-732d-4243-8f11-42bf7248c442?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:14 GMT']
+      date: ['Tue, 03 Apr 2018 23:33:42 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/32078138-732d-4243-8f11-42bf7248c442?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -207,26 +175,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/32078138-732d-4243-8f11-42bf7248c442?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"cf0e03d4-3fbd-44a2-8ba7-149b31f12fef","status":"Succeeded","startTime":"2017-12-26T23:15:14.167Z"}'}
+    body: {string: '{"name":"32078138-732d-4243-8f11-42bf7248c442","status":"Succeeded","startTime":"2018-04-03T23:33:43.443Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:29 GMT']
+      date: ['Tue, 03 Apr 2018 23:33:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -235,26 +201,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:31 GMT']
+      date: ['Tue, 03 Apr 2018 23:33:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -264,25 +228,25 @@ interactions:
       CommandName: [postgres server firewall-rule show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:32 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -292,29 +256,28 @@ interactions:
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:33 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "123.123.123.123"}}'
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -322,26 +285,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['88']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:33.847Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-04-03T23:34:05.277Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/f38b111e-7d31-4f05-84f5-496315301279?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:33 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:05 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/f38b111e-7d31-4f05-84f5-496315301279?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -350,26 +313,50 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/f38b111e-7d31-4f05-84f5-496315301279?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"25854233-1cfb-4d65-8287-317594de1944","status":"Succeeded","startTime":"2017-12-26T23:15:33.847Z"}'}
+    body: {string: '{"name":"f38b111e-7d31-4f05-84f5-496315301279","status":"Succeeded","startTime":"2018-04-03T23:34:05.277Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:49 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['434']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 03 Apr 2018 23:34:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -379,57 +366,28 @@ interactions:
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:49 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['434']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:51 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "0.0.0.0"}}'
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -437,26 +395,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['80']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:52.287Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-04-03T23:34:25.127Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/d634a7b1-6e24-4e89-8d64-63feaa4138d9?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:51 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:25 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/d634a7b1-6e24-4e89-8d64-63feaa4138d9?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -465,26 +423,50 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/d634a7b1-6e24-4e89-8d64-63feaa4138d9?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"0dbab360-221e-404f-a086-a04fb95641da","status":"Succeeded","startTime":"2017-12-26T23:15:52.287Z"}'}
+    body: {string: '{"name":"d634a7b1-6e24-4e89-8d64-63feaa4138d9","status":"Succeeded","startTime":"2018-04-03T23:34:25.127Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:08 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['426']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 03 Apr 2018 23:34:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -494,57 +476,28 @@ interactions:
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:11 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['426']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress":
-      "0.0.0.0"}}'
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -552,26 +505,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['80']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:16:13.21Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-04-03T23:34:45.147Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/4254ba51-3392-4ddf-863b-fabbb0ba020c?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['86']
+      content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:13 GMT']
+      date: ['Tue, 03 Apr 2018 23:34:44 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/4254ba51-3392-4ddf-863b-fabbb0ba020c?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -580,26 +533,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/4254ba51-3392-4ddf-863b-fabbb0ba020c?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"abd75b19-ab1b-4811-bc2b-1b15b362c022","status":"Succeeded","startTime":"2017-12-26T23:16:13.21Z"}'}
+    body: {string: '{"name":"4254ba51-3392-4ddf-863b-fabbb0ba020c","status":"Succeeded","startTime":"2018-04-03T23:34:45.147Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['106']
+      content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:29 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -608,30 +559,27 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:28 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "123.123.123.123"}}'
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -639,26 +587,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['88']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:16:30.91Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-04-03T23:35:05.023Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/f716d10b-699d-443a-89bb-2a77a779c0a5?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['86']
+      content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:30 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:04 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/f716d10b-699d-443a-89bb-2a77a779c0a5?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -667,26 +615,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/f716d10b-699d-443a-89bb-2a77a779c0a5?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"afa7c677-4252-46f0-8b83-c8ead4f4e873","status":"Succeeded","startTime":"2017-12-26T23:16:30.91Z"}'}
+    body: {string: '{"name":"f716d10b-699d-443a-89bb-2a77a779c0a5","status":"Succeeded","startTime":"2018-04-03T23:35:05.023Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['106']
+      content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:46 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -695,26 +641,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:48 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -724,25 +668,25 @@ interactions:
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"},{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
+    body: {string: '{"value":[{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"},{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['873']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:49 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -753,26 +697,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"DropElasticServerFirewallRule","startTime":"2017-12-26T23:16:50.443Z"}'}
+    body: {string: '{"operation":"DropElasticServerFirewallRule","startTime":"2018-04-03T23:35:25.9Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/800f6b70-f24d-4ee7-8d8c-64f40aacc018?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['84']
+      content-length: ['82']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:50 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:25 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/800f6b70-f24d-4ee7-8d8c-64f40aacc018?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -781,26 +725,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule delete]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/800f6b70-f24d-4ee7-8d8c-64f40aacc018?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"cc91da86-4b3e-490f-8b4f-26df33740ace","status":"Succeeded","startTime":"2017-12-26T23:16:50.443Z"}'}
+    body: {string: '{"name":"800f6b70-f24d-4ee7-8d8c-64f40aacc018","status":"Succeeded","startTime":"2018-04-03T23:35:25.9Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['107']
+      content-length: ['105']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:06 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -810,25 +752,25 @@ interactions:
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
+    body: {string: '{"value":[{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['446']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:07 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -839,26 +781,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"DropElasticServerFirewallRule","startTime":"2017-12-26T23:17:07.877Z"}'}
+    body: {string: '{"operation":"DropElasticServerFirewallRule","startTime":"2018-04-03T23:35:45.307Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/55c64dcd-96f9-483f-b35d-1f332800e371?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['84']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:08 GMT']
+      date: ['Tue, 03 Apr 2018 23:35:44 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/55c64dcd-96f9-483f-b35d-1f332800e371?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -867,26 +809,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule delete]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/55c64dcd-96f9-483f-b35d-1f332800e371?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"f8f95df8-1446-46fb-a6ce-6aaf8ed99f26","status":"Succeeded","startTime":"2017-12-26T23:17:07.877Z"}'}
+    body: {string: '{"name":"55c64dcd-96f9-483f-b35d-1f332800e371","status":"Succeeded","startTime":"2018-04-03T23:35:45.307Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:24 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -896,25 +836,25 @@ interactions:
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body: {string: '{"value":[]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:25 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -924,26 +864,26 @@ interactions:
       CommandName: [postgres db list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"charset":"UTF8","collation":"English_United
+    body: {string: '{"value":[{"properties":{"charset":"UTF8","collation":"English_United
         States.1252"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases/postgres","name":"postgres","type":"Microsoft.DBforPostgreSQL/servers/databases"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:25 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -953,29 +893,29 @@ interactions:
       CommandName: [postgres server configuration show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"on","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:27 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"value": "off"}}'
+    body: '{"properties": {"value": "off"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -983,26 +923,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['32']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpdateElasticServerConfig","startTime":"2017-12-26T23:17:28.493Z"}'}
+    body: {string: '{"operation":"UpdateElasticServerConfig","startTime":"2018-04-03T23:36:06.797Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/82189d66-dd56-4d3c-af2c-a0d0800b0217?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['80']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:28 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:06 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/82189d66-dd56-4d3c-af2c-a0d0800b0217?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -1011,26 +951,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/82189d66-dd56-4d3c-af2c-a0d0800b0217?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"8cf0d720-d929-488e-8cbd-44f57c7c7d55","status":"Succeeded","startTime":"2017-12-26T23:17:28.493Z"}'}
+    body: {string: '{"name":"82189d66-dd56-4d3c-af2c-a0d0800b0217","status":"Succeeded","startTime":"2018-04-03T23:36:06.797Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:44 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1039,30 +977,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"off","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"user-override"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"off","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"user-override"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:45 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"source": "system-default"}}'
+    body: '{"properties": {"source": "system-default"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1070,26 +1006,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['44']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpdateElasticServerConfig","startTime":"2017-12-26T23:17:46.313Z"}'}
+    body: {string: '{"operation":"UpdateElasticServerConfig","startTime":"2018-04-03T23:36:26.7Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/59cb0f2e-80f0-49b5-ad01-fa64e8f4b441?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['80']
+      content-length: ['78']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:46 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:26 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/operationResults/59cb0f2e-80f0-49b5-ad01-fa64e8f4b441?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -1098,26 +1034,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/koreasouth/azureAsyncOperation/59cb0f2e-80f0-49b5-ad01-fa64e8f4b441?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"eb96b2ca-7018-407d-99ea-36930d22101b","status":"Succeeded","startTime":"2017-12-26T23:17:46.313Z"}'}
+    body: {string: '{"name":"59cb0f2e-80f0-49b5-ad01-fa64e8f4b441","status":"Succeeded","startTime":"2018-04-03T23:36:26.7Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['107']
+      content-length: ['105']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:02 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1126,27 +1060,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"on","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:02 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1156,15 +1088,14 @@ interactions:
       CommandName: [postgres server configuration list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"safe_encoding","description":"Sets
+    body: {string: '{"value":[{"properties":{"value":"on","description":"Enable input
+        of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"safe_encoding","description":"Sets
         whether \"\\''\" is allowed in string literals.","defaultValue":"safe_encoding","dataType":"Enumeration","allowedValues":"safe_encoding,on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/backslash_quote","name":"backslash_quote","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"hex","description":"Sets
         the output format for bytea.","defaultValue":"hex","dataType":"Enumeration","allowedValues":"escape,hex","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/bytea_output","name":"bytea_output","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Check
         function bodies during CREATE FUNCTION.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/check_function_bodies","name":"check_function_bodies","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"sql_ascii","description":"Sets
@@ -1181,7 +1112,6 @@ interactions:
         mdy","dataType":"String","allowedValues":"(iso|postgres|sql|german)\\,\\s(dmy|mdy|ymd)","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/datestyle","name":"datestyle","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"1000","description":"Sets
         the amount of time, in milliseconds, to wait on a lock before checking for
         deadlock.","defaultValue":"1000","dataType":"Integer","allowedValues":"1-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/deadlock_timeout","name":"deadlock_timeout","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"Logs
-        each query''s parse tree.","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/debug_print_parse","name":"debug_print_parse","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"Logs
         each query''s execution plan.","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/debug_print_plan","name":"debug_print_plan","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"Logs
         each query''s rewritten parse tree.","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/debug_print_rewritten","name":"debug_print_rewritten","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"100","description":"Sets
         the default statistics target.","defaultValue":"100","dataType":"Integer","allowedValues":"1-10000","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/default_statistics_target","name":"default_statistics_target","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"pg_catalog.english","description":"Sets
@@ -1229,18 +1159,14 @@ interactions:
         logged. -1 disables logging statement durations.","defaultValue":"-1","dataType":"Integer","allowedValues":"-1-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_duration_statement","name":"log_min_duration_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"error","description":"Causes
         all statements generating error at or above this level to be logged.","defaultValue":"error","dataType":"Enumeration","allowedValues":"debug5,debug4,debug3,debug2,debug1,info,notice,warning,error,log,fatal,panic","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_error_statement","name":"log_min_error_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"warning","description":"Sets
         the message levels that are logged.","defaultValue":"warning","dataType":"Enumeration","allowedValues":"debug5,debug4,debug3,debug2,debug1,info,notice,warning,error,log,fatal,panic","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_messages","name":"log_min_messages","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"none","description":"Sets
-        the type of statements logged.","defaultValue":"none","dataType":"Enumeration","allowedValues":"none,ddl,mod,all","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_statement","name":"log_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"64","description":"Sets
-        the maximum number of locks per transaction.","defaultValue":"64","dataType":"Integer","allowedValues":"10-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_locks_per_transaction","name":"max_locks_per_transaction","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"64","description":"Sets
-        the maximum number of predicate locks per transaction.","defaultValue":"64","dataType":"Integer","allowedValues":"10-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_pred_locks_per_transaction","name":"max_pred_locks_per_transaction","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
-        the maximum number of simultaneously prepared transactions.","defaultValue":"0","dataType":"Integer","allowedValues":"0-8388607","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_prepared_transactions","name":"max_prepared_transactions","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"When
+        the type of statements logged.","defaultValue":"none","dataType":"Enumeration","allowedValues":"none,ddl,mod,all","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_statement","name":"log_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"When
         generating SQL fragments, quote all identifiers.","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/quote_all_identifiers","name":"quote_all_identifiers","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"4.0","description":"Sets
         the planner''s estimate of the cost of a nonsequentially fetched disk page.","defaultValue":"4.0","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/random_page_cost","name":"random_page_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"\"$user\",
         public","description":"Sets the schema search order for names that are not
         schema-qualified.","defaultValue":"\"$user\", public","dataType":"String","allowedValues":"[A-Za-z.\"$,
         ]+","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/search_path","name":"search_path","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"1.0","description":"Sets
         the planner''s estimate of the cost of a sequentially fetched disk page.","defaultValue":"1.0","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/seq_page_cost","name":"seq_page_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Causes
-        subtables to be included by default in various commands.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/sql_inheritance","name":"sql_inheritance","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Causes
-        ''...'' strings to treat backslashes literally.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/standard_conforming_strings","name":"standard_conforming_strings","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
+        subtables to be included by default in various commands.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/sql_inheritance","name":"sql_inheritance","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
         the maximum allowed duration (in milliseconds) of any statement. 0 turns this
         off.","defaultValue":"0","dataType":"Integer","allowedValues":"0-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/statement_timeout","name":"statement_timeout","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Enable
         synchronized sequential scans.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/synchronize_seqscans","name":"synchronize_seqscans","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Sets
@@ -1263,15 +1189,16 @@ interactions:
         how many days a log file is saved for.","defaultValue":"3","dataType":"Integer","allowedValues":"1-7","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_retention_days","name":"log_retention_days","type":"Microsoft.DBforPostgreSQL/servers/configurations"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['48202']
+      content-length: ['45279']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:03 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1281,25 +1208,25 @@ interactions:
       CommandName: [postgres server-logs list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles?api-version=2017-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"name":"postgresql-2017-12-26_231444.log","sizeInKB":1,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2017-12-26T23:17:48+00:00","type":"text","url":"https://wasd2prodweu1afse3.file.core.windows.net/bc641191b2114665ab06f050c0e9388f/pg_log/postgresql-2017-12-26_231444.log?sv=2015-04-05&sr=f&sig=GLq6WHcUL99pED9HX%2FKej5hhYvlIdn673Fvk%2Fqh37QE%3D&se=2017-12-27T00%3A18%3A05Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles/postgresql-2017-12-26_231444.log","name":"postgresql-2017-12-26_231444.log","type":"Microsoft.DBforPostgreSQL/servers/logFiles"}]}'}
+    body: {string: '{"value":[{"properties":{"name":"postgresql-2018-04-03_233305.log","sizeInKB":3,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2018-04-03T23:36:27+00:00","type":"text","url":"https://wasd2prodkoso1afse15.file.core.windows.net/8a316eeefb694b8baa22266ca3b74d7c/pg_log/postgresql-2018-04-03_233305.log?sv=2015-04-05&sr=f&sig=vhAeA%2BibNu31b7Vw1UIP2r0Lveh4e71lUG7wGUBha8A%3D&se=2018-04-04T00%3A36%3A47Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles/postgresql-2018-04-03_233305.log","name":"postgresql-2018-04-03_233305.log","type":"Microsoft.DBforPostgreSQL/servers/logFiles"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['817']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:05 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1310,22 +1237,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:18:06 GMT']
+      date: ['Tue, 03 Apr 2018 23:36:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLQzMzWkFDTkFQRTdPV1JINVpCNFQ2SkFIRFZXSkVEM0xSUHw1NTM0MEUwMjgzMTkwNDk5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdaWE1VWUY2S1pLNU9PVzJQRkg2Slg2WkdSSUxGRk9DSEJITXxBODYxM0FCMEQ1NkE3NEVCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

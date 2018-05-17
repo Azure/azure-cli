@@ -24,7 +24,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          config_source_control,
                                                          show_webapp,
                                                          get_streaming_log,
-                                                         download_historical_logs)
+                                                         download_historical_logs,
+                                                         validate_linux_create_options)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -306,6 +307,21 @@ class TestWebappMocked(unittest.TestCase):
         # assert
         site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
         get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
+
+    def test_valid_linux_create_options(self):
+        some_runtime = 'TOMCAT|8.5-jre8'
+        test_docker_image = 'lukasz/great-image:123'
+        test_multi_container_config = 'some_config.yaml'
+        test_multi_container_type = 'COMPOSE'
+
+        self.assertTrue(validate_linux_create_options(some_runtime, None, None, None))
+        self.assertTrue(validate_linux_create_options(None, test_docker_image, None, None))
+        self.assertTrue(validate_linux_create_options(None, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_linux_create_options(some_runtime, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_linux_create_options(some_runtime, None, test_multi_container_config, None))
+        self.assertFalse(validate_linux_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
+        self.assertFalse(validate_linux_create_options(None, None, test_multi_container_config, None))
+        self.assertFalse(validate_linux_create_options(None, None, None, None))
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

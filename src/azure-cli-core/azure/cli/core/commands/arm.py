@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
+from collections import OrderedDict
+import json
 import re
 from six import string_types
 
@@ -16,14 +18,87 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
 
 
+class ArmTemplateBuilder(object):
+
+    def __init__(self):
+        template = OrderedDict()
+        template['$schema'] = \
+            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+        template['contentVersion'] = '1.0.0.0'
+        template['parameters'] = {}
+        template['variables'] = {}
+        template['resources'] = []
+        template['outputs'] = {}
+        self.template = template
+        self.parameters = OrderedDict()
+
+    def add_resource(self, resource):
+        self.template['resources'].append(resource)
+
+    def add_variable(self, key, value):
+        self.template['variables'][key] = value
+
+    def add_parameter(self, key, value):
+        self.template['parameters'][key] = value
+
+    def add_secure_parameter(self, key, value, description=None):
+        param = {
+            "type": "securestring",
+            "metadata": {
+                "description": description or 'Secure {}'.format(key)
+            }
+        }
+        self.template['parameters'][key] = param
+        self.parameters[key] = {'value': value}
+
+    def add_id_output(self, key, provider, property_type, property_name):
+        new_output = {
+            key: {
+                'type': 'string',
+                'value': "[resourceId('{}/{}', '{}')]".format(
+                    provider, property_type, property_name)
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def add_output(self, key, property_name, provider=None, property_type=None,
+                   output_type='string', path=None):
+
+        if provider and property_type:
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+                provider=provider, type=property_type, property=property_name)
+        else:
+            value = "[reference('{}')".format(property_name)
+        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
+        new_output = {
+            key: {
+                'type': output_type,
+                'value': value
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def build(self):
+        return json.loads(json.dumps(self.template))
+
+    def build_parameters(self):
+        return json.loads(json.dumps(self.parameters))
+
+
+def handle_template_based_exception(ex):
+    try:
+        raise CLIError(ex.inner_exception.error.message)
+    except AttributeError:
+        raise CLIError(ex)
+
+
 def handle_long_running_operation_exception(ex):
-    import json
     import azure.cli.core.telemetry as telemetry
 
     telemetry.set_exception(
@@ -53,7 +128,7 @@ def handle_long_running_operation_exception(ex):
 
 
 def deployment_validate_table_format(result):
-    from collections import OrderedDict
+
     if result.get('error', None):
         error_result = OrderedDict()
         error_result['result'] = result['error']['code']
@@ -110,8 +185,24 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                 (dest) fields will also be of type `IterateValue`
                 '''
                 from msrestazure.tools import parse_resource_id
+                import os
+                if isinstance(values, str):
+                    values = [values]
+                expanded_values = []
+                for val in values:
+                    try:
+                        # support piping values from JSON. Does not require use of --query
+                        json_vals = json.loads(val)
+                        if not isinstance(json_vals, list):
+                            json_vals = [json_vals]
+                        for json_val in json_vals:
+                            if 'id' in json_val:
+                                expanded_values += [json_val['id']]
+                    except ValueError:
+                        # supports piping of --ids to the command when using TSV. Requires use of --query
+                        expanded_values = expanded_values + val.split(os.linesep)
                 try:
-                    for value in [values] if isinstance(values, str) else values:
+                    for value in expanded_values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.type.settings.get('id_part')]:
                             self.set_argument_value(namespace, arg, parts)
@@ -120,10 +211,11 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 
             @staticmethod
             def set_argument_value(namespace, arg, parts):
+
                 existing_values = getattr(namespace, arg.name, None)
                 if existing_values is None:
                     existing_values = IterateValue()
-                    existing_values.append(parts[arg.type.settings['id_part']])
+                    existing_values.append(parts.get(arg.type.settings['id_part'], None))
                 else:
                     if isinstance(existing_values, str):
                         if not getattr(arg.type, 'configured_default_applied', None):
@@ -132,7 +224,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                                 arg.name, existing_values, parts[arg.type.settings['id_part']]
                             )
                         existing_values = IterateValue()
-                    existing_values.append(parts[arg.type.settings['id_part']])
+                    existing_values.append(parts.get(arg.type.settings['id_part']))
                 setattr(namespace, arg.name, existing_values)
 
         return SplitAction
@@ -158,6 +250,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
             arg.required = False
 
         def required_values_validator(namespace):
+
             errors = [arg for arg in required_arguments
                       if getattr(namespace, arg.name, None) is None]
 
@@ -174,11 +267,10 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                              '--ids',
                              metavar='RESOURCE_ID',
                              dest=argparse.SUPPRESS,
-                             help="One or more resource IDs (space delimited). If provided, "
+                             help="One or more resource IDs (space-delimited). If provided, "
                                   "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
-                             type=ResourceId,
                              validator=required_values_validator,
                              arg_group=group_name)
 
@@ -289,6 +381,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         factory = _get_client_factory(name, commmand_kwargs)
         client = None
         if factory:
@@ -297,7 +390,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             except TypeError:
                 client = factory(context.cli_ctx, None)
 
-        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
         exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
         raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
@@ -359,13 +452,27 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        if no_wait_param:
-            setterargs[no_wait_param] = args[no_wait_param]
+
+        # Handle no-wait
+        supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        if supports_no_wait:
+            no_wait_enabled = args.get('no_wait', False)
+            augment_no_wait_handler_args(no_wait_enabled,
+                                         setter,
+                                         setterargs)
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param:
+                setterargs[no_wait_param] = args[no_wait_param]
+
         result = setter(**setterargs)
 
-        if no_wait_param and setterargs.get(no_wait_param, None):
+        if supports_no_wait and no_wait_enabled:
             return None
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param and setterargs.get(no_wait_param, None):
+                return None
 
         if _is_poller(result):
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
@@ -440,6 +547,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         return provisioning_state
 
     def handler(args):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
         import time
 
@@ -448,8 +556,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
-
-        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
@@ -582,11 +689,14 @@ def set_properties(instance, expression):
             throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
-            name = make_snake_case(name)
-            if not hasattr(instance, name):
+            if hasattr(instance, make_snake_case(name)):
+                setattr(instance, make_snake_case(name), value)
+            else:
+                instance.additional_properties[name] = value
+                instance.enable_additional_properties_sending()
                 logger.warning(
-                    "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
-            setattr(instance, name, value)
+                    "Property '%s' not found on %s. Send it as an additional property .", name, parent_name)
+
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
@@ -623,7 +733,7 @@ def add_properties(instance, argument_values):
             # attempt to convert anything else to JSON and fallback to string if error
             try:
                 argument = shell_safe_json_parse(argument)
-            except ValueError:
+            except (ValueError, CLIError):
                 pass
             list_to_add_to.append(argument)
 
@@ -644,12 +754,13 @@ def remove_properties(instance, argument_values):
         pass
 
     if not list_index:
-        _find_property(instance, list_attribute_path)
+        property_val = _find_property(instance, list_attribute_path)
         parent_to_remove_from = _find_property(instance, list_attribute_path[:-1])
         if isinstance(parent_to_remove_from, dict):
             del parent_to_remove_from[list_attribute_path[-1]]
         elif hasattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1])):
-            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]), None)
+            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]),
+                    [] if isinstance(property_val, list) else None)
         else:
             raise ValueError
     else:
@@ -662,7 +773,10 @@ def remove_properties(instance, argument_values):
 
 
 def throw_and_show_options(instance, part, path):
+    from msrest.serialization import Model
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
+    if isinstance(instance, Model) and isinstance(getattr(instance, 'additional_properties', None), dict):
+        options.update(options.pop('additional_properties'))
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
     if isinstance(options, dict):
@@ -716,7 +830,7 @@ def _get_name_path(path):
     return pathlist.pop(), pathlist
 
 
-def _update_instance(instance, part, path):
+def _update_instance(instance, part, path):  # pylint: disable=too-many-return-statements, inconsistent-return-statements
     try:
         index = index_or_filter_regex.match(part)
         if index and not isinstance(instance, list):
@@ -733,8 +847,8 @@ def _update_instance(instance, part, path):
                 if isinstance(x, dict) and x.get(key, None) == value:
                     matches.append(x)
                 elif not isinstance(x, dict):
-                    key = make_snake_case(key)
-                    if hasattr(x, key) and getattr(x, key, None) == value:
+                    snake_key = make_snake_case(key)
+                    if hasattr(x, snake_key) and getattr(x, snake_key, None) == value:
                         matches.append(x)
 
             if len(matches) == 1:
@@ -743,6 +857,9 @@ def _update_instance(instance, part, path):
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
             else:
+                if key in getattr(instance, 'additional_properties', {}):
+                    instance.enable_additional_properties_sending()
+                    return instance.additional_properties[key]
                 raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
         if index:
@@ -755,7 +872,12 @@ def _update_instance(instance, part, path):
         if isinstance(instance, dict):
             return instance[part]
 
-        return getattr(instance, make_snake_case(part))
+        if hasattr(instance, make_snake_case(part)):
+            return getattr(instance, make_snake_case(part), None)
+        elif hasattr(instance, 'additional_properties') and (part in instance.additional_properties):
+            instance.enable_additional_properties_sending()
+            return instance.additional_properties.get[part]
+        raise AttributeError()
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
 
@@ -769,7 +891,7 @@ def _find_property(instance, path):
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
     from msrestazure.azure_exceptions import CloudError
 
     # get
@@ -782,14 +904,15 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
         assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
-        properties = RoleAssignmentProperties(identity_role_id, principal_id)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
-        assignment_id = _gen_guid()
+        assignment_name = _gen_guid()
         for l in range(0, retry_times):
             try:
-                assignments_client.create(identity_scope, assignment_id, properties)
+                assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
+                                          parameters=parameters)
                 break
             except CloudError as ex:
                 if 'role assignment already exists' in ex.message:

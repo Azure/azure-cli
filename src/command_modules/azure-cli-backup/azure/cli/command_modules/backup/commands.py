@@ -47,6 +47,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_policy')
 
     with self.command_group('backup protection', backup_custom, client_factory=protected_items_cf) as g:
+        g.command('check-vm', 'check_protection_enabled_for_vm')
         g.command('enable-for-vm', 'enable_protection_for_vm')
         g.command('backup-now', 'backup_now', client_factory=backups_cf)
         g.command('disable', 'disable_protection', confirmation=True)

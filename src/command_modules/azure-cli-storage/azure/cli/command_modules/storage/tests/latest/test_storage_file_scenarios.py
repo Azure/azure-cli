@@ -166,6 +166,12 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(os.path.isfile(dest_file))
         self.assertEqual(os.stat(dest_file).st_size, 128 * 1024)
 
+        self.storage_cmd('storage file download --share-name {} -p "{}" --dest "{}" --start-range 0 --end-range 511', account_info,
+                         share, filename, dest_file)
+
+        self.assertTrue(os.path.isfile(dest_file))
+        self.assertEqual(os.stat(dest_file).st_size, 512)
+
         # test resize command
         self.storage_cmd('storage file resize --share-name {} -p "{}" --size 1234', account_info,
                          share, filename)

@@ -3,62 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-import json
-
-
-class ArmTemplateBuilder(object):
-    def __init__(self):
-        template = OrderedDict()
-        template['$schema'] = \
-            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
-        template['contentVersion'] = '1.0.0.0'
-        template['parameters'] = {}
-        template['variables'] = {}
-        template['resources'] = []
-        template['outputs'] = {}
-        self.template = template
-
-    def add_resource(self, resource):
-        self.template['resources'].append(resource)
-
-    def add_variable(self, key, value):
-        self.template['variables'][key] = value
-
-    def add_parameter(self, key, value):
-        self.template['parameters'][key] = value
-
-    def add_id_output(self, key, provider, property_type, property_name):
-        new_output = {
-            key: {
-                'type': 'string',
-                'value': "[resourceId('{}/{}', '{}')]".format(
-                    provider, property_type, property_name)
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def add_output(self, key, property_name, provider=None, property_type=None,
-                   output_type='string', path=None):
-
-        if provider and property_type:
-            template = "[reference(resourceId('{provider}/{type}', '{property}')," \
-                       "providers('{provider}', '{type}').apiVersions[0])"
-            value = template.format(provider=provider, type=property_type, property=property_name)
-        else:
-            value = "[reference('{}')".format(property_name)
-        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
-        new_output = {
-            key: {
-                'type': output_type,
-                'value': value
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def build(self):
-        return json.loads(json.dumps(self.template))
-
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
                               private_ip_allocation=None, zone=None):
@@ -137,9 +81,10 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
             'name': ssl_cert_name,
             'properties': {
                 'data': cert_data,
-                'password': cert_password
             }
         }
+        if cert_password:
+            ssl_cert['properties']['password'] = "[parameters('certPassword')]"
 
     backend_http_settings = {
         'name': http_settings_name,
@@ -289,15 +234,18 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
                                   enable_bgp, routing_weight, shared_key, use_policy_based_traffic_selectors):
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
-        'authorizationKey': authorization_key,
         'enableBgp': enable_bgp,
         'connectionType': vpn_type,
         'routingWeight': routing_weight
     }
+    if authorization_key:
+        vpn_properties['authorizationKey'] = "[parameters('authorizationKey')]"
     if cmd.supported_api_version(min_api='2017-03-01'):
         vpn_properties['usePolicyBasedTrafficSelectors'] = use_policy_based_traffic_selectors
 
     # add scenario specific properties
+    if shared_key:
+        shared_key = "[parameters('sharedKey')]"
     if vpn_type == 'IPSec':
         vpn_properties.update({
             'localNetworkGateway2': {'id': gateway2},

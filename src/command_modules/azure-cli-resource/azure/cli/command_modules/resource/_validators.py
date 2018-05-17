@@ -142,3 +142,8 @@ def validate_resource_lock(namespace):
                       'resource_type']:
             kwargs[param] = getattr(namespace, param, None)
         internal_validate_lock_parameters(namespace, **kwargs)
+
+
+def validate_metadata(namespace):
+    if namespace.metadata:
+        namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)

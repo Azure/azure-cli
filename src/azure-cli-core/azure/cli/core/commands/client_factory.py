@@ -10,24 +10,49 @@ from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
+from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
-from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
+def resolve_client_arg_name(operation, kwargs):
+    if not isinstance(operation, str):
+        raise CLIError("operation should be type 'str'. Got '{}'".format(type(operation)))
+    if 'client_arg_name' in kwargs:
+        logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
+        return kwargs['client_arg_name']
+    path, op_path = operation.split('#', 1)
+    path_comps = path.split('.')
+    if path_comps[0] == 'azure':
+        # for CLI command modules
+        # SDK method: azure.mgmt.foo... or azure.foo...
+        # custom method: azure.cli.command_modules.foo...
+        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
+    elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
+        # for CLI extensions
+        # SDK method: the operation takes the form '<class name>.<method_name>'
+        # custom method: the operation takes the form '<method_name>'
+        op_comps = op_path.split('.')
+        client_arg_name = 'self' if len(op_comps) > 1 else 'client'
+    else:
+        raise ValueError('Unrecognized operation: {}'.format(operation))
+    return client_arg_name
+
+
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
     sdk_profile = None
-    if isinstance(client_or_resource_type, ResourceType):
+    if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
         api_version = api_version or get_api_version(cli_ctx, client_or_resource_type, as_sdk_profile=True)
         if isinstance(api_version, SDKProfile):
             sdk_profile = api_version.profile
-            api_version = api_version.default_api_version
+            api_version = None
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
@@ -44,6 +69,8 @@ def get_subscription_service_client(cli_ctx):
 
 def configure_common_settings(cli_ctx, client):
     client = _debug.change_ssl_cert_verification(client)
+
+    client.config.enable_http_logger = True
 
     client.config.add_user_agent(UA_AGENT)
     try:
@@ -105,13 +132,15 @@ def _get_mgmt_service_client(cli_ctx,
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, endpoint_suffix=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
                          'sas_token': sas_token}
+        if socket_timeout:
+            client_kwargs['socket_timeout'] = socket_timeout
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)

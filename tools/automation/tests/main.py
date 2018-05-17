@@ -4,64 +4,46 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 
-from automation.utilities.path import get_repo_root
+from automation.utilities.display import display, output
+from automation.utilities.path import get_repo_root, get_test_results_dir
 from automation.tests.nose_helper import get_nose_runner
-from automation.utilities.path import get_test_results_dir
 
-
-def get_unittest_runner(tests):
-    test_cases = list(tests)
-
-    def _runner(module_paths):
-        from subprocess import CalledProcessError
-        if len(module_paths) > 1:
-            print('When --test is given, no more than 1 module can be selected.')
-            return False
-
-        module_path = module_paths[0][len(os.path.join(get_repo_root(), 'src' + os.sep)):]
-        if module_path.startswith('command_modules'):
-            module_path = module_path.split(os.sep, 2)[-1].replace(os.sep, '.')
-        else:
-            module_path = module_path.split(os.sep, 1)[-1].replace(os.sep, '.')
-
-        try:
-            import unittest
-            suite = unittest.TestLoader().loadTestsFromNames(['{}.{}'.format(module_path, t) for t in test_cases])
-            runner = unittest.TextTestRunner()
-            result = runner.run(suite)
-
-            return not result.failures
-        except CalledProcessError:
-            return False
-
-    return _runner
 
 
 def run_tests(modules, parallel, run_live, tests):
-    print('Run automation')
-    print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
-    # create test results folder
-    test_results_folder = get_test_results_dir(with_timestamp=True, prefix='tests')
+    if not modules and not tests:
+        display('No tests set to run.')
+        sys.exit(1)
+
+    display("""
+=============
+  Run Tests
+=============
+""")
+    if modules:
+        display('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
     # set environment variable
     if run_live:
         os.environ['AZURE_TEST_RUN_LIVE'] = 'True'
 
-    if not tests:
-        # the --test is not given, use nosetests to run entire module
-        print('Drive test by nosetests')
-        runner = get_nose_runner(test_results_folder, parallel=parallel, process_timeout=3600 if run_live else 600)
-    else:
-        # the --test is given, use unittest to run single test
-        print('Drive test by unittest')
-        runner = get_unittest_runner(tests)
+    test_paths = tests or [p for _, _, p in modules]
 
-    # run tests
-    result = runner([p for _, _, p in modules])
-
-    return result
+    display('Drive test by nosetests')
+    from six import StringIO
+    old_stderr = sys.stderr
+    test_stderr = StringIO()
+    sys.stderr = test_stderr
+    runner = get_nose_runner(parallel=parallel, process_timeout=3600 if run_live else 600)
+    results = runner([path for path in test_paths])
+    stderr_val = test_stderr.getvalue()
+    sys.stderr = old_stderr
+    test_stderr.close()
+    failed_tests = summarize_tests(stderr_val)
+    return results, failed_tests
 
 
 def collect_test():
@@ -92,3 +74,28 @@ def collect_tests(path, return_collection, prefix=''):
                 for test in suite._tests:  # pylint: disable=protected-access
                     return_collection.append(
                         '{}.{}.{}'.format(full_name, test.__class__.__name__, test._testMethodName))  # pylint: disable=protected-access
+
+def summarize_tests(test_output):
+    display(test_output)
+    failed_tests = []
+    for line in test_output.splitlines():
+        if '... ERROR' in line or '... FAIL' in line:
+            line = line.replace('(', '')
+            line = line.replace(')', '')
+            try:
+                test_name, _, _, _ = line.split(' ')
+                line = test_name
+            except:
+                pass
+            failed_tests.append(line)
+
+    if failed_tests:
+        display("""
+==========
+  FAILED
+==========
+""")
+        for failed_test in failed_tests:
+            display(failed_test)
+    return failed_tests
+

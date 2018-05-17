@@ -5,7 +5,7 @@
 
 # TODO Move this to a package shared by CLI and SDK
 from enum import Enum
-from functools import total_ordering, partial
+from functools import total_ordering
 from importlib import import_module
 
 
@@ -22,6 +22,12 @@ class APIVersionException(Exception):
 
 # Sentinel value for profile
 PROFILE_TYPE = object()
+
+
+class CustomResourceType(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, import_prefix, client_name):
+        self.import_prefix = import_prefix
+        self.client_name = client_name
 
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
@@ -59,18 +65,22 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
-        self.default_api_version = default_api_version
         self.profile = profile if profile is not None else {}
+        self.profile[None] = default_api_version
+
+    @property
+    def default_api_version(self):
+        return self.profile[None]
 
 
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2017-11-01',
+        ResourceType.MGMT_NETWORK: '2018-02-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
             'resource_skus': '2017-09-01',
-            'disks': '2017-03-30',
-            'snapshots': '2017-03-30',
+            'disks': '2018-04-01',
+            'snapshots': '2018-04-01',
             'virtual_machine_run_commands': '2017-03-30'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -79,7 +89,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_STORAGE: '2017-07-29',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
@@ -215,7 +225,7 @@ def _validate_api_version(api_version_str, min_api=None, max_api=None):
     return True
 
 
-def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
+def supported_api_version(api_profile, resource_type, min_api=None, max_api=None, operation_group=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
@@ -223,18 +233,14 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
-    if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
-        raise TypeError()
+    if not isinstance(resource_type, (ResourceType, CustomResourceType)) and resource_type != PROFILE_TYPE:
+        raise ValueError("'resource_type' is required.")
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
-        if isinstance(resource_type, ResourceType) else api_profile
+        if isinstance(resource_type, (ResourceType, CustomResourceType)) else api_profile
     if isinstance(api_version_obj, SDKProfile):
-        return _get_api_version_tuple(
-            resource_type,
-            api_version_obj,
-            partial(_validate_api_version, min_api=min_api, max_api=max_api)
-        )
+        api_version_obj = api_version_obj.profile.get(operation_group or '', api_version_obj.default_api_version)
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 

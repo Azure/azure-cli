@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import json
 
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+from azure.cli.core.util import get_file_json
 
 
 # TYPES VALIDATORS
@@ -36,7 +36,7 @@ def duration_format(value):
 
 
 def metadata_item_format(value):
-    """Space separated values in 'key=value' format."""
+    """Space-separated values in 'key=value' format."""
     try:
         data_name, data_value = value.split('=')
     except ValueError:
@@ -47,7 +47,7 @@ def metadata_item_format(value):
 
 
 def environment_setting_format(value):
-    """Space separated values in 'key=value' format."""
+    """Space-separated values in 'key=value' format."""
     try:
         env_name, env_value = value.split('=')
     except ValueError:
@@ -58,7 +58,7 @@ def environment_setting_format(value):
 
 
 def application_package_reference_format(value):
-    """Space separated application IDs with optional version in 'id[#version]' format."""
+    """Space-separated application IDs with optional version in 'id[#version]' format."""
     app_reference = value.split('#', 1)
     package = {'application_id': app_reference[0]}
     try:
@@ -69,13 +69,13 @@ def application_package_reference_format(value):
 
 
 def certificate_reference_format(value):
-    """Space separated certificate thumbprints."""
+    """Space-separated certificate thumbprints."""
     cert = {'thumbprint': value, 'thumbprint_algorithm': 'sha1'}
     return cert
 
 
 def task_id_ranges_format(value):
-    """Space separated number ranges in 'start-end' format."""
+    """Space-separated number ranges in 'start-end' format."""
     try:
         start, end = [int(i) for i in value.split('-')]
     except ValueError:
@@ -86,7 +86,7 @@ def task_id_ranges_format(value):
 
 
 def resource_file_format(value):
-    """Space separated resource references in filename=blobsource format."""
+    """Space-separated resource references in filename=blobsource format."""
     try:
         file_name, blob_source = value.split('=', 1)
     except ValueError:
@@ -170,8 +170,7 @@ def validate_json_file(namespace):
     """Validate the give json file existing"""
     if namespace.json_file:
         try:
-            with open(namespace.json_file) as file_handle:
-                json.load(file_handle)
+            get_file_json(namespace.json_file)
         except EnvironmentError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:

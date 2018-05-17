@@ -3,6 +3,59 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Added completer for `--account-name` argument.
+* Fixed problem with `storage entity query`.
+
+2.0.32
+++++++
+* Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.
+* Expose --socket-timeout for blob uploads and downloads.
+* Treat blob names that start with path separators as relative paths.
+* `storage blob copy` Allow --source-sas with starting query char, '?'
+* `storage entity query` Fix --marker to accept list of key=values.
+
+2.0.31
+++++++
+* Better error message for malformed connection strings.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.30
+++++++
+* Fix issue of upload file with size between 195GB and 200GB
+
+2.0.29
+++++++
+* Minor fixes.
+
+2.0.28
+++++++
+* Fix problems with append blob uploads ignoring condition parameters.
+
+2.0.27
+++++++
+* Fix issue of missing endpoint suffix in batch copy command.
+* Blob batch commands no longer throw error upon failed precondition.
+* Support Autorest 3.0 based SDKs
+
+2.0.26
+++++++
+* Enabled specifying destination-path/prefix to blobs in batch upload and copy commands.
+
+2.0.25
+++++++
+* Added `storage blob service-properties delete-policy` and `storage blob undelete` commands to enable soft-delete.
+
+2.0.24
+++++++
+* `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
+* Added progress reporting for all upload/download commands, including batch.
+* `storage account check-name`: fixed bug preventing "-n" arg option.
+* Added 'snapshot' column to table output for blob list/show.
+* Fixed bugs with various parameters that needed to be parsed as ints, added test coverage.
+* Small fix with test, `storage blob service-properties show`: "hourMetrics.enabled" defaults to false.
+
 2.0.23
 ++++++
 * Minor fixes.

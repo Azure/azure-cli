@@ -3,7 +3,7 @@
 ;      Zone version:  10
 ;
 
-@                       IN  SOA zoneimport. hostmaster. (
+@                       IN  SOA zone2.com. hostmaster. (
                         		10           ; serial number
                         		900          ; refresh
                         		600          ; retry
@@ -14,7 +14,7 @@
 ;  Zone NS records
 ;
 
-@                       NS	zoneimport.
+@                       NS	zone2.com.
 
 ;
 ;  Zone records
@@ -26,12 +26,12 @@ a2                      A	1.2.3.4
                         A	2.3.4.5
 aaaa2                   AAAA 2001:cafe:130::100
                         AAAA 2001:cafe:130::101
-doozie                  TXT	( "abcdefghijklmnopqrstuvwxyz"
+doozie                  TXT	( "abcdefghijklmnopqrstuvwxyz" ; test comment
                               "1234567890"
                         	  "abcdefghijklmnopqrstuvwxyz"
-							  "1234567890"
+							  "1234567890" ; another comment
                         	  "abcdefghijklmnopqrstuvwxyz"
-							  "1234567890" )
+							  "1234567890" ) ; comments
 fee2                    CNAME	bar.com.
                         CNAME	bar. ; This should be ignored and a warning given
 mail                    MX	10	mail1.mymail.com.

@@ -3,6 +3,27 @@
 Release History
 ===============
 
+0.1.20
+++++++
+
+* Minor fixes to compat with msrest 0.4.28
+
+0.1.19
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
+0.1.18
+++++++
+* Support Autorest 3.0 based SDKs
+
+0.1.17
+++++++
+* iot dps access policy create/update: Fixes issue where the command would occasionally return a 'not found' error on success. Added `--no-wait` support.
+* iot dps linked-hub create/update: Fixes issue where the command would occasionally return a 'not found' error on success. Added `--no-wait` support.
+* iot hub create: Allow specifying numbers of partitions during creation.
+* Minor fixes.
+
 0.1.16
 ++++++
 * Added support for device provisioning service

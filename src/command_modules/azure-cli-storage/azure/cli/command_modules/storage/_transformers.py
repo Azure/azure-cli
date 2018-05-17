@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-import re
 from .url_quote_util import encode_url_path
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -13,6 +11,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 def transform_acl_list_output(result):
     """ Transform to convert SDK output into a form that is more readily
     usable by the CLI and tools such as jpterm. """
+    from collections import OrderedDict
     new_result = []
     for key in sorted(result.keys()):
         new_entry = OrderedDict()
@@ -29,6 +28,7 @@ def transform_container_permission_output(result):
 
 
 def transform_cors_list_output(result):
+    from collections import OrderedDict
     new_result = []
     for service in sorted(result.keys()):
         service_name = service
@@ -48,6 +48,7 @@ def transform_cors_list_output(result):
 
 
 def transform_entity_query_output(result):
+    from collections import OrderedDict
     new_results = []
     ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
     for row in result['items']:
@@ -62,6 +63,7 @@ def transform_entity_query_output(result):
 
 
 def transform_logging_list_output(result):
+    from collections import OrderedDict
     new_result = []
     for key in sorted(result.keys()):
         new_entry = OrderedDict()
@@ -75,6 +77,7 @@ def transform_logging_list_output(result):
 
 
 def transform_metrics_list_output(result):
+    from collections import OrderedDict
     new_result = []
     for service in sorted(result.keys()):
         service_name = service
@@ -104,6 +107,7 @@ def transform_storage_list_output(result):
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
+    import re
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
     return encode_url_path(result)

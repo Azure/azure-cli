@@ -1,30 +1,32 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-04-02T15:51:23Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-02T15:51:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:39 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1179']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,23 +36,24 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-02T15:51:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:40 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
@@ -62,33 +65,35 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['123']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"cli.lock.rsrc000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002\"\
-        ,\r\n  \"etag\": \"W/\\\"23ac3040-ab3f-4369-a90e-fbd23840dc5d\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"03c0681f-adc9-4c70-b83b-e05e78c3e489\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"2ecccd05-bc53-466b-9dfa-dfd12b30c425\"\
+        \ \"Updating\",\r\n    \"resourceGuid\": \"6ee83a20-37c3-45a2-b26f-806306ce2fac\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":\
         \ [],\r\n    \"enableDdosProtection\": false,\r\n    \"enableVmProtection\"\
         : false\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2ac345e6-7b6b-4b4a-9a99-161a692e4cd5?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a4bb581-48ee-410d-9cf8-158dc9022652?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['816']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:40 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -97,25 +102,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [network vnet create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2ac345e6-7b6b-4b4a-9a99-161a692e4cd5?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a4bb581-48ee-410d-9cf8-158dc9022652?api-version=2018-02-01
   response:
-    body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
+    body: {string: "{\r\n  \"status\": \"InProgress\"\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['29']
+      content-length: ['30']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:45 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -124,18 +129,44 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [network vnet create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a4bb581-48ee-410d-9cf8-158dc9022652?api-version=2018-02-01
+  response:
+    body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['29']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 02 Apr 2018 15:51:38 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network vnet create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"cli.lock.rsrc000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002\"\
-        ,\r\n  \"etag\": \"W/\\\"0513b57f-3676-497d-9ad7-7355e75dc7be\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"12d8b1f2-acdf-41ee-bc82-829dd88abdc0\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"2ecccd05-bc53-466b-9dfa-dfd12b30c425\"\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"6ee83a20-37c3-45a2-b26f-806306ce2fac\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":\
@@ -145,17 +176,18 @@ interactions:
       cache-control: [no-cache]
       content-length: ['817']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:45 GMT']
-      etag: [W/"0513b57f-3676-497d-9ad7-7355e75dc7be"]
+      date: ['Mon, 02 Apr 2018 15:51:39 GMT']
+      etag: [W/"12d8b1f2-acdf-41ee-bc82-829dd88abdc0"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"name": "cli-test-lock000003", "properties": {"level": "CanNotDelete"}}'''
+    body: 'b''{"properties": {"level": "CanNotDelete"}, "name": "cli-test-lock000003"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -163,8 +195,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['127']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -174,11 +206,12 @@ interactions:
       cache-control: [no-cache]
       content-length: ['502']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:45 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1170']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -188,69 +221,84 @@ interactions:
       CommandName: [resource lock show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body: {string: '{"value":[{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Storage/storageAccounts/acliautomationlab8049/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Storage/storageAccounts/acliautomationlab7392/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.KeyVault/vaults/cliautomationlab3636/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.KeyVault/vaults/cliautomationlab1646/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Storage/storageAccounts/awilxdevlab9274/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Storage/storageAccounts/acliautomationlab1131/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.KeyVault/vaults/wilxdevlab8104/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.KeyVault/vaults/cliautomationlab4599/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Network/virtualNetworks/Dtlwilxdevlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Authorization/locks/rglock","type":"Microsoft.Authorization/locks","name":"rglock"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Compute/virtualMachines/vm625810/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg9de67119f7/providers/Microsoft.Storage/storageAccounts/st3ea29977a4/providers/Microsoft.Authorization/locks/stLock","type":"Microsoft.Authorization/locks","name":"stLock"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rged92722916/providers/Microsoft.Network/virtualNetworks/nete1352643ac/subnets/subnet1/providers/Microsoft.Authorization/locks/subnetLock","type":"Microsoft.Authorization/locks","name":"subnetLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Storage/storageAccounts/acliautomationlab9396/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.KeyVault/vaults/cliautomationlab8702/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Storage/storageAccounts/acliautomationlab6290/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-tc/providers/Microsoft.Authorization/locks/myLock","type":"Microsoft.Authorization/locks","name":"myLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Storage/storageAccounts/acliautomationlab4621/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.KeyVault/vaults/cliautomationlab3425/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.KeyVault/vaults/cliautomationlab7523/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Authorization/locks/myLock4","type":"Microsoft.Authorization/locks","name":"myLock4"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock3","type":"Microsoft.Authorization/locks","name":"myLock3"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock6","type":"Microsoft.Authorization/locks","name":"myLock6"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab2987/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Storage/storageAccounts/acliautomationlab904/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab786/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.KeyVault/vaults/cliautomationlab2733/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Pending
-        support ticket: REG:117080316140410"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2del/providers/Microsoft.Authorization/locks/nottodelete","type":"Microsoft.Authorization/locks","name":"nottodelete"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm795032group/providers/Microsoft.Compute/virtualMachines/vm795032/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/wilxgroup/providers/Microsoft.Authorization/locks/mylock","type":"Microsoft.Authorization/locks","name":"mylock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Storage/storageAccounts/acliautomationlab2281/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.KeyVault/vaults/cliautomationlab6073/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Storage/storageAccounts/acliautomationlab3246/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Authorization/locks/lock-1","type":"Microsoft.Authorization/locks","name":"lock-1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Storage/storageAccounts/anustg234/providers/Microsoft.Authorization/locks/lock-2","type":"Microsoft.Authorization/locks","name":"lock-2"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Storage/storageAccounts/acliautomationlab1231/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.KeyVault/vaults/cliautomationlab5931/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.KeyVault/vaults/cliautomationlab505/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Storage/storageAccounts/acliautomationlab8325/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.KeyVault/vaults/cliautomationlab7706/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Storage/storageAccounts/acliautomationlab9906/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.KeyVault/vaults/cliautomationlab3605/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Storage/storageAccounts/acliautomationlab5809/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.KeyVault/vaults/cliautomationlab6282/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Storage/storageAccounts/acliautomationlab2855/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.KeyVault/vaults/cliautomationlab7437/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Storage/storageAccounts/acliautomationlab799/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.KeyVault/vaults/cliautomationlab952/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['12814']
+      content-length: ['13601']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:51 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -260,8 +308,8 @@ interactions:
       CommandName: [resource lock show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -271,12 +319,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['502']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:52 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -286,8 +335,8 @@ interactions:
       CommandName: [resource lock list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks?api-version=2016-09-01
@@ -297,12 +346,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['514']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:52 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -312,69 +362,84 @@ interactions:
       CommandName: [resource lock update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body: {string: '{"value":[{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Storage/storageAccounts/acliautomationlab8049/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Storage/storageAccounts/acliautomationlab7392/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.KeyVault/vaults/cliautomationlab3636/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.KeyVault/vaults/cliautomationlab1646/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Storage/storageAccounts/awilxdevlab9274/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Storage/storageAccounts/acliautomationlab1131/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.KeyVault/vaults/wilxdevlab8104/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.KeyVault/vaults/cliautomationlab4599/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Network/virtualNetworks/Dtlwilxdevlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Authorization/locks/rglock","type":"Microsoft.Authorization/locks","name":"rglock"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Compute/virtualMachines/vm625810/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg9de67119f7/providers/Microsoft.Storage/storageAccounts/st3ea29977a4/providers/Microsoft.Authorization/locks/stLock","type":"Microsoft.Authorization/locks","name":"stLock"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rged92722916/providers/Microsoft.Network/virtualNetworks/nete1352643ac/subnets/subnet1/providers/Microsoft.Authorization/locks/subnetLock","type":"Microsoft.Authorization/locks","name":"subnetLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Storage/storageAccounts/acliautomationlab9396/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.KeyVault/vaults/cliautomationlab8702/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Storage/storageAccounts/acliautomationlab6290/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-tc/providers/Microsoft.Authorization/locks/myLock","type":"Microsoft.Authorization/locks","name":"myLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Storage/storageAccounts/acliautomationlab4621/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.KeyVault/vaults/cliautomationlab3425/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.KeyVault/vaults/cliautomationlab7523/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Authorization/locks/myLock4","type":"Microsoft.Authorization/locks","name":"myLock4"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock3","type":"Microsoft.Authorization/locks","name":"myLock3"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock6","type":"Microsoft.Authorization/locks","name":"myLock6"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab2987/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Storage/storageAccounts/acliautomationlab904/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab786/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.KeyVault/vaults/cliautomationlab2733/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Pending
-        support ticket: REG:117080316140410"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2del/providers/Microsoft.Authorization/locks/nottodelete","type":"Microsoft.Authorization/locks","name":"nottodelete"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm795032group/providers/Microsoft.Compute/virtualMachines/vm795032/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/wilxgroup/providers/Microsoft.Authorization/locks/mylock","type":"Microsoft.Authorization/locks","name":"mylock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Storage/storageAccounts/acliautomationlab2281/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.KeyVault/vaults/cliautomationlab6073/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Storage/storageAccounts/acliautomationlab3246/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Authorization/locks/lock-1","type":"Microsoft.Authorization/locks","name":"lock-1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Storage/storageAccounts/anustg234/providers/Microsoft.Authorization/locks/lock-2","type":"Microsoft.Authorization/locks","name":"lock-2"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Storage/storageAccounts/acliautomationlab1231/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.KeyVault/vaults/cliautomationlab5931/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.KeyVault/vaults/cliautomationlab505/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Storage/storageAccounts/acliautomationlab8325/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.KeyVault/vaults/cliautomationlab7706/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Storage/storageAccounts/acliautomationlab9906/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.KeyVault/vaults/cliautomationlab3605/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Storage/storageAccounts/acliautomationlab5809/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.KeyVault/vaults/cliautomationlab6282/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Storage/storageAccounts/acliautomationlab2855/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.KeyVault/vaults/cliautomationlab7437/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Storage/storageAccounts/acliautomationlab799/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.KeyVault/vaults/cliautomationlab952/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['12814']
+      content-length: ['13601']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:52 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -384,8 +449,8 @@ interactions:
       CommandName: [resource lock update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -395,16 +460,17 @@ interactions:
       cache-control: [no-cache]
       content-length: ['502']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:52 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"name": "cli-test-lock000003", "properties": {"level": "ReadOnly",
-      "notes": "notes000004"}}\'''''
+    body: 'b''b\''{"properties": {"level": "ReadOnly", "notes": "notes000004"}, "name":
+      "cli-test-lock000003"}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -412,8 +478,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['156']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -423,13 +489,14 @@ interactions:
       cache-control: [no-cache]
       content-length: ['529']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:53 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1182']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -439,69 +506,84 @@ interactions:
       CommandName: [resource lock delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body: {string: '{"value":[{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Storage/storageAccounts/acliautomationlab8049/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Storage/storageAccounts/acliautomationlab7392/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.KeyVault/vaults/cliautomationlab3636/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.KeyVault/vaults/cliautomationlab1646/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation016zx7ulhvrc7ng6fcdst72y2t2fgbvbyueykqnw4d76aq4gyxd267voh5nixs/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5d5s7t6ltceqo5tg4dxvxtspxhl2xcmhfgyhpecowralnvufqlaywvytovn6v3/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Storage/storageAccounts/awilxdevlab9274/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Storage/storageAccounts/acliautomationlab1131/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.KeyVault/vaults/wilxdevlab8104/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.KeyVault/vaults/cliautomationlab4599/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''wilxdevlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/wilx-group/providers/Microsoft.Network/virtualNetworks/Dtlwilxdevlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Authorization/locks/rglock","type":"Microsoft.Authorization/locks","name":"rglock"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm625810group/providers/Microsoft.Compute/virtualMachines/vm625810/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg9de67119f7/providers/Microsoft.Storage/storageAccounts/st3ea29977a4/providers/Microsoft.Authorization/locks/stLock","type":"Microsoft.Authorization/locks","name":"stLock"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rged92722916/providers/Microsoft.Network/virtualNetworks/nete1352643ac/subnets/subnet1/providers/Microsoft.Authorization/locks/subnetLock","type":"Microsoft.Authorization/locks","name":"subnetLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Storage/storageAccounts/acliautomationlab9396/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01uaic4wwniigwe6n5bmni4ch3mzqlplsgiwalrlnfznoigmt5ah3fyj7ay5jf/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.KeyVault/vaults/cliautomationlab8702/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Storage/storageAccounts/acliautomationlab6290/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01p5mb65te4noiwqbh7ni3sggmdrhbawq2atk5mc6elgdat5qkg6fuguonzmvj/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-tc/providers/Microsoft.Authorization/locks/myLock","type":"Microsoft.Authorization/locks","name":"myLock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Storage/storageAccounts/acliautomationlab4621/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.KeyVault/vaults/cliautomationlab3425/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.KeyVault/vaults/cliautomationlab7523/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01ofs4jum5pgipgviiyt3rz6dfx6jphkwzwxtb7ztjus4mrvurxauwow5oi2ip/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationr7zmwrv545myosbhrhgmvyxvh473lloj24vcvwx5xuabi7hadxngt4sg7cbfxm/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Authorization/locks/myLock4","type":"Microsoft.Authorization/locks","name":"myLock4"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock3","type":"Microsoft.Authorization/locks","name":"myLock3"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/javacsmrg8678/providers/Microsoft.Storage/storageAccounts/stg24699/providers/Microsoft.Authorization/locks/myLock6","type":"Microsoft.Authorization/locks","name":"myLock6"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab2987/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Storage/storageAccounts/acliautomationlab904/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab786/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.KeyVault/vaults/cliautomationlab2733/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"ReadOnly","notes":"notes000004"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Pending
-        support ticket: REG:117080316140410"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2del/providers/Microsoft.Authorization/locks/nottodelete","type":"Microsoft.Authorization/locks","name":"nottodelete"},{"properties":{"level":"ReadOnly","notes":"vm
-        readonly lock"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vm795032group/providers/Microsoft.Compute/virtualMachines/vm795032/providers/Microsoft.Authorization/locks/vmlock","type":"Microsoft.Authorization/locks","name":"vmlock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/wilxgroup/providers/Microsoft.Authorization/locks/mylock","type":"Microsoft.Authorization/locks","name":"mylock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Storage/storageAccounts/acliautomationlab2281/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01x2ivwmgy7h7xlhxsucwcey6t3oqntveobkjypkl4l2qhrsxs5yzrlkt43pwg/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.KeyVault/vaults/cliautomationlab6073/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Storage/storageAccounts/acliautomationlab3246/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
-        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Authorization/locks/lock-1","type":"Microsoft.Authorization/locks","name":"lock-1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anu-abc/providers/Microsoft.Storage/storageAccounts/anustg234/providers/Microsoft.Authorization/locks/lock-2","type":"Microsoft.Authorization/locks","name":"lock-2"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Storage/storageAccounts/acliautomationlab1231/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.KeyVault/vaults/cliautomationlab5931/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.KeyVault/vaults/cliautomationlab505/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation2uaupk3gjn62bq6xovmzmkfiau5ckzltzzg23wipgtikelknor4mttwch5lzg6/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
-        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyl5duneg4gkn25csd2rd4lbm2yjjq5n33z24jxikgchafi3xnfgokwxtsor56r/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Storage/storageAccounts/acliautomationlab8325/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.KeyVault/vaults/cliautomationlab7706/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation014whdssyvw7jfnoexwuyhiqyqsndnjgnj5naa27jcghah5uoqumtrmojy6lwa/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Storage/storageAccounts/acliautomationlab9906/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.KeyVault/vaults/cliautomationlab3605/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationyfwfjfweexioxkx2y3zmbmgodchnm3uetmvqsaexybtsrwkd47lsvrp5zmdzlr/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"ReadOnly","notes":"notes000004"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Storage/storageAccounts/acliautomationlab5809/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.KeyVault/vaults/cliautomationlab6282/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation01vrhbspwox2r4xyvnrvowmlzxq6jr6fl7fpaa6qi7heb4bvrlg7rei72b22gw/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Storage/storageAccounts/acliautomationlab2855/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.KeyVault/vaults/cliautomationlab7437/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomationqykn64bzakkymrnxrjj5epxgcwrtjuv3bril5nwr6g674dsmrnjkbdslhvv6be/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Storage/storageAccounts/acliautomationlab799/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.KeyVault/vaults/cliautomationlab952/providers/Microsoft.Authorization/locks/DevTestLabs
+        Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"},{"properties":{"level":"CanNotDelete","notes":"Reserved
+        resource locked by ''cliautomationlab'' lab."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation5bhuubklmix25cgxkmdnru4a4my626erp5ekt72ictql2e3whesn6yn5dxxz4j/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/providers/Microsoft.Authorization/locks/DevTestLabs
         Lock","type":"Microsoft.Authorization/locks","name":"DevTestLabs Lock"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['12841']
+      content-length: ['13628']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:38:53 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -512,8 +594,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 managementlockclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -522,11 +604,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:38:53 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1181']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -537,9 +620,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001?api-version=2017-05-10
@@ -548,11 +631,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:38:59 GMT']
+      date: ['Mon, 02 Apr 2018 15:51:54 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVTT1VSQ0U6NUZMT0NLSzVLTDNPUUZITTRFU0tKU1YyTnwxRTgwODJCQkE2QTg5MzAyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVTT1VSQ0U6NUZMT0NLS0lUM1JKRVRDVEszN0QzVTc2RHw0NzRDMTBFNzdERjBEQUU0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1178']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
     status: {code: 202, message: Accepted}
 version: 1
