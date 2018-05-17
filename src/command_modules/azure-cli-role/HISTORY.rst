@@ -5,7 +5,7 @@ Release History
 
 2.0.24
 ++++++
-* Minor fixes.
+* ad app update: add generic update support
 
 2.0.23
 ++++++
