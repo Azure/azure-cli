@@ -52,13 +52,12 @@ def acr_image_import(cmd,
             raise CLIError(REGISTRY_MISMATCH)
         else:
             resource_id = registry_from_login_server.id
-    else:
-        if not resource_id:
-            from knack.prompting import prompt, NoTTYException
-            try:
-                resource_id = prompt(SOURCE_REGISTRY_NOT_FOUND)
-            except NoTTYException:
-                raise CLIError(NO_TTY_ERROR)
+    elif not resource_id:
+        from knack.prompting import prompt, NoTTYException
+        try:
+            resource_id = prompt(SOURCE_REGISTRY_NOT_FOUND)
+        except NoTTYException:
+            raise CLIError(NO_TTY_ERROR)
 
     source_image = source_image[slash + 1:]
     if not source_image:
