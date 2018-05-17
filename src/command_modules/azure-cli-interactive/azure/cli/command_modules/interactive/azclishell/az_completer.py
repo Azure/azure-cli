@@ -205,6 +205,7 @@ class AzCompleter(Completer):
         AzCliCommandParser.error = error_pass
         AzCliCommandParser._check_value = _check_value_muted
 
+        # No exception is expected. However, we add this try-catch block, as this may have far-reaching effects.
         try:
             parse_args = self.argsfinder.get_parsed_args(parse_quotes(text, quotes=False, string=False))
         except Exception:  # pylint: disable=broad-except
