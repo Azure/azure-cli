@@ -437,14 +437,20 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None,
-                              subscription_id=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, external_subscription_ids=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
+
+        external_tenants_info = []
+        for s in [x for x in (external_subscription_ids or []) if x != subscription_id]:
+            a = self.get_subscription(s)
+            if a[_TENANT_ID] != account[_TENANT_ID]:
+                external_tenants_info.append((a[_USER_ENTITY][_USER_NAME], a[_TENANT_ID]))
+
         if identity_type is None:
             def _retrieve_token():
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -453,8 +459,16 @@ class Profile(object):
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                      account[_TENANT_ID], resource)
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+
+            def _retrieve_tokens_from_external_tenants():
+                external_tokens = []
+                for u, t in external_tenants_info:
+                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
+                return external_tokens
+
             from azure.cli.core.adal_authentication import AdalAuthentication
-            auth_object = AdalAuthentication(_retrieve_token)
+            auth_object = AdalAuthentication(_retrieve_token,
+                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
         else:
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
