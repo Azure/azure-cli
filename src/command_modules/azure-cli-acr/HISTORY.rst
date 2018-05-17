@@ -13,7 +13,7 @@ Release History
 
 2.0.25
 ++++++
-* Add ACR Image Import commands.
+* Add ACR Image Import command.
 
 2.0.24
 ++++++
