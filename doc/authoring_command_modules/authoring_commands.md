@@ -18,17 +18,21 @@ The document provides instructions and guidelines on how to author individual co
 
 [7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-[8. Generic Update Commands](#generic-update-commands)
+[8. Supporting Name or ID Parameters](#supporting-name-or-id-parameters)
 
-[9. Custom Table Formats](#custom-table-formats)
+[9. Generic Update Commands](#generic-update-commands)
 
-[10. Tab Completion (bash only)](#tab-completion)
+[10. Custom Table Formats](#custom-table-formats)
 
-[11. Validators](#validators)
+[11. Tab Completion (bash only)](#tab-completion)
 
-[12. Registering Flag Arguments](#registering-flags)
+[12. Validators](#validators)
 
-[13. Registering Enum Arguments](#registering-enums)
+[13. Registering Flag Arguments](#registering-flags)
+
+[14. Registering Enum Arguments](#registering-enums)
+
+[15. Preventing particular extensions from being loading](#extension-suppression)
 
 Authoring Commands
 =============================
@@ -55,7 +59,7 @@ class MyCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         super(MyCommandsLoader, self).load_arguments(command)
         # TODO: Register argument contexts and arguments here
-        
+
 COMMAND_LOADER_CLS = MyCommandsLoader
 ```
 
@@ -63,7 +67,11 @@ COMMAND_LOADER_CLS = MyCommandsLoader
 
 Write your command as a simple function, specifying your arguments as the parameter names.
 
+***Parameter Naming Guidance***
+
 When choosing names, it is recommended that you look at similiar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
+
+Avoid using a parameter name called `name` as this is a very common alias in the CLI and will often create aliasing conflicts.
 
 If you specify a default value in your function signature, this will flag the argument as optional and will automatically display the default value in the help text for the command. Any parameters that do not have a default value are required and will automatically appear in help with the [Required] label. The required and default behaviors for arguments can be overridden (see Argument Customization below) but this is not generally needed.
 
@@ -110,6 +118,7 @@ command_group(self, group_name, command_type=None, **kwargs)
 - `command_type`: a `CliCommandType` object that will be used for all calls to `command` within the group.
 - `kwargs`: any supported kwarg that will be used as the basis for all command calls. Commonly used kwargs include: `custom_command_type` (if custom commands are split amongst many files) and `client_factory` (if custom commands use the `client` argument).
 
+
 **(3) Command Registration Helpers**
 
 ***command***
@@ -120,7 +129,7 @@ command(self, name, method_name=None, command_type=None, **kwargs)
 - `name`: The name of the command within the command group
 - `method_name`: The name of the SDK or custom method, relative to the path specified in `operations_tmpl`.
 - `command_type`: A `CliCommandType` object to apply to this command (optional).
-- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `no_wait_param` and  `transform`.
+- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `supports_no_wait` and  `transform`.
 
 Any kwargs that are not specified will be pulled from the `command_type` kwarg, if present.
 
@@ -150,6 +159,52 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
    g.generic_wait_command('wait')
 ```
 
+**(4) Supporting --no-wait**
+
+When registering a command, the boolean `supports_no_wait` property can be used to specify that the command supports `--no-wait`.
+
+Here are examples:
+
+***command()***
+
+```Python
+with self.command_group('mymod', mymod_sdk) as g:
+    g.command('command1', 'do_something_1', supports_no_wait=True)
+```
+
+***custom_command()***
+
+```Python
+# inside load_command_table(...)
+with self.command_group('mymod', mymod_sdk) as g:
+    g.custom_command('command2', 'do_something_2', supports_no_wait=True)
+
+# inside custom.py
+from azure.cli.core.util import sdk_no_wait
+def do_something_2(cmd, arg1, arg2, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, arg1, arg2)
+```
+
+The signature of `azure.cli.core.util.sdk_no_wait` is:
+
+```Python
+sdk_no_wait(no_wait, func, *args, **kwargs)
+```
+
+
+- `no_wait` - The boolean for no wait. `True` if `--no-wait` specified. `False` otherwise.
+- `func` - The callable to use.
+- `args` - The positional arguments that should be passed to the callable.
+- `kwargs` - The keyword arguments that should be passed to the callable.
+
+***generic_update_command()***
+
+```Python
+with self.command_group('mymod', mymod_sdk) as g:
+    g.generic_update_command('update', supports_no_wait=True)
+```
+
+
 ## Write Help Entry
 
 See the following for guidance on writing a help entry: https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
@@ -177,7 +232,7 @@ For more information:
 argument_context(self, scope, **kwargs):
 ```
 
-- `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`. 
+- `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`.
 
 ```Python
 with self.argument_context('my_param', ...) as c:  # applies to BOTH command1 and command2
@@ -311,11 +366,11 @@ The following kwargs may be inherited from the command loader:
 
 Most ARM resources can be identified by an ID. In many cases, for example `show` and `delete` commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space separated IDs, allowing the client to loop the command over each ID.
+Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `AzArgumentContext.argument`.
 
-Consider the following simplified example for NIC IP config. 
+Consider the following simplified example for NIC IP config.
 
 ```Python
 def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
@@ -335,7 +390,7 @@ The help output for this command would be:
  Arguments
     --name -n          : The IP config name.
     --nic-name         : The NIC name.
-    --resource-group -g: Name of resource group.   
+    --resource-group -g: Name of resource group.
 ```
 
 Now let's specify values for the `id_part` kwarg in the calls to `argument`:
@@ -361,11 +416,11 @@ Resource Id Arguments
                          should be specified.
     --name -n          : The IP config name.
     --nic-name         : The NIC name.
-    --resource-group -g: Name of resource group. 
+    --resource-group -g: Name of resource group.
 ```
 Now the user may identify the target IP config by specifying either the resource group, NIC and IP config names or by simply pasting in the ID for the IP config itself.
 
-This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument. 
+This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument.
 
 For example, consider the following ID of a subnet lock:
 ```
@@ -392,6 +447,54 @@ Any of these keys could be supplied as a value for `id_part`, thought typically 
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
+- `--ids` is intended to be the ID of the resource the command group is about. Thus, it needs to be suppressed on `list` commands for child resources. This simplest way to do this:
+```Python
+with self.argument_context('parent child') as c:
+  c.argument('parent_name', id_part=None)  # This should ALWAYS be the id_part that was 'name'.
+  c.argument('child_name', ...)
+```
+
+## Supporting Name or ID Parameters
+
+Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
+
+DO NOT:
+- Expose an ID parameter like `--storage-account-id`. 
+- Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
+
+DO:
+- Call the parameter `--storage-account` and indicate in the help text that it accepts the "Name or ID of the storage account."
+- Add logic similar to the following to a validator or custom command to process the name or ID logic:
+
+**Custom Command**
+```Python
+def my_command(cmd, resource_group_name, foo_name, storage_account):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(storage_account):
+        storage_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=storage_account
+        )
+```
+
+**Validator**
+```Python
+def validate_storage_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.storage_account:
+        if not is_valid_resource_id(namespace.storage_account):
+            namespace.storage_account = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Storage', type='storageAccounts',
+                name=namespace.storage_account
+            )
+```
+
 
 ## Generic Update Commands
 
@@ -411,6 +514,8 @@ with self.command_group('test', test_sdk) as g:
   g.generic_update_command('update')
 ```
 
+However, most commonly, the `custom_func_name` and `custom_func_type` kwargs will be used to expose convenience arguments in addition to the generic arguments.
+
 - `name` - The name of the command. Most commonly 'update'.
 - `getter_name` - The name of the method which will be used to retrieve the object instance. If the method is named `get` (which is the case for most SDKs), this can be omitted.
 - `getter_type` - A `CliCommandType` object which will be used to locate the getter. Only needed if the getter is a custom command (uncommon).
@@ -418,7 +523,7 @@ with self.command_group('test', test_sdk) as g:
 - `setter_type` - A `CliCommandType` object which will be used to locate the setter. Only needed if the setter is a custom command (uncommon).
 - `setter_arg_name` - The name of the argument in the setter which corresponds to the object being updated. If the name if `parameters` (which is the case for most SDKs), this can be omitted.
 - `custom_func_name` (optional) - The name of a method which accepts the object being updated (must be named `instance`), mutates, and returns that object. This is commonly used to add convenience options to the command by listing them in the method signature, similar to a purely custom method. The difference is that a custom command function returns the command result while a generic update custom function returns only the object being updated. A simple custom function might look like:
-  
+
   ```Python
   def my_custom_function(instance, item_name, custom_arg=None):
     if custom_arg:
@@ -435,7 +540,7 @@ Sometimes you will want to write commands that operate on child resources and it
   - `child_collection_prop_name` - the name of the child collection property. For example, if object `my_parent` has a child collection called `my_children` that you would access using `my_parent.my_children` then the name you would use is 'my_children'.
   - `child_collection_key_name` - Most child collections in Azure are lists of objects (as opposed to dictionaries) which will have a property in them that serves as the key. This is the name of that key property. By default it is 'name'. In the above example, if an entry in the `my_children` collection has a key property called `my_identifier` then the value you would supply is 'my_identifier'.
   - `child_arg_name` - If you want to refer the child object key (the property identified by `child_collection_key_name`) inside a custom function, you should specify the argument name you use in your custom function. By default, this is called `item_name`. In the above example, where our child object had a key called `my_identifier`, you could refer to this property within your custom function through the `item_name` property, or specify something different.
-  
+
 **Logic Flow**
 
 A simplified understanding of the flow of the generic update is as follows:
@@ -446,6 +551,34 @@ if custom_function:
     instance = custom_function(...) # apply custom logic
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
+```
+
+**Generic Update for PATCH-based Services**
+
+`generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
+
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
+```Python
+def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
+   from my_foo_sdk import FooUpdateParameters, ComplexProperty
+
+   # (1) instantiate the update parameters object. Generally, you can pass simple parameters
+   # as-is and the service will correctly interpret this.
+   parameters = FooUpdateParameters(
+     prop1=prop1,
+     prop2=prop2)
+     
+   # (2) complex objects must also have PATCH-like behavior, and often services do not
+   # correctly support this. You may need to fill these objects with the existing
+   # values if they are not being updated
+   parameters.complex_prop = ComplexProperty(
+     complex_prop1=complex_prop1 or instance.complex_prop.complex_prop1,
+     complex_prop2=complex_prop2 or instance.complex_prop.complex_prop2
+   )
+   # (3) instead of returning the instance object as you do with a PUT-based generic update,
+   # return the update parameters object.
+   return parameters
 ```
 
 ## Custom Table Formats
@@ -468,7 +601,7 @@ def transform_foo(result):
 
 A string containing Python dictionary-syntax '{Key:JMESPath path to property, ...}'
 
-Example: 
+Example:
 ```Python
 table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}'
 ```
@@ -500,7 +633,7 @@ from azure.cli.core.decorators import Completer
 @Completer
 def get_foo_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     # TODO: Your custom logic here
-    result = ... 
+    result = ...
     return [r.name for r in result]
 ```
 
@@ -533,7 +666,7 @@ Validators are executed after argument parsing, and thus after the native argpar
 The `validator` keyword applies to commands and arguments. A command can have, at most, one validator. If supplied, then *only* this validator will be executed. Any argument-level validators will be ignored. The reason to use a command validator is if the validation sequence is important.  However, the command validator can and very often is composed to individual argument level validators. You simply define the sequence in which they execute.
 
 ***Argument Validators***
-An argument can be assigned, at most, one validator. However, since a command can have many arguments, this means that a command can have many argument validators. Furthermore, since an argument context may apply to many commands, this means that this argument validator can be reused across many commands. At execution time, argument validators are executed *in random order*, so you should ensure you do not have dependencies between validators. If you do, the a command validator is the appropriate route to take. It is fine to have an argument validator involve several parameters as long as they are interdependent (for example, a validator involving a vnet name and subnet name).  
+An argument can be assigned, at most, one validator. However, since a command can have many arguments, this means that a command can have many argument validators. Furthermore, since an argument context may apply to many commands, this means that this argument validator can be reused across many commands. At execution time, argument validators are executed *in random order*, so you should ensure you do not have dependencies between validators. If you do, the a command validator is the appropriate route to take. It is fine to have an argument validator involve several parameters as long as they are interdependent (for example, a validator involving a vnet name and subnet name).
 
 ## Registering Flags
 
@@ -576,3 +709,27 @@ with self.argument_context('mymod') as c:
 ```
 
 Above are two examples of how this can be used. In the first instance, an Enum model is reflected from the SDK. In the second instance, a custom choice list is provided. This is preferable to using the native `argparse.choices` kwarg because the choice lists generated by `get_enum_type` will be case insensitive.
+
+## Extension Suppression
+
+It is possible for a command module to suppress specific extensions from being loaded.
+
+This is useful for commands that were once extensions that have now moved inside a command module.
+
+Here, we suppress an extension by name and also by version.
+
+This will allow the extension to be published in the future with the same name and a newer version that will not be suppressed.
+
+This is great for experimental extensions that periodically get incorporated into the product.
+
+```Python
+class MyCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core import ModExtensionSuppress
+        # Suppress myextension up to and including version 0.2.0
+        super(MyCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                               suppress_extension=ModExtensionSuppress(__name__, 'myextension', '0.2.0',
+                                                                                       reason='These commands are now in the CLI.',
+                                                                                       recommend_remove=True))
+```

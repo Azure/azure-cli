@@ -41,6 +41,13 @@ def cli_redis_import_method(cmd, client, resource_group_name, name, file_format,
 
 
 # pylint: disable=unused-argument
+def cli_redis_list(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+# pylint: disable=unused-argument
 def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_configuration):
     from azure.mgmt.redis.models import RedisUpdateParameters
     logger.warning('This command is getting deprecated. Please use "redis update" command')

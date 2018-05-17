@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: profile-2017-03-09. Python module name can't begin with a digit.
     target_profile=profile_${target_profile//-/_}
 fi
-echo ==== $target_profile ====
+echo Pick up profile: $target_profile 
 
 ##############################################
 # Define colored output func
@@ -51,6 +51,12 @@ for setup_file in $(find src -name 'setup.py'); do
     python setup.py -q sdist -d $sdist_dir
     popd >/dev/null
 done
+
+##############################################
+# copy private packages
+if [ -z ./privates ]; then
+    cp ./privates/*.whl $output_dir
+fi
 
 ##############################################
 # build test packages
@@ -147,6 +153,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.bat',
                        '*.txt',
                        '*.cer',
+                       '*.yml',
                        '**/*.cer',
                        '**/*.pem',
                        '**/*.pfx',
@@ -177,7 +184,7 @@ popd >/dev/null
 
 ##############################################
 # clear afterwards
-# rm -rf $testsrc_dir
+rm -rf $testsrc_dir
 git checkout src
 
 ##############################################

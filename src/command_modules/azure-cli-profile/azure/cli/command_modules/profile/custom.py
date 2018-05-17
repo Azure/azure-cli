@@ -12,12 +12,13 @@ from knack.util import CLIError
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import in_cloud_console
 
-from azure.cli.core.commands.validators import DefaultStr
-
 logger = get_logger(__name__)
 
-_CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticates the user account it was initially"
-                                   " launched under, as a result 'az %s' is disabled.")
+
+_CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cloud Shell identity with"
+                                 " 'az login --identity'. Login with a new identity with 'az login'.")
+_CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated under the initial account signed-in with."
+                                " Run 'az login' only if you need to use a different account")
 
 
 def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -36,7 +37,7 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
     for sub in subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
     if not all:
-        enabled_ones = [s for s in subscriptions if s['state'] == 'Enabled']
+        enabled_ones = [s for s in subscriptions if s.get('state') == 'Enabled']
         if len(enabled_ones) != len(subscriptions):
             logger.warning("A few accounts are skipped as they don't have 'Enabled' state. "
                            "Use '--all' to display them.")
@@ -67,7 +68,7 @@ def get_access_token(cmd, subscription=None, resource=None):
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
-        'expiresOn': creds[2]['expiresOn'],
+        'expiresOn': creds[2].get('expiresOn', 'N/A'),
         'subscription': subscription,
         'tenant': tenant
     }
@@ -83,37 +84,33 @@ def set_active_subscription(cmd, subscription):
 
 def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
+    if in_cloud_console():
+        logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     profile.logout_all()
 
 
 # pylint: disable=inconsistent-return-statements
-def login(cmd, username=None, password=None, service_principal=None, tenant=None,
-          allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
+def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
+          identity=False):
     """Log in to access Azure subscriptions"""
-    import os
-    import re
     from adal.adal_error import AdalError
     import requests
 
     # quick argument usage check
-    if (any([password, service_principal, tenant, allow_no_subscriptions]) and
-            any([msi, not getattr(msi_port, 'is_default', None)])):
-        raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
+    if (any([password, service_principal, tenant, allow_no_subscriptions]) and identity):
+        raise CLIError("usage error: '--identity' is not applicable with other arguments")
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
 
-    if in_cloud_console():
-        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
-        if console_tokens:
-            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
-        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'login')
-        return
-
-    if msi:
-        return profile.find_subscriptions_in_vm_with_msi(msi_port, username)
+    if identity:
+        if in_cloud_console():
+            return profile.find_subscriptions_in_cloud_console()
+        return profile.find_subscriptions_in_vm_with_msi(username)
+    elif in_cloud_console():  # tell users they might not need login
+        logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
         if not password:
@@ -125,7 +122,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         interactive = True
 
     try:
-        profile = Profile(cli_ctx=cmd.cli_ctx)
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
             username,
@@ -154,8 +150,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
-        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
-        return
+        logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:

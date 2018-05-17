@@ -59,7 +59,7 @@ def validate_ssh_key(namespace):
 
 
 def validate_list_of_integers(string):
-    # extract comma separated list of integers
+    # extract comma-separated list of integers
     return list(map(int, string.split(',')))
 
 
@@ -71,14 +71,16 @@ def validate_create_parameters(namespace):
 
 
 def validate_k8s_version(namespace):
-    """Validates a string as a possible Kubernetes version."""
-    k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
-    found = k8s_release_regex.findall(namespace.kubernetes_version)
-    if found:
-        namespace.kubernetes_version = found[0]
-    else:
-        raise CLIError('--kubernetes-version should be the full version number, '
-                       'such as "1.7.7" or "1.8.1"')
+    """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
+    to use its default version."""
+    if namespace.kubernetes_version:
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        found = k8s_release_regex.findall(namespace.kubernetes_version)
+        if found:
+            namespace.kubernetes_version = found[0]
+        else:
+            raise CLIError('--kubernetes-version should be the full version number, '
+                           'such as "1.7.12" or "1.8.7"')
 
 
 def validate_k8s_client_version(namespace):
@@ -89,7 +91,7 @@ def validate_k8s_client_version(namespace):
         namespace.client_version = found[0]
     else:
         raise CLIError('--client-version should be the full version number '
-                       '(such as "1.7.7" or "1.8.1") or "latest"')
+                       '(such as "1.7.12" or "1.8.7") or "latest"')
 
 
 def validate_linux_host_name(namespace):

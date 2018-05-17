@@ -12,8 +12,12 @@ def create_metric_rule(client, resource_group_name, rule_name, target, condition
     from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction
     condition.data_source.resource_uri = target
     custom_emails, webhooks, _ = _parse_actions(actions)
-    actions = [RuleEmailAction(email_service_owners, custom_emails)] + (webhooks or [])
-    rule = AlertRuleResource(location, rule_name, not disabled, condition, tags, description, actions)
+    actions = [
+        RuleEmailAction(send_to_service_owners=email_service_owners, custom_emails=custom_emails)
+    ] + (webhooks or [])
+    rule = AlertRuleResource(
+        location=location, alert_rule_resource_name=rule_name, is_enabled=not disabled,
+        condition=condition, tags=tags, description=description, actions=actions)
     return client.create_or_update(resource_group_name, rule_name, rule)
 
 
@@ -68,7 +72,7 @@ def update_metric_rule(instance, target=None, condition=None, description=None, 
     from azure.mgmt.monitor.models import RuleEmailAction
     if email_service_owners is None:
         email_service_owners = curr_email_service_owners
-    actions = [RuleEmailAction(email_service_owners, emails)] + webhooks
+    actions = [RuleEmailAction(send_to_service_owners=email_service_owners, custom_emails=emails)] + webhooks
     instance.actions = actions
 
     return instance

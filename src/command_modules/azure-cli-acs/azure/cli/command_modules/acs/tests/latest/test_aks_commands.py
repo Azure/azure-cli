@@ -9,6 +9,8 @@ import unittest
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
+from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.checkers import StringContainCheck
 
 # flake8: noqa
 
@@ -17,103 +19,155 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):
-        # the simplest aks create scenario
-        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
+        # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        dns_prefix = self.create_random_name('cliaksdns', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
 
         # create
-        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} -l {} ' \
-                     '--service-principal {} --client-secret {}'
-        self.cmd(
-            create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file,
-                              resource_group_location, sp_name, sp_password),
-            checks=[
-                self.exists('fqdn'),
-                self.check('provisioningState', 'Succeeded')
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
         ])
 
         # show
-        self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            self.check('type', 'Microsoft.ContainerService/ManagedClusters'),
-            self.check('name', aks_name),
-            self.check('resourceGroup', resource_group),
-            self.check('agentPoolProfiles[0].count', 3),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
-            self.check('dnsPrefix', dns_prefix)
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion')
         ])
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {} -n {} -f {}'.format(resource_group, aks_name, temp_path))
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
         finally:
             os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
-        self.cmd('aks get-credentials -g {} -n {} -f -'.format(resource_group, aks_name))
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
         temp_path = 'kubeconfig.tmp'
+        self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {} -n {} -f {}'.format(resource_group, aks_name, temp_path))
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
 
-        # scale-up
-        self.cmd('aks scale -g {} -n {} --node-count 5'.format(resource_group, aks_name), checks=[
-            self.check('agentPoolProfiles[0].count', 5)
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # show again
-        self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            self.check('agentPoolProfiles[0].count', 5)
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
         ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
-        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
-        aks_name = self.create_random_name('cliakstest', 16)
-        dns_prefix = self.create_random_name('cliaksdns', 16)
-        original_k8s_version = '1.7.7'
+    def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliakstest', 16),
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'k8s_version': '1.8.11'
+        })
 
-        # create
-        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} --kubernetes-version {} -l {} ' \
-                     '--service-principal {} --client-secret {}'
-        self.cmd(
-            create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file, original_k8s_version,
-                              resource_group_location, sp_name, sp_password),
-            checks=[
-                self.exists('fqdn'),
-                self.check('provisioningState', 'Succeeded')
-        ])
+        # create --no-wait
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
+                     '--tags scenario_test --no-wait'
+        self.cmd(create_cmd, checks=[self.is_empty()])
+
+        # wait
+        self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
 
         # show
-        self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            self.check('type', 'Microsoft.ContainerService/ManagedClusters'),
-            self.check('name', aks_name),
-            self.check('resourceGroup', resource_group),
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 3),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
-            self.check('dnsPrefix', dns_prefix),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('kubernetesVersion', '1.7.7')
-        ])
-
-        # upgrade
-        new_k8s_version = '1.8.1'
-        upgrade_cmd = 'aks upgrade -g {} -n {} --kubernetes-version {} --yes'
-        self.cmd(upgrade_cmd.format(resource_group, aks_name, new_k8s_version), checks=[
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
-        # show again
-        self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            self.check('kubernetesVersion', '1.8.1')
+        # show k8s versions
+        self.cmd('aks get-versions -l {location}', checks=[
+            self.exists('orchestrators[*].orchestratorVersion')
         ])
+
+        # show k8s versions in table format
+        self.cmd('aks get-versions -l {location} -o table', checks=[
+            StringContainCheck(self.kwargs['k8s_version'])
+        ])
+
+        # get versions for upgrade
+        self.cmd('aks get-upgrades -g {resource_group} -n {name}', checks=[
+            self.exists('id'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].kubernetesVersion', '{k8s_version}'),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.exists('controlPlaneProfile.upgrades'),
+            self.check('type', 'Microsoft.ContainerService/managedClusters/upgradeprofiles')
+        ])
+
+        # get versions for upgrade in table format
+        k8s_upgrade_version = '1.9.6'
+        self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
+            StringContainCheck('Upgrades'),
+            StringContainCheck(k8s_upgrade_version)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
+
+        # show again and expect failure
+        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
 
     @classmethod
     def generate_ssh_keys(cls):

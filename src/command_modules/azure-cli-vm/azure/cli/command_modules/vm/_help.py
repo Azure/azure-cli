@@ -12,9 +12,34 @@ vm_ids_example = """        - name: {0}
             az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 """
 
+helps['vm secret'] = """
+    type: group
+    short-summary: Manage VM secrets.
+"""
+
+helps['vm secret add'] = """
+    type: command
+    short-summary: Add a secret to a VM.
+"""
+
+helps['vm secret list'] = """
+    type: command
+    short-summary: List secrets on a VM.
+"""
+
+helps['vm secret remove'] = """
+    type: command
+    short-summary: Remove a secret from a VM.
+"""
+
 helps['vm secret format'] = """
     type: command
     short-summary: Transform secrets into a form that can be used by VMs and VMSSes.
+    parameters:
+        - name: --secrets -s
+          long-summary: >
+            The command will attempt to resolve the vault ID for each secret. If it is unable to do so,
+            specify the vault ID to use for *all* secrets using: --keyvault NAME --resource-group NAME | --keyvault ID.
     examples:
         - name: Create a self-signed certificate with the default policy, and add it to a virtual machine.
           text: >
@@ -197,7 +222,7 @@ helps['vm extension set'] = """
 """
 
 helps['vm availability-set delete'] = """
-    type: command'
+    type: command
     short-summary: Delete an availability set.
     examples:
         - name: Delete an availability set.
@@ -259,8 +284,6 @@ helps['vmss get-instance-view'] = """
     type: command
     short-summary: View an instance of a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: A VM instance ID or "*" to list instance view for all VMs in a scale set.
 
@@ -275,8 +298,6 @@ helps['vmss reimage'] = """
     type: command
     short-summary: Reimage VMs within a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: VM instance ID. If missing, reimage all instances.
 """
@@ -298,8 +319,6 @@ helps['vmss show'] = """
     type: command
     short-summary: Get details on VMs within a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: VM instance ID. If missing, show the VMSS.
 """
@@ -332,6 +351,16 @@ helps['vmss wait'] = """
 helps['vmss disk'] = """
     type: group
     short-summary: Manage data disks of a VMSS.
+"""
+
+helps['vmss disk attach'] = """
+    type: command
+    short-summary: Attach managed data disks to a scale set or its instances.
+"""
+
+helps['vmss disk detach'] = """
+    type: command
+    short-summary: Detach managed data disks from a scale set or its instances.
 """
 
 helps['vmss nic'] = """
@@ -807,6 +836,11 @@ helps['vm image show'] = """
             az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
 """
 
+helps['vm image accept-terms'] = """
+    type: command
+    short-summary: Accept Azure Marketplace term so that the image can be used to create VMs
+"""
+
 helps['vm nic'] = """
     type: group
     short-summary: Manage network interfaces. See also `az network nic`.
@@ -1167,26 +1201,36 @@ helps['vm wait'] = """
 {0}
 """.format(vm_ids_example.format('Wait until all VMs in a resource group are deleted.', 'vm wait --deleted'))
 
-helps['vm assign-identity'] = """
+helps['vm identity'] = """
+    type: group
+    short-summary: manage service identities of a VM
+"""
+
+helps['vm identity assign'] = """
     type: command
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
         - name: Enable identity on a VM with the 'Reader' role.
-          text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader
 """
 
-helps['vm remove-identity'] = """
+helps['vm identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM.
     examples:
         - name: Remove 2 identities which are in the same resource group with the VM
-          text: az vm remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
+
+helps['vm identity show'] = """
+    type: command
+    short-summary: display VM's managed identity info.
 """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: (PREVIEW) Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine
 """
 
 helps['vm run-command invoke'] = """
@@ -1199,21 +1243,31 @@ helps['vm run-command invoke'] = """
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
 """
 
-helps['vmss assign-identity'] = """
+helps['vmss identity'] = """
+    type: group
+    short-summary: manage service identities of a VM scaleset.
+"""
+
+helps['vmss identity assign'] = """
     type: command
     short-summary: Enable managed service identity on a VMSS.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
         - name: Enable identity on a VMSS with the 'Owner' role.
-          text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
+          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner
 """
 
-helps['vmss remove-identity'] = """
+helps['vmss identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
     examples:
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
-          text: az vmss remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vmss identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
+
+helps['vmss identity show'] = """
+    type: command
+    short-summary: display VM scaleset's managed identity info.
 """
 
 helps['disk'] = """

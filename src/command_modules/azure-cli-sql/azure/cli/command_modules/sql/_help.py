@@ -17,10 +17,28 @@ helps['sql db'] = """
 helps['sql db copy'] = """
     type: command
     short-summary: Create a copy of a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The copy destination database must have the same edition as the source database, but you can change the edition
+                  after the copy has completed.
+    examples:
+        - name: Create a database with performance level S0 as a copy of an existing Standard database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a copy of an existing GeneralPurpose database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb -f Gen4 -c 1
     """
 helps['sql db create'] = """
     type: command
     short-summary: Create a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+    examples:
+        - name: Create a Standard S0 database.
+          text: az sql db create -g mygroup -s myserver -n mydb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware and 1 vcore
+          text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+        - name: Create a database with zone redundancy enabled
+          text: az sql db create -g mygroup -s myserver -n mydb -z
+        - name: Create a database with zone redundancy explicitly disabled
+          text: az sql db create -g mygroup -s myserver -n mydb -z false
     """
 helps['sql db delete'] = """
     type: command
@@ -42,6 +60,10 @@ helps['sql db list-editions'] = """
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
+helps['sql db rename'] = """
+    type: command
+    short-summary: Rename a database.
+    """
 helps['sql db show'] = """
     type: command
     short-summary: Get the details for a database.
@@ -56,6 +78,11 @@ helps['sql db show-connection-string'] = """
 helps['sql db update'] = """
     type: command
     short-summary: Update a database.
+    examples:
+        - name: Update database with zone redundancy enabled
+          text: az sql db update -g mygroup -s myserver -n mypool -z
+        - name: Update database with zone redundancy explicitly disabled
+          text: az sql db update -g mygroup -s myserver -n mypool -z false
     """
 helps['sql db audit-policy'] = """
     type: group
@@ -114,6 +141,13 @@ helps['sql db replica'] = """
 helps['sql db replica create'] = """
     type: command
     short-summary: Create a database as a readable secondary replica of an existing database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The secondary database must have the same edition as the primary database.
+    examples:
+        - name: Create a database with performance level S0 as a secondary replica of an existing Standard database.
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a secondary replica of an existing GeneralPurpose database
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb -f Gen4 -c 1
     """
 helps['sql db replica set-primary'] = """
     type: command
@@ -241,6 +275,15 @@ helps['sql elastic-pool'] = """
 helps['sql elastic-pool create'] = """
     type: command
     short-summary: Create an elastic pool.
+    examples:
+        - name: Create elastic pool with zone redundancy enabled
+          text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z
+        - name: Create elastic pool with zone redundancy explicitly disabled
+          text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z false
+        - name: Create a Standard 100 DTU elastic pool.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
+        - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
     """
 helps['sql elastic-pool list-editions'] = """
     type: command
@@ -262,6 +305,21 @@ helps['sql elastic-pool list-editions'] = """
 helps['sql elastic-pool update'] = """
     type: command
     short-summary: Update an elastic pool.
+    examples:
+        - name: Update elastic pool with zone redundancy enabled
+          text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z
+        - name: Update elastic pool with zone redundancy explicitly disabled
+          text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
+    """
+helps['sql elastic-pool op'] = """
+    type: group
+    short-summary: Manage operations on an elastic pool.
+    """
+helps['sql elastic-pool op cancel'] = """
+    type: command
+    examples:
+        - name: Cancel an operation.
+          text: az sql elastic-pool op cancel -g mygroup -s myserver -ep myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
     """
 helps['sql server'] = """
     type: group
@@ -295,6 +353,14 @@ helps['sql server conn-policy show'] = """
 helps['sql server conn-policy update'] = """
     type: command
     short-summary: Updates a server's secure connection policy.
+    """
+helps['sql server dns-alias'] = """
+    type: group
+    short-summary: Manage a server's DNS aliases.
+    """
+helps['sql server dns-alias set'] = """
+    type: command
+    short-summary: Sets a server to which DNS alias should point
     """
 helps['sql server firewall-rule'] = """
     type: group

@@ -2,6 +2,30 @@
 
 Release History
 ===============
+2.0.22
+++++++
+* make keyvault commands work in cloud shell or vms with identity
+
+2.0.21
+++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.20
+++++++
+* Support Autorest 3.0 based SDKs
+
+2.0.19
+++++++
+* Minor fixes.
+
+2.0.18
+++++++
+* Minor fixes.
+
+2.0.17
+++++++
+* Minor fixes.
 
 2.0.16
 ++++++

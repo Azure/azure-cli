@@ -7,6 +7,8 @@ The document provides instructions and guidelines on how to author command modul
 
 **Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md
 
+**Command Guidelines**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md
+
 **Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md
 
 **Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
@@ -152,26 +154,42 @@ $ az myfoo create --myfoo-name foo --resource-group-name myrg
 Testing
 -------
 
+Discover tests
+
+```
+azdev test --discover
+```
+
 Run all tests in a module:
 
 ```
-run_tests --module <module> [--live] [--parallel]
+azdev test MODULE [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
 
 Run an individual test:
 
 ```
-run_tests --module <module> --test <file>.<class>[.<test>]
+azdev test TEST [TEST ...] [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
-For example `run_tests --module mymod --test test_myfoo.MyFooTests.test_myfoo`
+For example `azdev test test_myfoo`
 
+Run a test when there is a conflict (for example, both 'azure-cli-core' and 'azure-cli-network' have 'test_foo'):
+```
+azdev test MODULE.TEST [--live]
+```
+
+The list of failed tests are displayed at the end of a run and dumped to the file specified with `--dest-file` or `test_failures.txt` if nothing is provided. This allows for conveniently replaying failed tests:
+
+```
+azdev test --src-file test_failures.txt [--live] [--series] [--discover]
+```
+
+Relying on the default filename, the list of failed tests should grow shorter as you fix the cause of the failures until there are no more failing tests.
 
 Style Checks
 ------------
 
 ```
-check_style --module <module> [--pylint] [--pep8]
-OR
 azdev style --module <module> [--pylint] [--pep8]
 ```
 

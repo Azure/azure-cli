@@ -22,6 +22,8 @@ AUTH_TYPES = {
     'LoginWithMicrosoftAccount': BuiltInAuthenticationProvider.microsoft_account,
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
+MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
+
 # pylint: disable=too-many-statements
 
 
@@ -56,7 +58,9 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
 
     with self.argument_context('appservice plan') as c:
-        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.')
 
@@ -71,8 +75,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
     with self.argument_context('webapp show') as c:
@@ -82,10 +89,16 @@ def load_arguments(self, _):
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
 
     with self.argument_context('webapp traffic-routing') as c:
-        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
+        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
     with self.argument_context('webapp update') as c:
         c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS", arg_type=get_three_state_flag(return_label=True))
+        c.argument('skip_custom_domain_verification', help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified", arg_type=get_three_state_flag(return_label=True))
+        c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name", arg_type=get_three_state_flag(return_label=True))
+        c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation", arg_type=get_three_state_flag(return_label=True))
+
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true', help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
@@ -108,8 +121,9 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
-            c.argument('settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
-            c.argument('setting_names', nargs='+', help="space separated app setting names")
+            c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
+            c.argument('setting_names', nargs='+', help="space-separated app setting names")
+
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -132,16 +146,26 @@ def load_arguments(self, _):
             c.argument('slot_swap', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
             c.argument('repository_type', help='repository type', arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
-        with self.argument_context(scope + ' assign-identity') as c:
+        with self.argument_context(scope + ' identity') as c:
             c.argument('disable_msi', action='store_true', help='disable the identity')
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
 
+        with self.argument_context(scope + ' deployment source config-zip') as c:
+            c.argument('src', help='a zip file path for deployment')
+
+        with self.argument_context(scope + ' config appsettings list') as c:
+            c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+        with self.argument_context(scope + ' config hostname list') as c:
+            c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
+
+    with self.argument_context('webapp config connection-string list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-    with self.argument_context('webapp config appsettings') as c:
-        c.argument('slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
     with self.argument_context('webapp deployment container config') as c:
         c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment', arg_type=get_enum_type(['true', 'false']))
     with self.argument_context('webapp deployment slot') as c:
@@ -171,9 +195,9 @@ def load_arguments(self, _):
 
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
-            c.argument('settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
-            c.argument('slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
-            c.argument('setting_names', nargs='+', help="space separated {} names".format(scope))
+            c.argument('settings', nargs='+', help="space-separated {} in a format of <name>=<value>".format(scope))
+            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of <name>=<value>".format(scope))
+            c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
@@ -184,6 +208,9 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
         c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
+        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
+        c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
 
     with self.argument_context('webapp config set') as c:
         c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
@@ -198,6 +225,8 @@ def load_arguments(self, _):
         c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
         c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
         c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+        c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+        c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
         c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
     with self.argument_context('webapp config backup') as c:
@@ -211,6 +240,7 @@ def load_arguments(self, _):
         c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
 
     with self.argument_context('webapp config backup update') as c:
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
         c.argument('frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
         c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag(return_label=True))
         c.argument('retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
@@ -223,27 +253,28 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp auth update') as c:
         c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
-        c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True))
+        c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True), help='use App Service Token Store')
         c.argument('action', arg_type=get_enum_type(AUTH_TYPES))
+        c.argument('runtime_version', help='Runtime version of the Authentication/Authorization feature in use for the current app')
         c.argument('token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
-        c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space delimited).")
-        c.argument('client_id', options_list=['--aad-client-id'], arg_group='Azure Active Directory')
-        c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory')
-        c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'], arg_group='Azure Active Directory', help="One or more token audiences (space delimited).")
+        c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space-delimited).")
+        c.argument('client_id', options_list=['--aad-client-id'], arg_group='Azure Active Directory', help='Application ID to integrate AAD organization account Sign-in into your web app')
+        c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory', help='AAD application secret')
+        c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'], arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from \'az cloud show\' at \"endpoints.activeDirectory\". '
                         'The tenantID can be found using \'az account show\'. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
-        c.argument('facebook_app_id', arg_group='Facebook')
-        c.argument('facebook_app_secret', arg_group='Facebook')
-        c.argument('facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space delimited).", arg_group='Facebook')
-        c.argument('twitter_consumer_key', arg_group='Twitter')
-        c.argument('twitter_consumer_secret', arg_group='Twitter')
-        c.argument('google_client_id', arg_group='Google')
-        c.argument('google_client_secret', arg_group='Google')
-        c.argument('google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space delimited).", arg_group='Google')
-        c.argument('microsoft_account_client_id', arg_group='Microsoft')
-        c.argument('microsoft_account_client_secret', arg_group='Microsoft')
-        c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space delimited).", arg_group='Microsoft')
+        c.argument('facebook_app_id', arg_group='Facebook', help="Application ID to integrate Facebook Sign-in into your web app")
+        c.argument('facebook_app_secret', arg_group='Facebook', help='Facebook Application client secret')
+        c.argument('facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
+        c.argument('twitter_consumer_key', arg_group='Twitter', help='Application ID to integrate Twitter Sign-in into your web app')
+        c.argument('twitter_consumer_secret', arg_group='Twitter', help='Twitter Application client secret')
+        c.argument('google_client_id', arg_group='Google', help='Application ID to integrate Google Sign-in into your web app')
+        c.argument('google_client_secret', arg_group='Google', help='Google Application client secret')
+        c.argument('google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space-delimited).", arg_group='Google')
+        c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
+        c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
+        c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
@@ -251,7 +282,8 @@ def load_arguments(self, _):
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
     with self.argument_context('functionapp create') as c:
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
         c.argument('new_app_name', options_list=['--name', '-n'], help='name of the new function app')
         c.argument('storage_account', options_list=['--storage-account', '-s'],
@@ -261,3 +293,5 @@ def load_arguments(self, _):
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)
+    with self.argument_context('functionapp config appsettings') as c:
+        c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")

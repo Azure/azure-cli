@@ -8,7 +8,8 @@ import os
 import time
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name
+from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
 from azure.cli.core.util import get_file_json
 
 
@@ -59,12 +60,8 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 class ResourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
+    @AllowLargeResponse()
     def test_resource_scenario(self, resource_group, resource_group_location):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         self.kwargs.update({
             'loc': resource_group_location,
             'vnet': self.create_random_name('vnet-', 30),
@@ -242,9 +239,12 @@ class ProviderOperationTest(ScenarioTest):
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
         ])
-        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+        self.cmd('provider operation show --namespace microsoft.compute', checks=[
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
+        ])
+        self.cmd('provider operation show --namespace microsoft.storage', checks=[
+            self.check("resourceTypes|[?name=='storageAccounts/blobServices/containers/blobs']|[0].operations[0].isDataAction", True),
         ])
 
 
@@ -348,7 +348,8 @@ class DeploymentNoWaitTest(ScenarioTest):
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
 
-class DeploymentThruUriTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class DeploymentThruUriTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
@@ -356,7 +357,7 @@ class DeploymentThruUriTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
-            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json',
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
@@ -400,8 +401,12 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature list --namespace Microsoft.Network',
                  checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
 
+        # Once a feature goes GA , it will be removed from the feature list. Once that happens, use other ones to test
+        self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
+
 
 class PolicyScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -413,21 +418,26 @@ class PolicyScenarioTest(ScenarioTest):
             'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
-            'mode': 'Indexed'
+            'mode': 'Indexed',
+            'metadata': {u'category': u'test'},
+            'updated_metadata': {u'category': u'test2'},
         })
 
         # create a policy
-        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode}', checks=[
+        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
             self.check('description', '{desc}'),
-            self.check('mode', '{mode}')
+            self.check('mode', '{mode}'),
+            self.check('metadata', '{metadata}')
         ])
 
         # update it
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
-        self.cmd('policy definition update -n {pn} --description {desc}',
-                 checks=self.check('description', '{desc}'))
+        self.cmd('policy definition update -n {pn} --description {desc} --metadata category=test2', checks=[
+            self.check('description', '{desc}'),
+            self.check('metadata', '{updated_metadata}')
+        ])
 
         # list and show it
         self.cmd('policy definition list',
@@ -468,7 +478,7 @@ class PolicyScenarioTest(ScenarioTest):
 
         # create a policy assignment using a built in policy definition name
         self.kwargs['pan2'] = self.create_random_name('azurecli-test-policy-assignment2', 40)
-        self.kwargs['bip'] = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()['name']
+        self.kwargs['bip'] = '06a78e20-9358-41c9-923c-fb736d382a4d'
         self.cmd('policy assignment create --policy {bip} -n {pan2} --display-name {padn} -g {rg}', checks=[
             self.check('name', '{pan2}'),
             self.check('displayName', '{padn}')
@@ -497,6 +507,8 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition list',
                  checks=self.check("length([?name=='{pn}'])", 0))
 
+    # remove and re-record once issue #6008 is fixed
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policyset(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -561,6 +573,12 @@ class PolicyScenarioTest(ScenarioTest):
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy set-definition list',
                  checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        self.cmd('policy definition delete -n {pn}')
+        time.sleep(10)  # ensure the policy is gone when run live.
+        self.cmd('policy definition list',
+                 checks=self.check("length([?name=='{pn}'])", 0))
 
     def test_show_built_in_policy(self):
         # This test actually does not work...
@@ -762,9 +780,9 @@ class InvokeActionTest(ScenarioTest):
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')
         self.cmd('resource invoke-action --action deallocate --ids {vm_id}')
 
-        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
+        self.kwargs['request_body'] = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
 
-        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(self.kwargs['vm_id'], request_body))
+        self.cmd('resource invoke-action --action capture --ids {vm_id} --request-body {request_body}')
 
 
 if __name__ == '__main__':

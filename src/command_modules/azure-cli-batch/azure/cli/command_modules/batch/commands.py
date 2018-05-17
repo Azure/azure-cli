@@ -52,9 +52,9 @@ def load_command_table(self, _):
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
         g.command('show', 'get')
-        g.custom_command('create', 'create_account', no_wait_param='no_wait')
+        g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
-        g.command('delete', 'delete', no_wait_param='no_wait', confirmation=True)
+        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('login', 'login_account')
         g.command('autostorage-keys sync', 'synchronize_auto_storage_keys')
         g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
@@ -83,6 +83,9 @@ def load_command_table(self, _):
 
     with self.command_group('batch pool node-agent-skus', get_data_type('account')) as g:
         g.batch_command('list', 'list_node_agent_skus')
+
+    with self.command_group('batch pool node-counts', get_data_type('account')) as g:
+        g.batch_command('list', 'list_pool_node_counts')
 
     with self.command_group('batch certificate', get_data_type('certificate'), client_factory=get_data_factory('certificate')) as g:
         g.custom_command('create', 'create_certificate')
@@ -169,3 +172,4 @@ def load_command_table(self, _):
         g.batch_command('scheduling enable', 'enable_scheduling')
         g.batch_command('remote-login-settings show', 'get_remote_login_settings')
         g.batch_command('remote-desktop download', 'get_remote_desktop')
+        g.batch_command('service-logs upload', 'upload_batch_service_logs')

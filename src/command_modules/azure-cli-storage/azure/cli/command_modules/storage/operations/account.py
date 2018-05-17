@@ -5,7 +5,6 @@
 
 """Custom operations for storage account commands"""
 
-from knack.util import CLIError
 from azure.cli.command_modules.storage._client_factory import storage_client_factory
 
 
@@ -16,9 +15,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
-    params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
+    params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
-        params.custom_domain = CustomDomain(custom_domain, None)
+        params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
     if encryption_services:
         params.encryption = Encryption(services=encryption_services)
     if access_tier:
@@ -30,18 +29,11 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
+            from knack.util import CLIError
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                                  virtual_network_rules=None)
 
-    return scf.storage_accounts.create(resource_group_name, account_name, params)
-
-
-def create_storage_account_with_account_type(cmd, resource_group_name, account_name, account_type, location=None,
-                                             tags=None):
-    StorageAccountCreateParameters, AccountType = cmd.get_models('StorageAccountCreateParameters', 'AccountType')
-    scf = storage_client_factory(cmd.cli_ctx)
-    params = StorageAccountCreateParameters(location, AccountType(account_type), tags)
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
@@ -87,6 +79,7 @@ def show_storage_account_usage(cmd):
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
 
 
+# pylint: disable=too-many-locals
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
@@ -95,7 +88,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                        'Encryption', 'NetworkRuleSet')
     domain = instance.custom_domain
     if custom_domain is not None:
-        domain = CustomDomain(custom_domain)
+        domain = CustomDomain(name=custom_domain)
         if use_subdomain is not None:
             domain.name = use_subdomain == 'true'
 
@@ -114,7 +107,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             raise ValueError('--encryption-services is required when configure encryption key source')
 
     params = StorageAccountUpdateParameters(
-        sku=Sku(sku) if sku is not None else instance.sku,
+        sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
         custom_domain=domain,
         encryption=encryption,
@@ -126,16 +119,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if NetworkRuleSet:
         acl = instance.network_rule_set
-        if not acl:
-            if bypass and not default_action:
-                raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
-                                 default_action=default_action)
-        else:
+        if acl:
             if bypass:
                 acl.bypass = bypass
             if default_action:
                 acl.default_action = default_action
+        elif default_action:
+            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
+                                 default_action=default_action)
+        elif bypass:
+            from knack.util import CLIError
+            raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
     return params
@@ -156,16 +150,17 @@ def add_network_rule(cmd, client, resource_group_name, storage_account_name, act
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
+            from knack.util import CLIError
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
         if not rules.virtual_network_rules:
             rules.virtual_network_rules = []
-        rules.virtual_network_rules.append(VirtualNetworkRule(subnet, action=action))
+        rules.virtual_network_rules.append(VirtualNetworkRule(virtual_network_resource_id=subnet, action=action))
     if ip_address:
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
             rules.ip_rules = []
-        rules.ip_rules.append(IpRule(ip_address, action=action))
+        rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)

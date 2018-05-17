@@ -39,7 +39,7 @@ echo '1.0' > $debian_dir/source/format
 echo '9' > $debian_dir/compat
 
 cat > $debian_dir/changelog <<- EOM
-azure-cli (${CLI_VERSION}-1) unstable; urgency=low
+azure-cli (${CLI_VERSION}-${CLI_VERSION_REVISION:=1}) unstable; urgency=low
 
   * Debian package release.
 
@@ -58,7 +58,7 @@ Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
 Architecture: all
-Depends: \${misc:Depends}
+Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Azure CLI 2.0
  A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
  our next generation multi-platform command line experience for Azure.
@@ -90,8 +90,14 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 EOM
 
+# TODO: Instead of "_ssl.cpython-36m-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
+
 cat > $debian_dir/rules << EOM
 #!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+export DH_OPTIONS=-v
 
 %:
 ${TAB}dh \$@ --sourcedirectory $source_dir
@@ -104,11 +110,15 @@ ${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -Im azure.cli \"\044\100
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
+${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.6/lib-dynload/_ssl.cpython-36m-x86_64-linux-gnu.so
+
 
 override_dh_strip:
 ${TAB}dh_strip --exclude=_cffi_backend
 
 EOM
+
+cat $debian_dir/rules
 
 # debian/rules should be executable
 chmod 0755 $debian_dir/rules

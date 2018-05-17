@@ -20,6 +20,9 @@ helps['extension add'] = """
       text: az extension add --source https://contoso.com/anextension-0.0.1-py2.py3-none-any.whl
     - name: Add extension from local disk
       text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl
+    - name: Add extension from local disk and use pip proxy for dependencies
+      text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl
+            --pip-proxy https://user:pass@proxy.server:8080
 """
 
 helps['extension list'] = """
@@ -34,7 +37,7 @@ helps['extension list-available'] = """
     - name: List all publicly available extensions
       text: az extension list-available
     - name: List details on a particular extension
-      text: az extension list-available --query anextension
+      text: az extension list-available --show-details --query anextension
 """
 
 helps['extension show'] = """
@@ -50,4 +53,9 @@ helps['extension remove'] = """
 helps['extension update'] = """
     type: command
     short-summary: Update an extension.
+    examples:
+    - name: Update an extension by name
+      text: az extension update --name anextension
+    - name: Update an extension by name and use pip proxy for dependencies
+      text: az extension update --name anextension --pip-proxy https://user:pass@proxy.server:8080
 """

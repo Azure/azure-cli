@@ -5,6 +5,7 @@
 
 import argparse
 import json
+from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
@@ -17,6 +18,8 @@ from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry
+
+USER_HOME = expanduser('~')
 
 
 def get_help_files(cli_ctx):
@@ -83,29 +86,38 @@ class AzHelpGenDirective(Directive):
                for arg in sorted(help_file.parameters,
                                 key=lambda p: group_registry.get_group_priority(p.group_name)
                                 + str(not p.required) + p.name):
-                  yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
-                  yield ''
-                  yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
-                  short_summary = arg.short_summary or ''
-                  possible_values_index = short_summary.find(' Possible values include')
-                  short_summary = short_summary[0:possible_values_index
-                                                if possible_values_index >= 0 else len(short_summary)]
-                  short_summary = short_summary.strip()
-                  yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
-                  yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
-                  if arg.choices:
-                     yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
-                  if arg.default and arg.default != argparse.SUPPRESS:
-                     yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
-                  if arg.value_sources:
-                     yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
-                  yield ''
+                    yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
+                    yield ''
+                    yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
+                    short_summary = arg.short_summary or ''
+                    possible_values_index = short_summary.find(' Possible values include')
+                    short_summary = short_summary[0:possible_values_index
+                                                    if possible_values_index >= 0 else len(short_summary)]
+                    short_summary = short_summary.strip()
+                    yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
+                    yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
+                    if arg.choices:
+                        yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
+                    if arg.default and arg.default != argparse.SUPPRESS:
+                        try:
+                            if arg.default.startswith(USER_HOME):
+                                arg.default = arg.default.replace(USER_HOME, '~').replace('\\', '/')
+                        except Exception:
+                            pass
+                        try:
+                            arg.default = arg.default.replace("\\", "\\\\")
+                        except Exception:
+                            pass
+                        yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
+                    if arg.value_sources:
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
+                    yield ''
             yield ''
             if len(help_file.examples) > 0:
                for e in help_file.examples:
                   yield '{}.. cliexample:: {}'.format(INDENT, e.name)
                   yield ''
-                  yield DOUBLEINDENT + e.text
+                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
                   yield ''
 
     def run(self):

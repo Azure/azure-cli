@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 import os
-import os.path
-from fnmatch import fnmatch
-from datetime import datetime, timedelta
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -29,7 +27,7 @@ def collect_blobs(blob_service, container, pattern=None):
         except NameError:
             blob_name = blob.name
 
-        if _match_path(pattern, blob_name):
+        if not pattern or _match_path(blob_name, pattern):
             results.append(blob_name)
 
     return results
@@ -72,16 +70,14 @@ def filter_none(iterable):
 
 def glob_files_locally(folder_path, pattern):
     """glob files in local folder based on the given pattern"""
+
     pattern = os.path.join(folder_path, pattern.lstrip('/')) if pattern else None
 
-    from os import walk
     len_folder_path = len(folder_path) + 1
-    for root, _, files in walk(folder_path):
+    for root, _, files in os.walk(folder_path):
         for f in files:
             full_path = os.path.join(root, f)
-            if pattern and fnmatch(full_path, pattern):
-                yield (full_path, full_path[len_folder_path:])
-            elif not pattern:
+            if not pattern or _match_path(full_path, pattern):
                 yield (full_path, full_path[len_folder_path:])
 
 
@@ -95,13 +91,14 @@ def glob_files_remotely(cmd, client, share_name, pattern):
         current_dir = queue.pop()
         for f in client.list_directories_and_files(share_name, current_dir):
             if isinstance(f, t_file):
-                if (pattern and fnmatch(os.path.join(current_dir, f.name), pattern)) or (not pattern):
+                if not pattern or _match_path(os.path.join(current_dir, f.name), pattern):
                     yield current_dir, f.name
             elif isinstance(f, t_dir):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -114,6 +111,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
 
 
 def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -129,6 +127,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
 
 
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -141,6 +140,7 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -167,8 +167,9 @@ def _pattern_has_wildcards(p):
     return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
 
 
-def _match_path(pattern, *args):
-    return fnmatch(os.path.join(*args), pattern) if pattern else True
+def _match_path(path, pattern):
+    from fnmatch import fnmatch
+    return fnmatch(path, pattern)
 
 
 def guess_content_type(file_path, original, settings_class):
@@ -198,3 +199,30 @@ def get_storage_client(cli_ctx, service_type, namespace):
     sas_token = getattr(namespace, 'sas_token', az_config.get('storage', 'sas_token', None))
 
     return get_storage_data_service_client(cli_ctx, service_type, name, key, connection_string, sas_token)
+
+
+def normalize_blob_file_path(path, name):
+    # '/' is the path separator used by blobs/files, we normalize to it
+    path_sep = '/'
+    if path:
+        name = path_sep.join((path, name))
+    return path_sep.join(os.path.normpath(name).split(os.path.sep)).strip(path_sep)
+
+
+def check_precondition_success(func):
+    def wrapper(*args, **kwargs):
+        from azure.common import AzureHttpError
+        try:
+            return True, func(*args, **kwargs)
+        except AzureHttpError as ex:
+            # Precondition failed error
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
+            # Not modified error
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+            if ex.status_code not in [304, 412]:
+                raise
+            from knack.log import get_logger
+            logger = get_logger(__name__)
+            logger.warning('Failed precondition')
+            return False, None
+    return wrapper

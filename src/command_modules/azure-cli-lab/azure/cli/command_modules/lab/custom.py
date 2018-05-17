@@ -2,12 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import getpass
 
-from azure.mgmt.devtestlabs.models.custom_image_properties_from_vm import CustomImagePropertiesFromVm
-from azure.mgmt.devtestlabs.models import CustomImage
-from azure.mgmt.devtestlabs.models import WindowsOsInfo
-from azure.mgmt.devtestlabs.models import LinuxOsInfo
+import getpass
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
@@ -15,6 +11,8 @@ from azure.mgmt.devtestlabs.models import LinuxOsInfo
 def create_custom_image(client, resource_group_name, lab_name, name, source_vm_id, os_type, os_state,
                         author=None, description=None):
     """ Command to create a custom image from a source VM, managed image, or VHD """
+    from azure.mgmt.devtestlabs.models import (
+        CustomImagePropertiesFromVm, CustomImage, WindowsOsInfo, LinuxOsInfo)
 
     if source_vm_id is not None:
         payload = CustomImagePropertiesFromVm(
@@ -88,7 +86,7 @@ def claim_vm(cmd, client, lab_name=None, name=None, resource_group_name=None):
 
 # pylint: disable=too-many-locals, unused-argument
 def create_environment(client, resource_group_name, lab_name, name, arm_template, parameters=None,
-                       artifact_source_name=None, user_name=None, tags=None):
+                       artifact_source_name=None, user_name="@me", tags=None):
     """ Command to create an environment the Azure DevTest Lab """
 
     from azure.mgmt.devtestlabs.models.environment_deployment_properties \

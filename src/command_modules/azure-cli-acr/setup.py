@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.20"
+VERSION = "2.0.24"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -33,7 +33,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-resource==1.2.1',
     'azure-mgmt-storage==1.5.0',
-    'azure-mgmt-containerregistry==1.0.1',
+    'azure-mgmt-containerregistry==2.0.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -58,6 +58,6 @@ setup(
         'azure.cli.command_modules.acr',
     ],
     install_requires=DEPENDENCIES,
-    package_data={'azure.cli.command_modules.acr': ['template.json', 'template_new_storage.json', 'template_existing_storage.json']},
+    package_data={'azure.cli.command_modules.acr': ['*.json']},
     cmdclass=cmdclass
 )

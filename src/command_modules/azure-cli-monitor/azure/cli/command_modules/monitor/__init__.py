@@ -12,33 +12,21 @@ from azure.cli.command_modules.monitor._help import helps  # pylint: disable=unu
 # pylint: disable=line-too-long
 class MonitorArgumentContext(AzArgumentContext):
 
-    def resource_parameter_context(self, dest, arg_group=None, required=True, skip_validator=False):
+    def resource_parameter(self, dest, arg_group=None, required=True, skip_validator=False, alias='resource',
+                           preserve_resource_group_parameter=False):
         from azure.cli.command_modules.monitor.validators import get_target_resource_validator
-        self.argument(dest, options_list='--resource', arg_group=arg_group, required=required,
-                      validator=get_target_resource_validator(dest, required) if not skip_validator else None,
+        self.argument(dest, options_list='--{}'.format(alias), arg_group=arg_group, required=required,
+                      validator=get_target_resource_validator(
+                          dest, required, alias=alias,
+                          preserve_resource_group_parameter=preserve_resource_group_parameter) if not skip_validator else None,
                       help="Name or ID of the target resource.")
-        self.extra('namespace', options_list='--resource-namespace', arg_group=arg_group,
+        self.extra('namespace', options_list='--{}-namespace'.format(alias), arg_group=arg_group,
                    help="Target resource provider namespace.")
-        self.extra('parent', options_list='--resource-parent', arg_group=arg_group,
+        self.extra('parent', options_list='--{}-parent'.format(alias), arg_group=arg_group,
                    help="Target resource parent path, if applicable.")
-        self.extra('resource_type', options_list='--resource-type', arg_group=arg_group,
-                   help="Target resource type. Can also accept namespace/type format "
-                        "(Ex: 'Microsoft.Compute/virtualMachines)')")
+        self.extra('resource_type', options_list='--{}-type'.format(alias), arg_group=arg_group,
+                   help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
         self.extra('resource_group_name', options_list=['--resource-group', '-g'], arg_group=arg_group)
-
-    def resource_parameter(self, dest, arg_group=None, required=True):
-        """ Helper method to add the extra parameters needed to support specifying name or ID for target resources. """
-        from azure.cli.command_modules.monitor.validators import get_target_resource_validator
-        self.argument(dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=required,
-                      validator=get_target_resource_validator(dest, required, preserve_resource_group_parameter=True),
-                      help="Name or ID of the target resource.")
-        self.extra('namespace', options_list=['--{}-namespace'.format(dest)], arg_group=arg_group,
-                   help="Target resource provider namespace.")
-        self.extra('parent', options_list=['--{}-parent'.format(dest)], arg_group=arg_group,
-                   help="Target resource parent path, if applicable.")
-        self.extra('resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group,
-                   help="Target resource type. Can also accept namespace/type format "
-                        "(Ex: 'Microsoft.Compute/virtualMachines)')")
 
 
 class MonitorCommandsLoader(AzCommandsLoader):

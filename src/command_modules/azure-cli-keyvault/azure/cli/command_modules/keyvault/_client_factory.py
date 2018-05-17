@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
 
 def keyvault_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -23,8 +21,9 @@ def keyvault_data_plane_factory(cli_ctx, _):
         import adal
         from azure.cli.core._profile import Profile
         try:
-            return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
         except adal.AdalError as err:
+            from knack.util import CLIError
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
                     ('error_description' in err.error_response) and

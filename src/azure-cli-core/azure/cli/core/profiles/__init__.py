@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 #  pylint: disable=unused-import
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, PROFILE_TYPE
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, CustomResourceType, PROFILE_TYPE
 
 
 def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
@@ -21,7 +21,7 @@ def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
     return _sdk_get_api_version(cli_ctx.cloud.profile, resource_type, as_sdk_profile)
 
 
-def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
+def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None, operation_group=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
@@ -37,7 +37,11 @@ def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
     :rtype: bool or tuple[bool]
     """
     from azure.cli.core.profiles._shared import supported_api_version as _sdk_supported_api_version
-    return _sdk_supported_api_version(cli_ctx.cloud.profile, resource_type, min_api, max_api)
+    return _sdk_supported_api_version(cli_ctx.cloud.profile,
+                                      resource_type=resource_type,
+                                      min_api=min_api,
+                                      max_api=max_api,
+                                      operation_group=operation_group)
 
 
 def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
@@ -85,3 +89,15 @@ API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
     '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile']
 }
+
+
+def register_resource_type(profile_name, resource_type, api_version):
+    err_msg = "Failed to add resource type to profile '{p}': "
+    if not isinstance(resource_type, CustomResourceType):
+        raise TypeError((err_msg + "resource_type should be of type {c}, got {r}.").format(p=profile_name,
+                                                                                           c=CustomResourceType,
+                                                                                           r=type(resource_type)))
+    try:
+        API_PROFILES[profile_name].update({resource_type: api_version})
+    except KeyError:
+        raise ValueError((err_msg + "Profile '{p}' not found.").format(p=profile_name))

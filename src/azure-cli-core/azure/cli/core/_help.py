@@ -40,6 +40,7 @@ WELCOME_MESSAGE = r"""
 
 Welcome to the cool new Azure CLI!
 
+Use `az --version` to display the current version.
 Here are the base commands:
 """
 
@@ -56,6 +57,8 @@ class AzCliHelp(CLIHelp):
             return
         if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
+            if help_file.command_source.preview:
+                logger.warning(help_file.command_source.get_preview_warn_msg())
 
     @classmethod
     def print_detailed_help(cls, cli_name, help_file):
@@ -126,12 +129,20 @@ class CliCommandHelpFile(CliHelpFile):
         self.parameters = []
 
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:  # pylint: disable=protected-access
-            self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
-                                                 action.help,
-                                                 required=action.required,
-                                                 choices=action.choices,
-                                                 default=action.default,
-                                                 group_name=action.container.description))
+            if action.option_strings:
+                self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
+                                                     action.help,
+                                                     required=action.required,
+                                                     choices=action.choices,
+                                                     default=action.default,
+                                                     group_name=action.container.description))
+            else:
+                self.parameters.append(HelpParameter(action.metavar,
+                                                     action.help,
+                                                     required=False,
+                                                     choices=action.choices,
+                                                     default=None,
+                                                     group_name='Positional Arguments'))
 
         help_param = next(p for p in self.parameters if p.name == '--help -h')
         help_param.group_name = 'Global Arguments'

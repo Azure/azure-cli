@@ -3,6 +3,34 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Minor fixes
+
+2.0.32
+++++++
+* Minor fixes
+
+2.0.31
+++++++
+* Minor fixes
+
+2.0.30
+++++++
+* Minor fixes
+
+2.0.29
+++++++
+* Minor fixes
+
+2.0.28
+++++++
+* Bug fix for 'ValueError: field 6 out of range (need a 48-bit value)' - https://github.com/Azure/azure-cli/issues/5184
+
+2.0.27
+++++++
+* Minor fixes
+
 2.0.26
 ++++++
 * Minor fixes

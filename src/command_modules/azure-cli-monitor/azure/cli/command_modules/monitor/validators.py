@@ -3,13 +3,106 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, resource_id
+from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 
 
-def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
+def process_autoscale_create_namespace(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    validate_tags(namespace)
+    get_target_resource_validator('resource', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource).get('resource_group', None)
+    get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_autoscale_recurrence(namespace):
+    from knack.util import CLIError
+    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
+
+    def _validate_weekly_recurrence(namespace):
+        # Construct days
+        valid_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        days = []
+        for partial in namespace.recurrence[1:]:
+            if len(partial) < 2:
+                raise CLIError('specifying fewer than 2 characters for day is ambiguous.')
+            try:
+                match = next(x for x in valid_days if x.lower().startswith(partial.lower()))
+            except StopIteration:
+                raise CLIError("No match for day '{}'.".format(partial))
+            days.append(match)
+            valid_days.remove(match)
+
+        # validate, but don't process start and end time
+        recurrence_obj = Recurrence(
+            frequency=RecurrenceFrequency.week,
+            schedule=RecurrentSchedule(
+                time_zone=namespace.timezone,
+                days=days,
+                hours=[],  # will be filled in during custom command
+                minutes=[]  # will be filled in during custom command
+            )
+        )
+        return recurrence_obj
+
+    valid_recurrence = {
+        'week': {
+            'usage': '-r week [DAY DAY ...]',
+            'validator': _validate_weekly_recurrence
+        }
+    }
+    if namespace.recurrence:
+        raw_values = namespace.recurrence
+        try:
+            delimiter = raw_values[0].lower()
+            usage = valid_recurrence[delimiter]['usage']
+            try:
+                namespace.recurrence = valid_recurrence[delimiter]['validator'](namespace)
+            except CLIError as ex:
+                raise CLIError('{} invalid usage: {}'.format(ex, usage))
+        except KeyError as ex:
+            raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
+
+
+def validate_autoscale_timegrain(namespace):
+    from azure.mgmt.monitor.models import MetricTrigger
+    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
+
+    values = namespace.timegrain
+    if len(values) == 1:
+        # workaround because CMD.exe eats > character... Allows condition to be
+        # specified as a quoted expression
+        values = values[0].split(' ')
+    name_offset = 0
+    try:
+        time_grain = period_type(values[1])
+        name_offset += 1
+    except ValueError:
+        time_grain = period_type('1m')
+    try:
+        statistic = get_autoscale_statistic_map()[values[0]]
+        name_offset += 1
+    except KeyError:
+        statistic = get_autoscale_statistic_map()['avg']
+    timegrain = MetricTrigger(
+        metric_name=None,
+        metric_resource_uri=None,
+        time_grain=time_grain,
+        statistic=statistic,
+        time_window=None,
+        time_aggregation=None,
+        operator=None,
+        threshold=None
+    )
+    namespace.timegrain = timegrain
+
+
+def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
+        from msrestazure.tools import is_valid_resource_id
+        from knack.util import CLIError
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -18,7 +111,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                                '--{0}-type TYPE [--{0}-parent PARENT] '
-                               '[--{0}-namespace NAMESPACE]'.format(dest))
+                               '[--{0}-namespace NAMESPACE]'.format(alias))
         if not name_or_id and required:
             raise usage_error
         elif name_or_id:
@@ -48,6 +141,8 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    from knack.util import CLIError
     resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
                            "service bus namespace and rule. "
 
@@ -71,7 +166,7 @@ def validate_diagnostic_settings(cmd, namespace):
                                           type='workspaces',
                                           name=namespace.workspace)
 
-    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub_name:
+    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub:
         raise CLIError(
             'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
 
@@ -153,9 +248,15 @@ def process_metric_dimension(namespace):
 
     param_filter = ns.pop('filter', None)
     if param_filter:
+        from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
+
+
+def validate_metric_names(namespace):
+    if namespace.metricnames:
+        namespace.metricnames = ','.join(namespace.metricnames)
 
 
 def process_webhook_prop(namespace):

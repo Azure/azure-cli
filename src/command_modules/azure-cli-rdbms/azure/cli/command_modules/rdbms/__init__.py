@@ -11,13 +11,22 @@ import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
+
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
-        super(RdbmsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  min_profile='2017-03-10-profile',
-                                                  custom_command_type=rdbms_custom,
-                                                  argument_context_cls=RdbmsArgumentContext)
+        super(RdbmsCommandsLoader, self).__init__(
+            cli_ctx=cli_ctx,
+            min_profile='2017-03-10-profile',
+            custom_command_type=rdbms_custom,
+            argument_context_cls=RdbmsArgumentContext,
+            suppress_extension=ModExtensionSuppress(
+                __name__,
+                'rdbms',
+                '0.0.5',
+                reason='These commands are now in the CLI.',
+                recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.rdbms.commands import load_command_table

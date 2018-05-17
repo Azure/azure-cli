@@ -11,20 +11,15 @@ from azure.cli.core.commands.parameters import (
 
 from azure.cli.command_modules.dla._validators import validate_resource_group_name, datetime_format
 
-from azure.mgmt.datalake.analytics.account.models.data_lake_analytics_account_management_client_enums import (
-    FirewallState,
-    TierType,
-    FirewallAllowAzureIpsState,
-    AADObjectType)
-
-from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management_client_enums import (
-    CompileMode,
-    JobState,
-    JobResult)
-
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
+
+    from azure.mgmt.datalake.analytics.account.models.data_lake_analytics_account_management_client_enums import (
+        FirewallState, TierType, FirewallAllowAzureIpsState, AADObjectType)
+
+    from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management_client_enums import (
+        CompileMode, JobState, JobResult)
 
     datalake_analytics_name_type = CLIArgumentType(help='Name of the Data Lake Analytics account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeAnalytics/accounts'), id_part='name')
 

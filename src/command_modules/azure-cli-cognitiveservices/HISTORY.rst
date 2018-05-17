@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.1.13
+++++++
+* Fix typo with example for `az cognitiveservices account create` [#5603](https://github.com/Azure/azure-cli/issues/5603)
+
+0.1.12
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
+0.1.11
+++++++
+* Update the 'notice' of creating a new Cognitive Service account.
+
 0.1.10
 ++++++
 * Update for CLI core changes.
