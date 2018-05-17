@@ -11,8 +11,6 @@ import re
 import shlex
 from subprocess import check_output, CalledProcessError
 
-from colorama import Fore
-
 from automation.utilities.display import display, output
 from automation.utilities.path import filter_user_selected_modules_with_tests, get_config_dir
 
@@ -103,20 +101,24 @@ def validate_usage(args):
 
 
 def get_current_profile(args):
+    import colorama
+
+    colorama.init(autoreset=True)
     try:
-        fore_red = Fore.RED if not IS_WINDOWS else ''
-        fore_reset = Fore.RESET if not IS_WINDOWS else ''
+        fore_red = colorama.Fore.RED if not IS_WINDOWS else ''
+        fore_reset = colorama.Fore.RESET if not IS_WINDOWS else ''
         current_profile = check_output(shlex.split('az cloud show --query profile -otsv'),
                                        shell=IS_WINDOWS).decode('utf-8').strip()
-        if not args.profile:
+        if not args.profile or current_profile == args.profile:
             args.profile = current_profile
             display('The tests are set to run against current profile {}.'
                     .format(fore_red + current_profile + fore_reset))
         elif current_profile != args.profile:
             display('The tests are set to run against profile {} but the current az cloud profile is {}.'
                     .format(fore_red + args.profile + fore_reset, fore_red + current_profile + fore_reset))
-            display('Please use "az cloud set" command to change the current profile.')
-            sys.exit(1)
+            display('SWITCHING TO PROFILE {}.'.format(fore_red + args.profile + fore_reset))
+            display('az cloud update --profile {}'.format(args.profile))
+            check_output(shlex.split('az cloud update --profile {}'.format(args.profile)), shell=IS_WINDOWS)
         return current_profile
     except CalledProcessError:
         display('Failed to retrieve current az profile')
