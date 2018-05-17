@@ -172,7 +172,7 @@ def discover_tests(args):
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
 
-    profile = args.profile
+    profile = args.profile.replace('-', '_')
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')
