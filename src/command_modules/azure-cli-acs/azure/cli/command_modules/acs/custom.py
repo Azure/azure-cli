@@ -1418,12 +1418,15 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_name='default', parent_space_name=None):  # pylint: disable=line-too-long
+dev_spaces_extension = 'dev-spaces-preview'
+
+
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='default', parent_space_name=None):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
-    :param cluster_name: Name of the managed cluster.
-    :type cluster_name: String
+    :param name: Name of the managed cluster.
+    :type name: String
     :param resource_group_name: Name of resource group. You can configure the default group. \
     Using 'az configure --defaults group=<name>'.
     :type resource_group_name: String
@@ -1434,37 +1437,22 @@ def aks_use_dev_spaces(cmd, client, cluster_name, resource_group_name, space_nam
     :type parent_space_name: String
     """
 
-    dev_spaces_extension = 'dev-spaces-preview'
-
-    should_create_resource = False
-    if not _is_dev_spaces_extension_installed(dev_spaces_extension):
-        if _install_dev_spaces_extension(dev_spaces_extension):
-            should_create_resource = True
-    else:
-        should_create_resource = True
-
-    if should_create_resource:
+    if _is_dev_spaces_extension_installed(dev_spaces_extension):
+        azext_custom = _get_azext_module(dev_spaces_extension)
         try:
-            # Adding the installed extension in the path
-            from azure.cli.core.extension import get_extension_path
-            ext_dir = get_extension_path(dev_spaces_extension)
-            sys.path.append(ext_dir)
-            # Import the extension module
-            from importlib import import_module
-            azext_custom = import_module('azext_dev_spaces_preview.custom')
             azext_custom.ads_use_dev_spaces(
-                cluster_name, resource_group_name,
+                name, resource_group_name,
                 space_name, parent_space_name)
-        except Exception as e:  # nopa pylint: disable=broad-except
-            raise CLIError(e)
+        except AttributeError as ae:
+            raise CLIError(ae)
 
 
-def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt=False):  # pylint: disable=line-too-long
+def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     """
     Remove Azure Dev Spaces from a managed Kubernetes cluster.
 
-    :param cluster_name: Name of the managed cluster.
-    :type cluster_name: String
+    :param name: Name of the managed cluster.
+    :type name: String
     :param resource_group_name: Name of resource group. You can configure the default group. \
     Using 'az configure --defaults group=<name>'.
     :type resource_group_name: String
@@ -1472,45 +1460,44 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
     :type prompt: bool
     """
 
-    dev_spaces_extension = 'dev-spaces-preview'
-
-    should_delete_resource = False
-    if not _is_dev_spaces_extension_installed(dev_spaces_extension):
-        if _install_dev_spaces_extension(dev_spaces_extension):
-            should_delete_resource = True
-    else:
-        should_delete_resource = True
-
-    if should_delete_resource:
+    if _is_dev_spaces_extension_installed(dev_spaces_extension):
+        azext_custom = _get_azext_module(dev_spaces_extension)
         try:
-            # Adding the installed extension in the path
-            from azure.cli.core.extension import get_extension_path
-            ext_dir = get_extension_path(dev_spaces_extension)
-            sys.path.append(ext_dir)
-            # Import the extension module
-            from importlib import import_module
-            azext_custom = import_module('azext_dev_spaces_preview.custom')
             azext_custom.ads_remove_dev_spaces(
-                cluster_name, resource_group_name, prompt)
-        except Exception as e:  # nopa pylint: disable=broad-except
-            raise CLIError(e)
+                name, resource_group_name, prompt)
+        except AttributeError as ae:
+            raise CLIError(ae)
 
 
-def _install_dev_spaces_extension(dev_spaces_extension):
+def _get_azext_module(extension_name):
+    try:
+        # Adding the installed extension in the path
+        from azure.cli.core.extension import get_extension_path
+        ext_dir = get_extension_path(extension_name)
+        sys.path.append(ext_dir)
+        # Import the extension module
+        from importlib import import_module
+        azext_custom = import_module('azext_dev_spaces_preview.custom')
+        return azext_custom
+    except ImportError as ie:
+        raise CLIError(ie)
+
+
+def _install_dev_spaces_extension(extension_name):
     try:
         from azure.cli.command_modules.extension import custom
-        custom.add_extension(extension_name=dev_spaces_extension)
+        custom.add_extension(extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
 
 
-def _is_dev_spaces_extension_installed(dev_spaces_extension):
+def _is_dev_spaces_extension_installed(extension_name):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
-        get_extension(dev_spaces_extension)
+        get_extension(extension_name)
     except ExtensionNotInstalledException:
-        return False
+        return _install_dev_spaces_extension(extension_name)
     return True
 
 
