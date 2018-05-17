@@ -13,13 +13,13 @@ helps['policy event list'] = """
     type: command
     short-summary: List policy events.
     parameters:
-        - name: --management-group-name -mg
+        - name: --management-group-name -m
           type: string
 
         - name: --subscription-id -s
           type: string
 
-        - name: --resource-group-name -rg
+        - name: --resource-group-name -g
           type: string
 
         - name: --resource-id -r
@@ -40,19 +40,19 @@ helps['policy event list'] = """
         - name: --to
           type: datetime
 
-        - name: --top -t
+        - name: --top
           type: long
 
-        - name: --order-by -o
+        - name: --order-by
           type: string
 
-        - name: --select -sl
+        - name: --select
           type: string
 
-        - name: --filter -f
+        - name: --filter
           type: string
 
-        - name: --apply -a
+        - name: --apply
           type: string
     examples:
         - name: Get policy events at current subscription scope created in the last day.
@@ -63,10 +63,10 @@ helps['policy event list'] = """
               az policy event list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get policy events at management group scope.
           text: >
-              az policy event list -mg "myMg"
+              az policy event list -m "myMg"
         - name: Get policy events at resource group scope in current subscription.
           text: >
-              az policy event list -rg "myRg"
+              az policy event list -g "myRg"
         - name: Get policy events for a resource.
           text: >
               az policy event list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
@@ -81,28 +81,28 @@ helps['policy event list'] = """
               az policy event list -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get policy events for a policy assignment in the specified resource group in current subscription.
           text: >
-              az policy event list -rg "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
+              az policy event list -g "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get top 5 policy events in current subscription, selecting a subset of properties and customizing ordering.
           text: >
-              az policy event list -top 5 -ob "timestamp desc, policyAssignmentName asc" -sl "timestamp, resourceId, policyAssignmentId, policySetDefinitionId, policyDefinitionId"
+              az policy event list --top 5 --order-by "timestamp desc, policyAssignmentName asc" --select "timestamp, resourceId, policyAssignmentId, policySetDefinitionId, policyDefinitionId"
         - name: Get policy events in current subscription during a custom time interval.
           text: >
-              az policy event list -from "2018-03-08T00:00:00Z" -to "2018-03-15T00:00:00Z"
+              az policy event list --from "2018-03-08T00:00:00Z" --to "2018-03-15T00:00:00Z"
         - name: Get policy events in current subscription filtering results based on some property values.
           text: >
-              az policy event list -f "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
+              az policy event list --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
         - name: Get number of policy events in current subscription.
           text: >
-              az policy event list -a "aggregate($count as numberOfRecords)"
+              az policy event list --apply "aggregate($count as numberOfRecords)"
         - name: Get policy events in current subscription aggregating results based on some properties.
           text: >
-              az policy event list -a "groupby((policyAssignmentId, policyDefinitionId, policyDefinitionAction, resourceId), aggregate($count as numEvents))"
+              az policy event list --apply "groupby((policyAssignmentId, policyDefinitionId, policyDefinitionAction, resourceId), aggregate($count as numEvents))"
         - name: Get policy events in current subscription grouping results based on some properties.
           text: >
-              az policy event list -a "groupby((policyAssignmentName, resourceId))"
+              az policy event list --apply "groupby((policyAssignmentName, resourceId))"
         - name: Get policy events in current subscription aggregating results based on some properties specifying multiple groupings.
           text: >
-              az policy event list -a "groupby((policyAssignmentId, policyDefinitionId, resourceId))/groupby((policyAssignmentId, policyDefinitionId), aggregate($count as numResourcesWithEvents))"
+              az policy event list --apply "groupby((policyAssignmentId, policyDefinitionId, resourceId))/groupby((policyAssignmentId, policyDefinitionId), aggregate($count as numResourcesWithEvents))"
 """
 helps['policy state'] = """
     type: group
@@ -112,13 +112,13 @@ helps['policy state list'] = """
     type: command
     short-summary: List policy compliance states.
     parameters:
-        - name: --management-group-name -mg
+        - name: --management-group-name -m
           type: string
 
         - name: --subscription-id -s
           type: string
 
-        - name: --resource-group-name -rg
+        - name: --resource-group-name -g
           type: string
 
         - name: --resource-id -r
@@ -139,19 +139,19 @@ helps['policy state list'] = """
         - name: --to
           type: datetime
 
-        - name: --top -t
+        - name: --top
           type: long
 
-        - name: --order-by -o
+        - name: --order-by
           type: string
 
-        - name: --select -sl
+        - name: --select
           type: string
 
-        - name: --filter -f
+        - name: --filter
           type: string
 
-        - name: --apply -a
+        - name: --apply
           type: string
     examples:
         - name: Get latest policy states at current subscription scope.
@@ -162,13 +162,13 @@ helps['policy state list'] = """
               az policy state list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get all policy states at current subscription scope.
           text: >
-              az policy state list -all
+              az policy state list --all
         - name: Get latest policy states at management group scope.
           text: >
-              az policy state list -mg "myMg"
+              az policy state list -m "myMg"
         - name: Get latest policy states at resource group scope in current subscription.
           text: >
-              az policy state list -rg "myRg"
+              az policy state list -g "myRg"
         - name: Get latest policy states for a resource.
           text: >
               az policy state list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
@@ -183,40 +183,40 @@ helps['policy state list'] = """
               az policy state list -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get latest policy states for a policy assignment in the specified resource group in current subscription.
           text: >
-              az policy state list -rg "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
+              az policy state list -g "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get top 5 latest policy states in current subscription, selecting a subset of properties and customizing ordering.
           text: >
-              az policy state list -top 5 -ob "timestamp desc, policyAssignmentName asc" -sl "timestamp, resourceId, policyAssignmentId, policySetDefinitionId, policyDefinitionId"
+              az policy state list --top 5 --order-by "timestamp desc, policyAssignmentName asc" --select "timestamp, resourceId, policyAssignmentId, policySetDefinitionId, policyDefinitionId"
         - name: Get latest policy states in current subscription during a custom time interval.
           text: >
-              az policy state list -from "2018-03-08T00:00:00Z" -to "2018-03-15T00:00:00Z"
+              az policy state list --from "2018-03-08T00:00:00Z" --to "2018-03-15T00:00:00Z"
         - name: Get latest policy states in current subscription filtering results based on some property values.
           text: >
-              az policy state list -f "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
+              az policy state list --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
         - name: Get number of latest policy states in current subscription.
           text: >
-              az policy state list -a "aggregate($count as numberOfRecords)"
+              az policy state list --apply "aggregate($count as numberOfRecords)"
         - name: Get latest policy states in current subscription aggregating results based on some properties.
           text: >
-              az policy state list -a "groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId), aggregate($count as numStates))"
+              az policy state list --apply "groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId), aggregate($count as numStates))"
         - name: Get latest policy states in current subscription grouping results based on some properties.
           text: >
-              az policy state list -a "groupby((policyAssignmentName, resourceId))"
+              az policy state list --apply "groupby((policyAssignmentName, resourceId))"
         - name: Get latest policy states in current subscription aggregating results based on some properties specifying multiple groupings.
           text: >
-              az policy state list -a "groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId, resourceId))/groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId), aggregate($count as numNonCompliantResources))"
+              az policy state list --apply "groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId, resourceId))/groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId), aggregate($count as numNonCompliantResources))"
 """
 helps['policy state summarize'] = """
     type: command
     short-summary: Summarize policy compliance states.
     parameters:
-        - name: --management-group-name -mg
+        - name: --management-group-name -m
           type: string
 
         - name: --subscription-id -s
           type: string
 
-        - name: --resource-group-name -rg
+        - name: --resource-group-name -g
           type: string
 
         - name: --resource-id -r
@@ -237,10 +237,10 @@ helps['policy state summarize'] = """
         - name: --to
           type: datetime
 
-        - name: --top -t
+        - name: --top
           type: long
 
-        - name: --filter -f
+        - name: --filter
           type: string
     examples:
         - name: Get latest non-compliant policy states summary at current subscription scope.
@@ -251,10 +251,10 @@ helps['policy state summarize'] = """
               az policy state summarize -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get latest non-compliant policy states summary at management group scope.
           text: >
-              az policy state summarize -mg "myMg"
+              az policy state summarize -m "myMg"
         - name: Get latest non-compliant policy states summary at resource group scope in current subscription.
           text: >
-              az policy state summarize -rg "myRg"
+              az policy state summarize -g "myRg"
         - name: Get latest non-compliant policy states summary for a resource.
           text: >
               az policy state summarize -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
@@ -269,14 +269,14 @@ helps['policy state summarize'] = """
               az policy state summarize -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get latest non-compliant policy states summary for a policy assignment in the specified resource group in current subscription.
           text: >
-              az policy state summarize -rg "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
+              az policy state summarize -g "myRg" -pa "ddd8ef92e3714a5ea3d208c1"
         - name: Get latest non-compliant policy states summary in current subscription, limiting the assignments summary to top 5.
           text: >
-              az policy state summarize -top 5
+              az policy state summarize --top 5
         - name: Get latest non-compliant policy states summary in current subscription for a custom time interval.
           text: >
-              az policy state summarize -from "2018-03-08T00:00:00Z" -to "2018-03-15T00:00:00Z"
+              az policy state summarize --from "2018-03-08T00:00:00Z" --to "2018-03-15T00:00:00Z"
         - name: Get latest non-compliant policy states summary in current subscription filtering results based on some property values.
           text: >
-              az policy state summarize -f "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
+              az policy state summarize --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
 """
