@@ -603,12 +603,10 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
-def update_application(client, identifier, display_name=None, homepage=None,
+def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
-    object_id = _resolve_application(client, identifier)
-
     password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
@@ -626,7 +624,14 @@ def update_application(client, identifier, display_name=None, homepage=None,
                                                   available_to_other_tenants=available_to_other_tenants,
                                                   required_resource_access=required_accesses,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
-    return client.patch(object_id, app_patch_param)
+
+    return app_patch_param
+
+
+def patch_application(cmd, identifier, parameters):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_application(graph_client.applications, identifier)
+    return graph_client.applications.patch(object_id, parameters)
 
 
 def _build_application_accesses(required_resource_accesses):
