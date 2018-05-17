@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.21
+++++++
+* Mute logging from parser for completions.
+
 0.3.20
 ++++++
 * Allow interactive completers to function with positional arguments.
