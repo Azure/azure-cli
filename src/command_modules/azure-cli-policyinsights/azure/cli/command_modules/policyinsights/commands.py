@@ -7,6 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (policy_events_operations, policy_states_operations)
 from ._exception_handler import policy_insights_exception_handler
 
+
 def load_command_table(self, _):
     policy_events_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.policyinsights.operations.policy_events_operations#PolicyEventsOperations.{}',

@@ -8,6 +8,7 @@
 from azure.cli.command_modules.policyinsights._help import helps
 from azure.cli.core import AzCommandsLoader
 
+
 class PolicyInsightsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -33,5 +34,6 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
         from ._params import load_arguments
 
         load_arguments(self, command)
+
 
 COMMAND_LOADER_CLS = PolicyInsightsCommandsLoader

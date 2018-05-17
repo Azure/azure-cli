@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 
+
 def list_policy_events(
         cmd,
         client,
@@ -79,6 +80,7 @@ def list_policy_events(
             query_options)
 
     return events.value
+
 
 def list_policy_states(
         cmd,
@@ -167,6 +169,7 @@ def list_policy_states(
             query_options)
 
     return states.value
+
 
 def summarize_policy_states(
         cmd,

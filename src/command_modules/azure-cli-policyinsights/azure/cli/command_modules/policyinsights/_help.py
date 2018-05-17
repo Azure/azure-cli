@@ -57,13 +57,13 @@ helps['policy event list'] = """
     examples:
         - name: Get policy events at current subscription scope created in the last day.
           text: >
-              az policy event list 
+              az policy event list
         - name: Get policy events at specified subscription scope.
           text: >
               az policy event list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get policy events at management group scope.
           text: >
-              az policy event list -mg "myMg" 
+              az policy event list -mg "myMg"
         - name: Get policy events at resource group scope in current subscription.
           text: >
               az policy event list -rg "myRg"
@@ -156,7 +156,7 @@ helps['policy state list'] = """
     examples:
         - name: Get latest policy states at current subscription scope.
           text: >
-              az policy state list 
+              az policy state list
         - name: Get latest policy states at specified subscription scope.
           text: >
               az policy state list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
@@ -165,7 +165,7 @@ helps['policy state list'] = """
               az policy state list -all
         - name: Get latest policy states at management group scope.
           text: >
-              az policy state list -mg "myMg" 
+              az policy state list -mg "myMg"
         - name: Get latest policy states at resource group scope in current subscription.
           text: >
               az policy state list -rg "myRg"
@@ -245,13 +245,13 @@ helps['policy state summarize'] = """
     examples:
         - name: Get latest non-compliant policy states summary at current subscription scope.
           text: >
-              az policy state summarize 
+              az policy state summarize
         - name: Get latest non-compliant policy states summary at specified subscription scope.
           text: >
               az policy state summarize -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get latest non-compliant policy states summary at management group scope.
           text: >
-              az policy state summarize -mg "myMg" 
+              az policy state summarize -mg "myMg"
         - name: Get latest non-compliant policy states summary at resource group scope in current subscription.
           text: >
               az policy state summarize -rg "myRg"

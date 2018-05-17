@@ -11,6 +11,7 @@ from azure.cli.command_modules.resource._completers import (
     get_policy_set_completion_list, get_policy_completion_list,
     get_policy_assignment_completion_list)
 
+
 def load_arguments(self, _):
     with self.argument_context('policy event') as c:
         c.argument(

@@ -5,6 +5,7 @@
 
 from azure.cli.core.util import CLIError
 
+
 def policy_insights_exception_handler(ex):
     from azure.mgmt.policyinsights.models import QueryFailureException
 
