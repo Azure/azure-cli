@@ -206,8 +206,7 @@ class AzCompleter(Completer):
         AzCliCommandParser._check_value = _check_value_muted
 
         try:
-            parse_args = self.argsfinder.get_parsed_args(
-                parse_quotes(text, quotes=False, string=False))
+            parse_args = self.argsfinder.get_parsed_args(parse_quotes(text, quotes=False, string=False))
         except Exception:  # pylint: disable=broad-except
             pass
 
