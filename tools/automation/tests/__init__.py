@@ -18,7 +18,7 @@ from automation.utilities.path import filter_user_selected_modules_with_tests, g
 
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
-TEST_INDEX_FILE = 'testIndex.json'
+TEST_INDEX_FORMAT = 'testIndex_{}.json'
 
 
 def extract_module_name(path):
@@ -124,7 +124,7 @@ def get_current_profile(args):
 
 
 def get_test_index(args):
-    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FILE)
+    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
