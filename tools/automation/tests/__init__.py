@@ -127,6 +127,7 @@ def get_current_profile(args):
 
 def get_test_index(args):
     test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
+    print(test_index_path)
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
