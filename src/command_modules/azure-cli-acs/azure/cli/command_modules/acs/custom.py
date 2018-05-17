@@ -1476,9 +1476,8 @@ def aks_remove_dev_spaces(cmd, client, cluster_name, resource_group_name, prompt
 
     should_delete_resource = False
     if not _is_dev_spaces_extension_installed(dev_spaces_extension):
-        raise CLIError("Extension '{}' not installed properly. \
-Use 'az aks use-dev-spaces' commands for Azure Dev Spaces."
-                       .format(dev_spaces_extension))
+        if _install_dev_spaces_extension(dev_spaces_extension):
+            should_delete_resource = True
     else:
         should_delete_resource = True
 
