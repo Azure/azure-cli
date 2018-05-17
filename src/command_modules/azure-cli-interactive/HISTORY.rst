@@ -6,6 +6,7 @@ Release History
 0.3.21
 ++++++
 * Mute logging from parser for completions.
+* Made interactive more resistant to stale/corrupted help caches.
 
 0.3.20
 ++++++
