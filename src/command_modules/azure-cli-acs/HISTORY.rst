@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* add new Dev-Spaces commands: `az aks use-dev-spaces` and `az aks remove-dev-spaces`
+
 2.0.32
 ++++++
 * remind the user that `az aks` is a preview service
