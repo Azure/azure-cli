@@ -1418,7 +1418,8 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-dev_spaces_extension = 'dev-spaces-preview'
+DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
+DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
 
 
 def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='default', parent_space_name=None):
@@ -1437,12 +1438,10 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='defau
     :type parent_space_name: String
     """
 
-    if _is_dev_spaces_extension_installed(dev_spaces_extension):
-        azext_custom = _get_azext_module(dev_spaces_extension)
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+        azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(
-                name, resource_group_name,
-                space_name, parent_space_name)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, space_name, parent_space_name)
         except AttributeError as ae:
             raise CLIError(ae)
 
@@ -1460,16 +1459,15 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     :type prompt: bool
     """
 
-    if _is_dev_spaces_extension_installed(dev_spaces_extension):
-        azext_custom = _get_azext_module(dev_spaces_extension)
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+        azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_remove_dev_spaces(
-                name, resource_group_name, prompt)
+            azext_custom.ads_remove_dev_spaces(name, resource_group_name, prompt)
         except AttributeError as ae:
             raise CLIError(ae)
 
 
-def _get_azext_module(extension_name):
+def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
         from azure.cli.core.extension import get_extension_path
@@ -1477,7 +1475,7 @@ def _get_azext_module(extension_name):
         sys.path.append(ext_dir)
         # Import the extension module
         from importlib import import_module
-        azext_custom = import_module('azext_dev_spaces_preview.custom')
+        azext_custom = import_module(module_name)
         return azext_custom
     except ImportError as ie:
         raise CLIError(ie)
@@ -1492,7 +1490,7 @@ def _install_dev_spaces_extension(extension_name):
     return True
 
 
-def _is_dev_spaces_extension_installed(extension_name):
+def _get_or_add_extension(extension_name):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
