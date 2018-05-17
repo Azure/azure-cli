@@ -5,6 +5,7 @@ Release History
 0.1.33
 ++++++
 * webapp/functionapp: improve generic update commands
+* webapp/functionapp: webapp deployment source config-zip supports async operation with status updates for long running operation 
 
 0.1.32
 ++++++
