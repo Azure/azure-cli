@@ -23,7 +23,7 @@ def load_arguments(self, _):
             help='Subscription id.')
         c.argument(
             'resource_group_name',
-            options_list=('--resource-group-name', '-rg'),
+            options_list=('--resource-group-name', '-g'),
             arg_type=resource_group_name_type,
             completer=get_resource_group_completion_list,
             help='Resource group name.')
@@ -48,32 +48,32 @@ def load_arguments(self, _):
             help='Policy assignment name.')
         c.argument(
             'from_value',
-            options_list=('--from', '-from'),
+            options_list=('--from'),
             help='Timestamp specifying the start time of the interval to query.')
         c.argument(
             'to_value',
-            options_list=('--to', '-to'),
+            options_list=('--to'),
             help='Timestamp specifying the end time of the interval to query.')
         c.argument(
             'top_value',
-            options_list=('--top', '-top'),
+            options_list=('--top'),
             type=int,
             help='Maximum number of records to return.')
         c.argument(
             'order_by_clause',
-            options_list=('--order-by', '-ob'),
+            options_list=('--order-by'),
             help='Ordering expression using OData notation.')
         c.argument(
             'select_clause',
-            options_list=('--select', '-sl'),
+            options_list=('--select'),
             help='Select expression using OData notation.')
         c.argument(
             'filter_clause',
-            options_list=('--filter', '-f'),
+            options_list=('--filter'),
             help='Filter expression using OData notation.')
         c.argument(
             'apply_clause',
-            options_list=('--apply', '-a'),
+            options_list=('--apply'),
             help='Apply expression for aggregations using OData notation.')
 
     with self.argument_context('policy state') as c:
