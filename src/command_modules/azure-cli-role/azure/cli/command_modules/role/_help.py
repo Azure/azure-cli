@@ -145,6 +145,10 @@ helps['ad app update'] = """
                         }
                    ]
                 }]
+        - name: update an application's group membership claims to "All"
+          text: >
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
+
 """
 helps['ad user list'] = """
     type: command
@@ -173,6 +177,10 @@ helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
     long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use `--all`.
+"""
+helps['role assignment list-changelogs'] = """
+    type: command
+    short-summary: List changelogs for role assignments.
 """
 helps['role definition'] = """
     type: group
@@ -259,9 +267,17 @@ helps['ad group'] = """
     type: group
     short-summary: Manage Azure Active Directory groups.
 """
+helps['ad group create'] = """
+    type: command
+    short-summary: Create a group in the directory.
+"""
 helps['ad group member'] = """
     type: group
     short-summary: Manage Azure Active Directory group members.
+"""
+helps['ad group member check'] = """
+    type: command
+    short-summary: Check if a member is in a group.
 """
 helps['ad sp'] = """
     type: group

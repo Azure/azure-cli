@@ -157,7 +157,7 @@ helps['aks create'] = """
           short-summary: Size of Virtual Machines to create as Kubernetes nodes.
         - name: --dns-name-prefix -p
           type: string
-          short-summary: Prefix for hostnames that are created. If not specified, gemerate a hostname using the
+          short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the
                          managed cluster and resource group names.
         - name: --node-count -c
           type: int

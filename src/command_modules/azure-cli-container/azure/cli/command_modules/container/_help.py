@@ -37,6 +37,8 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/azfile/myfile" --azure-file-volume-share-name myshare --azure-file-volume-account-name mystorageaccount --azure-file-volume-account-key mystoragekey --azure-file-volume-mount-path /mnt/azfile
         - name: Create a container in a container group that mounts a git repo as volume.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/gitrepo" --gitrepo-url https://github.com/user/myrepo.git --gitrepo-dir ./dir1 --gitrepo-mount-path /mnt/gitrepo
+        - name: Create a container in a container group using a yaml file.
+          text: az container create -g MyResourceGroup -f containerGroup.yaml
 """
 
 helps['container delete'] = """
@@ -57,6 +59,14 @@ helps['container show'] = """
 helps['container logs'] = """
     type: command
     short-summary: Examine the logs for a container in a container group.
+"""
+
+helps['container export'] = """
+    type: command
+    short-summary: Export a container group in yaml format.
+    examples:
+        - name: Export a container group in yaml.
+          text: az container export -g MyResourceGroup --name mynginx -f output.yaml
 """
 
 helps['container exec'] = """

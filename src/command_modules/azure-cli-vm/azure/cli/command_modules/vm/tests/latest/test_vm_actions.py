@@ -75,6 +75,12 @@ class TestActions(unittest.TestCase):
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
+        test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        self.assertEqual(src_disk, test_data)
+        self.assertFalse(src_snapshot)
+        self.assertFalse(src_blob_uri)
+
     def test_source_storage_account_err_case(self):
         np = mock.MagicMock()
         cmd = mock.MagicMock()
@@ -207,6 +213,21 @@ class TestActions(unittest.TestCase):
         logger_mock.assert_called_with("Querying the image of '%s' failed for an error '%s'. "
                                        "Configuring plan settings will be skipped", 'publisher1:offer1:sku1:1.0.0',
                                        'image not found')
+
+    def test_parse_unmanaged_image_argument(self):
+        np = mock.MagicMock()
+        np.image = 'https://foo.blob.core.windows.net/vhds/1'
+        cmd = mock.MagicMock()
+        # action & assert
+        self.assertEqual(_parse_image_argument(cmd, np), 'uri')
+
+    def test_parse_managed_image_argument(self):
+        np = mock.MagicMock()
+        np.image = '/subscriptions/123/resourceGroups/foo/providers/Microsoft.Compute/images/nixos-imag.vhd'
+        cmd = mock.MagicMock()
+
+        # action & assert
+        self.assertEqual(_parse_image_argument(cmd, np), 'image_id')
 
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
@@ -346,27 +367,6 @@ class TestActions(unittest.TestCase):
         # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
-        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
-
-        # verify write accelerator configuring; also, when it is enabled, caching will be set to None
-
-        r = normalize_disk_info(write_accelerator_settings=['true'])
-        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
-
-        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['true'])
-        self.assertEqual(r['os']['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[1]['writeAcceleratorEnabled'], True)
-
-        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['0=true'])
-        self.assertEqual(r['os'].get('writeAcceleratorEnabled'), None)
-        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
-        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[1].get('writeAcceleratorEnabled'), None)
-
-        # error on configuring non-existing disks
-        with self.assertRaises(CLIError) as err:
-            normalize_disk_info(write_accelerator_settings=['0=true'])
         self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
 

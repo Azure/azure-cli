@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.1"
+VERSION = "0.1.3"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'jmespath',
     'mock',
     'vcrpy>=1.10.3',
-    'azure-devtools>=0.5.4'
+    'azure-devtools~=1.0.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.1.2
+++++++
+* `network watcher show-topology`: Fix issue where command would not work with vnet and/or subnet name. [#6326](https://github.com/Azure/azure-cli/issues/6326)
+
+2.1.1
+++++++
+* `network watcher`: Fix issue where certain commands would claim Network Watcher is not enabled for regions when it actually is. [#6264](https://github.com/Azure/azure-cli/issues/6264)
+
 2.1.0
 ++++++
 * BREAKING CHANGE: `express-route auth list`, `express-route peering list`, `nic ip-config list`

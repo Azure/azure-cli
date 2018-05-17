@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* core: ignore FileNotFoundError error on expanding `@`
+
 2.0.32
 ++++++
 * auth: fix a unhandled exception when retrieve secrets from a service principal account with cert

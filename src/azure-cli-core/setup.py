@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.32"
+VERSION = "2.0.33"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -50,13 +50,12 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=0.4.7',
     'applicationinsights>=0.11.1',
     'argcomplete>=1.8.0',
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack==0.3.2',
+    'knack==0.3.3',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko',
