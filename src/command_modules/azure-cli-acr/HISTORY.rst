@@ -10,6 +10,10 @@ Release History
 ++++++
 * Improve manifest delete confirmation on tags
 
+2.0.25
+++++++
+* Add ACR Image Import commands.
+
 2.0.24
 ++++++
 * Add ACR Build commands.
