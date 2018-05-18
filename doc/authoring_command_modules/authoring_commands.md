@@ -133,8 +133,6 @@ command(self, name, method_name=None, command_type=None, **kwargs)
 
 Any kwargs that are not specified will be pulled from the `command_type` kwarg, if present.
 
-For `show` command, ensure `404(Not Found)` is always trapped by either using `exception_handler=empty_on_404`, or catching the exception in your custom code. For context, refer to [issue](https://github.com/Azure/azure-cli/issues/6324).
-
 ***custom_command***
 
 The signature for `custom_command` is exactly the same as `command`. The only difference is that, whereas `command` uses `command_type` as the fallback for missings kwargs, `custom_command` relies on `custom_command_type`.
