@@ -5,12 +5,13 @@
 
 import re
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 from azure.mgmt.maps.models.maps_management_client_enums import KeyType
 
 
 class MapsScenarioTests(ScenarioTest):
 
+    @record_only()
     @ResourceGroupPreparer(key='rg')
     @ResourceGroupPreparer(key='rg1')
     def test_create_maps_account(self, resource_group):
