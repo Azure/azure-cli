@@ -16,18 +16,18 @@ helps['policy event list'] = """
         - name: Get policy events at current subscription scope created in the last day.
           text: >
               az policy event list
-        - name: Get policy events at specified subscription scope.
-          text: >
-              az policy event list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get policy events at management group scope.
           text: >
               az policy event list -m "myMg"
         - name: Get policy events at resource group scope in current subscription.
           text: >
               az policy event list -g "myRg"
-        - name: Get policy events for a resource.
+        - name: Get policy events for a resource using resource ID.
           text: >
               az policy event list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+        - name: Get policy events for a resource using resource name.
+          text: >
+              az policy event list -r "myKeyVault" --resource-provider-namespace "Microsoft.KeyVault" --resource-type "vaults"
         - name: Get policy events for a policy set definition in current subscription.
           text: >
               az policy event list -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"
@@ -73,9 +73,6 @@ helps['policy state list'] = """
         - name: Get latest policy states at current subscription scope.
           text: >
               az policy state list
-        - name: Get latest policy states at specified subscription scope.
-          text: >
-              az policy state list -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get all policy states at current subscription scope.
           text: >
               az policy state list --all
@@ -85,9 +82,12 @@ helps['policy state list'] = """
         - name: Get latest policy states at resource group scope in current subscription.
           text: >
               az policy state list -g "myRg"
-        - name: Get latest policy states for a resource.
+        - name: Get latest policy states for a resource using resource ID.
           text: >
               az policy state list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+        - name: Get latest policy states for a resource using resource name.
+          text: >
+              az policy state list -r "myKeyVault" --resource-provider-namespace "Microsoft.KeyVault" --resource-type "vaults"
         - name: Get latest policy states for a policy set definition in current subscription.
           text: >
               az policy state list -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"
@@ -129,18 +129,18 @@ helps['policy state summarize'] = """
         - name: Get latest non-compliant policy states summary at current subscription scope.
           text: >
               az policy state summarize
-        - name: Get latest non-compliant policy states summary at specified subscription scope.
-          text: >
-              az policy state summarize -s "fff10b27-fff3-fff5-fff8-fffbe01e86a5"
         - name: Get latest non-compliant policy states summary at management group scope.
           text: >
               az policy state summarize -m "myMg"
         - name: Get latest non-compliant policy states summary at resource group scope in current subscription.
           text: >
               az policy state summarize -g "myRg"
-        - name: Get latest non-compliant policy states summary for a resource.
+        - name: Get latest non-compliant policy states summary for a resource using resource ID.
           text: >
               az policy state summarize -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+        - name: Get latest non-compliant policy states summary for a resource using resource name.
+          text: >
+              az policy state summarize -r "myKeyVault" --resource-provider-namespace "Microsoft.KeyVault" --resource-type "vaults"
         - name: Get latest non-compliant policy states summary for a policy set definition in current subscription.
           text: >
               az policy state summarize -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"

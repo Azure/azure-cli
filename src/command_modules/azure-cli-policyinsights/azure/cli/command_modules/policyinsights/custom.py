@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from msrestazure.tools import is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 
@@ -10,9 +11,10 @@ def list_policy_events(
         cmd,
         client,
         management_group_name=None,
-        subscription_id=None,
         resource_group_name=None,
-        resource_id=None,
+        resource=None,
+        resource_provider_namespace=None,
+        resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
         policy_assignment_name=None,
@@ -35,39 +37,44 @@ def list_policy_events(
         filter=filter_clause,
         apply=apply_clause)
 
-    default_subscription_id = subscription_id
-    if default_subscription_id is None:
-        default_subscription_id = get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
             events = client.list_query_results_for_resource_group_level_policy_assignment(
-                default_subscription_id,
+                subscription_id,
                 resource_group_name,
                 policy_assignment_name,
                 query_options)
         else:
             events = client.list_query_results_for_subscription_level_policy_assignment(
-                default_subscription_id,
+                subscription_id,
                 policy_assignment_name,
                 query_options)
     elif policy_definition_name is not None:
         events = client.list_query_results_for_policy_definition(
-            default_subscription_id,
+            subscription_id,
             policy_definition_name,
             query_options)
     elif policy_set_definition_name is not None:
         events = client.list_query_results_for_policy_set_definition(
-            default_subscription_id,
+            subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource_id is not None:
+    elif resource is not None:
+        if not is_valid_resource_id(resource):
+            resource = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace=resource_provider_namespace,
+                type=resource_type,
+                name=resource)
         events = client.list_query_results_for_resource(
-            resource_id,
+            resource,
             query_options)
     elif resource_group_name is not None:
         events = client.list_query_results_for_resource_group(
-            default_subscription_id,
+            subscription_id,
             resource_group_name,
             query_options)
     elif management_group_name is not None:
@@ -76,7 +83,7 @@ def list_policy_events(
             query_options)
     else:
         events = client.list_query_results_for_subscription(
-            default_subscription_id,
+            subscription_id,
             query_options)
 
     return events.value
@@ -87,9 +94,10 @@ def list_policy_states(
         client,
         all_results=False,
         management_group_name=None,
-        subscription_id=None,
         resource_group_name=None,
-        resource_id=None,
+        resource=None,
+        resource_provider_namespace=None,
+        resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
         policy_assignment_name=None,
@@ -116,45 +124,50 @@ def list_policy_states(
     if all_results is True:
         policy_states_resource = 'default'
 
-    default_subscription_id = subscription_id
-    if default_subscription_id is None:
-        default_subscription_id = get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
             states = client.list_query_results_for_resource_group_level_policy_assignment(
                 policy_states_resource,
-                default_subscription_id,
+                subscription_id,
                 resource_group_name,
                 policy_assignment_name,
                 query_options)
         else:
             states = client.list_query_results_for_subscription_level_policy_assignment(
                 policy_states_resource,
-                default_subscription_id,
+                subscription_id,
                 policy_assignment_name,
                 query_options)
     elif policy_definition_name is not None:
         states = client.list_query_results_for_policy_definition(
             policy_states_resource,
-            default_subscription_id,
+            subscription_id,
             policy_definition_name,
             query_options)
     elif policy_set_definition_name is not None:
         states = client.list_query_results_for_policy_set_definition(
             policy_states_resource,
-            default_subscription_id,
+            subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource_id is not None:
+    elif resource is not None:
+        if not is_valid_resource_id(resource):
+            resource = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace=resource_provider_namespace,
+                type=resource_type,
+                name=resource)
         states = client.list_query_results_for_resource(
             policy_states_resource,
-            resource_id,
+            resource,
             query_options)
     elif resource_group_name is not None:
         states = client.list_query_results_for_resource_group(
             policy_states_resource,
-            default_subscription_id,
+            subscription_id,
             resource_group_name,
             query_options)
     elif management_group_name is not None:
@@ -165,7 +178,7 @@ def list_policy_states(
     else:
         states = client.list_query_results_for_subscription(
             policy_states_resource,
-            default_subscription_id,
+            subscription_id,
             query_options)
 
     return states.value
@@ -175,9 +188,10 @@ def summarize_policy_states(
         cmd,
         client,
         management_group_name=None,
-        subscription_id=None,
         resource_group_name=None,
-        resource_id=None,
+        resource=None,
+        resource_provider_namespace=None,
+        resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
         policy_assignment_name=None,
@@ -194,39 +208,44 @@ def summarize_policy_states(
         to=to_value,
         filter=filter_clause)
 
-    default_subscription_id = subscription_id
-    if default_subscription_id is None:
-        default_subscription_id = get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if policy_assignment_name is not None:
         if resource_group_name is not None:
             summary = client.summarize_for_resource_group_level_policy_assignment(
-                default_subscription_id,
+                subscription_id,
                 resource_group_name,
                 policy_assignment_name,
                 query_options)
         else:
             summary = client.summarize_for_subscription_level_policy_assignment(
-                default_subscription_id,
+                subscription_id,
                 policy_assignment_name,
                 query_options)
     elif policy_definition_name is not None:
         summary = client.summarize_for_policy_definition(
-            default_subscription_id,
+            subscription_id,
             policy_definition_name,
             query_options)
     elif policy_set_definition_name is not None:
         summary = client.summarize_for_policy_set_definition(
-            default_subscription_id,
+            subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource_id is not None:
+    elif resource is not None:
+        if not is_valid_resource_id(resource):
+            resource = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace=resource_provider_namespace,
+                type=resource_type,
+                name=resource)
         summary = client.summarize_for_resource(
-            resource_id,
+            resource,
             query_options)
     elif resource_group_name is not None:
         summary = client.summarize_for_resource_group(
-            default_subscription_id,
+            subscription_id,
             resource_group_name,
             query_options)
     elif management_group_name is not None:
@@ -235,7 +254,7 @@ def summarize_policy_states(
             query_options)
     else:
         summary = client.summarize_for_subscription(
-            default_subscription_id,
+            subscription_id,
             query_options)
 
     return summary.value[0]

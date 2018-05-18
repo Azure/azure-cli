@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.parameters import (
-    resource_group_name_type, get_resource_group_completion_list,
-    get_three_state_flag)
+    resource_group_name_type, get_resource_group_completion_list)
 
 from azure.cli.command_modules.resource._completers import (
     get_policy_set_completion_list, get_policy_completion_list,
-    get_policy_assignment_completion_list)
+    get_policy_assignment_completion_list, get_providers_completion_list, get_resource_types_completion_list)
 
+from ._validators import validate_resource
 
 def load_arguments(self, _):
     for scope in ['state', 'event']:
@@ -20,19 +20,26 @@ def load_arguments(self, _):
                 options_list=['--management-group-name', '-m'],
                 help='Management group name.')
             c.argument(
-                'subscription_id',
-                options_list=['--subscription-id', '-s'],
-                help='Subscription id.')
-            c.argument(
                 'resource_group_name',
                 options_list=['--resource-group-name', '-g'],
                 arg_type=resource_group_name_type,
                 completer=get_resource_group_completion_list,
                 help='Resource group name.')
             c.argument(
-                'resource_id',
-                options_list=['--resource-id', '-r'],
-                help='Resource id.')
+                'resource',
+                options_list=['--resource', '-r'],
+                validator=validate_resource,
+                help='Resource id or resource name.')
+            c.argument(
+                'resource_provider_namespace',
+                options_list=['--resource-provider-namespace', '-n'],
+                completer=get_providers_completion_list,
+                help='Resource provider namespace.')
+            c.argument(
+                'resource_type',
+                options_list=['--resource-type', '-t'],
+                completer=get_resource_types_completion_list,
+                help='Resource type.')
             c.argument(
                 'policy_set_definition_name',
                 options_list=['--policy-set-definition-name', '-p'],
@@ -82,7 +89,7 @@ def load_arguments(self, _):
         c.argument(
             'all_results',
             options_list=['--all'],
-            arg_type=get_three_state_flag(),
+            action='store_true',
             help='Within the specified time interval, get all policy states instead of the latest only.')
 
     with self.argument_context('policy state summarize') as c:
