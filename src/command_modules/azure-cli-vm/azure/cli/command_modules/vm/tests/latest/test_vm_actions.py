@@ -369,27 +369,6 @@ class TestActions(unittest.TestCase):
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
         self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
-        # verify write accelerator configuring; also, when it is enabled, caching will be set to None
-
-        r = normalize_disk_info(write_accelerator_settings=['true'])
-        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
-
-        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['true'])
-        self.assertEqual(r['os']['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[1]['writeAcceleratorEnabled'], True)
-
-        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['0=true'])
-        self.assertEqual(r['os'].get('writeAcceleratorEnabled'), None)
-        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
-        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
-        self.assertEqual(r[1].get('writeAcceleratorEnabled'), None)
-
-        # error on configuring non-existing disks
-        with self.assertRaises(CLIError) as err:
-            normalize_disk_info(write_accelerator_settings=['0=true'])
-        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
-
 
 if __name__ == '__main__':
     unittest.main()
