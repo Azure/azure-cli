@@ -160,14 +160,13 @@ popd
 :: Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
-    : echo %%~f
     set PARENT_DIR=%%~df%%~pf..
     set FILENAME=%%~nf
-	set BASE_FILENAME=!FILENAME:~0,-11!
-	set pyc=!BASE_FILENAME!.pyc
-	del !PARENT_DIR!\!BASE_FILENAME!.py
-	copy %%~f !PARENT_DIR!\!pyc! >nul
-	del %%~f 
+    set BASE_FILENAME=!FILENAME:~0,-11!
+    set pyc=!BASE_FILENAME!.pyc
+    del !PARENT_DIR!\!BASE_FILENAME!.py
+    copy %%~f !PARENT_DIR!\!pyc! >nul
+    del %%~f 
 )
 popd
 
