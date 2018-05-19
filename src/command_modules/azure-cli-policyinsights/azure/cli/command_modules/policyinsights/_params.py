@@ -12,6 +12,7 @@ from azure.cli.command_modules.resource._completers import (
 
 from ._validators import validate_resource
 
+
 def load_arguments(self, _):
     for scope in ['state', 'event']:
         with self.argument_context('policy {}'.format(scope)) as c:

@@ -7,7 +7,7 @@ from msrestazure.tools import is_valid_resource_id
 from knack.util import CLIError
 
 
-def validate_resource(cmd, namespace): # pylint: disable=unused-argument
+def validate_resource(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.resource:
         if not is_valid_resource_id(namespace.resource):
             if namespace.resource_provider_namespace is None:
