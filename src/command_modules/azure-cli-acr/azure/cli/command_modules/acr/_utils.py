@@ -23,7 +23,10 @@ from ._client_factory import (
 )
 
 logger = get_logger(__name__)
+<<<<<<< HEAD
 
+=======
+>>>>>>> Move import to commands under ACR
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
@@ -108,6 +111,8 @@ def get_registry_by_login_server(cli_ctx, login_server):
     elif len(elements) > 1:
         logger.warning("More than one registry object is found by the login server.")
         return None
+    elif len(elements) > 1:
+        logger.debug("More than one registry object is found by the login server.")
     return elements[0]
 
 
