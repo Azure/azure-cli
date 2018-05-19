@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
@@ -21,6 +22,7 @@ from ._client_factory import (
     get_acr_service_client
 )
 
+logger = get_logger(__name__)
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
@@ -102,8 +104,10 @@ def get_registry_by_login_server(cli_ctx, login_server):
 
     elements = [item for item in registry_list if item.login_server.lower() == login_server_lower]
 
-    if len(elements) != 1:
+    if not elements:
         return None
+    elif len(elements) > 1:
+        logger.debug("More than one registry object is found by the login server.")
     return elements[0]
 
 

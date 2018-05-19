@@ -18,7 +18,7 @@ helps['acr credential'] = """
 
 helps['acr repository'] = """
     type: group
-    short-summary: Manage repositories (image names) for Azure Container Registries.
+    short-summary: Manage repositories for Azure Container Registries.
     """
 
 helps['acr webhook'] = """
@@ -34,11 +34,6 @@ helps['acr replication'] = """
 helps['acr build-task'] = """
     type: group
     short-summary: Manage build definitions, which can be triggered by git commits or base image updates.
-    """
-
-helps['acr image'] = """
-    type: group
-    short-summary: Manage container images for Azure Container Registries.
     """
 
 helps['acr check-name'] = """
@@ -435,20 +430,20 @@ helps['acr build'] = """
             az acr build -r MyRegistry .
 """
 
-helps['acr image import'] = """
+helps['acr import'] = """
     type: command
-    short-summary: Imports an image to the container registry from the specified container registry.
+    short-summary: Imports to the container registry from source
     examples:
-        - name: Import image to keep the repository and tag pair the same as the source
+        - name: Import an image to the target registry and keep repository-tag pair the same as the source image
           text: >
-            az acr image import -n targetRegistry --source-image sourceregistry.azurecr.io/repository:tag
-        - name: Import from the same registry.
+            az acr import -n targetRegistry --source sourceregistry.azurecr.io/repository:tag
+        - name: Import an image within the same registry.
           text: >
-            az acr image import -n registry --source-image registry.azurecr.io/repository:tag -t targetrepository:targettag
-        - name: Import from a different registry in the same subscription as the target registry.
+            az acr import -n registry --source registry.azurecr.io/repository:tag -t targetrepository:targettag
+        - name: Import an image from a registry in the same subscription as the target registry is in.
           text: >
-            az acr image import -n targetRegistry --source-image sourceregistry.azurecr.io/repository:tag -t targetrepository:targettag
-        - name: Import from a registry in a different subscription from the one the target registry is in.
+            az acr import -n targetRegistry --source sourceregistry.azurecr.io/repository:tag -t targetrepository:targettag
+        - name: Import an image from a registry in a different subscription from the one the target registry is in.
           text: >
-            az acr image import -n targetRegistry --source-image sourceregistry.azurecr.io/repository:tag -t targetrepository:targettag --resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
+            az acr import -n targetRegistry --source sourceregistry.azurecr.io/repository:tag -t targetrepository:targettag --resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
 """

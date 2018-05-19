@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     ImportImageParameters,
     ImportSource,
@@ -24,24 +23,24 @@ REGISTRY_MISMATCH = "Registry mismatch. Please check either source-image or reso
                     "to make sure that they are referring to the same registry and try again."
 
 
-def acr_image_import(cmd,
-                     client,
-                     registry_name,
-                     source_image,
-                     resource_id=None,
-                     target_tags=None,
-                     resource_group_name=None,
-                     repository=None,
-                     force=False):
+def acr_import(cmd,
+               client,
+               registry_name,
+               source,
+               resource_id=None,
+               target_tags=None,
+               resource_group_name=None,
+               repository=None,
+               force=False):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
 
-    slash = source_image.find('/')
+    slash = source.find('/')
 
     if slash < 0:
         raise CLIError(INVALID_SOURCE_IMAGE)
 
-    source_registry_login_server = source_image[:slash]
+    source_registry_login_server = source[:slash]
     if not source_registry_login_server:
         raise CLIError(INVALID_SOURCE_IMAGE)
 
@@ -59,7 +58,7 @@ def acr_image_import(cmd,
         except NoTTYException:
             raise CLIError(NO_TTY_ERROR)
 
-    source_image = source_image[slash + 1:]
+    source_image = source[slash + 1:]
     if not source_image:
         raise CLIError(INVALID_SOURCE_IMAGE)
 
@@ -73,7 +72,7 @@ def acr_image_import(cmd,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
 
-    return LongRunningOperation(cmd.cli_ctx)(client.import_image(
+    return client.import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
-        parameters=import_parameters))
+        parameters=import_parameters)
