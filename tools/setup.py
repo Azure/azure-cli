@@ -32,7 +32,7 @@ DEPENDENCIES = [
     'readme_renderer>=17.2',
     'requests',
     'pyyaml',
-    'knack',
+    #'knack',
     'six>=1.10.0',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'
@@ -53,7 +53,12 @@ setup(
         'automation.tests',
         'automation.setup',
         'automation.coverage',
-        'automation.verify'
+        'automation.verify',
+        'automation.utilities',
+        'automation.clibuild',
+        'automation.cli_linter',
+        'automation.setup',
+        'automation.clipublish'
     ],
     entry_points={
         'console_scripts': [

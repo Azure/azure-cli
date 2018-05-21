@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli',
+    # 'azure-cli',
     'jmespath',
     'mock',
     'vcrpy>=1.10.3',
