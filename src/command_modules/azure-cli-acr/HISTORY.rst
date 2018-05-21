@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.25
 ++++++
-Minor fix
+* Improve manifest delete confirmation on tags
 
 2.0.24
 ++++++
