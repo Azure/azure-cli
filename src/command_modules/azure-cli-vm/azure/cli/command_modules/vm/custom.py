@@ -721,7 +721,7 @@ def get_vm_details(cmd, resource_group_name, vm_name):
 
 
 def list_skus(cmd, location=None):
-    from ._vm_utils import list_sku_info   
+    from ._vm_utils import list_sku_info
     return list_sku_info(cmd.cli_ctx, location)
 
 

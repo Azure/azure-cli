@@ -789,7 +789,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         lines = result.output.split('\n')
         # 1st line is header
         self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size', 'Restrictions'])
-        # spot check the first 3 entries
+        # spot check the first 4 entries
         fd_found, ud_found, size_found, zone_found = False, False, False, False
         for l in lines[2:]:
             parts = l.split()
@@ -797,7 +797,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
                 fd_found = True
             elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
                 ud_found = True
-            elif not size_found and parts[:3] ==  ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
+            elif not size_found and parts[:3] == ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
                 size_found = True
             elif not zone_found and parts[3] == '1,2,3':
                 zone_found = True
