@@ -98,17 +98,16 @@ def get_registry_by_login_server(cli_ctx, login_server):
     """Returns a Registry object for the specified login server.
     :param str login_server: The login server of the container registry.
     """
-    login_server_lower = login_server.lower()
-
     client = get_acr_service_client(cli_ctx).registries
     registry_list = client.list()
 
-    elements = [item for item in registry_list if item.login_server.lower() == login_server_lower]
+    elements = [item for item in registry_list if item.login_server.lower() == login_server.lower()]
 
     if not elements:
         return None
     elif len(elements) > 1:
-        logger.debug("More than one registry object is found by the login server.")
+        logger.warning("More than one registry object is found by the login server.")
+        return None
     return elements[0]
 
 

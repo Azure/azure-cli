@@ -49,8 +49,7 @@ def acr_import(cmd,
     if registry_from_login_server:
         if resource_id and registry_from_login_server.id != resource_id:
             raise CLIError(REGISTRY_MISMATCH)
-        else:
-            resource_id = registry_from_login_server.id
+        resource_id = registry_from_login_server.id
     elif not resource_id:
         from knack.prompting import prompt, NoTTYException
         try:
