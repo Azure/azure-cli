@@ -10,7 +10,6 @@ Release History
 2.0.25
 ++++++
 * Improve manifest delete confirmation on tags
-* Add 'acr import' command
 
 2.0.24
 ++++++
