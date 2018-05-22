@@ -197,6 +197,13 @@ def load_arguments(self, _):
         c.argument('os_type', get_enum_type(aci_connector_os_type))
         c.argument('service_principal')
 
+    with self.argument_context('aks use-dev-spaces') as c:
+        c.argument('space_name', options_list=['--space', '-s'])
+        c.argument('parent_space_name', options_list=['--parent-space', '-p'])
+
+    with self.argument_context('aks remove-dev-spaces') as c:
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
+
 
 def _get_default_install_location(exe_name):
     system = platform.system()
