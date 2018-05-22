@@ -408,11 +408,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
+        subscription_id = res['subscription']
+        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
         image_info = compute_client.images.get(res['resource_group'], res['name'])
         # pylint: disable=no-member
         namespace.os_type = image_info.storage_profile.os_disk.os_type.value
         image_data_disks = image_info.storage_profile.data_disks
+        if subscription_id:
+            if not namespace.external_subscription_ids:
+                namespace.external_subscription_ids = []
+            namespace.external_subscription_ids.append(subscription_id)
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID

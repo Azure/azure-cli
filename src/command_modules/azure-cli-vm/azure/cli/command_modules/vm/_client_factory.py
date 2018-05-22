@@ -7,7 +7,8 @@
 def _compute_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE, subscription_id=kwargs.get('subscription_id'))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE, subscription_id=kwargs.get('subscription_id'),
+                                   external_subscription_ids=kwargs.get('external_subscription_ids'))
 
 
 def cf_ni(cli_ctx, _):
