@@ -7,6 +7,7 @@ Release History
 ++++++
 * Add polling build status.
 * Allow case-insensitive enum values.
+* Add --top and --orderby parameters for show-manifests.
 
 2.0.27
 ++++++

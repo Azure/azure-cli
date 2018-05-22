@@ -238,18 +238,20 @@ def _parameters(registry_name,
     return parameters
 
 
-# pylint: disable=inconsistent-return-statements
 def random_storage_account_name(cli_ctx, registry_name):
     from datetime import datetime
 
     client = get_storage_service_client(cli_ctx).storage_accounts
     prefix = registry_name[:18].lower()
 
-    while True:
+    for x in range(10):
         time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
         storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
+        logger.debug("Checking storage account %s with name '%s'.", x, storage_account_name)
         if client.check_name_availability(storage_account_name).name_available:  # pylint: disable=no-member
             return storage_account_name
+
+    raise CLIError("Could not find an available storage account name. Please try again later.")
 
 
 def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, message=None):

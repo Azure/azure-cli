@@ -170,6 +170,9 @@ helps['acr repository show-manifests'] = """
         - name: Show manifests of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository
+        - name: Show the latest 10 manifests ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
 """
 
 helps['acr repository delete'] = """
