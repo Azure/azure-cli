@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import (
-    resource_group_name_type, get_resource_group_completion_list)
+from azure.cli.core.commands.parameters import resource_group_name_type
 
 from azure.cli.command_modules.resource._completers import (
     get_policy_set_completion_list, get_policy_completion_list,
@@ -19,71 +18,88 @@ def load_arguments(self, _):
             c.argument(
                 'management_group_name',
                 options_list=['--management-group-name', '-m'],
+                arg_group='Scope',
                 help='Management group name.')
             c.argument(
                 'resource_group_name',
-                options_list=['--resource-group-name', '-g'],
                 arg_type=resource_group_name_type,
-                completer=get_resource_group_completion_list,
-                help='Resource group name.')
+                arg_group='Scope')
             c.argument(
                 'resource',
                 options_list=['--resource', '-r'],
                 validator=validate_resource,
-                help='Resource id or resource name.')
+                arg_group='Resource ID',
+                help='Resource ID or resource name.')
             c.argument(
-                'resource_provider_namespace',
-                options_list=['--resource-provider-namespace', '-n'],
+                'namespace',
+                options_list=['--namespace'],
                 completer=get_providers_completion_list,
-                help='Resource provider namespace.')
+                arg_group='Resource ID',
+                help='Provider namespace (Ex: ''Microsoft.Provider'').')
+            c.argument(
+                'resource_type_parent',
+                options_list=['--parent'],
+                arg_group='Resource ID',
+                help='The parent path (Ex: ''resA/myA/resB/myB'').')
             c.argument(
                 'resource_type',
-                options_list=['--resource-type', '-t'],
+                options_list=['--resource-type'],
                 completer=get_resource_types_completion_list,
-                help='Resource type.')
+                arg_group='Resource ID',
+                help='Resource type (Ex: ''resC'').')
             c.argument(
                 'policy_set_definition_name',
                 options_list=['--policy-set-definition-name', '-p'],
                 completer=get_policy_set_completion_list,
+                arg_group='Scope',
                 help='Policy set definition name.')
             c.argument(
                 'policy_definition_name',
                 options_list=['--policy-definition-name', '-d'],
                 completer=get_policy_completion_list,
+                arg_group='Scope',
                 help='Policy definition name.')
             c.argument(
                 'policy_assignment_name',
                 options_list=['--policy-assignment-name', '-a'],
                 completer=get_policy_assignment_completion_list,
+                arg_group='Scope',
                 help='Policy assignment name.')
             c.argument(
                 'from_value',
                 options_list=['--from'],
+                arg_group='Query Option',
                 help='ISO 8601 formatted timestamp specifying the start time of the interval to query.')
             c.argument(
                 'to_value',
                 options_list=['--to'],
+                arg_group='Query Option',
                 help='ISO 8601 formatted timestamp specifying the end time of the interval to query.')
             c.argument(
                 'top_value',
                 options_list=['--top'],
                 type=int,
+                arg_group='Query Option',
                 help='Maximum number of records to return.')
             c.argument(
                 'order_by_clause',
                 options_list=['--order-by'],
+                arg_group='Query Option',
                 help='Ordering expression using OData notation.')
             c.argument(
                 'select_clause',
                 options_list=['--select'],
+                arg_group='Query Option',
                 help='Select expression using OData notation.')
             c.argument(
                 'filter_clause',
                 options_list=['--filter'],
+                arg_group='Query Option',
                 help='Filter expression using OData notation.')
             c.argument(
                 'apply_clause',
                 options_list=['--apply'],
+                arg_group='Query Option',
                 help='Apply expression for aggregations using OData notation.')
 
     with self.argument_context('policy state') as c:

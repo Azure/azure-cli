@@ -13,7 +13,8 @@ def list_policy_events(
         management_group_name=None,
         resource_group_name=None,
         resource=None,
-        resource_provider_namespace=None,
+        namespace=None,
+        resource_type_parent=None,
         resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
@@ -39,8 +40,8 @@ def list_policy_events(
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    if policy_assignment_name is not None:
-        if resource_group_name is not None:
+    if policy_assignment_name:
+        if resource_group_name:
             events = client.list_query_results_for_resource_group_level_policy_assignment(
                 subscription_id,
                 resource_group_name,
@@ -51,33 +52,36 @@ def list_policy_events(
                 subscription_id,
                 policy_assignment_name,
                 query_options)
-    elif policy_definition_name is not None:
+    elif policy_definition_name:
         events = client.list_query_results_for_policy_definition(
             subscription_id,
             policy_definition_name,
             query_options)
-    elif policy_set_definition_name is not None:
+    elif policy_set_definition_name:
         events = client.list_query_results_for_policy_set_definition(
             subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource is not None:
+    elif resource:
         if not is_valid_resource_id(resource):
+            if resource_type_parent:
+                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
+                resource_type = "{}/{}".format(resource_type_parent, resource_type)
             resource = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
-                namespace=resource_provider_namespace,
+                namespace=namespace,
                 type=resource_type,
                 name=resource)
         events = client.list_query_results_for_resource(
             resource,
             query_options)
-    elif resource_group_name is not None:
+    elif resource_group_name:
         events = client.list_query_results_for_resource_group(
             subscription_id,
             resource_group_name,
             query_options)
-    elif management_group_name is not None:
+    elif management_group_name:
         events = client.list_query_results_for_management_group(
             management_group_name,
             query_options)
@@ -96,7 +100,8 @@ def list_policy_states(
         management_group_name=None,
         resource_group_name=None,
         resource=None,
-        resource_provider_namespace=None,
+        namespace=None,
+        resource_type_parent=None,
         resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
@@ -126,8 +131,8 @@ def list_policy_states(
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    if policy_assignment_name is not None:
-        if resource_group_name is not None:
+    if policy_assignment_name:
+        if resource_group_name:
             states = client.list_query_results_for_resource_group_level_policy_assignment(
                 policy_states_resource,
                 subscription_id,
@@ -140,37 +145,40 @@ def list_policy_states(
                 subscription_id,
                 policy_assignment_name,
                 query_options)
-    elif policy_definition_name is not None:
+    elif policy_definition_name:
         states = client.list_query_results_for_policy_definition(
             policy_states_resource,
             subscription_id,
             policy_definition_name,
             query_options)
-    elif policy_set_definition_name is not None:
+    elif policy_set_definition_name:
         states = client.list_query_results_for_policy_set_definition(
             policy_states_resource,
             subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource is not None:
+    elif resource:
         if not is_valid_resource_id(resource):
+            if resource_type_parent:
+                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
+                resource_type = "{}/{}".format(resource_type_parent, resource_type)
             resource = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
-                namespace=resource_provider_namespace,
+                namespace=namespace,
                 type=resource_type,
                 name=resource)
         states = client.list_query_results_for_resource(
             policy_states_resource,
             resource,
             query_options)
-    elif resource_group_name is not None:
+    elif resource_group_name:
         states = client.list_query_results_for_resource_group(
             policy_states_resource,
             subscription_id,
             resource_group_name,
             query_options)
-    elif management_group_name is not None:
+    elif management_group_name:
         states = client.list_query_results_for_management_group(
             policy_states_resource,
             management_group_name,
@@ -190,7 +198,8 @@ def summarize_policy_states(
         management_group_name=None,
         resource_group_name=None,
         resource=None,
-        resource_provider_namespace=None,
+        namespace=None,
+        resource_type_parent=None,
         resource_type=None,
         policy_set_definition_name=None,
         policy_definition_name=None,
@@ -210,8 +219,8 @@ def summarize_policy_states(
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    if policy_assignment_name is not None:
-        if resource_group_name is not None:
+    if policy_assignment_name:
+        if resource_group_name:
             summary = client.summarize_for_resource_group_level_policy_assignment(
                 subscription_id,
                 resource_group_name,
@@ -222,33 +231,36 @@ def summarize_policy_states(
                 subscription_id,
                 policy_assignment_name,
                 query_options)
-    elif policy_definition_name is not None:
+    elif policy_definition_name:
         summary = client.summarize_for_policy_definition(
             subscription_id,
             policy_definition_name,
             query_options)
-    elif policy_set_definition_name is not None:
+    elif policy_set_definition_name:
         summary = client.summarize_for_policy_set_definition(
             subscription_id,
             policy_set_definition_name,
             query_options)
-    elif resource is not None:
+    elif resource:
         if not is_valid_resource_id(resource):
+            if resource_type_parent:
+                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
+                resource_type = "{}/{}".format(resource_type_parent, resource_type)
             resource = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
-                namespace=resource_provider_namespace,
+                namespace=namespace,
                 type=resource_type,
                 name=resource)
         summary = client.summarize_for_resource(
             resource,
             query_options)
-    elif resource_group_name is not None:
+    elif resource_group_name:
         summary = client.summarize_for_resource_group(
             subscription_id,
             resource_group_name,
             query_options)
-    elif management_group_name is not None:
+    elif management_group_name:
         summary = client.summarize_for_management_group(
             management_group_name,
             query_options)
@@ -258,3 +270,13 @@ def summarize_policy_states(
             query_options)
 
     return summary.value[0]
+
+
+def _remove_leading_and_trailing_slash(s):
+    if s:
+        if s.startswith('/'):
+            s = s[1:]
+        if s.endswith('/'):
+            s = s[:-1]
+
+    return s
