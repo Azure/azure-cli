@@ -6,6 +6,7 @@ Release History
 2.0.28
 ++++++
 * Add polling build status.
+* Add --top and --orderby parameters for show-manifests.
 
 2.0.27
 ++++++

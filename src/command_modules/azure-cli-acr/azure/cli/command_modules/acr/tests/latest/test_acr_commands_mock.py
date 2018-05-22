@@ -20,7 +20,6 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_delete,
     acr_repository_untag,
     _get_authorization_header,
-    _get_pagination_params,
     _get_manifest_v2_header
 )
 from azure.cli.command_modules.acr._docker_utils import (
@@ -51,7 +50,10 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_catalog',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20),
+            params={
+                'n': 20,
+                'orderby': None
+            },
             verify=mock.ANY)
 
         # List repositories using Bearer auth
@@ -60,7 +62,10 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_catalog',
             headers=_get_authorization_header(None, 'password'),
-            params=_get_pagination_params(20),
+            params={
+                'n': 20,
+                'orderby': None
+            },
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -81,7 +86,10 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/tags/list',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20),
+            params={
+                'n': 20,
+                'orderby': None
+            },
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -117,7 +125,20 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/manifests/list',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20),
+            params={
+                'n': 20,
+                'orderby': None
+            },
+            verify=mock.ANY)
+
+        acr_repository_show_manifests(cmd, 'testregistry', 'testrepository', top=10, orderby='time_desc')
+        mock_requests_get.assert_called_with(
+            'https://testregistry.azurecr.io/v2/_acr/testrepository/manifests/list',
+            headers=_get_authorization_header('username', 'password'),
+            params={
+                'n': 10,
+                'orderby': 'time_desc'
+            },
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.validate_managed_registry', autospec=True)
