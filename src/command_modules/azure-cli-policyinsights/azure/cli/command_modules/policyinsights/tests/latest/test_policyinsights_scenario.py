@@ -21,7 +21,7 @@ class PolicyInsightsTests(ScenarioTest):
             '-m "azgovtest4"',
             '',
             '-g "defaultresourcegroup-eus"',
-            '-r "/subscriptions/0b88dfdb-55b3-4fb0-b474-5b6dcbe6b2ef/resourcegroups/eastusnsggroup/providers/microsoft.network/networksecuritygroups/eastusnsg/securityrules/allow-joba"',
+            '-r "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/eastusnsggroup/providers/microsoft.network/networksecuritygroups/eastusnsg/securityrules/allow-joba"',
             '-r "omssecuritydevkeyvalut" --namespace "microsoft.keyvault" --resource-type "vaults" -g "omssecurityintresourcegroup"',
             '-r "default" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/mms-wcus-vnet" -g "mms-wcus"',
             '-p "335cefd2-ab16-430f-b364-974a170eb1d5"',
