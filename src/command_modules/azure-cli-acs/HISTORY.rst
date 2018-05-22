@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.35
+++++++
+* fix `az acs browse` command error
+
 2.0.34
 ++++++
 * `az aks get-credentials` creates the kube config file with more secure filesystem permissions
