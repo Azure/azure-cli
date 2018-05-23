@@ -161,6 +161,8 @@ class LinterManager(object):
         if not self.exit_code:
             print(os.linesep + 'No violations found.')
         colorama.deinit()
+        from .rules.command_rules import counter
+        print(counter)
         return self.exit_code
 
     def _run_rules(self, rule_group):

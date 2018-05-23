@@ -27,6 +27,7 @@ def no_404_handler_for_show_commands_rule(linter, command_name):
         return
     exception_handler = linter.get_exception_handler(command_name)
     if not exception_handler:
+        counter['No'] += 1
         raise RuleError('Show command is missing exception handler and should resolve a 404.')
 
     # create a CloudError to test exception handler
@@ -37,4 +38,8 @@ def no_404_handler_for_show_commands_rule(linter, command_name):
     try:
         exception_handler(error)
     except Exception:
+        counter['Handler'] += 1
         raise RuleError('Show command has exception handler %s, but did not handle 404 CloudError.' % exception_handler)
+    counter['Yes'] += 1
+
+counter = {'Yes':0, 'No':0, 'Handler':0}
