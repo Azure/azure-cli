@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.34
+++++++
+* core: support cross tenant resource referencing
 
 2.0.33
 ++++++
