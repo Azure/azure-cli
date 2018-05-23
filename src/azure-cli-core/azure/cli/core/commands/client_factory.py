@@ -44,7 +44,7 @@ def resolve_client_arg_name(operation, kwargs):
 
 
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
-                            external_subscription_ids=None, **kwargs):
+                            aux_subscriptions=None, **kwargs):
     sdk_profile = None
     if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client
@@ -58,7 +58,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
         client_type = client_or_resource_type
     client, _ = _get_mgmt_service_client(cli_ctx, client_type, subscription_id=subscription_id,
                                          api_version=api_version, sdk_profile=sdk_profile,
-                                         external_subscription_ids=external_subscription_ids,
+                                         aux_subscriptions=aux_subscriptions,
                                          **kwargs)
     return client
 
@@ -106,14 +106,14 @@ def _get_mgmt_service_client(cli_ctx,
                              base_url_bound=True,
                              resource=None,
                              sdk_profile=None,
-                             external_subscription_ids=None,
+                             aux_subscriptions=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
-                                                             external_subscription_ids=external_subscription_ids)
+                                                             aux_subscriptions=aux_subscriptions)
 
     client_kwargs = {}
     if base_url_bound:

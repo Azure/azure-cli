@@ -415,9 +415,9 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.os_type = image_info.storage_profile.os_disk.os_type.value
         image_data_disks = image_info.storage_profile.data_disks
         if subscription_id:
-            if not namespace.external_subscription_ids:
-                namespace.external_subscription_ids = []
-            namespace.external_subscription_ids.append(subscription_id)
+            if not namespace.aux_subscriptions:
+                namespace.aux_subscriptions = []
+            namespace.aux_subscriptions.append(subscription_id)
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
