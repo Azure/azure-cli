@@ -117,7 +117,7 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
         from msrestazure.azure_exceptions import CloudError
         try:
             types = client.virtual_machine_extension_images.list_types(location, publisher)
-        except CloudError:  # VM image publisher might not have any extension images, exception could raise
+        except CloudError:  # PIR image publishers might not have any extension images, exception could raise
             types = []
         if name:
             types = [t for t in types if _matched(name, t.name, partial_match)]
