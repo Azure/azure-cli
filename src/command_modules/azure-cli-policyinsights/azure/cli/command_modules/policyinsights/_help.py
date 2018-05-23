@@ -24,16 +24,16 @@ helps['policy event list'] = """
               az policy event list -g "myRg"
         - name: Get policy events for a resource using resource ID.
           text: >
-              az policy event list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+              az policy event list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
         - name: Get policy events for a resource using resource name.
           text: >
-              az policy event list -r "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
+              az policy event list --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
         - name: Get policy events for a nested resource using resource name.
           text: >
-              az policy event list -r "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
+              az policy event list --resource "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
         - name: Get policy events for a policy set definition in current subscription.
           text: >
-              az policy event list -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"
+              az policy event list -s "fff58873-fff8-fff5-fffc-fffbe7c9d697"
         - name: Get policy events for a policy definition in current subscription.
           text: >
               az policy event list -d "fff69973-fff8-fff5-fffc-fffbe7c9d698"
@@ -87,16 +87,16 @@ helps['policy state list'] = """
               az policy state list -g "myRg"
         - name: Get latest policy states for a resource using resource ID.
           text: >
-              az policy state list -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+              az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
         - name: Get latest policy states for a resource using resource name.
           text: >
-              az policy state list -r "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
+              az policy state list --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
         - name: Get latest policy states for a nested resource using resource name.
           text: >
-              az policy state list -r "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
+              az policy state list --resource "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
         - name: Get latest policy states for a policy set definition in current subscription.
           text: >
-              az policy state list -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"
+              az policy state list -s "fff58873-fff8-fff5-fffc-fffbe7c9d697"
         - name: Get latest policy states for a policy definition in current subscription.
           text: >
               az policy state list -d "fff69973-fff8-fff5-fffc-fffbe7c9d698"
@@ -143,16 +143,16 @@ helps['policy state summarize'] = """
               az policy state summarize -g "myRg"
         - name: Get latest non-compliant policy states summary for a resource using resource ID.
           text: >
-              az policy state summarize -r "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
+              az policy state summarize --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup /providers/Microsoft.EventHub/namespaces/myns1/eventhubs/eh1/consumergroups/cg1"
         - name: Get latest non-compliant policy states summary for a resource using resource name.
           text: >
-              az policy state summarize -r "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
+              az policy state summarize --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup"
         - name: Get latest non-compliant policy states summary for a nested resource using resource name.
           text: >
-              az policy state summarize -r "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
+              az policy state summarize --resource "myRule1" --namespace "Microsoft.Network" --resource-type "securityRules" --parent "networkSecurityGroups/mysecuritygroup1" -g "myresourcegroup"
         - name: Get latest non-compliant policy states summary for a policy set definition in current subscription.
           text: >
-              az policy state summarize -p "fff58873-fff8-fff5-fffc-fffbe7c9d697"
+              az policy state summarize -s "fff58873-fff8-fff5-fffc-fffbe7c9d697"
         - name: Get latest non-compliant policy states summary for a policy definition in current subscription.
           text: >
               az policy state summarize -d "fff69973-fff8-fff5-fffc-fffbe7c9d698"

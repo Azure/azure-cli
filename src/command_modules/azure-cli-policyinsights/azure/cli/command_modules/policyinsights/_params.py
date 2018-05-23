@@ -26,7 +26,7 @@ def load_arguments(self, _):
                 arg_group='Scope')
             c.argument(
                 'resource',
-                options_list=['--resource', '-r'],
+                options_list=['--resource'],
                 validator=validate_resource,
                 arg_group='Resource ID',
                 help='Resource ID or resource name.')
@@ -49,7 +49,7 @@ def load_arguments(self, _):
                 help='Resource type (Ex: ''resC'').')
             c.argument(
                 'policy_set_definition_name',
-                options_list=['--policy-set-definition-name', '-p'],
+                options_list=['--policy-set-definition-name', '-s'],
                 completer=get_policy_set_completion_list,
                 arg_group='Scope',
                 help='Policy set definition name.')
