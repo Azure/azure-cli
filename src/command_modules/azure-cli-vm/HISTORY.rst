@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.33
+++++++
+* `vm/vmss create`: support create from managed images from other tenants
+
 2.0.32
 ++++++
 * BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support

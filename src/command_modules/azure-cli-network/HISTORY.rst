@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.3
+++++++
+* `network vnet peering create`: support cross tenant vnet peering 
 
 2.1.2
 ++++++
