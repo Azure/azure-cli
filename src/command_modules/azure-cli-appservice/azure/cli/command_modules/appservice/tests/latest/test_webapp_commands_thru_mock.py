@@ -37,17 +37,19 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
-        self.client._client = mock.MagicMock()
-        client_factory_mock.return_value = self.client
-        mock_response = mock.MagicMock()
-        mock_response.status_code = 200
-        self.client._client.send.return_value = mock_response
+        class MockClient:
+            def update_publishing_user(self, user):
+                # Don't do an actual call, just return the incoming user
+                return user
+
+        client_factory_mock.return_value = MockClient()
 
         # action
-        result = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
+        user = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
 
         # assert things get wired up with a result returned
-        self.assertIsNotNone(result)
+        assert user.publishing_user_name == 'admin'
+        assert user.publishing_password == 'verySecret1'
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_source_control_token(self, client_factory_mock):
