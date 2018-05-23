@@ -346,7 +346,7 @@ def _check_remote_source_code(source_location):
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
        or lower_source_location.startswith("github.com/"):
         if re.search(r"\.git(?:#.+)?$", lower_source_location) or "visualstudio.com" in lower_source_location:
-            # git url must contain ".git"
+            # git url must contain ".git" or be from VSTS
             return source_location
         elif not lower_source_location.startswith("github.com/"):
             # Others are tarball
