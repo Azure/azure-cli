@@ -207,6 +207,8 @@ def load_command_table(self, _):
         client_factory=cf_packet_capture
     )
 
+    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
+
     # endregion
 
     # region NetworkRoot
@@ -624,7 +626,7 @@ def load_command_table(self, _):
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='virtual_network_peering_parameters')
+        g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
         g.command('delete', 'delete')
