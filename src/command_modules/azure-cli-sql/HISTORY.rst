@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.0.27
+++++++
+* Added new Managed instance and Managed database CRUD commands.
+    * Managed instance commands:
+        * az sql managed instance create
+        * az sql managed instance show
+        * az sql managed instance list
+        * az sql managed instance update
+        * az sql managed instance delete
+
+    * Managed database commands:
+        * az sql managed db create
+        * az sql managed db show
+        * az sql managed db list
+        * az sql managed instance restore
+        * az sql managed instance delete
+
 2.0.26
 ++++++
 * BREAKING CHANGES: Updated database, data warehouse, and elastic pool commands to use Azure-standard SKU properties for configuring performance level. This has resulted in some changes to the respose objects returned from db, dw, and elastic-pool commands.
