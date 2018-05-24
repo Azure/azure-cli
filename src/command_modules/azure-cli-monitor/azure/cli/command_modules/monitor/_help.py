@@ -491,11 +491,11 @@ helps['monitor autoscale rule delete'] = """
 """
 
 
-helps['monitor autoscale-settings'] = """
+helps['monitor autoscale'] = """
             type: group
             short-summary: (DEPRECATED) Manage autoscale settings.
             """
-helps['monitor autoscale-settings update'] = """
+helps['monitor autoscale update'] = """
             type: command
             short-summary: Updates an autoscale setting.
             """
