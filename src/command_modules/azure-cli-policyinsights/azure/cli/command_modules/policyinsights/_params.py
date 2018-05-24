@@ -26,13 +26,11 @@ def load_arguments(self, _):
                 arg_group='Scope')
             c.argument(
                 'resource',
-                options_list=['--resource'],
                 validator=validate_resource,
                 arg_group='Resource ID',
-                help='Resource ID or resource name.')
+                help='Resource ID or resource name. If a name is given, please provide the resource group and other relevant resource id arguments.')  # pylint: disable=line-too-long
             c.argument(
                 'namespace',
-                options_list=['--namespace'],
                 completer=get_providers_completion_list,
                 arg_group='Resource ID',
                 help='Provider namespace (Ex: ''Microsoft.Provider'').')
@@ -43,7 +41,6 @@ def load_arguments(self, _):
                 help='The parent path (Ex: ''resA/myA/resB/myB'').')
             c.argument(
                 'resource_type',
-                options_list=['--resource-type'],
                 completer=get_resource_types_completion_list,
                 arg_group='Resource ID',
                 help='Resource type (Ex: ''resC'').')
