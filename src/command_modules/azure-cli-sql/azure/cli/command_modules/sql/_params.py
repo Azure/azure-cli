@@ -18,7 +18,8 @@ from azure.mgmt.sql.models import (
     ExportRequest,
     Server,
     ServerAzureADAdministrator,
-    Sku
+    Sku,
+    ManagedInstance
 )
 
 from azure.mgmt.sql.models.sql_management_client_enums import (
@@ -140,9 +141,13 @@ zone_redundant_param_type = CLIArgumentType(
     help='Specifies whether to enable zone redundancy',
     arg_type=get_three_state_flag())
 
+managed_instance_param_type = CLIArgumentType(
+    options_list=['--managed_instance', '-mi'],
+    help='Name of the Azure SQL managed instance.')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
 dw_service_objective_examples = 'DW100, DW1000c'
+mi_service_objective_examples = 'GP_Gen4, GP_Gen5'
 
 
 ###############################################
@@ -1005,3 +1010,133 @@ def load_arguments(self, _):
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
                 help='The virtual network name')
+
+    ###############################################
+    #                sql managed instance         #
+    ###############################################
+    with self.argument_context('sql managed instance') as c:
+        c.argument('managed_instance_name',
+                   help='The managed instance name',
+                   options_list=['--name', '-n'],
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
+
+    with self.argument_context('sql managed instance create') as c:
+        # Create args that will be used to build up the ManagedInstance object
+        create_args_for_complex_type(
+            c, 'parameters', ManagedInstance, [
+                'administrator_login',
+                'administrator_login_password',
+                'location',
+                'license_type',
+                'subnet_id',
+                'vcores',
+                'storage_size_in_gb',
+                'sku_name',
+            ])
+
+        c.argument('administrator_login',
+                   options_list=['--admin-user', '-u'],
+                   required=True)
+
+        c.argument('administrator_login_password',
+                   options_list=['--admin-password', '-p'],
+                   required=True)
+
+        c.argument('subnet_id',
+                   required=True,
+                   options_list=['--subnet-id', '-subn'])
+
+        c.argument('license_type',
+                   required=True,
+                   arg_type=get_enum_type(DatabaseLicenseType))
+
+        c.argument('vcores',
+                   required=True,
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+
+        c.argument('storage_size_in_gb',
+                   required=True,
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+
+        c.argument('sku_name',
+                   required=True)
+
+        c.argument('assign_identity',
+                   options_list=['--assign-identity', '-i'],
+                   help='Generate and assign an Azure Active Directory Identity for this managed instance'
+                   'for use with key management services like Azure KeyVault.')
+
+    with self.argument_context('sql managed instance update') as c:
+        # Create args that will be used to build up the ManagedInstance object
+        create_args_for_complex_type(
+            c, 'parameters', ManagedInstance, [
+                'administrator_login_password',
+                'license_type',
+                'v_cores',
+                'storage_size_in_gb',
+            ])
+
+        c.argument('administrator_login_password',
+                   options_list=['--admin-password', '-p'],
+                   required=True)
+
+        c.argument('license_type',
+                   required=False,
+                   arg_type=get_enum_type(DatabaseLicenseType))
+
+        c.argument('v_cores',
+                   required=False,
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+
+        c.argument('storage_size_in_gb',
+                   required=False,
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+
+        c.argument('assign_identity',
+                   options_list=['--assign-identity', '-i'],
+                   help='Generate and assign an Azure Active Directory Identity for this managed instance'
+                   'for use with key management services like Azure KeyVault.')
+
+    ###############################################
+    #                sql managed db               #
+    ###############################################
+    with self.argument_context('sql managed db') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type,
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
+
+        c.argument('database_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Azure SQL Managed Database.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
+
+    with self.argument_context('sql managed db create') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedInstance, [
+                'collation',
+            ])
+
+        c.argument('collation',
+                   required=False,
+                   help='The collation of the Azure SQL Managed Database collation to use.')
+
+    with self.argument_context('sql managed db restore') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedInstance, [
+                'target_managed_database_name',
+                'restore_point_in_time'
+            ])
+        c.argument('target_managed_database_name',
+                   help='Name of the database that will be created as the restore destination.')
+
+        restore_point_arg_group = 'Restore Point'
+
+        c.argument('restore_point_in_time',
+                   options_list=['--time', '-t'],
+                   arg_group=restore_point_arg_group,
+                   help='The point in time of the source database that will be restored to create the'
+                   ' new database. Must be greater than or equal to the source database\'s'
+                   ' earliestRestoreDate value.')

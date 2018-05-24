@@ -42,6 +42,8 @@ from ._util import (
     get_sql_server_usages_operations,
     get_sql_subscription_usages_operations,
     get_sql_virtual_network_rules_operations,
+    get_sql_managed_instances_operations,
+    get_sql_managed_databases_operations
 )
 
 from ._validators import (
@@ -406,3 +408,41 @@ def load_command_table(self, _):
         c.command('create', 'create_or_update')
         c.command('delete', 'delete')
         c.custom_command('set', 'server_dns_alias_set')
+
+    ###############################################
+    #                sql managed instance         #
+    ###############################################
+
+    managed_instances_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.managed_instances_operations#ManagedInstancesOperations.{}',
+        client_factory=get_sql_managed_instances_operations)
+
+    with self.command_group('sql managed instance',
+                            managed_instances_operations,
+                            client_factory=get_sql_managed_instances_operations) as g:
+
+        g.custom_command('create', 'managed_instance_create')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('show', 'get')
+        g.custom_command('list', 'managed_instance_list')
+        g.generic_update_command('update', custom_func_name='managed_instance_update')
+
+    ###############################################
+    #                sql managed db               #
+    ###############################################
+
+    managed_databases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.managed_databases_operations#ManagedDatabasesOperations.{}',
+        client_factory=get_sql_managed_databases_operations)
+
+    with self.command_group('sql managed db',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+
+        g.custom_command('create', 'managed_db_create',
+                         supports_no_wait=True)
+        g.custom_command('restore', 'managed_db_restore',
+                         supports_no_wait=True)
+        g.command('show', 'get')
+        g.custom_command('list', 'managed_db_list')
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)

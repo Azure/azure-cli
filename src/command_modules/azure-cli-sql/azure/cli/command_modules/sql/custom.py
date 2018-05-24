@@ -34,7 +34,8 @@ from azure.mgmt.sql.models import (
 
 from ._util import (
     get_sql_capabilities_operations,
-    get_sql_servers_operations
+    get_sql_servers_operations,
+    get_sql_managed_instances_operations
 )
 
 
@@ -55,6 +56,19 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
+        resource_group_name=resource_group_name).location
+
+
+# Determines managed instance location
+def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
+    '''
+    Returns the location (i.e. Azure region) that the specified managed instance is in.
+    '''
+
+    managed_instance_client = get_sql_managed_instances_operations(cli_ctx, None)
+    # pylint: disable=no-member
+    return managed_instance_client.get(
+        managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name).location
 
 
@@ -259,6 +273,22 @@ def _get_server_dns_suffx(cli_ctx):
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
+
+
+def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}/databases/{}'.format(
+        quote(get_subscription_id(cli_ctx)),
+        quote(resource_group_name),
+        quote(managed_instance_name),
+        quote(database_name))
 
 
 def db_show_conn_str(
@@ -1815,3 +1845,149 @@ def encryption_protector_update(
             server_key_name=key_name
         )
     )
+
+###############################################
+#                sql managed instance         #
+###############################################
+
+
+def managed_instance_create(
+        client,
+        name,
+        resource_group_name,
+        location,
+        assign_identity=False,
+        **kwargs):
+    '''
+    Creates a managed instance.
+    '''
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    kwargs['location'] = location
+
+    # Create
+    return client.create_or_update(
+        managed_instance_name=name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_instance_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists managed instances in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all managed instances in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all managed instances in the subscription
+    return client.list()
+
+
+def managed_instance_update(
+        instance,
+        administrator_login_password=None,
+        license_type=None,
+        v_cores=None,
+        storage_size_in_gb=None,
+        assign_identity=False):
+    '''
+    Updates a managed instance. Custom update function to apply parameters to instance.
+    '''
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Apply params to instance
+    instance.administrator_login_password = (
+        administrator_login_password or instance.administrator_login_password)
+    instance.license_type = (
+        license_type or instance.license_type)
+    instance.v_cores = (
+        v_cores or instance.v_cores)
+    instance.storage_size_in_gb = (
+        storage_size_in_gb or instance.storage_size_in_gb)
+
+    return instance
+
+###############################################
+#                sql managed db               #
+###############################################
+
+
+def managed_db_create(
+        cmd,
+        client,
+        name,
+        managed_instance_name,
+        resource_group_name,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        database_name=name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_list(
+        client,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Lists databases in a managed instance.
+    '''
+
+    # List all databases in the server
+    return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=managed_instance_name)
+
+
+def managed_db_restore(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        target_managed_database_name,
+        restore_point_in_time=None,
+        **kwargs):
+    '''
+    Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
+
+    Custom function makes create mode more convenient.
+    '''
+
+    if not restore_point_in_time:
+        raise CLIError('--restore_point_in_time must be specified.')
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['restore_point_in_time'] = restore_point_in_time
+    kwargs['create_mode'] = CreateMode.point_in_time_restore.value
+    kwargs['source_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name)
+
+    return client.create_or_update(
+        database_name=target_managed_database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
