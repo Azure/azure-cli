@@ -1076,6 +1076,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         parameters=params if params is not None else definition.parameters)
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
 
+
 def _register_rp(cli_ctx, subscription_id=None):
     rp = "Microsoft.Management"
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -1179,7 +1180,9 @@ def cli_managementgroups_subscription_remove(
     _register_rp(cmd.cli_ctx, subscription_id)
     return client.delete(group_name, subscription_id)
 
+
 # region Locks
+
 
 def _validate_lock_params_match_lock(
         lock_client, name, resource_group, resource_provider_namespace, parent_resource_path,

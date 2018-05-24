@@ -20,6 +20,7 @@ from azure.cli.command_modules.resource._validators import process_deployment_cr
 
 from ._exception_handler import managementgroups_exception_handler
 
+
 # Resource group commands
 def transform_resource_group_list(result):
     return [OrderedDict([
