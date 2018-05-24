@@ -17,9 +17,9 @@ def load_arguments(self, _):
         with self.argument_context('policy {}'.format(scope)) as c:
             c.argument(
                 'management_group_name',
-                options_list=['--management-group-name', '-m'],
+                options_list=['--management-group', '-m'],
                 arg_group='Scope',
-                help='Management group name.')
+                help='Name of management group.')
             c.argument(
                 'resource_group_name',
                 arg_type=resource_group_name_type,
@@ -49,22 +49,22 @@ def load_arguments(self, _):
                 help='Resource type (Ex: ''resC'').')
             c.argument(
                 'policy_set_definition_name',
-                options_list=['--policy-set-definition-name', '-s'],
+                options_list=['--policy-set-definition', '-s'],
                 completer=get_policy_set_completion_list,
                 arg_group='Scope',
-                help='Policy set definition name.')
+                help='Name of policy set definition.')
             c.argument(
                 'policy_definition_name',
-                options_list=['--policy-definition-name', '-d'],
+                options_list=['--policy-definition', '-d'],
                 completer=get_policy_completion_list,
                 arg_group='Scope',
-                help='Policy definition name.')
+                help='Name of policy definition.')
             c.argument(
                 'policy_assignment_name',
-                options_list=['--policy-assignment-name', '-a'],
+                options_list=['--policy-assignment', '-a'],
                 completer=get_policy_assignment_completion_list,
                 arg_group='Scope',
-                help='Policy assignment name.')
+                help='Name of policy assignment.')
             c.argument(
                 'from_value',
                 options_list=['--from'],
