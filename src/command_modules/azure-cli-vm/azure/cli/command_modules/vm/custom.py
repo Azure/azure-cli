@@ -2402,3 +2402,27 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
                               _get_vmss,
                               _set_vmss)
 # endregion
+
+# region image galleries
+def list_image_galleries(cmd, resource_group_name=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.galleries.list_by_resource_group(resource_group_name)
+    return client.galleries.list_by_subscription()
+
+
+def create_image_gallery(cmd, resource_group_name, gallery_name, unique_name=None, description=None,
+                           location=None, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    Gallery, GalleryIdentifier = cmd.get_models('Gallery', 'GalleryIdentifier')
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    unique_name = unique_name or gallery_name
+    gallery_identifier = GalleryIdentifier(unique_name=unique_name)
+
+    gallery = Gallery(identifier=gallery_identifier, description=description, location=location)
+
+    client = _compute_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
+
+# endregion

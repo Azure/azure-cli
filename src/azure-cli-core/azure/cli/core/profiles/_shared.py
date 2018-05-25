@@ -81,7 +81,10 @@ AZURE_API_PROFILES = {
             'resource_skus': '2017-09-01',
             'disks': '2018-04-01',
             'snapshots': '2018-04-01',
-            'virtual_machine_run_commands': '2017-03-30'
+            'virtual_machine_run_commands': '2017-03-30',
+            'galleries': '2018-06-01',
+            'gallery_image_versions': '2018-06-01',
+            'gallery_images': '2018-06-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
