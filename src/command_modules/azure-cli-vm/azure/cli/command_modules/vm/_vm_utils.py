@@ -5,6 +5,10 @@
 
 import json
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -123,7 +127,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, write_accelerator_settings=None):
+                        os_disk_caching=None, data_disk_cachings=None):
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
@@ -170,19 +174,11 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     if data_disk_cachings:
         update_disk_caching(info, data_disk_cachings)
 
-    # fill in write accelerators
-    if write_accelerator_settings:
-        update_write_accelerator_settings(info, write_accelerator_settings)
-
     # default os disk caching to 'ReadWrite' unless set otherwise
     if os_disk_caching:
         info['os']['caching'] = os_disk_caching
     else:
-        if info['os'].get('writeAcceleratorEnabled'):
-            info['os']['caching'] = 'None'
-        else:
-            info['os']['caching'] = 'ReadWrite'
-
+        info['os']['caching'] = 'ReadWrite'
     return info
 
 
@@ -253,3 +249,19 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
             lun = lun.lower()
             lun = int(lun) if lun != 'os' else lun
             _update(model, lun, value.lower() == 'true')
+
+
+def get_storage_blob_uri(cli_ctx, storage):
+    from azure.cli.core.profiles._shared import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    if urlparse(storage).scheme:
+        storage_uri = storage
+    else:
+        storage_mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+        storage_accounts = storage_mgmt_client.storage_accounts.list()
+        storage_account = next((a for a in list(storage_accounts)
+                                if a.name.lower() == storage.lower()), None)
+        if storage_account is None:
+            raise CLIError('{} does\'t exist.'.format(storage))
+        storage_uri = storage_account.primary_endpoints.blob
+    return storage_uri

@@ -94,6 +94,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp update') as c:
         c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS", arg_type=get_three_state_flag(return_label=True))
+        c.argument('skip_custom_domain_verification', help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified", arg_type=get_three_state_flag(return_label=True))
+        c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name", arg_type=get_three_state_flag(return_label=True))
+        c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation", arg_type=get_three_state_flag(return_label=True))
+
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true', help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:

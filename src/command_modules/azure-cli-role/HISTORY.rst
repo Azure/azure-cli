@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* ad app update: add generic update support
+
 2.0.23
 ++++++
 * BREAKING CHANGE: remove deprecated `az ad sp reset-credentials`

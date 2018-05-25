@@ -167,7 +167,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-    zip_url = scm_url + '/api/zipdeploy'
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+    deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
@@ -179,14 +180,13 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        r = requests.post(zip_url, data=zip_content, headers=headers)
-        if r.status_code != 200:
-            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
-                zip_url, r.status_code, r.text))
-
-    # on successful deployment navigate to the app, display the latest deployment json response
-    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
-    return response.json()
+        requests.post(zip_url, data=zip_content, headers=headers)
+    # check the status of async deployment
+    response = requests.get(deployment_status_url, headers=authorization)
+    if response.json()['status'] != 4:
+        logger.warning(response.json()['progress'])
+        response = _check_zip_deployment_status(deployment_status_url, authorization)
+    return response
 
 
 def get_sku_name(tier):
@@ -205,12 +205,6 @@ def get_sku_name(tier):
         return 'PREMIUMV2'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
-
-
-# deprecated, do not use
-def _get_sku_name(tier):
-    return get_sku_name(tier)
-# endregion
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -234,12 +228,44 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
+# for generic updater
+def get_webapp(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,
+               skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):
+    instance = kwargs['parameters']
+    client = web_client_factory(cmd.cli_ctx)
+    updater = client.web_apps.create_or_update_slot if slot else client.web_apps.create_or_update
+    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance,
+                  skip_dns_registration=skip_dns_registration,
+                  skip_custom_domain_verification=skip_custom_domain_verification,
+                  force_dns_registration=force_dns_registration,
+                  ttl_in_seconds=ttl_in_seconds)
+    if slot:
+        kwargs['slot'] = slot
+
+    return updater(**kwargs)
+
+
 def update_webapp(instance, client_affinity_enabled=None, https_only=None):
+    if 'function' in instance.kind:
+        raise CLIError("please use 'az functionapp update' to update this function app")
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
         instance.https_only = https_only == 'true'
+
     return instance
+
+
+def set_functionapp(cmd, resource_group_name, name, **kwargs):
+    instance = kwargs['parameters']
+    if 'function' not in instance.kind:
+        raise CLIError('Not a function app to update')
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.create_or_update(resource_group_name, name, site_envelope=instance)
 
 
 def list_webapp(cmd, resource_group_name=None):
@@ -1734,3 +1760,25 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
     return client.list_geo_regions(full_sku, linux_workers_enabled)
+
+
+def _check_zip_deployment_status(deployment_status_url, authorization):
+    import requests
+    import time
+    num_trials = 1
+    while num_trials < 200:
+        time.sleep(15)
+        response = requests.get(deployment_status_url, headers=authorization)
+        res_dict = response.json()
+        num_trials = num_trials + 1
+        if res_dict['status'] == 5:
+            logger.warning("Zip deployment failed status %s", res_dict['status_text'])
+            break
+        elif res_dict['status'] == 4:
+            break
+        logger.warning(res_dict['progress'])
+    # if the deployment is taking longer than expected
+    if res_dict['status'] != 4:
+        logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
+            beforing launching the app""", deployment_status_url)
+    return res_dict

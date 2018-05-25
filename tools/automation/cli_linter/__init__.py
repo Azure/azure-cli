@@ -22,6 +22,7 @@ def define_arguments(parser):
     parser.add_argument('--help-file-entries', dest='rule_types_to_run', action='append_const', const='help_entries',
                         help='Run linter on help-file-entries.')
     parser.add_argument('--modules', dest='modules', nargs='+', help='The modules on which the linter should run.')
+    parser.add_argument('--rules', dest='rules', nargs='+', help='The rules which the linter should run.')
 
 
 def main(args):
@@ -69,7 +70,8 @@ def main(args):
     linter_manager = LinterManager(command_table=command_table,
                                    help_file_entries=help_file_entries,
                                    loaded_help=loaded_help,
-                                   exclusions=exclusions)
+                                   exclusions=exclusions,
+                                   rule_inclusions=args.rules)
     exit_code = linter_manager.run(run_params='params' in args.rule_types_to_run,
                                    run_commands='commands' in args.rule_types_to_run,
                                    run_command_groups='command_groups' in args.rule_types_to_run,

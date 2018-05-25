@@ -204,10 +204,9 @@ def _normalize_extension_version(cli_ctx, publisher, vm_extension_name, version,
 
     if not version:
         result = load_extension_images_thru_services(cli_ctx, publisher, vm_extension_name, None, location,
-                                                     show_latest=True)
+                                                     show_latest=True, partial_match=False)
         if not result:
             raise CLIError('Failed to find the latest version for the extension "{}"'.format(vm_extension_name))
-
         # with 'show_latest' enabled, we will only get one result.
         version = result[0]['version']
 
@@ -495,13 +494,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
               storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None,
-              data_disk_sizes_gb=None, write_accelerator=None, disk_info=None,
+              data_disk_sizes_gb=None, disk_info=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None):
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
+              boot_diagnostics_storage=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -617,7 +617,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_name=os_disk_name, custom_image_os_type=os_type, storage_sku=storage_sku,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
-        license_type=license_type, zone=zone, disk_info=disk_info)
+        license_type=license_type, zone=zone, disk_info=disk_info,
+        boot_diagnostics_storage_uri=boot_diagnostics_storage)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -886,7 +887,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -906,6 +907,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if disk_caching is not None:
         update_disk_caching(vm.storage_profile, disk_caching)
+
+    if license_type is not None:
+        vm.license_type = license_type
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -992,25 +996,15 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
     if not (diag_profile and diag_profile.boot_diagnostics and diag_profile.boot_diagnostics.enabled):
         return
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
 
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
+    from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
     vm = get_vm(cmd, resource_group_name, vm_name)
-    if urlparse(storage).scheme:
-        storage_uri = storage
-    else:
-        storage_mgmt_client = _get_storage_management_client(cmd.cli_ctx)
-        storage_accounts = storage_mgmt_client.storage_accounts.list()
-        storage_account = next((a for a in list(storage_accounts)
-                                if a.name.lower() == storage.lower()), None)
-        if storage_account is None:
-            raise CLIError('{} does\'t exist.'.format(storage))
-        storage_uri = storage_account.primary_endpoints.blob
+    storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
 
     if (vm.diagnostics_profile and
             vm.diagnostics_profile.boot_diagnostics and
@@ -1027,8 +1021,6 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     else:
         vm.diagnostics_profile.boot_diagnostics = boot_diag
 
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
@@ -2178,11 +2170,6 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
-def set_vmss(cmd, resource_group_name, name, no_wait=False, **kwargs):
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
-                       resource_group_name, name, **kwargs)
-
-
 def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
@@ -2214,6 +2201,15 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
+
+
+def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, **kwargs):
+    vmss = kwargs['parameters']
+    if license_type is not None:
+        vmss.virtual_machine_profile.license_type = license_type
+
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 # endregion
 
 

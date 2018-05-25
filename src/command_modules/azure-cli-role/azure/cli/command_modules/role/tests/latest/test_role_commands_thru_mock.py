@@ -310,15 +310,9 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
 
     def test_update_application_to_be_single_tenant(self):
-        graph_app_client = mock.MagicMock()
-        app_mock = mock.MagicMock()
-        test_object_id = '11111111-2222-3333-4444-555555555555'
-        app_mock.object_id = test_object_id
-        graph_app_client.list.return_value = [app_mock]
-
-        update_application(graph_app_client, 'http://any-client', available_to_other_tenants=True)
-        graph_app_client.patch.assert_called_with(test_object_id,
-                                                  ApplicationUpdateParameters(available_to_other_tenants=True))
+        instance = update_application(None, 'http://any-client', available_to_other_tenants=True)
+        self.assertTrue(isinstance(instance, ApplicationUpdateParameters))
+        self.assertEqual(instance.available_to_other_tenants, True)
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_list_sp_pwd_creds(self, graph_client_mock):

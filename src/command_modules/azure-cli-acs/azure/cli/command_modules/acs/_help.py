@@ -157,7 +157,7 @@ helps['aks create'] = """
           short-summary: Size of Virtual Machines to create as Kubernetes nodes.
         - name: --dns-name-prefix -p
           type: string
-          short-summary: Prefix for hostnames that are created. If not specified, gemerate a hostname using the
+          short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the
                          managed cluster and resource group names.
         - name: --node-count -c
           type: int
@@ -382,6 +382,23 @@ helps['aks upgrade-connector'] = """
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
+"""
+
+helps['aks use-dev-spaces'] = """
+    type: command
+    short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+    parameters:
+        - name: --space -s
+          type: string
+          short-summary: Name of the dev space to use.
+        - name: --parent-space -p
+          type: string
+          short-summary: Name of a parent dev space to inherit from when creating a new dev space. By default, if there is already a single dev space with no parent, the new space inherits from this one.
+"""
+
+helps['aks remove-dev-spaces'] = """
+    type: command
+    short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
 """
 
 helps['aks wait'] = """

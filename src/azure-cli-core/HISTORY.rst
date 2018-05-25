@@ -3,9 +3,13 @@
 Release History
 ===============
 
+2.0.34
+++++++
+* Minor fixes.
+
 2.0.33
 ++++++
-* Minor fixes
+* core: ignore FileNotFoundError error on expanding `@`
 
 2.0.32
 ++++++

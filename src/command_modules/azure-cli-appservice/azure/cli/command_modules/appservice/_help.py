@@ -332,7 +332,7 @@ helps['webapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a webapp.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including a .deployment file on your
+        npm install or dotnet publish. This can be overridden by including a .deployment file in your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
@@ -566,6 +566,11 @@ helps['functionapp create'] = """
             az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
 """
 
+helps['functionapp update'] = """
+    type: command
+    short-summary: Update a function app.
+"""
+
 helps['functionapp delete'] = """
     type: command
     short-summary: Delete a function app.
@@ -757,7 +762,7 @@ helps['functionapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a function app.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including an .deployment file on your
+        npm install or dotnet publish. This can be overridden by including an .deployment file in your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.

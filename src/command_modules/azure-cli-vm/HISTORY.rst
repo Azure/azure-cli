@@ -4,6 +4,11 @@ Release History
 ===============
 2.0.32
 ++++++
+* BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support
+                   can be accessed through `vm update` or `vm disk attach`
+* vm/vmss extension: fix an incorrect extension image matching logic
+* vm create: expose `--boot-diagnostics-storage` to capture boot log
+* vm/vmss update: expose `--license-type`
 * vm/vmss: use PATCH for updating identities
 
 2.0.31
