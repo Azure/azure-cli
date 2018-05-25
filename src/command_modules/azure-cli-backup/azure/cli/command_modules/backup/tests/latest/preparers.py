@@ -89,7 +89,10 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-username {} --admin-password %j^VYw9Q3Z@Cu$*h'
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {}'
+            param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
+                                               '%j^VYw9Q3Z@Cu$*h')
+            cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd.format(name, self.resource_group, name))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
