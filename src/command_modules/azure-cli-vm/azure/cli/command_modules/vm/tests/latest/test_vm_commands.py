@@ -1591,7 +1591,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
 
-class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
+class AcceleratedNetworkingTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_accelerated_networking')
     def test_vmss_accelerated_networking(self, resource_group):
@@ -1602,6 +1602,14 @@ class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
         self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
+
+    @ResourceGroupPreparer()
+    def test_vm_accelerated_networking(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
+        self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
