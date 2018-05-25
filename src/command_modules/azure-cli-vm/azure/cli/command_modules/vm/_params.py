@@ -316,7 +316,8 @@ def load_arguments(self, _):
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
         c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'")
         c.argument('dns_servers', nargs='+', help="space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
-        c.argument('accelerated_networking', action='store_true', help="enable accelerated networking")
+        c.argument('accelerated_networking', arg_type=get_three_state_flag(),
+                   help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
