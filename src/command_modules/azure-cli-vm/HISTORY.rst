@@ -5,6 +5,8 @@ Release History
 2.0.33
 ++++++
 * `vm create`: support `--accelerated-networking`
+* `vm/vmss extension image list`: absorb 404 when an image type is not found
+* `identity create`: support `--tags`
 
 2.0.32
 ++++++
