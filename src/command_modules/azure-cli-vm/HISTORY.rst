@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.33
 ++++++
+* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
 * `vm create`: support `--accelerated-networking`
 * `vm/vmss extension image list`: absorb 404 when an image type is not found
 * `identity create`: support `--tags`
