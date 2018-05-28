@@ -130,6 +130,27 @@ def _find_edition_capability(sku, supported_editions):
         # Find default edition capability
         return _get_default_capability(supported_editions)
 
+def _find_family_capability(sku, supported_families):
+    '''
+    Finds the family capability in the collection of supported families
+    that matches the requested sku.
+
+    If the edition has no family specified, returns the default family.
+    '''
+
+    if sku.family:
+        # Find requested edition capability
+        try:
+            return next(e for e in supported_families if e.name == sku.family)
+        except StopIteration:
+            candiate_families = [e.name for e in supported_families]
+            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+                sku.family, candiate_families
+            ))
+    else:
+        # Find default family capability
+        return _get_default_capability(supported_families)
+
 
 def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family):
     '''
@@ -1851,12 +1872,52 @@ def encryption_protector_update(
 ###############################################
 
 
+def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Given a requested sku which may have some properties filled in
+    (e.g. tier and capacity), finds the canonical matching sku
+    from the given location's capabilities.
+    '''
+
+    logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
+
+    if sku.name:
+        # User specified sku.name, so nothing else needs to be resolved.
+        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
+        return sku
+
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out.
+        # Server side will pick a default.
+        logger.debug('_find_managed_instance_sku_from_capabilities return None')
+        return None
+
+    # Some properties of sku are specified, but not name. Use the requested properties
+    # to find a matching capability and copy the sku from there.
+
+    # Get default server version capability
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_managed_instance_versions)
+    managed_instance_version_capability  = _get_default_capability(capabilities.supported_managed_instance_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
+
+    # Find family level capability, based on requested sku properties
+    family_capability = _find_family_capability(sku, edition_capability.supported_families)
+
+    result = Sku(name=family_capability.sku)
+    logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
+    return result
+
 def managed_instance_create(
+        cmd,
         client,
-        name,
+        managed_instance_name,
         resource_group_name,
         location,
         assign_identity=False,
+        sku=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -1867,9 +1928,11 @@ def managed_instance_create(
 
     kwargs['location'] = location
 
+    kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+
     # Create
     return client.create_or_update(
-        managed_instance_name=name,
+        managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
 
@@ -1893,7 +1956,7 @@ def managed_instance_update(
         instance,
         administrator_login_password=None,
         license_type=None,
-        v_cores=None,
+        vcores=None,
         storage_size_in_gb=None,
         assign_identity=False):
     '''
@@ -1910,7 +1973,7 @@ def managed_instance_update(
     instance.license_type = (
         license_type or instance.license_type)
     instance.v_cores = (
-        v_cores or instance.v_cores)
+        vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
 
@@ -1924,7 +1987,7 @@ def managed_instance_update(
 def managed_db_create(
         cmd,
         client,
-        name,
+        database_name,
         managed_instance_name,
         resource_group_name,
         **kwargs):
@@ -1937,7 +2000,7 @@ def managed_db_create(
 
     # Create
     return client.create_or_update(
-        database_name=name,
+        database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)

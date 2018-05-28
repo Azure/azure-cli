@@ -435,7 +435,7 @@ helps['sql managed instance create'] = """
     short-summary: Create a managed instance.
     examples:
         - name: Create a managed instance with specified parameters and with identity
-          text: az sql managed instance create -g mygroup -mi myinstance -l mylocation -i -u myusername -p mypassword --license-type mylicensetype --subnet-id mysubnetid --vcores vcorenum --storage-size-in-gb storagesizenum --sku-name skuname
+          text: az sql managed instance create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type mylicensetype --subnet mysubnetid --capacity vcorecapacity --storage storagesize --edition editionname --family familyname
     """
 helps['sql managed instance list'] = """
     type: command
@@ -451,21 +451,21 @@ helps['sql managed instance show'] = """
     short-summary: Get the details for a managed instance.
     examples:
         - name: Get the details for a managed instance
-          text: az sql managed instance show -g mygroup -mi myinstance
+          text: az sql managed instance show -g mygroup -n myinstance
     """
 helps['sql managed instance update'] = """
     type: command
     short-summary: Update a managed instance.
     examples:
         - name: Updates a managed instance with specified parameters and with identity
-          text: az sql managed instance update -g mygroup -mi myinstance -i -p mypassword --license-type mylicensetype --vcores vcorenum --storage-size-in-gb storagesizenum
+          text: az sql managed instance update -g mygroup -n myinstance -i -p mypassword --license-type mylicensetype --capacity vcorecapacity --storage storagesize
     """
 helps['sql managed instance delete'] = """
     type: command
     short-summary: Delete a managed instance.
     examples:
         - name: Delete a managed instance
-          text: az sql managed instance delete -g mygroup -mi myinstance --yes
+          text: az sql managed instance delete -g mygroup -n myinstance --yes
     """
 helps['sql managed db'] = """
     type: group
@@ -476,33 +476,33 @@ helps['sql managed db create'] = """
     short-summary: Create a managed database.
     examples:
         - name: Create a managed database with specified collation
-          text: az sql managed db create -g mygroup -mi myinstance -name mymanageddb --collation collationname
+          text: az sql managed db create -g mygroup --mi myinstance -n mymanageddb --collation collationname
     """
 helps['sql managed db list'] = """
     type: command
     short-summary: List maanged databases on a managed instance.
     examples:
         - name: List maanged databases on a managed instance
-          text: az sql managed db list -g mygroup -mi myinstance
+          text: az sql managed db list -g mygroup --mi myinstance
     """
 helps['sql managed db show'] = """
     type: command
     short-summary: Get the details for a managed database.
     examples:
         - name: Get the details for a managed database
-          text: az sql managed db show -g mygroup -mi myinstance -name mymanageddb
+          text: az sql managed db show -g mygroup --mi myinstance -n mymanageddb
     """
 helps['sql managed db restore'] = """
     type: command
-    short-summary: Restores a managed database.
+    short-summary: Restore a managed database.
     examples:
-        - name: Restores a managed database using Point in time restore
-          text: az sql managed db restore -g mygroup -mi myinstance -name mymanageddb --target-managed-database-name targetmidb --time pointintime
+        - name: Restore a managed database using Point in time restore
+          text: az sql managed db restore -g mygroup --mi myinstance -n mymanageddb --target-managed-database-name targetmidb --time pointintime
     """
 helps['sql managed db delete'] = """
     type: command
     short-summary: Delete a managed database.
     examples:
         - name: Delete a managed database
-          text: az sql managed db delete -g mygroup -mi myinstance -name mymanageddb --yes
+          text: az sql managed db delete -g mygroup --mi myinstance -n mymanageddb --yes
     """

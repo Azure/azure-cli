@@ -16,10 +16,11 @@ from azure.mgmt.sql.models import (
     ElasticPoolPerDatabaseSettings,
     ImportExtensionRequest,
     ExportRequest,
+    ManagedDatabase,
+    ManagedInstance,
     Server,
     ServerAzureADAdministrator,
-    Sku,
-    ManagedInstance
+    Sku
 )
 
 from azure.mgmt.sql.models.sql_management_client_enums import (
@@ -73,8 +74,8 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024,
-                                         TB=1024 * 1024 * 1024 * 1024)
+        self.unit_map = unit_map or dict(B=1/(1024*1024*1024), kB=1/(1024*1024), MB=1/1024, GB=1,
+                                         TB=1024)
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -142,8 +143,13 @@ zone_redundant_param_type = CLIArgumentType(
     arg_type=get_three_state_flag())
 
 managed_instance_param_type = CLIArgumentType(
-    options_list=['--managed_instance', '-mi'],
+    options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
+
+storage_param_type = CLIArgumentType(
+    options_list=['--storage'],
+    type=SizeWithUnitConverter('GB', result_type=int),
+    help='The storage size. If no unit is specified, defaults to gigabytes (GB).')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -1021,6 +1027,15 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=name is 1st name in uri
                    id_part='name')
 
+        c.argument('tier',
+                   arg_type=tier_param_type,
+                   help='The edition component of the sku. Allowed value is GeneralPurpose.')
+
+        c.argument('family',
+                   arg_type=family_param_type,
+                   help='The compute generation component of the sku. '
+                   'Allowed values include: Gen4, Gen5.')
+
     with self.argument_context('sql managed instance create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1031,9 +1046,18 @@ def load_arguments(self, _):
                 'license_type',
                 'subnet_id',
                 'vcores',
-                'storage_size_in_gb',
-                'sku_name',
+                'storage_size_in_gb'
             ])
+
+        # Create args that will be used to build up the Managed Instance's Sku object
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'],
@@ -1044,27 +1068,25 @@ def load_arguments(self, _):
                    required=True)
 
         c.argument('subnet_id',
-                   required=True,
-                   options_list=['--subnet-id', '-subn'])
+                   options_list=['--subnet'],
+                   required=True)
 
         c.argument('license_type',
-                   required=True,
-                   arg_type=get_enum_type(DatabaseLicenseType))
+                   arg_type=get_enum_type(DatabaseLicenseType),
+                   help='The license type to apply for this managed instance.')
 
         c.argument('vcores',
-                   required=True,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+                   options_list=['--capacity', '-c'],
+                   help='Determines how much VCore to associate with Managed instance.')
 
         c.argument('storage_size_in_gb',
-                   required=True,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
-
-        c.argument('sku_name',
-                   required=True)
+                   options_list=['--storage'],
+                   arg_type=storage_param_type,
+                   help='Determines how much storage size to associate with Managed instance.')
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this managed instance'
+                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql managed instance update') as c:
@@ -1073,25 +1095,25 @@ def load_arguments(self, _):
             c, 'parameters', ManagedInstance, [
                 'administrator_login_password',
                 'license_type',
-                'v_cores',
+                'vcores',
                 'storage_size_in_gb',
             ])
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p'],
-                   required=True)
+                   options_list=['--admin-password', '-p'])
 
         c.argument('license_type',
-                   required=False,
-                   arg_type=get_enum_type(DatabaseLicenseType))
+                   arg_type=get_enum_type(DatabaseLicenseType),
+                   help='The license type to apply for this managed instance.')
 
-        c.argument('v_cores',
-                   required=False,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+        c.argument('vcores',
+                   options_list=['--capacity', '-c'],
+                   help='Determines how much VCore to associate with Managed instance.')
 
         c.argument('storage_size_in_gb',
-                   required=False,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+                   options_list=['--storage'],
+                   arg_type=storage_param_type,
+                   help='Determines how much storage size to associate with Managed instance.')
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
@@ -1115,7 +1137,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql managed db create') as c:
         create_args_for_complex_type(
-            c, 'parameters', ManagedInstance, [
+            c, 'parameters', ManagedDatabase, [
                 'collation',
             ])
 
@@ -1125,18 +1147,20 @@ def load_arguments(self, _):
 
     with self.argument_context('sql managed db restore') as c:
         create_args_for_complex_type(
-            c, 'parameters', ManagedInstance, [
+            c, 'parameters', ManagedDatabase, [
                 'target_managed_database_name',
                 'restore_point_in_time'
             ])
         c.argument('target_managed_database_name',
-                   help='Name of the database that will be created as the restore destination.')
+                   required=True,
+                   help='Name of the managed database that will be created as the restore destination.')
 
         restore_point_arg_group = 'Restore Point'
 
         c.argument('restore_point_in_time',
                    options_list=['--time', '-t'],
                    arg_group=restore_point_arg_group,
+                   required=True,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value.')

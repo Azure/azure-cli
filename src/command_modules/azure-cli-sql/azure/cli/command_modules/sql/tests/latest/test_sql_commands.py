@@ -2520,15 +2520,16 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         loc = 'westcentralus'
         v_cores = 8
         storage_size_in_gb = '64'
-        sku_name = 'GP_Gen4'
+        edition = 'GeneralPurpose'
+        family = 'Gen4'
         resource_group_1 = "cl_pilot"
 
         user = admin_login
 
         # test create sql managed_instance with minimal required parameters
-        managed_instance_1 = self.cmd('sql managed instance create -g {} --name {} -l {} '
-                                      '-u {} -p {} --subnet-id {} --license-type {} --vcores {} --storage-size-in-gb {} --sku-name {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, sku_name),
+        managed_instance_1 = self.cmd('sql managed instance create -g {} -n {} -l {} '
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2536,10 +2537,13 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('vCores', v_cores),
                                           JMESPathCheck('storageSizeInGb', storage_size_in_gb),
                                           JMESPathCheck('licenseType', license_type),
+                                          JMESPathCheck('sku.tier', edition),
+                                          JMESPathCheck('sku.family', family),
+                                          JMESPathCheck('sku.capacity', v_cores),
                                           JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test show sql managed instance 1
-        self.cmd('sql managed instance show -g {} --name {}'
+        self.cmd('sql managed instance show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_1),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2555,7 +2559,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         # test update sql managed_instance
-        self.cmd('sql managed instance update -g {} --name {} --admin-password {} -i'
+        self.cmd('sql managed instance update -g {} -n {} --admin-password {} -i'
                  .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2574,9 +2578,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test create another sql managed instance, with identity this time
-        self.cmd('sql managed instance create -g {} --name {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet-id {} --license-type {} --vcores {} --storage-size-in-gb {} --sku-name {}'
-                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, sku_name),
+        self.cmd('sql managed instance create -g {} -n {} -l {} -i '
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -2584,10 +2588,13 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('vCores', v_cores),
                      JMESPathCheck('storageSizeInGb', storage_size_in_gb),
                      JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test show sql managed instance 2
-        self.cmd('sql managed instance show -g {} --name {}'
+        self.cmd('sql managed instance show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_2),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
@@ -2600,16 +2607,16 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test delete sql managed instance
         self.cmd('sql managed instance delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
-        self.cmd('sql managed instance delete -g {} --name {} --yes'
+        self.cmd('sql managed instance delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
 
         # test show sql managed instance doesn't return anything
-        self.cmd('sql managed instance show -g {} --name {}'
+        self.cmd('sql managed instance show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_1),
                  expect_failure=True)
 
         # test show sql managed instance doesn't return anything
-        self.cmd('sql managed instance show -g {} --name {}'
+        self.cmd('sql managed instance show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_2),
                  expect_failure=True)
 
@@ -2626,15 +2633,16 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         loc = 'westcentralus'
         v_cores = 8
         storage_size_in_gb = '64'
-        sku_name = 'GP_Gen4'
+        edition = 'GeneralPurpose'
+        family = 'Gen4'
         resource_group_1 = "cl_pilot"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 
         # Prepare managed instance for test
-        managed_instance_1 = self.cmd('sql managed instance create -g {} --name {} -l {} '
-                                      '-u {} -p {} --subnet-id {} --license-type {} --vcores {} --storage-size-in-gb {} --sku-name {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, sku_name),
+        managed_instance_1 = self.cmd('sql managed instance create -g {} -n {} -l {} '
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2642,10 +2650,13 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('vCores', v_cores),
                                           JMESPathCheck('storageSizeInGb', storage_size_in_gb),
                                           JMESPathCheck('licenseType', license_type),
+                                          JMESPathCheck('sku.tier', edition),
+                                          JMESPathCheck('sku.family', family),
+                                          JMESPathCheck('sku.capacity', v_cores),
                                           JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test sql db commands
-        db1 = self.cmd('sql managed db create -g {} --managed_instance {} --name {} --collation {}'
+        db1 = self.cmd('sql managed db create -g {} --mi {} -n {} --collation {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, collation),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
@@ -2654,12 +2665,12 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('collation', collation),
                            JMESPathCheck('status', 'Online')]).get_output_in_json()
 
-        self.cmd('sql managed db list -g {} --managed_instance {}'
+        self.cmd('sql managed db list -g {} --managed-instance {}'
                  .format(resource_group_1, managed_instance_name_1),
                  checks=[JMESPathCheck('length(@)', 1)])
 
         # Show by group/managed_instance/database-name
-        self.cmd('sql managed db show -g {} --managed_instance {} --name {}'
+        self.cmd('sql managed db show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
@@ -2679,12 +2690,12 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online')])
 
         # Delete by group/server/name
-        self.cmd('sql managed db delete -g {} --managed_instance {} --name {} --yes'
+        self.cmd('sql managed db delete -g {} --managed-instance {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  checks=[NoneCheck()])
 
         # test show sql managed instance doesn't return anything
-        self.cmd('sql managed db show -g {} --managed_instance {} --name {}'
+        self.cmd('sql managed db show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
