@@ -404,15 +404,25 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
-    image_data_disks = None
+    image_data_disks_num = 0
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        image_info = compute_client.images.get(res['resource_group'], res['name'])
+        if res['type'].lower() == 'image':
+            image_info = compute_client.images.get(res['resource_group'], res['name'])
+            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+        else:
+            # TODO: add a bit validations here and api-verson check
+            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'], gallery_name=res['name'],
+                                                           gallery_image_name=res['child_name_1'])
+            namespace.os_type = image_info.os_type.value
+            image_version_info = compute_client.gallery_image_versions.get(resource_group_name=res['resource_group'], gallery_name=res['name'],
+                                                                   gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
+            image_data_disks_num = len(image_version_info.storage_profile.data_disk_images or [])
+
         # pylint: disable=no-member
-        namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-        image_data_disks = image_info.storage_profile.data_disks
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
@@ -429,7 +439,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
+    namespace.disk_info = normalize_disk_info(image_data_disks_num=image_data_disks_num,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,

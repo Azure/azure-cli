@@ -129,7 +129,16 @@ def load_command_table(self, _):
     compute_galleries_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.galleries_operations#GalleriesOperations.{}',
         client_factory=cf_galleries,
-        # operation_group='galleries'
+    )
+
+    compute_gallery_images_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        client_factory=cf_gallery_images,
+    )
+
+    compute_gallery_image_versions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.gallery_image_versions_operations#GalleryImageVersionsOperations.{}',
+        client_factory=cf_gallery_image_versions,
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -334,3 +343,20 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('list', 'list_image_galleries')
         g.custom_command('create', 'create_image_gallery')
+
+    with self.command_group('vm image gallery', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
+        g.custom_command('create-image', 'create_gallery_image')  # consider merge with PIR
+        g.command('list-images', 'list_gallery_images_by_gallery')
+        g.command('show-image', 'get')
+        g.command('delete-image', 'delete')
+
+    with self.command_group('vm image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
+        g.command('delete-image-version', 'delete')
+        g.command('show-image-version', 'get')
+        g.command('list-image-versions', 'list_gallery_image_versions_by_gallery_image')
+        g.custom_command('upload', 'upload_image')
+
+
+
+
+
