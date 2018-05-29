@@ -84,7 +84,7 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
         try:
             uvals = (self.unit_map[unit_part] if unit_part else 1) / \
                 (self.unit_map[self.unit] if self.unit else 1)
-            return self.result_type(uvals) * self.result_type(numeric_part)
+            return self.result_type(uvals * self.result_type(numeric_part))
         except KeyError:
             raise ValueError()
 
@@ -148,9 +148,9 @@ managed_instance_param_type = CLIArgumentType(
 
 storage_param_type = CLIArgumentType(
     options_list=['--storage'],
-    type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1 / (1024 * 1024 * 1024),
-                                                                    kB=1 / (1024 * 1024),
-                                                                    MB=1 / 1024,
+    type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1.0 / (1024 * 1024 * 1024),
+                                                                    kB=1.0 / (1024 * 1024),
+                                                                    MB=1.0 / 1024,
                                                                     GB=1,
                                                                     TB=1024)),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).')
