@@ -130,6 +130,7 @@ def _find_edition_capability(sku, supported_editions):
         # Find default edition capability
         return _get_default_capability(supported_editions)
 
+
 def _find_family_capability(sku, supported_families):
     '''
     Finds the family capability in the collection of supported families
@@ -1898,7 +1899,7 @@ def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
     capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_managed_instance_versions)
-    managed_instance_version_capability  = _get_default_capability(capabilities.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(capabilities.supported_managed_instance_versions)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
@@ -1909,6 +1910,7 @@ def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
     result = Sku(name=family_capability.sku)
     logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
     return result
+
 
 def managed_instance_create(
         cmd,
