@@ -417,7 +417,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.managed_instances_operations#ManagedInstancesOperations.{}',
         client_factory=get_sql_managed_instances_operations)
 
-    with self.command_group('sql managed instance',
+    with self.command_group('sql managed-instance',
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
@@ -435,7 +435,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.managed_databases_operations#ManagedDatabasesOperations.{}',
         client_factory=get_sql_managed_databases_operations)
 
-    with self.command_group('sql managed db',
+    with self.command_group('sql managed-db',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
 

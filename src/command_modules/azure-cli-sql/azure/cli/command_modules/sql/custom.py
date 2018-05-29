@@ -1918,6 +1918,7 @@ def managed_instance_create(
         managed_instance_name,
         resource_group_name,
         location,
+        virtual_network_subnet_id,
         assign_identity=False,
         sku=None,
         **kwargs):
@@ -1936,6 +1937,7 @@ def managed_instance_create(
     return client.create_or_update(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
+        subnet_id = virtual_network_subnet_id,
         parameters=kwargs)
 
 

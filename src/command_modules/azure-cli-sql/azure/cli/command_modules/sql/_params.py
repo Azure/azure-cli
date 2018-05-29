@@ -57,7 +57,8 @@ from .custom import (
 from ._validators import (
     create_args_for_complex_type,
     validate_elastic_pool_id,
-    validate_managed_instance_storage_size
+    validate_managed_instance_storage_size,
+    validate_subnet
 )
 
 
@@ -1026,7 +1027,7 @@ def load_arguments(self, _):
     ###############################################
     #                sql managed instance         #
     ###############################################
-    with self.argument_context('sql managed instance') as c:
+    with self.argument_context('sql managed-instance') as c:
         c.argument('managed_instance_name',
                    help='The managed instance name',
                    options_list=['--name', '-n'],
@@ -1056,19 +1057,14 @@ def load_arguments(self, _):
                    options_list=['--capacity', '-c'],
                    help='Determines how much VCore to associate with Managed instance.')
 
-        c.argument('assign_identity',
-                   options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
-                   'for use with key management services like Azure KeyVault.')
-
-    with self.argument_context('sql managed instance create') as c:
+    with self.argument_context('sql managed-instance create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
-                'subnet_id',
+                'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb'
             ])
@@ -1091,11 +1087,23 @@ def load_arguments(self, _):
                    options_list=['--admin-password', '-p'],
                    required=True)
 
-        c.argument('subnet_id',
-                   options_list=['--subnet'],
-                   required=True)
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name',
+                validator=validate_subnet)
 
-    with self.argument_context('sql managed instance update') as c:
+        c.argument('virtual_network_subnet_id',
+                   options_list=['--subnet'],
+                   required=True,
+                   help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
+                   'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('assign_identity',
+                   options_list=['--assign-identity', '-i'],
+                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
+                   'for use with key management services like Azure KeyVault.')
+
+    with self.argument_context('sql managed-instance update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
@@ -1105,10 +1113,15 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'])
 
+        c.argument('assign_identity',
+                   options_list=['--assign-identity', '-i'],
+                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
+                   'for use with key management services like Azure KeyVault. If identity is already assigned - do nothing.')
+
     ###############################################
     #                sql managed db               #
     ###############################################
-    with self.argument_context('sql managed db') as c:
+    with self.argument_context('sql managed-db') as c:
         c.argument('managed_instance_name',
                    arg_type=managed_instance_param_type,
                    # Allow --ids command line argument. id_part=name is 1st name in uri
@@ -1120,7 +1133,7 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-    with self.argument_context('sql managed db create') as c:
+    with self.argument_context('sql managed-db create') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'collation',
@@ -1128,15 +1141,17 @@ def load_arguments(self, _):
 
         c.argument('collation',
                    required=False,
-                   help='The collation of the Azure SQL Managed Database collation to use.')
+                   help='The collation of the Azure SQL Managed Database collation to use, '
+                   'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
 
-    with self.argument_context('sql managed db restore') as c:
+    with self.argument_context('sql managed-db restore') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'target_managed_database_name',
                 'restore_point_in_time'
             ])
         c.argument('target_managed_database_name',
+                   options_list=['--target-db'],
                    required=True,
                    help='Name of the managed database that will be created as the restore destination.')
 
@@ -1148,4 +1163,7 @@ def load_arguments(self, _):
                    required=True,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
-                   ' earliestRestoreDate value.')
+                   ' earliestRestoreDate value. Time should be in following format: "YYYY-MM-DDTHH:MM:SS"')
+
+    with self.argument_context('sql managed-db list') as c:
+        c.argument('managed_instance_name', id_part=None)

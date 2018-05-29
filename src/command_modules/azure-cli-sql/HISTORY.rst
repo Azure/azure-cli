@@ -17,8 +17,8 @@ Release History
         * az sql managed db create
         * az sql managed db show
         * az sql managed db list
-        * az sql managed instance restore
-        * az sql managed instance delete
+        * az sql managed db restore
+        * az sql managed db delete
 
 2.0.26
 ++++++
