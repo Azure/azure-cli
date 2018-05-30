@@ -1412,7 +1412,7 @@ class TestProfile(unittest.TestCase):
 
         # test w/ trailing slash
         r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, adfs_url_1)
+        self.assertEqual(r.authority.url, adfs_url_1.rstrip('/'))
 
         # test w/o trailing slash
         adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
