@@ -16,7 +16,8 @@ from ._utils import (
 
 SOURCE_REGISTRY_MISING = "Please specify the source container registry: "
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
-INVALID_SOURCE_IMAGE = "Please specify source image in the form of '[registry.azurecr.io/]repository:tag' or 'repository@sha'."
+INVALID_SOURCE_IMAGE = "Please specify source image in the form of " \
+                        "'[registry.azurecr.io/]repository:tag' or 'repository@sha'."
 SOURCE_REGISTRY_NOT_FOUND = "Source registry cannot be found in the current subscription. " \
                             "Please specify the full resource ID for it: "
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
@@ -52,7 +53,7 @@ def acr_import(cmd,
         registry_by_registry_name = get_registry_from_name(cmd.cli_ctx, source_registry)
         registry_by_login_server = get_registry_from_name(cmd.cli_ctx, source_registry)
         if registry_by_registry_name or registry_by_login_server:
-            source_registry = registry_by_registry_name.id if not registry_by_login_server else registry_by_login_server.id
+            source_registry = registry_by_registry_name.id if registry_by_registry_name else registry_by_login_server.id
     else:
         source_registry_login_server = source[:slash]
         if not source_registry_login_server:
