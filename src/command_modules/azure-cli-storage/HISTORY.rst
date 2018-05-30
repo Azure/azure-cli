@@ -3,11 +3,14 @@
 Release History
 ===============
 
+2.0.34
+++++++
+* Added extra mimetypes for json and javascript to be inferred from file extensions.
+
 2.0.33
 ++++++
 * Added completer for `--account-name` argument.
 * Fixed problem with `storage entity query`.
-* Added extra mimetypes for json and javascript to be inferred from file extensions.
 
 2.0.32
 ++++++
