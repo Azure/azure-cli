@@ -8,6 +8,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 import os
 
+
 class EventGridTestConfiguration:
     def __init__(self):
         self.event_subscription_sanitized_endpoint = "https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1?code=hidden"
@@ -17,7 +18,9 @@ class EventGridTestConfiguration:
         except Exception as e:
             self.event_subscription_endpoint = self.event_subscription_sanitized_endpoint
 
+
 test_config = EventGridTestConfiguration()
+
 
 class EventGridTests(ScenarioTest):
     def test_topic_types(self):
@@ -98,8 +101,8 @@ class EventGridTests(ScenarioTest):
 
         endpoint_to_check = self._get_endpoint_to_check()
         self.cmd('az eventgrid event-subscription show --topic-name {topic_name} -g {rg} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-                self.check('destination.endpointUrl', endpoint_to_check),
-                self.check('destination.endpointBaseUrl', self.kwargs['event_subscription_base_endpoint'])
+            self.check('destination.endpointUrl', endpoint_to_check),
+            self.check('destination.endpointBaseUrl', self.kwargs['event_subscription_base_endpoint'])
         ])
 
         self.cmd('az eventgrid event-subscription update --topic-name {topic_name} -g {rg} --name {event_subscription_name} --endpoint {event_subscription_endpoint}', checks=[
@@ -255,7 +258,6 @@ class EventGridTests(ScenarioTest):
             # self.check('[0].provisioningState', 'Succeeded'),
         ])
         self.cmd('az eventgrid event-subscription delete --resource-group {rg} --name {event_subscription_name}')
-
 
     def _get_endpoint_to_check(self):
         if self.is_live:
