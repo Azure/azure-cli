@@ -341,7 +341,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
-def container_export(cmd, resource_group_name, name, file):
+def container_export(cmd, resource_group_name, name, file=None):
     resource_client = _resource_client_factory(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
@@ -362,6 +362,8 @@ def container_export(cmd, resource_group_name, name, file):
     resource.pop('kind', None)
     resource.pop('managed_by', None)
     resource['properties'].pop('provisioningState', None)
+    if 'ipAddress' in  resource['properties']:
+        resource['properties']['ipAddress'].pop('ip', None)
 
     for i in range(len(resource['properties']['containers'])):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
@@ -369,8 +371,11 @@ def container_export(cmd, resource_group_name, name, file):
     # Add the api version
     resource['apiVersion'] = container_group_client.api_version
 
-    with open(file, 'w+') as f:
-        yaml.dump(resource, f, default_flow_style=False)
+    if file:
+        with open(file, 'w+') as f:
+            yaml.dump(resource, f, default_flow_style=False)
+    else:
+        yaml.dump(resource, sys.stdout, default_flow_style=False)
 
 
 def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
