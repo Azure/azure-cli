@@ -103,10 +103,15 @@ class ResourceScenarioTest(ScenarioTest):
         self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
                  checks=self.check('tags', {}))
 
+        # check existence
+        self.cmd('resource exists -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
+                 checks=self.check('@', 'True'))
+
         # delete and verify
         self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
         time.sleep(10)
-        self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
+        self.cmd('resource exists -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
+                 checks=self.check('@', 'False'))
 
 
 class ResourceIDScenarioTest(ScenarioTest):
@@ -139,6 +144,8 @@ class ResourceIDScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('properties.addressPrefix', '10.0.0.0/24')
         ])
+
+        self.cmd('resource exists --id {subnet_id}', checks=self.check('@', 'True'))
 
         self.cmd('resource update --id {subnet_id} --set properties.addressPrefix=10.0.0.0/22',
                  checks=self.check('properties.addressPrefix', '10.0.0.0/22'))
