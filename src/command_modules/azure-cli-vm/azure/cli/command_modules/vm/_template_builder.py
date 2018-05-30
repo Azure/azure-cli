@@ -388,7 +388,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
     vm = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
+        'apiVersion': '2018-04-01', #cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
