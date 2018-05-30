@@ -1079,8 +1079,6 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
 
 def _register_rp(cli_ctx, subscription_id=None):
     rp = "Microsoft.Management"
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
     import time
     rcf = get_mgmt_service_client(
         cli_ctx,
@@ -1101,8 +1099,8 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
     for sub in subscriptions_list:
         if sub['id'] == subscription or sub['name'] == subscription:
             return sub['id']
-    from azure.cli.core.util import CLIError
     raise CLIError("Subscription not found in the current context.")
+
 
 def _get_parent_id_from_parent(parent):
     if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):

@@ -110,4 +110,3 @@ def cf_management_groups(cli_ctx, _):
 
 def cf_management_group_subscriptions(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_group_subscriptions
-    
