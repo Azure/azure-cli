@@ -447,19 +447,19 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded')])
 
         # Case 1: Import image from a regsitry in a different subscription from the current one
-        self.cmd('acr import -r {registry_name} --resource-id {resource_id} --source {source_image_diff_sub} -t {tag_diff_sub}')
+        self.cmd('acr import -n {registry_name} -r {resource_id} --source {source_image_diff_sub} -t {tag_diff_sub}')
 
         # Case 2: Import image from one regsitry to another where both registries belong to the same subscription
-        self.cmd('acr import -r {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
 
         # Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
-        self.cmd('acr import -r {registry_name} --source {source_image_same_sub}')
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub}')
 
         # Case 4: Import image to enable multiple tags in the target registry
-        self.cmd('acr import -r {registry_name} --source {source_image_same_sub} -t {tag_multitag1} -t {tag_multitag2}')
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_multitag1} -t {tag_multitag2}')
 
         # Case 5: Import image within the same registry
-        self.cmd('acr import -r {registry_name} --source {source_image_same_registry} -t {tag_same_registry}')
+        self.cmd('acr import -n {registry_name} --source {source_image_same_registry} -t {tag_same_registry}')
 
         # Case 6: Import image by manifest digest
-        self.cmd('acr import -r {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
+        self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
