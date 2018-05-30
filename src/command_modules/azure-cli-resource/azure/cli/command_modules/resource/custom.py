@@ -1104,6 +1104,10 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
     from azure.cli.core.util import CLIError
     raise CLIError("Subscription not found in the current context.")
 
+def _get_parent_id_from_parent(parent):
+    if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):
+        return parent
+    return "/providers/Microsoft.Management/managementGroups/"+parent
 
 def cli_managementgroups_group_list(cmd, client):
     _register_rp(cmd.cli_ctx)
@@ -1127,8 +1131,9 @@ def cli_managementgroups_group_create(
         client,
         group_name,
         display_name=None,
-        parent_id=None):
+        parent=None):
     _register_rp(cmd.cli_ctx)
+    parent_id=_get_parent_id_from_parent(parent)
     from azure.mgmt.managementgroups.models import (CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
     create_parent_grp_info = CreateParentGroupInfo(id=parent_id)
     create_mgmt_grp_details = CreateManagementGroupDetails(parent=create_parent_grp_info)
@@ -1139,22 +1144,23 @@ def cli_managementgroups_group_create(
 def cli_managementgroups_group_update_custom_func(
         instance,
         display_name=None,
-        parent_id=None):
+        parent=None):
     instance["display_name"] = display_name
-    instance["parent_id"] = parent_id
+    instance["parent"] = parent
     return instance
 
 
 def cli_managementgroups_group_update_get():
-    update_parameters = {'display_name': None, 'parent_id': None}
+    update_parameters = {'display_name': None, 'parent': None}
     return update_parameters
 
 
 def cli_managementgroups_group_update_set(
         cmd, client, group_name, parameters=None):
     _register_rp(cmd.cli_ctx)
+    parent_id=_get_parent_id_from_parent(parameters["parent"])
     from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
-    patch_mgmt_grp_request = PatchManagementGroupRequest(display_name=parameters["display_name"], parent_id=parameters["parent_id"])
+    patch_mgmt_grp_request = PatchManagementGroupRequest(display_name=parameters["display_name"], parent_id=parent_id)
     return client.update(group_name, patch_mgmt_grp_request)
 
 

@@ -23,12 +23,12 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_show_managementgroup(self):
-        self.cmd('account management-group create --group-name testcligetgroup1')
-        self.cmd('account management-group create --group-name testcligetgroup2 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup2 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup1')
         managementgroup_get = self.cmd(
-            'account management-group show --group-name testcligetgroup2').get_output_in_json()
-        self.cmd('account management-group delete --group-name testcligetgroup2')
-        self.cmd('account management-group delete --group-name testcligetgroup1')
+            'account management-group show --name testcligetgroup2').get_output_in_json()
+        self.cmd('account management-group delete --name testcligetgroup2')
+        self.cmd('account management-group delete --name testcligetgroup1')
 
         self.assertIsNotNone(managementgroup_get)
         self.assertIsNone(managementgroup_get["children"])
@@ -55,14 +55,14 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_show_managementgroup_with_expand(self):
-        self.cmd('account management-group create --group-name testcligetgroup1')
-        self.cmd('account management-group create --group-name testcligetgroup2 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup1')
-        self.cmd('account management-group create --group-name testcligetgroup3 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup2')
+        self.cmd('account management-group create --name testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup2 --parent testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup3 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup2')
         managementgroup_get = self.cmd(
-            'account management-group show --group-name testcligetgroup2 --expand').get_output_in_json()
-        self.cmd('account management-group delete --group-name testcligetgroup3')
-        self.cmd('account management-group delete --group-name testcligetgroup2')
-        self.cmd('account management-group delete --group-name testcligetgroup1')
+            'account management-group show --name testcligetgroup2 --expand').get_output_in_json()
+        self.cmd('account management-group delete --name testcligetgroup3')
+        self.cmd('account management-group delete --name testcligetgroup2')
+        self.cmd('account management-group delete --name testcligetgroup1')
 
         self.assertIsNotNone(managementgroup_get)
         self.assertIsNotNone(managementgroup_get["children"])
@@ -101,16 +101,16 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "testcligetgroup3")
 
     def test_show_managementgroup_with_expand_and_recurse(self):
-        self.cmd('account management-group create --group-name testcligetgroup1')
-        self.cmd('account management-group create --group-name testcligetgroup2 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup1')
-        self.cmd('account management-group create --group-name testcligetgroup3 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup2')
-        self.cmd('account management-group create --group-name testcligetgroup4 --parent-id /providers/Microsoft.Management/managementGroups/testcligetgroup3')
+        self.cmd('account management-group create --name testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup2 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup1')
+        self.cmd('account management-group create --name testcligetgroup3 --parent testcligetgroup2')
+        self.cmd('account management-group create --name testcligetgroup4 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup3')
         managementgroup_get = self.cmd(
-            'account management-group show --group-name testcligetgroup2 --expand --recurse').get_output_in_json()
-        self.cmd('account management-group delete --group-name testcligetgroup4')
-        self.cmd('account management-group delete --group-name testcligetgroup3')
-        self.cmd('account management-group delete --group-name testcligetgroup2')
-        self.cmd('account management-group delete --group-name testcligetgroup1')
+            'account management-group show --name testcligetgroup2 --expand --recurse').get_output_in_json()
+        self.cmd('account management-group delete --name testcligetgroup4')
+        self.cmd('account management-group delete --name testcligetgroup3')
+        self.cmd('account management-group delete --name testcligetgroup2')
+        self.cmd('account management-group delete --name testcligetgroup1')
 
         self.assertIsNotNone(managementgroup_get)
         self.assertIsNotNone(managementgroup_get["children"])
@@ -164,9 +164,9 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         name = "testcligroup"
         displayName = "testcligroup"
         managementgroup_create = self.cmd(
-            'account management-group create --group-name ' +
+            'account management-group create --name ' +
             name).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
+        self.cmd('account management-group delete --name ' + name)
 
         self.assertIsNotNone(managementgroup_create)
         self.assertIsNotNone(managementgroup_create["properties"]["details"])
@@ -196,11 +196,11 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         name = "testcligroup"
         displayName = "TestCliDisplayName"
         managementgroup_create = self.cmd(
-            'account management-group create --group-name ' +
+            'account management-group create --name ' +
             name +
             ' --display-name ' +
             displayName).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
+        self.cmd('account management-group delete --name ' + name)
 
         self.assertIsNotNone(managementgroup_create)
         self.assertIsNotNone(managementgroup_create["properties"]["details"])
@@ -231,14 +231,14 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         displayName = "testcligroupchild"
         parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
         parentName = "testcligroup"
-        self.cmd('account management-group create --group-name ' + parentName)
+        self.cmd('account management-group create --name ' + parentName)
         managementgroup_create = self.cmd(
-            'account management-group create --group-name ' +
+            'account management-group create --name ' +
             name +
-            ' --parent-id ' +
+            ' --parent ' +
             parentId).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
-        self.cmd('account management-group delete --group-name ' + parentName)
+        self.cmd('account management-group delete --name ' + name)
+        self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_create)
         self.assertIsNotNone(managementgroup_create["properties"]["details"])
@@ -268,16 +268,16 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         displayName = "testcligroupchildDisplayName"
         parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
         parentName = "testcligroup"
-        self.cmd('account management-group create --group-name ' + parentName)
+        self.cmd('account management-group create --name ' + parentName)
         managementgroup_create = self.cmd(
-            'account management-group create --group-name ' +
+            'account management-group create --name ' +
             name +
             ' --display-name ' +
             displayName +
-            ' --parent-id ' +
-            parentId).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
-        self.cmd('account management-group delete --group-name ' + parentName)
+            ' --parent ' +
+            parentName).get_output_in_json()
+        self.cmd('account management-group delete --name ' + name)
+        self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_create)
         self.assertIsNotNone(managementgroup_create["properties"]["details"])
@@ -305,13 +305,13 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
     def test_update_managementgroup_with_displayname(self):
         name = "testcligroup"
         displayName = "testcligroupDisplayName"
-        self.cmd('account management-group create --group-name ' + name)
+        self.cmd('account management-group create --name ' + name)
         managementgroup_update = self.cmd(
-            'account management-group update --group-name ' +
+            'account management-group update --name ' +
             name +
             ' --display-name ' +
             displayName).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
+        self.cmd('account management-group delete --name ' + name)
 
         self.assertIsNotNone(managementgroup_update)
         self.assertIsNotNone(managementgroup_update["details"])
@@ -340,15 +340,15 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         displayName = "testcligroupchild"
         parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
         parentName = "testcligroup"
-        self.cmd('account management-group create --group-name ' + parentName)
-        self.cmd('account management-group create --group-name ' + name)
+        self.cmd('account management-group create --name ' + parentName)
+        self.cmd('account management-group create --name ' + name)
         managementgroup_update = self.cmd(
-            'account management-group update --group-name ' +
+            'account management-group update --name ' +
             name +
-            ' --parent-id ' +
+            ' --parent ' +
             parentId).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
-        self.cmd('account management-group delete --group-name ' + parentName)
+        self.cmd('account management-group delete --name ' + name)
+        self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_update)
         self.assertIsNotNone(managementgroup_update["details"])
@@ -376,17 +376,17 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         displayName = "testcligroupchild"
         parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
         parentName = "testcligroup"
-        self.cmd('account management-group create --group-name ' + parentName)
-        self.cmd('account management-group create --group-name ' + name)
+        self.cmd('account management-group create --name ' + parentName)
+        self.cmd('account management-group create --name ' + name)
         managementgroup_update = self.cmd(
-            'account management-group update --group-name ' +
+            'account management-group update --name ' +
             name +
             ' --display-name ' +
             displayName +
-            ' --parent-id ' +
-            parentId).get_output_in_json()
-        self.cmd('account management-group delete --group-name ' + name)
-        self.cmd('account management-group delete --group-name ' + parentName)
+            ' --parent ' +
+            parentName).get_output_in_json()
+        self.cmd('account management-group delete --name ' + name)
+        self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_update)
         self.assertIsNotNone(managementgroup_update["details"])
@@ -410,5 +410,5 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_create_delete_group_managementgroup(self):
-        self.cmd('account management-group create --group-name testcligroup')
-        self.cmd('account management-group delete --group-name testcligroup')
+        self.cmd('account management-group create --name testcligroup')
+        self.cmd('account management-group delete --name testcligroup')
