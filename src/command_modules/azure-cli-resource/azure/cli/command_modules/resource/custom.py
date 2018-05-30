@@ -1107,7 +1107,8 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
 def _get_parent_id_from_parent(parent):
     if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):
         return parent
-    return "/providers/Microsoft.Management/managementGroups/"+parent
+    return "/providers/Microsoft.Management/managementGroups/" + parent
+
 
 def cli_managementgroups_group_list(cmd, client):
     _register_rp(cmd.cli_ctx)
