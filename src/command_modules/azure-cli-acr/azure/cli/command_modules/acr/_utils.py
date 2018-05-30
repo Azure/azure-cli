@@ -24,6 +24,7 @@ from ._client_factory import (
 
 logger = get_logger(__name__)
 
+
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
     :param str resource_name: The name of resource
