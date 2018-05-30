@@ -214,8 +214,8 @@ def load_arguments(self, _):
         c.argument('group_name', options_list=['--name', '-n'])
 
     with self.argument_context('account management-group show') as c:
-        c.argument('expand', arg_type=get_three_state_flag(), options_list=['--expand', '-e'], action='store_true')
-        c.argument('recurse', arg_type=get_three_state_flag(), options_list=['--recurse', '-r'], action='store_true')
+        c.argument('expand', options_list=['--expand', '-e'], action='store_true')
+        c.argument('recurse', options_list=['--recurse', '-r'], action='store_true')
 
     with self.argument_context('account management-group create') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
@@ -223,4 +223,4 @@ def load_arguments(self, _):
 
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
-        c.argument('parent', options_list=['--parent', '-p'])
+        c.argument('parent_id', options_list=['--parent', '-p'])

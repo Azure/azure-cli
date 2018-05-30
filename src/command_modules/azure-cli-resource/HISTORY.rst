@@ -5,7 +5,7 @@ Release History
 
 2.0.30
 ++++++
-* Add management-group commands
+*  add `account management-group` commands.
 
 2.0.29
 ++++++
