@@ -16,7 +16,7 @@ import six
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup
-from knack.deprecation import ImplicitDeprecated
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.log import get_logger
 from knack.util import CLIError
@@ -325,7 +325,7 @@ class AzCliCommandInvoker(CommandInvoker):
             path_comps = cmd.name.split()[:-1]
             implicit_deprecate_info = None
             while path_comps and not implicit_deprecate_info:
-                implicit_deprecate_info = self._resolve_deprecate_info(' '.join(path_comps))
+                implicit_deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
                 del path_comps[-1]
 
             if implicit_deprecate_info:

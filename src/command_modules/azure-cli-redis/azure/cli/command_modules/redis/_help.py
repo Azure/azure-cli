@@ -40,9 +40,6 @@ helps['redis list-all'] = """
 helps['redis update-settings'] = """
     type: command
     short-summary: Update the settings of a Redis cache.
-    parameters:
-        - name: --test
-          long-summary: This is a long summary of the magic thing.
 """
 
 helps['redis update'] = """

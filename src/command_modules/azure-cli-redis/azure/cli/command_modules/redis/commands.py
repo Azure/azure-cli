@@ -20,21 +20,21 @@ def load_command_table(self, _):
         client_factory=cf_patch_schedules)
 
     with self.command_group('redis', redis_sdk) as g:
-        g.custom_command('test', 'redis_test')
         g.custom_command('create', 'cli_redis_create', client_factory=cf_redis,
                          exception_handler=wrong_vmsize_argument_exception_handler)
         g.command('delete', 'delete')
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
-        g.custom_command('import-method', 'cli_redis_import_method')
+        g.custom_command('import-method', 'cli_redis_import_method',
+                         deprecate_info=g.deprecate(redirect='redis import', hide='2.0.34'))
         g.custom_command('import', 'cli_redis_import_method')
         g.custom_command('list', 'cli_redis_list')
-        g.command('list-all', 'list')
+        g.command('list-all', 'list', deprecate_info=g.deprecate(redirect='redis list', hide='2.0.34'))
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
         g.command('show', 'get')
         g.custom_command('update-settings', 'cli_redis_update_settings',
-                         deprecate_info=g.deprecate(redirect='az redis update', expiration='2.0.33'))
+                         deprecate_info=g.deprecate(redirect='redis update', hide='2.0.34'))
         g.generic_update_command('update', exception_handler=wrong_vmsize_argument_exception_handler,
                                  setter_name='update', custom_func_name='cli_redis_update')
 
@@ -44,6 +44,5 @@ def load_command_table(self, _):
         g.command('show', 'get')
 
     with self.command_group('redis patch-schedule patch-schedule', redis_patch,
-                            deprecate_info=self.deprecate(redirect='redis patch-schedule', hide='2.0.33',
-                                                          expiration='2.0.34')) as g:
+                            deprecate_info=self.deprecate(redirect='redis patch-schedule', hide='2.0.34')) as g:
         g.command('show', 'get')

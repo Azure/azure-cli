@@ -48,7 +48,7 @@ def cli_redis_list(cmd, client, resource_group_name=None):
 
 
 # pylint: disable=unused-argument
-def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_configuration, test=None, test2=None):
+def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_configuration):
     from azure.mgmt.redis.models import RedisUpdateParameters
 
     existing = client.get(resource_group_name, name)
@@ -125,15 +125,3 @@ def cli_redis_create(cmd, client,
     return client.create(resource_group_name, name, params)
 
 # endregion
-
-
-def redis_test(cmd):
-    """ TESTING STUFF! """
-    from azure.cli.core import get_default_cli
-    from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
-    # setup CLI to enable command loader
-    az_cli = get_default_cli()
-
-    # load commands, args, and help
-    create_invoker_and_load_cmds_and_args(az_cli)
-    return

@@ -494,7 +494,7 @@ helps['monitor autoscale rule delete'] = """
 
 helps['monitor autoscale-settings'] = """
             type: group
-            short-summary: (DEPRECATED) Manage autoscale settings.
+            short-summary: Manage autoscale settings.
             """
 helps['monitor autoscale-settings update'] = """
             type: command
