@@ -362,7 +362,7 @@ def container_export(cmd, resource_group_name, name, file=None):
     resource.pop('kind', None)
     resource.pop('managed_by', None)
     resource['properties'].pop('provisioningState', None)
-    if 'ipAddress' in  resource['properties']:
+    if 'ipAddress' in resource['properties']:
         resource['properties']['ipAddress'].pop('ip', None)
 
     for i in range(len(resource['properties']['containers'])):
