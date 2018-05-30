@@ -146,6 +146,7 @@ def load_command_table(self, _):
     with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
+        g.custom_command('exists', 'resource_exists')
         g.custom_command('show', 'show_resource', exception_handler=empty_on_404)
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')

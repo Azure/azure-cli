@@ -3,10 +3,13 @@
 Release History
 ===============
 
+2.0.30
+++++++
+* Added `resource exists` command.
+
 2.0.29
 ++++++
 * Minor changes
-
 
 2.0.28
 ++++++
