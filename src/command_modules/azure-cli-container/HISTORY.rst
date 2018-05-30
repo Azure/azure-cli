@@ -3,9 +3,13 @@
 Release History
 ===============
 
+0.1.25
+++++++
+* Make a file not required when exporting a container group. Print the yaml to the screen.
+
 0.1.24
 ++++++
-* Allow exporting a container group in yaml format to a file or standard out.
+* Allow exporting a container group in yaml format.
 * Allow using a yaml file to create / update a container group.
 
 0.1.23
