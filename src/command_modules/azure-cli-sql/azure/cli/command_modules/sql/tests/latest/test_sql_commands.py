@@ -2534,7 +2534,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         user = admin_login
 
         # test create sql managed_instance with minimal required parameters
-        managed_instance_1 = self.cmd('sql managed-instance create -g {} -n {} -l {} '
+        managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
                                       .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                                       checks=[
@@ -2550,7 +2550,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test show sql managed instance 1
-        self.cmd('sql managed-instance show -g {} -n {}'
+        self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_1),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2558,7 +2558,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         # test show sql managed instance 1 using id
-        self.cmd('sql managed-instance show --id {}'
+        self.cmd('sql mi show --id {}'
                  .format(managed_instance_1['id']),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2566,7 +2566,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         # test update sql managed_instance
-        self.cmd('sql managed-instance update -g {} -n {} --admin-password {} -i'
+        self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
                  .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2576,7 +2576,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # test update without identity parameter, validate identity still exists
         # also use --id instead of -g/-n
-        self.cmd('sql managed-instance update --id {} --admin-password {}'
+        self.cmd('sql mi update --id {} --admin-password {}'
                  .format(managed_instance_1['id'], admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
@@ -2585,7 +2585,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test create another sql managed instance, with identity this time
-        self.cmd('sql managed-instance create -g {} -n {} -l {} -i '
+        self.cmd('sql mi create -g {} -n {} -l {} -i '
                  '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
                  .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                  checks=[
@@ -2601,7 +2601,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test show sql managed instance 2
-        self.cmd('sql managed-instance show -g {} -n {}'
+        self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_2),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
@@ -2609,21 +2609,21 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         # test list sql managed_instance in the subscription should be at least 2
-        self.cmd('sql managed-instance list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
+        self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
         # test delete sql managed instance
-        self.cmd('sql managed-instance delete --id {} --yes'
+        self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
-        self.cmd('sql managed-instance delete -g {} -n {} --yes'
+        self.cmd('sql mi delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
 
         # test show sql managed instance doesn't return anything
-        self.cmd('sql managed-instance show -g {} -n {}'
+        self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_1),
                  expect_failure=True)
 
         # test show sql managed instance doesn't return anything
-        self.cmd('sql managed-instance show -g {} -n {}'
+        self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_2),
                  expect_failure=True)
 
@@ -2654,7 +2654,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         user = admin_login
 
         # Prepare managed instance for test
-        managed_instance_1 = self.cmd('sql managed-instance create -g {} -n {} -l {} '
+        managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
                                       .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
                                       checks=[
@@ -2670,7 +2670,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test sql db commands
-        db1 = self.cmd('sql managed-db create -g {} --mi {} -n {} --collation {}'
+        db1 = self.cmd('sql midb create -g {} --mi {} -n {} --collation {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, collation),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
@@ -2683,7 +2683,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(900)  # Sleeping 15 minutes seconds should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command
-        db1 = self.cmd('sql managed-db restore -g {} --mi {} -n {} --target-db {} --time {}'
+        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --target-db {} --time {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored, datetime.utcnow().isoformat()),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
@@ -2691,12 +2691,12 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('location', loc),
                            JMESPathCheck('status', 'Online')]).get_output_in_json()
 
-        self.cmd('sql managed-db list -g {} --managed-instance {}'
+        self.cmd('sql midb list -g {} --managed-instance {}'
                  .format(resource_group_1, managed_instance_name_1),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # Show by group/managed_instance/database-name
-        self.cmd('sql managed-db show -g {} --managed-instance {} -n {}'
+        self.cmd('sql midb show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
@@ -2706,7 +2706,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online')])
 
         # Show by id
-        self.cmd('sql managed-db show --id {}'
+        self.cmd('sql midb show --id {}'
                  .format(db1['id']),
                  checks=[
                      JMESPathCheck('name', database_name),
@@ -2716,14 +2716,14 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online')])
 
         # Delete by group/server/name
-        self.cmd('sql managed-db delete -g {} --managed-instance {} -n {} --yes'
+        self.cmd('sql midb delete -g {} --managed-instance {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  checks=[NoneCheck()])
 
         # test show sql managed db doesn't return anything
-        self.cmd('sql managed-db show -g {} --managed-instance {} -n {}'
+        self.cmd('sql midb show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
-        self.cmd('sql managed-instance delete --id {} --yes'
+        self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())

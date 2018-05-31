@@ -417,7 +417,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.managed_instances_operations#ManagedInstancesOperations.{}',
         client_factory=get_sql_managed_instances_operations)
 
-    with self.command_group('sql managed-instance',
+    with self.command_group('sql mi',
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
@@ -435,12 +435,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.managed_databases_operations#ManagedDatabasesOperations.{}',
         client_factory=get_sql_managed_databases_operations)
 
-    with self.command_group('sql managed-db',
+    with self.command_group('sql midb',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
 
         g.custom_command('create', 'managed_db_create', supports_no_wait=True)
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
         g.command('show', 'get')
-        g.custom_command('list', 'managed_db_list')
+        g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)

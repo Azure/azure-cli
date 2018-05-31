@@ -160,7 +160,6 @@ storage_param_type = CLIArgumentType(
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
 dw_service_objective_examples = 'DW100, DW1000c'
-mi_service_objective_examples = 'GP_Gen4, GP_Gen5'
 
 
 ###############################################
@@ -1027,7 +1026,7 @@ def load_arguments(self, _):
     ###############################################
     #                sql managed instance         #
     ###############################################
-    with self.argument_context('sql managed-instance') as c:
+    with self.argument_context('sql mi') as c:
         c.argument('managed_instance_name',
                    help='The managed instance name',
                    options_list=['--name', '-n'],
@@ -1046,7 +1045,7 @@ def load_arguments(self, _):
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
                    arg_type=storage_param_type,
-                   help='Determines how much storage size to associate with Managed instance. '
+                   help='The storage size of the managed instance. '
                    'Storage size must be specified in increments of 32 GB')
 
         c.argument('license_type',
@@ -1055,9 +1054,9 @@ def load_arguments(self, _):
 
         c.argument('vcores',
                    options_list=['--capacity', '-c'],
-                   help='Determines how much VCore to associate with Managed instance.')
+                   help='The capacity of the managed instance in vcores.')
 
-    with self.argument_context('sql managed-instance create') as c:
+    with self.argument_context('sql mi create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
@@ -1103,7 +1102,7 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
 
-    with self.argument_context('sql managed-instance update') as c:
+    with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
@@ -1121,7 +1120,7 @@ def load_arguments(self, _):
     ###############################################
     #                sql managed db               #
     ###############################################
-    with self.argument_context('sql managed-db') as c:
+    with self.argument_context('sql midb') as c:
         c.argument('managed_instance_name',
                    arg_type=managed_instance_param_type,
                    # Allow --ids command line argument. id_part=name is 1st name in uri
@@ -1133,7 +1132,7 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-    with self.argument_context('sql managed-db create') as c:
+    with self.argument_context('sql midb create') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'collation',
@@ -1144,16 +1143,24 @@ def load_arguments(self, _):
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
 
-    with self.argument_context('sql managed-db restore') as c:
+    with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'target_managed_database_name',
+                'target_managed_instance_name',
                 'restore_point_in_time'
             ])
+
         c.argument('target_managed_database_name',
                    options_list=['--target-db'],
                    required=True,
                    help='Name of the managed database that will be created as the restore destination.')
+
+        c.argument('target_managed_instance_name',
+                   options_list=['--target-mi'],
+                   help='Name of the managed instance to restore managed database to. '
+                   'This can be same managed instance, or another managed instance withing same resource group. '
+                   'When not specified it defaults to source managed instance.')
 
         restore_point_arg_group = 'Restore Point'
 
@@ -1165,5 +1172,5 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. Time should be in following format: "YYYY-MM-DDTHH:MM:SS"')
 
-    with self.argument_context('sql managed-db list') as c:
+    with self.argument_context('sql midb list') as c:
         c.argument('managed_instance_name', id_part=None)

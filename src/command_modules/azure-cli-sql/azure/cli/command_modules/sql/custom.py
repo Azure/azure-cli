@@ -144,9 +144,9 @@ def _find_family_capability(sku, supported_families):
         try:
             return next(e for e in supported_families if e.name == sku.family)
         except StopIteration:
-            candiate_families = [e.name for e in supported_families]
+            candidate_families = [e.name for e in supported_families]
             raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
-                sku.family, candiate_families
+                sku.family, candidate_families
             ))
     else:
         # Find default family capability
@@ -1930,14 +1930,13 @@ def managed_instance_create(
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     kwargs['location'] = location
-
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+    kwargs['subnet_id'] = virtual_network_subnet_id
 
     # Create
     return client.create_or_update(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
-        subnet_id = virtual_network_subnet_id,
         parameters=kwargs)
 
 
@@ -2010,18 +2009,6 @@ def managed_db_create(
         parameters=kwargs)
 
 
-def managed_db_list(
-        client,
-        managed_instance_name,
-        resource_group_name):
-    '''
-    Lists databases in a managed instance.
-    '''
-
-    # List all databases in the server
-    return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=managed_instance_name)
-
-
 def managed_db_restore(
         cmd,
         client,
@@ -2029,7 +2016,7 @@ def managed_db_restore(
         managed_instance_name,
         resource_group_name,
         target_managed_database_name,
-        restore_point_in_time=None,
+        target_managed_instance_name=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2037,15 +2024,14 @@ def managed_db_restore(
     Custom function makes create mode more convenient.
     '''
 
-    if not restore_point_in_time:
-        raise CLIError('--restore_point_in_time must be specified.')
+    if not target_managed_instance_name:
+        target_managed_instance_name = managed_instance_name
 
     kwargs['location'] = _get_managed_instance_location(
         cmd.cli_ctx,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['create_mode'] = CreateMode.point_in_time_restore.value
     kwargs['source_database_id'] = _get_managed_db_resource_id(
         cmd.cli_ctx,
@@ -2055,6 +2041,6 @@ def managed_db_restore(
 
     return client.create_or_update(
         database_name=target_managed_database_name,
-        managed_instance_name=managed_instance_name,
+        managed_instance_name=target_managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
