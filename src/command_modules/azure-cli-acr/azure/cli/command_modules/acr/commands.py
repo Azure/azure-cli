@@ -36,6 +36,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_registries
     )
 
+    acr_import_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.import#{}',
+        client_factory=cf_acr_registries
+    )
+
     acr_cred_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.credential#{}',
         table_transformer=credential_output_format,
@@ -85,6 +90,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries,
                                  table_transformer=registry_output_format)
+
+    with self.command_group('acr', acr_import_util) as g:
+        g.command('import', 'acr_import')
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.command('show', 'acr_credential_show', exception_handler=empty_on_404)

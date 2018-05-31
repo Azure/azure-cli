@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
@@ -20,6 +21,8 @@ from ._client_factory import (
     get_storage_service_client,
     get_acr_service_client
 )
+
+logger = get_logger(__name__)
 
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
@@ -89,6 +92,27 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     client = get_acr_service_client(cli_ctx).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
+
+
+def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=None):
+    """Returns a Registry object for the specified name.
+    :param str name: either the registry name or the login server of the registry.
+    """
+    client = get_acr_service_client(cli_ctx).registries
+    registry_list = client.list()
+
+    if registry_name:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower() or item.name.lower() == registry_name.lower()]
+    else:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower()]
+
+    if len(elements) == 1:
+        return elements[0]
+    elif len(elements) > 1:
+        logger.warning("More than one registries were found by %s.", login_server)
+    return None
 
 
 def arm_deploy_template_new_storage(cli_ctx,
