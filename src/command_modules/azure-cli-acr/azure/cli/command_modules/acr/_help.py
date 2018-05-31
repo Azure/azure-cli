@@ -18,7 +18,7 @@ helps['acr credential'] = """
 
 helps['acr repository'] = """
     type: group
-    short-summary: Manage repositories for Azure Container Registries.
+    short-summary: Manage repositories (image names) for Azure Container Registries.
     """
 
 helps['acr webhook'] = """

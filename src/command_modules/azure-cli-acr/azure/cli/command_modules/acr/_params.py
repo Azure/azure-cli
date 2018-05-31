@@ -64,8 +64,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr import') as c:
         c.argument('source', help="A source identifier, either fully qualified (e.g., 'registry.azurecr.io/repository:tag') or partially qualified (e.g., 'repository@sha').")
-        c.argument('source_registry', options_list=['--registry', '-r'], help='The container registry of the source. It can be name, canonical name (login server) or resource ID of the source registry.')
-        c.argument('target_tags', options_list=['--target-tags', '-t'], help="The repository and optionally a tag in the 'repository:tag' format for target images.", action='append')
+        c.argument('source_registry', options_list=['--registry', '-r'], help='The container registry of the source. It can be name, login server or resource ID of the source registry.')
+        c.argument('target_tags', options_list=['--image', '-t'], help="The repository and optionally a tag in the 'repository:tag' format for target images.", action='append')
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 

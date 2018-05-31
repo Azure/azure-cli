@@ -96,7 +96,7 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
 
 def get_registry_from_name(cli_ctx, name):
     """Returns a Registry object for the specified name.
-    :param str name: either the registry name or the canonical name (login server) of the registry.
+    :param str name: either the registry name or the login server of the registry.
     """
     client = get_acr_service_client(cli_ctx).registries
     registry_list = client.list()
@@ -107,7 +107,7 @@ def get_registry_from_name(cli_ctx, name):
     if not elements:
         return None
     elif len(elements) > 1:
-        logger.warning("More than one registry object is found by the registry name.")
+        logger.warning("More than one registry is found by the registry name.")
         return None
     return elements[0]
 

@@ -14,10 +14,11 @@ from ._utils import (
     get_registry_from_name
 )
 
-SOURCE_REGISTRY_MISING = "Please specify the source container registry: "
+SOURCE_REGISTRY_MISING = "Please specify the source container registry name or login server: "
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
-INVALID_SOURCE_IMAGE = "Please specify source image in the form of '[registry.azurecr.io/]repository:tag'."
-SOURCE_REGISTRY_NOT_FOUND = "Source registry cannot be found in the current subscription. " \
+INVALID_SOURCE_IMAGE = "Please specify source image in the form of '[registry.azurecr.io/]repository:tag' or " \
+"'[registry.azurecr.io/]repository@sha'"
+SOURCE_REGISTRY_NOT_FOUND = "Source registry could not be found in the current subscription. " \
                             "Please specify the full resource ID for it: "
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
 REGISTRY_MISMATCH = "Registry mismatch. Please check either source-image or resource ID " \
