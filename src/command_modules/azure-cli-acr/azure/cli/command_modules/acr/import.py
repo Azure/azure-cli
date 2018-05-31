@@ -60,14 +60,12 @@ def acr_import(cmd,
         if not source_image or not source_registry_login_server:
             raise CLIError(INVALID_SOURCE_IMAGE)
         registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
-        if source_registry:
-            if not registry or \
-            source_registry != registry.id and \
-            source_registry != registry.name and \
-            source_registry != registry.login_server:
+        if registry:
+            if source_registry and \
+                source_registry != registry.id and \
+                source_registry != registry.name and \
+                source_registry != registry.login_server:
                 raise CLIError(REGISTRY_MISMATCH)
-            source_registry = registry.id
-        elif registry:
             source_registry = registry.id
 
     if not is_valid_resource_id(source_registry):
