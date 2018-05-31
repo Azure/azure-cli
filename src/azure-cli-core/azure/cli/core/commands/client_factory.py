@@ -45,10 +45,10 @@ def resolve_client_arg_name(operation, kwargs):
 
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
                             aux_subscriptions=None, **kwargs):
-    '''
+    """
      :params subscription_id: the current account's subscription
      :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
-    '''
+    """
     sdk_profile = None
     if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client

@@ -448,10 +448,11 @@ class Profile(object):
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
         external_tenants_info = []
-        for s in [x for x in (aux_subscriptions or []) if x != subscription_id]:
-            a = self.get_subscription(s)
-            if a[_TENANT_ID] != account[_TENANT_ID]:
-                external_tenants_info.append((a[_USER_ENTITY][_USER_NAME], a[_TENANT_ID]))
+        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
+        for ext_sub in ext_subs:
+            sub = self.get_subscription(ext_sub)
+            if sub[_TENANT_ID] != account[_TENANT_ID]:
+                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
 
         if identity_type is None:
             def _retrieve_token():
