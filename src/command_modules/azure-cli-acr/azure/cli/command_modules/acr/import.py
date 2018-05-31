@@ -51,9 +51,10 @@ def acr_import(cmd,
                 source_registry = prompt(SOURCE_REGISTRY_MISSING)
             except NoTTYException:
                 raise CLIError(NO_TTY_ERROR)
-        registry_from_source = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
-        if registry_from_source:
-            source_registry = registry_from_source.id
+        if not is_valid_resource_id(source_registry):
+            registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
+            if registry:
+                source_registry = registry.id
     else:
         source_image = source[slash + 1:]
         source_registry_login_server = source[:slash]
