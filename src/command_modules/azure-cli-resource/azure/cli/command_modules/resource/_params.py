@@ -21,7 +21,7 @@ def load_arguments(self, _):
 
     from azure.cli.command_modules.resource._completers import (
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
-        get_resource_types_completion_list, get_providers_completion_list)
+        get_resource_types_completion_list, get_providers_completion_list, get_subscription_id_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata)
 
@@ -209,6 +209,9 @@ def load_arguments(self, _):
         c.argument('authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
         c.argument('createUiDefinition', options_list=('--create-ui-definition', '-c'), help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=('--main-template', '-t'), help='JSON formatted string or a path to a file with such content', type=file_type)
+
+    with self.argument_context('account') as c:
+        c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
 
     with self.argument_context('account management-group') as c:
         c.argument('group_name', options_list=['--name', '-n'])

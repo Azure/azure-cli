@@ -2,39 +2,6 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:39 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rB1pE9ac5F3Sg9lN_ZUjSoB0IDe0eK3pdDIF7oDG3VZNS6A5ZndQ4e7TZo5YiJW5rBCfziZK3onoV4uxgUrKdFy3a5w6c4087sYn7tZGaYm-5rh2FUJ5jVNQv_NXYVP-fxDQThxG0eCqM9roCZEZiLl0gZ5Kpz43VhooOBScsLrIgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [account management-group create]
@@ -46,54 +13,21 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:41 GMT']
+      date: ['Thu, 31 May 2018 18:41:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:52 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rx_PmnwEs5Xk5i8Ci2MI3mVTjfJaDTAbge-CBp_BkYeZbHjNlpZEtXy9HbeeOgQVIqUjOWyNpAcrVf4yvCIehR4yvWT2aHgaj3PPxf5Bw9wyiGW1e2eQPFp77vErA87Clw4ovsWm5AKMDin-MpoeZgu_g5sgDQn9ipXz3zYcLYQggAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -108,52 +42,19 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:52 GMT']
+      date: ['Thu, 31 May 2018 18:42:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:53 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7ryKCyt-1V5EMlQ-Cx-dcA_godjV56BU495byaY6Ts457t2G9wDAe5LvRbM45Roxhf_jxHhtpoMIAR2j-7HX5ka6AwmkiiuqDcixM84CF-1hF0R2Ak676NMtcT7hDFEATim7CxmLxZ_HYZBBK3gENBgjxuzGSAAST5R8dEsjhuMgQgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"name": "testcligetgroup1", "properties": {"details": {"parent": {}}}}'
@@ -170,59 +71,26 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
   response:
     body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"NotStarted"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:12:56 GMT']
+      date: ['Thu, 31 May 2018 18:42:10 GMT']
       expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup1?api-version=2018-03-01-preview']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup1?api-version=2018-03-01-preview']
       pragma: [no-cache]
-      request-id: [ee7cf5e5-5c97-4ec5-8b25-ec440dd79beb]
+      request-id: [4666cc4c-10f2-4c16-a0b3-823469064034]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
+      x-ms-ratelimit-remaining-tenant-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:06 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rlkgWmEFCV3TEAYwQuH8YFeeeyrhW9gxRoWePZVuq4VKcKx4IDvBKHu60-rs-Bw3Z_JA9osiRaNc7MCku5E1YrCgUn0d2q3CpO0y76FHxVW8SNpEmS2KyK5hW3uk7bOfKiRTmv_X4TL49Ib7KsNtE2AhF773Y41MlW5T-7opAVDYgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -234,56 +102,24 @@ interactions:
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"Succeeded","properties":{"tenantId":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"testcligetgroup1","details":{"version":11,"updatedTime":"2018-05-30T21:13:03.6329477Z","updatedBy":"823969e2-f8c1-4add-8526-62544e2f96b2","parent":{"id":"/providers/Microsoft.Management/managementGroups/b1af47f1-138c-4ed2-8bba-119041b95450","name":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"b1af47f1-138c-4ed2-8bba-119041b95450"}}}}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"Succeeded","properties":{"tenantId":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"testcligetgroup1","details":{"version":3,"updatedTime":"2018-05-31T18:42:12.6349587Z","updatedBy":"a320fc00-4c5f-4d70-9648-593b5877c7da","parent":{"id":"/providers/Microsoft.Management/managementGroups/a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","name":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"Tenant
+        Root Group"}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['601']
+      content-length: ['581']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:09 GMT']
+      date: ['Thu, 31 May 2018 18:42:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [e844f7f8-3855-497b-80fb-2737faab0354]
+      request-id: [5130069a-af82-440e-9c88-15d5abede23a]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:10 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rKk-UQNmORwY5kayxG9u57JRcpQvBlZY5_Tk_G0PuoIG94xjuTWWWMcFW_2--6uQ1GKv_PwBrp5kFHrWDSI5KREhsv1h0ugRONroRPY3qQtr4bjfrM3epPRiOpR2MBAn28atVwQiwpWpjCnEwbBWW5R9yPhiQhau0n93_3HU0GP0gAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -301,54 +137,21 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:12 GMT']
+      date: ['Thu, 31 May 2018 18:42:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:23 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rqzO1p1kmbNpZ-xAHbyS19HO0QiuLaTMC6BRr_JdabHbmqYKRPdU8q1eEz-KxUFlcZj9bZfC5k-ZpKar2r0ePjozHVlojznS0qL-wIEV82lhSI7TxCKh6kcbNOe1StIImo4oKJkUXIvp3Kp774lKGZvbmDijy5CWPIdq57j3oXeMgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -363,52 +166,19 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:23 GMT']
+      date: ['Thu, 31 May 2018 18:42:33 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:24 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rq0y0j7ugunQYqq18ymuv4I9636z4tWM4TEA_GPmc-Pu4TF66YWd8wTNqjrQOVfAgfOAuOreoseeJv7b050F5h6aiuqmMBB_K9sk_wGYJRt_GKvDDcSYK4ZZ5wTkTISEbUP-hfrmAHTGgn1AM5MGSPI6OI3SwRfW8U2RhiquPO0AgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"name": "testcligetgroup2", "properties": {"details": {"parent": {"id":
@@ -426,59 +196,26 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
   response:
     body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"NotStarted"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:27 GMT']
+      date: ['Thu, 31 May 2018 18:42:34 GMT']
       expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup2?api-version=2018-03-01-preview']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup2?api-version=2018-03-01-preview']
       pragma: [no-cache]
-      request-id: [36e63544-4799-4b87-924c-a80c31e42e44]
+      request-id: [859255e2-f753-4fcd-afd2-d82b854cb23a]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:37 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rRPea4WZzvkdpoJ_jIWeXOwJKJKoapbCtaqp_iFosRqxORBhtfwvVxlkwCbMtb9tIe8RqfG39di0BO2HoYQmHTl4Av-G3LoplIJ3V6gfDxtrYYxxubB-7TUFU0rf7jimZnYI6HDmuTRHtw_WANkF2VWTCTHc0U7QT0JeD_hU5-9sgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -490,56 +227,23 @@ interactions:
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"Succeeded","properties":{"tenantId":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"testcligetgroup2","details":{"version":10,"updatedTime":"2018-05-30T21:13:33.5354756Z","updatedBy":"823969e2-f8c1-4add-8526-62544e2f96b2","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","name":"testcligetgroup1","displayName":"testcligetgroup1"}}}}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"Succeeded","properties":{"tenantId":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"testcligetgroup2","details":{"version":3,"updatedTime":"2018-05-31T18:42:36.6792409Z","updatedBy":"a320fc00-4c5f-4d70-9648-593b5877c7da","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","name":"testcligetgroup1","displayName":"testcligetgroup1"}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['541']
+      content-length: ['540']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:38 GMT']
+      date: ['Thu, 31 May 2018 18:42:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [2c35a9f5-3985-4806-b43f-bcd9426e8467]
+      request-id: [4ac3674e-f106-490d-a5c2-20fa1a82a663]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:40 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rXNJLTkcfDR17xfnbocxbeuJ2AhSVheyDKXMUrjWf1gXPXG6Z7HN3B01aRBme_SMEyrfvxBB45vWO8gQ89FxxZMVwdl0Dmqij10JK0BtGSQHH0Fp5nlF2Hb0FH0rab4Y7tefzh0OOPIFBTfjBZPD1-s4vx66PyHDoMBnjTOogo_QgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -557,54 +261,21 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:43 GMT']
+      date: ['Thu, 31 May 2018 18:42:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:54 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r7FD2t7R_US7yw-YZ4Xz-vP19RC_DKbNvli5RaR4WjblySPgAVUkavcugknP3Iv74pDyHAjkbNO0iClG6AWqsRqN820vIZ6aDVmpRWbfU2BuVOUiWnHjMCcPh2c5GmfdEqMayCcssKSLdRe_hEUdRiRoBqYVwfXPxxX5rlIYvzvggAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -619,52 +290,19 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:55 GMT']
+      date: ['Thu, 31 May 2018 18:42:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:55 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rZ0v2_RjqTwYN9Sy1xOTSO_bAGd1HE3PPOVWkHLWqDzN3mAhKsl0lUAHy0ONqAr_NU8XWNZk8jqo6vSFV6FCJR1k45Z6Z1Eg3V7XX81H-J2WbC5JIAJSufyoR5-EDOhnqUUZrTs5NZDXQEJUKCv8ArGDm2bPXtRmXLVt6QOyuNiYgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"name": "testcligetgroup3", "properties": {"details": {"parent": {"id":
@@ -682,59 +320,26 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
   response:
     body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"NotStarted"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:13:58 GMT']
+      date: ['Thu, 31 May 2018 18:42:57 GMT']
       expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup3?api-version=2018-03-01-preview']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup3?api-version=2018-03-01-preview']
       pragma: [no-cache]
-      request-id: [4d1fbc73-98e5-4b4a-89f7-8094c523126d]
+      request-id: [2005e12d-3842-487c-9d74-a7d70c26169c]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1197']
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:08 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rZiCxIucbmZCM4iCIUHOO2cWngNmUZYZDaruLjL-CkCOBOrlqu2Og7Xke-g0gJdVtIwWz_tbfiPh_KmZTojLI91Xc5AdjkZlfwFpv8cWgec4KaVfERcF1YFyk9OiLGIMxY5xffarX4xRtEBFfx_1sno-ZqV4higxkquexlb0Ehv0gAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -746,56 +351,23 @@ interactions:
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"Succeeded","properties":{"tenantId":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"testcligetgroup3","details":{"version":8,"updatedTime":"2018-05-30T21:14:04.5086164Z","updatedBy":"823969e2-f8c1-4add-8526-62544e2f96b2","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","name":"testcligetgroup2","displayName":"testcligetgroup2"}}}}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"Succeeded","properties":{"tenantId":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"testcligetgroup3","details":{"version":2,"updatedTime":"2018-05-31T18:43:00.1290657Z","updatedBy":"a320fc00-4c5f-4d70-9648-593b5877c7da","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","name":"testcligetgroup2","displayName":"testcligetgroup2"}}}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['540']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:10 GMT']
+      date: ['Thu, 31 May 2018 18:43:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [3dd30cd3-669a-4f17-8283-90ab497737ff]
+      request-id: [61317db1-423b-4c4c-b0c0-28de23545c17]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:11 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rZ5x94t15JIuEO6lcPpsxgu_4mAXn2_3cuVifAxBppq1jHcEBGBOS4iYh81WLSxVLXJws-0KT2EwJA2lDppII-xDMHJKkXicIm96purLtPRp8PiebDG4dlz7iItKtobQLlZYz_KBuoF1an5Oqq3gM7tC2Zw56gZUdrZlUt6bkLCYgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -813,14 +385,14 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:14 GMT']
+      date: ['Thu, 31 May 2018 18:43:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -828,39 +400,6 @@ interactions:
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:24 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rh1YnyksBBflTyZ3TOxLNqZlemt7dBpBWjcqE8d7ynTTMWxRVTXZPs-26wtqkeSTQed1wa__XWpLmbJqlP0ttFVPgOzL-eZQENc3O-hEPBquJZK0TgZNs77G52gCvlA7-Ss_zVE9-DJofEe2Z1IPsolAiUVdjYWspj6e35-3GA9EgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -875,52 +414,19 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:25 GMT']
+      date: ['Thu, 31 May 2018 18:43:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:26 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rXtBE88_u2gpVJWQKA4lGKA-4K1szRtwYDWdPdDv68oizobrmx-bN_N54PaD2rP8YRBhxtJI2oANduNR18GG_YxsjzBipiPee-Wa6dOeEyF95mHOvRmoG7MOHPZ7La8WQNBJzCyoUU60QaOCzIKmGQsdVPg_WYZ62zD3AalsNk6UgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"name": "testcligetgroup4", "properties": {"details": {"parent": {"id":
@@ -938,59 +444,26 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
   response:
     body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"NotStarted"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:29 GMT']
+      date: ['Thu, 31 May 2018 18:43:21 GMT']
       expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup4?api-version=2018-03-01-preview']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup4?api-version=2018-03-01-preview']
       pragma: [no-cache]
-      request-id: [dc137ce9-b12a-44f2-9296-8d005d2af947]
+      request-id: [eae65ff2-ed65-4b24-afa1-96de6a9eb2b8]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1196']
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:39 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rg7_aH0sBubG-GJ7nSf16dwY71iK1v28ok5d7w-auY2C90hBXrChDUR2q8S-NqZtU8juhoXwPFK3331LXvakoU9TJJrK26LxsKGFgF0WQ-d5eWlrdrgG4uQHYQ-TXBs0p_mIunHRnFn5RWG6EM8GTkh1hRmjVJoGb8P3ra_6EDfcgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -1002,56 +475,23 @@ interactions:
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"Succeeded","properties":{"tenantId":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"testcligetgroup4","details":{"version":6,"updatedTime":"2018-05-30T21:14:34.5328858Z","updatedBy":"823969e2-f8c1-4add-8526-62544e2f96b2","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","name":"testcligetgroup3","displayName":"testcligetgroup3"}}}}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"Succeeded","properties":{"tenantId":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"testcligetgroup4","details":{"version":1,"updatedTime":"2018-05-31T18:43:23.6502206Z","updatedBy":"a320fc00-4c5f-4d70-9648-593b5877c7da","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","name":"testcligetgroup3","displayName":"testcligetgroup3"}}}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['540']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:41 GMT']
+      date: ['Thu, 31 May 2018 18:43:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [fec38314-6760-41c3-8496-156de4f95dd8]
+      request-id: [a893f76e-4416-477d-945b-e2faa0ac391d]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:42 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rWjY1o_vryJGomForU37Eav7GGWBsK2RuErWDKH9iDsJYqRKBfJOft61P3twihZKFxMvzo74Antv-4yXssTJPpxY7-V18c1aCYJRpFiNtj_sj2HXUuzEPpRYvdhQM1R14SDPhm1Bn81jyvKNbEAqKzAC1RC5WF2EW9Cb5cfRAvVQgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -1069,714 +509,14 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:56 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rgP-JiXtK2zYSycyG7U8kwFac_eezLNHqCtCrUpIYaP7nKIOSMiDQNhXwAlSK0eaMSARwXmlGyYv9Cz1Gfu9k-B5gp47sqTmBS3AaxtDKhxaO84ayE8AaAIZ3B9v_N6rqHUaKMq-lvijjYOELTqC-R0juFu69bsnR1U5aBd052ycgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:57 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:14:57 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rbHjjsF9rYTFZkjpoS0_HZZHOYQOPbwlyambjFwul8bS3KvZjvw57vbP1YPHo05N6tEXCxzaGDvc35DZkCNt3CyCtsC9W6_C0PkeuOwep33YR41hkHZus9Pg8zGbJ4Mvr_1hQR3MVE6dkGYgGkoqPD8h7sxGOP0ParhYAzr9-DDAgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview&$expand=children&$recurse=true
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","properties":{"tenantId":"b1af47f1-138c-4ed2-8bba-119041b95450","displayName":"testcligetgroup2","details":{"version":10,"updatedTime":"2018-05-30T21:13:33.5354756Z","updatedBy":"823969e2-f8c1-4add-8526-62544e2f96b2","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","name":"testcligetgroup1","displayName":"testcligetgroup1"}},"children":[{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","displayName":"testcligetgroup3","children":[{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","displayName":"testcligetgroup4"}]}]}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['930']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [13344870-94b8-473a-a694-e9d57855e993]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:02 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r1HRXOyZDdJgzlVe-f0geV2lvqWcziiaZHihkDe2f7ZiXlJMF2AKMayBFJp2txptimTnGXQvCIHnks0Ns_YDPq3tc1GT5yJlc69UsG02sZhK2m7FrNCCNaPnf6j4ISO6p0zc5IXlGNslLGuVS8FP224GdpieesHYsyVJJZKyUgaUgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:07 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:18 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rfOIk0NaeNpRGmpMYv7BOcaYJC4gYd6H4rp_DVDlGWGBLGfg53CuCMt4bD-J1QFmFhpm6_Zrt4P1-ixHlxux26qpBAK1pfuyHibRlTjkgUiRfAbBWpNeF9ccRnEa7k9a8bTZfXzpIxC1T9e6-nQFbKyXKW7GCiNZTV5AOTQIRH0ogAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:18 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rBj0lgtTVKpNSemF3o0VHijG-gEG7DahQ5CG2yCNkzO_bGccS7SmacGANcaewnPgC-WRAbiqXER701JgIQqGnaUQjiQ1j_2CswA5rr_UAdbj3XulfcvqygGEIDFMzrXC3VA1KiMxpTKq8V0Pvo_Cxjpl57s2XxmOSfc1EWxS2NDggAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"NotStarted"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['180']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:24 GMT']
-      expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup4?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [a56363f2-1027-4265-98ea-89609b804c12]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1195']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:33 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rSCkrk6by51ksBnbpgKSg3K-OeqTm9rMFGA_BXpEJYKAcNdnlEEnS86oXfWcav0uNCqir6NIt-6NfKA1I-AenmLexC1IES1F1yAijXiDM3ktxzbDxdN67RX-DIrNuzGks7bBWr8ISIn7bGUoVt2RGTtWxIxcCbIF_B57A-_JCjykgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"Succeeded"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['179']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [42844987-e8ca-4314-acc1-a56dc2b06b17]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:15:57 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r_dX1xULZcZPHRbXTAeH5Nr-n6tNgpWzyvv6cpKto6Sz1UQfZVqm2yd5Upoc9dPcKHC4XoMFBBSlk13-kOagXAgCyk4BSyxm9whCENqECkWm0Xk6zQPVD9VlqLpKOhNsH37I49E3ZBb4MMSCZJyPu5i7YXwnI5Pa4COAvitWjA0sgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:11 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rNFe75ZqsoLKE62VunHT-dwG9ZywpvuTr5uLXFlWehcBZDhTiJWYsL0zBeXxXrhVPw2_16YP8U72kt23k8irqmZf-TR-3FKhkVsjQN_QiBvyMgqSHNRy3AQxJhQMP8fnbbda0BOYWHNpjt8xyxEJvdHD4iq00-RDkh_9_EbTlNgMgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:13 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r7G6Q0HIiLayuzhO13p0l4_cKUFjUmwSgkw9sILKCPj0HmyqPFIADsZDfY5vwLMkbBwj4QvLFvYY_ZbfsS8Ytv-B8jpKvlR8vaLbRCXz4LClNkNCJlz8ZQIvfTmbx28TH52kAKqABzZPS9ZpsPmKfaFsCFA3LB5jXiw8Zm5jNjUUgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"NotStarted"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['180']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:17 GMT']
-      expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup3?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [f7d89a3e-282d-48d8-b36f-09c3faaa7d7b]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:27 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r_-T57N6iyswaVQve-v748FASFpb7nwSSB15FKvNQtkeOLUrlogYEqUgUf5xqxk-46QUKFY3o-UoZGVrVqmMNQLzYaoWfyEb6RIa81uSCJ_juv0vYTJyhEDXUommIh0LK-3f-S0rbPL2BUGqEhNIRlJu_Xibp9d-cPpGqekMQNkAgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"Succeeded"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['179']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:29 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [f54315e0-f77d-4d3a-94c1-feb057720355]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:30 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rSvBn11HYrC6XuTZ9dJcPgWMHLt-ubnn8jc193hOtxYD-D61ZMAufzMx8GFR8_lf-reCabAskNAysDQL2J7_aYZmemJf6wdBseMHqzUyELNvvusRZWF3QxYf4j8bDyexrdpZ808QTesa_96FpnAFwiKfBoDMh9_BFB4EJW9NltUIgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1300']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:34 GMT']
+      date: ['Thu, 31 May 2018 18:43:34 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1788,42 +528,9 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:44 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rjWr7WaOKWqqlF0PL5LiiHxhRg-F3EzbME9ja7NumToCJQtBAVAcyETQ78XXVyx_lJrPvCYv06AL1Bae3T3Bd5DAK2xqMGWiwLEUHoSA6bPpebAoqT0mbTLSxmjXih2Sweixdr3F4JbEnKtOTdFK2MlMq6pL9-1ryKu11UaZGBq0gAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
+      CommandName: [account management-group show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
@@ -1831,14 +538,14 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:45 GMT']
+      date: ['Thu, 31 May 2018 18:43:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1848,165 +555,34 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:45 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rq29SDkc4JFX8Pa41KJ00lPOqnTJ5ol8Vk55iYgtH95NubhUFNkgPWJoGYYdsjyMfLJJZb1BmmBOOHWkF2LyqzftIIIaShVc_BbYnnn2XDrQWPeFKcEGmzplsHM2lt7EYIpHGwBkRsoZRL0E8VexTwxEDRXzrVTPH9IrRUDhxdUkgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Cache-Control: [no-cache]
-      CommandName: [account management-group delete]
+      CommandName: [account management-group show]
       Connection: [keep-alive]
-      Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
       accept-language: [en-US]
-    method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview&$expand=children&$recurse=true
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"NotStarted"}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","properties":{"tenantId":"a6d629b5-ddc2-4f88-8bb5-5a68fd6adae2","displayName":"testcligetgroup2","details":{"version":3,"updatedTime":"2018-05-31T18:42:36.6792409Z","updatedBy":"a320fc00-4c5f-4d70-9648-593b5877c7da","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","name":"testcligetgroup1","displayName":"testcligetgroup1"}},"children":[{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","displayName":"testcligetgroup3","children":[{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","displayName":"testcligetgroup4"}]}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['180']
+      content-length: ['929']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:49 GMT']
-      expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup2?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [7d93662e-dfed-4076-ad16-4c64ebc796cc]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:16:59 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rSjfil31KC2YASf4v5e7gPYqizOIbtzakEEpUbEDJLwgybvud4MPiIsy9H6AujjS1tQVnj8fv0THjpU0DQlO5CMiwacahZplISCO6J0bv6_FC-wy7FMk8NygldexZqeVX7SXPl7Gz6OTbgVlBKMHV97sJMiQF2CQnHjvwJgl6pqYgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
-  response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"Succeeded"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['179']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:01 GMT']
+      date: ['Thu, 31 May 2018 18:43:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [2d950698-6846-4a91-8166-9d1b604766c3]
+      request-id: [8297070f-5e94-40d6-bdae-687c674d9e46]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:01 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rj4viHgbjJyUtzkBz1WQ34gpfTJYWi06WCzBuMYUQ5g2qAOly8JCMF-j4oUWEj_lEeAZpC0jtCNFs6vY0EBiCZEAdebpqFv3abTmyMH1IRMo3tORPhh8oEUeMJ9sZcSCJ3l1LOjCvg0OIurRz0DvyYITf9yM01f6bwXxZ0rA2Y5EgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -2024,54 +600,21 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: POST
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:04 GMT']
+      date: ['Thu, 31 May 2018 18:43:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:15 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rO5RTvY0BYPsUdUsFHoZ-baDtYy6GiYKMXbTnQ-HTB07tLwqar3IYkND1_9foeyIjCxpO0EE-lsh7xRSf03CH-LWZGMeB0uB3ve99IukfIa0Jtm7L1LsbqYWaN5fXVDZhLcu9Jx1oRvhJTHPQV1AudeEvOi4QV3SXLTDy2whc4NcgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -2086,52 +629,19 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1300']
+      content-length: ['1342']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:15 GMT']
+      date: ['Thu, 31 May 2018 18:43:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:16 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r-B6SnefRReYTO5VHjW9Tn1u0Fd_tnofFAfvrZvw_W4t8kjWWtnv5QMP1a536tZSASkUA5bLtZ9De46ayO2DeW6_hzrAqd_TUgNPsvI5ALKUAB_RN7PvQGG9gSumFZziILrm3HRA2ETwuVWSda45r6U72dAGcxA4p_0ttxyut3bQgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -2148,59 +658,26 @@ interactions:
           AZURECLI/2.0.34]
       accept-language: [en-US]
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"NotStarted"}'}
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"NotStarted"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:18 GMT']
+      date: ['Thu, 31 May 2018 18:43:57 GMT']
       expires: ['-1']
-      location: ['https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup1?api-version=2018-03-01-preview']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup4?api-version=2018-03-01-preview']
       pragma: [no-cache]
-      request-id: [1983fd86-3ebe-4e06-91ee-019165bf9ab7]
+      request-id: [76b2b6b4-cc0e-4267-abdd-f07347f92b42]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-tenant-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x64]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.6.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fb1af47f1-138c-4ed2-8bba-119041b95450%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/b1af47f1-138c-4ed2-8bba-119041b95450/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:28 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rmRE9KZ-VGrdqWQYfKP2ISpiOHenZtwIkCEsBM5LNxZCfOqj7ich2Bt99Lg6Hv01sWM6t_mPt8ZZTJ_8_TT7AxsWqfdZ0ZDqwur-HljLSAu4UNIbid5nqW42KaeXDOb3LB76eBckbFeZYw-AkI9V8cPMJEp6G8obN6jQsmGGkNL0gAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -2212,23 +689,392 @@ interactions:
           msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
           AZURECLI/2.0.34]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup4?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup4","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup4","status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['179']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      request-id: [d4465f66-5f4f-4a3a-8d84-dc14c1c32b05]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:21 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Cache-Control: [no-cache]
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"NotStarted"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['180']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:21 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup3?api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      request-id: [8e68b20a-6ed1-4754-9de3-fd20d7e28771]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup3?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup3","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup3","status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['179']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      request-id: [c045e9ea-d754-48a1-85bd-0c5ee38ef347]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:34 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:43 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Cache-Control: [no-cache]
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"NotStarted"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['180']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:45 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup2?api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      request-id: [21808a86-5d1f-432b-8969-798822ffd03b]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup2?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup2","status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['179']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      request-id: [8e7e1131-3857-4cf7-a7bb-b2bae6b43483]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:44:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:45:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Cache-Control: [no-cache]
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"NotStarted"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['180']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 31 May 2018 18:45:09 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup1?api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      request-id: [eccd348a-7041-4b10-a293-3c116f196db5]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.726]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [account management-group delete]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-managementgroups/2018-03-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligetgroup1?api-version=2018-03-01-preview
   response:
     body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"/providers/Microsoft.Management/managementGroups","name":"testcligetgroup1","status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['179']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 30 May 2018 21:17:30 GMT']
+      date: ['Thu, 31 May 2018 18:45:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [c07e4c69-67da-45c1-ba6b-c5b8482ef887]
+      request-id: [134f737e-5b7d-4028-9ad0-444f0aaeb483]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.804]
+      x-ba-restapi: [1.0.3.726]
       x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
