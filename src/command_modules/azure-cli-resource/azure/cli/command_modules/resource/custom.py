@@ -693,7 +693,26 @@ def _single_or_collection(obj, default=None):
     return obj
 
 
-# pylint: unused-argument
+def resource_exists(cmd, resource_ids=None, resource_group_name=None,
+                    resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                    resource_name=None, api_version=None):
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+    from azure.cli.core.util import empty_on_404
+
+    def _check_existence(id_dict):
+        try:
+            _get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).get_resource()
+        except Exception as ex:  # pylint: disable=broad-except
+            empty_on_404(ex)
+            return False
+        return True
+    return _single_or_collection([_check_existence(id_dict) for id_dict in parsed_ids])
+
+
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False):
