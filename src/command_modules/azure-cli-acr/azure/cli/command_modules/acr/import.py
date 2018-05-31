@@ -12,10 +12,10 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
 )
 from ._utils import (
     validate_managed_registry,
-    get_registry_from_name
+    get_registry_from_name_or_login_server
 )
 
-SOURCE_REGISTRY_MISING = "Please specify the source container registry name, login server or resource ID: "
+SOURCE_REGISTRY_MISSING = "Please specify the source container registry name, login server or resource ID: "
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 INVALID_SOURCE_IMAGE = "Please specify source image in the format '[registry.azurecr.io/]repository[:tag]' or " \
                        "'[registry.azurecr.io/]repository@digest'"
@@ -48,10 +48,10 @@ def acr_import(cmd,
         if not source_registry:
             from knack.prompting import prompt, NoTTYException
             try:
-                source_registry = prompt(SOURCE_REGISTRY_MISING)
+                source_registry = prompt(SOURCE_REGISTRY_MISSING)
             except NoTTYException:
                 raise CLIError(NO_TTY_ERROR)
-        registry_from_source = get_registry_from_name(cmd.cli_ctx, source_registry, source_registry)
+        registry_from_source = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
         if registry_from_source:
             source_registry = registry_from_source.id
     else:
@@ -59,16 +59,16 @@ def acr_import(cmd,
         source_registry_login_server = source[:slash]
         if not source_image or not source_registry_login_server:
             raise CLIError(INVALID_SOURCE_IMAGE)
-        registry = get_registry_from_name(cmd.cli_ctx, source_registry_login_server)
+        registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
         if source_registry:
-            registry_from_source = get_registry_from_name(cmd.cli_ctx, source_registry, source_registry)
-            if registry_from_source:
-                source_registry = registry_from_source.id
-        if registry:
-            if source_registry and registry.id != source_registry:
+            if not registry or \
+            source_registry != registry.id and \
+            source_registry != registry.name and \
+            source_registry != registry.login_server:
                 raise CLIError(REGISTRY_MISMATCH)
-            elif not source_registry:
-                source_registry = registry.id
+            source_registry = registry.id
+        elif registry:
+            source_registry = registry.id
 
     if not is_valid_resource_id(source_registry):
         from knack.prompting import prompt, NoTTYException

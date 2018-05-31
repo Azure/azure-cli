@@ -94,7 +94,7 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     return client.get(resource_group_name, registry_name), resource_group_name
 
 
-def get_registry_from_name(cli_ctx, login_server, registry_name=None):
+def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=None):
     """Returns a Registry object for the specified name.
     :param str name: either the registry name or the login server of the registry.
     """
@@ -111,7 +111,7 @@ def get_registry_from_name(cli_ctx, login_server, registry_name=None):
     if len(elements) == 1:
         return elements[0]
     elif len(elements) > 1:
-        logger.warning("More than one registry is found by %s.", login_server)
+        logger.warning("More than one registries were found by %s.", login_server)
     return None
 
 
