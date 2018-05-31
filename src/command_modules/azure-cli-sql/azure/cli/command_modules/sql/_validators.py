@@ -130,7 +130,7 @@ def validate_subnet(cmd, namespace):
 ###############################################
 
 
-def validate_managed_instance_storage_size(cmd, namespace):
+def validate_managed_instance_storage_size(namespace):
     # Validate if entered storage size value is an increment of 32 if provided
     if (not namespace.storage_size_in_gb) or (namespace.storage_size_in_gb and namespace.storage_size_in_gb % 32 == 0):
         pass

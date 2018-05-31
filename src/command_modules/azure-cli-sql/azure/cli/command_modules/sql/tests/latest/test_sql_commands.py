@@ -2679,7 +2679,6 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('collation', collation),
                            JMESPathCheck('status', 'Online')]).get_output_in_json()
 
-
         time.sleep(900)  # Sleeping 15 minutes seconds should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command

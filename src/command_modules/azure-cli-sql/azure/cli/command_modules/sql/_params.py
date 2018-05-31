@@ -1115,7 +1115,8 @@ def load_arguments(self, _):
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
-                   'for use with key management services like Azure KeyVault. If identity is already assigned - do nothing.')
+                   'for use with key management services like Azure KeyVault. '
+                   'If identity is already assigned - do nothing.')
 
     ###############################################
     #                sql managed db               #
