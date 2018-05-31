@@ -1133,10 +1133,14 @@ def cli_managementgroups_group_create(
         parent=None):
     _register_rp(cmd.cli_ctx)
     parent_id = _get_parent_id_from_parent(parent)
-    from azure.mgmt.managementgroups.models import (CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
+    from azure.mgmt.managementgroups.models import (
+        CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
     create_parent_grp_info = CreateParentGroupInfo(id=parent_id)
     create_mgmt_grp_details = CreateManagementGroupDetails(parent=create_parent_grp_info)
-    create_mgmt_grp_request = CreateManagementGroupRequest(name=group_name, display_name=display_name, details=create_mgmt_grp_details)
+    create_mgmt_grp_request = CreateManagementGroupRequest(
+        name=group_name,
+        display_name=display_name,
+        details=create_mgmt_grp_details)
     return client.create_or_update(group_name, create_mgmt_grp_request)
 
 
