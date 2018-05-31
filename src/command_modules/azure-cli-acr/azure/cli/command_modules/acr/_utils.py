@@ -112,6 +112,7 @@ def get_registry_from_name(cli_ctx, login_server, registry_name=None):
         return elements[0]
     elif len(elements) > 1:
         logger.warning("More than one registry is found by %s.", login_server)
+        return None
 
 
 def arm_deploy_template_new_storage(cli_ctx,
