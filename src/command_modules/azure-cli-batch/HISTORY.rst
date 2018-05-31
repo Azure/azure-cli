@@ -5,6 +5,7 @@ Release History
 
 3.2.3
 +++++
+* Remove azure-batch-extensions dependency.
 * Fixed bug in Pool list table formatting: issue #4378.
 
 3.2.2
