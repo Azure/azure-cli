@@ -340,10 +340,11 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None, sk
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
-    event_hub_dic['events'] = EventHubProperties(1, partition_count)
-    properties = IotHubProperties(None, None, event_hub_dic)
-    hub_description = IotHubDescription(location, client.iot_hub_resource.config.subscription_id, resource_group_name,
-                                        sku, None, None, properties)
+    event_hub_dic['events'] = EventHubProperties(retention_time_in_days=1, partition_count=partition_count)
+    properties = IotHubProperties(event_hub_endpoints=event_hub_dic)
+    hub_description = IotHubDescription(location=location,
+                                        sku=sku,
+                                        properties=properties)
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
 
 
@@ -376,7 +377,7 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
+def iot_hub_show_connection_string(client, hub_name, resource_group_name=None, policy_name='iothubowner',
                                    key_type=KeyType.primary.value):
     if hub_name is None:
         hubs = iot_hub_list(client, resource_group_name)
@@ -384,7 +385,7 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
             raise CLIError("No IoT Hub found.")
 
         def conn_str_getter(h):
-            return _get_single_hub_connection_string(client, h.name, h.resourcegroup, policy_name, key_type)
+            return _get_single_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
@@ -438,23 +439,23 @@ def iot_hub_policy_create(client, hub_name, policy_name, permissions, resource_g
     rights = _convert_perms_to_access_rights(permissions)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     policies = []
-    policies.extend(iot_hub_policy_list(client, hub_name, hub.resourcegroup))
+    policies.extend(iot_hub_policy_list(client, hub_name, hub.additional_properties['resourcegroup']))
     if _is_policy_existed(policies, policy_name):
         raise CLIError("Policy {0} already existed.".format(policy_name))
-    policies.append(SharedAccessSignatureAuthorizationRule(policy_name, rights))
+    policies.append(SharedAccessSignatureAuthorizationRule(key_name=policy_name, rights=rights))
     hub.properties.authorization_policies = policies
-    return client.iot_hub_resource.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=None):
     import copy
     hub = iot_hub_get(client, hub_name, resource_group_name)
-    policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
+    policies = iot_hub_policy_list(client, hub_name, hub.additional_properties['resourcegroup'])
     if not _is_policy_existed(copy.deepcopy(policies), policy_name):
         raise CLIError("Policy {0} not found.".format(policy_name))
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     hub.properties.authorization_policies = updated_policies
-    return client.iot_hub_resource.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def _is_policy_existed(policies, policy_name):
@@ -655,7 +656,7 @@ def _ensure_location(cli_ctx, resource_group_name, location):
 
 def _ensure_resource_group_name(client, resource_group_name, hub_name):
     if resource_group_name is None:
-        return _get_iot_hub_by_name(client, hub_name).resourcegroup
+        return _get_iot_hub_by_name(client, hub_name).additional_properties['resourcegroup']
     return resource_group_name
 
 

@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.21
+++++++
+
+* Adds support for creating Basic Tier IoT Hubs.
+* Updates to Azure SDK 0.5.0
+
 0.1.20
 ++++++
 
