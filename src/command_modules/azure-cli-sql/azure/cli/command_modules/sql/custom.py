@@ -85,10 +85,14 @@ def _get_default_capability(capabilities):
     '''
     Gets the first capability in the collection that has 'default' status.
     If none have 'default' status, gets the first capability that has 'available' status.
+    If still none are available, just gets the first one, which (by elimination) must
+    be unavailable, which at least ensures that the user does not get a confusing StopIteration
+    error.
     '''
 
     return (next((c for c in capabilities if c.status == CapabilityStatus.default), None) or
-            next(c for c in capabilities if c.status == CapabilityStatus.available))
+            next((c for c in capabilities if c.status == CapabilityStatus.available), None) or
+            next((c for c in capabilities), None))
 
 
 def is_available(status):
