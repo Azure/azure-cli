@@ -426,3 +426,85 @@ helps['sql server vnet-rule create'] = """
         - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the SQL server.
           text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
     """
+helps['sql mi'] = """
+    type: group
+    short-summary: Manage SQL managed instances.
+    """
+helps['sql mi create'] = """
+    type: command
+    short-summary: Create a managed instance.
+    examples:
+        - name: Create a managed instance with specified parameters and with identity
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen4
+        - name: Create a managed instance with minimal set of parameters
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
+    """
+helps['sql mi list'] = """
+    type: command
+    short-summary: List available managed instances.
+    examples:
+        - name: List all managed instances in the current subscription.
+          text: az sql mi list
+        - name: List all managed instances in a resource group.
+          text: az sql mi list -g mygroup
+    """
+helps['sql mi show'] = """
+    type: command
+    short-summary: Get the details for a managed instance.
+    examples:
+        - name: Get the details for a managed instance
+          text: az sql mi show -g mygroup -n myinstance
+    """
+helps['sql mi update'] = """
+    type: command
+    short-summary: Update a managed instance.
+    examples:
+        - name: Updates a mi with specified parameters and with identity
+          text: az sql mi update -g mygroup -n myinstance -i -p mypassword --license-type mylicensetype --capacity vcorecapacity --storage storagesize
+    """
+helps['sql mi delete'] = """
+    type: command
+    short-summary: Delete a managed instance.
+    examples:
+        - name: Delete a managed instance
+          text: az sql mi delete -g mygroup -n myinstance --yes
+    """
+helps['sql midb'] = """
+    type: group
+    short-summary: Manage SQL managed instance databases.
+    """
+helps['sql midb create'] = """
+    type: command
+    short-summary: Create a managed database.
+    examples:
+        - name: Create a managed database with specified collation
+          text: az sql midb create -g mygroup --mi myinstance -n mymanageddb --collation Latin1_General_100_CS_AS_SC
+    """
+helps['sql midb list'] = """
+    type: command
+    short-summary: List maanged databases on a managed instance.
+    examples:
+        - name: List managed databases on a managed instance
+          text: az sql midb list -g mygroup --mi myinstance
+    """
+helps['sql midb show'] = """
+    type: command
+    short-summary: Get the details for a managed database.
+    examples:
+        - name: Get the details for a managed database
+          text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
+    """
+helps['sql midb restore'] = """
+    type: command
+    short-summary: Restore a managed database.
+    examples:
+        - name: Restore a managed database using Point in time restore
+          text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
+    """
+helps['sql midb delete'] = """
+    type: command
+    short-summary: Delete a managed database.
+    examples:
+        - name: Delete a managed database
+          text: az sql midb delete -g mygroup --mi myinstance -n mymanageddb --yes
+    """

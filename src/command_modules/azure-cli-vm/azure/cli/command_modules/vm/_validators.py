@@ -559,6 +559,61 @@ def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
 
 
+def _validate_vm_vmss_accelerated_networking(namespace):
+    if namespace.accelerated_networking is None:
+        size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
+        size = size.lower()
+
+        # to refresh the list, run 'az vm create --accelerated-networking --size Standard_DS1_v2' and
+        # get it from the error
+        aval_sizes = ['Standard_D3_v2', 'Standard_D12_v2', 'Standard_D3_v2_Promo', 'Standard_D12_v2_Promo',
+                      'Standard_DS3_v2', 'Standard_DS12_v2', 'Standard_DS13-4_v2', 'Standard_DS14-4_v2',
+                      'Standard_DS3_v2_Promo', 'Standard_DS12_v2_Promo', 'Standard_DS13-4_v2_Promo',
+                      'Standard_DS14-4_v2_Promo', 'Standard_F4', 'Standard_F4s', 'Standard_D8_v3', 'Standard_D8s_v3',
+                      'Standard_D32-8s_v3', 'Standard_E8_v3', 'Standard_E8s_v3', 'Standard_D3_v2_ABC',
+                      'Standard_D12_v2_ABC', 'Standard_F4_ABC', 'Standard_F8s_v2', 'Standard_D4_v2',
+                      'Standard_D13_v2', 'Standard_D4_v2_Promo', 'Standard_D13_v2_Promo', 'Standard_DS4_v2',
+                      'Standard_DS13_v2', 'Standard_DS14-8_v2', 'Standard_DS4_v2_Promo', 'Standard_DS13_v2_Promo',
+                      'Standard_DS14-8_v2_Promo', 'Standard_F8', 'Standard_F8s', 'Standard_M64-16ms',
+                      'Standard_D16_v3', 'Standard_D16s_v3', 'Standard_D32-16s_v3', 'Standard_D64-16s_v3',
+                      'Standard_E16_v3', 'Standard_E16s_v3', 'Standard_E32-16s_v3', 'Standard_D4_v2_ABC',
+                      'Standard_D13_v2_ABC', 'Standard_F8_ABC', 'Standard_F16s_v2', 'Standard_D5_v2',
+                      'Standard_D14_v2', 'Standard_D5_v2_Promo', 'Standard_D14_v2_Promo', 'Standard_DS5_v2',
+                      'Standard_DS14_v2', 'Standard_DS5_v2_Promo', 'Standard_DS14_v2_Promo', 'Standard_F16',
+                      'Standard_F16s', 'Standard_M64-32ms', 'Standard_M128-32ms', 'Standard_D32_v3',
+                      'Standard_D32s_v3', 'Standard_D64-32s_v3', 'Standard_E32_v3', 'Standard_E32s_v3',
+                      'Standard_E32-8s_v3', 'Standard_E32-16_v3', 'Standard_D5_v2_ABC', 'Standard_D14_v2_ABC',
+                      'Standard_F16_ABC', 'Standard_F32s_v2', 'Standard_D15_v2', 'Standard_D15_v2_Promo',
+                      'Standard_D15_v2_Nested', 'Standard_DS15_v2', 'Standard_DS15_v2_Promo',
+                      'Standard_DS15_v2_Nested', 'Standard_D40_v3', 'Standard_D40s_v3', 'Standard_D15_v2_ABC',
+                      'Standard_M64ms', 'Standard_M64s', 'Standard_M128-64ms', 'Standard_D64_v3', 'Standard_D64s_v3',
+                      'Standard_E64_v3', 'Standard_E64s_v3', 'Standard_E64-16s_v3', 'Standard_E64-32s_v3',
+                      'Standard_F64s_v2', 'Standard_F72s_v2', 'Standard_M128s', 'Standard_M128ms', 'Standard_L8s_v2',
+                      'Standard_L16s_v2', 'Standard_L32s_v2', 'Standard_L64s_v2', 'Standard_L96s_v2', 'SQLGL',
+                      'SQLGLCore', 'Standard_D4_v3', 'Standard_D4s_v3', 'Standard_D2_v2', 'Standard_DS2_v2',
+                      'Standard_E4_v3', 'Standard_E4s_v3', 'Standard_F2', 'Standard_F2s', 'Standard_F4s_v2',
+                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C']
+        aval_sizes = [x.lower() for x in aval_sizes]
+        if size not in aval_sizes:
+            return
+
+        # VMs need to be a supported image in the marketplace
+        # Ubuntu 16.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
+        # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
+        publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
+        if not publisher:
+            return
+        publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
+        distros = [('canonical', 'UbuntuServer', '^16.04'), ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
+                   ('openlogic', 'centos', '^7.4'), ('coreos', 'coreos', None), ('credativ', 'debian', '-backports'),
+                   ('oracle', 'oracle-linux', '^7.4'), ('MicrosoftWindowsServer', 'WindowsServer', '^2016'),
+                   ('MicrosoftWindowsServer', 'WindowsServer', '^2012-R2')]
+        import re
+        for p, o, s in distros:
+            if p.lower() == publisher and (o is None or o.lower() == offer) and (s is None or re.match(s, sku, re.I)):
+                namespace.accelerated_networking = True
+
+
 def _validate_vmss_create_subnet(namespace):
     if namespace.vnet_type == 'new':
         if namespace.subnet_address_prefix is None:
@@ -889,6 +944,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
+    _validate_vm_vmss_accelerated_networking(namespace)
     _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1065,6 +1121,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
+    _validate_vm_vmss_accelerated_networking(namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
@@ -1197,4 +1254,5 @@ def process_remove_identity_namespace(cmd, namespace):
 # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
 def process_msi_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 # endregion
