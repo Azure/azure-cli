@@ -62,9 +62,9 @@ def acr_import(cmd,
         registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
         if registry:
             if source_registry and \
-                source_registry != registry.id and \
-                source_registry != registry.name and \
-                source_registry != registry.login_server:
+               source_registry.lower() != registry.id.lower() and \
+               source_registry.lower() != registry.name.lower() and \
+               source_registry.lower() != registry.login_server.lower():
                 raise CLIError(REGISTRY_MISMATCH)
             source_registry = registry.id
 
