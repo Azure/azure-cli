@@ -2519,9 +2519,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_pilot/providers/Microsoft.Network/virtualNetworks/cl_pilot/subnets/CLean'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
         else:
-            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_pilot/providers/Microsoft.Network/virtualNetworks/cl_pilot/subnets/CLean'
+            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CooL'
 
         license_type = 'LicenseIncluded'
         loc = 'westcentralus'
@@ -2529,7 +2529,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         storage_size_in_gb = '64'
         edition = 'GeneralPurpose'
         family = 'Gen4'
-        resource_group_1 = "cl_pilot"
+        resource_group_1 = "cl_one"
 
         user = admin_login
 
@@ -2639,9 +2639,9 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_pilot/providers/Microsoft.Network/virtualNetworks/cl_pilot/subnets/CLean'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
         else:
-            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_pilot/providers/Microsoft.Network/virtualNetworks/cl_pilot/subnets/CLean'
+            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CooL'
 
         license_type = 'LicenseIncluded'
         loc = 'westcentralus'
@@ -2649,7 +2649,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         storage_size_in_gb = '64'
         edition = 'GeneralPurpose'
         family = 'Gen4'
-        resource_group_1 = "cl_pilot"
+        resource_group_1 = "cl_one"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 
@@ -2679,7 +2679,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('collation', collation),
                            JMESPathCheck('status', 'Online')]).get_output_in_json()
 
-        time.sleep(900)  # Sleeping 15 minutes seconds should be enough for the restore to be possible (Skipped under playback mode)
+        time.sleep(300)  # Sleeping 5 minutes should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command
         db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
@@ -2708,7 +2708,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         self.cmd('sql midb show --id {}'
                  .format(db1['id']),
                  checks=[
-                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('name', database_name_restored),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('collation', collation),
