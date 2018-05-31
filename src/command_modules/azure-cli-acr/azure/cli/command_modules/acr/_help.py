@@ -436,8 +436,8 @@ helps['acr import'] = """
     examples:
         - name: Import an image to the target registry and inherits repository:tag from source.
           text: >
-            az acr import -n MyRegistry --source SourceRegistry.azurecr.io/SourceRepository:SourceTag
+            az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
         - name: Import an image from a registry in a different subscription.
           text: >
-            az acr import -n MyRegistry --source SourceRepository:SourceTag -t TargetRepository:TargetTag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
+            az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
 """

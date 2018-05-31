@@ -16,8 +16,7 @@ from ._utils import (
 
 SOURCE_REGISTRY_MISING = "Please specify the source container registry: "
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
-INVALID_SOURCE_IMAGE = "Please specify source image in the form of " \
-                        "'[registry.azurecr.io/]repository:tag' or 'repository@sha'."
+INVALID_SOURCE_IMAGE = "Please specify source image in the form of '[registry.azurecr.io/]repository:tag'."
 SOURCE_REGISTRY_NOT_FOUND = "Source registry cannot be found in the current subscription. " \
                             "Please specify the full resource ID for it: "
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
@@ -50,11 +49,13 @@ def acr_import(cmd,
                 source_registry = prompt(SOURCE_REGISTRY_MISING)
             except NoTTYException:
                 raise CLIError(NO_TTY_ERROR)
-        registry_by_registry_name = get_registry_from_name(cmd.cli_ctx, source_registry)
-        registry_by_login_server = get_registry_from_name(cmd.cli_ctx, source_registry)
-        if registry_by_registry_name or registry_by_login_server:
-            source_registry = registry_by_registry_name.id if registry_by_registry_name else registry_by_login_server.id
+        registry_from_name = get_registry_from_name(cmd.cli_ctx, source_registry)
+        if registry_from_name:
+            source_registry = registry_from_name.id
     else:
+        source_image = source[slash + 1:]
+        if not source_image:
+            raise CLIError(INVALID_SOURCE_IMAGE)
         source_registry_login_server = source[:slash]
         if not source_registry_login_server:
             raise CLIError(INVALID_SOURCE_IMAGE)
@@ -70,10 +71,6 @@ def acr_import(cmd,
                 source_registry = prompt(SOURCE_REGISTRY_NOT_FOUND)
             except NoTTYException:
                 raise CLIError(NO_TTY_ERROR)
-
-        source_image = source[slash + 1:]
-        if not source_image:
-            raise CLIError(INVALID_SOURCE_IMAGE)
 
     image_source = ImportSource(resource_id=source_registry, source_image=source_image)
 
