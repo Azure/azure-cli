@@ -432,7 +432,7 @@ helps['acr build'] = """
 
 helps['acr import'] = """
     type: command
-    short-summary: Imports to the container registry from source.
+    short-summary: Imports an image to the container registry from source.
     examples:
         - name: Import an image to the target registry and inherits sourcerepository:sourcetag from source.
           text: >
