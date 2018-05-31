@@ -100,7 +100,7 @@ def _get_default_server_version(location_capabilities):
         return _get_default_capability(server_versions)
     except StopIteration:
         # No default or available version found.
-        # Try behavor from azure-cli-sql 2.0.2 - 2.0.25: get version 12.0
+        # Fall back to behaviour from azure-cli-sql 2.0.25 and earlier: get version 12.0
         return next(sv for sv in server_versions if sv.name == "12.0")
 
 
