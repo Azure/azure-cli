@@ -6,6 +6,9 @@ Release History
 2.0.34
 ++++++
 * Minor fixes.
+* Improve telemetry upload reliability
+  1. Remove retry. Once failed stop uploading.
+  2. Update the process start configuration to prevent upload process from blocking the CLI process.
 
 2.0.33
 ++++++
