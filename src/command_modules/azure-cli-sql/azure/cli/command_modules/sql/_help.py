@@ -435,7 +435,9 @@ helps['sql mi create'] = """
     short-summary: Create a managed instance.
     examples:
         - name: Create a managed instance with specified parameters and with identity
-          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type mylicensetype --subnet mysubnetid --capacity vcorecapacity --storage storagesize --edition editionname --family familyname
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen4
+        - name: Create a managed instance with minimal set of parameters
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
     """
 helps['sql mi list'] = """
     type: command
@@ -469,7 +471,7 @@ helps['sql mi delete'] = """
     """
 helps['sql midb'] = """
     type: group
-    short-summary: Manage SQL managed databases.
+    short-summary: Manage SQL managed instance databases.
     """
 helps['sql midb create'] = """
     type: command
@@ -497,7 +499,7 @@ helps['sql midb restore'] = """
     short-summary: Restore a managed database.
     examples:
         - name: Restore a managed database using Point in time restore
-          text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --target-db targetmidb --time "2018-05-20T05:34:22"
+          text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
     """
 helps['sql midb delete'] = """
     type: command

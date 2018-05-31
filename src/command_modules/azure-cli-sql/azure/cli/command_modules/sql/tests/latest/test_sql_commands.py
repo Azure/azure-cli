@@ -2683,7 +2683,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(900)  # Sleeping 15 minutes seconds should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command
-        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --target-db {} --time {}'
+        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored, datetime.utcnow().isoformat()),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),

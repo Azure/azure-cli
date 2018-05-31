@@ -2017,6 +2017,7 @@ def managed_db_restore(
         resource_group_name,
         target_managed_database_name,
         target_managed_instance_name=None,
+        target_resource_group_name=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2026,6 +2027,9 @@ def managed_db_restore(
 
     if not target_managed_instance_name:
         target_managed_instance_name = managed_instance_name
+
+    if not target_resource_group_name:
+        target_resource_group_name = resource_group_name
 
     kwargs['location'] = _get_managed_instance_location(
         cmd.cli_ctx,
@@ -2042,5 +2046,5 @@ def managed_db_restore(
     return client.create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
-        resource_group_name=resource_group_name,
+        resource_group_name=target_resource_group_name,
         parameters=kwargs)

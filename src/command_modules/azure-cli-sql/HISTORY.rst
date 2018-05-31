@@ -7,18 +7,18 @@ Release History
 ++++++
 * Added new Managed instance and Managed database CRUD commands.
     * Managed instance commands:
-        * az sql managed instance create
-        * az sql managed instance show
-        * az sql managed instance list
-        * az sql managed instance update
-        * az sql managed instance delete
+        * az sql mi create
+        * az sql mi show
+        * az sql mi list
+        * az sql mi update
+        * az sql mi delete
 
     * Managed database commands:
-        * az sql managed db create
-        * az sql managed db show
-        * az sql managed db list
-        * az sql managed db restore
-        * az sql managed db delete
+        * az sql midb create
+        * az sql midb show
+        * az sql midb list
+        * az sql midb restore
+        * az sql midb delete
 
 2.0.26
 ++++++

@@ -1152,15 +1152,20 @@ def load_arguments(self, _):
             ])
 
         c.argument('target_managed_database_name',
-                   options_list=['--target-db'],
+                   options_list=['--dest-name'],
                    required=True,
                    help='Name of the managed database that will be created as the restore destination.')
 
         c.argument('target_managed_instance_name',
-                   options_list=['--target-mi'],
+                   options_list=['--dest-mi'],
                    help='Name of the managed instance to restore managed database to. '
-                   'This can be same managed instance, or another managed instance withing same resource group. '
+                   'This can be same managed instance, or another managed instance on same subscription. '
                    'When not specified it defaults to source managed instance.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--dest-resource-group'],
+                   help='Name of the resource group of the managed instance to restore managed database to. '
+                   'When not specified it defaults to source resource group.')
 
         restore_point_arg_group = 'Restore Point'
 
