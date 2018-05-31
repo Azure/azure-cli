@@ -324,6 +324,27 @@ helps['resource show'] = """
             az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
 """
 
+helps['resource exists'] = """
+    type: command
+    short-summary: Check the existence of a resource.
+    examples:
+        - name: Check existence of a virtual machine resource named 'MyVm'.
+          text: >
+            az vm exists -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: Check existence of a web app using a resource identifier.
+          text: >
+            az resource exists --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        - name: Check existence of a subnet.
+          text: >
+            az resource exists -g MyResourceGroup -n MySubnet --namespace Microsoft.Network --parent virtualnetworks/MyVnet --resource-type subnets
+        - name: Check existence of a subnet using a resource identifier.
+          text: >
+            az resource exists --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+        - name: Check existence of an application gateway path rule.
+          text: >
+            az resource exists -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
+"""
+
 helps['resource delete'] = """
     type: command
     short-summary: Delete a resource.
