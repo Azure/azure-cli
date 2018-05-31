@@ -14,10 +14,10 @@ from ._utils import (
     get_registry_from_name
 )
 
-SOURCE_REGISTRY_MISING = "Please specify the source container registry name or login server: "
+SOURCE_REGISTRY_MISING = "Please specify the source container registry name, login server or resource ID: "
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 INVALID_SOURCE_IMAGE = "Please specify source image in the form of '[registry.azurecr.io/]repository:tag' or " \
-"'[registry.azurecr.io/]repository@sha'"
+                       "'[registry.azurecr.io/]repository@digest'"
 SOURCE_REGISTRY_NOT_FOUND = "Source registry could not be found in the current subscription. " \
                             "Please specify the full resource ID for it: "
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
@@ -50,9 +50,7 @@ def acr_import(cmd,
                 source_registry = prompt(SOURCE_REGISTRY_MISING)
             except NoTTYException:
                 raise CLIError(NO_TTY_ERROR)
-        registry_from_name = get_registry_from_name(cmd.cli_ctx, source_registry)
-        if registry_from_name:
-            source_registry = registry_from_name.id
+        registry_from_name = get_registry_from_name(cmd.cli_ctx, source_registry, source_registry)
     else:
         source_image = source[slash + 1:]
         if not source_image:
@@ -60,18 +58,18 @@ def acr_import(cmd,
         source_registry_login_server = source[:slash]
         if not source_registry_login_server:
             raise CLIError(INVALID_SOURCE_IMAGE)
-        registry_by_login_server = get_registry_from_name(cmd.cli_ctx, source_registry_login_server)
+        registry_from_name = get_registry_from_name(cmd.cli_ctx, source_registry_login_server)
 
-        if registry_by_login_server:
-            if source_registry and registry_by_login_server.id != source_registry:
-                raise CLIError(REGISTRY_MISMATCH)
-            source_registry = registry_by_login_server.id
-        elif not source_registry:
-            from knack.prompting import prompt, NoTTYException
-            try:
-                source_registry = prompt(SOURCE_REGISTRY_NOT_FOUND)
-            except NoTTYException:
-                raise CLIError(NO_TTY_ERROR)
+    if registry_from_name:
+        if source_registry and registry_from_name.id != source_registry:
+            raise CLIError(REGISTRY_MISMATCH)
+        source_registry = registry_from_name.id
+    elif not source_registry:
+        from knack.prompting import prompt, NoTTYException
+        try:
+            source_registry = prompt(SOURCE_REGISTRY_NOT_FOUND)
+        except NoTTYException:
+            raise CLIError(NO_TTY_ERROR)
 
     image_source = ImportSource(resource_id=source_registry, source_image=source_image)
 

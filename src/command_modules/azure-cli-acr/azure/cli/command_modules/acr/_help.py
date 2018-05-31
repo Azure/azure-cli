@@ -434,7 +434,7 @@ helps['acr import'] = """
     type: command
     short-summary: Imports to the container registry from source.
     examples:
-        - name: Import an image to the target registry and inherits repository:tag from source.
+        - name: Import an image to the target registry and inherits sourcerepository:sourcetag from source.
           text: >
             az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
         - name: Import an image from a registry in a different subscription.

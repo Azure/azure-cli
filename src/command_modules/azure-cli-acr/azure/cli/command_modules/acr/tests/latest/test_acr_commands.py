@@ -425,7 +425,7 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Standard',
             'resource_id': '/subscriptions/a7ee80a4-3d5e-45c2-9378-36e8d98f4d13/resourceGroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
-            'source_image_diff_sub': 'sourceregistrydiffsub.azurecr.io/builder:latest',
+            'source_image_diff_sub': 'builder:latest',
             'source_image_same_sub': 'sourceregistrysamesub.azurecr.io/builder:latest',
             'source_image_same_registry': '{}.azurecr.io/builder:latest'.format(registry_name),
             'source_image_by_digest': 'sourceregistrysamesub.azurecr.io/builder@sha256:bc3842ba36fcc182317c07a8643daa4a8e4e7aed45958b1f7e2a2b30c2f5a64f',
