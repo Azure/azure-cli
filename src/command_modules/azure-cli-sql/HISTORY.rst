@@ -19,6 +19,7 @@ Release History
         * az sql midb list
         * az sql midb restore
         * az sql midb delete
+* Fixed confusing error when running `az sql db list-editions` for a location that is not available to your subscription.
 
 2.0.26
 ++++++
