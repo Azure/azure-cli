@@ -114,3 +114,11 @@ def get_sql_subscription_usages_operations(cli_ctx, _):
 
 def get_sql_virtual_network_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).virtual_network_rules
+
+
+def get_sql_managed_instances_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instances
+
+
+def get_sql_managed_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_databases
