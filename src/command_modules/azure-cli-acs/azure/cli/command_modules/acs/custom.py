@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import base64
 import binascii
 import datetime
 import errno
@@ -47,7 +46,6 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
-from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
@@ -55,6 +53,7 @@ from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
+from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -1328,9 +1327,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg.location  # pylint:disable=no-member
 
     ssh_config = ContainerServiceSshConfiguration(
-        [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
-    agent_pool_profile = ContainerServiceAgentPoolProfile(
-        'nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
+    agent_pool_profile = ManagedClusterAgentPoolProfile(
+        name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         dns_prefix=dns_name_prefix,
@@ -1340,7 +1339,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
-    linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
+    linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
     principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                   service_principal=service_principal, client_secret=client_secret,
                                                   subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
@@ -1380,14 +1379,13 @@ def aks_get_versions(cmd, client, location):
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    access_profile = client.get_access_profiles(
+    access_profile = client.get_access_profile(
         resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
 
     if not access_profile:
         raise CLIError("No Kubernetes access profile found.")
     else:
-        encoded_kubeconfig = access_profile.kube_config
-        kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
+        kubeconfig = access_profile.kube_config.decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
 
 
