@@ -478,24 +478,52 @@ def load_arguments(self, _):
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
     with self.argument_context('image gallery') as c:
-        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-        c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], id_part='child_name_1', help='gallery image name')
-        c.argument('gallery_image_version_name', options_list=['--gallery-image-version-name', '-e'], id_part='child_name_2', help='gallery image version')
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], help='gallery image name')
+        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
+
+    for scope in ['image gallery show', 'image gallery delete', 'image gallery show-image', 'image gallery delete-image', 'image gallery show-image-version', 'image gallery delete-image-version']:
+        with self.argument_context(scope) as c:
+            c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+            c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], id_part='child_name_1', help='gallery image name')
+            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
+            c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
+
+    with self.argument_context('image gallery create-image') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('disallowed_disk_types', nargs='*') # TODO: figure out what does this mean?
-        c.argument('regions', nargs='*')
         c.argument('os_state', arg_type=get_enum_type(['Generalized', 'Specialized']))
 
-        c.argument('minimum_cpu_core', type=int, arg_group='Recommendation')
-        c.argument('maximum_cpu_core', type=int, arg_group='Recommendation')
-        c.argument('minimum_memory', type=int, arg_group='Recommendation')
-        c.argument('maximum_memory', type=int, arg_group='Recommendation')
+        c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
+        c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
+        c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory')
+        c.argument('maximum_memory', type=int, arg_group='Recommendation', help='maximum memory')
 
         c.argument('plan_publisher', help='plan publisher', arg_group='Purchase plan')
         c.argument('plan_name', help='plan name', arg_group='Purchase plan')
         c.argument('plan_product', help='plan product', arg_group='Purchase plan')
 
-        c.argument('exclude_from_latest', arg_group=get_three_state_flag())
+        c.argument('description')
+        c.argument('eula', help='The Eula agreement for the gallery image')
+        c.argument('privacy_statement_uri', help='The privacy statement uri')
+        c.argument('release_note_uri', help='The release note uri')
+        c.argument('end_of_life_date', help='the end of life date')
+
+    with self.argument_context('image gallery create') as c:
+        c.argument('description', help='the description of the gallery')
+    with self.argument_context('image gallery create-image') as c:
+        c.argument('description', help='the description of the gallery image') 
+    with self.argument_context('image gallery create-image-version') as c:
+        c.argument('description', help='the description of the gallery image') 
+        c.argument('managed_image', help='the name or resource id of a managed image')
+        c.argument('version', help='image version')
+        c.argument('latest', arg_type=get_three_state_flag(),
+                   help="people deploying VMs with 'latest' as version will use this version")
+        c.argument('regions', nargs='*', help='space separated regions the image version will be published to')
+        c.argument('end_of_life_date', help='the end of life date')
+
+    with self.argument_context('image gallery show-image-version') as c:
+        c.argument('expand', help="The expand expression to apply on the operation. Possible values include: 'ReplicationStatus'")
     # endregion

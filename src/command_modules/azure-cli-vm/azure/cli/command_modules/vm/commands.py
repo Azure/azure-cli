@@ -356,6 +356,11 @@ def load_command_table(self, _):
         g.command('list-image-versions', 'list_gallery_image_versions_by_gallery_image')
         g.custom_command('create-image-version', 'upload_image')
 
+    # HACK, never release it!
+    from azure.cli.core.profiles import ResourceType
+    m = self.get_models('GalleryImageVersionPublishingProfile', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions')
+    m._attribute_map['end_of_life_date']['type'] = 'str'
+    m._attribute_map['published_date']['type'] = 'str'
 
 
 

@@ -2453,22 +2453,27 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image_id, version, location=None, regions=None, exclude_from_latest=None,
-                 published_date=None, end_of_life_date=None):
+def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version, location=None, regions=None, latest=None,
+                 end_of_life_date=None):
+    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion = cmd.get_models(
          'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     regions = regions or [location]  # can we create a version at a differernt location?
-    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, published_date=published_date,
-                                                   end_of_life_date=end_of_life_date)
-    profile.source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image_id), region=regions)
+    GalleryImageVersionPublishingProfile._attribute_map['end_of_life_date']['type'] = 'str'
+    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=None if not latest else not(latest),
+                                                   end_of_life_date=end_of_life_date, regions=regions)
+    if not is_valid_resource_id(managed_image):
+        managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                    namespace='Microsoft.Compute', type='images', name=managed_image)
+    profile.source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     image_version = GalleryImageVersion(publishing_profile=profile, location=location)
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
                                                           gallery_name=gallery_name,
                                                           gallery_image_name=gallery_image_name,
-                                                          gallery_image_version_name=version,
+                                                          gallery_image_version_name=gallery_image_version,
                                                           gallery_image_version=image_version)
 
 # endregion
