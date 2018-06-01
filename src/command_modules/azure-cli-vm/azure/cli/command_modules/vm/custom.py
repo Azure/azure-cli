@@ -2412,56 +2412,63 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                           location=None, no_wait=False):
-    # TODO: unique_name needed???
+                         location=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    Gallery, GalleryIdentifier = cmd.get_models('Gallery', 'GalleryIdentifier')
+    Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    #unique_name = unique_name or gallery_name
-    #gallery_identifier = GalleryIdentifier(unique_name=unique_name)
-
-    gallery = Gallery(description=description, location=location)#identifier=gallery_identifier, 
+    gallery = Gallery(description=description, location=location) 
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
 
 
-def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku, location=None):
-    GalleryImage, GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion, GalleryImageIdentifier = cmd.get_models(
-        'GalleryImage', 'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion', 'GalleryImageIdentifier')
+def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
+                         os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
+                         eula=None, description=None, location=None,
+                         minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,  # Recommended TODO call out the GB unit? 
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None):
+    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
+        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku), os_type=os_type, location=location)  # need sample for sku/offer
+    recommendation = None
+    if any([minimum_cpu_core, maximum_cpu_core, minimum_memory, maximum_memory]):
+        cpu_recommendation, memory_recommendation = None, None
+        if any([minimum_cpu_core, maximum_cpu_core]):
+            cpu_recommendation = ResourceRange(min=minimum_cpu_core, max=maximum_cpu_core)
+        if any([minimum_memory, maximum_memory]):
+            memory_recommendation = ResourceRange(min=minimum_memory, max=maximum_memory)
+        recommendation = RecommendedMachineConfiguration(v_cp_us=cpu_recommendation, memory=memory_recommendation)
+    purchase_plan = None
+    if any([plan_name, plan_publisher, plan_product]):
+        purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
+
+    image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku), os_type=os_type, os_state=os_state,
+                         end_of_life_date = end_of_life_date, # TODO timeformat to consider
+                         recommended = recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
+                         purchase_plan = purchase_plan,
+                         location=location)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
-        # TODO: a warning
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image_id, version, location=None, regions=None):
-    GalleryImage, GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion, GalleryImageIdentifier, GalleryImageVersionStorageProfile, GalleryOSDiskImage, GalleryDataDiskImage = cmd.get_models(
-        'GalleryImage', 'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion', 'GalleryImageIdentifier', 'GalleryImageVersionStorageProfile', 'GalleryOSDiskImage', 'GalleryDataDiskImage')
+def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image_id, version, location=None, regions=None, exclude_from_latest=None,
+                 published_date=None, end_of_life_date=None):
+    GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion = cmd.get_models(
+         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    regions = regions or [location]
-    profile = GalleryImageVersionPublishingProfile()
+    regions = regions or [location]  # can we create a version at a differernt location?
+    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, published_date=published_date,
+                                                   end_of_life_date=end_of_life_date)
     profile.source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image_id), region=regions)
-
-    # dig out enougn info from the image
-    from msrestazure.tools import parse_resource_id
-    res = parse_resource_id(managed_image_id)
-    image = client.images.get(res['resource_group'], res['name'])
-
-    #os_disk_image = GalleryOSDiskImage(sized_in_gb=image.storage_profile.os_disk.disk_size_gb, host_caching=image.storage_profile.os_disk.caching)
-    #data_disk_images = [GalleryDataDiskImage(size_in_gb=d.disk_size_gb, host_caching=d.caching, lun=d.lun) for d in (image.storage_profile.data_disks or [])]
-    #image_version_storage_profile = GalleryImageVersionStorageProfile(os_disk_image= os_disk_image, data_disk_images=data_disk_images)
-    #, image_version_storage_profile=image_version_storage_profile
     image_version = GalleryImageVersion(publishing_profile=profile, location=location)
 
-
-    # resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name, gallery_image_version
-    return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name, gallery_name=gallery_name, gallery_image_name=gallery_image_name,
-                                                          gallery_image_version_name=version, gallery_image_version=image_version)
-    
+    return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
+                                                          gallery_name=gallery_name,
+                                                          gallery_image_name=gallery_image_name,
+                                                          gallery_image_version_name=version,
+                                                          gallery_image_version=image_version)
 
 # endregion

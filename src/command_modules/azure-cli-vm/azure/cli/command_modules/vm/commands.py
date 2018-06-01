@@ -338,23 +338,23 @@ def load_command_table(self, _):
         g.command('get-latest', 'get_latest')
         g.command('start', 'start_os_upgrade')
 
-    with self.command_group('vm image gallery', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
-        g.command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_image_galleries')
+    with self.command_group('image gallery', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
+        g.command('show', 'get')
+        g.custom_command('list', 'list_image_galleries')
+        g.command('delete', 'delete')
 
-    with self.command_group('vm image gallery', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
+    with self.command_group('image gallery', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create-image', 'create_gallery_image')  # consider merge with PIR
         g.command('list-images', 'list_gallery_images_by_gallery')
         g.command('show-image', 'get')
         g.command('delete-image', 'delete')
 
-    with self.command_group('vm image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
+    with self.command_group('image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete-image-version', 'delete')
         g.command('show-image-version', 'get')
         g.command('list-image-versions', 'list_gallery_image_versions_by_gallery_image')
-        g.custom_command('upload', 'upload_image')
+        g.custom_command('create-image-version', 'upload_image')
 
 
 

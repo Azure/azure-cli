@@ -770,7 +770,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+        'apiVersion': '2018-04-01', # cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
         'sku': {
             'name': vm_sku,

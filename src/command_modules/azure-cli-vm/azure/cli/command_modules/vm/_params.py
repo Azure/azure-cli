@@ -477,4 +477,25 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
+    with self.argument_context('image gallery') as c:
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], id_part='child_name_1', help='gallery image name')
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version-name', '-e'], id_part='child_name_2', help='gallery image version')
+        c.argument('offer', options_list=['--offer', '-f'], help='image offer')
+        c.argument('sku', options_list=['--sku', '-s'], help='image sku')
+        c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
+        c.argument('disallowed_disk_types', nargs='*') # TODO: figure out what does this mean?
+        c.argument('regions', nargs='*')
+        c.argument('os_state', arg_type=get_enum_type(['Generalized', 'Specialized']))
+
+        c.argument('minimum_cpu_core', type=int, arg_group='Recommendation')
+        c.argument('maximum_cpu_core', type=int, arg_group='Recommendation')
+        c.argument('minimum_memory', type=int, arg_group='Recommendation')
+        c.argument('maximum_memory', type=int, arg_group='Recommendation')
+
+        c.argument('plan_publisher', help='plan publisher', arg_group='Purchase plan')
+        c.argument('plan_name', help='plan name', arg_group='Purchase plan')
+        c.argument('plan_product', help='plan product', arg_group='Purchase plan')
+
+        c.argument('exclude_from_latest', arg_group=get_three_state_flag())
     # endregion
