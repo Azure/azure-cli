@@ -1077,7 +1077,119 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
 
 
+def _register_rp(cli_ctx, subscription_id=None):
+    rp = "Microsoft.Management"
+    import time
+    rcf = get_mgmt_service_client(
+        cli_ctx,
+        ResourceType.MGMT_RESOURCE_RESOURCES,
+        subscription_id)
+    rcf.providers.register(rp)
+    while True:
+        time.sleep(10)
+        rp_info = rcf.providers.get(rp)
+        if rp_info.registration_state == 'Registered':
+            break
+
+
+def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: disable=inconsistent-return-statements
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    subscriptions_list = profile.load_cached_subscriptions()
+    for sub in subscriptions_list:
+        if sub['id'] == subscription or sub['name'] == subscription:
+            return sub['id']
+    raise CLIError("Subscription not found in the current context.")
+
+
+def _get_parent_id_from_parent(parent):
+    if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):
+        return parent
+    return "/providers/Microsoft.Management/managementGroups/" + parent
+
+
+def cli_managementgroups_group_list(cmd, client):
+    _register_rp(cmd.cli_ctx)
+    return client.list()
+
+
+def cli_managementgroups_group_show(
+        cmd,
+        client,
+        group_name,
+        expand=False,
+        recurse=False):
+    _register_rp(cmd.cli_ctx)
+    if expand:
+        return client.get(group_name, "children", recurse)
+    return client.get(group_name)
+
+
+def cli_managementgroups_group_create(
+        cmd,
+        client,
+        group_name,
+        display_name=None,
+        parent=None):
+    _register_rp(cmd.cli_ctx)
+    parent_id = _get_parent_id_from_parent(parent)
+    from azure.mgmt.managementgroups.models import (
+        CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
+    create_parent_grp_info = CreateParentGroupInfo(id=parent_id)
+    create_mgmt_grp_details = CreateManagementGroupDetails(parent=create_parent_grp_info)
+    create_mgmt_grp_request = CreateManagementGroupRequest(
+        name=group_name,
+        display_name=display_name,
+        details=create_mgmt_grp_details)
+    return client.create_or_update(group_name, create_mgmt_grp_request)
+
+
+def cli_managementgroups_group_update_custom_func(
+        instance,
+        display_name=None,
+        parent_id=None):
+    parent_id = _get_parent_id_from_parent(parent_id)
+    instance.display_name = display_name
+    instance.parent_id = parent_id
+    return instance
+
+
+def cli_managementgroups_group_update_get():
+    from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
+    update_parameters = PatchManagementGroupRequest(display_name=None, parent_id=None)
+    return update_parameters
+
+
+def cli_managementgroups_group_update_set(
+        cmd, client, group_name, parameters=None):
+    return client.update(group_name, parameters)
+
+
+def cli_managementgroups_group_delete(cmd, client, group_name):
+    _register_rp(cmd.cli_ctx)
+    return client.delete(group_name)
+
+
+def cli_managementgroups_subscription_add(
+        cmd, client, group_name, subscription):
+    subscription_id = _get_subscription_id_from_subscription(
+        cmd.cli_ctx, subscription)
+    _register_rp(cmd.cli_ctx)
+    _register_rp(cmd.cli_ctx, subscription_id)
+    return client.create(group_name, subscription_id)
+
+
+def cli_managementgroups_subscription_remove(
+        cmd, client, group_name, subscription):
+    subscription_id = _get_subscription_id_from_subscription(
+        cmd.cli_ctx, subscription)
+    _register_rp(cmd.cli_ctx)
+    _register_rp(cmd.cli_ctx, subscription_id)
+    return client.delete(group_name, subscription_id)
+
+
 # region Locks
+
 
 def _validate_lock_params_match_lock(
         lock_client, name, resource_group, resource_provider_namespace, parent_resource_path,

@@ -6,7 +6,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-from ._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
+from azure.cli.command_modules.iot.tests.latest._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 import random
 
 

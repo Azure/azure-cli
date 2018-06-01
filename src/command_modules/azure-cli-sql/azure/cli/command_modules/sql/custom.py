@@ -34,7 +34,8 @@ from azure.mgmt.sql.models import (
 
 from ._util import (
     get_sql_capabilities_operations,
-    get_sql_servers_operations
+    get_sql_servers_operations,
+    get_sql_managed_instances_operations
 )
 
 
@@ -55,6 +56,19 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
+        resource_group_name=resource_group_name).location
+
+
+# Determines managed instance location
+def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
+    '''
+    Returns the location (i.e. Azure region) that the specified managed instance is in.
+    '''
+
+    managed_instance_client = get_sql_managed_instances_operations(cli_ctx, None)
+    # pylint: disable=no-member
+    return managed_instance_client.get(
+        managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name).location
 
 
@@ -115,6 +129,28 @@ def _find_edition_capability(sku, supported_editions):
     else:
         # Find default edition capability
         return _get_default_capability(supported_editions)
+
+
+def _find_family_capability(sku, supported_families):
+    '''
+    Finds the family capability in the collection of supported families
+    that matches the requested sku.
+
+    If the edition has no family specified, returns the default family.
+    '''
+
+    if sku.family:
+        # Find requested edition capability
+        try:
+            return next(e for e in supported_families if e.name == sku.family)
+        except StopIteration:
+            candidate_families = [e.name for e in supported_families]
+            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+                sku.family, candidate_families
+            ))
+    else:
+        # Find default family capability
+        return _get_default_capability(supported_families)
 
 
 def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family):
@@ -259,6 +295,22 @@ def _get_server_dns_suffx(cli_ctx):
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
+
+
+def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}/databases/{}'.format(
+        quote(get_subscription_id(cli_ctx)),
+        quote(resource_group_name),
+        quote(managed_instance_name),
+        quote(database_name))
 
 
 def db_show_conn_str(
@@ -1815,3 +1867,184 @@ def encryption_protector_update(
             server_key_name=key_name
         )
     )
+
+###############################################
+#                sql managed instance         #
+###############################################
+
+
+def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Given a requested sku which may have some properties filled in
+    (e.g. tier and capacity), finds the canonical matching sku
+    from the given location's capabilities.
+    '''
+
+    logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
+
+    if sku.name:
+        # User specified sku.name, so nothing else needs to be resolved.
+        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
+        return sku
+
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out.
+        # Server side will pick a default.
+        logger.debug('_find_managed_instance_sku_from_capabilities return None')
+        return None
+
+    # Some properties of sku are specified, but not name. Use the requested properties
+    # to find a matching capability and copy the sku from there.
+
+    # Get default server version capability
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(capabilities.supported_managed_instance_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
+
+    # Find family level capability, based on requested sku properties
+    family_capability = _find_family_capability(sku, edition_capability.supported_families)
+
+    result = Sku(name=family_capability.sku)
+    logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
+    return result
+
+
+def managed_instance_create(
+        cmd,
+        client,
+        managed_instance_name,
+        resource_group_name,
+        location,
+        virtual_network_subnet_id,
+        assign_identity=False,
+        sku=None,
+        **kwargs):
+    '''
+    Creates a managed instance.
+    '''
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    kwargs['location'] = location
+    kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+    kwargs['subnet_id'] = virtual_network_subnet_id
+
+    # Create
+    return client.create_or_update(
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_instance_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists managed instances in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all managed instances in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all managed instances in the subscription
+    return client.list()
+
+
+def managed_instance_update(
+        instance,
+        administrator_login_password=None,
+        license_type=None,
+        vcores=None,
+        storage_size_in_gb=None,
+        assign_identity=False):
+    '''
+    Updates a managed instance. Custom update function to apply parameters to instance.
+    '''
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Apply params to instance
+    instance.administrator_login_password = (
+        administrator_login_password or instance.administrator_login_password)
+    instance.license_type = (
+        license_type or instance.license_type)
+    instance.v_cores = (
+        vcores or instance.v_cores)
+    instance.storage_size_in_gb = (
+        storage_size_in_gb or instance.storage_size_in_gb)
+
+    return instance
+
+###############################################
+#                sql managed db               #
+###############################################
+
+
+def managed_db_create(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_restore(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        target_managed_database_name,
+        target_managed_instance_name=None,
+        target_resource_group_name=None,
+        **kwargs):
+    '''
+    Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
+
+    Custom function makes create mode more convenient.
+    '''
+
+    if not target_managed_instance_name:
+        target_managed_instance_name = managed_instance_name
+
+    if not target_resource_group_name:
+        target_resource_group_name = resource_group_name
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.point_in_time_restore.value
+    kwargs['source_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name)
+
+    return client.create_or_update(
+        database_name=target_managed_database_name,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)

@@ -305,7 +305,7 @@ def acr_build(cmd,
             is_push_enabled = True
         else:
             is_push_enabled = False
-            logger.warning("'--image -t' is not provided. Skip image push after build.")
+            logger.warning("'--image -t' is not provided. Skipping image push after build.")
 
     build_request = QuickBuildRequest(
         source_location=source_location,
@@ -345,8 +345,8 @@ def _check_remote_source_code(source_location):
     # http
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
        or lower_source_location.startswith("github.com/"):
-        if re.search(r"\.git(?:#.+)?$", lower_source_location):
-            # git url must contain ".git"
+        if re.search(r"\.git(?:#.+)?$", lower_source_location) or "visualstudio.com" in lower_source_location:
+            # git url must contain ".git" or be from VSTS
             return source_location
         elif not lower_source_location.startswith("github.com/"):
             # Others are tarball

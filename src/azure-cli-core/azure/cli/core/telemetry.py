@@ -227,7 +227,6 @@ def flush():
 
     payload = _session.generate_payload()
     if payload:
-
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
 
     # reset session fields, retaining correlation id and application
@@ -241,7 +240,28 @@ def conclude():
 
     payload = _session.generate_payload()
     if payload:
-        subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+        kwargs = {
+            'args': [sys.executable, os.path.realpath(telemetry_core.__file__), payload]
+        }
+        if os.name == 'nt':
+            # Windows process creation flag to not reuse the parent console.
+            # Without this, the background service is associated with the
+            # starting process's console, and will block that console from
+            # exiting until the background service self-terminates.
+            # Elsewhere, fork just does the right thing.
+            kwargs['creationflags'] = 0x00000010  # CREATE_NEW_CONSOLE
+
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+            kwargs['startupinfo'] = startupinfo
+        else:
+            if sys.version_info >= (3, 3):
+                kwargs['stdin'] = subprocess.DEVNULL
+                if not telemetry_core.in_diagnostic_mode:
+                    kwargs['stdout'] = subprocess.DEVNULL
+                    kwargs['stderr'] = subprocess.STDOUT
+        subprocess.Popen(**kwargs)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)

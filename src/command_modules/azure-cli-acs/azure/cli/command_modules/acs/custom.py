@@ -1007,6 +1007,13 @@ def merge_kubernetes_configurations(existing_file, addition_file):
         _handle_merge(existing, addition, 'contexts')
         existing['current-context'] = addition['current-context']
 
+    # check that ~/.kube/config is only read- and writable by its owner
+    if platform.system() != 'Windows':
+        existing_file_perms = "{:o}".format(stat.S_IMODE(os.lstat(existing_file).st_mode))
+        if not existing_file_perms.endswith('600'):
+            logger.warning('%s has permissions "%s".\nIt should be readable and writable only by its owner.',
+                           existing_file, existing_file_perms)
+
     with open(existing_file, 'w+') as stream:
         yaml.dump(existing, stream, default_flow_style=False)
 
@@ -1605,7 +1612,7 @@ def _print_or_merge_credentials(path, kubeconfig):
             if ex.errno != errno.EEXIST:
                 raise
     if not os.path.exists(path):
-        with open(path, 'w+t'):
+        with os.fdopen(os.open(path, os.O_CREAT | os.O_WRONLY, 0o600), 'wt'):
             pass
 
     # merge the new kubeconfig into the existing one
