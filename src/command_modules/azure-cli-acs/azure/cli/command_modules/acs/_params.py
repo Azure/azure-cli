@@ -19,7 +19,6 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name)
 
-
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
 aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-0.1.3.tgz'
@@ -157,6 +156,12 @@ def load_arguments(self, _):
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
+        # c.argument('network_plugin')
+        # c.argument('network_policy')
+        # c.argument('pod_cidr', validator=validate_pod_cidr)
+        # c.argument('service_cidr', validator=validate_service_cidr)
+        # c.argument('dns_service_ip')
+        # c.argument('docker_bridge_cidr', validator=validate_docker_bridge_cidr)
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
