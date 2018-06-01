@@ -5,7 +5,7 @@ Release History
 
 0.0.22
 ++++++
-* Updated the ADLS version to latest.
+* Minor fixes.
 
 0.0.21
 ++++++
