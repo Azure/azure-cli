@@ -409,18 +409,22 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        if res['type'].lower() == 'image':
+        if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
             namespace.os_type = image_info.storage_profile.os_disk.os_type.value
             image_data_disks_num = len(image_info.storage_profile.data_disks or [])
-        else:
-            # TODO: add a bit validations here and api-verson check
-            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'], gallery_name=res['name'],
+        elif res['type'].lower() == 'galleries':
+            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
+                                                           gallery_name=res['name'],
                                                            gallery_image_name=res['child_name_1'])
             namespace.os_type = image_info.os_type.value
-            image_version_info = compute_client.gallery_image_versions.get(resource_group_name=res['resource_group'], gallery_name=res['name'],
-                                                                   gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
+            image_version_info = compute_client.gallery_image_versions.get(resource_group_name=res['resource_group'],
+                                                                           gallery_name=res['name'],
+                                                                           gallery_image_name=res['child_name_1'],
+                                                                           gallery_image_version_name=res['child_name_2'])  # pylint: disable=line-too-long
             image_data_disks_num = len(image_version_info.storage_profile.data_disk_images or [])
+        else:
+            raise CLIError('usage error: unrecognized image informations "{}"'.format(namespace.image))
 
         # pylint: disable=no-member
 

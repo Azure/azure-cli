@@ -509,24 +509,24 @@ def load_arguments(self, _):
         c.argument('eula', help='The Eula agreement for the gallery image')
         c.argument('privacy_statement_uri', help='The privacy statement uri')
         c.argument('release_note_uri', help='The release note uri')
-        c.argument('end_of_life_date', help='the end of life date')
+        c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
 
     with self.argument_context('image gallery create') as c:
         c.argument('description', help='the description of the gallery')
     with self.argument_context('image gallery create-image') as c:
-        c.argument('description', help='the description of the gallery image') 
+        c.argument('description', help='the description of the gallery image')
     with self.argument_context('image gallery create-image-version') as c:
-        c.argument('description', help='the description of the gallery image') 
+        c.argument('description', help='the description of the gallery image')
         c.argument('managed_image', help='the name or resource id of a managed image')
         c.argument('version', help='image version')
-        
-        #c.argument('latest', arg_type=get_three_state_flag(),
+
+        # c.argument('latest', arg_type=get_three_state_flag(),
         #           help="people deploying VMs with 'latest' as version will use this version")
         c.ignore('latest')  # service is not ready
-  
+
         c.argument('regions', nargs='*', help='space separated regions the image version will be published to')
-        c.argument('end_of_life_date', help='the end of life date')
+        c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
     with self.argument_context('image gallery show-image-version') as c:
         c.argument('expand', help="The expand expression to apply on the operation. Possible values include: 'ReplicationStatus'")

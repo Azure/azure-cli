@@ -2404,6 +2404,8 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
 # endregion
 
 # region image galleries
+
+
 def list_image_galleries(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
@@ -2417,7 +2419,7 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    gallery = Gallery(description=description, location=location) 
+    gallery = Gallery(description=description, location=location)
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
@@ -2428,6 +2430,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None):
+    # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2445,23 +2448,21 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if any([plan_name, plan_publisher, plan_product]):
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
-    image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku), os_type=os_type, os_state=os_state,
-                         end_of_life_date = end_of_life_date, # TODO timeformat to consider
-                         recommended = recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
-                         purchase_plan = purchase_plan,
-                         location=location)
+    image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
+                         os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
+                         recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
+                         purchase_plan=purchase_plan, location=location)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version, location=None, regions=None, latest=None,
-                 end_of_life_date=None):
-    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
+                 location=None, regions=None, latest=None, end_of_life_date=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
     GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion = cmd.get_models(
-         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion')
+        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    regions = regions or [location]  # can we create a version at a differernt location?
-    GalleryImageVersionPublishingProfile._attribute_map['end_of_life_date']['type'] = 'str'
+    regions = regions or [location]
     profile = GalleryImageVersionPublishingProfile(exclude_from_latest=None if not latest else not(latest),
                                                    end_of_life_date=end_of_life_date, regions=regions)
     if not is_valid_resource_id(managed_image):
