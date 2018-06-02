@@ -77,11 +77,11 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
         ResourceType.MGMT_NETWORK: '2018-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2018-04-01', {
             'resource_skus': '2017-09-01',
             'disks': '2018-04-01',
             'snapshots': '2018-04-01',
-            'virtual_machine_run_commands': '2017-03-30',
+            'virtual_machine_run_commands': '2018-04-01',
             'galleries': '2018-06-01',
             'gallery_image_versions': '2018-06-01',
             'gallery_images': '2018-06-01',
