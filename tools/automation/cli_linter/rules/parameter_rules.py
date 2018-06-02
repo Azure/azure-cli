@@ -20,4 +20,5 @@ def bad_short_option_rule(linter, command_name, parameter_name):
             bad_options.append(option)
 
     if bad_options:
-        raise RuleError('Found multi-character short options: {}'.format(' | '.join(bad_options)))
+        raise RuleError('Found multi-character short options: {}. Use a single character or '
+        				'convert to a long-option.'.format(' | '.join(bad_options)))
