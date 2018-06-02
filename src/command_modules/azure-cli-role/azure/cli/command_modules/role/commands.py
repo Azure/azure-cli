@@ -9,8 +9,6 @@ from collections import OrderedDict
 from azure.cli.core.profiles import PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 
-from azure.cli.core.util import empty_on_404
-
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 
