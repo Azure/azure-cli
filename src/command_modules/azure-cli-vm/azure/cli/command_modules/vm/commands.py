@@ -26,7 +26,7 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCom
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
 
-# pylint: disable=line-too-long, too-many-statements
+# pylint: disable=line-too-long, too-many-statements, too-many-locals, protected-access
 def load_command_table(self, _):
 
     custom_tmpl = 'azure.cli.command_modules.vm.custom#{}'
@@ -361,7 +361,3 @@ def load_command_table(self, _):
     m._attribute_map['published_date']['type'] = 'str'
     m = self.get_models('GalleryImage', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions')
     m._attribute_map['end_of_life_date']['type'] = 'str'
-
-
-
-
