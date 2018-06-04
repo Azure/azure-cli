@@ -482,7 +482,8 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                                                 overwrite_vhds=overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
+    # TODO: revert the following change by public release
+    print(json.dumps(result.additional_properties['properties']['output'], indent=2))  # pylint: disable=no-member
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
