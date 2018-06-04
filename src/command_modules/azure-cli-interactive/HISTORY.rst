@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.22
+++++++
+* Cap the dependencies
+
 0.3.21
 ++++++
 * Mute logging from parser for completions.
