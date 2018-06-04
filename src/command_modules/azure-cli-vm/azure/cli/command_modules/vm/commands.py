@@ -27,7 +27,7 @@ from azure.cli.core.commands.arm import deployment_validate_table_format, handle
 from azure.cli.core.util import empty_on_404
 
 
-# pylint: disable=line-too-long, too-many-statements, too-many-locals, protected-access
+# pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
 
     custom_tmpl = 'azure.cli.command_modules.vm.custom#{}'
@@ -346,20 +346,12 @@ def load_command_table(self, _):
 
     with self.command_group('image gallery', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create-image', 'create_gallery_image')  # consider merge with PIR
-        g.command('list-images', 'list_gallery_images_by_gallery')
+        g.command('list-images', 'list_by_gallery')
         g.command('show-image', 'get')
         g.command('delete-image', 'delete')
 
     with self.command_group('image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete-image-version', 'delete')
         g.command('show-image-version', 'get')
-        g.command('list-image-versions', 'list_gallery_image_versions_by_gallery_image')
+        g.command('list-image-versions', 'list_by_gallery_image')
         g.custom_command('create-image-version', 'upload_image')
-
-    # HACK, never release it!
-    from azure.cli.core.profiles import ResourceType
-    m = self.get_models('GalleryImageVersionPublishingProfile', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions')
-    m._attribute_map['end_of_life_date']['type'] = 'str'
-    m._attribute_map['published_date']['type'] = 'str'
-    m = self.get_models('GalleryImage', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions')
-    m._attribute_map['end_of_life_date']['type'] = 'str'

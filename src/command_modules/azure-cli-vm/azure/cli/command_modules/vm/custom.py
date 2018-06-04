@@ -2411,7 +2411,7 @@ def list_image_galleries(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
         return client.galleries.list_by_resource_group(resource_group_name)
-    return client.galleries.list_by_subscription()
+    return client.galleries.list()
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
@@ -2437,6 +2437,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
+    end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     recommendation = None
     if any([minimum_cpu_core, maximum_cpu_core, minimum_memory, maximum_memory]):
         cpu_recommendation, memory_recommendation = None, None
@@ -2464,6 +2465,7 @@ def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, man
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     regions = regions or [location]
+    end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     profile = GalleryImageVersionPublishingProfile(exclude_from_latest=None if not latest else not(latest),
                                                    end_of_life_date=end_of_life_date, regions=regions)
     if not is_valid_resource_id(managed_image):
@@ -2477,5 +2479,12 @@ def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, man
                                                           gallery_image_name=gallery_image_name,
                                                           gallery_image_version_name=gallery_image_version,
                                                           gallery_image_version=image_version)
+
+
+def fix_gallery_image_date_info(date_info):
+    # here we add needed time, if only date is provided, so the setting can be accepted by servie end
+    if date_info and 't' not in date_info.lower():
+        date_info += 'T12:59:59Z'
+    return date_info
 
 # endregion

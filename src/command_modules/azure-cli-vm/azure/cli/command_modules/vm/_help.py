@@ -1419,7 +1419,7 @@ helps['image gallery create-image'] = """
     type: command
     short-summary: create a gallery image
     examples:
-        - name: Create an linux image 
+        - name: Create an linux image
           text: |
             az image gallery create-image -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
 """

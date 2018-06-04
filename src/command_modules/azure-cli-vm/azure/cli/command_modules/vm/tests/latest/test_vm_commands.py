@@ -2634,7 +2634,6 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('image gallery delete-image -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
         self.cmd('image gallery delete -g {rg} --gallery-name {gallery}')
 
-
 # endregion
 
 
