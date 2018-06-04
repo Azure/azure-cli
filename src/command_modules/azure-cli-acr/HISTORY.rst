@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.27
+++++++
+* Add 'azure-storage-blob' as dependency.
+
 2.0.26
 ++++++
 * Allow VSTS as a remote source location

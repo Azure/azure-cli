@@ -185,7 +185,6 @@ class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_win_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -203,7 +202,6 @@ class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_linux_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
