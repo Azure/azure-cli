@@ -658,11 +658,6 @@ def _cli_generic_show_command(context, name, getter_op, **kwargs):
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
         cmd_args = getter_args.copy()
-
-        cmd_args['quiet_on_missing'] = CLICommandArgument(
-            'quiet_on_missing', options_list=['--quiet-on-missing'], action='store_true',
-            help="Swallow error logging to stderr when a 404(missing resource) is returned from the service."
-        )
         cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
         return [(k, v) for k, v in cmd_args.items()]
 
@@ -682,14 +677,13 @@ def _cli_generic_show_command(context, name, getter_op, **kwargs):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
-        quiet_on_missing = args.pop('quiet_on_missing', None)
-
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
-            if getattr(ex, 'status_code', None) == 404 and quiet_on_missing:
+            if getattr(ex, 'status_code', None) == 404:
+                logger.error(getattr(ex, 'message', ex))
                 import sys
-                sys.exit(1)
+                sys.exit(3)
             raise
     context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
