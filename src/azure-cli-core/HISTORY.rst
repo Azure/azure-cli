@@ -34,7 +34,7 @@ Release History
 
 2.0.35
 ++++++
-* Minor fixes
+* Added method of registering `show` commands with parameter to suppress error msg.
 
 2.0.34
 ++++++
