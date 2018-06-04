@@ -123,12 +123,12 @@ helps['acs wait'] = """
 
 helps['aks'] = """
      type: group
-     short-summary: (PREVIEW) Manage Azure Kubernetes Services.
+     short-summary: Manage Azure Kubernetes Services.
 """
 
 helps['aks browse'] = """
     type: command
-    short-summary: (PREVIEW) Show the dashboard for a Kubernetes cluster in a web browser.
+    short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
     parameters:
         - name: --disable-browser
           type: bool
@@ -138,7 +138,7 @@ helps['aks browse'] = """
 
 helps['aks create'] = """
     type: command
-    short-summary: (PREVIEW) Create a new managed Kubernetes cluster.
+    short-summary: Create a new managed Kubernetes cluster.
     parameters:
         - name: --generate-ssh-keys
           type: string
@@ -250,12 +250,12 @@ helps['aks create'] = """
 
 helps['aks delete'] = """
     type: command
-    short-summary: (PREVIEW) Delete a managed Kubernetes cluster.
+    short-summary: Delete a managed Kubernetes cluster.
 """
 
 helps['aks get-credentials'] = """
     type: command
-    short-summary: (PREVIEW) Get access credentials for a managed Kubernetes cluster.
+    short-summary: Get access credentials for a managed Kubernetes cluster.
     parameters:
         - name: --admin -a
           type: bool
@@ -267,17 +267,17 @@ helps['aks get-credentials'] = """
 
 helps['aks get-upgrades'] = """
     type: command
-    short-summary: (PREVIEW) Get the upgrade versions available for a managed Kubernetes cluster.
+    short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
 """
 
 helps['aks get-versions'] = """
     type: command
-    short-summary: (PREVIEW) Get the versions available for creating a managed Kubernetes cluster.
+    short-summary: Get the versions available for creating a managed Kubernetes cluster.
 """
 
 helps['aks install-cli'] = """
     type: command
-    short-summary: (PREVIEW) Download and install kubectl, the Kubernetes command-line tool.
+    short-summary: Download and install kubectl, the Kubernetes command-line tool.
 """
 
 helps['aks install-connector'] = """
@@ -339,7 +339,7 @@ helps['aks install-connector'] = """
 
 helps['aks list'] = """
     type: command
-    short-summary: (PREVIEW) List managed Kubernetes clusters.
+    short-summary: List managed Kubernetes clusters.
 """
 
 helps['aks remove-connector'] = """
@@ -364,7 +364,7 @@ helps['aks remove-connector'] = """
 
 helps['aks scale'] = """
     type: command
-    short-summary: (PREVIEW) Scale the node pool in a managed Kubernetes cluster.
+    short-summary: Scale the node pool in a managed Kubernetes cluster.
     parameters:
         - name: --node-count -c
           type: int
@@ -373,12 +373,12 @@ helps['aks scale'] = """
 
 helps['aks show'] = """
     type: command
-    short-summary: (PREVIEW) Show the details for a managed Kubernetes cluster.
+    short-summary: Show the details for a managed Kubernetes cluster.
 """
 
 helps['aks upgrade'] = """
     type: command
-    short-summary: (PREVIEW) Upgrade a managed Kubernetes cluster to a newer version.
+    short-summary: Upgrade a managed Kubernetes cluster to a newer version.
     long-summary: "Kubernetes will be unavailable during cluster upgrades."
     parameters:
         - name: --kubernetes-version -k
@@ -464,7 +464,7 @@ helps['aks remove-dev-spaces'] = """
 
 helps['aks wait'] = """
     type: command
-    short-summary: (PREVIEW) Wait for a managed Kubernetes cluster to reach a desired state.
+    short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
     long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
                   wait for it to complete.
     examples:
