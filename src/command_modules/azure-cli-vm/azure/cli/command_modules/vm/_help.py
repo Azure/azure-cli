@@ -1399,3 +1399,36 @@ helps['identity list-operations'] = """
     type: command
     short-summary: Lists available operations for the Managed Identity provider
 """
+
+helps['image gallery'] = """
+    type: group
+    short-summary: manage shared image gallery
+"""
+
+helps['image gallery create'] = """
+    type: command
+    short-summary: create a share image gallery.
+"""
+
+helps['image gallery list'] = """
+    type: command
+    short-summary: list share image galleries.
+"""
+
+helps['image gallery create-image'] = """
+    type: command
+    short-summary: create a gallery image
+    examples:
+        - name: Create an linux image 
+          text: |
+            az image gallery create-image -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+"""
+
+helps['image gallery create-image-version'] = """
+    type: command
+    short-summary: creat a new image version
+    examples:
+        - name: add a new version
+          text: |
+            az image gallery create-image-version -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+"""
