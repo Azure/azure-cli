@@ -646,6 +646,54 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
+def _cli_generic_show_command(context, name, getter_op, **kwargs):
+
+    if not isinstance(getter_op, string_types):
+        raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
+
+    factory = _get_client_factory(name, kwargs)
+
+    def generic_show_arguments_loader():
+
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+        cmd_args = getter_args.copy()
+
+        cmd_args['quiet_on_missing'] = CLICommandArgument(
+            'quiet_on_missing', options_list=['--quiet-on-missing'], action='store_true',
+            help="Swallow error logging to stderr when a 404(missing resource) is returned from the service."
+        )
+        cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
+        return [(k, v) for k, v in cmd_args.items()]
+
+    def handler(args):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
+
+        cmd = args.get('cmd')
+        operations_tmpl = _get_operations_tmpl(cmd)
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+        client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
+        try:
+            client = factory(context.cli_ctx) if factory else None
+        except TypeError:
+            client = factory(context.cli_ctx, None) if factory else None
+        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+            args[client_arg_name] = client
+
+        getter = context.get_op_handler(getter_op)
+        quiet_on_missing = args.pop('quiet_on_missing', None)
+
+        try:
+            return getter(**args)
+        except Exception as ex:  # pylint: disable=broad-except
+            if getattr(ex, 'status_code', None) == 404 and quiet_on_missing:
+                import sys
+                sys.exit(1)
+            raise
+    context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader, **kwargs)  # pylint: disable=protected-access
+
+
 def verify_property(instance, condition):
     from jmespath import compile as compile_jmespath
     result = todict(instance)
