@@ -451,6 +451,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                       min_api=kwargs.get('min_api'),
                                       max_api=kwargs.get('max_api'),
                                       operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
             self.command_table[name] = self.command_cls(self, name,
                                                         handler or default_command_handler,
                                                         **kwargs)

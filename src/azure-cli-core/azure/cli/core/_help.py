@@ -56,6 +56,10 @@ class AzCliHelp(CLIHelp):
                                         help_cls=CliHelpFile)
         from knack.help import HelpObject
 
+        # TODO: This workaround is used to avoid a bizarre bug in Python 2.7. It
+        # essentially reassigns Knack's HelpObject._normalize_text implementation
+        # with an identical implemenation in Az. For whatever reason, this fixes
+        # the bug in Python 2.7.
         @staticmethod
         def new_normalize_text(s):
             if not s or len(s) < 2:
@@ -65,7 +69,7 @@ class AzCliHelp(CLIHelp):
             trailing_period = '' if s[-1] in '.!?' else '.'
             return initial_upper + trailing_period
 
-        HelpObject._normalize_text = new_normalize_text
+        HelpObject._normalize_text = new_normalize_text  # pylint: disable=protected-access
 
     @staticmethod
     def _print_extensions_msg(help_file):

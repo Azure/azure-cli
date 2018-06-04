@@ -18,7 +18,6 @@ class Linter(object):
         self._all_yaml_help = help_file_entries
         self._loaded_help = loaded_help
         self._command_loader = command_loader
-        self._commands = set(self._command_loader.command_table.keys())
         self._parameters = {}
         self._help_file_entries = set(help_file_entries.keys())
 
@@ -29,7 +28,7 @@ class Linter(object):
 
     @property
     def commands(self):
-        return self._commands
+        return self._command_loader.command_table
 
     @property
     def command_groups(self):
@@ -71,7 +70,7 @@ class Linter(object):
         return self._get_loaded_help_description(command_group_name)
 
     def get_parameter_options(self, command_name, parameter_name):
-        return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+        return self.commands.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
 
     def get_parameter_help(self, command_name, parameter_name):
         options = self._command_loader.command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
@@ -94,9 +93,13 @@ class Linter(object):
         return False
 
     def command_group_expired(self, command_group_name):
-        deprecate_info = self._command_loader.command_group_table[command_group_name].group_kwargs.get('deprecate_info', None)
-        if deprecate_info:
-            return deprecate_info.expired()
+        try:
+            deprecate_info = self._command_loader.command_group_table[command_group_name].group_kwargs.get('deprecate_info', None)
+            if deprecate_info:
+                return deprecate_info.expired()
+        except AttributeError:
+            # Items with only token presence in the command table will not have any data. They can't be expired.
+            pass
         return False
 
     def parameter_expired(self, command_name, parameter_name):

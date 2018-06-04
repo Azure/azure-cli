@@ -860,7 +860,6 @@ class AzCommandGroup(CommandGroup):
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
         custom_func_op = self._resolve_operation(merged_kwargs, custom_func_name, custom_func_type,
                                                  source_kwarg='custom_command_type') if custom_func_name else None
-
         _cli_generic_update_command(
             self.command_loader,
             '{} {}'.format(self.group_name, name),
