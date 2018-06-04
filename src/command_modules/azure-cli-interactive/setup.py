@@ -36,7 +36,7 @@ DEPENDENCIES = [
     'jmespath~=0.9.3',
     'prompt_toolkit~=1.0.15',
     'pyyaml~=3.12',
-    'six~=1.10.0',
+    'six~=1.11.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
