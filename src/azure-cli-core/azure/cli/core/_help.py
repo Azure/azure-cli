@@ -54,6 +54,18 @@ class AzCliHelp(CLIHelp):
                                         welcome_message=WELCOME_MESSAGE,
                                         command_help_cls=CliCommandHelpFile,
                                         help_cls=CliHelpFile)
+        from knack.help import HelpObject
+
+        @staticmethod
+        def new_normalize_text(s):
+            if not s or len(s) < 2:
+                return s or ''
+            s = s.strip()
+            initial_upper = s[0].upper() + s[1:]
+            trailing_period = '' if s[-1] in '.!?' else '.'
+            return initial_upper + trailing_period
+
+        HelpObject._normalize_text = new_normalize_text
 
     @staticmethod
     def _print_extensions_msg(help_file):
