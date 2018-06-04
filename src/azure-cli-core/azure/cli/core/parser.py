@@ -172,10 +172,6 @@ class AzCliCommandParser(CLICommandParser):
         options_list = arg.options_list
         argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
         if options_list:
-            for opt in options_list:
-                if not opt.startswith('--') and len(opt) != 2:
-                    raise CLIError("command authoring error: multi-character short option '{}' is not allowed. "
-                                   "Use a single character or convert to a long-option.".format(opt))
             return obj.add_argument(*options_list, **argparse_options)
         else:
             if 'required' in argparse_options:
