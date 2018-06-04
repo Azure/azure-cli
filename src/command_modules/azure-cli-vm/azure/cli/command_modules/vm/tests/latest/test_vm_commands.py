@@ -2604,6 +2604,37 @@ class VMGenericUpdate(ScenarioTest):
             self.check('storageProfile.dataDisks', [])
         ])
 
+
+class VMGalleryImage(ScenarioTest):
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_gallery_e2e(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': 'gallery1',
+            'image': 'image1',
+            'version': '1.1.2',
+            'captured': 'managedImage1'
+        })
+
+        self.cmd('image gallery create -g {rg} --gallery-name {gallery}')
+        self.cmd('image gallery list -g {rg}')
+        self.cmd('image gallery show -g {rg} --gallery-name {gallery}')
+        self.cmd('image gallery create-image -g {rg} --gallery-name {gallery} --gallery-image-name {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('image gallery list-images -g {rg} --gallery-name {gallery}')
+        self.cmd('image gallery show-image -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --generate-ssh-keys')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('image gallery create-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version} --managed-image {captured}')
+        self.cmd('image gallery list-image-versions -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
+        self.cmd('image gallery show-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version}')
+
+        self.cmd('image gallery delete-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version}')
+        self.cmd('image gallery delete-image -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
+        self.cmd('image gallery delete -g {rg} --gallery-name {gallery}')
+
+
 # endregion
 
 
