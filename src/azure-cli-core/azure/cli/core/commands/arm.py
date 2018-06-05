@@ -672,7 +672,7 @@ def _cli_generic_show_command(context, name, getter_op, **kwargs):
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
-            client = factory(context.cli_ctx, None) if factory else None
+            client = factory(context.cli_ctx, args) if factory else None
         if client and (client_arg_name in getter_args or client_arg_name == 'self'):
             args[client_arg_name] = client
 
