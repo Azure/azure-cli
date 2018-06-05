@@ -81,6 +81,29 @@ def _any_sku_values_specified(sku):
     return any(val for key, val in sku.__dict__.items())
 
 
+def _get_default_server_version(location_capabilities):
+    '''
+    Gets the default server version capability from the full location
+    capabilities response.
+
+    If none have 'default' status, gets the first capability that has
+    'available' status.
+
+    If there is no default or available server version, falls back to
+    server version 12.0 in order to maintain compatibility with older
+    Azure CLI releases.
+    '''
+    server_versions = location_capabilities.supported_server_versions
+
+    try:
+        # Try behavior from azure-cli-sql 2.0.26: get default
+        return _get_default_capability(server_versions)
+    except StopIteration:
+        # No default or available version found.
+        # Fall back to behaviour from azure-cli-sql 2.0.25 and earlier: get version 12.0
+        return next(sv for sv in server_versions if sv.name == "12.0")
+
+
 def _get_default_capability(capabilities):
     '''
     Gets the first capability in the collection that has 'default' status.
@@ -464,7 +487,7 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
     capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_editions)
-    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+    server_version_capability = _get_default_server_version(capabilities)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
@@ -778,7 +801,7 @@ def db_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_editions)
 
     # Get subtree related to databases
-    editions = _get_default_capability(capabilities.supported_server_versions).supported_editions
+    editions = _get_default_server_version(capabilities).supported_editions
 
     # Filter by edition
     if edition:
@@ -1383,7 +1406,7 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
     capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
-    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+    server_version_capability = _get_default_server_version(capabilities)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
@@ -1509,7 +1532,7 @@ def elastic_pool_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get subtree related to elastic pools
-    editions = _get_default_capability(capabilities.supported_server_versions).supported_elastic_pool_editions
+    editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
 
     # Filter by edition
     if edition:
