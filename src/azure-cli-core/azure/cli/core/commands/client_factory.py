@@ -49,8 +49,6 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
      :params subscription_id: the current account's subscription
      :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
     """
-                            **kwargs):
-
     if not subscription_id and 'subscription_id' in cli_ctx.data:
         subscription_id = cli_ctx.data['subscription_id']
 

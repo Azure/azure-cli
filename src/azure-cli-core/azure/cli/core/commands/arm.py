@@ -9,7 +9,7 @@ import json
 import re
 from six import string_types
 
-from knack.arguments import CLICommandArgument, ignore_type
+from knack.arguments import CLICommandArgument, ignore_type, ArgumentsContext
 from knack.introspection import extract_args_from_signature
 from knack.log import get_logger
 from knack.util import todict, CLIError
@@ -18,6 +18,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
+from azure.cli.core.commands.parameters import AzArgumentContext
 from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
@@ -280,15 +281,22 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 
 def register_global_subscription_parameter(cli_ctx):
     import knack.events as events
+    from knack.util import CLIError
 
-    def add_subscription_parameter(_, arg_group):
-        arg_group.add_argument('--subscription', dest='_subscription', help='Subscription ID.')
+    def add_subscription_parameter(_, **kwargs):
+        commands_loader = kwargs['commands_loader']
+        cmd_tbl = kwargs['cmd_tbl']
+        for command_name, cmd in cmd_tbl.items():
+            if 'subscription' not in cmd.arguments:
+                commands_loader.extra_argument_registry[command_name]['_subscription'] = CLICommandArgument(
+                    '_subscription', options_list=['--subscription'], help='Subscription ID.', arg_group='Global')
+        commands_loader._update_command_definitions()
 
     def parse_subscription_parameter(cli_ctx, args, **kwargs):
         subscription_id = getattr(args, '_subscription', None)
         cli_ctx.data['subscription_id'] = subscription_id
 
-    cli_ctx.register_event(events.EVENT_PARSER_GLOBAL_CREATE, add_subscription_parameter)
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
     cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_subscription_parameter)
 
 
