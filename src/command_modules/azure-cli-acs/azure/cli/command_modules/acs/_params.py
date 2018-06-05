@@ -166,7 +166,6 @@ def load_arguments(self, _):
         c.argument('enable_rbac', options_list=['--enable-rbac', '-r'])
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
         c.argument('network_plugin')
-        c.argument('network_policy')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')

@@ -1311,7 +1311,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_ssh_key=False,
                enable_rbac=False,
                network_plugin=None,
-               network_policy=None,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1375,10 +1374,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         key_vault_secret_ref=None)
 
     network_profile = None
-    if any([network_plugin, network_policy, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
         network_profile = ContainerServiceNetworkProfile(
             network_plugin=network_plugin,
-            network_policy=network_policy,
             pod_cidr=pod_cidr,
             service_cidr=service_cidr,
             dns_service_ip=dns_service_ip,
