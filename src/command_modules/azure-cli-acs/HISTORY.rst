@@ -3,8 +3,8 @@
 Release History
 ===============
 
-2.0.35
-++++++
+2.1.0
++++++
 * `az aks create` understands advanced networking (VNet) options
 * `az aks create` accepts options to enable Log Analytics monitoring and HTTP application routing addons
 * `az aks create --no-ssh-key` creates a cluster without using local SSH keys
