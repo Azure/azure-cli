@@ -56,8 +56,8 @@ class Linter(object):
         return [param_help.get('name', None) for param_help in \
             self._all_yaml_help.get(entry_name).get('parameters', [])]
 
-    def is_valid_parameter_help_name(self, entry_name, param_name):
-        return param_name in [param.name for param in self._loaded_help.get(entry_name).parameters]
+    def is_valid_parameter_help_name(self, entry_name, param_help_name):
+        return param_help_name in [param.name for param in self._loaded_help.get(entry_name).parameters]
 
     def get_command_help(self, command_name):
         return self._get_loaded_help_description(command_name)
@@ -65,8 +65,11 @@ class Linter(object):
     def get_command_group_help(self, command_group_name):
         return self._get_loaded_help_description(command_group_name)
 
+    def get_parameter_options(self, command_name, parameter_name):
+        return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+
     def get_parameter_help(self, command_name, parameter_name):
-        options = self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+        options = self.get_parameter_options(command_name, parameter_name)
         parameter_helps = self._loaded_help.get(command_name).parameters
         param_help = next((param for param in parameter_helps if share_element(options, param.name.split())), None)
         # workaround for --ids which is not does not generate doc help (BUG)
