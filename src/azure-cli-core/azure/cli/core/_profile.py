@@ -74,7 +74,7 @@ def _authentication_context_factory(cli_ctx, tenant, cache):
     if is_adfs:
         authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
     else:
-        authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
+        authority_url = authority_url.rstrip('/') + '/' + (tenant or _COMMON_TENANT)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
 
