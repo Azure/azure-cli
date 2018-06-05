@@ -1318,7 +1318,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                docker_bridge_address=None,
                enable_addons=None,
                workspace_resource_id=None,
-               http_application_routing=False,
                vnet_subnet_id=None,
                max_pods=0,
                aad_client_app_id=None,
@@ -1387,15 +1386,24 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     addon_profiles = {}
-    if http_application_routing:
+    addons = enable_addons.split(',') if enable_addons else []
+    if 'http_application_routing' in addons:
         addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('http_application_routing')
     # TODO: can we help the user find a workspace resource ID?
-    if enable_addons == 'monitoring':
+    if 'monitoring' in addons:
+        if not workspace_resource_id:
+            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
             enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
-    # error out if 'enable_addons' isn't set but workspace_resource_id is
+        addons.remove('monitoring')
+    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
-        raise CLIError('"--workspace-resource-id" requires "-enable-addon monitoring".')
+        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    # error out if any (unrecognized) addons remain
+    if addons:
+        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
+            ",".join(addons), "are" if len(addons) > 1 else "is"))
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
