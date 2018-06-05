@@ -388,7 +388,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             try:
                 client = factory(context.cli_ctx)
             except TypeError:
-                client = factory(context.cli_ctx, None)
+                client = factory(context.cli_ctx, args)
 
         client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
@@ -560,7 +560,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
-            client = factory(context.cli_ctx, None) if factory else None
+            client = factory(context.cli_ctx, args) if factory else None
         if client and (client_arg_name in getter_args or client_arg_name == 'self'):
             args[client_arg_name] = client
 
