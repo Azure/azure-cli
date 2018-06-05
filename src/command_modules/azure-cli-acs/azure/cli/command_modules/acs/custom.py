@@ -1299,7 +1299,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
                      "port-forward", dashboard_pod, "8001:9090"])
 
 
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",

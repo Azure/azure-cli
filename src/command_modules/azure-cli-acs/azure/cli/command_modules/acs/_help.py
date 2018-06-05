@@ -184,7 +184,7 @@ helps['aks create'] = """
                          application is for user login via kubectl.
         - name: --aad-server-app-id
           type: string
-          short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This
+          short-summary: (PREVIEW) The ID of an Azure Active Directory server application of type "Web app/API". This
                          application represents the managed cluster's apiserver (Server application).
         - name: --aad-server-app-secret
           type: string
@@ -231,7 +231,7 @@ helps['aks create'] = """
         - name: --service-cidr
           type: string
           short-summary: A CIDR notation IP range from which to assign service cluster IPs.
-          long-summary: This range must not overlap with any Subnet IP ranges. For example: 10.0.0.0/16.
+          long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
         - name: --vnet-subnet-id
           type: string
           short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
