@@ -25,6 +25,7 @@ def cf_resource_groups(cli_ctx, *_):
 
 def get_auth_management_client(cli_ctx, scope=None, **_):
     import re
+    from azure.cli.core.profiles import ResourceType
     from azure.mgmt.authorization import AuthorizationManagementClient
 
     subscription_id = None
@@ -32,8 +33,7 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
         matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
-    return get_mgmt_service_client(cli_ctx, AuthorizationManagementClient,
-                                   subscription_id=subscription_id)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
 def get_container_service_client(cli_ctx, **_):
