@@ -7,6 +7,10 @@ Release History
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 
+0.1.2
++++++
+* Minor changes
+
 0.1.1
 +++++
 * Minor changes

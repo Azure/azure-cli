@@ -35,6 +35,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
+    MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
@@ -89,8 +90,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_AUTHORIZATION: '2018-01-01-preview',
         ResourceType.DATA_STORAGE: '2018-03-28',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -102,6 +104,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_AUTHORIZATION: '2015-07-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }

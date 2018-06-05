@@ -17,6 +17,7 @@ Release History
 
 2.0.25
 ++++++
+* support stack profile
 * ad: remove stack traces from graph exceptions before surface to users
 * ad sp create: do not throw if CLI can't resolve app id
 
