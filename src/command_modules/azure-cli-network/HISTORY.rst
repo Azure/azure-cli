@@ -5,6 +5,7 @@ Release History
 2.1.3
 ++++++
 * `network vnet peering`: a few improvements
+* `network traffic-manager endpoint create/update`: Fix issue where `--endpoint-status` was case sensitive. [#6502](https://github.com/Azure/azure-cli/issues/6502)
 
 2.1.2
 ++++++
