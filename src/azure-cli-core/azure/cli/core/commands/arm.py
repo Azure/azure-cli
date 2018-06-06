@@ -280,16 +280,21 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 
 
 def register_global_subscription_parameter(cli_ctx):
+
     import knack.events as events
     from knack.util import CLIError
 
     def add_subscription_parameter(_, **kwargs):
+        from azure.cli.command_modules.profile._completers import get_subscription_id_list
+
         commands_loader = kwargs['commands_loader']
         cmd_tbl = kwargs['cmd_tbl']
         for command_name, cmd in cmd_tbl.items():
             if 'subscription' not in cmd.arguments:
                 commands_loader.extra_argument_registry[command_name]['_subscription'] = CLICommandArgument(
-                    '_subscription', options_list=['--subscription'], help='Subscription ID.', arg_group='Global')
+                    '_subscription', options_list=['--subscription'],
+                    help='Name or ID of subscription. You can configure the default subscription using `az account set -s NAME_OR_ID`"',
+                    completer=get_subscription_id_list, arg_group='Global', configured_default='subscription')
         commands_loader._update_command_definitions()
 
     def parse_subscription_parameter(cli_ctx, args, **kwargs):

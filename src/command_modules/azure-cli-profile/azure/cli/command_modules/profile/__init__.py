@@ -46,6 +46,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.')
             c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
             c.argument('identity', options_list=['-i', '--identity'], action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')
+            c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')
@@ -56,6 +57,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.argument_context('account list') as c:
             c.argument('all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
             c.argument('refresh', help="retrieve up-to-date subscriptions from server", action='store_true')
+            c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='output result in compatible with Azure SDK auth file')
