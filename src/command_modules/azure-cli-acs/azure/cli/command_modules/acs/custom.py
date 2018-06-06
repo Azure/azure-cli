@@ -1454,6 +1454,8 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name=None, 
     :type space_name: String
     :param update: Update to the latest Azure Dev Spaces client components.
     :type update: bool
+    :param prompt: Do not prompt for confirmation. Requires --space.
+    :type prompt: bool
     """
 
     if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
