@@ -90,9 +90,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_AUTHORIZATION: '2018-01-01-preview',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
+            'classic_administrators': '2015-06-01'
+        }),
         ResourceType.DATA_STORAGE: '2018-03-28',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -104,7 +106,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_AUTHORIZATION: '2015-07-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01'
+        }),
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }

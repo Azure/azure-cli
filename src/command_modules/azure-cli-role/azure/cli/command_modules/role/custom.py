@@ -21,7 +21,6 @@ from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models.graph_error import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
-from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
                                     KeyCredential, UserCreateParameters, PasswordProfile,
