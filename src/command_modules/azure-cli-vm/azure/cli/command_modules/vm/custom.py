@@ -1186,10 +1186,8 @@ def list_extensions(cmd, resource_group_name, vm_name):
     return result
 
 
-def set_extension(
-        cmd, resource_group_name, vm_name, vm_extension_name, publisher,
-        version=None, settings=None,
-        protected_settings=None, no_auto_upgrade=False):
+def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher,
+                  version=None, settings=None, protected_settings=None, no_auto_upgrade=False, force_update_tag=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -1202,7 +1200,8 @@ def set_extension(
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings=settings,
-                                  auto_upgrade_minor_version=(not no_auto_upgrade))
+                                  auto_upgrade_minor_version=(not no_auto_upgrade),
+                                  force_update_tag=force_update_tag)
     return client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name, instance_name, ext)
 # endregion
 
@@ -2347,10 +2346,8 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
         else vmss.virtual_machine_profile.extension_profile.extensions
 
 
-def set_vmss_extension(
-        cmd, resource_group_name, vmss_name, extension_name, publisher,
-        version=None, settings=None,
-        protected_settings=None, no_auto_upgrade=False):
+def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
+                       settings=None, protected_settings=None, no_auto_upgrade=False, force_update_tag=None):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -2372,6 +2369,8 @@ def set_vmss_extension(
                                           type_handler_version=version,
                                           settings=settings,
                                           auto_upgrade_minor_version=(not no_auto_upgrade))
+    if force_update_tag:
+        ext.force_update_tag = force_update_tag
 
     if not vmss.virtual_machine_profile.extension_profile:
         vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])

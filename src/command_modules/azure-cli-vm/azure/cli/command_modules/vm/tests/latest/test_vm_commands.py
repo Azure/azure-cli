@@ -829,15 +829,16 @@ class VMExtensionScenarioTest(ScenarioTest):
         try:
             self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                      checks=self.check('length([])', 0))
-            self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}"')
+            self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update-tag 123')
             self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
                 self.check('*.extensions[0].name', ['VMAccessForLinux']),
-                self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1']),
+                self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
             ])
             self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
                 self.check('type(@)', 'object'),
                 self.check('name', '{ext}'),
-                self.check('resourceGroup', '{rg}')
+                self.check('resourceGroup', '{rg}'),
+                self.check('forceUpdateTag', '123')
             ])
             self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
         finally:
@@ -1046,11 +1047,12 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
         try:
-            self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}"')
+            self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update-tag 123')
             self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
                 self.check('type(@)', 'object'),
                 self.check('name', '{ext}'),
-                self.check('publisher', '{pub}')
+                self.check('publisher', '{pub}'),
+                self.check('forceUpdateTag', '123')
             ])
         finally:
             os.remove(config_file)

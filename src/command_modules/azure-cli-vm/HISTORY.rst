@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.34
+++++++
+* vm/vmss extension set: expose `--force-update-tag`
+
 2.0.33
 ++++++
 * `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
