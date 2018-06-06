@@ -1441,7 +1441,7 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='default', parent_space_name=None):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name=None, update=False, prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -1450,17 +1450,18 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='defau
     :param resource_group_name: Name of resource group. You can configure the default group. \
     Using 'az configure --defaults group=<name>'.
     :type resource_group_name: String
-    :param space_name: Name of the dev space to use.
+    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
     :type space_name: String
-    :param parent_space_name: Name of a parent dev space to inherit from when creating a new dev space. \
-    By default, if there is already a single dev space with no parent, the new space inherits from this one.
-    :type parent_space_name: String
+    :param update: Update to the latest Azure Dev Spaces client components.
+    :type update: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(name, resource_group_name, space_name, parent_space_name)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, space_name, update, prompt)
+        except TypeError:
+            raise CLIError("Use '--update' option to get the latest Azure Dev Spaces client components.")
         except AttributeError as ae:
             raise CLIError(ae)
 
@@ -1509,10 +1510,21 @@ def _install_dev_spaces_extension(extension_name):
     return True
 
 
-def _get_or_add_extension(extension_name):
+def _update_dev_spaces_extension(extension_name):
+    try:
+        from azure.cli.command_modules.extension import custom
+        custom.update_extension(extension_name=extension_name)
+    except Exception:  # nopa pylint: disable=broad-except
+        return False
+    return True
+
+
+def _get_or_add_extension(extension_name, update=False):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
+        if update:
+            _update_dev_spaces_extension(extension_name)
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True

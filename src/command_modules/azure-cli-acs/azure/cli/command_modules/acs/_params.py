@@ -199,7 +199,8 @@ def load_arguments(self, _):
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('space_name', options_list=['--space', '-s'])
-        c.argument('parent_space_name', options_list=['--parent-space', '-p'])
+        c.argument('update', options_list=['--update'], action='store_true')
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation. Requires --space.')
 
     with self.argument_context('aks remove-dev-spaces') as c:
         c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
