@@ -36,7 +36,6 @@ def _write_config_file(user_name):
                   'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
                   'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
                   'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
-    config_file_name = 'private_config_{}.json'.format(datetime.utcnow().strftime('%H%M%S%f'))
     config = {
         'username': user_name,
         'ssh_key': public_key
@@ -1044,13 +1043,13 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
         self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-        result=self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{ext}'),
             self.check('publisher', '{pub}'),
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
-        
+
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
     """
