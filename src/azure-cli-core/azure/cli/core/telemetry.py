@@ -220,6 +220,7 @@ def start():
     _session.start_time = datetime.datetime.utcnow()
 
 
+@_user_agrees_to_telemetry
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def flush():
     # flush out current information
