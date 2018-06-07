@@ -80,6 +80,9 @@ class Linter(object):
     def _get_loaded_help_description(self, entry):
         return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
 
+    def get_exception_handler(self, command_name):
+        return self._command_table.get(command_name).exception_handler
+
 
 class LinterManager(object):
     def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions=None,
@@ -161,6 +164,8 @@ class LinterManager(object):
         if not self.exit_code:
             print(os.linesep + 'No violations found.')
         colorama.deinit()
+        from .rules.command_rules import counter
+        print(counter)
         return self.exit_code
 
     def _run_rules(self, rule_group):
