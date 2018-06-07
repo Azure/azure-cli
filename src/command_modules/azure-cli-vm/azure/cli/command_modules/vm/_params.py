@@ -517,6 +517,9 @@ def load_arguments(self, _):
     with self.argument_context('image gallery create-image') as c:
         c.argument('description', help='the description of the gallery image')
     with self.argument_context('image gallery create-image-version') as c:
+        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
+                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
+
         c.argument('description', help='the description of the gallery image')
         c.argument('managed_image', help='the name or resource id of a managed image')
         c.argument('version', help='image version')

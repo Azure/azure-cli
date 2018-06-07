@@ -352,6 +352,6 @@ def load_command_table(self, _):
 
     with self.command_group('image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete-image-version', 'delete')
-        g.command('show-image-version', 'get')
+        g.command('show-image-version', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list-image-versions', 'list_by_gallery_image')
         g.custom_command('create-image-version', 'upload_image')
