@@ -297,8 +297,10 @@ def register_global_subscription_parameter(cli_ctx):
         commands_loader._update_command_definitions()  # pylint: disable=protected-access
 
     def parse_subscription_parameter(cli_ctx, args, **kwargs):  # pylint: disable=unused-argument
-        subscription_id = getattr(args, '_subscription', None)
-        if subscription_id:
+        subscription = getattr(args, '_subscription', None)
+        if subscription:
+            from azure.cli.core._profile import Profile
+            subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id(subscription)
             cli_ctx.data['subscription_id'] = subscription_id
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)

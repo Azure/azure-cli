@@ -172,7 +172,7 @@ def get_subscription_id(cli_ctx):
     if 'subscription_id' in cli_ctx.data:
         subscription_id = cli_ctx.data['subscription_id']
     else:
-        _, subscription_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials()
+        subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id()
     return subscription_id
 
 

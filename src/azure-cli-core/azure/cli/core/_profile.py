@@ -417,12 +417,16 @@ class Profile(object):
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
             subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
                 _SUBSCRIPTION_NAME].lower()])]
-        if len(result) != 1:
-            raise CLIError("Please run 'az account set' to select active account.")
+        if not result and subscription:
+            raise CLIError("Subscription '{}' not found. Check the spelling and casing and try again.".format(subscription))
+        elif not result and not subscription:
+            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+        elif len(result) > 1:
+            raise CLIError("Multiple subscriptions with the name '{}' found. Specify the subscription ID.".format(subscription))
         return result[0]
 
-    def get_subscription_id(self):
-        return self.get_subscription()[_SUBSCRIPTION_ID]
+    def get_subscription_id(self, subscription=None):  # take id or name
+        return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     def get_access_token_for_resource(self, username, tenant, resource):
         tenant = tenant or 'common'
