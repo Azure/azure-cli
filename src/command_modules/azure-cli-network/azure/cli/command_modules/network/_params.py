@@ -829,7 +829,7 @@ def load_arguments(self, _):
         c.argument('profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
         c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
         c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
-        c.argument('endpoint_status', help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
+        c.argument('endpoint_status', arg_type=get_enum_type(['Enabled', 'Disabled']), help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
         c.argument('min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
         c.argument('priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
         c.argument('target', help='Fully-qualified DNS name of the endpoint.')
