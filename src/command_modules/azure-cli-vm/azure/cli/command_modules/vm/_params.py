@@ -529,5 +529,5 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
     with self.argument_context('image gallery show-image-version') as c:
-        c.argument('expand', help="The expand expression to apply on the operation. Possible values include: 'ReplicationStatus'")
+        c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     # endregion
