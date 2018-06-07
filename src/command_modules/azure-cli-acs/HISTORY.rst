@@ -6,6 +6,7 @@ Release History
 2.0.35
 ++++++
 * Updated options of `az aks use-dev-spaces` command. Added `--update` support.
+* `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
 
 2.0.34
 ++++++
