@@ -24,6 +24,7 @@ from azure.cli.core.profiles import ResourceType
 logger = get_logger(__name__)
 
 
+# pylint:disable=too-many-lines
 class ArmTemplateBuilder(object):
 
     def __init__(self):
