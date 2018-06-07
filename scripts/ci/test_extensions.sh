@@ -12,6 +12,9 @@ pip install $ALL_MODULES
 
 echo "Listing Available Extensions:"
 az extension list-available -otable
+
+# turn off telemetry as it crowds output
+set AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
