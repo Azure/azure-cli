@@ -9,7 +9,7 @@ import json
 import re
 from six import string_types
 
-from knack.arguments import CLICommandArgument, ignore_type, ArgumentsContext
+from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
 from knack.log import get_logger
 from knack.util import todict, CLIError
@@ -18,7 +18,6 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.commands.parameters import AzArgumentContext
 from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
@@ -282,7 +281,6 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 def register_global_subscription_parameter(cli_ctx):
 
     import knack.events as events
-    from knack.util import CLIError
 
     def add_subscription_parameter(_, **kwargs):
         from azure.cli.command_modules.profile._completers import get_subscription_id_list
@@ -293,13 +291,15 @@ def register_global_subscription_parameter(cli_ctx):
             if 'subscription' not in cmd.arguments:
                 commands_loader.extra_argument_registry[command_name]['_subscription'] = CLICommandArgument(
                     '_subscription', options_list=['--subscription'],
-                    help='Name or ID of subscription. You can configure the default subscription using `az account set -s NAME_OR_ID`"',
+                    help='Name or ID of subscription. You can configure the default subscription '
+                         'using `az account set -s NAME_OR_ID`"',
                     completer=get_subscription_id_list, arg_group='Global', configured_default='subscription')
-        commands_loader._update_command_definitions()
+        commands_loader._update_command_definitions()  # pylint: disable=protected-access
 
-    def parse_subscription_parameter(cli_ctx, args, **kwargs):
+    def parse_subscription_parameter(cli_ctx, args, **kwargs):  # pylint: disable=unused-argument
         subscription_id = getattr(args, '_subscription', None)
-        cli_ctx.data['subscription_id'] = subscription_id
+        if subscription_id:
+            cli_ctx.data['subscription_id'] = subscription_id
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
     cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_subscription_parameter)
