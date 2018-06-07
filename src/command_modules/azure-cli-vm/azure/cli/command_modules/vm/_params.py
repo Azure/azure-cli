@@ -457,10 +457,10 @@ def load_arguments(self, _):
             c.argument('version', help='The version of the extension')
 
     with self.argument_context('vm extension set') as c:
-        c.argument('force_update_tag', help='How the extension handler should be forced to update even if the extension configuration has not changed.')
+        c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
-        c.argument('force_update_tag', help='How the extension handler should be forced to update even if the extension configuration has not changed.')
+        c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:
