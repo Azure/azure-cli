@@ -102,7 +102,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None):
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
 
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
@@ -133,6 +133,10 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         asg_ids = [{'id': x.id} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
+
+    if accelerated_networking is not None:
+        nic_properties['enableAcceleratedNetworking'] = accelerated_networking
+        api_version = '2016-09-01' if api_version < '2016-09-01' else api_version
 
     nic = {
         'apiVersion': api_version,
@@ -237,32 +241,15 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, is_linux, extension_version):
-    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
-    return {
-        'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'name': vm_name + '/' + ext_type_name,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
-        'location': location,
-        'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
-        'properties': {
-            'publisher': "Microsoft.ManagedIdentity",
-            'type': ext_type_name,
-            'typeHandlerVersion': extension_version,
-            'autoUpgradeMinorVersion': True,
-            'settings': {'port': port}
-        }
-    }
-
-
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        os_caching=None, data_caching=None, storage_sku=None,
-        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, data_disk_sizes_gb=None,
-        image_data_disks=None, custom_data=None, secrets=None, license_type=None, zone=None):
+        storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
+        disk_info=None, boot_diagnostics_storage_uri=None):
+
+    os_caching = disk_info['os'].get('caching')
 
     def _build_os_profile():
 
@@ -368,8 +355,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
-        return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 data_caching, storage_sku, attach_data_disks=attach_data_disks)
+        if disk_info['os'].get('writeAcceleratorEnabled') is not None:
+            profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
+        data_disks = [v for k, v in disk_info.items() if k != 'os']
+        if data_disks:
+            profile['dataDisks'] = data_disks
+
+        return profile
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -387,6 +379,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if license_type:
         vm_properties['licenseType'] = license_type
 
+    if boot_diagnostics_storage_uri:
+        vm_properties['diagnosticsProfile'] = {
+            'bootDiagnostics': {
+                "enabled": True,
+                "storageUri": boot_diagnostics_storage_uri
+            }
+        }
+
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
@@ -399,67 +399,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if zone:
         vm['zones'] = zone
     return vm
-
-
-def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                      data_caching, storage_sku, attach_data_disks=None):
-    lun = 0
-
-    # handle 2 kinds of values
-    # 1 "--data-disk-caching <value>": all disks will be applied
-    # 2 "--data-disk-caching 1=<value> 2=<value>": apply based on lun, the rest will use server side default
-    default_caching, individual_disk_cachings = None, {}
-    if data_caching:
-        if len(data_caching) == 1 and '=' not in data_caching[0]:
-            default_caching = data_caching[0]
-        else:
-            for x in data_caching:
-                temp, caching = x.split('=', 1)
-                temp = int(temp)
-                individual_disk_cachings[temp] = caching
-
-    if image_data_disks:
-        profile['dataDisks'] = profile.get('dataDisks') or []
-        for image_data_disk in image_data_disks or []:
-            profile['dataDisks'].append({
-                'lun': image_data_disk.lun,
-                'createOption': "fromImage",
-                'caching': default_caching or individual_disk_cachings.get(image_data_disk.lun),
-                'managedDisk': {'storageAccountType': storage_sku}
-            })
-            lun = lun + 1
-
-    if data_disk_sizes_gb:
-        profile['dataDisks'] = profile.get('dataDisks') or []
-        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
-        for size in data_disk_sizes_gb:
-            profile['dataDisks'].append({
-                'lun': lun,
-                'createOption': "empty",
-                'diskSizeGB': int(size),
-                'caching': default_caching or individual_disk_cachings.get(lun),
-                'managedDisk': {'storageAccountType': storage_sku}
-            })
-            lun = lun + 1
-
-    if attach_data_disks:
-        profile['dataDisks'] = profile.get('dataDisks') or []
-        from msrestazure.tools import is_valid_resource_id
-        for d in attach_data_disks:
-            disk_entry = {
-                'lun': lun,
-                'createOption': 'attach',
-                'caching': default_caching or individual_disk_cachings.get(lun),
-            }
-            if is_valid_resource_id(d):
-                disk_entry['managedDisk'] = {'id': d}
-            else:
-                disk_entry['vhd'] = {'uri': d}
-                disk_entry['name'] = d.split('/')[-1].split('.')[0]
-            profile['dataDisks'].append(disk_entry)
-            lun += 1
-
-    return profile
 
 
 def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
@@ -667,13 +606,12 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
 def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
-                        admin_username, authentication_type, storage_profile, os_disk_name,
-                        os_caching, data_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
-                        image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
+                        admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
+                        storage_sku, os_type, image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
-                        secrets=None, license_type=None, zones=None, priority=None):
+                        secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -709,6 +647,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     # Build storage profile
     storage_properties = {}
+    os_caching = disk_info['os'].get('caching')
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
             'name': os_disk_name,
@@ -743,10 +682,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['imageReference'] = {
             'id': image
         }
-
-    storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
-                                        image_data_disks, data_caching,
-                                        storage_sku)
+    data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if data_disks:
+        storage_properties['dataDisks'] = data_disks
 
     # Build OS Profile
     os_profile = {
@@ -818,6 +756,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['priority'] = priority
+
+    if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
+                                                     operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):

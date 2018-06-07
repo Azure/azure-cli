@@ -151,7 +151,7 @@ def load_arguments(self, _):
             c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
 
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
-            c.argument('resource_name', options_list=('--gateway-name',))
+            c.argument('resource_name', options_list=['--gateway-name'])
 
     for item in ['create', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -966,4 +966,25 @@ def load_arguments(self, _):
             c.argument(dest, arg_type=get_enum_type(model))
         c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
         c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+    # endregion
+
+    # region Remove --ids from listsaz
+    for scope in ['express-route auth', 'express-route peering']:
+        with self.argument_context('network {} list'.format(scope)) as c:
+            c.argument('circuit_name', id_part=None)
+
+    with self.argument_context('network nic ip-config list') as c:
+        c.argument('resource_name', id_part=None)
+
+    with self.argument_context('network nsg rule list') as c:
+        c.argument('network_security_group_name', id_part=None)
+
+    with self.argument_context('network route-filter rule list') as c:
+        c.argument('route_filter_name', id_part=None)
+
+    with self.argument_context('network route-table route list') as c:
+        c.argument('route_table_name', id_part=None)
+
+    with self.argument_context('network traffic-manager endpoint list') as c:
+        c.argument('profile_name', id_part=None)
     # endregion

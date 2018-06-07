@@ -4,12 +4,11 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.32"
+__version__ = "2.0.37"
 
 import os
 import sys
 import timeit
-from pkg_resources import parse_version
 
 from knack.arguments import ArgumentsContext
 from knack.cli import CLI
@@ -258,6 +257,7 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
         self.recommend_remove = recommend_remove
 
     def handle_suppress(self, ext):
+        from pkg_resources import parse_version
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
             parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
         if should_suppress:
@@ -449,10 +449,10 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from importlib import import_module
         import types
 
-        from azure.cli.core.profiles import ResourceType
+        from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        for rt in ResourceType:
+        for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
             if operation.startswith(rt.import_prefix + ".operations."):
                 subs = operation[len(rt.import_prefix + ".operations."):]
                 operation_group = subs[:subs.index('_operations')]

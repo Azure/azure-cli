@@ -89,3 +89,30 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
     elif not billing_period_name and top:
         return list(client.list(filter=filter_expression, top=top).advance_page())
     return client.list(filter=filter_expression)
+
+
+def cli_consumption_list_budgets(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group_name(resource_group_name)
+    return client.list()
+
+
+def cli_consumption_show_budget(client, budget_name, resource_group_name=None):
+    if resource_group_name:
+        return client.get_by_resource_group_name(resource_group_name, budget_name)
+    return client.get(budget_name)
+
+
+def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, meters=None, resource_group_name=None):
+    time_period = client.models.BudgetTimePeriod(start_date, end_date)
+    filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
+    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)
+    if resource_group_name:
+        return client.create_or_update(resource_group_name, budget_name, parameters)
+    return client.create_or_update(budget_name, parameters)
+
+
+def cli_consumption_delete_budget(client, budget_name, resource_group_name=None):
+    if resource_group_name:
+        return client.delete(resource_group_name, budget_name)
+    return client.delete(budget_name)

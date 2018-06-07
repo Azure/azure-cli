@@ -6,10 +6,13 @@
 import math
 import os
 import json
+from knack.log import get_logger
 
 from .command_tree import CommandBranch, CommandHead
 from .util import get_window_dim
 
+
+logger = get_logger(__name__)
 
 TOLERANCE = 10
 
@@ -88,7 +91,10 @@ class GatherCommands(object):
         self.output_options = OUTPUT_OPTIONS
         self.global_param = GLOBAL_PARAM
 
-        self._gather_from_files(config)
+        try:
+            self._gather_from_files(config)
+        except (TypeError, KeyError, ValueError):
+            logger.warning('Encountered unrecognizable cache, interactive will create a new updated cache for use.')
 
     def add_exit(self):
         """ adds the exits from the application """
@@ -137,8 +143,7 @@ class GatherCommands(object):
 
             command_params = data[command].get('parameters', {})
             for param in command_params:
-                if command_params[param]['help'] and \
-                   '==SUPPRESS==' not in command_params[param]['help']:
+                if '==SUPPRESS==' not in command_params[param]['help']:
                     param_aliases = set()
 
                     for par in command_params[param]['name']:

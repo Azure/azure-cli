@@ -2,6 +2,20 @@
 
 Release History
 ===============
+
+2.0.30
+++++++
+*  add `account management-group` commands.
+
+2.0.29
+++++++
+* Minor changes
+
+
+2.0.28
+++++++
+* Minor changes
+
 2.0.27
 ++++++
 * `policy definition create`: Add support for `--metadata`.

@@ -33,8 +33,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name}  --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --ssh-key-value={ssh_key_value} ' \
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
@@ -59,7 +59,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('type', '{resource_type}'),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
@@ -88,30 +88,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 5', checks=[
-            self.check('agentPoolProfiles[0].count', 5)
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 5)
-        ])
-
-        # scale down
-        self.cmd('aks scale -g {resource_group} -n {name} -c 1', checks=[
-            self.check('agentPoolProfiles[0].count', 1)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 1)
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # delete
-        self.cmd('aks delete -g {resource_group} -n {name} -y', checks=[self.is_empty()])
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-        # show again and expect failure
-        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -124,12 +112,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
             'service_principal': sp_name,
-            'client_secret': sp_password
+            'client_secret': sp_password,
+            'k8s_version': '1.8.11'
         })
 
         # create --no-wait
         create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
-                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} ' \
+                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
                      '--tags scenario_test --no-wait'
         self.cmd(create_cmd, checks=[self.is_empty()])
 
@@ -146,26 +135,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        # delete
-        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
-
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
-    @RoleBasedServicePrincipalPreparer()
-    @AllowLargeResponse()
-    def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
-        # kwargs for string formatting
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': self.create_random_name('cliakstest', 16),
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
-            'location': resource_group_location,
-            'service_principal': sp_name,
-            'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'k8s_version': '1.7.12'
-        })
-
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
             self.exists('orchestrators[*].orchestratorVersion')
@@ -174,27 +143,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show k8s versions in table format
         self.cmd('aks get-versions -l {location} -o table', checks=[
             StringContainCheck(self.kwargs['k8s_version'])
-        ])
-
-        # create
-        create_cmd = 'aks create -g {resource_group} -n {name} --dns-name-prefix {dns_name_prefix} ' \
-                     '--ssh-key-value {ssh_key_value} --kubernetes-version {k8s_version} -l {location} ' \
-                     '--service-principal {service_principal} --client-secret {client_secret} -c 1'
-        self.cmd(create_cmd, checks=[
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded')
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('kubernetesVersion', '{k8s_version}')
         ])
 
         # get versions for upgrade
@@ -208,32 +156,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = '1.8.7'
+        k8s_upgrade_version = '1.9.6'
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
         ])
 
-
-        # upgrade
-        self.kwargs.update({'k8s_version': k8s_upgrade_version})
-        self.cmd('aks upgrade -g {resource_group} -n {name} --kubernetes-version {k8s_version} --yes', checks=[
-            self.check('provisioningState', 'Succeeded')
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('kubernetesVersion', '{k8s_version}')
-        ])
-
-        # get versions for upgrade in table format
-        self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
-            StringContainCheck('Upgrades'),
-            StringContainCheck('None available')
-        ])
-
         # delete
-        self.cmd('aks delete -g {resource_group} -n {name} -y', checks=[self.is_empty()])
+        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
+
+        # show again and expect failure
+        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
 
     @classmethod

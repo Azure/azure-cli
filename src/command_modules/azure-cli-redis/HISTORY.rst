@@ -3,9 +3,16 @@
 Release History
 ===============
 
+
+0.2.13
+++++++
+* Deprecated `redis patch-schedule patch-schedule show` in favor of `redis patch-schedule show`.
+* Deprecated `redis list-all`. This functionality has been folded into `redis list`.
+* Deprecated `redis import-method` in favor of `redis import`.
+* Added support for `--ids` to various commands.
+
 0.2.12
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.2.11

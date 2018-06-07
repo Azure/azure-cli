@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
@@ -21,6 +22,8 @@ from ._client_factory import (
     get_acr_service_client
 )
 
+logger = get_logger(__name__)
+
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
@@ -31,9 +34,16 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     elements = [item for item in result if item.name.lower() == resource_name.lower()]
 
     if not elements:
-        raise CLIError(
-            "No resource with type '{}' can be found with name '{}'.".format(
-                resource_type, resource_name))
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cli_ctx)
+        message = "The resource with name '{}' and type '{}' could not be found".format(
+            resource_name, resource_type)
+        try:
+            subscription = profile.get_subscription()
+            raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
+        except (KeyError, TypeError):
+            raise CLIError("{} in the current subscription.".format(message))
+
     elif len(elements) == 1:
         return elements[0]
     else:
@@ -84,37 +94,25 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     return client.get(resource_group_name, registry_name), resource_group_name
 
 
-def arm_deploy_template_managed_storage(cli_ctx,
-                                        resource_group_name,
-                                        registry_name,
-                                        location,
-                                        sku,
-                                        admin_user_enabled,
-                                        deployment_name=None):
-    """Deploys ARM template to create a container registry with managed storage account.
-    :param str resource_group_name: The name of resource group
-    :param str registry_name: The name of container registry
-    :param str location: The name of location
-    :param str sku: The SKU of the container registry
-    :param bool admin_user_enabled: Enable admin user
-    :param str deployment_name: The name of the deployment
+def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=None):
+    """Returns a Registry object for the specified name.
+    :param str name: either the registry name or the login server of the registry.
     """
-    from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core.util import get_file_json
-    import os
+    client = get_acr_service_client(cli_ctx).registries
+    registry_list = client.list()
 
-    parameters = _parameters(
-        registry_name=registry_name,
-        location=location,
-        sku=sku,
-        admin_user_enabled=admin_user_enabled)
+    if registry_name:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower() or item.name.lower() == registry_name.lower()]
+    else:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower()]
 
-    file_path = os.path.join(os.path.dirname(__file__), 'template.json')
-    template = get_file_json(file_path)
-    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    return _arm_deploy_template(
-        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
+    if len(elements) == 1:
+        return elements[0]
+    elif len(elements) > 1:
+        logger.warning("More than one registries were found by %s.", login_server)
+    return None
 
 
 def arm_deploy_template_new_storage(cli_ctx,

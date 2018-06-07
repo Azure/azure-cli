@@ -4,7 +4,7 @@
 ::
 
 @IF EXIST "%~dp0\..\python.exe" (
-  "%~dp0\..\python.exe" -Im azure.cli %*
+  "%~dp0\..\python.exe" -IBm azure.cli %*
 ) ELSE (
   echo Failed to load python executable.
   exit /b 1

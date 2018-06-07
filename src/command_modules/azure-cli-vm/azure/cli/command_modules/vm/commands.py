@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._validators import (
     process_msi_namespace, process_remove_identity_namespace, process_vm_secret_format)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
-from azure.cli.core.commands.arm import deployment_validate_table_format
+from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 from azure.cli.core.util import empty_on_404
 
 
@@ -164,7 +164,7 @@ def load_command_table(self, _):
         g.custom_command('identity show', 'show_vm_identity')
 
         g.custom_command('capture', 'capture_vm')
-        g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace)
+        g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
         g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
         g.command('deallocate', 'deallocate', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
@@ -189,7 +189,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
-        g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True)
+        g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.command('list-sizes', 'list_available_sizes')
@@ -266,7 +266,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('identity show', 'show_vmss_identity')
-        g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace)
+        g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True)
         g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
@@ -277,12 +277,13 @@ def load_command_table(self, _):
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
+        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True)
-        g.generic_update_command('update', getter_name='get_vmss', setter_name='set_vmss', supports_no_wait=True, command_type=compute_custom)
+        g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.generic_wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
 

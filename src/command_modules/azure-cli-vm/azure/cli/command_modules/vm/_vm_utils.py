@@ -5,6 +5,10 @@
 
 import json
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -120,3 +124,144 @@ def list_sku_info(cli_ctx, location=None):
     if location:
         result = [r for r in result if _match_location(location, r.locations)]
     return result
+
+
+def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+                        os_disk_caching=None, data_disk_cachings=None):
+    # we should return a dictionary with info like below and will emoit when see conflictions
+    # {
+    #   'os': { caching: 'Read', write_accelerator: None},
+    #   0: { caching: 'None', write_accelerator: True},
+    #   1: { caching: 'None', write_accelerator: True},
+    # }
+    from msrestazure.tools import is_valid_resource_id
+    info = {}
+    attach_data_disks = attach_data_disks or []
+    image_data_disks = image_data_disks or []
+    data_disk_sizes_gb = data_disk_sizes_gb or []
+    info['os'] = {}
+
+    for i in range(len(image_data_disks) + len(data_disk_sizes_gb) + len(attach_data_disks)):
+        info[i] = {
+            'lun': i
+        }
+
+    # fill in storage sku for managed data disks
+    for i in range(len(image_data_disks) + len(data_disk_sizes_gb)):
+        info[i]['managedDisk'] = {'storageAccountType': storage_sku}
+
+    # fill in createOption
+    for i in range(len(image_data_disks)):
+        info[i]['createOption'] = 'fromImage'
+    base = len(image_data_disks)
+    for i in range(base, base + len(data_disk_sizes_gb)):
+        info[i]['createOption'] = 'empty'
+        info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
+    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    for i in range(base, base + len(attach_data_disks)):
+        info[i]['createOption'] = 'attach'
+
+    # fill in attached data disks details
+    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    for i, d in enumerate(attach_data_disks):
+        if is_valid_resource_id(d):
+            info[base + i]['managedDisk'] = {'id': d}
+        else:
+            info[base + i]['vhd'] = {'uri': d}
+            info[base + i]['name'] = d.split('/')[-1].split('.')[0]
+
+    # fill in data disk caching
+    if data_disk_cachings:
+        update_disk_caching(info, data_disk_cachings)
+
+    # default os disk caching to 'ReadWrite' unless set otherwise
+    if os_disk_caching:
+        info['os']['caching'] = os_disk_caching
+    else:
+        info['os']['caching'] = 'ReadWrite'
+    return info
+
+
+def update_disk_caching(model, caching_settings):
+
+    def _update(model, lun, value):
+        if isinstance(model, dict):
+            luns = model.keys() if lun is None else [lun]
+            for l in luns:
+                if l not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                model[l]['caching'] = value
+        else:
+            if lun is None:
+                disks = [model.os_disk] + (model.data_disks or [])
+            elif lun == 'os':
+                disks = [model.os_disk]
+            else:
+                disk = next((d for d in model.data_disks if d.lun == lun), None)
+                if not disk:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                disks = [disk]
+            for disk in disks:
+                disk.caching = value
+
+    if len(caching_settings) == 1 and '=' not in caching_settings[0]:
+        _update(model, None, caching_settings[0])
+    else:
+        for x in caching_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+            lun, value = x.split('=', 1)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
+            _update(model, lun, value)
+
+
+def update_write_accelerator_settings(model, write_accelerator_settings):
+
+    def _update(model, lun, value):
+        if isinstance(model, dict):
+            luns = model.keys() if lun is None else [lun]
+            for l in luns:
+                if l not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                model[l]['writeAcceleratorEnabled'] = value
+        else:
+            if lun is None:
+                disks = [model.os_disk] + (model.data_disks or [])
+            elif lun == 'os':
+                disks = [model.os_disk]
+            else:
+                disk = next((d for d in model.data_disks if d.lun == lun), None)
+                if not disk:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                disks = [disk]
+            for disk in disks:
+                disk.write_accelerator_enabled = value
+
+    if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
+        _update(model, None, write_accelerator_settings[0].lower() == 'true')
+    else:
+        for x in write_accelerator_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
+                               " on individual disk")
+            lun, value = x.split('=', 1)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
+            _update(model, lun, value.lower() == 'true')
+
+
+def get_storage_blob_uri(cli_ctx, storage):
+    from azure.cli.core.profiles._shared import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    if urlparse(storage).scheme:
+        storage_uri = storage
+    else:
+        storage_mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+        storage_accounts = storage_mgmt_client.storage_accounts.list()
+        storage_account = next((a for a in list(storage_accounts)
+                                if a.name.lower() == storage.lower()), None)
+        if storage_account is None:
+            raise CLIError('{} does\'t exist.'.format(storage))
+        storage_uri = storage_account.primary_endpoints.blob
+    return storage_uri

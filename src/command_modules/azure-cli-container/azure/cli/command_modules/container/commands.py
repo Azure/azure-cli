@@ -17,4 +17,5 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container', confirmation=True)
         g.custom_command('logs', 'container_logs', client_factory=cf_container_logs)
         g.custom_command('exec', 'container_exec')
+        g.custom_command('export', 'container_export')
         g.custom_command('attach', 'attach_to_container')

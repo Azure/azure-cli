@@ -24,6 +24,12 @@ class APIVersionException(Exception):
 PROFILE_TYPE = object()
 
 
+class CustomResourceType(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, import_prefix, client_name):
+        self.import_prefix = import_prefix
+        self.client_name = client_name
+
+
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
@@ -59,8 +65,12 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
-        self.default_api_version = default_api_version
         self.profile = profile if profile is not None else {}
+        self.profile[None] = default_api_version
+
+    @property
+    def default_api_version(self):
+        return self.profile[None]
 
 
 AZURE_API_PROFILES = {
@@ -223,12 +233,12 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
-    if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
+    if not isinstance(resource_type, (ResourceType, CustomResourceType)) and resource_type != PROFILE_TYPE:
         raise ValueError("'resource_type' is required.")
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
-        if isinstance(resource_type, ResourceType) else api_profile
+        if isinstance(resource_type, (ResourceType, CustomResourceType)) else api_profile
     if isinstance(api_version_obj, SDKProfile):
         api_version_obj = api_version_obj.profile.get(operation_group or '', api_version_obj.default_api_version)
     return _validate_api_version(api_version_obj, min_api, max_api)

@@ -39,9 +39,6 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
-    with self.argument_context('ad') as c:
-        c.ignore('additional_properties')
-
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 
@@ -54,7 +51,7 @@ def load_arguments(self, _):
         c.argument('skip_assignment', arg_type=get_three_state_flag(), help='do not create default assignment')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
-    for item in ['create-for-rbac', 'reset-credentials', 'ad sp']:
+    for item in ['create-for-rbac', 'credential reset']:
         with self.argument_context('ad sp {}'.format(item)) as c:
             c.argument('name', name_arg_type)
             c.argument('cert', arg_group='Credential', validator=validate_cert)
@@ -63,6 +60,11 @@ def load_arguments(self, _):
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+
+    for item in ['delete', 'list']:
+        with self.argument_context('ad sp credential {}'.format(item)) as c:
+            c.argument('key_id', help='credential key id')
+            c.argument('cert', action='store_true', help='a certificate based credential')
 
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')

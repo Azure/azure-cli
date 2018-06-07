@@ -6,6 +6,10 @@
 # pylint:disable=too-many-lines
 
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -13,7 +17,7 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import hash_string
-from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api
+from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
@@ -198,15 +202,11 @@ def _parse_image_argument(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     import re
 
-    # 1 - easy check for URI
-    if namespace.image.lower().endswith('.vhd'):
-        return 'uri'
-
-    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    # 1 - check if a fully-qualified ID (assumes it is an image ID)
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    # 3 - attempt to match an URN pattern
+    # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
         namespace.os_publisher = urn_match.group(1)
@@ -222,6 +222,10 @@ def _parse_image_argument(cmd, namespace):
                 namespace.plan_publisher = image_plan.publisher
 
         return 'urn'
+
+    # 3 - unmanaged vhd based images?
+    if urlparse(namespace.image).scheme:
+        return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
@@ -400,6 +404,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
+    image_data_disks = None
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
@@ -407,7 +412,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         image_info = compute_client.images.get(res['resource_group'], res['name'])
         # pylint: disable=no-member
         namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-        namespace.image_data_disks = image_info.storage_profile.data_disks
+        image_data_disks = image_info.storage_profile.data_disks
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
@@ -422,41 +427,14 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
-    namespace.os_caching = _process_disk_caching_value(cmd, namespace.os_caching, is_os_disk=True)
-    namespace.data_caching = _process_disk_caching_value(cmd, namespace.data_caching, is_os_disk=False)
-
-
-def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
-    from azure.cli.core.profiles import ResourceType
-    CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
-
-    if is_os_disk:
-        if not disk_caching:
-            return CachingTypes.read_write.value
-        # value check is done at arg-parse layer through enum choice list, so skipping here
-        return disk_caching
-
-    if disk_caching:
-        disk_caching_values = [x.value for x in CachingTypes]
-        disk_caching_values_lower = [x.value.lower() for x in CachingTypes]
-        invalid_caching_val_err = 'usage error: please use data disk caching value from ' + '|'.join(
-            disk_caching_values)
-        using_luns = [x for x in disk_caching if '=' in x]
-        if len(disk_caching) > 1:
-            # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
-            if len(using_luns) != len(disk_caching):
-                raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
-        for x in disk_caching:
-            c = x
-            if '=' in x:
-                lun, c = x.split('=', 1)
-                try:
-                    lun = int(lun)
-                except ValueError:
-                    raise CLIError("usage error: LUN used in --data-disk-caching must be an integer")
-            if c.lower() not in disk_caching_values_lower:
-                raise CLIError(invalid_caching_val_err.format('data'))
-    return disk_caching
+    from ._vm_utils import normalize_disk_info
+    # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
+    namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
+                                              data_disk_sizes_gb=namespace.data_disk_sizes_gb,
+                                              attach_data_disks=getattr(namespace, 'attach_data_disks', []),
+                                              storage_sku=namespace.storage_sku,
+                                              os_disk_caching=namespace.os_caching,
+                                              data_disk_cachings=namespace.data_caching)
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -579,6 +557,61 @@ def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     # '*1.5' so we have enough leeway for over-provision
     factor = 1.5 if over_provision else 1
     return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
+
+
+def _validate_vm_vmss_accelerated_networking(namespace):
+    if namespace.accelerated_networking is None:
+        size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
+        size = size.lower()
+
+        # to refresh the list, run 'az vm create --accelerated-networking --size Standard_DS1_v2' and
+        # get it from the error
+        aval_sizes = ['Standard_D3_v2', 'Standard_D12_v2', 'Standard_D3_v2_Promo', 'Standard_D12_v2_Promo',
+                      'Standard_DS3_v2', 'Standard_DS12_v2', 'Standard_DS13-4_v2', 'Standard_DS14-4_v2',
+                      'Standard_DS3_v2_Promo', 'Standard_DS12_v2_Promo', 'Standard_DS13-4_v2_Promo',
+                      'Standard_DS14-4_v2_Promo', 'Standard_F4', 'Standard_F4s', 'Standard_D8_v3', 'Standard_D8s_v3',
+                      'Standard_D32-8s_v3', 'Standard_E8_v3', 'Standard_E8s_v3', 'Standard_D3_v2_ABC',
+                      'Standard_D12_v2_ABC', 'Standard_F4_ABC', 'Standard_F8s_v2', 'Standard_D4_v2',
+                      'Standard_D13_v2', 'Standard_D4_v2_Promo', 'Standard_D13_v2_Promo', 'Standard_DS4_v2',
+                      'Standard_DS13_v2', 'Standard_DS14-8_v2', 'Standard_DS4_v2_Promo', 'Standard_DS13_v2_Promo',
+                      'Standard_DS14-8_v2_Promo', 'Standard_F8', 'Standard_F8s', 'Standard_M64-16ms',
+                      'Standard_D16_v3', 'Standard_D16s_v3', 'Standard_D32-16s_v3', 'Standard_D64-16s_v3',
+                      'Standard_E16_v3', 'Standard_E16s_v3', 'Standard_E32-16s_v3', 'Standard_D4_v2_ABC',
+                      'Standard_D13_v2_ABC', 'Standard_F8_ABC', 'Standard_F16s_v2', 'Standard_D5_v2',
+                      'Standard_D14_v2', 'Standard_D5_v2_Promo', 'Standard_D14_v2_Promo', 'Standard_DS5_v2',
+                      'Standard_DS14_v2', 'Standard_DS5_v2_Promo', 'Standard_DS14_v2_Promo', 'Standard_F16',
+                      'Standard_F16s', 'Standard_M64-32ms', 'Standard_M128-32ms', 'Standard_D32_v3',
+                      'Standard_D32s_v3', 'Standard_D64-32s_v3', 'Standard_E32_v3', 'Standard_E32s_v3',
+                      'Standard_E32-8s_v3', 'Standard_E32-16_v3', 'Standard_D5_v2_ABC', 'Standard_D14_v2_ABC',
+                      'Standard_F16_ABC', 'Standard_F32s_v2', 'Standard_D15_v2', 'Standard_D15_v2_Promo',
+                      'Standard_D15_v2_Nested', 'Standard_DS15_v2', 'Standard_DS15_v2_Promo',
+                      'Standard_DS15_v2_Nested', 'Standard_D40_v3', 'Standard_D40s_v3', 'Standard_D15_v2_ABC',
+                      'Standard_M64ms', 'Standard_M64s', 'Standard_M128-64ms', 'Standard_D64_v3', 'Standard_D64s_v3',
+                      'Standard_E64_v3', 'Standard_E64s_v3', 'Standard_E64-16s_v3', 'Standard_E64-32s_v3',
+                      'Standard_F64s_v2', 'Standard_F72s_v2', 'Standard_M128s', 'Standard_M128ms', 'Standard_L8s_v2',
+                      'Standard_L16s_v2', 'Standard_L32s_v2', 'Standard_L64s_v2', 'Standard_L96s_v2', 'SQLGL',
+                      'SQLGLCore', 'Standard_D4_v3', 'Standard_D4s_v3', 'Standard_D2_v2', 'Standard_DS2_v2',
+                      'Standard_E4_v3', 'Standard_E4s_v3', 'Standard_F2', 'Standard_F2s', 'Standard_F4s_v2',
+                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C']
+        aval_sizes = [x.lower() for x in aval_sizes]
+        if size not in aval_sizes:
+            return
+
+        # VMs need to be a supported image in the marketplace
+        # Ubuntu 16.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
+        # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
+        publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
+        if not publisher:
+            return
+        publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
+        distros = [('canonical', 'UbuntuServer', '^16.04'), ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
+                   ('openlogic', 'centos', '^7.4'), ('coreos', 'coreos', None), ('credativ', 'debian', '-backports'),
+                   ('oracle', 'oracle-linux', '^7.4'), ('MicrosoftWindowsServer', 'WindowsServer', '^2016'),
+                   ('MicrosoftWindowsServer', 'WindowsServer', '^2012-R2')]
+        import re
+        for p, o, s in distros:
+            if p.lower() == publisher and (o is None or o.lower() == offer) and (s is None or re.match(s, sku, re.I)):
+                namespace.accelerated_networking = True
 
 
 def _validate_vmss_create_subnet(namespace):
@@ -911,13 +944,15 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
+    _validate_vm_vmss_accelerated_networking(namespace)
     _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM')
     _validate_vm_vmss_msi(cmd, namespace)
-
+    if namespace.boot_diagnostics_storage:
+        namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 # endregion
 
 
@@ -1086,6 +1121,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
+    _validate_vm_vmss_accelerated_networking(namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
@@ -1094,6 +1130,9 @@ def process_vmss_create_namespace(cmd, namespace):
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+
+    if namespace.eviction_policy and not namespace.priority:
+        raise CLIError('Usage error: --priority PRIORITY [--eviction-policy POLICY]')
 # endregion
 
 
@@ -1169,7 +1208,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if source.lower().endswith('.vhd'):
+    if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
@@ -1215,4 +1254,5 @@ def process_remove_identity_namespace(cmd, namespace):
 # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
 def process_msi_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 # endregion

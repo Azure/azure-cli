@@ -3,8 +3,24 @@
 Release History
 ===============
 
+3.2.4
++++++
+* Remove azure-batch-extensions dependency.
+
+3.2.3
++++++
+* Fixed bug in Pool list table formatting: issue #4378.
+
+3.2.2
++++++
+* Updated to Batch SDK 4.1.2.
+
+3.2.1
++++++
+* Minor fixes.
+
 3.2.0
-++++++
++++++
 * Updated to Batch SDK 4.1.1.
 * `sdist` is now compatible with wheel 0.31.0
 

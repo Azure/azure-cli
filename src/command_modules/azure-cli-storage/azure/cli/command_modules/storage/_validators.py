@@ -262,7 +262,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
     query_params = []
     if source_sas:
-        query_params.append(source_sas)
+        query_params.append(source_sas.lstrip('?'))
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
 
@@ -433,6 +433,29 @@ def validate_entity(namespace):
     # ensure numbers are converted from strings so querying will work correctly
     values = {key: cast_val(key, val) for key, val in values.items()}
     namespace.entity = values
+
+
+def validate_marker(namespace):
+    """ Converts a list of key value pairs into a dictionary. Ensures that required
+    nextrowkey and nextpartitionkey are included. """
+    if not namespace.marker:
+        return
+    marker = dict(x.split('=', 1) for x in namespace.marker)
+    expected_keys = {'nextrowkey', 'nextpartitionkey'}
+
+    for key in marker:
+        new_key = key.lower()
+        if new_key in expected_keys:
+            expected_keys.remove(key.lower())
+            val = marker[key]
+            del marker[key]
+            marker[new_key] = val
+    if expected_keys:
+        import argparse
+        raise argparse.ArgumentError(
+            None, 'incorrect usage: marker requires: {}'.format(' '.join(expected_keys)))
+
+    namespace.marker = marker
 
 
 def get_file_path_validator(default_file_param=None):

@@ -2,6 +2,18 @@
 
 Release History
 ===============
+0.1.33
+++++++
+* webapp/functionapp: improve generic update commands
+* webapp/functionapp: webapp deployment source config-zip supports async operation with status updates for long running operation 
+
+0.1.32
+++++++
+* webapp: fix a bug in `az webapp delete` when `--slot` is provided
+* webapp: remove `--runtime-version` from `az webapp auth update` as it's not very public ready
+* webapp: az webapp config set support for min_tls_version & https2.0
+* webapp: az webapp create support for multicontainers
+
 0.1.31
 ++++++
 * (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago

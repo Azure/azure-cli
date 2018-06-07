@@ -9,17 +9,16 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.v2017_10_01.models import (
+    Registry,
     RegistryUpdateParameters,
     StorageAccountProperties,
-    SkuName,
     Sku
 )
 
-from ._constants import MANAGED_REGISTRY_SKU
+from ._constants import MANAGED_REGISTRY_SKU, CLASSIC_REGISTRY_SKU
 from ._utils import (
     arm_deploy_template_new_storage,
     arm_deploy_template_existing_storage,
-    arm_deploy_template_managed_storage,
     random_storage_account_name,
     get_registry_by_name,
     validate_managed_registry,
@@ -49,16 +48,15 @@ def acr_create(cmd,
                sku,
                location=None,
                storage_account_name=None,
-               admin_enabled='false',
+               admin_enabled=False,
                deployment_name=None):
-    if sku == SkuName.basic.value and storage_account_name:
+    if sku in MANAGED_REGISTRY_SKU and storage_account_name:
         raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
                        "to create a Classic registry using storage account `{}`."
                        .format(storage_account_name, storage_account_name))
-    admin_user_enabled = admin_enabled == 'true'
 
-    if sku == SkuName.classic.value:
+    if sku in CLASSIC_REGISTRY_SKU:
         logger.warning(
             "Due to the planned deprecation of the Classic registry SKU, we recommend using "
             "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
@@ -76,7 +74,7 @@ def acr_create(cmd,
                     location,
                     sku,
                     storage_account_name,
-                    admin_user_enabled,
+                    admin_enabled,
                     deployment_name)
             )
         else:
@@ -88,26 +86,17 @@ def acr_create(cmd,
                     location,
                     sku,
                     storage_account_name,
-                    admin_user_enabled,
+                    admin_enabled,
                     deployment_name)
             )
+        return client.get(resource_group_name, registry_name)
     else:
         if storage_account_name:
             logger.warning(
                 "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
                 registry_name, sku)
-        LongRunningOperation(cmd.cli_ctx)(
-            arm_deploy_template_managed_storage(
-                cmd.cli_ctx,
-                resource_group_name,
-                registry_name,
-                location,
-                sku,
-                admin_user_enabled,
-                deployment_name)
-        )
-
-    return client.get(resource_group_name, registry_name)
+        registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled)
+        return client.create(resource_group_name, registry_name, registry)
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
@@ -131,10 +120,10 @@ def acr_update_custom(cmd,
 
     if storage_account_name is not None:
         instance.storage_account = StorageAccountProperties(
-            get_resource_id_by_storage_account_name(cmd.cli_ctx, storage_account_name))
+            id=get_resource_id_by_storage_account_name(cmd.cli_ctx, storage_account_name))
 
     if admin_enabled is not None:
-        instance.admin_user_enabled = admin_enabled == 'true'
+        instance.admin_user_enabled = admin_enabled
 
     if tags is not None:
         instance.tags = tags
@@ -169,20 +158,8 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    from subprocess import PIPE, Popen, CalledProcessError
-    docker_not_installed = "Please verify if docker is installed."
-    docker_not_available = "Please verify if docker daemon is running properly."
-
-    try:
-        p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
-        _, stderr = p.communicate()
-    except OSError:
-        raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if stderr:
-        raise CLIError(stderr.decode())
+    from subprocess import PIPE, Popen
+    docker_command = _get_docker_command()
 
     login_server, username, password = get_login_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -191,46 +168,23 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
-    use_password_stdin = False
-    try:
-        p = Popen(["docker", "login", "--help"], stdout=PIPE, stderr=PIPE)
-        stdout, _ = p.communicate()
-        if b'--password-stdin' in stdout:
-            use_password_stdin = True
-    except OSError:
-        raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if use_password_stdin:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password-stdin",
-                   login_server], stdin=PIPE, stderr=PIPE)
-        _, stderr = p.communicate(input=password.encode())
-    else:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password", password,
-                   login_server], stderr=PIPE)
-        _, stderr = p.communicate()
+    p = Popen([docker_command, "login",
+               "--username", username,
+               "--password", password,
+               login_server], stderr=PIPE)
+    _, stderr = p.communicate()
 
     if stderr:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            if use_password_stdin:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password-stdin",
-                           login_server], stdin=PIPE)
-                p.communicate(input=password.encode())
-            else:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password", password,
-                           login_server])
-                p.wait()
+            p = Popen([docker_command, "login",
+                       "--username", username,
+                       "--password", password,
+                       login_server])
+            p.wait()
+        elif b'--password-stdin' in stderr:
+            pass
         else:
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)
@@ -243,6 +197,34 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
                                                        resource_group_name,
                                                        "Usage is only supported for managed registries.")
     return client.list_usages(resource_group_name, registry_name)
+
+
+def _get_docker_command():
+    docker_not_installed = "Please verify if docker is installed."
+    docker_not_available = "Please verify if docker daemon is running properly."
+    docker_command = 'docker'
+
+    from subprocess import PIPE, Popen, CalledProcessError
+    try:
+        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+        _, stderr = p.communicate()
+    except OSError:
+        # docker is not discoverable in WSL so retry docker.exe once
+        try:
+            docker_command = 'docker.exe'
+            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+            _, stderr = p.communicate()
+        except OSError:
+            raise CLIError(docker_not_installed)
+        except CalledProcessError:
+            raise CLIError(docker_not_available)
+    except CalledProcessError:
+        raise CLIError(docker_not_available)
+
+    if stderr:
+        raise CLIError(stderr.decode())
+
+    return docker_command
 
 
 def _check_wincred(login_server):

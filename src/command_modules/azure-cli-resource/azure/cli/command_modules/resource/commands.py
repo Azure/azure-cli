@@ -10,12 +10,15 @@ from collections import OrderedDict
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.arm import handle_template_based_exception
 
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
-    cf_resource_managedapplications, cf_resource_managedappdefinitions)
+    cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions)
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
+
+from ._exception_handler import managementgroups_exception_handler
 
 
 # Resource group commands
@@ -118,6 +121,24 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
+    resource_managementgroups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations.management_groups_operations#ManagementGroupsOperations.{}',
+        client_factory=cf_management_groups,
+        exception_handler=managementgroups_exception_handler
+    )
+
+    resource_managementgroups_subscriptions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations.management_group_subscriptions_operations#ManagementGroupSubscriptionsOperations.{}',
+        client_factory=cf_management_group_subscriptions,
+        exception_handler=managementgroups_exception_handler
+    )
+
+    resource_managementgroups_update_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.resource.custom#{}',
+        client_factory=cf_management_groups,
+        exception_handler=managementgroups_exception_handler
+    )
+
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -185,12 +206,12 @@ def load_command_table(self, _):
         g.command('remove-value', 'delete_value')
 
     with self.command_group('group deployment', resource_deployment_sdk) as g:
-        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace)
+        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('delete', 'delete')
-        g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format)
+        g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')
         g.generic_wait_command('wait')
 
@@ -243,3 +264,22 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
+
+    with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
+        g.custom_command('list', 'cli_managementgroups_group_list')
+        g.custom_command('show', 'cli_managementgroups_group_show')
+        g.custom_command('create', 'cli_managementgroups_group_create')
+        g.custom_command('delete', 'cli_managementgroups_group_delete')
+        g.generic_update_command(
+            'update',
+            getter_name='cli_managementgroups_group_update_get',
+            getter_type=resource_managementgroups_update_type,
+            setter_name='cli_managementgroups_group_update_set',
+            setter_type=resource_managementgroups_update_type,
+            custom_func_name='cli_managementgroups_group_update_custom_func',
+            custom_func_type=resource_managementgroups_update_type,
+            exception_handler=managementgroups_exception_handler)
+
+    with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
+        g.custom_command('add', 'cli_managementgroups_subscription_add')
+        g.custom_command('remove', 'cli_managementgroups_subscription_remove')

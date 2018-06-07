@@ -11,18 +11,16 @@ import re
 import shlex
 from subprocess import check_output, CalledProcessError
 
-from colorama import Fore
-
 from automation.utilities.display import display, output
 from automation.utilities.path import filter_user_selected_modules_with_tests, get_config_dir
 
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
-TEST_INDEX_FILE = 'testIndex.json'
+TEST_INDEX_FORMAT = 'testIndex_{}.json'
 
 
 def extract_module_name(path):
-    mod_name_regex = re.compile(r'azure-cli-([^/\\]*)')
+    mod_name_regex = re.compile(r'azure[/\\]cli[/\\]([^/\\]+)')
     ext_name_regex = re.compile(r'.*(azext_[^/\\]+).*')
 
     try:
@@ -103,20 +101,24 @@ def validate_usage(args):
 
 
 def get_current_profile(args):
+    import colorama
+
+    colorama.init(autoreset=True)
     try:
-        fore_red = Fore.RED if not IS_WINDOWS else ''
-        fore_reset = Fore.RESET if not IS_WINDOWS else ''
+        fore_red = colorama.Fore.RED if not IS_WINDOWS else ''
+        fore_reset = colorama.Fore.RESET if not IS_WINDOWS else ''
         current_profile = check_output(shlex.split('az cloud show --query profile -otsv'),
                                        shell=IS_WINDOWS).decode('utf-8').strip()
-        if not args.profile:
+        if not args.profile or current_profile == args.profile:
             args.profile = current_profile
             display('The tests are set to run against current profile {}.'
                     .format(fore_red + current_profile + fore_reset))
         elif current_profile != args.profile:
             display('The tests are set to run against profile {} but the current az cloud profile is {}.'
                     .format(fore_red + args.profile + fore_reset, fore_red + current_profile + fore_reset))
-            display('Please use "az cloud set" command to change the current profile.')
-            sys.exit(1)
+            display('SWITCHING TO PROFILE {}.'.format(fore_red + args.profile + fore_reset))
+            display('az cloud update --profile {}'.format(args.profile))
+            check_output(shlex.split('az cloud update --profile {}'.format(args.profile)), shell=IS_WINDOWS)
         return current_profile
     except CalledProcessError:
         display('Failed to retrieve current az profile')
@@ -124,7 +126,8 @@ def get_current_profile(args):
 
 
 def get_test_index(args):
-    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FILE)
+    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
+    print(test_index_path)
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
@@ -172,7 +175,7 @@ def discover_tests(args):
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
 
-    profile = args.profile
+    profile = args.profile.replace('-', '_')
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')

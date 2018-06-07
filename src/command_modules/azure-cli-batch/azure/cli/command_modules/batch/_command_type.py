@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 import re
 from six import string_types
 
@@ -17,6 +16,7 @@ from azure.cli.command_modules.batch import _parameter_format as pformat
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
+from azure.cli.core.util import get_file_json
 
 
 _CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
@@ -404,8 +404,7 @@ class BatchArgumentTree(object):
         try:
             if namespace.json_file:
                 try:
-                    with open(namespace.json_file) as file_handle:
-                        namespace.json_file = json.load(file_handle)
+                    namespace.json_file = get_file_json(namespace.json_file)
                 except EnvironmentError:
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:

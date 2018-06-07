@@ -23,6 +23,14 @@ def error_pass(_, message):  # pylint: disable=unused-argument
     return
 
 
+def _check_value_muted(_, action, value):
+    # patch for AzCliCommandParser that does no logging
+    if action.choices is not None and value not in action.choices:
+        import argparse
+        msg = 'invalid choice: {}'.format(value)
+        raise argparse.ArgumentError(action, msg)
+
+
 def sort_completions(completions_gen):
     """ sorts the completions """
 
@@ -45,7 +53,7 @@ class AzCompleter(Completer):
         self.started = False
 
         # dictionary of command to descriptions
-        self.command_description = None
+        self.command_description = {}
         # a list of all the possible parameters
         self.completable_param = None
         # the command tree
@@ -188,15 +196,23 @@ class AzCompleter(Completer):
                         return arg
         return None
 
+    # pylint: disable=protected-access
     def mute_parse_args(self, text):
         """ mutes the parser error when parsing, then puts it back """
         error = AzCliCommandParser.error
-        AzCliCommandParser.error = error_pass
+        _check_value = AzCliCommandParser._check_value
 
-        parse_args = self.argsfinder.get_parsed_args(
-            parse_quotes(text, quotes=False, string=False))
+        AzCliCommandParser.error = error_pass
+        AzCliCommandParser._check_value = _check_value_muted
+
+        # No exception is expected. However, we add this try-catch block, as this may have far-reaching effects.
+        try:
+            parse_args = self.argsfinder.get_parsed_args(parse_quotes(text, quotes=False, string=False))
+        except Exception:  # pylint: disable=broad-except
+            pass
 
         AzCliCommandParser.error = error
+        AzCliCommandParser._check_value = _check_value
         return parse_args
 
     # pylint: disable=too-many-branches

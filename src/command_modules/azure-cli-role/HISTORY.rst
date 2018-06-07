@@ -3,9 +3,17 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* ad app update: add generic update support
+
+2.0.23
+++++++
+* BREAKING CHANGE: remove deprecated `az ad sp reset-credentials`
+* Minor fixes.
+
 2.0.22
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 2.0.21

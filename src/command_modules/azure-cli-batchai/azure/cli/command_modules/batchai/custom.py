@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
 from __future__ import print_function
 
 import string
@@ -29,7 +30,7 @@ from msrestazure.tools import is_valid_resource_id
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core import keys
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 import azure.mgmt.batchai.models as models
 
@@ -228,7 +229,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.credentials and ref.account_name == storage_account_name:
                 require_storage_account_key = True
                 ref.credentials = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     # Patch parameters of blob file systems.
     if result.azure_blob_file_systems:
@@ -247,7 +249,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.account_name:
                 raise CLIError('Ill-formed Azure Blob File System reference in the configuration file - no account '
                                'name provided.')
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     if require_storage_account and not storage_account_name:
         raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
@@ -506,8 +509,8 @@ def _configure_auto_storage(cli_ctx, location):
     :return (str, str): a tuple with auto storage account name and key.
     """
     from azure.mgmt.resource.resources.models import ResourceGroup
-    from azure.storage.file import FileService
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService, FileService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                            'blob#BlockBlobService', 'file#FileService')
     resource_group = _get_auto_storage_resource_group()
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if resource_client.resource_groups.check_existence(resource_group):
@@ -601,7 +604,7 @@ def _generate_ssh_keys():
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, generate_ssh_keys=None, image=None, custom_image=None,
-                   use_auto_storage=False, vm_size=None, vm_priority='dedicated', target=None, min_nodes=None,
+                   use_auto_storage=False, vm_size=None, vm_priority=None, target=None, min_nodes=None,
                    max_nodes=None, subnet=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
                    azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
                    account_name=None, account_key=None, setup_task=None, setup_task_output=None):
@@ -765,8 +768,8 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     :param str path: path to list files from.
     :param int expiry: SAS expiration time in minutes.
     """
-    from azure.storage.file import FileService
-    from azure.storage.file.models import File, FilePermissions
+    FileService, File, FilePermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                                 'file#FileService', 'file.models#File', 'file.models#FilePermissions')
     result = []
     service = FileService(afs.account_name, _get_storage_account_key(cli_ctx, afs.account_name, None))
     share_name = afs.azure_file_url.split('/')[-1]

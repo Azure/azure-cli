@@ -2,9 +2,20 @@
 
 Release History
 ===============
+0.2.3
++++++
+* minor changes
+
+0.2.2
++++++
+* Now 'az batchai create cluster' respects vm priority configured in the cluster's configuration file.
+
+0.2.1
++++++
+* Minor fixes
 
 0.2.0
-++++++
++++++
 * Added support for 2018-03-01 API
 
  - Job level mounting

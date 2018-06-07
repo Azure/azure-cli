@@ -66,6 +66,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.{}',
         client_factory=cf_webapps
     )
+    appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
@@ -78,7 +80,7 @@ def load_command_table(self, _):
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity show', 'show_identity')
-        g.generic_update_command('update', custom_func_name='update_webapp', setter_arg_name='site_envelope')
+        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -179,9 +181,9 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
-        g.custom_command('assign-identity', 'assign_identity', deprecate_info='identity assign')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity show', 'show_identity')
+        g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"tags": {"product": "azurecli", "cause": "automation", "date": "2018-04-04T22:04:10Z"},
+    body: '{"tags": {"cause": "automation", "product": "azurecli", "date": "2018-04-30T21:13:18Z"},
       "location": "southeastasia"}'
     headers:
       Accept: [application/json]
@@ -9,19 +9,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['117']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.32]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southeastasia","tags":{"product":"azurecli","cause":"automation","date":"2018-04-04T22:04:10Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southeastasia","tags":{"cause":"automation","product":"azurecli","date":"2018-04-30T21:13:18Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['391']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:04:12 GMT']
+      date: ['Mon, 30 Apr 2018 21:13:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -29,8 +29,8 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"administratorLoginPassword": "SecretPassword123", "administratorLogin":
-      "admin123"}, "location": "southeastasia"}'
+    body: '{"location": "southeastasia", "properties": {"administratorLogin": "admin123",
+      "administratorLoginPassword": "SecretPassword123"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -38,21 +38,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['130']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
   response:
-    body: {string: '{"operation":"UpsertLogicalServer","startTime":"2018-04-04T22:04:17.053Z"}'}
+    body: {string: '{"operation":"UpsertLogicalServer","startTime":"2018-04-30T21:13:25.073Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview']
       cache-control: [no-cache]
       content-length: ['74']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:04:17 GMT']
+      date: ['Mon, 30 Apr 2018 21:13:24 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverOperationResults/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverOperationResults/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -66,17 +66,17 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql server create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview
   response:
-    body: {string: '{"name":"52baf6bd-70d9-4446-b699-d406490dd6b0","status":"InProgress","startTime":"2018-04-04T22:04:17.053Z"}'}
+    body: {string: '{"name":"4a388f90-622c-4186-ae1a-55fdbf43d5ee","status":"InProgress","startTime":"2018-04-30T21:13:25.073Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['108']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:04:19 GMT']
+      date: ['Mon, 30 Apr 2018 21:13:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -92,17 +92,17 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql server create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview
   response:
-    body: {string: '{"name":"52baf6bd-70d9-4446-b699-d406490dd6b0","status":"InProgress","startTime":"2018-04-04T22:04:17.053Z"}'}
+    body: {string: '{"name":"4a388f90-622c-4186-ae1a-55fdbf43d5ee","status":"InProgress","startTime":"2018-04-30T21:13:25.073Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['108']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:04:21 GMT']
+      date: ['Mon, 30 Apr 2018 21:13:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -118,17 +118,17 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql server create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview
   response:
-    body: {string: '{"name":"52baf6bd-70d9-4446-b699-d406490dd6b0","status":"InProgress","startTime":"2018-04-04T22:04:17.053Z"}'}
+    body: {string: '{"name":"4a388f90-622c-4186-ae1a-55fdbf43d5ee","status":"InProgress","startTime":"2018-04-30T21:13:25.073Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['108']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:04:44 GMT']
+      date: ['Mon, 30 Apr 2018 21:13:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -144,17 +144,43 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql server create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/52baf6bd-70d9-4446-b699-d406490dd6b0?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview
   response:
-    body: {string: '{"name":"52baf6bd-70d9-4446-b699-d406490dd6b0","status":"Succeeded","startTime":"2018-04-04T22:04:17.053Z"}'}
+    body: {string: '{"name":"4a388f90-622c-4186-ae1a-55fdbf43d5ee","status":"InProgress","startTime":"2018-04-30T21:13:25.073Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['108']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:13:53 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/serverAzureAsyncOperation/4a388f90-622c-4186-ae1a-55fdbf43d5ee?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"name":"4a388f90-622c-4186-ae1a-55fdbf43d5ee","status":"Succeeded","startTime":"2018-04-30T21:13:25.073Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:05:05 GMT']
+      date: ['Mon, 30 Apr 2018 21:14:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -170,8 +196,8 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql server create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
   response:
@@ -180,7 +206,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['587']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:05:06 GMT']
+      date: ['Mon, 30 Apr 2018 21:14:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -197,8 +223,8 @@ interactions:
       CommandName: [sql db create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
@@ -208,7 +234,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['587']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:05:08 GMT']
+      date: ['Mon, 30 Apr 2018 21:14:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -226,26 +252,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['29']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2017-10-01-preview
   response:
-    body: {string: '{"operation":"CreateLogicalDatabase","startTime":"\/Date(1522879512935+0000)\/"}'}
+    body: {string: '{"operation":"CreateLogicalDatabase","startTime":"2018-04-30T21:14:23.067Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview']
-      cache-control: ['no-store, no-cache']
-      content-length: ['80']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:05:13 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operationResults/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview']
-      preference-applied: [return-content]
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseAzureAsyncOperation/00aa1c97-db6b-4a8e-b2cc-66074d7aef3e?api-version=2017-10-01-preview']
+      cache-control: [no-cache]
+      content-length: ['76']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:14:22 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseOperationResults/00aa1c97-db6b-4a8e-b2cc-66074d7aef3e?api-version=2017-10-01-preview']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -254,19 +280,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql db create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseAzureAsyncOperation/00aa1c97-db6b-4a8e-b2cc-66074d7aef3e?api-version=2017-10-01-preview
   response:
-    body: {string: '{"operationId":"e732a4d9-8408-4d1f-b14d-52273f5830e1","status":"InProgress","error":null}'}
+    body: {string: '{"name":"00aa1c97-db6b-4a8e-b2cc-66074d7aef3e","status":"InProgress","startTime":"2018-04-30T21:14:23.067Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview']
-      cache-control: ['no-store, no-cache']
-      content-length: ['89']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:05:44 GMT']
+      cache-control: [no-cache]
+      content-length: ['108']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:14:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -280,19 +306,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql db create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseAzureAsyncOperation/00aa1c97-db6b-4a8e-b2cc-66074d7aef3e?api-version=2017-10-01-preview
   response:
-    body: {string: '{"operationId":"e732a4d9-8408-4d1f-b14d-52273f5830e1","status":"Succeeded","error":null}'}
+    body: {string: '{"name":"00aa1c97-db6b-4a8e-b2cc-66074d7aef3e","status":"InProgress","startTime":"2018-04-30T21:14:23.067Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/e732a4d9-8408-4d1f-b14d-52273f5830e1?api-version=2014-04-01-Preview']
-      cache-control: ['no-store, no-cache']
-      content-length: ['88']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:06:15 GMT']
+      cache-control: [no-cache]
+      content-length: ['108']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:14:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -306,20 +332,46 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql db create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseAzureAsyncOperation/00aa1c97-db6b-4a8e-b2cc-66074d7aef3e?api-version=2017-10-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases","location":"Southeast
-        Asia","kind":"v12.0,user","managedBy":null,"properties":{"databaseId":"c7edf1ca-53ac-40a6-ae46-a93f1a989f62","edition":"Standard","status":"Online","serviceLevelObjective":"S0","collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":"268435456000","creationDate":"2018-04-04T22:05:13.263Z","currentServiceObjectiveId":"f1173c43-91bd-4aaa-973c-54e79e15235b","requestedServiceObjectiveId":"f1173c43-91bd-4aaa-973c-54e79e15235b","requestedServiceObjectiveName":"S0","sampleName":null,"defaultSecondaryLocation":"East
-        Asia","earliestRestoreDate":"2018-04-04T22:35:45.307Z","elasticPoolName":null,"containmentState":2,"readScale":"Disabled","failoverGroupId":null,"zoneRedundant":false,"isUpgradeRequested":false}}'}
+    body: {string: '{"name":"00aa1c97-db6b-4a8e-b2cc-66074d7aef3e","status":"Succeeded","startTime":"2018-04-30T21:14:23.067Z"}'}
     headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['1076']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:06:17 GMT']
+      cache-control: [no-cache]
+      content-length: ['107']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:15:11 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2017-10-01-preview
+  response:
+    body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"kind":"v12.0,user","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":268435456000,"status":"Online","databaseId":"ac016d37-a673-41b6-8e01-4c6f9ec8cc95","creationDate":"2018-04-30T21:14:23.363Z","currentServiceObjectiveName":"S0","requestedServiceObjectiveName":"S0","defaultSecondaryLocation":"East
+        Asia","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"earliestRestoreDate":"2018-04-30T21:45:05.38Z","readScale":"Disabled","currentSku":{"name":"Standard","tier":"Standard","capacity":10}},"location":"southeastasia","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['965']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:15:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -334,21 +386,21 @@ interactions:
       CommandName: [sql db update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2017-10-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases","location":"Southeast
-        Asia","kind":"v12.0,user","managedBy":null,"properties":{"databaseId":"c7edf1ca-53ac-40a6-ae46-a93f1a989f62","edition":"Standard","status":"Online","serviceLevelObjective":"S0","collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":"268435456000","creationDate":"2018-04-04T22:05:13.263Z","currentServiceObjectiveId":"f1173c43-91bd-4aaa-973c-54e79e15235b","requestedServiceObjectiveId":"f1173c43-91bd-4aaa-973c-54e79e15235b","requestedServiceObjectiveName":"S0","sampleName":null,"defaultSecondaryLocation":"East
-        Asia","earliestRestoreDate":"2018-04-04T22:35:45.307Z","elasticPoolName":null,"containmentState":2,"readScale":"Disabled","failoverGroupId":null,"zoneRedundant":false,"isUpgradeRequested":false}}'}
+    body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"kind":"v12.0,user","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":268435456000,"status":"Online","databaseId":"ac016d37-a673-41b6-8e01-4c6f9ec8cc95","creationDate":"2018-04-30T21:14:23.363Z","currentServiceObjectiveName":"S0","requestedServiceObjectiveName":"S0","defaultSecondaryLocation":"East
+        Asia","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"earliestRestoreDate":"2018-04-30T21:45:05.38Z","readScale":"Disabled","currentSku":{"name":"Standard","tier":"Standard","capacity":10}},"location":"southeastasia","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases"}'}
     headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['1076']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:06:18 GMT']
+      cache-control: [no-cache]
+      content-length: ['965']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:15:16 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -356,36 +408,36 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "maxSizeBytes":
-      "268435456000", "requestedServiceObjectiveName": "S1", "readScale": "Disabled"},
-      "location": "Southeast Asia"}'
+    body: '{"sku": {"name": "S1"}, "location": "southeastasia", "properties": {"collation":
+      "SQL_Latin1_General_CP1_CI_AS", "readScale": "Disabled", "catalogCollation":
+      "SQL_Latin1_General_CP1_CI_AS", "maxSizeBytes": 268435456000}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [sql db update]
       Connection: [keep-alive]
-      Content-Length: ['187']
+      Content-Length: ['220']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01?api-version=2017-10-01-preview
   response:
-    body: {string: '{"operation":"AlterDatabaseOperation","startTime":"\/Date(1522879581391+0000)\/"}'}
+    body: {string: '{"operation":"UpdateLogicalDatabase","startTime":"2018-04-30T21:15:19.79Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/azureAsyncOperation/8e3ea5f3-be47-43dd-8657-c6bdddb99058?api-version=2014-04-01-Preview']
-      cache-control: ['no-store, no-cache']
-      content-length: ['81']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 04 Apr 2018 22:06:21 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operationResults/8e3ea5f3-be47-43dd-8657-c6bdddb99058?api-version=2014-04-01-Preview']
-      preference-applied: [return-content]
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseAzureAsyncOperation/ec6340ce-8709-48ab-8502-de9feb586fd3?api-version=2017-10-01-preview']
+      cache-control: [no-cache]
+      content-length: ['75']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 30 Apr 2018 21:15:19 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/southeastasia/databaseOperationResults/ec6340ce-8709-48ab-8502-de9feb586fd3?api-version=2017-10-01-preview']
+      pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -395,19 +447,19 @@ interactions:
       CommandName: [sql db op list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operations?api-version=2017-10-01-preview
   response:
     body: {string: '{"value":[{"properties":{"databaseName":"cliautomationdb01","operation":"UpdateLogicalDatabase","operationFriendlyName":"ALTER
-        DATABASE","percentComplete":0,"serverName":"clitestserver000002","startTime":"2018-04-04T22:06:21.343Z","state":"InProgress"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operations/8e3ea5f3-be47-43dd-8657-c6bdddb99058","name":"8e3ea5f3-be47-43dd-8657-c6bdddb99058","type":"Microsoft.Sql/servers/databases/operations"}]}'}
+        DATABASE","percentComplete":0,"serverName":"clitestserver000002","startTime":"2018-04-30T21:15:19.79Z","state":"InProgress"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operations/ec6340ce-8709-48ab-8502-de9feb586fd3","name":"ec6340ce-8709-48ab-8502-de9feb586fd3","type":"Microsoft.Sql/servers/databases/operations"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['719']
+      content-length: ['718']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 04 Apr 2018 22:06:22 GMT']
+      date: ['Mon, 30 Apr 2018 21:15:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -425,23 +477,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 azure-mgmt-sql/0.8.6 Azure-SDK-For-Python AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-sql/0.9.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operations/8e3ea5f3-be47-43dd-8657-c6bdddb99058/cancel?api-version=2017-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/databases/cliautomationdb01/operations/ec6340ce-8709-48ab-8502-de9feb586fd3/cancel?api-version=2017-10-01-preview
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 04 Apr 2018 22:06:24 GMT']
+      date: ['Mon, 30 Apr 2018 21:15:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -452,9 +504,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.31]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.32]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -463,12 +515,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 04 Apr 2018 22:06:27 GMT']
+      date: ['Mon, 30 Apr 2018 21:15:27 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdXV1kyUjNTNjRGTUNYVEI3NFgyQjRRVTZXM0syU1dCNDJSQXw3OEM0M0NBODJFMTRBOTc2LVNPVVRIRUFTVEFTSUEiLCJqb2JMb2NhdGlvbiI6InNvdXRoZWFzdGFzaWEifQ?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdQR1dCREszVU5SN1JDVDZPRzJVR1BUUTZVVTNUSjNWQlVXQXxDODNGMkYwODg0OTdGMzk1LVNPVVRIRUFTVEFTSUEiLCJqb2JMb2NhdGlvbiI6InNvdXRoZWFzdGFzaWEifQ?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

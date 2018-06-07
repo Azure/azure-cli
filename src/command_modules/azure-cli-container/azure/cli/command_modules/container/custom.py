@@ -25,18 +25,20 @@ except ImportError:
     # Not supported for Windows machines.
     pass
 import websocket
+import yaml
 from knack.log import get_logger
-from knack.prompting import prompt_pass, NoTTYException
+from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume)
+from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
-ACR_SERVER_SUFFIX = '.azurecr.io/'
+SERVER_DELIMITER = '.'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -59,10 +61,10 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.delete(resource_group_name, name)
 
 
-def create_container(client,
+def create_container(cmd,
                      resource_group_name,
-                     name,
-                     image,
+                     name=None,
+                     image=None,
                      location=None,
                      cpu=1,
                      memory=1.5,
@@ -85,8 +87,18 @@ def create_container(client,
                      gitrepo_revision=None,
                      gitrepo_mount_path=None,
                      secrets=None,
-                     secrets_mount_path=None):
+                     secrets_mount_path=None,
+                     file=None):
     """Create a container group. """
+
+    if file:
+        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file)
+
+    if not name:
+        raise CLIError("error: the --name/-n argument is required unless specified with a passed in file.")
+
+    if not image:
+        raise CLIError("error: the --image argument is required unless specified with a passed in file.")
 
     ports = ports or [80]
 
@@ -145,8 +157,53 @@ def create_container(client,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None)
 
-    raw_response = client.create_or_update(resource_group_name, name, cgroup, raw=True)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+    raw_response = container_group_client.create_or_update(resource_group_name, name, cgroup, raw=True)
     return raw_response.output
+
+
+def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
+    resource_client = _resource_client_factory(cli_ctx)
+    container_group_client = cf_container_groups(cli_ctx)
+
+    cg_defintion = None
+
+    try:
+        with open(file, 'r') as f:
+            cg_defintion = yaml.load(f)
+    except FileNotFoundError:
+        raise CLIError("No such file or directory: " + file)
+    except yaml.YAMLError as e:
+        raise CLIError("Error while parsing yaml file:\n\n" + str(e))
+
+    # Validate names match if both are provided
+    if name and cg_defintion.get('name', None):
+        if name != cg_defintion.get('name', None):
+            raise CLIError("The name parameter and name from yaml definition must match.")
+    else:
+        # Validate at least one name is provided
+        name = name or cg_defintion.get('name', None)
+        if cg_defintion.get('name', None) is None and not name:
+            raise CLIError("The name of the container group is required")
+
+    cg_defintion['name'] = name
+
+    location = location or cg_defintion.get('location', None)
+    if not location:
+        location = resource_client.resource_groups.get(resource_group_name).location
+    cg_defintion['location'] = location
+
+    api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
+
+    resource = resource_client.resources.create_or_update(resource_group_name,
+                                                          "Microsoft.ContainerInstance",
+                                                          '',
+                                                          "containerGroups",
+                                                          name,
+                                                          api_version,
+                                                          cg_defintion,
+                                                          raw=True)
+    return resource.output
 
 
 # pylint: disable=inconsistent-return-statements
@@ -171,7 +228,13 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif ACR_SERVER_SUFFIX in image:
+    elif SERVER_DELIMITER in image.split("/")[0]:
+        if not registry_username:
+            try:
+                registry_username = prompt(msg='Image registry username: ')
+            except NoTTYException:
+                raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
@@ -179,13 +242,12 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                 raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
-        acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
-        if acr_server and acr_username:
+        if acr_server:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                  username=acr_username,
+                                                                  username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
+            raise CLIError('Failed to parse ACR server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 
@@ -277,6 +339,38 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             shupdown_grace_period=5,
             stream_target=_stream_logs,
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
+
+
+def container_export(cmd, resource_group_name, name, file):
+    resource_client = _resource_client_factory(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+
+    resource = resource_client.resources.get(resource_group_name,
+                                             "Microsoft.ContainerInstance",
+                                             '',
+                                             "containerGroups",
+                                             name,
+                                             container_group_client.api_version,
+                                             False).__dict__
+
+    # Remove unwanted properites
+    resource['properties'].pop('instanceView', None)
+    resource.pop('sku', None)
+    resource.pop('id', None)
+    resource.pop('plan', None)
+    resource.pop('identity', None)
+    resource.pop('kind', None)
+    resource.pop('managed_by', None)
+    resource['properties'].pop('provisioningState', None)
+
+    for i in range(len(resource['properties']['containers'])):
+        resource['properties']['containers'][i]['properties'].pop('instanceView', None)
+
+    # Add the api version
+    resource['apiVersion'] = container_group_client.api_version
+
+    with open(file, 'w+') as f:
+        yaml.dump(resource, f, default_flow_style=False)
 
 
 def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
