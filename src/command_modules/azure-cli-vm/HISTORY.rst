@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.34
 ++++++
-* vm/vmss extension set: expose `--force-update-tag`
+* vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
 
 2.0.33
 ++++++

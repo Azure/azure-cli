@@ -41,7 +41,7 @@ def _write_config_file(user_name):
         'username': user_name,
         'ssh_key': public_key
     }
-    config_file = os.path.join(TEST_DIR, config_file_name)
+    _, config_file = tempfile.mkstemp()
     with open(config_file, 'w') as outfile:
         json.dump(config, outfile)
     return config_file
@@ -826,22 +826,20 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0')
 
-        try:
-            self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
-                     checks=self.check('length([])', 0))
-            self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
-            self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
-                self.check('*.extensions[0].name', ['VMAccessForLinux']),
-                self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
-            ])
-            self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
-                self.check('type(@)', 'object'),
-                self.check('name', '{ext}'),
-                self.check('resourceGroup', '{rg}'),
-            ])
-            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
-        finally:
-            os.remove(config_file)
+        self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
+                 checks=self.check('length([])', 0))
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
+            self.check('*.extensions[0].name', ['VMAccessForLinux']),
+            self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
+        ])
+        result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext}'),
+            self.check('resourceGroup', '{rg}'),
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
@@ -1045,16 +1043,14 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        try:
-            self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-            self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
-                self.check('type(@)', 'object'),
-                self.check('name', '{ext}'),
-                self.check('publisher', '{pub}'),
-            ])
-        finally:
-            os.remove(config_file)
-
+        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result=self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext}'),
+            self.check('publisher', '{pub}'),
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
+        
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
     """
