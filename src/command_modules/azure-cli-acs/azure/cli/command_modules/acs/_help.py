@@ -387,12 +387,12 @@ helps['aks use-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
     parameters:
-        - name: --space -s
-          type: string
-          short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
         - name: --update
           type: bool
           short-summary: Update to the latest Azure Dev Spaces client components.
+        - name: --space -s
+          type: string
+          short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
 """
 
 helps['aks remove-dev-spaces'] = """

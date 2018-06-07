@@ -1441,7 +1441,7 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name=None, update=False, prompt=False):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -1450,10 +1450,10 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name=None, 
     :param resource_group_name: Name of resource group. You can configure the default group. \
     Using 'az configure --defaults group=<name>'.
     :type resource_group_name: String
-    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
-    :type space_name: String
     :param update: Update to the latest Azure Dev Spaces client components.
     :type update: bool
+    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    :type space_name: String
     :param prompt: Do not prompt for confirmation. Requires --space.
     :type prompt: bool
     """
@@ -1461,7 +1461,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name=None, 
     if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(name, resource_group_name, space_name, update, prompt)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
         except TypeError:
             raise CLIError("Use '--update' option to get the latest Azure Dev Spaces client components.")
         except AttributeError as ae:
