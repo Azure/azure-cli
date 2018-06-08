@@ -92,6 +92,9 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
                                          'Permission', 'RoleDefinition', mod='models',
                                          operation_group='role_definitions')
 
+    if not Permission:
+        raise CLIError('"Permission" configuration is unavailable from the current profile. Please use "az cloud set"'
+                       ' command to use correct one')
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None),
                             data_actions=role_definition.get('dataActions', None),
