@@ -1646,7 +1646,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     else:
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
-        plan_info = client.app_service_plans.get(resource_group_name, plan)
+            planrg = parse_resource_id(plan)['resource_group']
+        plan_info = client.app_service_plans.get(planrg, plan)
         if not plan_info:
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
