@@ -488,13 +488,13 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None,
-              admin_username=getpass.getuser(), ssh_dest_key_path=None, ssh_key_value=None,
-              generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
+              admin_username=getpass.getuser(), ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
+              availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
               storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None,
-              data_disk_sizes_gb=None, write_accelerator=None, disk_info=None,
+              data_disk_sizes_gb=None, disk_info=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
@@ -583,7 +583,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         ]
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
-            public_ip_address_id, application_security_groups)
+            public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
@@ -1733,7 +1733,6 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             vmss.identity.identity_ids = external_identities
         if vmss_patch:
             vmss_patch.identity = vmss.identity
-            vmss_patch.sku = vmss.sku  # workaround https://github.com/Azure/azure-cli/issues/6262
             poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
         else:
             poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
@@ -1761,7 +1760,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 app_gateway_sku='Standard_Large', app_gateway_capacity=10,
                 backend_pool_name=None, nat_pool_name=None, backend_port=None, health_probe=None,
                 public_ip_address=None, public_ip_address_allocation=None,
-                public_ip_address_dns_name=None, accelerated_networking=False,
+                public_ip_address_dns_name=None, accelerated_networking=None,
                 public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
                 os_caching=None, data_caching=None,
                 storage_container_name='vhds', storage_sku=None,

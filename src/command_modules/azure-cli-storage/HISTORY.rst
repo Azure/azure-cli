@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.34
+++++++
+* Added extra mimetypes for json and javascript to be inferred from file extensions.
+
+2.0.33
+++++++
+* Added completer for `--account-name` argument.
+* Fixed problem with `storage entity query`.
+
 2.0.32
 ++++++
 * Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.

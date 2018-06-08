@@ -8,7 +8,7 @@ from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
 
 from OpenSSL import crypto, SSL
 from os.path import exists, join
-from ._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
+from azure.cli.command_modules.iot.tests.latest._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 import random
 
 VERIFICATION_FILE = "verify.cer"
@@ -38,10 +38,10 @@ class IotHubCertificateTest(ScenarioTest):
 
         # List certificates
         output = self.cmd('iot hub certificate list --hub-name {0} -g {1}'.format(hub, resource_group),
-                          checks=[self.check('length(@)', 1),
+                          checks=[self.check('length(value)', 1),
                                   self.check('value[0].name', cert_name),
                                   self.check('value[0].properties.isVerified', False)]).get_output_in_json()
-        assert len(output) == 1
+        assert len(output['value']) == 1
 
         # Get certificate
         etag = self.cmd('iot hub certificate show --hub-name {0} -g {1} -n {2}'.format(hub, resource_group, cert_name),

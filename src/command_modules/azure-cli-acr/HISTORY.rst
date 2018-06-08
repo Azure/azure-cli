@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.0.26
+++++++
+* Allow VSTS as a remote source location
+* Add 'acr import' command.
+
+2.0.25
+++++++
+* Improve manifest delete confirmation on tags
 
 2.0.24
 ++++++

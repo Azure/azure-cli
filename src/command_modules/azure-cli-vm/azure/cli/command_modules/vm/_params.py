@@ -79,6 +79,7 @@ def load_arguments(self, _):
 
     with self.argument_context('identity create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('tags', tags_type)
     # endregion
 
     # region Snapshots
@@ -153,10 +154,10 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
-        c.argument('write_accelerator', nargs='*', min_api='2017-12-01', arg_group='Storage',
-                   help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('boot_diagnostics_storage',
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
+        c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
+                   help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -316,7 +317,8 @@ def load_arguments(self, _):
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
         c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'")
         c.argument('dns_servers', nargs='+', help="space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
-        c.argument('accelerated_networking', action='store_true', help="enable accelerated networking")
+        c.argument('accelerated_networking', arg_type=get_three_state_flag(),
+                   help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
