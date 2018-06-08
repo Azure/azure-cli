@@ -19,7 +19,7 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)
 
@@ -892,7 +892,6 @@ def _find_property(instance, path):
 
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
-    from azure.cli.core.profiles import ResourceType, get_sdk
     from msrestazure.azure_exceptions import CloudError
 
     # get
@@ -933,7 +932,6 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
 def resolve_role_id(cli_ctx, role, scope):
     import uuid
-    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_definitions
 
     role_id = None

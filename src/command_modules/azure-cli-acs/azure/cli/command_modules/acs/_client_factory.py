@@ -25,7 +25,6 @@ def cf_resource_groups(cli_ctx, *_):
 
 def get_auth_management_client(cli_ctx, scope=None, **_):
     import re
-    from azure.cli.core.profiles import ResourceType
 
     subscription_id = None
     if scope:
