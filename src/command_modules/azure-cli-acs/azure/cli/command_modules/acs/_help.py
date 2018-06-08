@@ -393,11 +393,33 @@ helps['aks use-dev-spaces'] = """
         - name: --space -s
           type: string
           short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    examples:
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks
+
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+        client components and selecting a new or existing dev space 'scott'.
+          text: |-
+            az aks use-dev-spaces -g contoso-dev -n contoso-dev-aks --update --space scott
+
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+        'develop/scott' without prompting for confirmation.
+          text: |-
+            az aks use-dev-spaces -g contoso-dev -n contoso-dev-aks -s develop/scott -y
 """
 
 helps['aks remove-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+    examples:
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
+          text: |-
+            az aks remove-dev-spaces -g my-aks-group -n my-aks
+
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster without prompting.
+          text: |-
+            az aks remove-dev-spaces -g contoso-dev -n contoso-dev-aks --yes
 """
 
 helps['aks wait'] = """

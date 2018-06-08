@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.35
+++++++
+* Updated options of `az aks use-dev-spaces` command. Added update support.
+
 2.0.34
 ++++++
 * `az aks get-credentials` creates the kube config file with more secure filesystem permissions
