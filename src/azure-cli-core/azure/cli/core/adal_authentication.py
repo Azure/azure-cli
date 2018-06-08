@@ -14,17 +14,14 @@ from azure.cli.core.util import in_cloud_console
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, token_retriever, external_tenant_token_retriever=None):
+    def __init__(self, token_retriever):
         self._token_retriever = token_retriever
-        self._external_tenant_token_retriever = external_tenant_token_retriever
 
     def signed_session(self, session=None):
         session = session or super(AdalAuthentication, self).signed_session()
-        external_tenant_tokens = None
+
         try:
             scheme, token, _ = self._token_retriever()
-            if self._external_tenant_token_retriever:
-                external_tenant_tokens = self._external_tenant_token_retriever()
         except CLIError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
@@ -43,9 +40,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
         header = "{} {}".format(scheme, token)
         session.headers['Authorization'] = header
-        if external_tenant_tokens:
-            aux_tokens = ';'.join(['{} {}'.format(scheme2, tokens2) for scheme2, tokens2, _ in external_tenant_tokens])
-            session.headers['x-ms-authorization-auxiliary'] = aux_tokens
         return session
 
     @staticmethod

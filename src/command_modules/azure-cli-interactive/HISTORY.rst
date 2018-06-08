@@ -3,15 +3,6 @@
 Release History
 ===============
 
-0.3.22
-++++++
-* Cap the dependencies
-
-0.3.21
-++++++
-* Mute logging from parser for completions.
-* Made interactive more resistant to stale/corrupted help caches.
-
 0.3.20
 ++++++
 * Allow interactive completers to function with positional arguments.

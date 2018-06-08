@@ -205,8 +205,7 @@ def pool_list_table_format(result):
         table_row['State'] = item['state']
         table_row['Allocation State'] = item['allocationState']
         table_row['VM Size'] = item['vmSize']
-        table_row['Dedicated VM Count'] = item['currentDedicatedNodes']
-        table_row['Low Priority VM Count'] = item['currentLowPriorityNodes']
+        table_row['VM Count'] = item['currentDedicated']
         table_row['Type'] = 'IaaS' if item['virtualMachineConfiguration'] else 'PaaS'
         table_output.append(table_row)
     return table_output

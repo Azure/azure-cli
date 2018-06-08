@@ -33,7 +33,6 @@ class ObjectTestObject(object):
         self.my_string = str(str_val)
         self.my_int = int(int_val)
         self.my_bool = bool(bool_val)
-        self.additional_properties = None
 
 
 class TestObject(Model):
@@ -64,8 +63,7 @@ class TestObject(Model):
         self.empty_dict_of_dicts = {'dict': {'dict2': None}}
         self.empty_dict = {'dict3': None}
 
-        self.additional_properties = {'additional1': 'addition value #1', 'additionalList': []}
-        self.my_test_object = ObjectTestObject('myKeyAA', 1, False)
+        self.additional_properties = {'additional1': 'addition value #1'}
 
 
 def _prepare_test_loader():
@@ -133,9 +131,6 @@ class GenericUpdateTest(unittest.TestCase):
         cli.invoke('genupdate --set additional1=v1'.split())
         self.assertEqual(my_obj.additional_properties['additional1'], 'v1')
 
-        cli.invoke('genupdate --set my_test_object.additional1=v1'.split())  # for unknown properties, we also set as additional_proeprties
-        self.assertEqual(my_obj.my_test_object.additional_properties['additional1'], 'v1')
-
         # Test the different ways of indexing into a list of objects or dictionaries by filter
         cli.invoke('genupdate --set myListOfCamelDicts[myKey=value_2].myKey="foo=bar"'.split())
         self.assertEqual(my_obj.my_list_of_camel_dicts[1]['myKey'],
@@ -182,9 +177,6 @@ class GenericUpdateTest(unittest.TestCase):
         self.assertEqual(len(my_obj.my_prop), 1, 'nullify property, add two and remove one')
         self.assertEqual(my_obj.my_prop[0], 'str2', 'nullify property, add two and remove one')
 
-        cli.invoke('genupdate --add additionalList listMember1'.split())
-        self.assertEqual(my_obj.additional_properties['additionalList'][0], 'listMember1',
-                         'add a value to an array inside additional_properties')
         # Test various --add to lists
         cli.invoke('genupdate --set myList=[]'.split())
         cli.invoke(shlex.split('genupdate --add myList value1'))
@@ -235,7 +227,7 @@ class GenericUpdateTest(unittest.TestCase):
                 raise ex
             raise AssertionError("exception not raised for ''".format(message))
 
-        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['additional1', 'additionalList', 'emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp', 'myTestObject']"
+        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['additional1', 'emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp']"
         _execute_with_error('genupdate --remove doesntExist',
                             missing_remove_message,
                             'remove non-existent property by name')

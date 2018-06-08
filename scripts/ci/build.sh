@@ -153,7 +153,6 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.bat',
                        '*.txt',
                        '*.cer',
-                       '*.yml',
                        '**/*.cer',
                        '**/*.pem',
                        '**/*.pfx',

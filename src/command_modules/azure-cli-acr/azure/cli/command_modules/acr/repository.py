@@ -471,18 +471,27 @@ def _delete_manifest_confirmation(login_server,
     if yes:
         return manifest
 
-    tags = _obtain_data_from_registry(
+    manifests = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_tags'.format(repository),
+        path='/v2/_acr/{}/manifests/list'.format(repository),
         username=username,
         password=password,
-        result_index='tags'
+        result_index='manifests',
+        pagination=20
     )
+    filter_by_manifest = [x for x in manifests if manifest == x['digest']]
 
-    filter_by_manifest = [x['name'] for x in tags if manifest == x['digest']]
+    if not filter_by_manifest:
+        raise CLIError("No manifest can be found with digest '{}'.".format(manifest))
+    elif len(filter_by_manifest) == 1:
+        manifest = filter_by_manifest[0]['digest']
+        tags = filter_by_manifest[0]['tags']
+    else:
+        raise CLIError("More than one manifests can be found with digest '{}'.".format(manifest))
+
     message = "This operation will delete the manifest '{}'".format(manifest)
-    if filter_by_manifest:
-        images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in filter_by_manifest])
+    images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in tags])
+    if images:
         message += " and all the following images: {}".format(images)
     _user_confirmation("{}.\nAre you sure you want to continue?".format(message))
 

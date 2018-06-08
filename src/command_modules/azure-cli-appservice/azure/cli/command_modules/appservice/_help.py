@@ -332,7 +332,7 @@ helps['webapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a webapp.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including a .deployment file in your
+        npm install or dotnet publish. This can be overridden by including a .deployment file on your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
@@ -762,7 +762,7 @@ helps['functionapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a function app.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including an .deployment file in your
+        npm install or dotnet publish. This can be overridden by including an .deployment file on your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
