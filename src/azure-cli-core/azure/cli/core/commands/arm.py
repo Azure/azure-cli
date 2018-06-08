@@ -997,7 +997,8 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
         assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
         RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                                 'RoleAssignmentCreateParameters', mod='models')
+                                                 'RoleAssignmentCreateParameters', mod='models',
+                                                 operation_group='role_assignments')
         parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)

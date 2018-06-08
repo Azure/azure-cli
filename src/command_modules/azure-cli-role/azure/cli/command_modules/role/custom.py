@@ -89,7 +89,8 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
         raise CLIError("please provide 'assignableScopes'")
 
     Permission, RoleDefinition = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                         'Permission', 'RoleDefinition', mod='models')
+                                         'Permission', 'RoleDefinition', mod='models',
+                                         operation_group='role_definitions')
 
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None),
@@ -147,7 +148,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models')
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = _gen_guid()
     custom_headers = None
