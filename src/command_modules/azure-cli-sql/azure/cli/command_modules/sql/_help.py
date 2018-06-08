@@ -17,14 +17,27 @@ helps['sql db'] = """
 helps['sql db copy'] = """
     type: command
     short-summary: Create a copy of a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The copy destination database must have the same edition as the source database, but you can change the edition
+                  after the copy has completed.
+    examples:
+        - name: Create a database with performance level S0 as a copy of an existing Standard database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a copy of an existing GeneralPurpose database.
+          text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb -f Gen4 -c 1
     """
 helps['sql db create'] = """
     type: command
     short-summary: Create a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
     examples:
-        - name: Create database with zone redundancy enabled
+        - name: Create a Standard S0 database.
+          text: az sql db create -g mygroup -s myserver -n mydb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware and 1 vcore
+          text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+        - name: Create a database with zone redundancy enabled
           text: az sql db create -g mygroup -s myserver -n mydb -z
-        - name: Create database with zone redundancy explicitly disabled
+        - name: Create a database with zone redundancy explicitly disabled
           text: az sql db create -g mygroup -s myserver -n mydb -z false
     """
 helps['sql db delete'] = """
@@ -128,6 +141,13 @@ helps['sql db replica'] = """
 helps['sql db replica create'] = """
     type: command
     short-summary: Create a database as a readable secondary replica of an existing database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The secondary database must have the same edition as the primary database.
+    examples:
+        - name: Create a database with performance level S0 as a secondary replica of an existing Standard database.
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --service-objective S0
+        - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a secondary replica of an existing GeneralPurpose database
+          text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb -f Gen4 -c 1
     """
 helps['sql db replica set-primary'] = """
     type: command
@@ -260,6 +280,10 @@ helps['sql elastic-pool create'] = """
           text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z
         - name: Create elastic pool with zone redundancy explicitly disabled
           text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z false
+        - name: Create a Standard 100 DTU elastic pool.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
+        - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
+          text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
     """
 helps['sql elastic-pool list-editions'] = """
     type: command
@@ -401,4 +425,86 @@ helps['sql server vnet-rule create'] = """
               --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
         - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the SQL server.
           text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
+    """
+helps['sql mi'] = """
+    type: group
+    short-summary: Manage SQL managed instances.
+    """
+helps['sql mi create'] = """
+    type: command
+    short-summary: Create a managed instance.
+    examples:
+        - name: Create a managed instance with specified parameters and with identity
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen4
+        - name: Create a managed instance with minimal set of parameters
+          text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
+    """
+helps['sql mi list'] = """
+    type: command
+    short-summary: List available managed instances.
+    examples:
+        - name: List all managed instances in the current subscription.
+          text: az sql mi list
+        - name: List all managed instances in a resource group.
+          text: az sql mi list -g mygroup
+    """
+helps['sql mi show'] = """
+    type: command
+    short-summary: Get the details for a managed instance.
+    examples:
+        - name: Get the details for a managed instance
+          text: az sql mi show -g mygroup -n myinstance
+    """
+helps['sql mi update'] = """
+    type: command
+    short-summary: Update a managed instance.
+    examples:
+        - name: Updates a mi with specified parameters and with identity
+          text: az sql mi update -g mygroup -n myinstance -i -p mypassword --license-type mylicensetype --capacity vcorecapacity --storage storagesize
+    """
+helps['sql mi delete'] = """
+    type: command
+    short-summary: Delete a managed instance.
+    examples:
+        - name: Delete a managed instance
+          text: az sql mi delete -g mygroup -n myinstance --yes
+    """
+helps['sql midb'] = """
+    type: group
+    short-summary: Manage SQL managed instance databases.
+    """
+helps['sql midb create'] = """
+    type: command
+    short-summary: Create a managed database.
+    examples:
+        - name: Create a managed database with specified collation
+          text: az sql midb create -g mygroup --mi myinstance -n mymanageddb --collation Latin1_General_100_CS_AS_SC
+    """
+helps['sql midb list'] = """
+    type: command
+    short-summary: List maanged databases on a managed instance.
+    examples:
+        - name: List managed databases on a managed instance
+          text: az sql midb list -g mygroup --mi myinstance
+    """
+helps['sql midb show'] = """
+    type: command
+    short-summary: Get the details for a managed database.
+    examples:
+        - name: Get the details for a managed database
+          text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
+    """
+helps['sql midb restore'] = """
+    type: command
+    short-summary: Restore a managed database.
+    examples:
+        - name: Restore a managed database using Point in time restore
+          text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
+    """
+helps['sql midb delete'] = """
+    type: command
+    short-summary: Delete a managed database.
+    examples:
+        - name: Delete a managed database
+          text: az sql midb delete -g mygroup --mi myinstance -n mymanageddb --yes
     """

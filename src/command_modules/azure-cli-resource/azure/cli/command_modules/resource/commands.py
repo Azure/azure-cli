@@ -15,8 +15,10 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
-    cf_resource_managedapplications, cf_resource_managedappdefinitions)
+    cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions)
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
+
+from ._exception_handler import managementgroups_exception_handler
 
 
 # Resource group commands
@@ -117,6 +119,24 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.{}',
         client_factory=cf_resource_managedappdefinitions,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
+
+    resource_managementgroups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations.management_groups_operations#ManagementGroupsOperations.{}',
+        client_factory=cf_management_groups,
+        exception_handler=managementgroups_exception_handler
+    )
+
+    resource_managementgroups_subscriptions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations.management_group_subscriptions_operations#ManagementGroupSubscriptionsOperations.{}',
+        client_factory=cf_management_group_subscriptions,
+        exception_handler=managementgroups_exception_handler
+    )
+
+    resource_managementgroups_update_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.resource.custom#{}',
+        client_factory=cf_management_groups,
+        exception_handler=managementgroups_exception_handler
     )
 
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
@@ -244,3 +264,22 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
+
+    with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
+        g.custom_command('list', 'cli_managementgroups_group_list')
+        g.custom_command('show', 'cli_managementgroups_group_show')
+        g.custom_command('create', 'cli_managementgroups_group_create')
+        g.custom_command('delete', 'cli_managementgroups_group_delete')
+        g.generic_update_command(
+            'update',
+            getter_name='cli_managementgroups_group_update_get',
+            getter_type=resource_managementgroups_update_type,
+            setter_name='cli_managementgroups_group_update_set',
+            setter_type=resource_managementgroups_update_type,
+            custom_func_name='cli_managementgroups_group_update_custom_func',
+            custom_func_type=resource_managementgroups_update_type,
+            exception_handler=managementgroups_exception_handler)
+
+    with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
+        g.custom_command('add', 'cli_managementgroups_subscription_add')
+        g.custom_command('remove', 'cli_managementgroups_subscription_remove')

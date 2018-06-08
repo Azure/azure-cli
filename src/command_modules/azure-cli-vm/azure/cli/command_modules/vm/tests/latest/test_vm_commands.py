@@ -83,7 +83,7 @@ class VMOpenPortTest(ScenarioTest):
             'vm': 'vm1'
         })
 
-        self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password')
+        self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password @PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password')
 
         # min params - apply to existing NIC (updates existing NSG)
         self.kwargs['nsg_id'] = self.cmd('vm open-port -g {rg} -n {vm} --port "*" --priority 900').get_output_in_json()['id']
@@ -187,14 +187,6 @@ class VMImageListSkusScenarioTest(ScenarioTest):
 
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
-
-    @AllowLargeResponse(size_kb=2048)
-    def test_list_skus_contains_zone_info(self):
-        # we pick eastus2 as it is one of 3 regions so far with zone support
-        self.kwargs['loc'] = 'eastus2'
-        result = self.cmd('vm list-skus -otable -l {loc} -otable')
-        columns = next(l for l in result.output.splitlines() if '1,2,3' in l).split()
-        self.assertEqual(columns[3], '1,2,3')
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -599,11 +591,10 @@ class VMWriteAcceleratorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --write-accelerator 0=true --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester')
+        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
-            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
-            self.check('storageProfile.dataDisks[1].writeAcceleratorEnabled', None)
+            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', None)
         ])
         self.cmd('vm update -g {rg} -n {vm} --write-accelerator true --disk-caching readonly')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -768,7 +759,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -792,26 +783,29 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
 
 class ComputeListSkusScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_list_compute_skus_table_output(self):
-        result = self.cmd('vm list-skus -l westus -otable')
+        result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size'])
-        # spot check the first 3 entries
-        fd_found, ud_found, size_found = False, False, False
-        for l in lines[1:]:
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size', 'Restrictions'])
+        # spot check the first 4 entries
+        fd_found, ud_found, size_found, zone_found = False, False, False, False
+        for l in lines[2:]:
             parts = l.split()
-            if not fd_found and (parts == ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
                 fd_found = True
-            elif not ud_found and (parts == ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
                 ud_found = True
-            elif not size_found and (parts == ['virtualMachines', 'westus', 'Standard_DS1_v2', 'LowPriorityCapable=True', 'Standard', 'DS1_v2']):
+            elif not size_found and parts[:3] == ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
                 size_found = True
+            elif not zone_found and parts[3] == '1,2,3':
+                zone_found = True
 
         self.assertTrue(fd_found)
         self.assertTrue(ud_found)
         self.assertTrue(size_found)
+        self.assertTrue(zone_found)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
@@ -1592,7 +1586,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
 
-class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
+class AcceleratedNetworkingTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_accelerated_networking')
     def test_vmss_accelerated_networking(self, resource_group):
@@ -1603,6 +1597,14 @@ class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
         self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
+
+    @ResourceGroupPreparer()
+    def test_vm_accelerated_networking(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
+        self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -2067,8 +2069,9 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         # create a managed identity
-        emsi_result = self.cmd('identity create -g {rg} -n {emsi}',
-                               checks=self.check('name', '{emsi}')).get_output_in_json()
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with only user assigned identity
@@ -2175,7 +2178,6 @@ class VMLiveScenarioTest(LiveScenarioTest):
         # spot check we do have some relevant progress messages coming out
         # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
         # This has the consequence that it can't promise each resource's result wil be displayed)
-        self.assertTrue('Accepted:'.format(**self.kwargs) in lines)
         self.assertTrue('Succeeded:'.format(**self.kwargs) in lines)
 
 
@@ -2183,7 +2185,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2201,7 +2203,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group_location, self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='westus')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_error_on_zone_unavailable(self, resource_group, resource_group_location):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
@@ -2209,7 +2211,7 @@ class VMZoneScenarioTest(ScenarioTest):
             self.assertTrue('availablity zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2235,7 +2237,7 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_x_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2297,7 +2299,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group, resource_group_location, self.kwargs['disk'], self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_zonal_with_fd(self, resource_group, resource_group_location):
 
         self.kwargs.update({

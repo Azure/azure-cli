@@ -102,7 +102,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None):
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
 
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
@@ -133,6 +133,10 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         asg_ids = [{'id': x.id} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
+
+    if accelerated_networking is not None:
+        nic_properties['enableAcceleratedNetworking'] = accelerated_networking
+        api_version = '2016-09-01' if api_version < '2016-09-01' else api_version
 
     nic = {
         'apiVersion': api_version,

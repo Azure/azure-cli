@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-04-30T21:28:42Z"}}'
+      "date": "2018-05-15T00:14:06Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -9,19 +9,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
           msrest_azure/0.4.28 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.32]
+          AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-30T21:28:42Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-05-15T00:14:06Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:42 GMT']
+      date: ['Tue, 15 May 2018 00:14:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -33,23 +33,86 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [appservice plan create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-05-15T00:14:06Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 15 May 2018 00:14:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"location": "westus", "properties": {"name": "plan-linux-multi000003",
+      "perSiteScaling": false, "reserved": true}, "sku": {"name": "B1", "tier": "BASIC",
+      "capacity": 1}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [appservice plan create]
+      Connection: [keep-alive]
+      Content-Length: ['172']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","name":"plan-linux-multi000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
+        US","properties":{"serverFarmId":15478,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"1402be24-4f35-4ab7-a212-2cd496ebdf14","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"mdmId":"waws-prod-bay-063_15478","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1422']
+      content-type: [application/json]
+      date: ['Tue, 15 May 2018 00:14:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
-          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/serverfarms/yili-cus-stage-02?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003?api-version=2016-09-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/serverfarms/yili-cus-stage-02","name":"yili-cus-stage-02","type":"Microsoft.Web/serverfarms","kind":"linux","location":"North
-        Central US (Stage)","properties":{"serverFarmId":6060,"name":"yili-cus-stage-02","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"yili-cus-stage-01-NorthCentralUSStagewebspace","subscription":"ce678eba-8ab3-4a0c-9610-97fee4ee6b34","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"North
-        Central US (Stage)","perSiteScaling":false,"numberOfSites":10,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"yili-cus-stage-01","reserved":true,"mdmId":"waws-prod-msftintch1-501_6060","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","name":"plan-linux-multi000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
+        US","properties":{"serverFarmId":15478,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"1402be24-4f35-4ab7-a212-2cd496ebdf14","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"mdmId":"waws-prod-bay-063_15478","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1247']
+      content-length: ['1422']
       content-type: [application/json]
-      date: ['Mon, 30 Apr 2018 21:28:44 GMT']
+      date: ['Tue, 15 May 2018 00:14:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -61,69 +124,32 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: null
-    headers:
-      Connection: [close]
-      Host: [raw.githubusercontent.com]
-      User-Agent: [Python-urllib/3.5]
-    method: GET
-    uri: https://raw.githubusercontent.com/LukaszStem/spewlogs/master/randomconfig.yml
-  response:
-    body: {string: "version: '3'\nservices:\n  web:\n    image: lukems/python_app:1.0\n\
-        \    ports:\n     - \"5000:5000\"\n  redis:\n    image: \"redis:alpine\"\n"}
-    headers:
-      accept-ranges: [bytes]
-      access-control-allow-origin: ['*']
-      cache-control: [max-age=300]
-      connection: [close]
-      content-length: ['128']
-      content-security-policy: [default-src 'none'; style-src 'unsafe-inline'; sandbox]
-      content-type: [text/plain; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:46 GMT']
-      etag: ['"be1a65a6f5336a41bb688f940a6e2463ae677046"']
-      expires: ['Mon, 30 Apr 2018 21:33:46 GMT']
-      source-age: ['0']
-      strict-transport-security: [max-age=31536000]
-      vary: ['Authorization,Accept-Encoding']
-      via: [1.1 varnish]
-      x-cache: [MISS]
-      x-cache-hits: ['0']
-      x-content-type-options: [nosniff]
-      x-fastly-request-id: [2e4fc2423aed8f03b6745ff9892e2f2c2b2dcf4a]
-      x-frame-options: [deny]
-      x-geo-block-list: ['']
-      x-github-request-id: ['768C:6592:1DADF:1F94B:5AE78A8D']
-      x-served-by: [cache-dfw18624-DFW]
-      x-timer: ['S1525123726.988272,VS0,VE86']
-      x-xss-protection: [1; mode=block]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"location": "North Central US (Stage)", "properties": {"siteConfig": {"netFrameworkVersion":
-      "v4.6", "appSettings": [], "linuxFxVersion": "COMPOSE|dmVyc2lvbjogJzMnCnNlcnZpY2VzOgogIHdlYjoKICAgIGltYWdlOiBsdWtlbXMvcHl0aG9uX2FwcDoxLjAKICAgIHBvcnRzOgogICAgIC0gIjUwMDA6NTAwMCIKICByZWRpczoKICAgIGltYWdlOiAicmVkaXM6YWxwaW5lIgo=",
-      "localMySqlEnabled": false, "http20Enabled": true}, "reserved": false, "serverFarmId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/serverfarms/yili-cus-stage-02",
-      "scmSiteAlsoStopped": false}}'
+    body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003",
+      "reserved": false, "siteConfig": {"netFrameworkVersion": "v4.6", "linuxFxVersion":
+      "COMPOSE|DQp2ZXJzaW9uOiAnMycNCnNlcnZpY2VzOg0KICB3ZWI6DQogICAgaW1hZ2U6ICJwYXRsZS9weXRob25fYXBwOjEuMCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==",
+      "appSettings": [], "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
+      false}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['581']
+      Content-Length: ['645']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
-          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/sites/lukasz-cli-test-17?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/sites/lukasz-cli-test-17","name":"lukasz-cli-test-17","type":"Microsoft.Web/sites","kind":"app,linux","location":"North
-        Central US (Stage)","properties":{"name":"lukasz-cli-test-17","state":"Running","hostNames":["lukasz-cli-test-17.azurewebsites.net"],"webSpace":"yili-cus-stage-01-NorthCentralUSStagewebspace","selfLink":"https://waws-prod-msftintch1-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/yili-cus-stage-01-NorthCentralUSStagewebspace/sites/lukasz-cli-test-17","repositorySiteName":"lukasz-cli-test-17","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["lukasz-cli-test-17.azurewebsites.net","lukasz-cli-test-17.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnCnNlcnZpY2VzOgogIHdlYjoKICAgIGltYWdlOiBsdWtlbXMvcHl0aG9uX2FwcDoxLjAKICAgIHBvcnRzOgogICAgIC0gIjUwMDA6NTAwMCIKICByZWRpczoKICAgIGltYWdlOiAicmVkaXM6YWxwaW5lIgo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"lukasz-cli-test-17.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"lukasz-cli-test-17.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/serverfarms/yili-cus-stage-02","reserved":true,"lastModifiedTimeUtc":"2018-04-30T21:28:48.37","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"lukasz-cli-test-17","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux","outboundIpAddresses":"157.56.8.115,23.96.201.21","possibleOutboundIpAddresses":"157.56.8.115,23.96.201.21,23.96.241.1","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-msftintch1-501","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"yili-cus-stage-01","defaultHostName":"lukasz-cli-test-17.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002","name":"webapp-linux-multi000002","type":"Microsoft.Web/sites","kind":"app,linux","location":"West
+        US","properties":{"name":"webapp-linux-multi000002","state":"Running","hostNames":["webapp-linux-multi000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-063.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002.azurewebsites.net","webapp-linux-multi000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|DQp2ZXJzaW9uOiAnMycNCnNlcnZpY2VzOg0KICB3ZWI6DQogICAgaW1hZ2U6ICJwYXRsZS9weXRob25fYXBwOjEuMCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg=="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"lastModifiedTimeUtc":"2018-05-15T00:14:22.4233333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux","outboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234","possibleOutboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234,13.93.235.174,52.160.85.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-063","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2986']
+      content-length: ['3418']
       content-type: [application/json]
-      date: ['Mon, 30 Apr 2018 21:28:50 GMT']
-      etag: ['"1D3E0CA39EC9D20"']
+      date: ['Tue, 15 May 2018 00:14:31 GMT']
+      etag: ['"1D3EBE1AD56EB40"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -144,28 +170,30 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
-          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.28 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yili-cus-stage-01/providers/Microsoft.Web/sites/lukasz-cli-test-17/publishxml?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/publishxml?api-version=2016-08-01
   response:
-    body: {string: '<publishData><publishProfile profileName="lukasz-cli-test-17 -
-        Web Deploy" publishMethod="MSDeploy" publishUrl="lukasz-cli-test-17.scm.azurewebsites.net:443"
-        msdeploySite="lukasz-cli-test-17" userName="$lukasz-cli-test-17" userPWD="cj5xSKCTMYat6jTTfQ4CsENAccBp3A0nAhkuwnlH6lGDkkzxNJ4MTjqMvZ4j"
-        destinationAppUrl="http://lukasz-cli-test-17.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="lukasz-cli-test-17
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-msftintch1-501.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="lukasz-cli-test-17\$lukasz-cli-test-17" userPWD="cj5xSKCTMYat6jTTfQ4CsENAccBp3A0nAhkuwnlH6lGDkkzxNJ4MTjqMvZ4j"
-        destinationAppUrl="http://lukasz-cli-test-17.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile></publishData>'}
+    body: {string: '<publishData><publishProfile profileName="webapp-linux-multi000002
+        - Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-linux-multi000002.scm.azurewebsites.net:443"
+        msdeploySite="webapp-linux-multi000002" userName="$webapp-linux-multi000002"
+        userPWD="6HLhujC3YBNek2Kzxaxw0QLvFFWHRfErb4Ja2hQLNiy4m3qaNoow2pEwAdJj" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="webapp-linux-multi000002 -
+        FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-063.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="webapp-linux-multi000002\$webapp-linux-multi000002"
+        userPWD="6HLhujC3YBNek2Kzxaxw0QLvFFWHRfErb4Ja2hQLNiy4m3qaNoow2pEwAdJj" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile></publishData>'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1103']
+      content-length: ['1150']
       content-type: [application/xml]
-      date: ['Mon, 30 Apr 2018 21:28:51 GMT']
+      date: ['Tue, 15 May 2018 00:14:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -183,17 +211,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 34 times.
+    body: {string: 'Hello World! I have been seen 2 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:51 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -203,17 +231,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 35 times.
+    body: {string: 'Hello World! I have been seen 4 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:51 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -223,17 +251,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 36 times.
+    body: {string: 'Hello World! I have been seen 5 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:52 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -243,17 +271,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 37 times.
+    body: {string: 'Hello World! I have been seen 6 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:52 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -263,17 +291,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 38 times.
+    body: {string: 'Hello World! I have been seen 7 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:52 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -283,17 +311,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 39 times.
+    body: {string: 'Hello World! I have been seen 8 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:52 GMT']
+      date: ['Tue, 15 May 2018 00:15:24 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -303,17 +331,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 40 times.
+    body: {string: 'Hello World! I have been seen 9 times.
 
         '}
     headers:
-      content-length: ['40']
+      content-length: ['39']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:52 GMT']
+      date: ['Tue, 15 May 2018 00:15:25 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -323,17 +351,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 41 times.
+    body: {string: 'Hello World! I have been seen 11 times.
 
         '}
     headers:
       content-length: ['40']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:53 GMT']
+      date: ['Tue, 15 May 2018 00:15:25 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -343,17 +371,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 42 times.
+    body: {string: 'Hello World! I have been seen 12 times.
 
         '}
     headers:
       content-length: ['40']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:53 GMT']
+      date: ['Tue, 15 May 2018 00:15:25 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -363,17 +391,17 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.18.4]
     method: GET
-    uri: http://lukasz-cli-test-17.azurewebsites.net/
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
-    body: {string: 'Hello World! I have been seen 43 times.
+    body: {string: 'Hello World! I have been seen 13 times.
 
         '}
     headers:
       content-length: ['40']
       content-type: [text/html; charset=utf-8]
-      date: ['Mon, 30 Apr 2018 21:28:53 GMT']
+      date: ['Tue, 15 May 2018 00:15:25 GMT']
       server: [Werkzeug/0.14.1 Python/3.4.8]
-      set-cookie: [ARRAffinity=0e632b6e7ee82a5a6d040687477d6e7796ff76bd0a2a19fdbd5dd76edfd5e90d;Path=/;HttpOnly;Domain=lukasz-cli-test-17.azurewebsites.net]
+      set-cookie: [ARRAffinity=c7043095ee60892436fa9cb084a908c14827babe20c1061d39f83d251dc4ba75;Path=/;HttpOnly;Domain=webapp-linux-multivwnxjq.azurewebsites.net]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -384,9 +412,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.28
           msrest_azure/0.4.28 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.32]
+          AZURECLI/2.0.33]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -395,12 +423,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 30 Apr 2018 21:28:53 GMT']
+      date: ['Tue, 15 May 2018 00:15:26 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdRNEhMRFNUQ0I2M0lDVlNQMlo2MzdHUFczQUFDNjU0TTdLRHwzRTNCOTRFQ0ZEN0JCOTJFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdSNkRDNjQ3VEMzUzdVQVpZNU5BSktTTjJXNTNFSFg2NE9YTnxENkY5M0Y2M0I5NEQwMjY2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1
