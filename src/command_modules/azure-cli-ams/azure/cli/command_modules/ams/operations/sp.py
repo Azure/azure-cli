@@ -161,7 +161,8 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     role_id = _resolve_role_id(role, scope, definitions_client)
 
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models')
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
 
     return assignments_client.create(scope=scope,
