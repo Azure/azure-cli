@@ -340,6 +340,14 @@ def _get_client_factory(_, kwargs):
     return factory
 
 
+def get_arguments_loader(context, getter_op, cmd_args=None):
+    getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op), excluded_params=EXCLUDED_PARAMS))
+    cmd_args = cmd_args or {}
+    cmd_args.update(getter_args)
+    cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
+    return cmd_args
+
+
 # pylint: disable=too-many-statements
 def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_name='parameters',
                                 child_collection_prop_name=None, child_collection_key='name',
@@ -354,9 +362,6 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         raise TypeError("Custom function operation must be a string. Got '{}'".format(
             custom_function_op))
 
-    def get_arguments_loader():
-        return dict(extract_args_from_signature(context.get_op_handler(getter_op), excluded_params=EXCLUDED_PARAMS))
-
     def set_arguments_loader():
         return dict(extract_args_from_signature(context.get_op_handler(setter_op), excluded_params=EXCLUDED_PARAMS))
 
@@ -369,10 +374,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return dict(extract_args_from_signature(custom_op, excluded_params=EXCLUDED_PARAMS))
 
     def generic_update_arguments_loader():
-
-        arguments = {}
+        arguments = get_arguments_loader(context, getter_op)
         arguments.update(set_arguments_loader())
-        arguments.update(get_arguments_loader())
         arguments.update(function_arguments_loader())
         arguments.pop('instance', None)  # inherited from custom_function(instance, ...)
         arguments.pop('parent', None)
@@ -407,7 +410,6 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
             metavar='LIST INDEX', arg_group=group_name
         )
-        arguments['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
@@ -528,10 +530,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
     factory = _get_client_factory(name, kwargs)
 
     def generic_wait_arguments_loader():
-
-        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
-        cmd_args = getter_args.copy()
+        cmd_args = get_arguments_loader(context, getter_op)
 
         group_name = 'Wait Condition'
         cmd_args['timeout'] = CLICommandArgument(
@@ -564,7 +563,6 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
                  "provisioningState!='InProgress', "
                  "instanceView.statuses[?code=='PowerState/running']"
         )
-        cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
         return [(k, v) for k, v in cmd_args.items()]
 
     def get_provisioning_state(instance):
@@ -655,11 +653,7 @@ def _cli_generic_show_command(context, name, getter_op, **kwargs):
     factory = _get_client_factory(name, kwargs)
 
     def generic_show_arguments_loader():
-
-        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
-        cmd_args = getter_args.copy()
-        cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
+        cmd_args = get_arguments_loader(context, getter_op)
         return [(k, v) for k, v in cmd_args.items()]
 
     def handler(args):
