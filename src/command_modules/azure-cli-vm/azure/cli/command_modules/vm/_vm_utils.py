@@ -127,7 +127,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None):
+                        os_disk_caching=None, data_disk_cachings=None, write_accelerator_settings=None):
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
@@ -174,11 +174,19 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     if data_disk_cachings:
         update_disk_caching(info, data_disk_cachings)
 
+    # fill in write accelerators
+    if write_accelerator_settings:
+        update_write_accelerator_settings(info, write_accelerator_settings)
+
     # default os disk caching to 'ReadWrite' unless set otherwise
     if os_disk_caching:
         info['os']['caching'] = os_disk_caching
     else:
-        info['os']['caching'] = 'ReadWrite'
+        if info['os'].get('writeAcceleratorEnabled'):
+            info['os']['caching'] = 'None'
+        else:
+            info['os']['caching'] = 'ReadWrite'
+
     return info
 
 

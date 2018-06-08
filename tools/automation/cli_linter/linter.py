@@ -98,7 +98,7 @@ class LinterManager(object):
         self._ci = False
 
     def add_rule(self, rule_type, rule_name, rule_callable):
-        include_rule = not self._rule_inclusions or rule_name in self._rule_inclusions
+        include_rule = self._rule_inclusions and rule_name in self._rule_inclusions
         if rule_type in self._rules and include_rule:
             def get_linter():
                 if rule_name in self._ci_exclusions and self._ci:

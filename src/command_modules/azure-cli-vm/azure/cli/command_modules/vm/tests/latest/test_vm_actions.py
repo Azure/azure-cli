@@ -17,8 +17,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       process_disk_or_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
-                                                      _validate_vm_vmss_msi,
-                                                      _validate_vm_vmss_accelerated_networking)
+                                                      _validate_vm_vmss_msi)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info
 from azure.cli.testsdk import TestCli
 from azure.mgmt.compute.models import CachingTypes
@@ -370,59 +369,26 @@ class TestActions(unittest.TestCase):
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
         self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
-    def test_validate_vm_vmss_accelerated_networking(self):
-        # not a qualified size
-        np = mock.MagicMock()
-        np.size = 'Standard_Ds1_v2'
-        np.accelerated_networking = None
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertIsNone(np.accelerated_networking)
+        # verify write accelerator configuring; also, when it is enabled, caching will be set to None
 
-        # qualified size and recognized distro
-        np = mock.MagicMock()
-        np.size = 'Standard_f8'
-        np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'Canonical', 'UbuntuServer', '16.04'
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertTrue(np.accelerated_networking)
+        r = normalize_disk_info(write_accelerator_settings=['true'])
+        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
 
-        np = mock.MagicMock()
-        np.size = 'Standard_DS4_v2'
-        np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertTrue(np.accelerated_networking)
+        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['true'])
+        self.assertEqual(r['os']['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[1]['writeAcceleratorEnabled'], True)
 
-        # not a qualified size, but user want it
-        np = mock.MagicMock()
-        np.size = 'Standard_Ds1_v2'
-        np.accelerated_networking = True
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertTrue(np.accelerated_networking)
+        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['0=true'])
+        self.assertEqual(r['os'].get('writeAcceleratorEnabled'), None)
+        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
+        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[1].get('writeAcceleratorEnabled'), None)
 
-        # qualified size, but distro version not good
-        np = mock.MagicMock()
-        np.size = 'Standard_f8'
-        np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'canonical', 'UbuntuServer', '18.04'
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertIsNone(np.accelerated_networking)
-
-        # qualified size, but distro infor is not available (say, custom images)
-        np = mock.MagicMock()
-        np.size = 'Standard_f8'
-        np.accelerated_networking = None
-        np.os_publisher = None
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertIsNone(np.accelerated_networking)
-
-        # qualified size, but distro version is not right
-        np = mock.MagicMock()
-        np.size = 'Standard_f8'
-        np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'oracle', 'oracle-linux', '7.3'
-        _validate_vm_vmss_accelerated_networking(np)
-        self.assertIsNone(np.accelerated_networking)
+        # error on configuring non-existing disks
+        with self.assertRaises(CLIError) as err:
+            normalize_disk_info(write_accelerator_settings=['0=true'])
+        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
 
 if __name__ == '__main__':

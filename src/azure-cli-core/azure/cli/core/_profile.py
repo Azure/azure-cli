@@ -71,9 +71,7 @@ def _authentication_context_factory(cli_ctx, tenant, cache):
     import adal
     authority_url = cli_ctx.cloud.endpoints.active_directory
     is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
-    if is_adfs:
-        authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
-    else:
+    if not is_adfs:
         authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
@@ -439,21 +437,14 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
+    def get_login_credentials(self, resource=None,
+                              subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
-
-        external_tenants_info = []
-        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
-        for ext_sub in ext_subs:
-            sub = self.get_subscription(ext_sub)
-            if sub[_TENANT_ID] != account[_TENANT_ID]:
-                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
-
         if identity_type is None:
             def _retrieve_token():
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -462,16 +453,8 @@ class Profile(object):
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                      account[_TENANT_ID], resource)
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
-
-            def _retrieve_tokens_from_external_tenants():
-                external_tokens = []
-                for u, t in external_tenants_info:
-                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
-                return external_tokens
-
             from azure.cli.core.adal_authentication import AdalAuthentication
-            auth_object = AdalAuthentication(_retrieve_token,
-                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
+            auth_object = AdalAuthentication(_retrieve_token)
         else:
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)

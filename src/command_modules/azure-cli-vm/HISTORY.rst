@@ -2,17 +2,8 @@
 
 Release History
 ===============
-2.0.33
-++++++
-* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
-* `vm create`: support `--accelerated-networking`
-* `vm/vmss extension image list`: absorb 404 when an image type is not found
-* `identity create`: support `--tags`
-
 2.0.32
 ++++++
-* BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support
-                   can be accessed through `vm update` or `vm disk attach`
 * vm/vmss extension: fix an incorrect extension image matching logic
 * vm create: expose `--boot-diagnostics-storage` to capture boot log
 * vm/vmss update: expose `--license-type`

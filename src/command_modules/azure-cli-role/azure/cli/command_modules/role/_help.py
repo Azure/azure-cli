@@ -145,10 +145,6 @@ helps['ad app update'] = """
                         }
                    ]
                 }]
-        - name: update an application's group membership claims to "All"
-          text: >
-                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
-
 """
 helps['ad user list'] = """
     type: command

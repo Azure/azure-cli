@@ -3,10 +3,6 @@
 Release History
 ===============
 
-3.2.3
-+++++
-* Fixed bug in Pool list table formatting: issue #4378.
-
 3.2.2
 +++++
 * Updated to Batch SDK 4.1.2.

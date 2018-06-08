@@ -2,9 +2,6 @@
 
 Release History
 ===============
-2.1.3
-++++++
-* `network vnet peering`: a few improvements
 
 2.1.2
 ++++++

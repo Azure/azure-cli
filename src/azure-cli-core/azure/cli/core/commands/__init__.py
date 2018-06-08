@@ -76,11 +76,7 @@ def _expand_file_prefixed_files(args):
         if not poss_file:  # if nothing after @ then it can't be a file
             return arg
         elif ix == 0:
-            try:
-                return _load_file(poss_file)
-            except IOError:
-                logger.debug("Failed to load @'%s', assume not a file", arg)
-                return arg
+            return _load_file(poss_file)
 
         # if @ not at the start it can't be a file
         return arg

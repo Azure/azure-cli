@@ -39,6 +39,9 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
+    with self.argument_context('ad') as c:
+        c.ignore('additional_properties')
+
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 
