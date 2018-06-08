@@ -23,7 +23,11 @@ for ext in $output; do
     echo "Verifying extension:" $ext
     az extension add -n $ext
     azdev verify load_all
-    if [ $? != 0 ]; then exit_code=1; fi
+    if [ $? != 0 ]
+    then
+        exit_code=1
+        echo "Failed to verify:" $ext
+    fi
     az extension remove -n $ext
     echo $ext "extension has been removed."
 done
