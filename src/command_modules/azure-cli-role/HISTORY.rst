@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.26
+++++++
+* Minor fixes.
+
 2.0.25
 ++++++
 * ad: remove stack traces from graph exceptions before surface to users
