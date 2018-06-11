@@ -16,11 +16,12 @@ from azure.cli.command_modules.batchai.custom import (
     _add_azure_file_share_to_mount_volumes,
     _add_nfs_to_mount_volumes,
     _is_on_mount_point,
-    _verify_subnet,
+    _ensure_subnet_is_valid,
     _get_image_reference,
     _list_node_setup_files_for_cluster,
     _generate_auto_storage_account_name,
-    _add_setup_task)
+    _add_setup_task,
+    _get_effective_resource_parameters)
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import TestCli
 from azure.mgmt.batchai.models import (
@@ -785,17 +786,17 @@ class TestBatchAICustom(unittest.TestCase):
                 None, '/subscriptions/00/resourceGroups/gr/providers/Microsoft.Compute/images/img')
 
     def test_validate_subnet_no_subnet(self):
-        _verify_subnet(None, None, 'mocknfs', 'mockgr')
+        _ensure_subnet_is_valid(None, None, 'mockrg', 'mockws', 'mocknfs')
 
     def test_validate_subnet_no_nfs(self):
-        _verify_subnet(
+        _ensure_subnet_is_valid(
             None,
             '/subscriptions/000/resourceGroups/gr/providers/Microsoft.Network/virtualNetworks/vn/subnets/subnet',
-            None, 'mockgr')
+            'mockrg', 'mockws', None)
 
     def test_validate_subnet_wrong_resource_id(self):
         with self.assertRaisesRegexp(CLIError, 'Ill-formed subnet resource id'):
-            _verify_subnet(None, 'bla-bla', None, 'foo')
+            _ensure_subnet_is_valid(None, 'bla-bla', 'mockrg', 'mockws', 'mocknfs')
 
     def test_validate_subnet_no_conflicts(self):
         mock_client = MagicMock()
@@ -803,10 +804,10 @@ class TestBatchAICustom(unittest.TestCase):
             return_value=FileServer(subnet=ResourceId(
                 id='/subscriptions/000/resourceGroups/gr/providers/Microsoft.Network/virtualNetworks/vn/subnets/subnet')
             ))
-        _verify_subnet(
+        _ensure_subnet_is_valid(
             mock_client,
             '/subscriptions/000/resourceGroups/gr/providers/Microsoft.Network/virtualNetworks/vn/subnets/subnet',
-            'mocknfs', 'mockrg')
+            'mockrg', 'mockws', 'mocknfs')
 
     def test_validate_subnet_when_conflict(self):
         mock_client = MagicMock()
@@ -815,10 +816,10 @@ class TestBatchAICustom(unittest.TestCase):
                 subnet=ResourceId(id='conflict')
             ))
         with self.assertRaisesRegexp(CLIError, 'Cluster and mounted NFS must be in the same subnet'):
-            _verify_subnet(
+            _ensure_subnet_is_valid(
                 mock_client,
                 '/subscriptions/000/resourceGroups/gr/providers/Microsoft.Network/virtualNetworks/vn/subnets/subnet',
-                'mocknfs', 'mockrg')
+                'mockrg', 'mockws', 'mocknfs')
 
     def test_is_on_mount_point_yes(self):
         self.assertTrue(_is_on_mount_point('afs', 'afs'))
@@ -968,3 +969,17 @@ class TestBatchAICustom(unittest.TestCase):
                                      run_elevated=False
                                  ),
                                  mount_volumes=[])))
+
+    def test_get_effective_resource_parameters_when_resource_id_given(self):
+        rg, ws, name = _get_effective_resource_parameters(
+            '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.BatchAI/workspaces/ws/clusters/cl',
+            'other_rg', 'other_ws')
+        self.assertEqual([rg, ws, name], ['rg', 'ws', 'cl'])
+
+    def test_get_effective_resource_parameters_when_name_given(self):
+        rg, ws, name = _get_effective_resource_parameters('cl', 'rg', 'ws')
+        self.assertEqual([rg, ws, name], ['rg', 'ws', 'cl'])
+
+    def test_get_effective_resource_parameters_when_none_given(self):
+        rg, ws, name = _get_effective_resource_parameters(None, 'rg', 'ws')
+        self.assertEqual([rg, ws, name], [None, None, None])
