@@ -1504,7 +1504,6 @@ def _get_azext_module(extension_name, module_name):
 
 
 def _install_dev_spaces_extension(extension_name):
-    from azure.cli.core.extension import ExtensionNotInstalledException
     try:
         from azure.cli.command_modules.extension import custom
         custom.add_extension(extension_name=extension_name)
