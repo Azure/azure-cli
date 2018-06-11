@@ -17,7 +17,7 @@ EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.
                                                                                           'cliextensions')
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
-WHL_METADATA_FILENAME = 'metadata.json'
+WHL_METADATA_FILENAME = 'METADATA'
 AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
@@ -102,6 +102,7 @@ class WheelExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
+        from wheel.metadata import pkginfo_to_dict
         from wheel.install import WHEEL_INFO_RE
         if not extension_exists(self.name):
             return None
@@ -116,8 +117,8 @@ class WheelExtension(Extension):
             if parsed_dist_info_dir and parsed_dist_info_dir.groupdict().get('name') == self.name.replace('-', '_'):
                 whl_metadata_filepath = os.path.join(ext_dir, dist_info_dirname, WHL_METADATA_FILENAME)
                 if os.path.isfile(whl_metadata_filepath):
-                    with open(whl_metadata_filepath) as f:
-                        metadata.update(json.load(f))
+                    whl_dict = pkginfo_to_dict(whl_metadata_filepath)
+                    metadata.update(whl_dict)
         return metadata
 
     @staticmethod
