@@ -31,7 +31,7 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
-        from azure.cli.core.commands.arm import add_id_parameters
+        from azure.cli.core.commands.arm import add_id_parameters, register_global_subscription_parameter
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.extensions import register_extensions
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
@@ -55,6 +55,7 @@ class AzCli(CLI):
 
         register_extensions(self)
         self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
+        register_global_subscription_parameter(self)
 
         self.progress_controller = None
 

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.15
+++++++
+* Minor fixes
+
 0.0.14
 ++++++
 * Be more resilient to system error when removing an extension.

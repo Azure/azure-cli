@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.23
+++++++
+* Minor fixes
+
 0.3.22
 ++++++
 * Cap the dependencies
