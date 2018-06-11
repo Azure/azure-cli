@@ -397,16 +397,14 @@ helps['aks use-dev-spaces'] = """
         - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
           text: |-
             az aks use-dev-spaces -g my-aks-group -n my-aks
-
         - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
-        client components and selecting a new or existing dev space 'scott'.
+        client components and selecting a new or existing dev space 'my-space'.
           text: |-
-            az aks use-dev-spaces -g contoso-dev -n contoso-dev-aks --update --space scott
-
+            az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
         - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
-        'develop/scott' without prompting for confirmation.
+        'develop/my-space' without prompting for confirmation.
           text: |-
-            az aks use-dev-spaces -g contoso-dev -n contoso-dev-aks -s develop/scott -y
+            az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -416,10 +414,9 @@ helps['aks remove-dev-spaces'] = """
         - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
           text: |-
             az aks remove-dev-spaces -g my-aks-group -n my-aks
-
         - name: Remove Azure Dev Spaces from a managed Kubernetes cluster without prompting.
           text: |-
-            az aks remove-dev-spaces -g contoso-dev -n contoso-dev-aks --yes
+            az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
 """
 
 helps['aks wait'] = """

@@ -1503,20 +1503,20 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _install_dev_spaces_extension(extension_name):
+def _install_or_update_dev_spaces_extension(extension_name, update_extension):
+    from azure.cli.core.extension import ExtensionNotInstalledException
     try:
         from azure.cli.command_modules.extension import custom
-        custom.add_extension(extension_name=extension_name)
-    except Exception:  # nopa pylint: disable=broad-except
+        if update_extension:
+            custom.update_extension(extension_name=extension_name)
+        else:
+            custom.add_extension(extension_name=extension_name)
+    except ExtensionNotInstalledException as err:
+        logger.debug(err)
         return False
-    return True
-
-
-def _update_dev_spaces_extension(extension_name):
-    try:
-        from azure.cli.command_modules.extension import custom
-        custom.update_extension(extension_name=extension_name)
-    except Exception:  # nopa pylint: disable=broad-except
+    except ModuleNotFoundError as err:
+        logger.debug(err)
+        logger.error("Error occurred attempting to load the extension module. Use --debug for more information.")
         return False
     return True
 
@@ -1526,9 +1526,9 @@ def _get_or_add_extension(extension_name, update=False):
     try:
         get_extension(extension_name)
         if update:
-            _update_dev_spaces_extension(extension_name)
+            return _install_or_update_dev_spaces_extension(extension_name, update_extension=True)
     except ExtensionNotInstalledException:
-        return _install_dev_spaces_extension(extension_name)
+        return _install_or_update_dev_spaces_extension(extension_name, update_extension=False)
     return True
 
 
