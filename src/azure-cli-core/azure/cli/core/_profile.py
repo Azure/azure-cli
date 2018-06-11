@@ -418,11 +418,13 @@ class Profile(object):
             subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
                 _SUBSCRIPTION_NAME].lower()])]
         if not result and subscription:
-            raise CLIError("Subscription '{}' not found. Check the spelling and casing and try again.".format(subscription))
+            raise CLIError("Subscription '{}' not found. "
+                           "Check the spelling and casing and try again.".format(subscription))
         elif not result and not subscription:
             raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
         elif len(result) > 1:
-            raise CLIError("Multiple subscriptions with the name '{}' found. Specify the subscription ID.".format(subscription))
+            raise CLIError("Multiple subscriptions with the name '{}' found. "
+                           "Specify the subscription ID.".format(subscription))
         return result[0]
 
     def get_subscription_id(self, subscription=None):  # take id or name
