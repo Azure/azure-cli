@@ -89,8 +89,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
         old_cu = 2
         new_cu = 4
         family = 'Gen5'
-        skuname = '{}_{}_{}'.format("GP", family, old_cu)
-        newskuname = '{}_{}_{}'.format("GP", family, new_cu)
+        skuname = 'GP_{}_{}'.format(family, old_cu)
+        newskuname = 'GP_{}_{}'.format(family, new_cu)
         loc = 'koreasouth'
 
         geoGeoRedundantBackup = 'Disabled'
