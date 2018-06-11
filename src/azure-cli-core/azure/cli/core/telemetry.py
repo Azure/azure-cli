@@ -263,6 +263,7 @@ def conclude():
         _upload_telemetry_with_user_agreement(payload, **kwargs)
 
 
+# This includes a final user-agreement-check; ALL methods sending telemetry MUST call this.
 @_user_agrees_to_telemetry
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def _upload_telemetry_with_user_agreement(payload, **kwargs):
