@@ -18,6 +18,9 @@ name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
+    with self.argument_context('ad') as c:
+        c.argument('_subscription')  # hide global subscription param
+
     with self.argument_context('ad app') as c:
         c.argument('app_id', help='application id')
         c.argument('application_object_id', options_list=('--object-id',))
