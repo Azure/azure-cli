@@ -73,6 +73,7 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_cluster_user_account_settings_using_config(self):
         params = ClusterCreateParameters(
+            vm_size=None,
             user_account_settings=UserAccountSettings(
                 admin_user_name='name',
                 admin_user_password='password'))
@@ -80,7 +81,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params, actual)
 
     def test_batchai_update_cluster_user_account_settings_using_command_line(self):
-        params = ClusterCreateParameters()
+        params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
         self.assertEquals(actual.user_account_settings,
                           UserAccountSettings(
@@ -90,6 +91,7 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_overriding_config(self):
         params = ClusterCreateParameters(
+            vm_size=None,
             user_account_settings=UserAccountSettings(
                 admin_user_name='old_name',
                 admin_user_ssh_public_key='old key',
@@ -102,7 +104,7 @@ class TestBatchAICustom(unittest.TestCase):
                               admin_user_password='password'))
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_when_key_is_path(self):
-        params = ClusterCreateParameters()
+        params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(actual.user_account_settings,
                           UserAccountSettings(
@@ -110,14 +112,14 @@ class TestBatchAICustom(unittest.TestCase):
                               admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_when_key_is_wrong(self):
-        params = ClusterCreateParameters()
+        params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         with self.assertRaisesRegexp(CLIError, 'Incorrect ssh public key value'):
             _update_user_account_settings(params, 'user', 'my key', None)
 
     @patch('getpass.getuser')
     def test_batchai_update_cluster_user_account_settings_using_current_user(self, getuser):
         getuser.return_value = 'current_user'
-        params = ClusterCreateParameters()
+        params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, None, None, 'password')
         self.assertEquals(actual.user_account_settings,
                           UserAccountSettings(
@@ -130,7 +132,7 @@ class TestBatchAICustom(unittest.TestCase):
             self, get_default_ssh_public_key_location, getuser):
         get_default_ssh_public_key_location.return_value = _data_file('key.txt')
         getuser.return_value = 'current_user'
-        params = ClusterCreateParameters()
+        params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, None, None, None)
         self.assertEquals(actual.user_account_settings,
                           UserAccountSettings(
@@ -139,6 +141,8 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_file_server_user_account_settings_using_config(self):
         params = FileServerCreateParameters(
+            vm_size=None,
+            data_disks=None,
             ssh_configuration=SshConfiguration(
                 user_account_settings=UserAccountSettings(
                     admin_user_name='name', admin_user_password='password')))
@@ -146,7 +150,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params, actual)
 
     def test_batchai_update_file_server_user_account_settings_using_command_line(self):
-        params = FileServerCreateParameters()
+        params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
         self.assertEquals(actual.ssh_configuration.user_account_settings,
                           UserAccountSettings(
@@ -156,6 +160,8 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_file_server_user_account_settings_using_command_line_overriding_config(self):
         params = FileServerCreateParameters(
+            vm_size=None,
+            data_disks=None,
             ssh_configuration=SshConfiguration(
                 user_account_settings=UserAccountSettings(
                     admin_user_name='old_name',
@@ -169,7 +175,7 @@ class TestBatchAICustom(unittest.TestCase):
                               admin_user_password='password'))
 
     def test_batchai_update_file_server_user_account_settings_using_command_line_when_key_is_path(self):
-        params = FileServerCreateParameters()
+        params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(actual.ssh_configuration.user_account_settings,
                           UserAccountSettings(
@@ -177,14 +183,14 @@ class TestBatchAICustom(unittest.TestCase):
                               admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_update_fileserver_user_account_settings_using_command_line_when_key_is_wrong(self):
-        params = FileServerCreateParameters()
+        params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         with self.assertRaisesRegexp(CLIError, 'Incorrect ssh public key value'):
             _update_user_account_settings(params, 'user', 'my key', None)
 
     @patch('getpass.getuser')
     def test_batchai_update_file_server_user_account_settings_using_current_user(self, getuser):
         getuser.return_value = 'current_user'
-        params = FileServerCreateParameters()
+        params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, None, None, 'password')
         self.assertEquals(actual.ssh_configuration.user_account_settings,
                           UserAccountSettings(
@@ -197,7 +203,7 @@ class TestBatchAICustom(unittest.TestCase):
             self, get_default_ssh_public_key_location, getuser):
         get_default_ssh_public_key_location.return_value = _data_file('key.txt')
         getuser.return_value = 'current_user'
-        params = FileServerCreateParameters()
+        params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, None, None, None)
         self.assertEquals(actual.ssh_configuration.user_account_settings,
                           UserAccountSettings(
@@ -845,7 +851,7 @@ class TestBatchAICustom(unittest.TestCase):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
-                        comman_line='true',
+                        command_line='true',
                         std_out_err_path_prefix='/somewhere')))
             _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
 
@@ -854,7 +860,7 @@ class TestBatchAICustom(unittest.TestCase):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
-                        comman_line='true',
+                        command_line='true',
                         std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/nfs')))
             _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
 
@@ -863,7 +869,7 @@ class TestBatchAICustom(unittest.TestCase):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
-                        comman_line='true',
+                        command_line='true',
                         std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/nfs')))
             cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
             _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
@@ -871,15 +877,19 @@ class TestBatchAICustom(unittest.TestCase):
     def test_list_setup_task_files_for_cluster_when_output_not_on_afs_or_bfs(self):
         with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
             cluster = Cluster(
+                vm_size=None,
+                user_account_settings=None,
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
-                        comman_line='true',
+                        command_line='true',
                         std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/nfs')),
                 mount_volumes=MountVolumes(
                     azure_file_shares=[
                         AzureFileShareReference(
                             azure_file_url='https://account.file.core.windows.net/share',
-                            relative_mount_path='afs'
+                            relative_mount_path='afs',
+                            account_name='some',
+                            credentials=None
                         )]
                 ))
             cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
@@ -890,17 +900,25 @@ class TestBatchAICustom(unittest.TestCase):
         cluster = Cluster(
             node_setup=NodeSetup(
                 setup_task=SetupTask(
-                    comman_line='true',
+                    command_line='true',
                     std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/afs')))
         cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
         cluster.node_setup.mount_volumes = MountVolumes(
             azure_file_shares=[
-                AzureFileShareReference(relative_mount_path='afs')])
+                AzureFileShareReference(
+                    relative_mount_path='afs',
+                    account_name='some',
+                    azure_file_url='some url',
+                    credentials=None)])
         cli_ctx = TestCli()
         _list_node_setup_files_for_cluster(cli_ctx, cluster, '.', 60)
         get_files_from_afs.assert_called_once_with(
             cli_ctx,
-            AzureFileShareReference(relative_mount_path='afs'),
+            AzureFileShareReference(
+                relative_mount_path='afs',
+                account_name='some',
+                azure_file_url='some url',
+                credentials=None),
             os.path.join('path/segment', '.'), 60)
 
     @patch('azure.cli.command_modules.batchai.custom._get_files_from_bfs')
@@ -908,17 +926,26 @@ class TestBatchAICustom(unittest.TestCase):
         cluster = Cluster(
             node_setup=NodeSetup(
                 setup_task=SetupTask(
-                    comman_line='true',
+                    command_line='true',
                     std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/bfs')))
         cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
         cluster.node_setup.mount_volumes = MountVolumes(
             azure_blob_file_systems=[
-                AzureBlobFileSystemReference(relative_mount_path='bfs')])
+                AzureBlobFileSystemReference(
+                    relative_mount_path='bfs',
+                    account_name='some',
+                    container_name='container',
+                    credentials=None
+                    )])
         cli_ctx = TestCli()
         _list_node_setup_files_for_cluster(cli_ctx, cluster, '.', 60)
         get_files_from_bfs.assert_called_once_with(
             cli_ctx,
-            AzureBlobFileSystemReference(relative_mount_path='bfs'),
+            AzureBlobFileSystemReference(
+                account_name='some',
+                relative_mount_path='bfs',
+                container_name='container',
+                credentials=None),
             os.path.join('path/segment/', '.'), 60)
 
     def test_generate_auto_storage_account_name(self):
@@ -928,12 +955,14 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_setup_task_no_output(self):
         with self.assertRaisesRegexp(CLIError, '--setup-task requires providing of --setup-task-output'):
-            _add_setup_task('echo hi', None, ClusterCreateParameters())
+            _add_setup_task('echo hi', None, ClusterCreateParameters(vm_size=None, user_account_settings=None))
 
     def test_setup_task_added_to_cluster_without_node_setup(self):
-        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters())
+        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters(vm_size=None, user_account_settings=None))
         self.assertEqual(actual,
                          ClusterCreateParameters(
+                             vm_size=None,
+                             user_account_settings=None,
                              node_setup=NodeSetup(
                                  setup_task=SetupTask(
                                      command_line='echo hi',
@@ -942,9 +971,12 @@ class TestBatchAICustom(unittest.TestCase):
                                  ))))
 
     def test_setup_task_added_to_cluster_without_setup_task(self):
-        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters(node_setup=NodeSetup()))
+        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters(
+            vm_size=None, user_account_settings=None, node_setup=NodeSetup()))
         self.assertEqual(actual,
                          ClusterCreateParameters(
+                             vm_size=None,
+                             user_account_settings=None,
                              node_setup=NodeSetup(
                                  setup_task=SetupTask(
                                      command_line='echo hi',
@@ -956,12 +988,17 @@ class TestBatchAICustom(unittest.TestCase):
         # Should overwrite setup task but keep other parameters of node setup (here we use mount_volumes to check it)
         actual = _add_setup_task('echo hi', '/tmp',
                                  ClusterCreateParameters(
+                                     vm_size=None,
+                                     user_account_settings=None,
                                      node_setup=NodeSetup(
-                                         setup_task=SetupTask(command_line='different'),
+                                         setup_task=SetupTask(
+                                             command_line='different', std_out_err_path_prefix=None),
                                          mount_volumes=[]
                                      )))
         self.assertEqual(actual,
                          ClusterCreateParameters(
+                             vm_size=None,
+                             user_account_settings=None,
                              node_setup=NodeSetup(
                                  setup_task=SetupTask(
                                      command_line='echo hi',
