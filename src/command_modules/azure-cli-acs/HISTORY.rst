@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.0
++++++
+* expose read-only "nodeResourceGroup" property on managed clusters
+
 2.1.0
 +++++
 * `az aks create` understands advanced networking (VNet) options
