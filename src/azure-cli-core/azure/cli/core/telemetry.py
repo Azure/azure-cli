@@ -48,7 +48,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
-        self.mode = None
+        self.mode = 'default'
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -220,7 +220,7 @@ def _user_agrees_to_telemetry(func):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def start(mode=None):
     if mode:
-        _session.mode=mode
+        _session.mode = mode
     _session.start_time = datetime.datetime.utcnow()
 
 
