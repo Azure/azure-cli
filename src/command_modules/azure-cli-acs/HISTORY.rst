@@ -7,6 +7,7 @@ Release History
 ++++++
 * Updated options of `az aks use-dev-spaces` command. Added `--update` support.
 * `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
+* expose read-only "nodeResourceGroup" property on managed clusters
 
 2.1.0
 +++++
