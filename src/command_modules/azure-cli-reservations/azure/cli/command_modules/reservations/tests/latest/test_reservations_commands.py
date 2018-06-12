@@ -6,7 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 
 
-# @record_only()
+@record_only()
 class AzureReservationsTests(ScenarioTest):
 
     def _validate_reservation_order(self, reservation_order):
@@ -14,9 +14,6 @@ class AzureReservationsTests(ScenarioTest):
         self.assertTrue(reservation_order['etag'])
         self.assertTrue(reservation_order['id'])
         self.assertTrue(reservation_order['name'])
-        self.assertTrue(reservation_order['createdDateTime'])
-        self.assertTrue(reservation_order['displayName'])
-        self.assertTrue(reservation_order['expiryDate'])
         self.assertTrue(reservation_order['originalQuantity'])
         self.assertTrue(reservation_order['provisioningState'])
         self.assertTrue(reservation_order['requestDateTime'])
@@ -40,7 +37,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_applied_reservation_order_ids(self):
         self.kwargs.update({
-            'subscription': '302110e3-cd4e-4244-9874-07c91853c809'
+            'subscription': '00000000-0000-0000-0000-000000000000'
         })
         result = self.cmd('reservations reservation-order-id list --subscription-id {subscription}') \
                      .get_output_in_json()
@@ -106,7 +103,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_catalog(self):
         self.kwargs.update({
-            'subscription': '302110e3-cd4e-4244-9874-07c91853c809',
+            'subscription': '00000000-0000-0000-0000-000000000000',
             'type': 'SuseLinux'
         })
         catalog = self.cmd('reservations catalog show --subscription-id {subscription} --reserved-resource-type {type}').get_output_in_json()
@@ -119,26 +116,26 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_update_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057",
-            'reservation_id': '7e4e7046-6e22-4140-8285-6931d2bf7791',
-            'scope': '/subscriptions/6c1fecce-899b-4cd6-8d94-622dadf93cfb',
-            'autoFit': "InstanceFlexibilityOn"
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
+            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05',
+            'scope': '/subscriptions/302110e3-cd4e-4244-9874-07c91853c809',
+            'instance_flexibility': "On"
         })
 
         single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
                                       ' --reservation-id {reservation_id} -t Single -s {scope}'
-                                      ' --auto-fit {autoFit}').get_output_in_json()
+                                      ' --instance-flexibility {instance_flexibility}').get_output_in_json()
         self.assertEqual('Single', single_reservation['properties']['appliedScopeType'])
 
         shared_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id} '
                                       '--reservation-id {reservation_id} -t Shared'
-                                      ' --auto-fit {autoFit}').get_output_in_json()
+                                      ' --instance-flexibility {instance_flexibility}').get_output_in_json()
         self.assertEqual('Shared', shared_reservation['properties']['appliedScopeType'])
 
     def test_split_and_merge(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057",
-            'reservation_id': '7e4e7046-6e22-4140-8285-6931d2bf7791',
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
+            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05',
             'quantity1': 1,
             'quantity2': 1
         })

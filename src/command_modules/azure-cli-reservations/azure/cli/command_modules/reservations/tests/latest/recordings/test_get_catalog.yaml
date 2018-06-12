@@ -2,88 +2,55 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Charset: [utf-8]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.4]
-      return-client-request-id: ['true']
-      x-client-CPU: [x86]
-      x-client-OS: [win32]
-      x-client-SKU: [Python]
-      x-client-Ver: [0.5.0]
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F83398c96-804e-4d3b-90f6-f96a096c64d5%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/83398c96-804e-4d3b-90f6-f96a096c64d5/.well-known/openid-configuration"}'}
-    headers:
-      access-control-allow-methods: ['GET, OPTIONS']
-      access-control-allow-origin: ['*']
-      cache-control: [private]
-      content-length: ['131']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 29 May 2018 21:34:48 GMT']
-      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rzcFhi6nIA8TDLEIRkxeKHViDTDe7jEdcKBC4fv6wkf_-TpzYkeSyZhC3iO2d03Nl_69iBErO0aFRH4lNz_meYHEASKBgSXb7HkSeFn5n4f_3jFaZj2MWYg4m3MY5tlldrF6kU77Aj7_tzO4M1tMynqQrHrCUfmcknn-Gt40HJnMgAA;
-          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [reservations catalog show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-reservations/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-reservations/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.37]
       accept-language: [en-US]
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/catalogs?api-version=2018-06-01&reservedResourceType=SuseLinux
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/catalogs?api-version=2018-06-01&reservedResourceType=SuseLinux
   response:
     body: {string: '[{"resourceType":"SuseLinux","name":"sles_hpc_priority_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for HPC Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Priority"},{"name":"SkuName","value":"1-2 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Priority"},{"name":"SkuName","value":"1-2 vCPU VM"},{"name":"MeterId","value":"e275a668-ce79-44e2-a659-f43443265e98"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for HPC Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Standard"},{"name":"SkuName","value":"3-4 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
-        for HPC Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Standard"},{"name":"SkuName","value":"5+ vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_priority_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Standard"},{"name":"SkuName","value":"3-4 vCPU VM"},{"name":"MeterId","value":"4ed70d2d-e2bb-4dcd-b6fa-42da71861a1c"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_priority_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for HPC Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Priority"},{"name":"SkuName","value":"5+ vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_1_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Priority"},{"name":"SkuName","value":"5+ vCPU VM"},{"name":"MeterId","value":"4edcd5a5-8510-49a8-a9fc-c9721f501913"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
+        for HPC Standard"},{"name":"SkuName","value":"5+ vCPU VM"},{"name":"MeterId","value":"907a85de-024f-4dd6-969c-347d47a1bdff"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_1_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Priority"},{"name":"SkuName","value":"1
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"dd75c4ed-be82-4c52-9e65-f63f0b544941"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for SAP Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for SAP Priority"},{"name":"SkuName","value":"5+ vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for SAP Priority"},{"name":"SkuName","value":"5+ vCPU VM"},{"name":"MeterId","value":"18ae79cd-dfce-48c9-897b-ebd3053c6058"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_5plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Standard"},{"name":"SkuName","value":"5+
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"7b349b65-d906-42e5-833f-b2af38513468"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Standard"},{"name":"SkuName","value":"1-2
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_8plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"4b2fecfc-b110-4312-8f9d-807db1cb79ae"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_8plus_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Priority"},{"name":"SkuName","value":"8+
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_2-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"93329a72-24d7-4faa-93d9-203f367ed334"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_2-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Priority"},{"name":"SkuName","value":"2-4
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_priority_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"924bee71-5eb8-424f-83ed-a58823c33908"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_priority_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for HPC Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Priority"},{"name":"SkuName","value":"3-4 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_6_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Priority"},{"name":"SkuName","value":"3-4 vCPU VM"},{"name":"MeterId","value":"e531e1c0-09c9-4d83-b7d0-a2c6741faa22"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_priority_6_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Priority"},{"name":"SkuName","value":"6
-        vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        vCPU VM"},{"name":"MeterId","value":"e8862232-6131-4dbe-bde4-e2ae383afc6f"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for SAP Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for SAP Priority"},{"name":"SkuName","value":"3-4 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for SAP Priority"},{"name":"SkuName","value":"3-4 vCPU VM"},{"name":"MeterId","value":"847887de-68ce-4adc-8a33-7a3f4133312f"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_hpc_standard_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for HPC Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for HPC Standard"},{"name":"SkuName","value":"1-2 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for HPC Standard"},{"name":"SkuName","value":"1-2 vCPU VM"},{"name":"MeterId","value":"8c94ad45-b93b-4772-aab1-ff92fcec6610"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_sap_priority_1-2_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         for SAP Priority"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server
-        for SAP Priority"},{"name":"SkuName","value":"1-2 vCPU VM"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
+        for SAP Priority"},{"name":"SkuName","value":"1-2 vCPU VM"},{"name":"MeterId","value":"497fe0b6-fa3c-4e3d-a66b-836097244142"}],"restrictions":[]},{"resourceType":"SuseLinux","name":"sles_standard_3-4_vcpu_vm","terms":["P1Y","P3Y"],"skuProperties":[{"name":"ProductShortName","value":"SLES
         Standard"},{"name":"ProductTitle","value":"SUSE Linux Enterprise Server Standard"},{"name":"SkuName","value":"3-4
-        vCPU VM"}],"restrictions":[]}]'}
+        vCPU VM"},{"name":"MeterId","value":"0c3ebb4c-db7d-4125-b45a-0534764d4bda"}],"restrictions":[]}]'}
     headers:
       cache-control: [no-cache]
-      content-length: ['4770']
+      content-length: ['5826']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 29 May 2018 21:34:50 GMT']
+      date: ['Tue, 12 Jun 2018 18:49:35 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
@@ -91,7 +58,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-content-type-options: [nosniff]
-      x-ms-test: ['{"contact":"cabri-fixedheader","scenarios":"ACE Purchase Test","retention":"6/8/2018
-          9:34:50 PM"}']
+      x-ms-test: ['{"contact":"kgautam","scenarios":"SqlSusePurchase","retention":"6/22/2018
+          6:49:35 PM"}']
     status: {code: 200, message: OK}
 version: 1
