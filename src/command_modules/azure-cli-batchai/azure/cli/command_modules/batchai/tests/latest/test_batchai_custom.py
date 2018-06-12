@@ -935,8 +935,7 @@ class TestBatchAICustom(unittest.TestCase):
                     relative_mount_path='bfs',
                     account_name='some',
                     container_name='container',
-                    credentials=None
-                    )])
+                    credentials=None)])
         cli_ctx = TestCli()
         _list_node_setup_files_for_cluster(cli_ctx, cluster, '.', 60)
         get_files_from_bfs.assert_called_once_with(
