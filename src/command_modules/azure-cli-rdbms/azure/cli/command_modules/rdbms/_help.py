@@ -55,6 +55,32 @@ def add_helps(command_group, server_type):
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
                             -l westus2 --sku-name GP_Gen5_2
                 """.format(command_group, server_type)
+    helps['mysql server replica'] = """
+                type: group
+                short-summary: Manage cloud replication.
+                """
+    helps['mysql server replica create'] = """
+                type: command
+                short-summary: Create a cloud replica for a server.
+                examples:
+                    - name: Create replica for server testsvr.
+                      text: az mysql server replica create -n testreplsvr -g testgroup -s testsvr
+                    - name: Create replica testreplsvr for server testsvr2, where 'testreplsvr' is in a different resource group.
+                      text: |
+                        az mysql server replica create -n testreplsvr -g testgroup \\
+                            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testsvr2"
+                """
+    helps['mysql server replica stop'] = """
+                type: command
+                short-summary: Stop Replica to make it an individual server.
+                examples:
+                    - name: Stop server testsvr as replica and make it an individual server.
+                      text: az mysql server replica stop -g testgroup -n testsvr
+                """
+    helps['mysql server replica list'] = """
+                type: command
+                short-summary: List all replicas for a given server.
+                """
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.
