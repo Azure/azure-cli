@@ -31,6 +31,7 @@ class HelpTest(unittest.TestCase):
         cli = TestCli()
         parser_dict = {}
         cli = TestCli()
+        help_ctx = cli.help_cls(cli)
         try:
             cli.invoke(['-h'])
         except SystemExit:
@@ -50,7 +51,8 @@ class HelpTest(unittest.TestCase):
 
         for name, parser in parser_dict.items():
             try:
-                help_file = GroupHelpFile(name, parser) if _is_group(parser) else CliCommandHelpFile(name, parser)
+                help_file = GroupHelpFile(help_ctx, name, parser) if _is_group(parser) \
+                    else CliCommandHelpFile(help_ctx, name, parser)
                 help_file.load(parser)
             except Exception as ex:
                 raise HelpAuthoringException('{}, {}'.format(name, ex))

@@ -68,7 +68,7 @@ class FreshTable(object):
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    command_table = None
+    loader = None
 
     def __init__(self, shell_ctx):
         self.shell_ctx = shell_ctx
@@ -117,7 +117,7 @@ class FreshTable(object):
         load_help_files(cmd_table_data)
         elapsed = timeit.default_timer() - start_time
         logger.debug('Command table dumped: %s sec', elapsed)
-        FreshTable.command_table = main_loader.command_table
+        FreshTable.loader = main_loader
 
         # dump into the cache file
         command_file = shell_ctx.config.get_help_files()

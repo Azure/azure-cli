@@ -107,9 +107,10 @@ class AzCompleter(Completer):
 
     def initialize_command_table_attributes(self):
         from ._dump_commands import FreshTable
-        self.cmdtab = FreshTable(self.shell_ctx).command_table
-        if self.cmdtab:
-            self.parser.load_command_table(self.cmdtab)
+        loader = FreshTable(self.shell_ctx).loader
+        if loader and loader.command_table:
+            self.cmdtab = loader.command_table
+            self.parser.load_command_table(loader)
             self.argsfinder = ArgsFinder(self.parser)
 
     def validate_param_completion(self, param, leftover_args):
