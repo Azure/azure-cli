@@ -62,7 +62,7 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
         role_definition = shell_safe_json_parse(role_definition)
 
     if not isinstance(role_definition, dict):
-        raise CLIError('Invalid role defintion. A valid json object is expected')
+        raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
     # to workaround service defects, ensure property names are camel case
     names = [p for p in role_definition if p[:1].isupper()]
     for n in names:
