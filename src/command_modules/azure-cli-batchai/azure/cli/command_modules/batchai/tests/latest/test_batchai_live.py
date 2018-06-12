@@ -15,7 +15,7 @@ def _data_file(filename):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename).replace('\\', '\\\\')
 
 
-#@live_only()
+@live_only()
 class BatchAILiveScenariosTests(ScenarioTest):
     @ResourceGroupPreparer(location=LOCATION_FOR_LIVE_TESTS)
     def test_cluster_job_node_exec(self, resource_group):
