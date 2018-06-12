@@ -2,23 +2,56 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F83398c96-804e-4d3b-90f6-f96a096c64d5%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/83398c96-804e-4d3b-90f6-f96a096c64d5/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 29 May 2018 21:34:47 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rnDtqMTAj-YuTZDSnBKjNYFgGjfHWXMGsf7oJk1joltbHFMfgG7b1Qg63pkXtR-ZufawrvMZSdFZEuMjezOpX913foltvxaPci4yqOfjS728z1gFZ_eMgTiXxucf_5hWg4Wb0LXLHeFeM2Orh_w_yav1FUJST6FSI3Tmhn8l5LSwgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [reservations reservation-order-id list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-reservations/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.32]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/appliedReservations?api-version=2017-11-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/appliedReservations?api-version=2018-06-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.capacity/AppliedReservations/default","type":"Microsoft.Capacity/AppliedReservations","name":"default","properties":{"reservationOrderIds":{"value":["/providers/Microsoft.Capacity/reservationorders/f8dc1a06-c795-4513-b387-11416b058f51","/providers/Microsoft.Capacity/reservationorders/8c165114-9981-4e50-9cf2-da5145f1a9a5","/providers/Microsoft.Capacity/reservationorders/86d9870a-bf1e-4635-94c8-b0f08932bc3a"]}}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.capacity/AppliedReservations/default","type":"Microsoft.Capacity/AppliedReservations","name":"default","properties":{"reservationOrderIds":{"value":["/providers/Microsoft.Capacity/reservationorders/79001a2a-ec6b-408b-b1bf-d6651cebd057"]}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['492']
+      content-length: ['318']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 06 Nov 2017 19:00:14 GMT']
+      date: ['Tue, 29 May 2018 21:34:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
