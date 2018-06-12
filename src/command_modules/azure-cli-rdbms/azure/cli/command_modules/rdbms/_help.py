@@ -59,8 +59,8 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: Update a server.
                 examples:
-                    - name: Update a server's vcore to 2.
-                      text: az {0} server update -g testgroup -n testsvrnew --vcore 2
+                    - name: Update a server's sku.
+                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen4_4
                     - name: Update a server's tags.
                       text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
                 """.format(command_group)

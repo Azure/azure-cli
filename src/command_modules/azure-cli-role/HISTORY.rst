@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.25
+++++++
+* ad: remove stack traces from graph exceptions before surface to users
+* ad sp create: do not throw if CLI can't resolve app id
 
 2.0.24
 ++++++

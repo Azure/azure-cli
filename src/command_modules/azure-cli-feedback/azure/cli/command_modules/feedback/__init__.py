@@ -22,5 +22,9 @@ class FeedbackCommandsLoader(AzCommandsLoader):
 
         return self.command_table
 
+    def load_arguments(self, command):
+        with self.argument_context('feedback') as c:
+            c.ignore('_subscription')  # hide global subscription param
+
 
 COMMAND_LOADER_CLS = FeedbackCommandsLoader
