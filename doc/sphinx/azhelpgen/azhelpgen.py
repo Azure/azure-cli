@@ -82,6 +82,8 @@ class AzHelpGenDirective(Directive):
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
+            if help_file.deprecate_info:
+                yield '{}:deprecated: {}'.format(INDENT, help_file.deprecate_info._get_message(help_file.deprecate_info))
             if not is_command:
                 top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
@@ -101,6 +103,8 @@ class AzHelpGenDirective(Directive):
                     yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
                     yield ''
                     yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
+                    if arg.deprecate_info:
+                        yield '{}:deprecated: {}'.format(DOUBLEINDENT, arg.deprecate_info._get_message(arg.deprecate_info))
                     short_summary = arg.short_summary or ''
                     possible_values_index = short_summary.find(' Possible values include')
                     short_summary = short_summary[0:possible_values_index
