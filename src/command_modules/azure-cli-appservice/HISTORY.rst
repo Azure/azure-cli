@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.35
+++++++
+* dependencies: remove the cap on the urllib as newer requests was released
 
 0.1.35
 ++++++
