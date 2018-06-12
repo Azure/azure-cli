@@ -29,7 +29,6 @@ from msrest.serialization import Deserializer
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from six.moves import urllib_parse
-from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
 
 from azure.cli.core import keys
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -1050,6 +1049,7 @@ def _create_tunnel(remote_host, port, username, password, ssh_private_key, local
     :param remote_addresses: target addresses
     :param func: a function to run on the remote host. The forwarding is stopped as soon as func completes execution.
     """
+    from sshtunnel import SSHTunnelForwarder
     local_addresses = [(a[0], a[1] if a[1] != 0 else _get_available_local_port()) for a in local_addresses]
     with SSHTunnelForwarder((remote_host, port),
                             ssh_username=username,
@@ -1096,6 +1096,7 @@ def _ssh_exec(ip, port, cmdline, username, password, ssh_private_key):
 
 def exec_on_node(client, resource_group, workspace_name, cluster_name, node_id=None, ports=None, cmdline=None,
                  password=None, ssh_private_key=None):
+    from sshtunnel import BaseSSHTunnelForwarderError
     if not any((cmdline, ports)):
         return
     ip, port = None, None
