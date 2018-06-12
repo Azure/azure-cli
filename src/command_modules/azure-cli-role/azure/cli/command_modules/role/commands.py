@@ -31,11 +31,6 @@ def graph_err_handler(ex):
     raise ex
 
 
-def get_role_definition_op(operation_name):
-    return 'azure.mgmt.authorization.operations.role_definitions_operations' \
-           '#RoleDefinitionsOperations.{}'.format(operation_name)
-
-
 def get_role_definitions(cli_ctx, _):
     return _auth_client_factory(cli_ctx, ).role_definitions
 

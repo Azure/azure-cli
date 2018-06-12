@@ -22,8 +22,6 @@ from azure.graphrbac.models.graph_error import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
-from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
-
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
                                     KeyCredential, UserCreateParameters, PasswordProfile,
                                     ServicePrincipalCreateParameters, RequiredResourceAccess,
@@ -55,6 +53,7 @@ def update_role_definition(cmd, role_definition):
 
 
 def _create_update_role_definition(cli_ctx, role_definition, for_update):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     definitions_client = _auth_client_factory(cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
@@ -87,6 +86,13 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
+    Permission, RoleDefinition = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                         'Permission', 'RoleDefinition', mod='models',
+                                         operation_group='role_definitions')
+
+    if not Permission:
+        raise CLIError('"Permission" configuration is unavailable from the current profile. Please use "az cloud set"'
+                       ' command to use correct one')
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None),
                             data_actions=role_definition.get('dataActions', None),
@@ -132,6 +138,7 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -141,6 +148,9 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = _gen_guid()
     custom_headers = None

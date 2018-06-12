@@ -46,7 +46,6 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -1201,6 +1200,7 @@ def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, sc
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -1209,6 +1209,9 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
