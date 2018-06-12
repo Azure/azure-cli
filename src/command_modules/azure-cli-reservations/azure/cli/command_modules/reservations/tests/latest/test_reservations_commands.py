@@ -6,7 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 
 
-@record_only()
+# @record_only()
 class AzureReservationsTests(ScenarioTest):
 
     def _validate_reservation_order(self, reservation_order):
@@ -40,7 +40,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_applied_reservation_order_ids(self):
         self.kwargs.update({
-            'subscription': '00000000-0000-0000-0000-000000000000'
+            'subscription': '302110e3-cd4e-4244-9874-07c91853c809'
         })
         result = self.cmd('reservations reservation-order-id list --subscription-id {subscription}') \
                      .get_output_in_json()
@@ -59,7 +59,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation_order(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057"
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775"
         })
         command = 'reservations reservation-order show --reservation-order-id {reservation_order_id}'
         reservation_order = self.cmd(command).get_output_in_json()
@@ -69,7 +69,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057"
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775"
         })
         reservation_list = self.cmd('reservations reservation list --reservation-order-id {reservation_order_id}') \
                                .get_output_in_json()
@@ -81,8 +81,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057",
-            'reservation_id': '7e4e7046-6e22-4140-8285-6931d2bf7791'
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
+            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05'
         })
         reservation = self.cmd('reservations reservation show  --reservation-order-id {reservation_order_id} '
                                '--reservation-id {reservation_id}').get_output_in_json()
@@ -93,8 +93,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation_history(self):
         self.kwargs.update({
-            'reservation_order_id': "79001a2a-ec6b-408b-b1bf-d6651cebd057",
-            'reservation_id': '7e4e7046-6e22-4140-8285-6931d2bf7791'
+            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
+            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05'
         })
         history = self.cmd('reservations reservation list-history --reservation-order-id {reservation_order_id}'
                            ' --reservation-id {reservation_id}').get_output_in_json()
@@ -106,7 +106,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_catalog(self):
         self.kwargs.update({
-            'subscription': '00000000-0000-0000-0000-000000000000',
+            'subscription': '302110e3-cd4e-4244-9874-07c91853c809',
             'type': 'SuseLinux'
         })
         catalog = self.cmd('reservations catalog show --subscription-id {subscription} --reserved-resource-type {type}').get_output_in_json()

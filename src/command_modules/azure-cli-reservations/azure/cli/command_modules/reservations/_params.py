@@ -8,6 +8,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type
 
+
 def load_arguments(self, _):
     with self.argument_context('reservations reservation update') as c:
         c.argument('applied_scope_type', options_list=['--applied-scope-type', '-t'], arg_type=get_enum_type(['Single', 'Shared']))
