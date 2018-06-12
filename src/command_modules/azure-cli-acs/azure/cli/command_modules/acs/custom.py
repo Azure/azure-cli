@@ -996,6 +996,16 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     existing = load_kubernetes_configuration(existing_file)
     addition = load_kubernetes_configuration(addition_file)
 
+    # rename the admin context so it doesn't overwrite the user context
+    for ctx in addition.get('contexts', []):
+        try:
+            if ctx['context']['user'].startswith('clusterAdmin'):
+                admin_name = ctx['name'] + '-admin'
+                addition['current-context'] = ctx['name'] = admin_name
+                break
+        except (KeyError, TypeError):
+            continue
+
     if addition is None:
         raise CLIError('failed to load additional configuration from {}'.format(addition_file))
 
