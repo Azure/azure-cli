@@ -39,7 +39,7 @@ Authoring Commands
 
 ## Write the Command Loader
 
-As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
+As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
 
 ```Python
 class MyCommandsLoader(AzCommandsLoader):
@@ -289,9 +289,9 @@ Additional Topics
 
 ## Keyword Argument Reference
 
-**Overview of Keyword Arguments in Azure CLI 2.0**
+**Overview of Keyword Arguments in the Azure CLI**
 
-When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
+When writing commands for the Azure CLI, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
 
 ![](/doc/assets/annotated-kwarg-structure.gif)
 
@@ -366,7 +366,7 @@ The following kwargs may be inherited from the command loader:
 
 Most ARM resources can be identified by an ID. In many cases, for example `show` and `delete` commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
+Azure CLI supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `AzArgumentContext.argument`.
 
