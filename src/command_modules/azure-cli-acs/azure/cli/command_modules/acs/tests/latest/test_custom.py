@@ -94,9 +94,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.kubernetes)
+            orchestrator_type=ContainerServiceOrchestratorTypes.kubernetes)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
@@ -109,9 +109,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.dcos)
+            orchestrator_type=ContainerServiceOrchestratorTypes.dcos)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch(

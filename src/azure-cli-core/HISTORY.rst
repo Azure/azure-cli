@@ -3,9 +3,17 @@
 Release History
 ===============
 
-2.0.37
+2.0.38
 ++++++
 * Add global support for `--subscription` to most commands.
+
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36
+++++++
+* Minor fixes
 
 2.0.35
 ++++++
