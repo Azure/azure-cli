@@ -177,4 +177,5 @@ def load_arguments(self, _):
         c.argument('subnet', options_list=['--subnet'], help='ARM ID of a virtual network subnet to put the file server in. If not provided via command line or in the configuration file, Batch AI will create a new virtual network and subnet under your subscription.')
 
     with self.argument_context('batchai file-server list') as c:
+        c.argument('workspace_name', options_list=['--workspace', '-w'], id_part=None, help='Name of workspace.')
         c.ignore('file_servers_list_by_workspace_options')
