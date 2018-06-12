@@ -158,7 +158,7 @@ def _server_update_custom_func(instance,
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
-    if sku_name is not None:
+    if sku_name:
         instance.sku.name = sku_name
         instance.sku.capacity = None
         instance.sku.family = None
@@ -166,10 +166,10 @@ def _server_update_custom_func(instance,
     else:
         instance.sku = None
 
-    if storage_mb is not None:
+    if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
 
-    if backup_retention_days is not None:
+    if backup_retention_days:
         instance.storage_profile.backup_retention_days = backup_retention_days
 
     params = ServerUpdateParameters(sku=instance.sku,
