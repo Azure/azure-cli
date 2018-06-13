@@ -1483,12 +1483,20 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         _print_or_merge_credentials(path, kubeconfig)
 
 
+def aks_install_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None):
+    raise NotImplementedError()
+
+
 def aks_list(cmd, client, resource_group_name=None):
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
     else:
         managed_clusters = client.list()
     return _remove_nulls(list(managed_clusters))
+
+
+def aks_remove_addons(cmd, client, resource_group_name, name, addons):
+    raise NotImplementedError()
 
 
 def aks_show(cmd, client, resource_group_name, name):

@@ -178,6 +178,9 @@ def load_arguments(self, _):
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
 
+    with self.argument_context('aks install-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
     with self.argument_context('aks install-cli') as c:
         c.argument('client_version', validator=validate_k8s_client_version)
         c.argument('install_location', default=_get_default_install_location('kubectl'))
@@ -192,6 +195,9 @@ def load_arguments(self, _):
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
         c.argument('service_principal',
                    help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
+
+    with self.argument_context('aks remove-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
 
     with self.argument_context('aks remove-connector') as c:
         c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)

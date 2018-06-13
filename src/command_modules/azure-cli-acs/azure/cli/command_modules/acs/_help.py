@@ -281,6 +281,22 @@ helps['aks get-versions'] = """
     short-summary: Get the versions available for creating a managed Kubernetes cluster.
 """
 
+helps['aks install-addons'] = """
+    type: command
+    short-summary: Install Kubernetes addons.
+    long-summary: |-
+      These addons are available:
+          http_application_routing - configure ingress with automatic public DNS name creation.
+          monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Install the Kubernetes addons in a comma-separated list.
+        - name: --workspace-resource-id
+          type: string
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+"""
+
 helps['aks install-cli'] = """
     type: command
     short-summary: Download and install kubectl, the Kubernetes command-line tool.
@@ -345,6 +361,15 @@ helps['aks install-connector'] = """
 helps['aks list'] = """
     type: command
     short-summary: List managed Kubernetes clusters.
+"""
+
+helps['aks remove-addons'] = """
+    type: command
+    short-summary: Remove Kubernetes addons.
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Remove the Kubernetes addons in a comma-separated list.
 """
 
 helps['aks remove-connector'] = """
