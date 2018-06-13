@@ -29,7 +29,7 @@ class MapsScenarioTests(ScenarioTest):
 
         # Test 'az maps account create'.
         # Test to create a Maps account.
-        account = self.cmd('az maps account create -n {name} -g {rg} --sku {sku}',
+        account = self.cmd('az maps account create -n {name} -g {rg} --sku {sku} --accept-tos',
                            checks=[
                                self.check('name', '{name}'),
                                self.check('resourceGroup', '{rg}'),
@@ -39,7 +39,7 @@ class MapsScenarioTests(ScenarioTest):
 
         # Call create again, expect to get the same account.
         account_duplicated = self.cmd(
-            'az maps account create -n {name} -g {rg} --sku {sku}').get_output_in_json()
+            'az maps account create -n {name} -g {rg} --sku {sku} --accept-tos').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
         # Test 'az maps account update'
@@ -83,8 +83,8 @@ class MapsScenarioTests(ScenarioTest):
         ])
 
         # Create two new accounts (One in separate resource group).
-        self.cmd('az maps account create -n {name1} -g {rg1} --sku {sku}')
-        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku}')
+        self.cmd('az maps account create -n {name1} -g {rg1} --sku {sku} --accept-tos')
+        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku} --accept-tos')
         # Check that list command now shows two accounts in one resource group, and one in another.
         self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 2),
