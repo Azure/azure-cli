@@ -1321,7 +1321,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
                      "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
 
 
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -1406,25 +1406,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = {}
-    addons = enable_addons.split(',') if enable_addons else []
-    if 'http_application_routing' in addons:
-        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
-        addons.remove('http_application_routing')
-    # TODO: can we help the user find a workspace resource ID?
-    if 'monitoring' in addons:
-        if not workspace_resource_id:
-            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
-        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
-            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
-        addons.remove('monitoring')
-    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-    elif workspace_resource_id:
-        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
-    # error out if any (unrecognized) addons remain
-    if addons:
-        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
-            ",".join(addons), "are" if len(addons) > 1 else "is"))
+    addon_profiles = _handle_addons_args({}, enable_addons, workspace_resource_id)
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
@@ -1483,8 +1465,20 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         _print_or_merge_credentials(path, kubeconfig)
 
 
-def aks_install_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None):
-    raise NotImplementedError()
+ADDONS = {
+    'http_application_routing': 'httpApplicationRouting',
+    'monitoring': 'omsagent'
+}
+
+
+def aks_install_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=True,
+                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -1495,8 +1489,13 @@ def aks_list(cmd, client, resource_group_name=None):
     return _remove_nulls(list(managed_clusters))
 
 
-def aks_remove_addons(cmd, client, resource_group_name, name, addons):
-    raise NotImplementedError()
+def aks_remove_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_show(cmd, client, resource_group_name, name):
@@ -1579,6 +1578,36 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait=False):
+    # parse the comma-separated addons argument
+    addon_args = addons.split(',')
+
+    addon_profiles = instance.addon_profiles or {}
+
+    # for each addons argument
+    for addon_arg in addon_args:
+        addon = ADDONS[addon_arg]
+        if enable:
+            # add new addons or update existing ones and enable them
+            addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=True))
+            # special config handling for certain addons
+            if addon == 'omsagent' and workspace_resource_id:
+                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            addon_profiles[addon] = addon_profile
+        else:
+            if addon not in addon_profiles:
+                raise CLIError("The addon {} is not installed.", addon)
+        addon_profiles[addon].enabled = enable
+
+    instance.addon_profiles = addon_profiles
+
+    # null out the SP and AAD profile because otherwise validation complains
+    instance.service_principal_profile = None
+    instance.aad_profile = None
+
+    return instance
+
+
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
@@ -1591,6 +1620,28 @@ def _get_azext_module(extension_name, module_name):
         return azext_custom
     except ImportError as ie:
         raise CLIError(ie)
+
+
+def _handle_addons_args(addons_str, addon_profiles={}, workspace_resource_id=None):
+    addons = addons_str.split(',') if addons_str else []
+    if 'http_application_routing' in addons:
+        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('http_application_routing')
+    # TODO: can we help the user find a workspace resource ID?
+    if 'monitoring' in addons:
+        if not workspace_resource_id:
+            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
+        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
+            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+        addons.remove('monitoring')
+    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+    elif workspace_resource_id:
+        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    # error out if any (unrecognized) addons remain
+    if addons:
+        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
+            ",".join(addons), "are" if len(addons) > 1 else "is"))
+    return addon_profiles
 
 
 def _install_dev_spaces_extension(extension_name):
