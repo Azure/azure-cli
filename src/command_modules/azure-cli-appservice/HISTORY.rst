@@ -2,9 +2,9 @@
 
 Release History
 ===============
-
 0.1.35
 ++++++
+* dependencies: remove the cap on the urllib as newer requests was released
 * functionapp create: support to use appservice plan from external resource groups
 
 0.1.34
