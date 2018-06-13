@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.34
 ++++++
+* vm create: refine vm size check for accelerated networking support
 * vmss create: warn about the default vm size will be switched from "Standard_D1_v2" to "Standard_DS1_v2"
 * vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
 

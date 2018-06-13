@@ -590,7 +590,7 @@ class VMWriteAcceleratorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys --accelerated-network false')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
             self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', None)
