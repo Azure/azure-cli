@@ -5,6 +5,8 @@
 
 from knack.help_files import helps
 
+# pylint: disable=line-too-long
+
 helps['reservations'] = """
     type: group
     short-summary: Manage Azure Reservations.
@@ -67,6 +69,9 @@ helps['reservations catalog show'] = """
         - name: --subscription-id
           type: string
           short-summary: Id of the subscription to get the catalog for
+        - name: --reserved-resource-type
+          type: string
+          short-summary: Type of the resource for which the skus should be provided.
 """
 
 helps['reservations reservation list'] = """
@@ -98,16 +103,19 @@ helps['reservations reservation update'] = """
     parameters:
         - name: --reservation-order-id
           type: string
-          short-summary: Order id of reservation to update
+          short-summary: Reservation order id of the reservation to update
         - name: --reservation-id
           type: string
-          short-summary: Reservation id of reservation to update
+          short-summary: Id of the reservation to update
         - name: --applied-scope-type -t
           type: string
-          short-summary: 'Type is either Single or Shared'
+          short-summary: Type of the Applied Scope to update the reservation with
         - name: --applied-scopes -s
           type: string
-          short-summary: 'If applied scope type is Single, this field must be provided'
+          short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
+        - name: --instance-flexibility -i
+          type: string
+          short-summary: Type of the Instance Flexibility to update the reservation with
 """
 
 helps['reservations reservation split'] = """
@@ -116,10 +124,10 @@ helps['reservations reservation split'] = """
     parameters:
         - name: --reservation-order-id
           type: string
-          short-summary: Order id of original reservation
+          short-summary: Reservation order id of the reservation to split
         - name: --reservation-id
           type: string
-          short-summary: Reservation id of original reservation
+          short-summary: Reservation id of the reservation to split
         - name: --quantity-1 -1
           type: int
           short-summary: Quantity of the first reservation that will be created from split operation
@@ -134,7 +142,7 @@ helps['reservations reservation merge'] = """
     parameters:
         - name: --reservation-order-id
           type: string
-          short-summary: Order id of original reservation
+          short-summary: Reservation order id of the reservations to merge
         - name: --reservation-id-1 -1
           type: string
           short-summary: Id of the first reservation to merge
