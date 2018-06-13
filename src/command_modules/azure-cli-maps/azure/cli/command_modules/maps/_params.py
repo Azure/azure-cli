@@ -38,6 +38,11 @@ def load_arguments(self, _):
         c.argument('tags',
                    arg_type=tags_type)
 
+    with self.argument_context('maps account create') as c:
+        c.argument('force',
+                   options_list=['--accept-tos'],
+                   action='store_true')
+
     # Prevent --ids argument in keys with id_part=None
     with self.argument_context('maps account keys') as c:
         c.argument('account_name',
