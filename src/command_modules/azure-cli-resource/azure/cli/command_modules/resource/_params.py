@@ -144,6 +144,21 @@ def load_arguments(self, _):
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
+    with self.argument_context('deployment') as c:
+        c.argument('deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
+        c.argument('deployment_location', options_list=('--location', '-l'), required=True, help='The deployment location.')
+        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+        c.argument('template_uri', help='a uri to a remote template file')
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Only Incremental is supported for deployment at subscription scope')
+        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+
+    with self.argument_context('deployment create') as c:
+        c.argument('deployment_name', options_list=('--name', '-n'), required=False,
+                   help='The deployment name. Default to template file base name')
+
+    with self.argument_context('deployment operation show') as c:
+        c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
+
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
         c.argument('include_parameter_default_value', action='store_true')
