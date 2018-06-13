@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.34
 ++++++
+* vm create: refine vm size check for accelerated networking support
 * vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
 
 2.0.33
