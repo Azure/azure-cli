@@ -39,6 +39,7 @@ class InteractiveCommandsLoader(AzCommandsLoader):
         with self.argument_context('interactive') as c:
             c.argument('style', options_list=['--style', '-s'], help='The colors of the shell.',
                        choices=style_options())
+            c.ignore('_subscription')  # hide global subscription param
 
 
 COMMAND_LOADER_CLS = InteractiveCommandsLoader
