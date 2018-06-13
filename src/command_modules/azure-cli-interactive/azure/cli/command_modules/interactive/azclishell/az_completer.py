@@ -33,11 +33,12 @@ def _check_value_muted(_, action, value):
 
 def sort_completions(completions_gen):
     """ sorts the completions """
+    from knack.help import REQUIRED_TAG
 
     def _get_weight(val):
         """ weights the completions with required things first the lexicographically"""
         priority = ''
-        if val.display_meta and val.display_meta.startswith('[REQUIRED]'):
+        if val.display_meta and val.display_meta.startswith(REQUIRED_TAG):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 

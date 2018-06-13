@@ -7,6 +7,7 @@ import json
 import os
 import yaml
 
+from knack.help import REQUIRED_TAG
 from knack.help_files import helps
 from knack.log import get_logger
 from azure.cli.core import MainCommandsLoader
@@ -96,15 +97,15 @@ class FreshTable(object):
 
                 # checking all the parameters for a single command
                 parameter_metadata = {}
-                for key in cmd.arguments:
+                for arg in cmd.arguments.values():
                     options = {
-                        'name': [name for name in cmd.arguments[key].options_list],
-                        'required': '[REQUIRED]' if cmd.arguments[key].type.settings.get('required') else '',
-                        'help': cmd.arguments[key].type.settings.get('help') or ''
+                        'name': [name for name in arg.options_list],
+                        'required': REQUIRED_TAG if arg.type.settings.get('required') else '',
+                        'help': arg.type.settings.get('help') or ''
                     }
                     # the key is the first alias option
-                    if cmd.arguments[key].options_list:
-                        parameter_metadata[cmd.arguments[key].options_list[0]] = options
+                    if arg.options_list:
+                        parameter_metadata[arg.options_list[0]] = options
 
                 cmd_table_data[command_name] = {
                     'parameters': parameter_metadata,
