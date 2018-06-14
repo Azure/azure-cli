@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.35
+++++++
+* Minor fixes
+
 2.0.34
 ++++++
 * vm create: refine vm size check for accelerated networking support
