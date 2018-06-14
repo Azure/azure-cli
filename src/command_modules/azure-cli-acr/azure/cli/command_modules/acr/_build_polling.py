@@ -42,7 +42,7 @@ def get_build_with_polling(client,  # cf_acr_builds
         ))
 
 
-class BuildPolling(PollingMethod):
+class BuildPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, registry_name, build_id, timeout=15):
         self._registry_name = registry_name
