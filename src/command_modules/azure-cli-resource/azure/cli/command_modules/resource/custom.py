@@ -248,10 +248,11 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
         return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
-def _deploy_arm_template_subscription_scope(cli_ctx, # pylint: disable=too-many-arguments
-                              template_file=None, template_uri=None, deployment_name=None, deployment_location=None,
-                              parameters=None, mode=None, validate_only=False,
-                              no_wait=False):
+
+def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
+                                            template_file=None, template_uri=None, deployment_name=None, deployment_location=None,
+                                            parameters=None, mode=None, validate_only=False,
+                                            no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties', 'TemplateLink', mod='models')
     template = None
@@ -625,7 +626,7 @@ def create_applicationdefinition(cmd, resource_group_name,
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
         applicationAuth = ApplicationProviderAuthorization(
-            principal_id=principalId, 
+            principal_id=principalId,
             role_definition_id=roleDefinitionId)
         applicationAuthList.append(applicationAuth)
 
@@ -658,11 +659,11 @@ def deploy_arm_template(cmd, resource_group_name,
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, no_wait=no_wait)
 
-def deploy_arm_template_at_subscription_scope(cmd,
-                        template_file=None, template_uri=None, deployment_name=None, deployment_location=None,
-                        parameters=None, no_wait=False):
-    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                     deployment_name, deployment_location, parameters, 'Incremental', no_wait=no_wait)
+
+def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_name=None, deployment_location=None,
+                                              parameters=None, no_wait=False):
+    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri, deployment_name, deployment_location,
+                                                   parameters, 'Incremental', no_wait=no_wait)
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
@@ -670,15 +671,18 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
+
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
-                          parameters=None):
+                                                parameters=None):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                     'deployment_dry_run', deployment_location, parameters, 'Incremental', validate_only=True)
+                                                   'deployment_dry_run', deployment_location, parameters, 'Incremental', validate_only=True)
+
 
 def export_subscription_deployment_template(cmd, deployment_name):
     smc = _resource_client_factory(cmd.cli_ctx)
     result = smc.deployments.export_template_at_subscription_scope(deployment_name)
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
+
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
     smc = _resource_client_factory(cmd.cli_ctx)
@@ -862,6 +866,7 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
         dep = client.get(resource_group_name, deployment_name, op_id)
         result.append(dep)
     return result
+
 
 def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
     """get a deployment's operation."""

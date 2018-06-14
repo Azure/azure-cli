@@ -331,6 +331,7 @@ class DeploymentTest(ScenarioTest):
             self.check('length([])', 4)
         ])
 
+
 class DeploymentLiveTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_group_deployment_progress(self, resource_group):
