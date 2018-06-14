@@ -9,6 +9,7 @@ Release History
 * Add a `--disable-rbac` argument and deprecate `--enable-rbac` since it's the default now.
 * Updated options for `az aks browse` command. Added `--listen-port` support.
 * Update the default helm chart package for `az aks install-connector` command. Use virtual-kubelet-for-aks-latest.tgz.
+* added `az aks install-addons` and `remove-addons` commands to update an existing cluster
 
 2.1.1
 +++++
