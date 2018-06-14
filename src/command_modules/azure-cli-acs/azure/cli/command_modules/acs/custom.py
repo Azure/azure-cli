@@ -126,11 +126,11 @@ def acs_browse(cmd, client, resource_group, name, disable_browser=False, ssh_key
 def _acs_browse_internal(cmd, client, acs_info, resource_group, name, disable_browser, ssh_key_file):
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
-    if orchestrator_type == 'kubernetes' or \
+    if str(orchestrator_type).lower() == 'kubernetes' or \
        orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
        (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
         return k8s_browse(cmd, client, name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
-    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
+    elif str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
