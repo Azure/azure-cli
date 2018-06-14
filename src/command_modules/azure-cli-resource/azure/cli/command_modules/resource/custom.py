@@ -624,10 +624,12 @@ def create_applicationdefinition(cmd, resource_group_name,
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applicationAuth = ApplicationProviderAuthorization(principalId, roleDefinitionId)
+        applicationAuth = ApplicationProviderAuthorization(
+            principal_id=principalId, 
+            role_definition_id=roleDefinitionId)
         applicationAuthList.append(applicationAuth)
 
-    applicationDef = ApplicationDefinition(lock_level, applicationAuthList, package_file_uri)
+    applicationDef = ApplicationDefinition(lock_level=lock_level, authorizations=applicationAuthList, package_file_uri=package_file_uri)
     applicationDef.display_name = display_name
     applicationDef.description = description
     applicationDef.location = location
@@ -658,9 +660,9 @@ def deploy_arm_template(cmd, resource_group_name,
 
 def deploy_arm_template_at_subscription_scope(cmd,
                         template_file=None, template_uri=None, deployment_name=None, deployment_location=None,
-                        parameters=None, mode=None, no_wait=False):
+                        parameters=None, no_wait=False):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                     deployment_name, deployment_location, parameters, mode, no_wait=no_wait)
+                                     deployment_name, deployment_location, parameters, 'Incremental', no_wait=no_wait)
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
@@ -669,9 +671,9 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
-                          parameters=None, mode=None):
+                          parameters=None):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                     'deployment_dry_run', deployment_location, parameters, mode, validate_only=True)
+                                     'deployment_dry_run', deployment_location, parameters, 'Incremental', validate_only=True)
 
 def export_subscription_deployment_template(cmd, deployment_name):
     smc = _resource_client_factory(cmd.cli_ctx)
@@ -965,7 +967,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
@@ -980,9 +982,9 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                     return
             assignment.not_scopes = kwargs_list
         PolicySku = cmd.get_models('PolicySku')
-        policySku = PolicySku('A0', 'Free')
+        policySku = PolicySku(name='A0', tier='Free')
         if sku:
-            policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
+            policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
         assignment.sku = policySku
 
     return policy_client.policy_assignments.create(scope,
