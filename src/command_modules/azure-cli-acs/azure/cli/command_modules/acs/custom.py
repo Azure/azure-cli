@@ -1496,8 +1496,9 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False)
     # TODO: change this approach when we support multiple agent pools.
     instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
-    # null out the service principal because otherwise validation complains
+    # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -1506,8 +1507,9 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     instance = client.get(resource_group_name, name)
     instance.kubernetes_version = kubernetes_version
 
-    # null out the service principal because otherwise validation complains
+    # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
