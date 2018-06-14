@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['backup'] = """
             type: group
-            short-summary: Commands to manage Azure Backups.
+            short-summary: Manage Azure Backups.
             """
 
 helps['backup vault'] = """

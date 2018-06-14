@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['batchai'] = """
     type: group
-    short-summary: Batch AI.
+    short-summary: Manage Batch AI.
 """
 
 helps['batchai cluster'] = """

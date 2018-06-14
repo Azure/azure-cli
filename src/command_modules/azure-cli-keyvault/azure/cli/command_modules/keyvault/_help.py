@@ -8,7 +8,7 @@ from knack.help_files import helps
 
 helps['keyvault'] = """
     type: group
-    short-summary: Safeguard and maintain control of keys, secrets, and certificates.
+    short-summary: Manage KeyVault keys, secrets, and certificates.
 """
 
 helps['keyvault create'] = """
