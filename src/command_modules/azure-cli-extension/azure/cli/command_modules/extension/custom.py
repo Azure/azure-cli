@@ -284,7 +284,7 @@ def list_available_extensions(index_url=None, show_details=False):
     results = []
     for name, items in OrderedDict(sorted(index_data.items())).items():
         # exclude extensions/versions incompatible with current CLI version
-        items = [item for item in items if ext_compat_with_cli(item['metadata'])]
+        items = [item for item in items if ext_compat_with_cli(item['metadata'])[0]]
         if not items:
             continue
 
