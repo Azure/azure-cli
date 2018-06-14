@@ -686,8 +686,8 @@ helps['deployment create'] = """
         - name: Create a deployment from a local template file, using parameters from a JSON string.
           text: |
             az deployment create --location WestUS --template-file azuredeploy.json --parameters '{
-                    "storageAccountName": {
-                        "value": "sa001"
+                    "policyName": {
+                        "value": "policy2"
                     }
                 }'
         - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.

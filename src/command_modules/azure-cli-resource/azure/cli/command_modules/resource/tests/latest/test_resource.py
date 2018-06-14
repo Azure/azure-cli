@@ -218,12 +218,9 @@ class ProviderRegistrationTest(ScenarioTest):
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
             self.cmd('provider register -n {prov}')
-            time.sleep(5)
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
-            time.sleep(5)
             self.cmd('provider unregister -n {prov}')
-            time.sleep(5)
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
         else:
@@ -327,10 +324,12 @@ class DeploymentTest(ScenarioTest):
             self.check('name', '{dn}')
         ])
 
+        self.cmd('deployment export -n {dn}', checks=[
+        ])
+
         self.cmd('deployment operation list -n {dn}', checks=[
             self.check('length([])', 4)
         ])
-
 
 class DeploymentLiveTest(LiveScenarioTest):
     @ResourceGroupPreparer()
@@ -624,7 +623,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
     def test_managedappdef(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'eastus2euap',
+            'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
@@ -669,7 +668,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
-            'loc': 'eastus2euap',
+            'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
