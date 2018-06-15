@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.27
+++++++
+* login: use browser for interactive login
+
 2.0.26
 ++++++
 * Minor fixes

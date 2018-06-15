@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.39
 ++++++
-* Minor fixes
+* authentication: support authorization code flow for interactive login
 
 2.0.38
 ++++++
