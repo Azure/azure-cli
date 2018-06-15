@@ -10,6 +10,10 @@ Release History
 =======
 >>>>>>> revert some version changes.
 
+2.0.28
+++++++
+* Minor fixes
+
 2.0.27
 ++++++
 * Add 'azure-storage-blob' as dependency.
