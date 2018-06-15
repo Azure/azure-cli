@@ -29,6 +29,7 @@ def build_all_debian(git_url, git_branch, cli_version, artifact_dir, arg_ns=None
         ('artful', 'ubuntu:artful'),
         ('xenial', 'ubuntu:xenial'),
         ('trusty', 'ubuntu:trusty'),
+        ('bionic', 'ubuntu:bionic'),
     ]
     with ThreadPoolExecutor(max_workers=len(dists)) as executor:
             tasks = {executor.submit(build_debian, dist_info, git_url, git_branch, cli_version, artifact_dir, arg_ns=arg_ns) for dist_info

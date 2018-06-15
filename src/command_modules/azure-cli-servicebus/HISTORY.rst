@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.2
+++++++
+
+* Fix package wheel
+* `sdist` is now compatible with wheel 0.31.0
+
 0.1.1
 +++++
 * Suppress the service bus extension from being loaded now.

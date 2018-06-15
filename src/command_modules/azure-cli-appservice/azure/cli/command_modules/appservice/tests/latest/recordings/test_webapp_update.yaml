@@ -1,30 +1,32 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"tags": {"product": "azurecli", "cause": "automation", "date": "2018-05-07T22:29:51Z"},
+      "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_update000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001","name":"cli_test_webapp_update000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001","name":"cli_test_webapp_update000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-05-07T22:29:51Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Sun, 18 Feb 2018 02:47:24 GMT']
+      date: ['Mon, 07 May 2018 22:29:53 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,28 +36,28 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.33]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_update000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001","name":"cli_test_webapp_update000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001","name":"cli_test_webapp_update000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-05-07T22:29:51Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Sun, 18 Feb 2018 02:47:24 GMT']
+      date: ['Mon, 07 May 2018 22:29:53 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"sku": {"name": "S1", "tier": "STANDARD", "capacity": 1}, "location":
-      "westus", "properties": {"name": "webapp-update-plan000003", "perSiteScaling":
-      false}}'''
+    body: 'b''{"sku": {"name": "S1", "tier": "STANDARD", "capacity": 1}, "properties":
+      {"perSiteScaling": false, "name": "webapp-update-plan000003"}, "location": "westus"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -63,20 +65,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['173']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","name":"webapp-update-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-update-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_update000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_update000001","reserved":false,"mdmId":"waws-prod-bay-093_2185","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":10900,"name":"webapp-update-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_update000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_update000001","reserved":false,"isXenon":false,"mdmId":"waws-prod-bay-091_10900","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1430']
+      content-length: ['1471']
       content-type: [application/json]
-      date: ['Sun, 18 Feb 2018 02:47:34 GMT']
+      date: ['Mon, 07 May 2018 22:30:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -84,7 +86,8 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -95,20 +98,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","name":"webapp-update-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-update-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_update000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_update000001","reserved":false,"mdmId":"waws-prod-bay-093_2185","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":10900,"name":"webapp-update-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_update000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_update000001","reserved":false,"isXenon":false,"mdmId":"waws-prod-bay-091_10900","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1430']
+      content-length: ['1471']
       content-type: [application/json]
-      date: ['Sun, 18 Feb 2018 02:47:34 GMT']
+      date: ['Mon, 07 May 2018 22:30:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -116,14 +119,15 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"location": "West US", "properties": {"scmSiteAlsoStopped": false,
-      "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003",
-      "reserved": false, "siteConfig": {"localMySqlEnabled": false, "netFrameworkVersion":
-      "v4.6", "http20Enabled": true, "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION",
-      "value": "6.9.1"}]}}}\'''''
+    body: 'b''b\''{"properties": {"reserved": false, "siteConfig": {"appSettings":
+      [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "6.9.1"}], "netFrameworkVersion":
+      "v4.6", "http20Enabled": true, "localMySqlEnabled": false}, "scmSiteAlsoStopped":
+      false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003"},
+      "location": "West US"}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -131,20 +135,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['501']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002","name":"webapp-update-test000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-093.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"lastModifiedTimeUtc":"2018-02-18T02:47:38.7133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41","possibleOutboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41,138.91.254.30,138.91.249.213","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-093","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:08.32","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3393']
+      content-length: ['3426']
       content-type: [application/json]
-      date: ['Sun, 18 Feb 2018 02:48:04 GMT']
-      etag: ['"1D3A862D72CAB8B"']
+      date: ['Mon, 07 May 2018 22:30:11 GMT']
+      etag: ['"1D3E652F47A3735"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -152,6 +156,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -164,8 +169,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/publishxml?api-version=2016-08-01
@@ -173,13 +178,13 @@ interactions:
     body: {string: '<publishData><publishProfile profileName="webapp-update-test000002
         - Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-update-test000002.scm.azurewebsites.net:443"
         msdeploySite="webapp-update-test000002" userName="$webapp-update-test000002"
-        userPWD="lDeqbZX541olKTmrABKmwMGXQnJdGQFMATguogBP7JLWRGnC49hsthcBMbim" destinationAppUrl="http://webapp-update-test000002.azurewebsites.net"
+        userPWD="xDJp7rSMtrYp2JjeRnWETtANcxgSRkruHKm1KLjBYaEj1kjgXolAMxmqA9gP" destinationAppUrl="http://webapp-update-test000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-update-test000002 -
-        FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-093.ftp.azurewebsites.windows.net/site/wwwroot"
+        FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-091.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-update-test000002\$webapp-update-test000002"
-        userPWD="lDeqbZX541olKTmrABKmwMGXQnJdGQFMATguogBP7JLWRGnC49hsthcBMbim" destinationAppUrl="http://webapp-update-test000002.azurewebsites.net"
+        userPWD="xDJp7rSMtrYp2JjeRnWETtANcxgSRkruHKm1KLjBYaEj1kjgXolAMxmqA9gP" destinationAppUrl="http://webapp-update-test000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>'}
@@ -187,12 +192,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1294']
       content-type: [application/xml]
-      date: ['Sun, 18 Feb 2018 02:48:04 GMT']
+      date: ['Mon, 07 May 2018 22:30:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -204,20 +210,20 @@ interactions:
       CommandName: [webapp update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002","name":"webapp-update-test000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-093.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"lastModifiedTimeUtc":"2018-02-18T02:47:39.4166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41","possibleOutboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41,138.91.254.30,138.91.249.213","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-093","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:08.7233333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3393']
+      content-length: ['3431']
       content-type: [application/json]
-      date: ['Sun, 18 Feb 2018 02:48:12 GMT']
-      etag: ['"1D3A862D72CAB8B"']
+      date: ['Mon, 07 May 2018 22:30:13 GMT']
+      etag: ['"1D3E652F47A3735"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -225,17 +231,18 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"tags": {"foo": "bar"}, "kind": "app", "location": "West
-      US", "properties": {"dailyMemoryTimeQuota": 0, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003",
-      "clientCertEnabled": false, "clientAffinityEnabled": false, "hostNamesDisabled":
-      false, "httpsOnly": false, "enabled": true, "scmSiteAlsoStopped": false, "hostNameSslStates":
-      [{"name": "webapp-update-test000002.azurewebsites.net", "hostType": "Standard",
-      "sslState": "Disabled"}, {"name": "webapp-update-test000002.scm.azurewebsites.net",
-      "hostType": "Repository", "sslState": "Disabled"}], "reserved": false, "containerSize":
-      0}}\\\''\'''''
+    body: 'b''b\''b\\\''{"tags": {"foo": "bar"}, "properties": {"reserved": false,
+      "hostNamesDisabled": false, "enabled": true, "httpsOnly": false, "containerSize":
+      0, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003",
+      "hostNameSslStates": [{"sslState": "Disabled", "name": "webapp-update-test000002.azurewebsites.net",
+      "hostType": "Standard"}, {"sslState": "Disabled", "name": "webapp-update-test000002.scm.azurewebsites.net",
+      "hostType": "Repository"}], "dailyMemoryTimeQuota": 0, "clientAffinityEnabled":
+      false, "clientCertEnabled": false, "scmSiteAlsoStopped": false}, "location":
+      "West US", "kind": "app"}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -243,20 +250,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['806']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002","name":"webapp-update-test000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","tags":{"foo":"bar"},"properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-093.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"lastModifiedTimeUtc":"2018-02-18T02:48:08.76","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41","possibleOutboundIpAddresses":"40.112.191.159,138.91.252.122,40.86.180.238,138.91.248.136,138.91.253.41,138.91.254.30,138.91.249.213","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-093","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":{"foo":"bar"},"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","tags":{"foo":"bar"},"properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:14.38","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":{"foo":"bar"},"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3419']
+      content-length: ['3457']
       content-type: [application/json]
-      date: ['Sun, 18 Feb 2018 02:48:09 GMT']
-      etag: ['"1D3A862E8AA1B80"']
+      date: ['Mon, 07 May 2018 22:30:15 GMT']
+      etag: ['"1D3E652F7D95AC0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -264,7 +271,149 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002","name":"webapp-update-test000002","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","tags":{"foo":"bar"},"properties":{"name":"webapp-update-test000002","state":"Running","hostNames":["webapp-update-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002.azurewebsites.net","webapp-update-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:14.38","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":{"foo":"bar"},"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3457']
+      content-type: [application/json]
+      date: ['Mon, 07 May 2018 22:30:15 GMT']
+      etag: ['"1D3E652F7D95AC0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''b\''{"properties": {"reserved": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "http20Enabled": true, "localMySqlEnabled": false}, "scmSiteAlsoStopped":
+      false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003"},
+      "location": "West US"}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot create]
+      Connection: [keep-alive]
+      Content-Length: ['424']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1","name":"webapp-update-test000002/s1","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
+        US","properties":{"name":"webapp-update-test000002(s1)","state":"Running","hostNames":["webapp-update-test000002-s1.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002-s1.azurewebsites.net","webapp-update-test000002-s1.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002-s1.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002-s1.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:19.3666667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002__779e","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002-s1.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3478']
+      content-type: [application/json]
+      date: ['Mon, 07 May 2018 22:30:33 GMT']
+      etag: ['"1D3E652F7D95AC0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1","name":"webapp-update-test000002/s1","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
+        US","properties":{"name":"webapp-update-test000002(s1)","state":"Running","hostNames":["webapp-update-test000002-s1.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002-s1.azurewebsites.net","webapp-update-test000002-s1.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002-s1.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002-s1.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:19.7866667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002__779e","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002-s1.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3478']
+      content-type: [application/json]
+      date: ['Mon, 07 May 2018 22:30:34 GMT']
+      etag: ['"1D3E652FB1258AB"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''b\''b\\\''{"properties": {"reserved": false, "hostNamesDisabled": false,
+      "enabled": true, "httpsOnly": false, "containerSize": 0, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003",
+      "hostNameSslStates": [{"sslState": "Disabled", "name": "webapp-update-test000002-s1.azurewebsites.net",
+      "hostType": "Standard"}, {"sslState": "Disabled", "name": "webapp-update-test000002-s1.scm.azurewebsites.net",
+      "hostType": "Repository"}], "dailyMemoryTimeQuota": 0, "clientAffinityEnabled":
+      true, "clientCertEnabled": false, "scmSiteAlsoStopped": false}, "location":
+      "West US", "kind": "app"}\\\''\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp update]
+      Connection: [keep-alive]
+      Content-Length: ['787']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.33]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/sites/webapp-update-test000002/slots/s1","name":"webapp-update-test000002/s1","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
+        US","properties":{"name":"webapp-update-test000002(s1)","state":"Running","hostNames":["webapp-update-test000002-s1.azurewebsites.net"],"webSpace":"cli_test_webapp_update000001-WestUSwebspace","selfLink":"https://waws-prod-bay-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_update000001-WestUSwebspace/sites/webapp-update-test000002","repositorySiteName":"webapp-update-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-update-test000002-s1.azurewebsites.net","webapp-update-test000002-s1.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-update-test000002-s1.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-update-test000002-s1.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_update000001/providers/Microsoft.Web/serverfarms/webapp-update-plan000003","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-05-07T22:30:35.4733333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-update-test000002__779e","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164","possibleOutboundIpAddresses":"104.42.128.171,104.42.131.62,104.42.134.143,104.42.130.245,104.42.133.164,104.42.129.68,104.42.130.49","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_update000001","defaultHostName":"webapp-update-test000002-s1.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3477']
+      content-type: [application/json]
+      date: ['Mon, 07 May 2018 22:30:35 GMT']
+      etag: ['"1D3E653046BF115"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -276,9 +425,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.28]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.33]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_update000001?api-version=2017-05-10
@@ -287,11 +436,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sun, 18 Feb 2018 02:48:09 GMT']
+      date: ['Mon, 07 May 2018 22:30:36 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGV0VCQVBQOjVGVVBEQVRFWExJTlhTSUxQMkZWR0RZVUk0TXwyQzdEMjQzQTk3N0I3MDU0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGV0VCQVBQOjVGVVBEQVRFSkhTUlBWSE5BRVkzNzZXUEtORHxCREU1NkUzOEZGRTAyMDNELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

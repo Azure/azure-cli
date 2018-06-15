@@ -53,6 +53,24 @@ def _get_pagination_params(count):
     return {'n': count}
 
 
+def _parse_error_message(error_message, response):
+    import json
+    try:
+        server_message = json.loads(response.text)['errors'][0]['message']
+        error_message = 'Error: {}'.format(server_message) if server_message else error_message
+    except (ValueError, KeyError, TypeError, IndexError):
+        pass
+
+    if not error_message.endswith('.'):
+        error_message = '{}.'.format(error_message)
+
+    try:
+        correlation_id = response.headers['x-ms-correlation-request-id']
+        return '{} Correlation ID: {}.'.format(error_message, correlation_id)
+    except (KeyError, TypeError, AttributeError):
+        return error_message
+
+
 def _delete_data_from_registry(login_server, path, username, password, retry_times=3, retry_interval=5):
     for i in range(0, retry_times):
         errorMessage = None
@@ -66,10 +84,12 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
 
             if response.status_code == 200 or response.status_code == 202:
                 return
-            elif response.status_code == 401 or response.status_code == 404:
-                raise CLIError(response.text)
+            elif response.status_code == 401:
+                raise CLIError(_parse_error_message('Authentication required.', response))
+            elif response.status_code == 404:
+                raise CLIError(_parse_error_message('The requested data does not exist.', response))
             else:
-                raise Exception(response.text)
+                raise Exception(_parse_error_message('Could not delete the requested data.', response))
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -95,10 +115,12 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
-            elif response.status_code == 401 or response.status_code == 404:
-                raise CLIError(response.text)
+            elif response.status_code == 401:
+                raise CLIError(_parse_error_message('Authentication required.', response))
+            elif response.status_code == 404:
+                raise CLIError(_parse_error_message('The manifest does not exist.', response))
             else:
-                raise Exception(response.text)
+                raise Exception(_parse_error_message('Could not get manifest digest.', response))
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -147,10 +169,12 @@ def _obtain_data_from_registry(login_server,
                         path = linkHeader[(linkHeader.index('<') + 1):linkHeader.index('>')]
                         executeNextHttpCall = True
                     break
-                elif response.status_code == 401 or response.status_code == 404:
-                    raise CLIError(response.text)
+                elif response.status_code == 401:
+                    raise CLIError(_parse_error_message('Authentication required.', response))
+                elif response.status_code == 404:
+                    raise CLIError(_parse_error_message('The requested data does not exist.', response))
                 else:
-                    raise Exception(response.text)
+                    raise Exception(_parse_error_message('Could not get the requested data.', response))
             except CLIError:
                 raise
             except Exception as e:  # pylint: disable=broad-except
@@ -447,27 +471,18 @@ def _delete_manifest_confirmation(login_server,
     if yes:
         return manifest
 
-    manifests = _obtain_data_from_registry(
+    tags = _obtain_data_from_registry(
         login_server=login_server,
-        path='/v2/_acr/{}/manifests/list'.format(repository),
+        path='/acr/v1/{}/_tags'.format(repository),
         username=username,
         password=password,
-        result_index='manifests',
-        pagination=20
+        result_index='tags'
     )
-    filter_by_manifest = [x for x in manifests if manifest == x['digest']]
 
-    if not filter_by_manifest:
-        raise CLIError("No manifest can be found with digest '{}'.".format(manifest))
-    elif len(filter_by_manifest) == 1:
-        manifest = filter_by_manifest[0]['digest']
-        tags = filter_by_manifest[0]['tags']
-    else:
-        raise CLIError("More than one manifests can be found with digest '{}'.".format(manifest))
-
+    filter_by_manifest = [x['name'] for x in tags if manifest == x['digest']]
     message = "This operation will delete the manifest '{}'".format(manifest)
-    images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in tags])
-    if images:
+    if filter_by_manifest:
+        images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in filter_by_manifest])
         message += " and all the following images: {}".format(images)
     _user_confirmation("{}.\nAre you sure you want to continue?".format(message))
 

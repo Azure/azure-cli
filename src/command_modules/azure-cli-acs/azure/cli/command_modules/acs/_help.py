@@ -89,7 +89,8 @@ helps['acs kubernetes'] = """
 
 helps['acs kubernetes get-credentials'] = """
     type: command
-    short-summary: Download and install credentials to access a cluster.
+    short-summary: Download and install credentials to access a cluster.  This command requires
+                   the same private-key used to create the cluster.
 """
 
 helps['acs list-locations'] = """
@@ -156,7 +157,7 @@ helps['aks create'] = """
           short-summary: Size of Virtual Machines to create as Kubernetes nodes.
         - name: --dns-name-prefix -p
           type: string
-          short-summary: Prefix for hostnames that are created. If not specified, gemerate a hostname using the
+          short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the
                          managed cluster and resource group names.
         - name: --node-count -c
           type: int
@@ -177,6 +178,67 @@ helps['aks create'] = """
         - name: --admin-username -u
           type: string
           short-summary: User account to create on node VMs for SSH access.
+        - name: --aad-client-app-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory client application of type "Native". This
+                         application is for user login via kubectl.
+        - name: --aad-server-app-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory server application of type "Web app/API". This
+                         application represents the managed cluster's apiserver (Server application).
+        - name: --aad-server-app-secret
+          type: string
+          short-summary: (PREVIEW) The secret of an Azure Active Directory server application.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory tenant.
+        - name: --dns-service-ip
+          type: string
+          short-summary: An IP address assigned to the Kubernetes DNS service.
+          long-summary: This address must be within the Kubernetes service address range specified by "--service-cidr".
+                        For example, 10.0.0.10.
+        - name: --docker-bridge-address
+          type: string
+          short-summary: An IP address and netmask assigned to the Docker bridge.
+          long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range.
+                        For example, 172.17.0.1/16.
+        - name: --enable-addons -a
+          type: string
+          short-summary: Enable the Kubernetes addons in a comma-separated list.
+          long-summary: |-
+            These addons are available:
+                http_application_routing - configure ingress with automatic public DNS name creation.
+                monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+        - name: --enable-rbac -r
+          type: string
+          short-summary: Enable Kubernetes Role-Based Access Control.
+        - name: --max-pods -m
+          type: int
+          short-summary: The maximum number of pods deployable to a node.
+          long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+        - name: --network-plugin
+          type: string
+          short-summary: The Kubernetes network plugin to use.
+          long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+        - name: --no-ssh-key -x
+          type: string
+          short-summary: Do not use or create a local SSH key.
+          long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
+        - name: --pod-cidr
+          type: string
+          short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
+          long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+        - name: --service-cidr
+          type: string
+          short-summary: A CIDR notation IP range from which to assign service cluster IPs.
+          long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
+        - name: --vnet-subnet-id
+          type: string
+          short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+        - name: --workspace-resource-id
+          type: string
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+
     examples:
         - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -220,7 +282,7 @@ helps['aks install-cli'] = """
 
 helps['aks install-connector'] = """
     type: command
-    short-summary: Install the ACI Connector on a managed Kubernetes cluster.
+    short-summary: (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
     parameters:
         - name: --chart-url
           type: string
@@ -247,7 +309,7 @@ helps['aks install-connector'] = """
           type: string
           short-summary: The resource group to create the ACI container groups. Use the MC_*
                          resource group if it is not specified.
-        - name: --location
+        - name: --location -l
           type: string
           short-summary: The location to create the ACI container groups. Use the location of the MC_*
                          resource group if it is not specified.
@@ -282,7 +344,7 @@ helps['aks list'] = """
 
 helps['aks remove-connector'] = """
     type: command
-    short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
+    short-summary: (PREVIEW) Remove the ACI Connector from a managed Kubernetes cluster.
     parameters:
         - name: --connector-name
           type: string
@@ -328,7 +390,7 @@ helps['aks upgrade'] = """
 
 helps['aks upgrade-connector'] = """
     type: command
-    short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
+    short-summary: (PREVIEW) Upgrade the ACI Connector on a managed Kubernetes cluster.
     parameters:
         - name: --chart-url
           type: string
@@ -355,7 +417,7 @@ helps['aks upgrade-connector'] = """
           type: string
           short-summary: The resource group to create the ACI container groups. Use the MC_*
                          resource group if it is not specified.
-        - name: --location
+        - name: --location -l
           type: string
           short-summary: The location to create the ACI container groups. Use the location of the MC_*
                          resource group if it is not specified.
@@ -381,6 +443,23 @@ helps['aks upgrade-connector'] = """
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
+"""
+
+helps['aks use-dev-spaces'] = """
+    type: command
+    short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+    parameters:
+        - name: --space -s
+          type: string
+          short-summary: Name of the dev space to use.
+        - name: --parent-space -p
+          type: string
+          short-summary: Name of a parent dev space to inherit from when creating a new dev space. By default, if there is already a single dev space with no parent, the new space inherits from this one.
+"""
+
+helps['aks remove-dev-spaces'] = """
+    type: command
+    short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
 """
 
 helps['aks wait'] = """

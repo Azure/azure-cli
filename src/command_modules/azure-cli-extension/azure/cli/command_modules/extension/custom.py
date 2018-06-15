@@ -211,12 +211,16 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
 
 
 def remove_extension(extension_name):
+    def log_err(func, path, exc_info):
+        logger.debug("Error occurred attempting to delete item from the extension '%s'.", extension_name)
+        logger.debug("%s: %s - %s", func, path, exc_info)
+
     try:
         # Get the extension and it will raise an error if it doesn't exist
         get_extension(extension_name)
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name)
-        shutil.rmtree(get_extension_path(extension_name))
+        shutil.rmtree(get_extension_path(extension_name), onerror=log_err)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -283,7 +287,8 @@ def list_available_extensions(index_url=None, show_details=False):
         installed = False
         if name in installed_extension_names:
             installed = True
-            if parse_version(latest['metadata']['version']) > parse_version(get_extension(name).version):
+            ext_version = get_extension(name).version
+            if ext_version and parse_version(latest['metadata']['version']) > parse_version(ext_version):
                 installed = str(True) + ' (upgrade available)'
         results.append({
             'name': name,
@@ -329,9 +334,9 @@ def check_distro_consistency():
         logger.debug(err)
 
     if current_linux_dist_name != stored_linux_dist_name:
-        logger.warning("Linux distro check: Mismatch distribution "
-                       "name in %s file", LIST_FILE_PATH)
-        logger.warning("Linux distro check: If command fails, install the appropriate package "
-                       "for your distribution or change the above file accordingly.")
-        logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
-                       LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
+        logger.debug("Linux distro check: Mismatch distribution "
+                     "name in %s file", LIST_FILE_PATH)
+        logger.debug("Linux distro check: If command fails, install the appropriate package "
+                     "for your distribution or change the above file accordingly.")
+        logger.debug("Linux distro check: %s has '%s', current distro is '%s'",
+                     LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)

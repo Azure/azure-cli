@@ -8,6 +8,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from prompt_toolkit.completion import Completer, Completion
 from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.command_modules.interactive.events import (
+    EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING,
+    EVENT_INTERACTIVE_POST_SUB_TREE_CREATE
+)
 from . import configuration
 from .argfinder import ArgsFinder
 from .util import parse_quotes
@@ -17,6 +21,14 @@ SELECT_SYMBOL = configuration.SELECT_SYMBOL
 
 def error_pass(_, message):  # pylint: disable=unused-argument
     return
+
+
+def _check_value_muted(_, action, value):
+    # patch for AzCliCommandParser that does no logging
+    if action.choices is not None and value not in action.choices:
+        import argparse
+        msg = 'invalid choice: {}'.format(value)
+        raise argparse.ArgumentError(action, msg)
 
 
 def sort_completions(completions_gen):
@@ -41,7 +53,7 @@ class AzCompleter(Completer):
         self.started = False
 
         # dictionary of command to descriptions
-        self.command_description = None
+        self.command_description = {}
         # a list of all the possible parameters
         self.completable_param = None
         # the command tree
@@ -136,8 +148,13 @@ class AzCompleter(Completer):
         if not self.started:
             return
 
-        text = document.text_before_cursor
-        text = self.reformat_cmd(text)
+        text = self.reformat_cmd(document.text_before_cursor)
+        event_payload = {
+            'text': text
+        }
+        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING, event_payload=event_payload)
+        # Reload various attributes from event_payload
+        text = event_payload.get('text', text)
         text_split = text.split()
         self.unfinished_word = ''
         new_word = text and text[-1].isspace()
@@ -146,6 +163,7 @@ class AzCompleter(Completer):
             text_split = text_split[:-1]
 
         self.subtree, self.current_command, self.leftover_args = self.command_tree.get_sub_tree(text_split)
+        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_POST_SUB_TREE_CREATE, subtree=self.subtree)
         self.complete_command = not self.subtree.children
 
         for comp in sort_completions(self.gen_cmd_and_param_completions()):
@@ -178,22 +196,29 @@ class AzCompleter(Completer):
                         return arg
         return None
 
+    # pylint: disable=protected-access
     def mute_parse_args(self, text):
         """ mutes the parser error when parsing, then puts it back """
         error = AzCliCommandParser.error
-        AzCliCommandParser.error = error_pass
+        _check_value = AzCliCommandParser._check_value
 
-        parse_args = self.argsfinder.get_parsed_args(
-            parse_quotes(text, quotes=False, string=False))
+        AzCliCommandParser.error = error_pass
+        AzCliCommandParser._check_value = _check_value_muted
+
+        # No exception is expected. However, we add this try-catch block, as this may have far-reaching effects.
+        try:
+            parse_args = self.argsfinder.get_parsed_args(parse_quotes(text, quotes=False, string=False))
+        except Exception:  # pylint: disable=broad-except
+            pass
 
         AzCliCommandParser.error = error
+        AzCliCommandParser._check_value = _check_value
         return parse_args
 
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
         try:  # pylint: disable=too-many-nested-blocks
-
             param = self.leftover_args[-1]
 
             # command table specific name
@@ -202,7 +227,7 @@ class AzCompleter(Completer):
             for comp in self.gen_enum_completions(arg_name):
                 yield comp
 
-            parse_args = self.mute_parse_args(text)
+            parsed_args = self.mute_parse_args(text)
 
             # there are 3 formats for completers the cli uses
             # this try catches which format it is
@@ -210,7 +235,7 @@ class AzCompleter(Completer):
                 completions = []
                 try:
                     completions = self.cmdtab[self.current_command].arguments[arg_name].completer(
-                        prefix=self.unfinished_word, action=None, parsed_args=parse_args)
+                        prefix=self.unfinished_word, action=None, parsed_args=parsed_args)
                 except TypeError:
                     try:
                         completions = self.cmdtab[self.current_command].arguments[arg_name].completer(
@@ -240,7 +265,7 @@ class AzCompleter(Completer):
             for param in self.command_param_info.get(self.current_command, []):
                 if self.validate_param_completion(param, self.leftover_args):
                     yield self.yield_param_completion(param, self.unfinished_word)
-        else:
+        elif not self.leftover_args:
             for child_command in self.subtree.children:
                 if self.validate_completion(child_command):
                     yield Completion(child_command, -len(self.unfinished_word))

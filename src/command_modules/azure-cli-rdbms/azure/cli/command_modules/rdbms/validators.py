@@ -15,7 +15,6 @@ def get_combined_validator(validators):
         # do additional creation validation
         verb = cmd.name.rsplit(' ', 1)[1]
         if verb == 'create':
-            storage_validator(namespace)
             password_validator(namespace)
             get_default_location_from_resource_group(cmd, namespace)
 
@@ -40,8 +39,3 @@ def password_validator(ns):
             ns.administrator_login_password = prompt_pass(msg='Admin Password: ')
         except NoTTYException:
             raise CLIError('Please specify password in non-interactive mode.')
-
-
-def storage_validator(ns):
-    if ns.storage_mb and ns.storage_mb > 1023 * 1024:
-        raise ValueError('The size of storage cannot exceed 1023GB.')

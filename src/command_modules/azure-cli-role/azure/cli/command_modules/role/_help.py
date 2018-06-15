@@ -72,11 +72,6 @@ helps['ad sp credential delete'] = """
     short-summary: delete a service principal's credential.
 """
 
-helps['ad sp reset-credentials'] = """
-    type: command
-    short-summary: (Deprecated, use "az ad sp credential reset")
-"""
-
 helps['ad sp credential reset'] = """
     type: command
     short-summary: Reset a service principal credential.
@@ -117,13 +112,13 @@ helps['ad sp show'] = """
     type: command
     short-summary: Get the details of a service principal.
 """
+helps['ad app'] = """
+    type: group
+    short-summary: Manage applications with AAD Graph.
+"""
 helps['ad app delete'] = """
     type: command
     short-summary: Delete an application.
-"""
-helps['ad app create'] = """
-    type: command
-    short-summary: Create an application.
 """
 helps['ad app list'] = """
     type: command
@@ -136,6 +131,24 @@ helps['ad app show'] = """
 helps['ad app update'] = """
     type: command
     short-summary: Update an application.
+    examples:
+        - name: update a native application with delegated permission of "access the AAD directory as the signed-in user"
+          text: |
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --required-resource-accesses @manifest.json
+                ("manifest.json" contains the following content)
+                [{
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                            "type": "Scope"
+                        }
+                   ]
+                }]
+        - name: update an application's group membership claims to "All"
+          text: >
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
+
 """
 helps['ad user list'] = """
     type: command
@@ -164,6 +177,10 @@ helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
     long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use `--all`.
+"""
+helps['role assignment list-changelogs'] = """
+    type: command
+    short-summary: List changelogs for role assignments.
 """
 helps['role definition'] = """
     type: group
@@ -223,35 +240,6 @@ helps['role definition update'] = """
         - name: --role-definition
           type: string
           short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
-    examples:
-        - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
-          text: |
-                az role definition create --role-definition '{
-                    "Name": "Contoso On-call",
-                    "Description": "Perform VM actions and read storage and network information."
-                    "Actions": [
-                        "Microsoft.Compute/*/read",
-                        "Microsoft.Compute/virtualMachines/start/action",
-                        "Microsoft.Compute/virtualMachines/restart/action",
-                        "Microsoft.Network/*/read",
-                        "Microsoft.Storage/*/read",
-                        "Microsoft.Authorization/*/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"
-                    ],
-                    "DataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
-                    ],
-                    "NotDataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-                    ],
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-                }'
-        - name: Create a role from a file containing a JSON description.
-          text: >
-            az role definition create --role-definition ad-role.json
 """
 helps['ad'] = """
     type: group
@@ -261,9 +249,9 @@ helps['ad app create'] = """
     type: command
     short-summary: Create a web application, web API or native application
     examples:
-        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user
+        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user"
           text: |
-                az ad app create --display-name my-native --native-app --requiredResourceAccess @manifest.json
+                az ad app create --display-name my-native --native-app --required-resource-accesses @manifest.json
                 ("manifest.json" contains the following content)
                 [{
                     "resourceAppId": "00000002-0000-0000-c000-000000000000",
@@ -279,9 +267,17 @@ helps['ad group'] = """
     type: group
     short-summary: Manage Azure Active Directory groups.
 """
+helps['ad group create'] = """
+    type: command
+    short-summary: Create a group in the directory.
+"""
 helps['ad group member'] = """
     type: group
     short-summary: Manage Azure Active Directory group members.
+"""
+helps['ad group member check'] = """
+    type: command
+    short-summary: Check if a member is in a group.
 """
 helps['ad sp'] = """
     type: group

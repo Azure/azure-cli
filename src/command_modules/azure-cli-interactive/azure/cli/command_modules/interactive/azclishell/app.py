@@ -285,22 +285,23 @@ class AzInteractiveShell(object):
 
         rows, _ = get_window_dim()
         rows = int(rows)
-        if not self.completer:
-            return param_descrip, example
 
         param_args = self.completer.leftover_args
         last_word = self.completer.unfinished_word
         command = self.completer.current_command
         new_command = ' '.join([command, last_word]).strip()
-        if not self.completer.complete_command and new_command in self.completer.command_param_info:
+
+        if not self.completer.complete_command and new_command in self.completer.command_description:
             command = new_command
 
-        param = param_args[-1] if param_args else ''
-        param = last_word if last_word.startswith('-') else param
+        # get command/group help
+        if self.completer and command in self.completer.command_description:
+            self.description_docs = u'{}'.format(self.completer.command_description[command])
 
+        # get parameter help if full command
         if self.completer and command in self.completer.command_param_info:
-            self.description_docs = u'{}'.format(
-                self.completer.command_description[command])
+            param = param_args[-1] if param_args else ''
+            param = last_word if last_word.startswith('-') else param
 
             if param in self.completer.command_param_info[command] and self.completer.has_description(
                     command + " " + param):
@@ -501,7 +502,8 @@ class AzInteractiveShell(object):
         elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
             continue_flag = self.handle_jmespath_query(args)
             telemetry.track_query_gesture()
-
+        elif not args:
+            continue_flag = True
         elif args[0] == '--version' or args[0] == '-v':
             try:
                 continue_flag = True

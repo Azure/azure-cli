@@ -18,8 +18,6 @@ from azure.mgmt.resource.subscriptions.models import \
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
-from azure.cli.core.msi_imds_authentication import MSIImdsAuthentication
-
 from azure.cli.testsdk import TestCli
 
 from knack.util import CLIError
@@ -83,26 +81,6 @@ class TestProfile(unittest.TestCase):
                                      'e-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_'
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
-
-        cls.test_cloud_shell_msi_access_token = (
-            'yJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3'
-            'ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwcz'
-            'ovL3N0cy53aW5kb3dzLm5ldC81NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTIwMjgzODI3LCJuYmY'
-            'iOjE1MjAyODM4MjcsImV4cCI6MTUyMDI4ODAyNiwiYWNyIjoiMSIsImFpbyI6IkFWUUFxLzhHQUFBQXppd1c2VE1heElJeGxxVkR3TnAx'
-            'MkZvNG5IeVc3NnFXd0ZlS2VlanlYTmdrRUFlckNBM1JoQ0ZLU3VMOGRaQXVBQnd6cTErOTgzdlRoK1dHMTdqa0NWSWVtN1JwYXU5M3Zla'
-            '2RVbkxxdVpRPSIsImFsdHNlY2lkIjoiNTo6MTAwMzAwMDA4MDFDNDREMyIsImFtciI6WyJyc2EiXSwiYXBwaWQiOiJiNjc3YzI5MC1jZj'
-            'RiLTRhOGUtYTYwZS05MWJhNjUwYTRhYmUiLCJhcHBpZGFjciI6IjIiLCJlX2V4cCI6MjYzMDk5LCJlbWFpbCI6Inl1Z2FuZ3dAbWljcm9'
-            'zb2Z0LmNvbSIsImZhbWlseV9uYW1lIjoiV2FuZyIsImdpdmVuX25hbWUiOiJZdWdhbmciLCJncm91cHMiOlsiZTRiYjBiNTYtMTAxNC00'
-            'MGY4LTg4YWItM2Q4YThjYjBlMDg2Il0sImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiL'
-            'TJkN2NkMDExZGI0Ny8iLCJpcGFkZHIiOiIxNjcuMjIwLjEuMjM0IiwibmFtZSI6Ill1Z2FuZyBXYW5nIiwib2lkIjoiODllZDViZTgtZm'
-            'Y5Ny00MWI1LWFiMTEtMDU1ZTFlM2NjMzRiIiwicHVpZCI6IjEwMDNCRkZEOTU5Rjg5NTUiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24'
-            'iLCJzdWIiOiIyRFhuT05jNUVBcjZhXzNVcmtSUmJRQXZHbnh6cUFhLUhMVnMxcld3Z3RJIiwidGlkIjoiNTQ4MjZiMjItMzhkNi00ZmIy'
-            'LWJhZDktYjdiOTNhM2U5YzVhIiwidW5pcXVlX25hbWUiOiJ5dWdhbmd3QG1pY3Jvc29mdC5jb20iLCJ1dGkiOiJESGNDOFQwYkJrLTh5W'
-            'VB2cjlBQ0FBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDVlMTAiXX0.U5rdKCPd_3'
-            'EsleHmZhWaYe19I3jNzFSwvzn84f8cExXbgxkK-X8ejkE_J4A_SufHnaI1x_QHgEIpbIz6RD99tUyccI-emNCpJpM7Ucfhl779gAOdVzy'
-            '75Nc87RhXOXVObNlfvay_BKJ3bDEcayXeoRcPRa2uJ-4c8t6rAqFAHi8UrxOOo2lTTJqhWWlLJ00qY3y31MJQqR_ThwMyaHrORgrnMS6_'
-            '2if0WIg9-BMDbZYiSOIHKJApZNBi2W1Bl-S4FIkh_e70QWQn1h5p1D8eGmnI1vSyCwb6PpIYW93vldYe0Q4hketRlDXyGlOmRZywN7eHZ'
-            'qUGFKxJnyEx9rKrvg')
 
     def test_normalize(self):
         cli = TestCli()
@@ -449,33 +427,83 @@ class TestProfile(unittest.TestCase):
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
+                                                     [test_subscription],
                                                      False)
         profile._set_subscriptions(consolidated)
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # verify
-        self.assertEqual(subscription_id, '1')
+        self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
         token_type, token = cred._token_retriever()
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
-        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, test_tenant_id,
                                                'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_get_login_credentials_msi_system_assigned(self, mock_get, mock_read_cred_file):
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_login_credentials_aux_subscriptions(self, mock_get_token, mock_read_cred_file):
         cli = TestCli()
+        raw_token2 = 'some...secrets2'
+        token_entry2 = {
+            "resource": "https://management.core.windows.net/",
+            "tokenType": "Bearer",
+            "_authority": "https://login.microsoftonline.com/common",
+            "accessToken": raw_token2,
+        }
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [TestProfile.token_entry1, token_entry2]
+        mock_get_token.side_effect = [(some_token_type, TestProfile.raw_token1), (some_token_type, raw_token2)]
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_subscription_id2 = '12345678-1bf0-4dda-aec3-cb9272f09591'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_tenant_id2 = '12345678-38d6-4fb2-bad9-b7b93a3e4321'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, test_tenant_id)
+        test_subscription2 = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id2),
+                                              'MSI-DEV-INC2', self.state1, test_tenant_id2)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [test_subscription, test_subscription2],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id,
+                                                                 aux_subscriptions=[test_subscription_id2])
+
+        # verify
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # verify the cred._tokenRetriever is a working lambda
+        token_type, token = cred._token_retriever()
+        self.assertEqual(token, self.raw_token1)
+        self.assertEqual(some_token_type, token_type)
+
+        token2 = cred._external_tenant_token_retriever()
+        self.assertEqual(len(token2), 1)
+        self.assertEqual(token2[0][1], raw_token2)
+
+        self.assertEqual(mock_get_token.call_count, 2)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_login_credentials_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'systemAssignedIdentity'
@@ -485,16 +513,7 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
 
-        # setup a response for the token request
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'good token for you'
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        response = mock.MagicMock()
-        response.status_code = 200
-        response.content = encoded_test_token
-        mock_get.return_value = response
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -502,25 +521,20 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(subscription_id, test_subscription_id)
 
-        # verify the cred._tokenRetriever is a working lambda
-        token_entry = cred.get_token()
-        self.assertEqual(token_entry, test_token_entry)
-        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
-                                    params={
-                                        'resource': 'https://management.core.windows.net/',
-                                        'api-version': '2018-02-01'
-                                    },
-                                    headers={'Metadata': 'true'})
+        # sniff test the msi_auth object
+        cred.set_token()
+        cred.token
+        self.assertTrue(cred.set_token_invoked_count)
+        self.assertTrue(cred.token_read_count)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_get_login_credentials_msi_user_assigned_with_client_id(self, mock_get, mock_read_cred_file):
-        cli = TestCli()
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_login_credentials_msi_user_assigned_with_client_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'userAssignedIdentity'
@@ -529,16 +543,7 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties(test_user, [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
-        # setup a response for the token request
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'good token for you'
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        response = mock.MagicMock()
-        response.status_code = 200
-        response.content = encoded_test_token
-        mock_get.return_value = response
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -546,26 +551,22 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(subscription_id, test_subscription_id)
 
-        # verify the cred._tokenRetriever is a working lambda
-        token_entry = cred.get_token()
-        self.assertEqual(test_token_entry, token_entry)
-        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
-                                    params={
-                                        'resource': 'https://management.core.windows.net/',
-                                        'client_id': '12345678-38d6-4fb2-bad9-b7b93a3e8888',
-                                        'api-version': '2018-02-01'
-                                    },
-                                    headers={'Metadata': 'true'})
+        # sniff test the msi_auth object
+        cred.set_token()
+        cred.token
+        self.assertTrue(cred.set_token_invoked_count)
+        self.assertTrue(cred.token_read_count)
+        self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_get_login_credentials_msi_user_assigned_with_object_id(self, mock_get, mock_read_cred_file):
-        cli = TestCli()
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_login_credentials_msi_user_assigned_with_object_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
         msi_subscription = SubscriptionStub('/subscriptions/12345678-1bf0-4dda-aec3-cb9272f09590',
                                             'MSIObject-{}'.format(test_object_id),
@@ -573,97 +574,52 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
-        # setup a response for the token request
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'foo'
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        response = mock.MagicMock()
-        response.status_code = 200
-        response.content = encoded_test_token
-        mock_get.return_value = response
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # assert
-        cred.get_token()
-        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
-                                    params={
-                                        'resource': 'https://management.core.windows.net/',
-                                        'object_id': test_object_id,
-                                        'api-version': '2018-02-01'
-                                    },
-                                    headers={'Metadata': 'true'})
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # sniff test the msi_auth object
+        cred.set_token()
+        cred.token
+        self.assertTrue(cred.set_token_invoked_count)
+        self.assertTrue(cred.token_read_count)
+        self.assertTrue(cred.object_id, test_object_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_get_login_credentials_msi_user_assigned_with_res_id(self, mock_get, mock_read_cred_file):
-        cli = TestCli()
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_login_credentials_msi_user_assigned_with_res_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        test_sub_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
-                       'userAssignedIdentities/id1').format(test_sub_id)
-        msi_subscription = SubscriptionStub('/subscriptions/{}'.format(test_sub_id),
+                       'userAssignedIdentities/id1').format(test_subscription_id)
+        msi_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
                                             'MSIResource-{}'.format(test_res_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
-        # setup a response for the token request
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'foo'
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        response = mock.MagicMock()
-        response.status_code = 200
-        response.content = encoded_test_token
-        mock_get.return_value = response
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # assert
-        cred.get_token()
-        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
-                                    params={
-                                        'resource': 'https://management.core.windows.net/',
-                                        'msi_res_id': test_res_id,
-                                        'api-version': '2018-02-01'
-                                    },
-                                    headers={'Metadata': 'true'})
+        self.assertEqual(subscription_id, test_subscription_id)
 
-    @mock.patch('requests.get', autospec=True)
-    @mock.patch('time.sleep', autospec=True)
-    def test_msi_token_request_retries(self, mock_sleep, mock_get):
-        # set up error case: #1 exception thrown, #2 error status
-        bad_response = mock.MagicMock()
-        bad_response.status_code = 429
-        bad_response.text = 'just bad'
-
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'good token for you',
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-
-        mock_get.side_effect = [bad_response, good_response]
-
-        msi_auth = MSIImdsAuthentication(resource='azure-resource', object_id='12345')
-        # action
-        whole_entry = msi_auth.get_token()
-
-        # assert
-        self.assertEqual(test_token_entry, whole_entry)
+        # sniff test the msi_auth object
+        cred.set_token()
+        cred.token
+        self.assertTrue(cred.set_token_invoked_count)
+        self.assertTrue(cred.token_read_count)
+        self.assertTrue(cred.msi_res_id, test_res_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
@@ -695,14 +651,13 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_get_raw_token_msi_system_assigned(self, mock_get, mock_read_cred_file):
-        cli = TestCli()
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_raw_token_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'systemAssignedIdentity'
@@ -713,34 +668,15 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
 
-        # setup a response for the token request
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'good token for you'
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        response = mock.MagicMock()
-        response.status_code = 200
-        response.content = encoded_test_token
-        mock_get.return_value = response
-        test_resource = 'https://foo'
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
+
         # action
-        cred, subscription_id, _ = profile.get_raw_token(resource=test_resource)
+        cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource')
 
         # assert
         self.assertEqual(subscription_id, test_subscription_id)
-
-        # verify the cred._tokenRetriever is a working lambda
-        token_type, token, whole_entry = cred
-        self.assertEqual(test_token_entry['access_token'], token)
-        self.assertEqual(test_token_entry['token_type'], token_type)
-        self.assertEqual(test_token_entry, whole_entry)
-        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
-                                    params={
-                                        'resource': test_resource,
-                                        'api-version': '2018-02-01'
-                                    },
-                                    headers={'Metadata': 'true'})
+        self.assertEqual(cred[0], 'Bearer')
+        self.assertEqual(cred[1], TestProfile.test_msi_access_token)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
@@ -850,46 +786,50 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
 
-    @mock.patch('requests.get', autospec=True)
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_thru_username_non_password(self, mock_auth_context):
+        cli = TestCli()
+        mock_auth_context.acquire_token_with_username_password.return_value = None
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: None)
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', None, 'http://goo-resource')
+
+        # assert
+        self.assertEqual([], subs)
+
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
-    def test_find_subscriptions_in_cloud_console(self, mock_get_token_endpoint, mock_get_client_class, mock_get):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_cloud_console(self, mock_subscription_finder, mock_get_token_endpoint,
+                                                 mock_get_client_class, mock_msi_auth):
 
-        class ClientStub:
-            def __init__(self, *args, **kwargs):
-                self.subscriptions = mock.MagicMock()
-                self.subscriptions.list.return_value = [TestProfile.subscription1]
-                self.config = mock.MagicMock()
+        class SubscriptionFinderStub:
+            def find_from_raw_token(self, tenant, token):
+                # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
+                if token != TestProfile.test_msi_access_token or tenant != '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a':
+                    raise AssertionError('find_from_raw_token was not invoked with expected tenant or token')
+                return [TestProfile.subscription1]
+
+        mock_subscription_finder.return_value = SubscriptionFinderStub()
 
         mock_get_token_endpoint.return_value = "http://great_endpoint"
-        mock_get_client_class.return_value = ClientStub
-        cli = TestCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        mock_msi_auth.return_value = MSRestAzureAuthStub()
 
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-        mock_get.return_value = good_response
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
 
+        # action
         subscriptions = profile.find_subscriptions_in_cloud_console()
 
         # assert
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'admin3@AzureSDKTeam.onmicrosoft.com')
+        self.assertEqual(s['user']['cloudShellID'], True)
         self.assertEqual(s['user']['type'], 'user')
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
-        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
-        mock_get.assert_called_once_with(mock_get_token_endpoint.return_value,
-                                         params={'resource': 'https://management.core.windows.net/'},
-                                         headers={'Metadata': 'true'})
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
@@ -964,36 +904,47 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
-    @mock.patch('requests.get', autospec=True)
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_get_client_class, mock_get):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
+                                                                            mock_msi_auth):
+        from requests import HTTPError
 
-        class ClientStub:
-            def __init__(self, *args, **kwargs):
-                self.subscriptions = mock.MagicMock()
-                self.subscriptions.list.return_value = [TestProfile.subscription1]
-                self.config = mock.MagicMock()
+        class SubscriptionFinderStub:
+            def find_from_raw_token(self, tenant, token):
+                # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
+                if token != TestProfile.test_msi_access_token or tenant != '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a':
+                    raise AssertionError('find_from_raw_token was not invoked with expected tenant or token')
+                return [TestProfile.subscription1]
 
-        mock_get_client_class.return_value = ClientStub
-        cli = TestCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        class AuthStub:
+            def __init__(self, **kwargs):
+                self.token = None
+                self.client_id = kwargs.get('client_id')
+                self.object_id = kwargs.get('object_id')
 
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
-        }
+            def set_token(self):
+                # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
+                if self.object_id:
+                    self.token = {
+                        'token_type': 'Bearer',
+                        'access_token': TestProfile.test_msi_access_token
+                    }
+                else:
+                    mock_obj = mock.MagicMock()
+                    mock_obj.status, mock_obj.reason = 400, 'Bad Request'
+                    raise HTTPError(response=mock_obj)
+
+        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
+
+        mock_subscription_finder.return_value = SubscriptionFinderStub()
+
+        mock_msi_auth.side_effect = AuthStub
         test_object_id = '54826b22-38d6-4fb2-bad9-b7b93a3e9999'
 
-        bad_response = mock.MagicMock()
-        bad_response.status_code = 400  # this ensures sniffing on client_id will fail and fall back to object_id
-
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-        mock_get.side_effect = [bad_response, good_response]
-
+        # action
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_object_id)
 
         # assert
@@ -1286,6 +1237,23 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    def test_credscache_retrieve_sp_secret_with_cert(self, mock_read_file):
+        cli = TestCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "certificateFile": 'junkcert.pem'
+        }
+        mock_read_file.return_value = [test_sp]
+
+        # action
+        creds_cache = CredsCache(cli, async_persist=False)
+        creds_cache.load_adal_token_cache()
+
+        # assert
+        self.assertEqual(creds_cache.retrieve_secret_of_service_principal(test_sp['servicePrincipalId']), None)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_add_new_sp_creds(self, _, mock_open_for_write, mock_read_file):
@@ -1332,6 +1300,30 @@ class TestProfile(unittest.TestCase):
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
+        self.assertFalse(mock_open_for_write.called)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_add_preexisting_sp_new_secret(self, _, mock_open_for_write, mock_read_file):
+        cli = TestCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = [test_sp]
+        creds_cache = CredsCache(cli, async_persist=False)
+
+        new_creds = test_sp.copy()
+        new_creds['accessToken'] = 'Secret2'
+        # action
+        creds_cache.save_service_principal_cred(new_creds)
+
+        # assert
+        self.assertEqual(creds_cache._service_principal_creds, [new_creds])
+        self.assertTrue(mock_open_for_write.called)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
@@ -1447,7 +1439,7 @@ class TestProfile(unittest.TestCase):
 
         # test w/ trailing slash
         r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, adfs_url_1)
+        self.assertEqual(r.authority.url, adfs_url_1.rstrip('/'))
 
         # test w/o trailing slash
         adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
@@ -1491,6 +1483,31 @@ class TenantStub(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, tenant_id):
         self.tenant_id = tenant_id
+
+
+class MSRestAzureAuthStub:
+    def __init__(self, *args, **kwargs):
+        self._token = {
+            'token_type': 'Bearer',
+            'access_token': TestProfile.test_msi_access_token
+        }
+        self.set_token_invoked_count = 0
+        self.token_read_count = 0
+        self.client_id = kwargs.get('client_id')
+        self.object_id = kwargs.get('object_id')
+        self.msi_res_id = kwargs.get('msi_res_id')
+
+    def set_token(self):
+        self.set_token_invoked_count += 1
+
+    @property
+    def token(self):
+        self.token_read_count += 1
+        return self._token
+
+    @token.setter
+    def token(self, value):
+        self._token = value
 
 
 if __name__ == '__main__':

@@ -62,14 +62,19 @@ _COMMON_TENANT = 'common'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
+_SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
+_USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+
 
 def _authentication_context_factory(cli_ctx, tenant, cache):
     import re
     import adal
     authority_url = cli_ctx.cloud.endpoints.active_directory
     is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
-    if not is_adfs:
-        authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
+    if is_adfs:
+        authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
+    else:
+        authority_url = authority_url.rstrip('/') + '/' + (tenant or _COMMON_TENANT)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
 
@@ -227,30 +232,36 @@ class Profile(object):
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None):
         import jwt
-        from .msi_imds_authentication import MSIImdsAuthentication
+        from requests import HTTPError
+        from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        msi_creds = MSIImdsAuthentication()
+        msi_creds = MSIAuthentication()
 
         token_entry = None
         if identity_id:
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIImdsAuthentication(resource=resource, msi_res_id=identity_id)
+                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
-                msi_creds = MSIImdsAuthentication(resource=resource, client_id=identity_id)
+                msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                 try:
-                    token_entry = msi_creds.get_token()
+                    msi_creds.set_token()
+                    token_entry = msi_creds.token
                     identity_type = MsiAccountTypes.user_assigned_client_id
-                except ValueError:
-                    identity_type = MsiAccountTypes.user_assigned_object_id
-                    msi_creds = MSIImdsAuthentication(resource=resource, object_id=identity_id)
+                except HTTPError as ex:
+                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                    else:
+                        raise
         else:
             identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIImdsAuthentication(resource=resource)
+            msi_creds = MSIAuthentication(resource=resource)
 
         if not token_entry:
-            token_entry = msi_creds.get_token()
+            msi_creds.set_token()
+            token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -261,7 +272,7 @@ class Profile(object):
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = 'userAssignedIdentity' if identity_id else 'systemAssignedIdentity'
+        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:
@@ -272,6 +283,7 @@ class Profile(object):
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
+
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -290,13 +302,10 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        import requests
-        request_uri = _get_cloud_console_token_endpoint()
-        payload = {
-            'resource': resource
-        }
-        result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-        token_entry = json.loads(result.content.decode())
+        from msrestazure.azure_active_directory import MSIAuthentication
+        auth = MSIAuthentication(resource=resource)
+        auth.set_token()
+        token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -347,7 +356,7 @@ class Profile(object):
     @staticmethod
     def _pick_working_subscription(subscriptions):
         from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
@@ -422,20 +431,29 @@ class Profile(object):
         return access_token
 
     @staticmethod
-    def _try_parse_msi_account_name(subscription_name):
-        parts = subscription_name.split('-', 1)
-        if parts[0] in MsiAccountTypes.valid_msi_account_types():
-            return parts[0], (None if len(parts) <= 1 else parts[1])
+    def _try_parse_msi_account_name(account):
+        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            parts = subscription_name.split('-', 1)
+            if parts[0] in MsiAccountTypes.valid_msi_account_types():
+                return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None,
-                              subscription_id=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
+
+        external_tenants_info = []
+        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
+        for ext_sub in ext_subs:
+            sub = self.get_subscription(ext_sub)
+            if sub[_TENANT_ID] != account[_TENANT_ID]:
+                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+
         if identity_type is None:
             def _retrieve_token():
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -444,8 +462,16 @@ class Profile(object):
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                      account[_TENANT_ID], resource)
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+
+            def _retrieve_tokens_from_external_tenants():
+                external_tokens = []
+                for u, t in external_tenants_info:
+                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
+                return external_tokens
+
             from azure.cli.core.adal_authentication import AdalAuthentication
-            auth_object = AdalAuthentication(_retrieve_token)
+            auth_object = AdalAuthentication(_retrieve_token,
+                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
         else:
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
@@ -476,10 +502,11 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
-            token_entry = msi_creds.get_token()
+            msi_creds.set_token()
+            token_entry = msi_creds.token
             creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             creds = self._get_token_from_cloud_shell(resource)
@@ -609,15 +636,15 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from .msi_imds_authentication import MSIImdsAuthentication
+        from msrestazure.azure_active_directory import MSIAuthentication
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIImdsAuthentication(resource=resource)
+            return MSIAuthentication(resource=resource)
         elif cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIImdsAuthentication(resource=resource, client_id=identity)
+            return MSIAuthentication(resource=resource, client_id=identity)
         elif cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIImdsAuthentication(resource=resource, object_id=identity)
+            return MSIAuthentication(resource=resource, object_id=identity)
         elif cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIImdsAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthentication(resource=resource, msi_res_id=identity)
         else:
             raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
@@ -653,6 +680,8 @@ class SubscriptionFinder(object):
         else:  # when refresh account, we will leverage local cached tokens
             token_entry = context.acquire_token(resource, username, _CLIENT_ID)
 
+        if not token_entry:
+            return []
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:
@@ -801,7 +830,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("No matched service principal found")
         cred = matched[0]
-        return cred[_ACCESS_TOKEN]
+        return cred.get(_ACCESS_TOKEN, None)
 
     @property
     def adal_token_cache(self):
@@ -824,10 +853,10 @@ class CredsCache(object):
         state_changed = False
         if matched:
             # pylint: disable=line-too-long
-            if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
+            if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
                 self._service_principal_creds.remove(matched[0])
-                self._service_principal_creds.append(matched[0])
+                self._service_principal_creds.append(sp_entry)
                 state_changed = True
         else:
             self._service_principal_creds.append(sp_entry)

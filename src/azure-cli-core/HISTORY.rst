@@ -3,6 +3,45 @@
 Release History
 ===============
 
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* Minor fixes
+
+2.0.34
+++++++
+* core: support cross tenant resource referencing
+* Improve telemetry upload reliability
+  1. Remove retry. Once failed stop uploading.
+  2. Update the process start configuration to prevent upload process from blocking the CLI process.
+
+2.0.33
+++++++
+* core: ignore FileNotFoundError error on expanding `@`
+
+2.0.32
+++++++
+* auth: fix a unhandled exception when retrieve secrets from a service principal account with cert
+* auth: improve the logic of detecting msi based account
+* Added limited support for positional arguments.
+* Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)
+* Improves piping scenarios from commands when using `--ids`. Supports `-o tsv` with a query specified or `-o json`
+  without specifying a query.
+* Display command suggestions on error if users have typo in their commands
+* More friendly error when users type `az ''`
+* Support custom resource types for command modules and extensions
+
+2.0.31
+++++++
+* Allow other sources to add additional tab completion choices via event hook
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.30
 ++++++

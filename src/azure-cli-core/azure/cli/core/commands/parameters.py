@@ -7,12 +7,14 @@
 import argparse
 import platform
 
-from knack.arguments import CLIArgumentType, CaseInsensitiveList
+from knack.arguments import (
+    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.commands.validators import validate_tag, validate_tags
-from azure.cli.core.commands.validators import generate_deployment_name
+from azure.cli.core import EXCLUDED_PARAMS
+from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
+from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
 
@@ -291,3 +293,202 @@ zone_type = CLIArgumentType(
     choices=['1', '2', '3'],
     nargs=1
 )
+
+
+def patch_arg_make_required(argument):
+    argument.settings['required'] = True
+
+
+def patch_arg_make_optional(argument):
+    argument.settings['required'] = False
+
+
+def patch_arg_update_description(description):
+    def _patch_action(argument):
+        argument.settings['help'] = description
+
+    return _patch_action
+
+
+class AzArgumentContext(ArgumentsContext):
+
+    def __init__(self, command_loader, scope, **kwargs):
+        from azure.cli.core.commands import _merge_kwargs as merge_kwargs
+        super(AzArgumentContext, self).__init__(command_loader, scope)
+        self.scope = scope  # this is called "command" in knack, but that is not an accurate name
+        self.group_kwargs = merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
+        self.is_stale = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.is_stale = True
+
+    def _applicable(self):
+        if self.command_loader.skip_applicability:
+            return True
+        command_name = self.command_loader.command_name
+        scope = self.scope
+        return command_name.startswith(scope)
+
+    def _check_stale(self):
+        if self.is_stale:
+            message = "command authoring error: argument context '{}' is stale! " \
+                      "Check that the subsequent block for has a corresponding `as` statement.".format(self.scope)
+            logger.error(message)
+            raise CLIError(message)
+
+    def _flatten_kwargs(self, kwargs, arg_type, supported_kwargs=None):
+        merged_kwargs = self._merge_kwargs(kwargs, supported_kwargs=supported_kwargs)
+        if arg_type:
+            arg_type_copy = arg_type.settings.copy()
+            arg_type_copy.update(merged_kwargs)
+            return arg_type_copy
+        return merged_kwargs
+
+    def _merge_kwargs(self, kwargs, base_kwargs=None, supported_kwargs=None):
+        from azure.cli.core.commands import _merge_kwargs as merge_kwargs
+        base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
+        return merge_kwargs(kwargs, base, supported_kwargs or CLI_PARAM_KWARGS)
+
+    # pylint: disable=arguments-differ
+    def argument(self, dest, arg_type=None, **kwargs):
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
+        if merged_kwargs.get('options_list') == []:
+            del merged_kwargs['options_list']
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
+            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+        else:
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+
+    def positional(self, dest, arg_type=None, **kwargs):
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        if self.scope not in self.command_loader.command_table:
+            raise ValueError("command authoring error: positional argument '{}' cannot be registered to a group-level "
+                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
+
+        # Before adding the new positional arg, ensure that there are no existing positional arguments
+        # registered for this command.
+        command_args = self.command_loader.argument_registry.arguments[self.scope]
+        positional_args = {k: v for k, v in command_args.items() if v.settings.get('options_list') == []}
+        if positional_args and dest not in positional_args:
+            raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
+                           "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
+
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type, supported_kwargs=CLI_POSITIONAL_PARAM_KWARGS)
+        merged_kwargs = {k: v for k, v in merged_kwargs.items() if k in CLI_POSITIONAL_PARAM_KWARGS}
+        merged_kwargs['options_list'] = []
+
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
+            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+        else:
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+
+    def expand(self, dest, model_type, group_name=None, patches=None):
+        # TODO:
+        # two privates symbols are imported here. they should be made public or this utility class
+        # should be moved into azure.cli.core
+        from knack.introspection import extract_args_from_signature, option_descriptions
+
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        if not patches:
+            patches = dict()
+
+        # fetch the documentation for model parameters first. for models, which are the classes
+        # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
+        # document of their properties are attached to the classes instead of constructors.
+        parameter_docs = option_descriptions(model_type)
+
+        def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type):
+            """
+            Return a validator which will aggregate multiple arguments to one complex argument.
+            """
+
+            def _expansion_validator_impl(namespace):
+                """
+                The validator create a argument of a given type from a specific set of arguments from CLI
+                command.
+                :param namespace: The argparse namespace represents the CLI arguments.
+                :return: The argument of specific type.
+                """
+                ns = vars(namespace)
+                kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+
+                setattr(namespace, assigned_arg, model_type(**kwargs))
+
+            return _expansion_validator_impl
+
+        expanded_arguments = []
+        for name, arg in extract_args_from_signature(model_type.__init__, excluded_params=EXCLUDED_PARAMS):
+            arg = arg.type
+            if name in parameter_docs:
+                arg.settings['help'] = parameter_docs[name]
+
+            if group_name:
+                arg.settings['arg_group'] = group_name
+
+            if name in patches:
+                patches[name](arg)
+
+            self.extra(name, arg_type=arg)
+            expanded_arguments.append(name)
+
+        dest_option = ['--__{}'.format(dest.upper())]
+        self.argument(dest,
+                      arg_type=ignore_type,
+                      options_list=dest_option,
+                      validator=get_complex_argument_processor(expanded_arguments, dest, model_type))
+
+    def ignore(self, *args):
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        for arg in args:
+            super(AzArgumentContext, self).ignore(arg)
+
+    def extra(self, dest, arg_type=None, **kwargs):
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        if self.scope not in self.command_loader.command_table:
+            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
+                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
+
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
+            merged_kwargs.pop('dest', None)
+            super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)

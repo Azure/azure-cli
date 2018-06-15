@@ -3,9 +3,36 @@
 Release History
 ===============
 
+2.1.0
++++++
+* `az aks create` understands advanced networking (VNet) options
+* `az aks create` accepts options to enable Log Analytics monitoring and HTTP application routing addons
+* `az aks create --no-ssh-key` creates a cluster without using local SSH keys
+* `az aks create --enable-rbac` creates a cluster with Kubernetes Role-Based Access Control
+* `az aks create` handles Azure Active Directory auth options (PREVIEW)
+
+2.0.34
+++++++
+* `az aks get-credentials` creates the kube config file with more secure filesystem permissions
+
+2.0.33
+++++++
+* add new Dev-Spaces commands: `az aks use-dev-spaces` and `az aks remove-dev-spaces`
+* fix typo in help message
+
+2.0.32
+++++++
+* remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
+2.0.31
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
 2.0.30
 ++++++
 * Minor fixes
+* aks created spn will be valid for 5 years
 
 2.0.29
 ++++++

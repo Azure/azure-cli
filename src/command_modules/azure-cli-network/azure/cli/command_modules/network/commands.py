@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import deployment_validate_table_format
+from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
@@ -20,7 +20,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor)
+    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
+    cf_ddos_protection_plans)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -32,7 +33,7 @@ from azure.cli.command_modules.network._format import (
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table)
+    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -63,6 +64,11 @@ def load_command_table(self, _):
     network_asg_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.application_security_groups_operations#ApplicationSecurityGroupsOperations.{}',
         client_factory=cf_application_security_groups
+    )
+
+    network_ddos_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.ddos_protection_plans_operations#DdosProtectionPlansOperations.{}',
+        client_factory=cf_ddos_protection_plans
     )
 
     network_dns_zone_sdk = CliCommandType(
@@ -201,6 +207,8 @@ def load_command_table(self, _):
         client_factory=cf_packet_capture
     )
 
+    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
+
     # endregion
 
     # region NetworkRoot
@@ -212,7 +220,7 @@ def load_command_table(self, _):
 
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace)
+        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete', supports_no_wait=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('list', 'list_application_gateways')
@@ -301,6 +309,16 @@ def load_command_table(self, _):
 
     # endregion
 
+    # region DdosProtectionPlans
+    with self.command_group('network ddos-protection', network_ddos_sdk, min_api='2018-02-01') as g:
+        g.custom_command('create', 'create_ddos_plan')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_ddos_plans')
+        g.command('show', 'get')
+        g.generic_update_command('update', custom_func_name='update_ddos_plan')
+
+    # endregion
+
     # region DNS
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
         g.command('delete', 'delete', confirmation=True)
@@ -369,7 +387,7 @@ def load_command_table(self, _):
     # region LoadBalancers
     with self.command_group('network lb', network_lb_sdk) as g:
         g.command('show', 'get', exception_handler=empty_on_404)
-        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace)
+        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_lbs')
         g.generic_update_command('update')
@@ -472,8 +490,8 @@ def load_command_table(self, _):
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
         g.command('delete', 'delete')
-        g.command('show', 'get', exception_handler=empty_on_404)
-        g.command('list', 'list')
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_nsg_rule_table_output)
+        g.command('list', 'list', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
         g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
                                  custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
@@ -608,7 +626,7 @@ def load_command_table(self, _):
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='virtual_network_peering_parameters')
+        g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
         g.command('delete', 'delete')
@@ -650,7 +668,7 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGatewayConnections
     with self.command_group('network vpn-connection', network_vpn_sdk) as g:
-        g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace)
+        g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404, transform=transform_vpn_connection)
         g.command('list', 'list', transform=transform_vpn_connection_list)

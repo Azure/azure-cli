@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-def network_client_factory(cli_ctx, **_):
+def network_client_factory(cli_ctx, aux_subscriptions=None, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK,
+                                   aux_subscriptions=aux_subscriptions)
 
 
 def resource_client_factory(cli_ctx, **_):
@@ -26,6 +27,10 @@ def cf_application_security_groups(cli_ctx, _):
 
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
+
+
+def cf_ddos_protection_plans(cli_ctx, _):
+    return network_client_factory(cli_ctx).ddos_protection_plans
 
 
 def cf_endpoint_services(cli_ctx, _):

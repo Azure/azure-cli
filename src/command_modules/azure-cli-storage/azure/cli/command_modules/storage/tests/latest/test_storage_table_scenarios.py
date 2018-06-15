@@ -56,9 +56,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
             'storage entity show -t {} --row-key 001 --partition-key 001 --select name',
             account_info, table_name).assert_with_checks(JMESPathCheck('name', 'test'),
                                                          JMESPathCheck('value', None))
-        self.storage_cmd(
-            'storage entity merge -t {} -e rowkey=001 partitionkey=001 name=test value=newval',
-            account_info, table_name)
+        self.storage_cmd('storage entity merge -t {} -e rowkey=001 partitionkey=001 name=test value=newval',
+                         account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
             .assert_with_checks(JMESPathCheck('name', 'test'), JMESPathCheck('value', 'newval'))
@@ -74,6 +73,16 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name).assert_with_checks(NoneCheck())
+        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
+                         account_info, table_name)
+        self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',
+                         account_info, table_name)
+        result = self.storage_cmd('storage entity query -t {} --num-results 1',
+                                  account_info, table_name).get_output_in_json()
+        marker = result.get('nextMarker')
+        self.storage_cmd('storage entity query -t {} --marker nextpartitionkey={} nextrowkey={}', account_info,
+                         table_name, marker.get('nextpartitionkey'), marker.get('nextrowkey')).assert_with_checks(
+                             JMESPathCheck('length(items)', 1))
 
     def verify_table_acl_operations(self, account_info, table_name):
         self.storage_cmd('storage table policy list -t {}', account_info,
