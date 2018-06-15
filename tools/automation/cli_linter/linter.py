@@ -10,7 +10,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 import yaml
 import colorama
-from .util import get_command_groups, share_element, exclude_mods
+from .util import get_command_groups, share_element, exclude_commands
 
 
 class Linter(object):
@@ -106,8 +106,8 @@ class LinterManager(object):
             def get_linter():
                 if rule_name in self._ci_exclusions and self._ci:
                     mod_exclusions = self._ci_exclusions[rule_name]
-                    command_table, help_file_entries = exclude_mods(self._command_table, self._help_file_entries,
-                                                                    mod_exclusions)
+                    command_table, help_file_entries = exclude_commands(self._command_table, self._help_file_entries,
+                                                                        mod_exclusions)
                     return Linter(command_table=command_table, help_file_entries=help_file_entries,
                                   loaded_help=self._loaded_help)
                 return self.linter
