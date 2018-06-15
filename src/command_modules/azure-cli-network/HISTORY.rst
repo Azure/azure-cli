@@ -3,6 +3,12 @@
 Release History
 ===============
 
+<<<<<<< HEAD
+
+2.1.6
+++++++
+* minor fixes
+
 2.1.5
 ++++++
 * `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)

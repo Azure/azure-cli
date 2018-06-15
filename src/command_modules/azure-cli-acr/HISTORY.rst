@@ -8,6 +8,10 @@ Release History
 * Allow case-insensitive enum values.
 * Add --top and --orderby parameters for show-manifests.
 
+2.0.28
+++++++
+* Minor fixes
+
 2.0.27
 ++++++
 * Add 'azure-storage-blob' as dependency.
