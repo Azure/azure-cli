@@ -288,7 +288,7 @@ def list_available_extensions(index_url=None, show_details=False):
         if not items:
             continue
 
-        latest = sorted(items, key=lambda c: parse_version(c['metadata']['version']))[-1]
+        latest = max(items, key=lambda c: parse_version(c['metadata']['version']))
         installed = False
         if name in installed_extension_names:
             installed = True
