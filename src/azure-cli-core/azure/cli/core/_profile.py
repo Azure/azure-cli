@@ -727,26 +727,26 @@ class SubscriptionFinder(object):
         url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
                '&redirect_uri={3}&state={4}&resource={5}&prompt=login')
         url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
+        logger.info('Open browser with url: %s', url)
         succ = open_page_in_browser(url)
         if succ is False:
             web_server.server_close()
             results['no_browser'] = True
             return
-        # wait for callback from browser. TODO: move to background so users can ctrl+c to kill the whole damn thing
+        # wait for callback from browser.
         web_server.handle_request()
         if 'error' in web_server.query_params:
-            raise CLIError('Login failed')
+            raise CLIError('Login failed due to error of "{}"'.format(web_server.query_params['error']))
         if 'code' in web_server.query_params:
             code = web_server.query_params['code']
         else:
-            raise CLIError('unknown error, please open an issue')
+            raise CLIError('Login failed as authorization code was not captured')
         results['code'] = code[0]
         results['reply_url'] = reply_url
 
     def find_through_authorization_code_flow(self, tenant, aad_endpoint, resource):
         import threading
         import time
-        import adal
         results = {}
         t = threading.Thread(target=SubscriptionFinder._get_authrozation_code,
                              args=(tenant, aad_endpoint, resource, results))
@@ -1033,10 +1033,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         query = parse_qs(query, keep_blank_values=True)
         self.server.query_params = query
 
-        if 'code' in query:
-            page = 'login_ok.html'
-        else:
-            page = 'login_fail.html'  # TODO: test it
+        page = 'login_ok.html' if 'code' in query else 'login_fail.html'
 
         page_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), page)
         with open(page_path, 'rb') as f:
