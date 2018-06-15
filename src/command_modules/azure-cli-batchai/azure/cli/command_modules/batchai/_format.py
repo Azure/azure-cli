@@ -6,6 +6,24 @@
 from collections import OrderedDict
 
 
+def workspace_list_table_format(result):
+    """Format workspace list as a table"""
+    table = []
+    for item in result:
+        table.append(workspace_show_table_format(item))
+    return table
+
+
+def workspace_show_table_format(workspace):
+    """Format the workspace as a table"""
+    row = OrderedDict()
+    row['Name'] = workspace['name']
+    row['Resource Group'] = workspace['resourceGroup']
+    row['Location'] = workspace['location']
+    row['State'] = workspace['provisioningState']
+    return row
+
+
 def cluster_list_table_format(result):
     """Format cluster list as a table."""
     table = []
@@ -16,9 +34,11 @@ def cluster_list_table_format(result):
 
 def cluster_show_table_format(result):
     """Format cluster as a table."""
+    from msrestazure.tools import parse_resource_id
     row = OrderedDict()
     row['Name'] = result['name']
     row['Resource Group'] = result['resourceGroup']
+    row['Workspace'] = parse_resource_id(result['id'])['name']
     row['VM Size'] = result['vmSize']
     if result['provisioningState'] == 'deleting':
         row['State'] = 'deleting'
@@ -32,6 +52,25 @@ def cluster_show_table_format(result):
     return row
 
 
+def experiment_list_table_format(result):
+    """Format experiment list as a table"""
+    table = []
+    for item in result:
+        table.append(experiment_show_table_format(item))
+    return table
+
+
+def experiment_show_table_format(experiment):
+    """Format the experiment as a table"""
+    from msrestazure.tools import parse_resource_id
+    row = OrderedDict()
+    row['Name'] = experiment['name']
+    row['Resource Group'] = experiment['resourceGroup']
+    row['Workspace'] = parse_resource_id(experiment['id'])['name']
+    row['State'] = experiment['provisioningState']
+    return row
+
+
 def job_list_table_format(result):
     """Format job list as a table."""
     table = []
@@ -40,23 +79,24 @@ def job_list_table_format(result):
     return table
 
 
-def job_show_table_format(result):
+def job_show_table_format(job):
     """Format job as a table."""
+    from msrestazure.tools import parse_resource_id
     row = OrderedDict()
-    row['Name'] = result['name']
-    row['Resource Group'] = result['resourceGroup']
-    cluster = result['cluster']['id'].split('/')[8]
-    row['Cluster'] = cluster
-    row['Cluster RG'] = result['cluster']['resourceGroup']
-    row['Tool'] = result['toolType']
-    row['Nodes'] = result['nodeCount']
-    if result['provisioningState'] == 'deleting':
+    row['Name'] = job['name']
+    cluster = parse_resource_id(job['cluster']['id'])
+    row['Cluster'] = cluster['resource_name']
+    row['Cluster RG'] = job['cluster']['resourceGroup']
+    row['Cluster Workspace'] = cluster['name']
+    row['Tool'] = job['toolType']
+    row['Nodes'] = job['nodeCount']
+    if job['provisioningState'] == 'deleting':
         row['State'] = 'deleting'
     else:
-        row['State'] = result['executionState']
-    if result['executionInfo'] and \
-       result['executionInfo']['exitCode'] is not None:
-        row['Exit code'] = str(result['executionInfo']['exitCode'])
+        row['State'] = job['executionState']
+    if job['executionInfo'] and \
+       job['executionInfo']['exitCode'] is not None:
+        row['Exit code'] = str(job['executionInfo']['exitCode'])
     else:
         row['Exit code'] = ''
     return row
@@ -68,8 +108,8 @@ def file_list_table_format(result):
     for item in result:
         row = OrderedDict()
         row['Name'] = item['name']
-        row['Is directory'] = 'yes' if item['isDirectory'] else 'no'
-        row['Size'] = '' if item['isDirectory'] else str(item['contentLength'])
+        row['Type'] = item['fileType']
+        row['Size'] = '' if item['fileType'] == 'directory' else str(item['contentLength'])
         row['Modified'] = item['lastModified'] or ' '
         table.append(row)
     return table
@@ -96,7 +136,6 @@ def file_server_show_table_format(result):
     if mount_settings:
         row['Public IP'] = mount_settings['fileServerPublicIp']
         row['Internal IP'] = mount_settings['fileServerInternalIp']
-        row['Type'] = mount_settings['fileServerType']
         row['Mount Point'] = mount_settings['mountPoint']
     return row
 
@@ -108,7 +147,7 @@ def remote_login_table_format(result):
         row = OrderedDict()
         row['ID'] = item['nodeId']
         row['IP'] = item['ipAddress']
-        row['Port'] = int(item['port'])
+        row['Port'] = int(item['SSH Port'])
         table.append(row)
     return table
 

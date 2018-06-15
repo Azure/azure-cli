@@ -185,7 +185,6 @@ class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_win_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -203,7 +202,6 @@ class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_linux_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
@@ -619,100 +617,6 @@ class WebappSSLCertTest(ScenarioTest):
         ])
         self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
-
-
-class WebappBackupConfigScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    def test_webapp_backup_config(self, resource_group):
-        webapp_name = self.create_random_name(prefix='azurecli-webapp-backupconfigtest', length=36)
-        plan = self.create_random_name(prefix='webapp-backup-plan', length=24)
-        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
-
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
-        frequency = '1d'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-        retention_period = 5
-
-        # set without databases
-        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
-                 .format(resource_group, webapp_name, frequency, sas_url, retention_period))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 1),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
-        # update with databases
-        database_name = 'cli-backup'
-        database_type = 'SqlAzure'
-        self.cmd('webapp config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
-                 .format(resource_group, webapp_name, db_conn_str, database_name, database_type))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 1),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
-        # update frequency and retention only
-        frequency = '18h'
-        retention_period = 7
-        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
-                 .format(resource_group, webapp_name, frequency, retention_period))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 18),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Hour'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', False),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
-    @record_only()  # to workaround https://github.com/Azure/azure-cli/issues/5369
-    @ResourceGroupPreparer()
-    def test_webapp_backup_restore(self, resource_group):
-        webapp_name = self.create_random_name(prefix='azurecli-webapp-backuptest', length=36)
-        plan = self.create_random_name(prefix='webapp-backup-plan', length=24)
-        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-
-        database_name = 'cli-backup'
-        database_type = 'SqlAzure'
-        backup_name = 'mybackup'
-        create_checks = [
-            JMESPathCheck('backupItemName', backup_name),
-            JMESPathCheck('storageAccountUrl', sas_url),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup create -g {} --webapp-name {} --container-url "{}" --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
-                 .format(resource_group, webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
-        list_checks = [
-            JMESPathCheck('[-1].backupItemName', backup_name),
-            JMESPathCheck('[-1].storageAccountUrl', sas_url),
-            JMESPathCheck('[-1].databases[0].connectionString', db_conn_str),
-            JMESPathCheck('[-1].databases[0].databaseType', database_type),
-            JMESPathCheck('[-1].databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=list_checks)
-        time.sleep(900)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
-        self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url "{}" --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
-                 .format(resource_group, webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', webapp_name))
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):

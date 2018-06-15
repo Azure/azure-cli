@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.1.4
+++++++
+* `network lb probe create`: support `Https` protocol [#6571](https://github.com/Azure/azure-cli/issues/6571)
+* `network traffic-manager endpoint create/update`: Fix issue where `--endpoint-status` was case sensitive. [#6502](https://github.com/Azure/azure-cli/issues/6502)
+
 2.1.3
 ++++++
 * `network vnet peering`: a few improvements

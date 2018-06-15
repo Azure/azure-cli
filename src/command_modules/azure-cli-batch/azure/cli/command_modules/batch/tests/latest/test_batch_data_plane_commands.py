@@ -52,7 +52,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     @BatchAccountPreparer(location='japanwest')
     def test_batch_pool_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
-        is_playback = os.path.exists(self.recording_file)
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'c_file': self._get_test_data_file('batchCreatePool.json'),
@@ -93,7 +92,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('[0].lowPriority.total', 0)])
 
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
-        if not is_playback:
+        if self.is_live or self.in_recording:
             import time
             time.sleep(120)
 
@@ -174,10 +173,13 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch task delete --job-id {j_id} --task-id {t_id} --yes')
 
         self.batch_cmd('batch task create --job-id {j_id} --task-id aaa'
-                       ' --command-line "ping 127.0.0.1"').assert_with_checks([
+                       ' --command-line "ping 127.0.0.1 -n 30"').assert_with_checks([
                            self.check('id', 'aaa'),
-                           self.check('commandLine', 'ping 127.0.0.1')])
+                           self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(10)
         task_counts = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
         self.assertEqual(task_counts["completed"], 0)
         self.assertEqual(task_counts["active"], 1)

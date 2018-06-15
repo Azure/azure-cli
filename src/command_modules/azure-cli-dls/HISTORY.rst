@@ -3,9 +3,12 @@
 Release History
 ===============
 
+0.0.22
+++++++
+* Updated the ADLS version to latest.
+
 0.0.21
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.0.20

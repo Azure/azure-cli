@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.34"
+VERSION = "0.1.35"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'azure-mgmt-web==0.35.0',
     'azure-mgmt-containerregistry==2.0.0',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
-    'urllib3[secure]>=1.18,<=1.22',
+    'urllib3[secure]>=1.18',
     'xmltodict',
     'pyOpenSSL',
     'six',

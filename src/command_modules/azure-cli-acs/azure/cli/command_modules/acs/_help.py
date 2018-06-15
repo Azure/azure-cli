@@ -316,8 +316,7 @@ helps['aks install-connector'] = """
     examples:
         - name: Install the ACI Connector for Linux to a managed Kubernetes cluster.
           text: |-
-            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-              --connector-name aci-connector
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
         - name: Install the ACI Connector for Windows to a managed Kubernetes cluster.
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
@@ -335,7 +334,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
-""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
+"""
 
 helps['aks list'] = """
     type: command
@@ -449,17 +448,36 @@ helps['aks use-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
     parameters:
+        - name: --update
+          type: bool
+          short-summary: Update to the latest Azure Dev Spaces client components.
         - name: --space -s
           type: string
-          short-summary: Name of the dev space to use.
-        - name: --parent-space -p
-          type: string
-          short-summary: Name of a parent dev space to inherit from when creating a new dev space. By default, if there is already a single dev space with no parent, the new space inherits from this one.
+          short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    examples:
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+        client components and selecting a new or existing dev space 'my-space'.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+        'develop/my-space' without prompting for confirmation.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
 """
 
 helps['aks remove-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+    examples:
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
+          text: |-
+            az aks remove-dev-spaces -g my-aks-group -n my-aks
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster without prompting.
+          text: |-
+            az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
 """
 
 helps['aks wait'] = """

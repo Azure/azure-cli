@@ -185,7 +185,7 @@ def load_arguments(self, _):
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
         c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
         c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
         c.argument('image_tag', help='The image tag of the virtual kubelet')
         c.argument('location', help='The location to create the ACI container groups')
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
@@ -193,7 +193,7 @@ def load_arguments(self, _):
                    help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 
     with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
         c.argument('graceful', action='store_true',
                    help='Mention if you want to drain/uncordon your aci-connector to move your applications')
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
@@ -205,15 +205,16 @@ def load_arguments(self, _):
         c.argument('aci_resource_group')
         c.argument('chart_url', default=aci_connector_chart_url)
         c.argument('client_secret')
-        c.argument('connector_name', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector', validator=validate_connector_name)
         c.argument('image_tag')
         c.argument('location')
         c.argument('os_type', get_enum_type(aci_connector_os_type))
         c.argument('service_principal')
 
     with self.argument_context('aks use-dev-spaces') as c:
+        c.argument('update', options_list=['--update'], action='store_true')
         c.argument('space_name', options_list=['--space', '-s'])
-        c.argument('parent_space_name', options_list=['--parent-space', '-p'])
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation. Requires --space.')
 
     with self.argument_context('aks remove-dev-spaces') as c:
         c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')

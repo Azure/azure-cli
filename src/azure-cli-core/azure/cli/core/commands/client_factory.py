@@ -49,6 +49,9 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
      :params subscription_id: the current account's subscription
      :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
     """
+    if not subscription_id and 'subscription_id' in cli_ctx.data:
+        subscription_id = cli_ctx.data['subscription_id']
+
     sdk_profile = None
     if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client
@@ -166,7 +169,10 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
 
 def get_subscription_id(cli_ctx):
     from azure.cli.core._profile import Profile
-    _, subscription_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials()
+    if 'subscription_id' in cli_ctx.data:
+        subscription_id = cli_ctx.data['subscription_id']
+    else:
+        subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id()
     return subscription_id
 
 

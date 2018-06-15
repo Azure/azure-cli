@@ -16,3 +16,7 @@ def reservation_mgmt_client_factory(cli_ctx, kwargs):
 
 def reservation_order_mgmt_client_factory(cli_ctx, kwargs):
     return cf_reservations(cli_ctx, **kwargs).reservation_order
+
+
+def base_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_reservations(cli_ctx, **kwargs)

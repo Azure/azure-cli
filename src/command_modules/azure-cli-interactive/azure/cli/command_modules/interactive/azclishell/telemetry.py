@@ -52,7 +52,7 @@ _session = Telemetry()
 
 # core telemetry operations
 def start():
-    telemetry_core.start()
+    telemetry_core.start(mode='interactive')
 
 
 def flush():

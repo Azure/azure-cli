@@ -30,6 +30,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
             c.argument('version', help='Server version')
 
+        with self.argument_context('{} server update'.format(command_group)) as c:
+            c.ignore('family', 'capacity', 'tier')
+            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
+
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
@@ -58,7 +62,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     for scope in ['mysql server', 'postgres server']:
         with self.argument_context(scope) as c:
-            c.ignore('size', 'family', 'capacity', 'tier')
+            c.ignore('family', 'capacity', 'tier')
 
             c.argument('server_name', options_list=['--name', '-n'], id_part='name', help='Name of the server.')
             c.argument('administrator_login', options_list=['--admin-user', '-u'])

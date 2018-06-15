@@ -38,6 +38,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--service-principal={service_principal} --client-secret={client_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -58,6 +59,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('type', '{resource_type}'),
             self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
