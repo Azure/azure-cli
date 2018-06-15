@@ -267,7 +267,8 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, False, finder)
+        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, allow_no_subscriptions=False,
+                                            subscription_finder=finder)
         # action
         extended_info = profile.get_sp_auth_info()
         # assert
@@ -1048,7 +1049,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual([self.subscription1], subs)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
+    def test_find_subscriptions_through_device_code_flow(self, mock_auth_context):
         cli = TestCli()
         test_nonsense_code = {'message': 'magic code for you'}
         mock_auth_context.acquire_user_code.return_value = test_nonsense_code
@@ -1069,6 +1070,40 @@ class TestProfile(unittest.TestCase):
             mgmt_resource, test_nonsense_code, mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_through_authorization_code_flow(self, mock_auth_context):
+        import adal
+
+        def _get_authorization_code_test_stub(tenant, resource, aad_endpoint):
+            return {
+                'code': 'code1',
+                'reply_url': 'http://localhost:8888'
+            }
+
+        cli = TestCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+        finder._get_authorization_code = _get_authorization_code_test_stub
+        mgmt_resource = 'https://management.core.windows.net/'
+        temp_token_cache = mock.MagicMock()
+        type(mock_auth_context).cache = temp_token_cache
+        temp_token_cache.read_items.return_value = []
+        mock_auth_context.acquire_token_with_authorization_code.return_value = self.token_entry1
+
+        # action
+        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/')
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        mock_auth_context.acquire_token.assert_called_once_with(mgmt_resource, self.user1, mock.ANY)
+        mock_auth_context.acquire_token_with_authorization_code.assert_called_once_with('code1',
+                                                                                        'http://localhost:8888',
+                                                                                        mgmt_resource, mock.ANY,
+                                                                                        None)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_interactive_from_particular_tenent(self, mock_auth_context):

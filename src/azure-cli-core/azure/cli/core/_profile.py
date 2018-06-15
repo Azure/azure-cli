@@ -163,7 +163,7 @@ class Profile(object):
             if not use_device_code:
                 try:
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad, self._ad_resource_uri)
+                        tenant, self._ad_resource_uri, self._ad)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to login you in, falling back to device code...')
@@ -710,7 +710,7 @@ class SubscriptionFinder(object):
         return result
 
     @staticmethod
-    def _get_authrozation_code(tenant, aad_endpoint, resource, results):
+    def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
         import socket
         for port in range(8400, 9000):
             try:
@@ -744,11 +744,12 @@ class SubscriptionFinder(object):
         results['code'] = code[0]
         results['reply_url'] = reply_url
 
-    def find_through_authorization_code_flow(self, tenant, aad_endpoint, resource):
+    @staticmethod
+    def _get_authorization_code(tenant, resource, aad_endpoint):
         import threading
         import time
         results = {}
-        t = threading.Thread(target=SubscriptionFinder._get_authrozation_code,
+        t = threading.Thread(target=SubscriptionFinder._get_authorization_code_worker,
                              args=(tenant, aad_endpoint, resource, results))
         t.daemon = True
         t.start()
@@ -758,6 +759,11 @@ class SubscriptionFinder(object):
                 break  # done
         if results.get('no_browser'):
             raise RuntimeError()
+        return results
+
+    def find_through_authorization_code_flow(self, tenant, resource, aad_endpoint):
+        # launch browser and get the code
+        results = SubscriptionFinder._get_authorization_code(tenant, resource, aad_endpoint)
 
         # exchange the code for the token
         context = self._create_auth_context(tenant, use_token_cache=False)
@@ -1019,6 +1025,27 @@ class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-fe
 
 
 class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    # pylint: disable=line-too-long
+
+    # backup greeting pages if official ones from "docs.microsoft.com" are unavailable
+    ok_html = ('<!DOCTYPE html>'
+               '<html>'
+               '<head><meta charset="utf-8" /><title>Login successfully</title></head>'
+               '<body>'
+               '<a href="https://azure.microsoft.com/en-us/" title="Microsoft Azure" style="color: #0078d7;font-size: 22px;font-weight: 600;position: relative;top: 5px;text-decoration:none">Microsoft Azure</a>'
+               '<h4>You have logged into Microsoft Azure!</h4>'
+               '<p>You can close this window and start to use Azure CLI. If you are new to Azure CLI, you can check out <a href="https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest">documents</a> to get started.</p>'
+               '</body>'
+               '</html>')
+    fail_html = ('<!DOCTYPE html>'
+                 '<html>'
+                 '<head><meta charset="utf-8" /><title>Login failed</title></head>'
+                 '<body>'
+                 '<a href="https://azure.microsoft.com/en-us/" title="Microsoft Azure" style="color: #0078d7;font-size: 22px;font-weight: 600;position: relative;top: 5px;text-decoration:none">Microsoft Azure</a>'
+                 '<h4>Some failures occurred during the authentication</h4>'
+                 '<p>You can log an issue at <a href="https://github.com/azure/azure-cli/issues">Azure CLI GitHub Respository</a> and we will assist you to get it resolved</p>'
+                 '</body>'
+                 '</html>')
 
     def do_GET(self):
         try:
@@ -1032,13 +1059,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         query = self.path.split('?', 1)[-1]
         query = parse_qs(query, keep_blank_values=True)
         self.server.query_params = query
-
-        page = 'login_ok.html' if 'code' in query else 'login_fail.html'
-
-        page_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), page)
-        with open(page_path, 'rb') as f:
-            page_content = f.read()
-        self.wfile.write(page_content)
+        self.wfile.write(self.ok_html.encode() if 'code' in query else self.fail_html.encode())
 
     def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
         return  # this prevent http server from dumping messages to stdout
