@@ -2,17 +2,10 @@
 
 Release History
 ===============
-<<<<<<< HEAD
 
 2.0.28
 ++++++
 * Add polling build status.
-=======
->>>>>>> revert some version changes.
-
-2.0.28
-++++++
-* Minor fixes
 
 2.0.27
 ++++++
