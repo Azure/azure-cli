@@ -422,6 +422,12 @@ helps['acr build-task list-builds'] = """
         - name: List all of the builds for a registry and show the results in a table.
           text: >
             az acr build-task list-builds -r MyRegistry -o table
+        - name: List the last 10 successful builds for a registry and show the results in a table.
+          text: >
+            az acr build-task list-builds -r MyRegistry --build-status Succeeded --top 10 -o table
+        - name: List all of the builds that built the image 'hello-world:latest' for a registry and show the results in a table.
+          text: >
+            az acr build-task list-builds -r MyRegistry --image hello-world:latest -o table
 """
 
 helps['acr build-task show-build'] = """
@@ -444,17 +450,20 @@ helps['acr build-task run'] = """
 
 helps['acr build-task logs'] = """
     type: command
-    short-summary: Show logs for a particular build. If no build-id is supplied, it shows logs for the last updated build.
+    short-summary: Show logs for a particular build. If no build-id is supplied, it shows logs for the last created build.
     examples:
-        - name: Show logs for the last updated build in the registry.
+        - name: Show logs for the last created build in the registry.
           text: >
             az acr build-task logs -r MyRegistry
-        - name: Show logs for the last updated build in the registry, filtered by build task.
+        - name: Show logs for the last created build in the registry, filtered by build task.
           text: >
             az acr build-task logs -r MyRegistry -n MyBuildTask
         - name: Show logs for a particular build.
           text: >
             az acr build-task logs -r MyRegistry --build-id buildId
+        - name: Show logs for the last created build in the registry that built the image 'hello-world:latest'.
+          text: >
+            az acr build-task logs -r MyRegistry --image hello-world:latest
 """
 
 helps['acr build'] = """
