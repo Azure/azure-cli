@@ -267,8 +267,8 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, allow_no_subscriptions=False,
-                                            subscription_finder=finder)
+        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, use_device_code=False,
+                                            allow_no_subscriptions=False, subscription_finder=finder)
         # action
         extended_info = profile.get_sp_auth_info()
         # assert
@@ -313,6 +313,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      True,
                                                      self.tenant_id,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -347,6 +348,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      False,
                                                      None,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -371,6 +373,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      False,
                                                      None,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -1072,22 +1075,19 @@ class TestProfile(unittest.TestCase):
             mgmt_resource, self.user1, mock.ANY)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_find_subscriptions_through_authorization_code_flow(self, mock_auth_context):
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_subscriptions_through_authorization_code_flow(self, _get_authorization_code_mock, mock_auth_context):
         import adal
-
-        def _get_authorization_code_test_stub(tenant, resource, aad_endpoint):
-            return {
-                'code': 'code1',
-                'reply_url': 'http://localhost:8888'
-            }
-
         cli = TestCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         token_cache = adal.TokenCache()
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
-        finder._get_authorization_code = _get_authorization_code_test_stub
+        _get_authorization_code_mock.return_value = {
+            'code': 'code1',
+            'reply_url': 'http://localhost:8888'
+        }
         mgmt_resource = 'https://management.core.windows.net/'
         temp_token_cache = mock.MagicMock()
         type(mock_auth_context).cache = temp_token_cache

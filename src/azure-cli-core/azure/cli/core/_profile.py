@@ -709,61 +709,9 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    @staticmethod
-    def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
-        import socket
-        for port in range(8400, 9000):
-            try:
-                web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
-                reply_url = "http://localhost:{}".format(port)
-                break
-            except socket.error:
-                logger.warning("Port '%s' is taken. Trying with the next one", port)
-
-        if reply_url is None:
-            raise CLIError("Too bad, can't reserve a port")
-
-        # launch browser:
-        url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
-               '&redirect_uri={3}&state={4}&resource={5}&prompt=login')
-        url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
-        logger.info('Open browser with url: %s', url)
-        succ = open_page_in_browser(url)
-        if succ is False:
-            web_server.server_close()
-            results['no_browser'] = True
-            return
-        # wait for callback from browser.
-        web_server.handle_request()
-        if 'error' in web_server.query_params:
-            raise CLIError('Login failed due to error of "{}"'.format(web_server.query_params['error']))
-        if 'code' in web_server.query_params:
-            code = web_server.query_params['code']
-        else:
-            raise CLIError('Login failed as authorization code was not captured')
-        results['code'] = code[0]
-        results['reply_url'] = reply_url
-
-    @staticmethod
-    def _get_authorization_code(tenant, resource, aad_endpoint):
-        import threading
-        import time
-        results = {}
-        t = threading.Thread(target=SubscriptionFinder._get_authorization_code_worker,
-                             args=(tenant, aad_endpoint, resource, results))
-        t.daemon = True
-        t.start()
-        while True:
-            time.sleep(2)  # so that ctrl+c can stop the command
-            if not t.is_alive():
-                break  # done
-        if results.get('no_browser'):
-            raise RuntimeError()
-        return results
-
     def find_through_authorization_code_flow(self, tenant, resource, aad_endpoint):
         # launch browser and get the code
-        results = SubscriptionFinder._get_authorization_code(tenant, resource, aad_endpoint)
+        results = _get_authorization_code(tenant, resource, aad_endpoint)
 
         # exchange the code for the token
         context = self._create_auth_context(tenant, use_token_cache=False)
@@ -1030,18 +978,16 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     # backup greeting pages if official ones from "docs.microsoft.com" are unavailable
     ok_html = ('<!DOCTYPE html>'
                '<html>'
-               '<head><meta charset="utf-8" /><title>Login successfully</title></head>'
+               '<head><meta charset="utf-8" /><meta http-equiv="refresh" content="10;url=https://docs.microsoft.com/en-us/cli/azure/"><title>Login successfully</title></head>'
                '<body>'
-               '<a href="https://azure.microsoft.com/en-us/" title="Microsoft Azure" style="color: #0078d7;font-size: 22px;font-weight: 600;position: relative;top: 5px;text-decoration:none">Microsoft Azure</a>'
                '<h4>You have logged into Microsoft Azure!</h4>'
-               '<p>You can close this window and start to use Azure CLI. If you are new to Azure CLI, you can check out <a href="https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest">documents</a> to get started.</p>'
+               '<p>You can close this window, or we will redirect you to <a href="https://docs.microsoft.com/en-us/cli/azure/">CLI documents</a> in 10 seconds.</p>'
                '</body>'
                '</html>')
     fail_html = ('<!DOCTYPE html>'
                  '<html>'
                  '<head><meta charset="utf-8" /><title>Login failed</title></head>'
                  '<body>'
-                 '<a href="https://azure.microsoft.com/en-us/" title="Microsoft Azure" style="color: #0078d7;font-size: 22px;font-weight: 600;position: relative;top: 5px;text-decoration:none">Microsoft Azure</a>'
                  '<h4>Some failures occurred during the authentication</h4>'
                  '<p>You can log an issue at <a href="https://github.com/azure/azure-cli/issues">Azure CLI GitHub Respository</a> and we will assist you to get it resolved</p>'
                  '</body>'
@@ -1063,3 +1009,55 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
         return  # this prevent http server from dumping messages to stdout
+
+
+def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
+    import socket
+    for port in range(8400, 9000):
+        try:
+            web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
+            reply_url = "http://localhost:{}".format(port)
+            break
+        except socket.error:
+            logger.warning("Port '%s' is taken. Trying with the next one", port)
+
+    if reply_url is None:
+        raise CLIError("Too bad, can't reserve a port")
+
+    # launch browser:
+    url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
+           '&redirect_uri={3}&state={4}&resource={5}&prompt=login')
+    url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
+    logger.info('Open browser with url: %s', url)
+    succ = open_page_in_browser(url)
+    if succ is False:
+        web_server.server_close()
+        results['no_browser'] = True
+        return
+    # wait for callback from browser.
+    web_server.handle_request()
+    if 'error' in web_server.query_params:
+        raise CLIError('Login failed due to error of "{}"'.format(web_server.query_params['error']))
+    if 'code' in web_server.query_params:
+        code = web_server.query_params['code']
+    else:
+        raise CLIError('Login failed as authorization code was not captured')
+    results['code'] = code[0]
+    results['reply_url'] = reply_url
+
+
+def _get_authorization_code(tenant, resource, aad_endpoint):
+    import threading
+    import time
+    results = {}
+    t = threading.Thread(target=_get_authorization_code_worker,
+                         args=(tenant, aad_endpoint, resource, results))
+    t.daemon = True
+    t.start()
+    while True:
+        time.sleep(2)  # so that ctrl+c can stop the command
+        if not t.is_alive():
+            break  # done
+    if results.get('no_browser'):
+        raise RuntimeError()
+    return results
