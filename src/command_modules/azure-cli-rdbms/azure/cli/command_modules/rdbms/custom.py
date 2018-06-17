@@ -125,10 +125,8 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
             properties=mysql.models.ServerPropertiesForGeoRestore(
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                ),
-                source_server_id=source_server
-                ),
+                    geo_redundant_backup=geo_redundant_backup),
+                source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
@@ -137,10 +135,8 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
             properties=postgresql.models.ServerPropertiesForGeoRestore(
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                ),
-                source_server_id=source_server
-                ),
+                    geo_redundant_backup=geo_redundant_backup),
+                source_server_id=source_server),
             location=location)
 
     parameters.properties.source_server_id = source_server
@@ -235,6 +231,7 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
         instance.end_ip_address = end_ip_address
     return instance
 
+
 def _custom_vnet_update_get(client, resource_group_name, server_name, virtual_network_rule_name):
     return client.get(resource_group_name, server_name, virtual_network_rule_name)
 
@@ -245,6 +242,7 @@ def _custom_vnet_update_set(client, resource_group_name, server_name, virtual_ne
     return client.create_or_update(resource_group_name, server_name,
                                    virtual_network_rule_name, virtual_network_subnet_id,
                                    ignore_missing_vnet_service_endpoint)
+
 
 # Custom functions for server logs
 def _download_log_files(

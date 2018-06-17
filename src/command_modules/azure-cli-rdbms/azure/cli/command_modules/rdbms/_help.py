@@ -133,7 +133,7 @@ def add_helps(command_group, server_type):
                       text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
                     - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
                       text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-                """.format(server_type, command_group, command_group)           
+                """.format(server_type, command_group, command_group)
     helps['{} server configuration'.format(command_group)] = """
                 type: group
                 short-summary: Manage configuration values for a server.
