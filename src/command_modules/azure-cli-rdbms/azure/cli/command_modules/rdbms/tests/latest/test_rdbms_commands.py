@@ -247,6 +247,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='mysql')
     def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
@@ -255,6 +256,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='postgres')
     def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
@@ -340,6 +342,70 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server firewall-rule delete -n {} -g {} -s {} --yes'
                  .format(database_engine, firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('{} server firewall-rule list -g {} --server {}'
+                 .format(database_engine, resource_group, server), checks=[NoneCheck()])
+
+    def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
+        vnet_firewall_rule_1 = 'vnet_rule1'
+        vnet_firewall_rule_2 = 'vnet_rule2'
+        location = 'koreasouth'
+        vnet_name = 'clitestvnet'
+        ignore_missing_endpoint = 'true'
+        address_prefix = '10.0.0.0/16'
+
+        subnet_name_1 = 'clitestsubnet1'
+        subnet_prefix_1 = '10.0.0.0/24'
+
+        subnet_name_2 = 'clitestsubnet2'
+        subnet_prefix_2 = '10.0.1.0/24'
+
+        # pre create the dependent resources here
+        # create vnet and subnet
+        execute(self.cli_ctx, 'az network vnet create -n {} -g {} -l {} '
+                '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1,
+                                                                                 subnet_prefix_1))
+        # add one more subnet
+        execute(self.cli_ctx, 'az network vnet subnet create --vnet-name {} -g {} '
+                '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+        # test vnet-rule create
+        self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server,
+                         vnet_name, subnet_name_1, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test vnet-rule show
+        self.cmd('{} server vnet-rule show -n {} -g {} -s {}'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test create one more vnet rule .
+        self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server,
+                         vnet_name, subnet_name_2, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test vnet-rule list
+        self.cmd('{} server vnet-rule list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        self.cmd('{} server vnet-rule delete --name {} -g {} --server {} --yes'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server), checks=NoneCheck())
+        self.cmd('{} server vnet-rule list -g {} --server {}'
+                 .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('{} server vnet-rule delete -n {} -g {} -s {} --yes'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server), checks=NoneCheck())
+        self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[NoneCheck()])
 
     def _test_db_mgmt(self, resource_group, server, database_engine):

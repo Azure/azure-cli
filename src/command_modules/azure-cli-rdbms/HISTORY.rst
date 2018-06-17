@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.4
++++++
+* Add support for virtual network operations.
+
 0.2.3
 +++++
 * Minor fixes.
