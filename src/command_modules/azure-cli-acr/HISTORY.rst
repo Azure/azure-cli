@@ -2,9 +2,15 @@
 
 Release History
 ===============
+
+2.0.28
+++++++
+* Add polling build status.
+
 2.0.27
 ++++++
 * Add 'azure-storage-blob' as dependency.
+* Use 2 cores as the default CPU configuration in 'acr build-task create' command.
 
 2.0.26
 ++++++

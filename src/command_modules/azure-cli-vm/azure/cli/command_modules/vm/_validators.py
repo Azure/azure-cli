@@ -559,7 +559,7 @@ def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
 
 
-def _validate_vm_vmss_accelerated_networking(namespace):
+def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
     if namespace.accelerated_networking is None:
         size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
         size = size.lower()
@@ -596,6 +596,19 @@ def _validate_vm_vmss_accelerated_networking(namespace):
         aval_sizes = [x.lower() for x in aval_sizes]
         if size not in aval_sizes:
             return
+
+        new_4core_sizes = ['Standard_D3_v2', 'Standard_D3_v2_Promo', 'Standard_D3_v2_ABC', 'Standard_DS3_v2',
+                           'Standard_DS3_v2_Promo', 'Standard_D12_v2', 'Standard_D12_v2_Promo', 'Standard_D12_v2_ABC',
+                           'Standard_DS12_v2', 'Standard_DS12_v2_Promo', 'Standard_F8s_v2', 'Standard_F4',
+                           'Standard_F4_ABC', 'Standard_F4s', 'Standard_E8_v3', 'Standard_E8s_v3', 'Standard_D8_v3',
+                           'Standard_D8s_v3']
+        new_4core_sizes = [x.lower() for x in new_4core_sizes]
+        if size not in new_4core_sizes:
+            compute_client = _compute_client_factory(cli_ctx)
+            sizes = compute_client.virtual_machine_sizes.list(namespace.location)
+            size_info = next((s for s in sizes if s.name.lower() == size), None)
+            if size_info is None or size_info.number_of_cores < 8:
+                return
 
         # VMs need to be a supported image in the marketplace
         # Ubuntu 16.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
@@ -944,7 +957,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
-    _validate_vm_vmss_accelerated_networking(namespace)
+    _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1112,6 +1125,12 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     validate_tags(namespace)
+    if namespace.vm_sku is None:
+        from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
+        if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
+            logger.warning('In a future release, the default vm size will be changed from "Standard_D1_v2"'
+                           ' to "Standard_DS1_v2". You can use "--vm-sku" argument to maintain the same size')
+        namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
@@ -1121,7 +1140,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
-    _validate_vm_vmss_accelerated_networking(namespace)
+    _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 

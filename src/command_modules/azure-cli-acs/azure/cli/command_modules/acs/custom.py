@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import base64
 import binascii
 import datetime
 import errno
@@ -47,15 +46,17 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
-from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
 from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
-
+from azure.mgmt.containerservice.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
@@ -125,11 +126,11 @@ def acs_browse(cmd, client, resource_group, name, disable_browser=False, ssh_key
 def _acs_browse_internal(cmd, client, acs_info, resource_group, name, disable_browser, ssh_key_file):
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
-    if orchestrator_type == 'kubernetes' or \
+    if str(orchestrator_type).lower() == 'kubernetes' or \
        orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
        (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
         return k8s_browse(cmd, client, name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
-    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
+    elif str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
@@ -996,6 +997,16 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     existing = load_kubernetes_configuration(existing_file)
     addition = load_kubernetes_configuration(addition_file)
 
+    # rename the admin context so it doesn't overwrite the user context
+    for ctx in addition.get('contexts', []):
+        try:
+            if ctx['context']['user'].startswith('clusterAdmin'):
+                admin_name = ctx['name'] + '-admin'
+                addition['current-context'] = ctx['name'] = admin_name
+                break
+        except (KeyError, TypeError):
+            continue
+
     if addition is None:
         raise CLIError('failed to load additional configuration from {}'.format(addition_file))
 
@@ -1310,7 +1321,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
                      "port-forward", dashboard_pod, "8001:9090"])
 
 
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -1319,15 +1330,31 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,
+               no_ssh_key=False,
+               enable_rbac=False,
+               network_plugin=None,
+               pod_cidr=None,
+               service_cidr=None,
+               dns_service_ip=None,
+               docker_bridge_address=None,
+               enable_addons=None,
+               workspace_resource_id=None,
+               vnet_subnet_id=None,
+               max_pods=0,
+               aad_client_app_id=None,
+               aad_server_app_id=None,
+               aad_server_app_secret=None,
+               aad_tenant_id=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
-    try:
-        if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
-            raise ValueError()
-    except (TypeError, ValueError):
-        shortened_key = truncate_text(ssh_key_value)
-        raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
+    if not no_ssh_key:
+        try:
+            if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
+                raise ValueError()
+        except (TypeError, ValueError):
+            shortened_key = truncate_text(ssh_key_value)
+            raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
@@ -1339,20 +1366,26 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg.location  # pylint:disable=no-member
 
-    ssh_config = ContainerServiceSshConfiguration(
-        [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
-    agent_pool_profile = ContainerServiceAgentPoolProfile(
-        'nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+    agent_pool_profile = ManagedClusterAgentPoolProfile(
+        name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         dns_prefix=dns_name_prefix,
         os_type="Linux",
-        storage_profile=ContainerServiceStorageProfileTypes.managed_disks
+        storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
+        vnet_subnet_id=vnet_subnet_id,
+        max_pods=int(max_pods) if max_pods else None
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
-    linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
+    linux_profile = None
+    # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
+    if not no_ssh_key:
+        ssh_config = ContainerServiceSshConfiguration(
+            public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
+        linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
+
     principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                   service_principal=service_principal, client_secret=client_secret,
                                                   subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
@@ -1362,13 +1395,56 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
+    network_profile = None
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
+        network_profile = ContainerServiceNetworkProfile(
+            network_plugin=network_plugin,
+            pod_cidr=pod_cidr,
+            service_cidr=service_cidr,
+            dns_service_ip=dns_service_ip,
+            docker_bridge_cidr=docker_bridge_address
+        )
+
+    addon_profiles = {}
+    addons = enable_addons.split(',') if enable_addons else []
+    if 'http_application_routing' in addons:
+        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('http_application_routing')
+    # TODO: can we help the user find a workspace resource ID?
+    if 'monitoring' in addons:
+        if not workspace_resource_id:
+            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
+        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
+            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+        addons.remove('monitoring')
+    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+    elif workspace_resource_id:
+        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    # error out if any (unrecognized) addons remain
+    if addons:
+        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
+            ",".join(addons), "are" if len(addons) > 1 else "is"))
+
+    aad_profile = None
+    if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
+        aad_profile = ManagedClusterAADProfile(
+            client_app_id=aad_client_app_id,
+            server_app_id=aad_server_app_id,
+            server_app_secret=aad_server_app_secret,
+            tenant_id=aad_tenant_id
+        )
+
     mc = ManagedCluster(
         location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
+        enable_rbac=enable_rbac,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
-        service_principal_profile=service_principal_profile)
+        service_principal_profile=service_principal_profile,
+        network_profile=network_profile,
+        addon_profiles=addon_profiles,
+        aad_profile=aad_profile)
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -1392,14 +1468,13 @@ def aks_get_versions(cmd, client, location):
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    access_profile = client.get_access_profiles(
+    access_profile = client.get_access_profile(
         resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
 
     if not access_profile:
         raise CLIError("No Kubernetes access profile found.")
     else:
-        encoded_kubeconfig = access_profile.kube_config
-        kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
+        kubeconfig = access_profile.kube_config.decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
 
 
@@ -1421,8 +1496,9 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False)
     # TODO: change this approach when we support multiple agent pools.
     instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
-    # null out the service principal because otherwise validation complains
+    # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -1431,8 +1507,9 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     instance = client.get(resource_group_name, name)
     instance.kubernetes_version = kubernetes_version
 
-    # null out the service principal because otherwise validation complains
+    # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -1441,7 +1518,7 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='default', parent_space_name=None):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -1450,17 +1527,20 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, space_name='defau
     :param resource_group_name: Name of resource group. You can configure the default group. \
     Using 'az configure --defaults group=<name>'.
     :type resource_group_name: String
-    :param space_name: Name of the dev space to use.
+    :param update: Update to the latest Azure Dev Spaces client components.
+    :type update: bool
+    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
     :type space_name: String
-    :param parent_space_name: Name of a parent dev space to inherit from when creating a new dev space. \
-    By default, if there is already a single dev space with no parent, the new space inherits from this one.
-    :type parent_space_name: String
+    :param prompt: Do not prompt for confirmation. Requires --space.
+    :type prompt: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(name, resource_group_name, space_name, parent_space_name)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
+        except TypeError:
+            raise CLIError("Use '--update' option to get the latest Azure Dev Spaces client components.")
         except AttributeError as ae:
             raise CLIError(ae)
 
@@ -1509,10 +1589,27 @@ def _install_dev_spaces_extension(extension_name):
     return True
 
 
-def _get_or_add_extension(extension_name):
+def _update_dev_spaces_extension(extension_name):
+    from azure.cli.core.extension import ExtensionNotInstalledException
+    try:
+        from azure.cli.command_modules.extension import custom
+        custom.update_extension(extension_name=extension_name)
+    except ExtensionNotInstalledException as err:
+        logger.debug(err)
+        return False
+    except ModuleNotFoundError as err:
+        logger.debug(err)
+        logger.error("Error occurred attempting to load the extension module. Use --debug for more information.")
+        return False
+    return True
+
+
+def _get_or_add_extension(extension_name, update=False):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
+        if update:
+            return _update_dev_spaces_extension(extension_name)
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True

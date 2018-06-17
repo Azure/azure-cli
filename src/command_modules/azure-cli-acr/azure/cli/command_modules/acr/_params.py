@@ -56,6 +56,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')
         c.argument('image_names', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.", action='append')
+        c.argument('timeout', type=int, help='The build timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
         c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_build_arg)
         c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
@@ -115,7 +116,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
-        c.argument('timeout', help='The build timeout in seconds.')
 
     with self.argument_context('acr build-task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -125,7 +125,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('status', help='The current status of build task.', choices=[BuildTaskStatus.enabled.value, BuildTaskStatus.disabled.value])
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', choices=[OsType.linux.value, OsType.windows.value])
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the build.')
-        c.argument('timeout', type=int, help='Build timeout in seconds.')
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('git_access_token', help="The access token used to access the source control provider.")

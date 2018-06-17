@@ -6,9 +6,6 @@
 # pylint: disable=too-many-lines
 from __future__ import print_function
 
-import string
-from random import shuffle
-
 import collections
 import copy
 import datetime
@@ -16,24 +13,27 @@ import getpass
 import json
 import os
 import signal
+import socket
+import string
 import sys
+import threading
 import time
-from six.moves import urllib_parse
+from functools import partial
+from random import shuffle
 
+import paramiko
 import requests
-
 from knack.log import get_logger
 from knack.util import CLIError
 from msrest.serialization import Deserializer
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from six.moves import urllib_parse
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core import keys
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
-
 import azure.mgmt.batchai.models as models
-
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
 # decision about which storage account to use instead of using his default account specified via AZURE_STORAGE_ACCOUNT
@@ -86,6 +86,11 @@ def _get_resource_group_location(cli_ctx, resource_group):
     return client.resource_groups.get(resource_group).location
 
 
+def _get_workspace_location(client, resource_group, workspace_name):
+    workspace = client.workspaces.get(resource_group, workspace_name)
+    return workspace.location
+
+
 def _get_default_ssh_public_key_location():
     path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
     if os.path.exists(path):
@@ -98,16 +103,26 @@ def _get_deserializer():
     return Deserializer(client_models)
 
 
-def _ensure_resource_not_exist(client, resource_group, name):
+def _ensure_resource_not_exist(client, resource_group, workspace, name):
     try:
-        client.get(resource_group, name)
-        raise CLIError('"{0}" already exists in "{1}" resource group'.format(name, resource_group))
+        client.get(resource_group, workspace, name)
+        raise CLIError('"{0}" already exists in "{1}" resource group under {2} resource group.'.format(
+            name, resource_group, workspace))
     except CloudError as e:
         if e.status_code != 404:
             raise
 
 
-def _verify_subnet(client, subnet, nfs_name, nfs_resource_group):
+def _ensure_job_not_exist(client, resource_group, workspace, experiment, name):
+    try:
+        client.get(resource_group, workspace, experiment, name)
+        raise CLIError('A job with given name, experiment, workspace and resource group already exists.')
+    except CloudError as e:
+        if e.status_code != 404:
+            raise
+
+
+def _ensure_subnet_is_valid(client, subnet, nfs_resource_group, nfs_workspace, nfs_name):
     if not subnet:
         return
     if not is_valid_resource_id(subnet):
@@ -118,7 +133,7 @@ def _verify_subnet(client, subnet, nfs_name, nfs_resource_group):
         return
     nfs = None  # type: models.FileServer
     try:
-        nfs = client.file_servers.get(nfs_name, nfs_resource_group)
+        nfs = client.file_servers.get(nfs_resource_group, nfs_workspace, nfs_name)
     except CloudError as e:
         if e.status_code != 404:
             raise
@@ -146,7 +161,7 @@ def _get_storage_account_key(cli_ctx, account_name, account_key):
     account = [a.id for a in list(storage_client.storage_accounts.list()) if a.name == account_name]
     if not account:
         raise CLIError('Cannot find "{0}" storage account.'.format(account_name))
-    resource_group = account[0].split('/')[4]
+    resource_group = parse_resource_id(account[0])['resource_group']
     keys_list_result = storage_client.storage_accounts.list_keys(resource_group, account_name)
     if not keys_list_result or not keys_list_result.keys:
         raise CLIError('Cannot find a key for "{0}" storage account.'.format(account_name))
@@ -277,7 +292,7 @@ def _update_user_account_settings(params, admin_user_name, ssh_key, password):
             result.ssh_configuration = models.SshConfiguration(user_account_settings=None)
         parent = result.ssh_configuration
     if parent.user_account_settings is None:
-        parent.user_account_settings = models.UserAccountSettings()
+        parent.user_account_settings = models.UserAccountSettings(admin_user_name=None)
     # Get effective user name, password and key trying them in the following order: provided via command line,
     # provided in the config file, current user name and his default public ssh key.
     effective_user_name = admin_user_name or parent.user_account_settings.admin_user_name or getpass.getuser()
@@ -444,7 +459,7 @@ def _get_image_reference(image, custom_image):
 
 
 def _get_scale_settings(initial_count, min_count, max_count):
-    """Returns scale settings for a cluster with gine parameters"""
+    """Returns scale settings for a cluster with given parameters"""
     if not initial_count and not min_count and not max_count:
         # Get from the config file
         return None
@@ -601,37 +616,63 @@ def _generate_ssh_keys():
                    'nodes. If using machines without permanent storage, back up your keys to a safe location.')
 
 
+def list_workspaces(client, resource_group=None):
+    if resource_group:
+        return client.list_by_resource_group(resource_group)
+    return client.list()
+
+
+def create_workspace(cmd, client, resource_group, workspace_name, location=None):
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
+    return client.create(resource_group, workspace_name, location).result()
+
+
+def create_experiment(client, resource_group, workspace_name, experiment_name):
+    return client.create(resource_group, workspace_name, experiment_name).result()
+
+
+def _get_effective_resource_parameters(name_or_id, resource_group, workspace):
+    """Returns effective resource group, workspace and name for the given resource"""
+    if not name_or_id:
+        return None, None, None
+    if is_valid_resource_id(name_or_id):
+        parts = parse_resource_id(name_or_id)
+        return parts['resource_group'], parts['name'], parts['resource_name']
+    return resource_group, workspace, name_or_id
+
+
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
-                   resource_group, cluster_name, json_file=None, location=None, user_name=None,
+                   resource_group, workspace_name, cluster_name, json_file=None, user_name=None,
                    ssh_key=None, password=None, generate_ssh_keys=None, image=None, custom_image=None,
                    use_auto_storage=False, vm_size=None, vm_priority=None, target=None, min_nodes=None,
-                   max_nodes=None, subnet=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
-                   azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
-                   account_name=None, account_key=None, setup_task=None, setup_task_output=None):
+                   max_nodes=None, subnet=None, nfs=None, nfs_mount_path='nfs', azure_file_share=None,
+                   afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
+                   account_key=None, setup_task=None, setup_task_output=None):
     if generate_ssh_keys:
         _generate_ssh_keys()
         if ssh_key is None:
             ssh_key = _get_default_ssh_public_key_location()
-    _ensure_resource_not_exist(client.clusters, resource_group, cluster_name)
-    _verify_subnet(client, subnet, nfs_name, nfs_resource_group or resource_group)
+    _ensure_resource_not_exist(client.clusters, resource_group, workspace_name, cluster_name)
+    nfs_resource_group, nfs_workspace, nfs_name = _get_effective_resource_parameters(
+        nfs, resource_group, workspace_name)
+    _ensure_subnet_is_valid(client, subnet, nfs_resource_group, nfs_workspace, nfs_name)
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             params = _get_deserializer()('ClusterCreateParameters', json_obj)
     else:
         # noinspection PyTypeChecker
-        params = models.ClusterCreateParameters()
+        params = models.ClusterCreateParameters(vm_size=None, user_account_settings=None)
     if params.node_setup:
         params.node_setup.mount_volumes = _patch_mount_volumes(
             cmd.cli_ctx, params.node_setup.mount_volumes, account_name, account_key)
     params = _update_user_account_settings(params, user_name, ssh_key, password)
-    params.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
     params = _update_nodes_information(params, image, custom_image, vm_size, vm_priority, target, min_nodes, max_nodes)
     if nfs_name or azure_file_share or container_name:
         params.node_setup = params.node_setup or models.NodeSetup()
     mount_volumes = params.node_setup.mount_volumes if params.node_setup else None
     if nfs_name:
-        file_server = client.file_servers.get(nfs_resource_group or resource_group, nfs_name)
+        file_server = client.file_servers.get(nfs_resource_group, nfs_workspace, nfs_name)
         mount_volumes = _add_nfs_to_mount_volumes(mount_volumes, file_server.id, nfs_mount_path)
     if azure_file_share:
         mount_volumes = _add_azure_file_share_to_mount_volumes(cmd.cli_ctx, mount_volumes, azure_file_share,
@@ -640,7 +681,8 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
         mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
                                                               container_mount_path, account_name, account_key)
     if use_auto_storage:
-        auto_storage_account, auto_storage_key = _configure_auto_storage(cmd.cli_ctx, params.location)
+        auto_storage_account, auto_storage_key = _configure_auto_storage(
+            cmd.cli_ctx, _get_workspace_location(client, resource_group, workspace_name))
         mount_volumes = _add_azure_file_share_to_mount_volumes(
             cmd.cli_ctx, mount_volumes, AUTO_STORAGE_SHARE_NAME, AUTO_STORAGE_SHARE_PATH,
             auto_storage_account, auto_storage_key)
@@ -655,22 +697,20 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
         params.subnet = models.ResourceId(id=subnet)
     if setup_task:
         params = _add_setup_task(setup_task, setup_task_output, params)
-    return client.clusters.create(resource_group, cluster_name, params)
+    return client.clusters.create(resource_group, workspace_name, cluster_name, params)
 
 
-def list_clusters(client, resource_group=None):
-    if resource_group:
-        return list(client.list_by_resource_group(resource_group))
-    return list(client.list())
+def list_clusters(client, resource_group, workspace_name):
+    return list(client.list_by_workspace(resource_group, workspace_name))
 
 
-def resize_cluster(client, resource_group, cluster_name, target):
-    return client.update(resource_group, cluster_name, scale_settings=models.ScaleSettings(
+def resize_cluster(client, resource_group, workspace_name, cluster_name, target):
+    return client.update(resource_group, workspace_name, cluster_name, scale_settings=models.ScaleSettings(
         manual=models.ManualScaleSettings(target_node_count=target)))
 
 
-def set_cluster_auto_scale_parameters(client, resource_group, cluster_name, min_nodes, max_nodes):
-    return client.update(resource_group, cluster_name, scale_settings=models.ScaleSettings(
+def set_cluster_auto_scale_parameters(client, resource_group, workspace_name, cluster_name, min_nodes, max_nodes):
+    return client.update(resource_group, workspace_name, cluster_name, scale_settings=models.ScaleSettings(
         auto_scale=models.AutoScaleSettings(minimum_node_count=min_nodes, maximum_node_count=max_nodes)))
 
 
@@ -681,8 +721,9 @@ def _is_on_mount_point(path, mount_path):
     return path == mount_path or os.path.commonprefix([path, mount_path + '/']) == mount_path + '/'
 
 
-def list_node_setup_files(cmd, client, resource_group, cluster_name, path='.', expiry=DEFAULT_URL_EXPIRY_MIN):
-    cluster = client.get(resource_group, cluster_name)  # type: models.Cluster
+def list_node_setup_files(cmd, client, resource_group, workspace_name, cluster_name, path='.',
+                          expiry=DEFAULT_URL_EXPIRY_MIN):
+    cluster = client.get(resource_group, workspace_name, cluster_name)  # type: models.Cluster
     return _list_node_setup_files_for_cluster(cmd.cli_ctx, cluster, path, expiry)
 
 
@@ -790,57 +831,58 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     return result
 
 
-def create_job(cmd, client, resource_group, job_name, json_file, location=None, cluster_name=None,
-               cluster_resource_group=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
-               azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
-               account_name=None, account_key=None):
-    _ensure_resource_not_exist(client.jobs, resource_group, job_name)
+def create_job(cmd,  # pylint: disable=too-many-locals
+               client, resource_group, workspace_name, experiment_name, job_name, json_file,
+               cluster, nfs=None, nfs_mount_path='nfs', azure_file_share=None, afs_mount_path='afs',
+               container_name=None, container_mount_path='bfs', account_name=None, account_key=None):
+    _ensure_job_not_exist(client.jobs, resource_group, workspace_name, experiment_name, job_name)
     with open(json_file) as f:
         json_obj = json.load(f)
-        params = _get_deserializer()('JobCreateParameters', json_obj)  # type: models.JobCreateParameters
-        params.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
-        # If cluster name is specified, find the cluster and use its resource id for the new job.
-        if cluster_name is not None:
-            if cluster_resource_group is None:  # The job must be created in the cluster's resource group.
-                cluster_resource_group = resource_group
-            cluster = client.clusters.get(cluster_resource_group, cluster_name)
-            params.cluster = models.ResourceId(id=cluster.id)
-        if params.cluster is None:
-            raise CLIError('Please provide cluster information via command line or configuration file.')
-        if params.mount_volumes:
-            params.mount_volumes = _patch_mount_volumes(
-                cmd.cli_ctx, params.mount_volumes, account_name, account_key)
-        # Add file systems specified via command line into mount volumes
-        if nfs_name or azure_file_share or container_name:
-            params.mount_volumes = params.mount_volumes or models.MountVolumes()
-        mount_volumes = params.mount_volumes
-        if nfs_name:
-            file_server = client.file_servers.get(nfs_resource_group or resource_group, nfs_name)
-            mount_volumes = _add_nfs_to_mount_volumes(mount_volumes, file_server.id, nfs_mount_path)
-        if azure_file_share:
-            mount_volumes = _add_azure_file_share_to_mount_volumes(cmd.cli_ctx, mount_volumes, azure_file_share,
-                                                                   afs_mount_path, account_name, account_key)
-        if container_name:
-            mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
-                                                                  container_mount_path, account_name, account_key)
-        if mount_volumes:
-            params.mount_volumes = mount_volumes
-        return client.jobs.create(resource_group, job_name, params)
+    params = _get_deserializer()('JobCreateParameters', json_obj)  # type: models.JobCreateParameters
+    # If cluster is not configured via command line, let's get it from the config file.
+    if not cluster:
+        cluster = params.cluster.id
+    if not cluster:
+        raise CLIError('Please provide cluster information via command line or configuration file.')
+    cluster_resource_group, cluster_workspace, cluster_name = _get_effective_resource_parameters(
+        cluster, resource_group, workspace_name)
+    # Check presence of the cluster.
+    existing_cluster = client.clusters.get(cluster_resource_group, cluster_workspace, cluster_name)
+    params.cluster = models.ResourceId(id=existing_cluster.id)
+    # Update credentials and other parameters for mount volumes configured via config file.
+    if params.mount_volumes:
+        params.mount_volumes = _patch_mount_volumes(
+            cmd.cli_ctx, params.mount_volumes, account_name, account_key)
+    # Create mount volumes if required
+    if nfs or azure_file_share or container_name:
+        params.mount_volumes = params.mount_volumes or models.MountVolumes()
+    mount_volumes = params.mount_volumes
+    # Add NFS into mount volumes
+    if nfs:
+        nfs_resource_group, nfs_workspace, nfs_name = _get_effective_resource_parameters(
+            nfs, resource_group, workspace_name)
+        file_server = client.file_servers.get(nfs_resource_group, nfs_workspace, nfs_name)
+        mount_volumes = _add_nfs_to_mount_volumes(mount_volumes, file_server.id, nfs_mount_path)
+    # Add Azure File Share into mount volumes.
+    if azure_file_share:
+        mount_volumes = _add_azure_file_share_to_mount_volumes(cmd.cli_ctx, mount_volumes, azure_file_share,
+                                                               afs_mount_path, account_name, account_key)
+    # Add Blob Container into mount volumes.
+    if container_name:
+        mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
+                                                              container_mount_path, account_name, account_key)
+    params.mount_volumes = mount_volumes
+    return client.jobs.create(resource_group, workspace_name, experiment_name, job_name, params)
 
 
-def list_jobs(client, resource_group=None):
-    if resource_group:
-        return list(client.list_by_resource_group(resource_group))
-    return list(client.list())
-
-
-def list_files(client, resource_group, job_name, output_directory_id=STANDARD_OUTPUT_DIRECTORY_ID, path='.',
+def list_files(client, resource_group, workspace_name, experiment_name, job_name,
+               output_directory_id=STANDARD_OUTPUT_DIRECTORY_ID, path='.',
                expiry=DEFAULT_URL_EXPIRY_MIN):
     options = models.JobsListOutputFilesOptions(
         outputdirectoryid=output_directory_id,
         directory=path,
         linkexpiryinminutes=expiry)
-    return list(client.list_output_files(resource_group, job_name, options))
+    return list(client.list_output_files(resource_group, workspace_name, experiment_name, job_name, options))
 
 
 def sigint_handler(*_):
@@ -850,31 +892,21 @@ def sigint_handler(*_):
     os._exit(0)  # pylint: disable=protected-access
 
 
-def tail_file(client, resource_group, job_name, file_name, output_directory_id=STANDARD_OUTPUT_DIRECTORY_ID, path='.'):
-    """Output the current content of the file and outputs appended data as the file grows (similar to 'tail -f').
-
-    The output will be interrupted as soon as job is completed.
-
-    :param BatchAIClient client: the client.
-    :param resource_group: name of the resource group.
-    :param job_name: job's name.
-    :param output_directory_id: job's output directory id.
-    :param path: path to the file.
-    :param file_name: name of the file.
-    """
+def tail_file(client, resource_group, workspace_name, experiment_name, job_name, file_name,
+              output_directory_id=STANDARD_OUTPUT_DIRECTORY_ID, path='.'):
     signal.signal(signal.SIGINT, sigint_handler)
     url = None
     # Wait until the file become available.
     reported_absence_of_file = False
     while url is None:
-        files = list_files(client, resource_group, job_name, output_directory_id, path)
+        files = list_files(client, resource_group, workspace_name, experiment_name, job_name, output_directory_id, path)
         for f in files:
             if f.name == file_name:
                 url = f.download_url
                 logger.warning('File found with URL "%s". Start streaming', url)
                 break
         if url is None:
-            job = client.get(resource_group, job_name)
+            job = client.get(resource_group, workspace_name, experiment_name, job_name)
             if job.execution_state in [models.ExecutionState.succeeded, models.ExecutionState.failed]:
                 break
             if not reported_absence_of_file:
@@ -891,21 +923,14 @@ def tail_file(client, resource_group, job_name, file_name, output_directory_id=S
         if int(r.status_code / 100) == 2:
             downloaded += len(r.content)
             print(r.content.decode(), end='')
-        job = client.get(resource_group, job_name)
+        job = client.get(resource_group, workspace_name, experiment_name, job_name)
         if job.execution_state in [models.ExecutionState.succeeded, models.ExecutionState.failed]:
             break
         time.sleep(1)
 
 
-def wait_for_job_completion(client, resource_group, job_name, check_interval_sec=15):
-    """Waits for specified job completion and setups the exit code to the code of the job.
-
-    :param azure.mgmt.batchai.BatchAIManagementClient client: Batch AI client.
-    :param str resource_group: name of the resource group.
-    :param str job_name: name of the job.
-    :param int check_interval_sec: how often to check the job state.
-    """
-    job = client.jobs.get(resource_group_name=resource_group, job_name=job_name)  # type: models.Job
+def wait_for_job_completion(client, resource_group, workspace_name, experiment_name, job_name, check_interval_sec=15):
+    job = client.jobs.get(resource_group, workspace_name, experiment_name, job_name)  # type: models.Job
     logger.warning('Job submitted at %s', str(job.creation_time))
     last_state = None
     reported_job_start_time = False
@@ -915,7 +940,7 @@ def wait_for_job_completion(client, resource_group, job_name, check_interval_sec
             logger.warning('Job started execution at %s', str(info.start_time))
             reported_job_start_time = True
         if job.execution_state != last_state:
-            logger.warning('Job state: %s', job.execution_state.name)
+            logger.warning('Job state: %s', job.execution_state)
             last_state = job.execution_state
         if job.execution_state == models.ExecutionState.succeeded:
             logger.warning('Job completed at %s; execution took %s', str(info.end_time),
@@ -925,7 +950,7 @@ def wait_for_job_completion(client, resource_group, job_name, check_interval_sec
             _log_failed_job(resource_group, job)
             sys.exit(-1)
         time.sleep(check_interval_sec)
-        job = client.jobs.get(resource_group_name=resource_group, job_name=job_name)
+        job = client.jobs.get(resource_group, workspace_name, experiment_name, job_name)
 
 
 def _log_failed_job(resource_group, job):
@@ -950,27 +975,26 @@ def _log_failed_job(resource_group, job):
     logger.warning('Failed job has no execution info')
 
 
-def create_file_server(cmd, client, resource_group, file_server_name, json_file=None, vm_size=None, location=None,
-                       user_name=None, ssh_key=None, password=None, generate_ssh_keys=None,
-                       disk_count=None, disk_size=None, caching_type=None, storage_sku=None, subnet=None,
-                       raw=False):
+def create_file_server(client, resource_group, workspace, file_server_name, json_file=None, vm_size=None,
+                       user_name=None, ssh_key=None, password=None, generate_ssh_keys=None, disk_count=None,
+                       disk_size=None, caching_type=None, storage_sku=None, subnet=None, raw=False):
     if generate_ssh_keys:
         _generate_ssh_keys()
         if ssh_key is None:
             ssh_key = _get_default_ssh_public_key_location()
-    _ensure_resource_not_exist(client, resource_group, file_server_name)
+    _ensure_resource_not_exist(client.file_servers, resource_group, workspace, file_server_name)
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             params = _get_deserializer()('FileServerCreateParameters', json_obj)
     else:
         # noinspection PyTypeChecker
-        params = models.FileServerCreateParameters()
+        params = models.FileServerCreateParameters(location=None, vm_size=None, ssh_configuration=None, data_disks=None)
     params = _update_user_account_settings(params, user_name, ssh_key, password)
-    params.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
+    params.location = _get_workspace_location(client, resource_group, workspace)
     if not params.data_disks:
         # noinspection PyTypeChecker
-        params.data_disks = models.DataDisks()
+        params.data_disks = models.DataDisks(disk_size_in_gb=None, disk_count=None, storage_account_type=None)
     if disk_size:
         params.data_disks.disk_size_in_gb = disk_size
     if not params.data_disks.disk_size_in_gb:
@@ -994,10 +1018,138 @@ def create_file_server(cmd, client, resource_group, file_server_name, json_file=
             raise CLIError('Ill-formed subnet resource id')
         params.subnet = models.ResourceId(id=subnet)
 
-    return client.create(resource_group, file_server_name, params, raw=raw)
+    return client.file_servers.create(resource_group, workspace, file_server_name, params, raw=raw)
 
 
-def list_file_servers(client, resource_group=None):
-    if resource_group:
-        return list(client.list_by_resource_group(resource_group))
-    return list(client.list())
+def list_file_servers(client, resource_group, workspace_name):
+    return client.list_by_workspace(resource_group, workspace_name)
+
+
+def _get_available_local_port():
+    """
+    Gets a random, available local port
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
+    s.bind(('', 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
+def _create_tunnel(remote_host, port, username, password, ssh_private_key, local_addresses, remote_addresses, func):
+    """Creates a tunnel to the remote host and runs provided func under the tunnel.
+
+    :param str remote_host: ip or address of the remote host
+    :param int port: the ssh port number
+    :param str username: username to login under
+    :param str or None password: the user password
+    :param str or None ssh_private_key: the path to private ssh key
+    :param local_addresses: local addresses to be forwarded
+    :param remote_addresses: target addresses
+    :param func: a function to run on the remote host. The forwarding is stopped as soon as func completes execution.
+    """
+    from sshtunnel import SSHTunnelForwarder
+    local_addresses = [(a[0], a[1] if a[1] != 0 else _get_available_local_port()) for a in local_addresses]
+    with SSHTunnelForwarder((remote_host, port),
+                            ssh_username=username,
+                            ssh_password=password,
+                            ssh_pkey=ssh_private_key,
+                            remote_bind_addresses=remote_addresses,
+                            local_bind_addresses=local_addresses):
+        func()
+
+
+def _ssh_exec(ip, port, cmdline, username, password, ssh_private_key):
+    """Executes the given cmdline on the provided host under given credentials.
+
+    :param str ip: id address
+    :param int port: the ssh port number
+    :param str cmdline: command line to execute
+    :param str username: username to login
+    :param str or None password: the user password
+    :param str or None ssh_private_key: the path to the private ssh key
+    """
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(ip, port, username, password=password, key_filename=ssh_private_key)
+    transport = ssh.get_transport()
+    transport.set_keepalive(15)
+    _, out, err = ssh.exec_command('bash -ilc "{}"'.format(cmdline), get_pty=True)
+    output_lock = threading.Lock()
+
+    def _worker(s):
+        for l in s:
+            with output_lock:
+                print(l, end='')
+
+    threads = [threading.Thread(target=_worker, args=(s,)) for s in [out, err]]
+    for t in threads:
+        t.start()
+    # On Windows thread.join() call prevents the master thread from handling Ctrl-C, so we are joining with timeout.
+    while True:
+        for t in threads:
+            t.join(timeout=1)
+            if not t.is_alive():
+                return
+
+
+def exec_on_node(client, resource_group, workspace_name, cluster_name, node_id=None, ports=None, cmdline=None,
+                 password=None, ssh_private_key=None):
+    from sshtunnel import BaseSSHTunnelForwarderError
+    if not any((cmdline, ports)):
+        return
+    ip, port = None, None
+    if node_id:
+        for n in client.list_remote_login_information(resource_group, workspace_name, cluster_name):
+            if n.node_id == node_id:
+                ip = n.ip_address
+                port = int(n.port)
+        if ip is None:
+            raise CLIError('Cannot find a node with id={0}'.format(node_id))
+    else:
+        nodes = list(client.list_remote_login_information(resource_group, workspace_name, cluster_name))
+        if not nodes:
+            raise CLIError('No nodes available in the cluster')
+        ip = nodes[0].ip_address
+        port = int(nodes[0].port)
+
+    cluster = client.get(resource_group, workspace_name, cluster_name)  # type: models.Cluster
+    username = cluster.user_account_settings.admin_user_name
+    try:
+        signal.signal(signal.SIGINT, sigint_handler)
+        if ports:
+            local_addresses = [('0.0.0.0', int(p.split(':')[0])) for p in ports]
+            remote_addresses = [(p.split(':')[1], int(p.split(':')[2])) for p in ports]
+            if cmdline:
+                func = partial(_ssh_exec, ip, port, cmdline, username, password, ssh_private_key)
+            else:
+                def _sleep():
+                    while True:
+                        time.sleep(1)
+
+                func = _sleep
+            _create_tunnel(ip, port, username, password, ssh_private_key,
+                           local_addresses, remote_addresses, func)
+        else:
+            _ssh_exec(ip, port, cmdline, username, password, ssh_private_key)
+    except (BaseSSHTunnelForwarderError, paramiko.ssh_exception.AuthenticationException) as e:
+        raise CLIError('Connection to remote host failed. Please check provided credentials. Error: {0}'.format(e))
+
+
+def exec_on_job_node(client, resource_group, workspace_name, experiment_name, job_name, node_id=None, ports=None,
+                     cmdline=None, password=None, ssh_private_key=None):
+    if not any((cmdline, ports)):
+        return
+    # find the node if was not provided
+    if not node_id:
+        nodes = list(client.jobs.list_remote_login_information(
+            resource_group, workspace_name, experiment_name, job_name))
+        if not nodes:
+            raise CLIError('No nodes available in the cluster')
+        node_id = nodes[0].node_id
+    # find the cluster
+    job = client.jobs.get(resource_group, workspace_name, experiment_name, job_name)  # type: models.Job
+    cluster_id = parse_resource_id(job.cluster.id)
+    exec_on_node(client, cluster_id['resource_group'], cluster_id['name'],
+                 cluster_id['resource_name'], node_id, ports, cmdline, password, ssh_private_key)

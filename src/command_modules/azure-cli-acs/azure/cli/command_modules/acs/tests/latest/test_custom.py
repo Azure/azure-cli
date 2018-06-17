@@ -94,9 +94,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.kubernetes)
+            orchestrator_type=ContainerServiceOrchestratorTypes.kubernetes)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
@@ -109,9 +109,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.dcos)
+            orchestrator_type=ContainerServiceOrchestratorTypes.dcos)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch(
@@ -199,6 +199,107 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(len(merged['users']), 2)
         self.assertEqual(merged['users'], ['user1', 'user2'])
         self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_merge_admin_credentials(self):
+        existing = tempfile.NamedTemporaryFile(delete=False)
+        existing.close()
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj1 = {
+            'apiVersion': 'v1',
+            'clusters': [
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'contexts': [
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'current-context': 'aztest',
+            'kind': 'Config',
+            'preferences': {},
+            'users': [
+                {
+                    'name': 'clusterUser_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'clientcertificatedata1',
+                        'client-key-data': 'clientkeydata1',
+                        'token': 'token1'
+                    }
+                }
+            ]
+        }
+        with open(existing.name, 'w+') as stream:
+            yaml.dump(obj1, stream)
+        self.addCleanup(os.remove, existing.name)
+        obj2 = {
+            'apiVersion': 'v1',
+            'clusters': [
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata2',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'contexts': [
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterAdmin_aztest_aztest'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'current-context': 'aztest',
+            'kind': 'Config',
+            'preferences': {},
+            'users': [
+                {
+                    'name': 'clusterAdmin_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'someclientcertificatedata2',
+                        'client-key-data': 'someclientkeydata2',
+                        'token': 'token2'
+                    }
+                }
+            ]
+        }
+        with open(addition.name, 'w+') as stream:
+            yaml.dump(obj2, stream)
+        self.addCleanup(os.remove, addition.name)
+
+        merge_kubernetes_configurations(existing.name, addition.name)
+
+        with open(existing.name, 'r') as stream:
+            merged = yaml.load(stream)
+        self.assertEqual(len(merged['clusters']), 2)
+        self.assertEqual([c['cluster'] for c in merged['clusters']],
+                         [{'certificate-authority-data': 'certificateauthoritydata1',
+                           'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'},
+                          {'certificate-authority-data': 'certificateauthoritydata2',
+                           'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'}])
+        self.assertEqual(len(merged['contexts']), 2)
+        self.assertEqual(merged['contexts'],
+                         [{'context': {'cluster': 'aztest', 'user': 'clusterUser_aztest_aztest'},
+                           'name': 'aztest'},
+                          {'context': {'cluster': 'aztest', 'user': 'clusterAdmin_aztest_aztest'},
+                           'name': 'aztest-admin'}])
+        self.assertEqual(len(merged['users']), 2)
+        self.assertEqual([u['name'] for u in merged['users']],
+                         ['clusterUser_aztest_aztest', 'clusterAdmin_aztest_aztest'])
+        self.assertEqual(merged['current-context'], 'aztest-admin')
 
     def test_merge_credentials_missing(self):
         existing = tempfile.NamedTemporaryFile(delete=False)

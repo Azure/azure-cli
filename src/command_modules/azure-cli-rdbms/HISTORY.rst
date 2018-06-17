@@ -3,9 +3,13 @@
 Release History
 ===============
 
-0.2.4
+0.2.5
 +++++
 * Add support for virtual network operations.
+
+0.2.4
++++++
+* Minor fix allowing elastic server update using skuname.
 
 0.2.3
 +++++

@@ -123,12 +123,12 @@ helps['acs wait'] = """
 
 helps['aks'] = """
      type: group
-     short-summary: (PREVIEW) Manage Azure Kubernetes Services.
+     short-summary: Manage Azure Kubernetes Services.
 """
 
 helps['aks browse'] = """
     type: command
-    short-summary: (PREVIEW) Show the dashboard for a Kubernetes cluster in a web browser.
+    short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
     parameters:
         - name: --disable-browser
           type: bool
@@ -138,7 +138,7 @@ helps['aks browse'] = """
 
 helps['aks create'] = """
     type: command
-    short-summary: (PREVIEW) Create a new managed Kubernetes cluster.
+    short-summary: Create a new managed Kubernetes cluster.
     parameters:
         - name: --generate-ssh-keys
           type: string
@@ -178,6 +178,67 @@ helps['aks create'] = """
         - name: --admin-username -u
           type: string
           short-summary: User account to create on node VMs for SSH access.
+        - name: --aad-client-app-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory client application of type "Native". This
+                         application is for user login via kubectl.
+        - name: --aad-server-app-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory server application of type "Web app/API". This
+                         application represents the managed cluster's apiserver (Server application).
+        - name: --aad-server-app-secret
+          type: string
+          short-summary: (PREVIEW) The secret of an Azure Active Directory server application.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: (PREVIEW) The ID of an Azure Active Directory tenant.
+        - name: --dns-service-ip
+          type: string
+          short-summary: An IP address assigned to the Kubernetes DNS service.
+          long-summary: This address must be within the Kubernetes service address range specified by "--service-cidr".
+                        For example, 10.0.0.10.
+        - name: --docker-bridge-address
+          type: string
+          short-summary: An IP address and netmask assigned to the Docker bridge.
+          long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range.
+                        For example, 172.17.0.1/16.
+        - name: --enable-addons -a
+          type: string
+          short-summary: Enable the Kubernetes addons in a comma-separated list.
+          long-summary: |-
+            These addons are available:
+                http_application_routing - configure ingress with automatic public DNS name creation.
+                monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+        - name: --enable-rbac -r
+          type: string
+          short-summary: Enable Kubernetes Role-Based Access Control.
+        - name: --max-pods -m
+          type: int
+          short-summary: The maximum number of pods deployable to a node.
+          long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+        - name: --network-plugin
+          type: string
+          short-summary: The Kubernetes network plugin to use.
+          long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+        - name: --no-ssh-key -x
+          type: string
+          short-summary: Do not use or create a local SSH key.
+          long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
+        - name: --pod-cidr
+          type: string
+          short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
+          long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+        - name: --service-cidr
+          type: string
+          short-summary: A CIDR notation IP range from which to assign service cluster IPs.
+          long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
+        - name: --vnet-subnet-id
+          type: string
+          short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+        - name: --workspace-resource-id
+          type: string
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+
     examples:
         - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -189,12 +250,12 @@ helps['aks create'] = """
 
 helps['aks delete'] = """
     type: command
-    short-summary: (PREVIEW) Delete a managed Kubernetes cluster.
+    short-summary: Delete a managed Kubernetes cluster.
 """
 
 helps['aks get-credentials'] = """
     type: command
-    short-summary: (PREVIEW) Get access credentials for a managed Kubernetes cluster.
+    short-summary: Get access credentials for a managed Kubernetes cluster.
     parameters:
         - name: --admin -a
           type: bool
@@ -206,17 +267,17 @@ helps['aks get-credentials'] = """
 
 helps['aks get-upgrades'] = """
     type: command
-    short-summary: (PREVIEW) Get the upgrade versions available for a managed Kubernetes cluster.
+    short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
 """
 
 helps['aks get-versions'] = """
     type: command
-    short-summary: (PREVIEW) Get the versions available for creating a managed Kubernetes cluster.
+    short-summary: Get the versions available for creating a managed Kubernetes cluster.
 """
 
 helps['aks install-cli'] = """
     type: command
-    short-summary: (PREVIEW) Download and install kubectl, the Kubernetes command-line tool.
+    short-summary: Download and install kubectl, the Kubernetes command-line tool.
 """
 
 helps['aks install-connector'] = """
@@ -277,7 +338,7 @@ helps['aks install-connector'] = """
 
 helps['aks list'] = """
     type: command
-    short-summary: (PREVIEW) List managed Kubernetes clusters.
+    short-summary: List managed Kubernetes clusters.
 """
 
 helps['aks remove-connector'] = """
@@ -302,7 +363,7 @@ helps['aks remove-connector'] = """
 
 helps['aks scale'] = """
     type: command
-    short-summary: (PREVIEW) Scale the node pool in a managed Kubernetes cluster.
+    short-summary: Scale the node pool in a managed Kubernetes cluster.
     parameters:
         - name: --node-count -c
           type: int
@@ -311,12 +372,12 @@ helps['aks scale'] = """
 
 helps['aks show'] = """
     type: command
-    short-summary: (PREVIEW) Show the details for a managed Kubernetes cluster.
+    short-summary: Show the details for a managed Kubernetes cluster.
 """
 
 helps['aks upgrade'] = """
     type: command
-    short-summary: (PREVIEW) Upgrade a managed Kubernetes cluster to a newer version.
+    short-summary: Upgrade a managed Kubernetes cluster to a newer version.
     long-summary: "Kubernetes will be unavailable during cluster upgrades."
     parameters:
         - name: --kubernetes-version -k
@@ -387,22 +448,41 @@ helps['aks use-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
     parameters:
+        - name: --update
+          type: bool
+          short-summary: Update to the latest Azure Dev Spaces client components.
         - name: --space -s
           type: string
-          short-summary: Name of the dev space to use.
-        - name: --parent-space -p
-          type: string
-          short-summary: Name of a parent dev space to inherit from when creating a new dev space. By default, if there is already a single dev space with no parent, the new space inherits from this one.
+          short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    examples:
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+        client components and selecting a new or existing dev space 'my-space'.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
+        - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+        'develop/my-space' without prompting for confirmation.
+          text: |-
+            az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
 """
 
 helps['aks remove-dev-spaces'] = """
     type: command
     short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+    examples:
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
+          text: |-
+            az aks remove-dev-spaces -g my-aks-group -n my-aks
+        - name: Remove Azure Dev Spaces from a managed Kubernetes cluster without prompting.
+          text: |-
+            az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
 """
 
 helps['aks wait'] = """
     type: command
-    short-summary: (PREVIEW) Wait for a managed Kubernetes cluster to reach a desired state.
+    short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
     long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
                   wait for it to complete.
     examples:
