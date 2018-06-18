@@ -134,6 +134,10 @@ helps['aks browse'] = """
           type: bool
           short-summary: Don't launch a web browser after establishing port-forwarding.
           long-summary: Add this argument when launching a web browser manually, or for automated testing.
+        - name: --listen-port
+          type: string
+          short-summary: The listening port for the dashboard.
+          long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
 """
 
 helps['aks create'] = """
