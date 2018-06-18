@@ -10,7 +10,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 import yaml
 import colorama
-from .util import get_command_groups, share_element, exclude_commands
+from .util import get_command_groups, share_element, exclude_commands, LinterError
 
 
 class Linter(object):
@@ -140,7 +140,7 @@ class LinterManager(object):
             for rule_name, add_to_linter_func in functions:
                 if hasattr(add_to_linter_func, 'linter_rule'):
                     if rule_name in found_rules:
-                        raise Exception('Multiple rules found with the same name: %s' % rule_name)
+                        raise LinterError('Multiple rules found with the same name: %s' % rule_name)
                     found_rules.add(rule_name)
                     add_to_linter_func(self)
 

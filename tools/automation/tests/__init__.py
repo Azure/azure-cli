@@ -40,8 +40,7 @@ def execute(args):
     if args.ci:
         # CI Mode runs specific modules
         output('Running in CI Mode')
-        selected_modules = [
-                            # ('All modules', 'azure.cli', 'azure.cli'),
+        selected_modules = [('All modules', 'azure.cli', 'azure.cli'),
                             ('CLI Linter', 'automation.cli_linter', 'automation.cli_linter')]
     elif not (args.tests or args.src_file):
         # Default is to run with modules (possibly via environment variable)
