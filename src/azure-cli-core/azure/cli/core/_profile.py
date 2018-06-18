@@ -975,24 +975,6 @@ class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-fe
 class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     # pylint: disable=line-too-long
 
-    # backup greeting pages if official ones from "docs.microsoft.com" are unavailable
-    ok_html = ('<!DOCTYPE html>'
-               '<html>'
-               '<head><meta charset="utf-8" /><meta http-equiv="refresh" content="10;url=https://docs.microsoft.com/en-us/cli/azure/"><title>Login successfully</title></head>'
-               '<body>'
-               '<h4>You have logged into Microsoft Azure!</h4>'
-               '<p>You can close this window, or we will redirect you to <a href="https://docs.microsoft.com/en-us/cli/azure/">CLI documents</a> in 10 seconds.</p>'
-               '</body>'
-               '</html>')
-    fail_html = ('<!DOCTYPE html>'
-                 '<html>'
-                 '<head><meta charset="utf-8" /><title>Login failed</title></head>'
-                 '<body>'
-                 '<h4>Some failures occurred during the authentication</h4>'
-                 '<p>You can log an issue at <a href="https://github.com/azure/azure-cli/issues">Azure CLI GitHub Respository</a> and we will assist you to get it resolved</p>'
-                 '</body>'
-                 '</html>')
-
     def do_GET(self):
         try:
             from urllib.parse import parse_qs
@@ -1004,8 +986,12 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         query = self.path.split('?', 1)[-1]
         query = parse_qs(query, keep_blank_values=True)
+
         self.server.query_params = query
-        self.wfile.write(self.ok_html.encode() if 'code' in query else self.fail_html.encode())
+        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                    'ok.html' if 'code' in query else 'fail.html')
+        with open(landing_file, 'rb') as html_file:
+            self.wfile.write(html_file.read())
 
     def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
         return  # this prevent http server from dumping messages to stdout
