@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.5
+++++++
+* `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)
+
 2.1.4
 ++++++
 * `network lb probe create`: support `Https` protocol [#6571](https://github.com/Azure/azure-cli/issues/6571)
