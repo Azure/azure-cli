@@ -165,8 +165,7 @@ class AzCliCommand(CLICommand):
             arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
-        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and \
-                self.command_source.overrides_command:
+        if isinstance(self.command_source, ExtensionCommandSource) and self.command_source.overrides_command:
             logger.warning(self.command_source.get_command_warn_msg())
         return super(AzCliCommand, self).__call__(*args, **kwargs)
 
@@ -293,8 +292,10 @@ class AzCliCommandInvoker(CommandInvoker):
             command_source = self.commands_loader.command_table[command].command_source
 
             extension_version = None
+            extension_name = None
             try:
-                if command_source:
+                if isinstance(command_source, ExtensionCommandSource):
+                    extension_name = command_source.extension_name
                     extension_version = get_extension(command_source.extension_name).version
             except Exception:  # pylint: disable=broad-except
                 pass
@@ -302,10 +303,9 @@ class AzCliCommandInvoker(CommandInvoker):
             telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                           [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                                            (p.startswith('-') and len(p) > 1)],
-                                          extension_name=command_source.extension_name if command_source else None,
-                                          extension_version=extension_version)
-            if command_source:
-                self.data['command_extension_name'] = command_source.extension_name
+                                          extension_name=extension_name, extension_version=extension_version)
+            if extension_name:
+                self.data['command_extension_name'] = extension_name
 
             try:
                 result = cmd(params)
