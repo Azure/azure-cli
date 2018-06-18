@@ -64,8 +64,8 @@ def main(args):
     # only run linter on modules and extensions specified
     if args.modules or args.extensions:
         from .util import include_commands
-        command_table, help_file_entries = include_commands(
-            command_table, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
+        command_loader, help_file_entries = include_commands(
+            command_loader, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
 
     # Instantiate and run Linter
     linter_manager = LinterManager(command_loader=command_loader,

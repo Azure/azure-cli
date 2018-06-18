@@ -7,11 +7,6 @@ Release History
 ++++++
 * Minor fixes.
 
-0.2.14
-++++++
-
-* Updated module definition.
-
 0.2.13
 ++++++
 * Deprecated `redis patch-schedule patch-schedule show` in favor of `redis patch-schedule show`.

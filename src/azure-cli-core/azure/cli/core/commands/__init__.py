@@ -175,6 +175,7 @@ class AzCliCommand(CLICommand):
             and not self.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
 
         if confirm and not self._user_confirmed(self.confirmation, cmd_args):
+            from knack.events import EVENT_COMMAND_CANCELLED
             self.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=self.name, command_args=cmd_args)
             raise CLIError('Operation cancelled.')
         return self.handler(*args, **kwargs)

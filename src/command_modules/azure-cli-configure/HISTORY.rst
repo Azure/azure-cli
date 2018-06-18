@@ -5,8 +5,7 @@ Release History
 
 2.0.17
 ++++++
-
-* Updated module definition.
+* Minor fixes.
 
 2.0.16
 ++++++

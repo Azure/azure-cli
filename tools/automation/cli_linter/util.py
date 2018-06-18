@@ -12,13 +12,13 @@ import inspect
 _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
 
-def exclude_commands(command_table, help_file_entries, module_exclusions=None, extensions=None):
-    return _filter_mods(command_table, help_file_entries, modules=module_exclusions, extensions=extensions,
+def exclude_commands(command_loader, help_file_entries, module_exclusions=None, extensions=None):
+    return _filter_mods(command_loader, help_file_entries, modules=module_exclusions, extensions=extensions,
                         exclude=True)
 
 
-def include_commands(command_table, help_file_entries, module_inclusions=None, extensions=None):
-    return _filter_mods(command_table, help_file_entries, modules=module_inclusions, extensions=extensions)
+def include_commands(command_loader, help_file_entries, module_inclusions=None, extensions=None):
+    return _filter_mods(command_loader, help_file_entries, modules=module_inclusions, extensions=extensions)
 
 
 def _filter_mods(command_loader, help_file_entries, modules=None, extensions=None, exclude=False):

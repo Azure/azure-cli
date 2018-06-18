@@ -139,7 +139,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
             else:
                 # use metavar for positional parameters
                 param_kwargs = {
-                    'name_source': [action.metavar],
+                    'name_source': [action.metavar or action.dest],
                     'deprecate_info': getattr(action, 'deprecate_info', None),
                     'description': action.help,
                     'choices': action.choices,

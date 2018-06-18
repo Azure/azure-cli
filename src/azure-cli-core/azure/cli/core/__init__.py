@@ -130,10 +130,11 @@ class MainCommandsLoader(CLICommandsLoader):
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
                 try:
                     start_time = timeit.default_timer()
-                    module_command_table = _load_module_command_loader(self, args, mod)
+                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
                     for cmd in module_command_table.values():
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
+                    self.command_group_table.update(module_group_table)
                     elapsed_time = timeit.default_timer() - start_time
                     logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
                     cumulative_elapsed_time += elapsed_time
