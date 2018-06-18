@@ -37,7 +37,8 @@ def _filter_mods(command_table, help_file_entries, modules=None, extensions=None
             source_name, is_extension = _get_command_source(command_name, command_table)
         except LinterError as ex:
             print(ex)
-            continue
+            # command is unrecognized
+            source_name, is_extension = None, False
 
         is_specified = source_name in extensions if is_extension else source_name in filtered_module_names
         if is_specified == exclude:
@@ -63,22 +64,15 @@ def get_command_groups(command_name):
 
 
 def _get_command_source(command_name, command_table):
+    from azure.cli.core.commands import ExtensionCommandSource
     command = command_table.get(command_name)
-    # see if command is an extension
-    if command.command_source:
+    # see if command is from an extension
+    if isinstance(command.command_source, ExtensionCommandSource):
         return command.command_source.extension_name, True
-
-    # hacky way to get a command's module
-    loader_cls = command.loader.__class__
-    loader_file_path = inspect.getfile(loader_cls)
-    # normalize os path to '/' for regex
-    loader_file_path = '/'.join(loader_file_path.split(os.path.sep))
-    match = _LOADER_CLS_RE.match(loader_file_path)
-    # loader class path is consistent due to convention, throw error if no match
-    if not match:
-        raise LinterError('`{}`\'s loader class path does not match regex pattern: {}' \
-            .format(command_name, _LOADER_CLS_RE.pattern))
-    return match.groupdict().get('module'), False
+    if command.command_source is None:
+        raise LinterError('Command: `%s`, has no command source.' % command_name)
+    # command is from module
+    return command.command_source, False
 
 
 class LinterError(Exception):

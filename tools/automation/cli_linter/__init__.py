@@ -67,7 +67,6 @@ def main(args):
         command_table, help_file_entries = include_commands(
             command_table, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
 
-
     # Instantiate and run Linter
     linter_manager = LinterManager(command_table=command_table,
                                    help_file_entries=help_file_entries,
