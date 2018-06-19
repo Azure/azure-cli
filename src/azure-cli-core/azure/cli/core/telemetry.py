@@ -48,6 +48,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
+        self.mode = 'default'
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -174,6 +175,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'ExtensionName', ext_info)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
+        set_custom_properties(result, 'Mode', self.mode)
 
         return result
 
@@ -216,10 +218,13 @@ def _user_agrees_to_telemetry(func):
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def start():
+def start(mode=None):
+    if mode:
+        _session.mode = mode
     _session.start_time = datetime.datetime.utcnow()
 
 
+@_user_agrees_to_telemetry
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def flush():
     # flush out current information
@@ -227,7 +232,7 @@ def flush():
 
     payload = _session.generate_payload()
     if payload:
-        subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+        _upload_telemetry_with_user_agreement(payload)
 
     # reset session fields, retaining correlation id and application
     _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
@@ -240,9 +245,7 @@ def conclude():
 
     payload = _session.generate_payload()
     if payload:
-        kwargs = {
-            'args': [sys.executable, os.path.realpath(telemetry_core.__file__), payload]
-        }
+        kwargs = dict()
         if os.name == 'nt':
             # Windows process creation flag to not reuse the parent console.
             # Without this, the background service is associated with the
@@ -261,7 +264,14 @@ def conclude():
                 if not telemetry_core.in_diagnostic_mode:
                     kwargs['stdout'] = subprocess.DEVNULL
                     kwargs['stderr'] = subprocess.STDOUT
-        subprocess.Popen(**kwargs)
+        _upload_telemetry_with_user_agreement(payload, **kwargs)
+
+
+# This includes a final user-agreement-check; ALL methods sending telemetry MUST call this.
+@_user_agrees_to_telemetry
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def _upload_telemetry_with_user_agreement(payload, **kwargs):
+    subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload], **kwargs)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)

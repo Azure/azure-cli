@@ -201,7 +201,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
-        c.argument('num_results', type=int)
+        c.argument('num_results', type=int,
+                   help='Specifies the maximum number of blobs to return. Must be in range [1,5000]. '
+                        'If this parameter is not provided, all blobs will be returned.')
         c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
 
     with self.argument_context('storage blob generate-sas') as c:

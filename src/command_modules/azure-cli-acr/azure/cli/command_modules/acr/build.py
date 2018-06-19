@@ -29,6 +29,7 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
 )
 from ._utils import validate_managed_registry
 from ._client_factory import cf_acr_registries
+from ._build_polling import get_build_with_polling
 
 
 logger = get_logger(__name__)
@@ -172,7 +173,7 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
                 if curr_bytes:
                     print(curr_bytes.decode('utf-8', errors='ignore'))
 
-                print("No additional logs found. Timing out...")
+                logger.warning("No additional logs found. Timing out...")
                 return
 
         # If no new data available but not complete, sleep before trying to process additional data.
@@ -293,10 +294,10 @@ def acr_build(cmd,
                 unit = S
                 break
             size = size / 1024.0
-        print("Sending build context ({0:.3f} {1}) to ACR.".format(size, unit))
+        logger.warning("Sending build context ({0:.3f} {1}) to ACR.".format(size, unit))
     else:
         source_location = _check_remote_source_code(source_location)
-        print("Sending build context to ACR.")
+        logger.warning("Sending build context to ACR.")
 
     if no_push:
         is_push_enabled = False
@@ -321,12 +322,13 @@ def acr_build(cmd,
         registry_name=registry_name,
         build_request=build_request))
 
-    if no_logs:
-        return queued_build
-
     build_id = queued_build.build_id
-    print("Queued a build with build ID: {}".format(build_id))
-    print("Waiting for a build agent...")
+    logger.warning("Queued a build with build ID: %s", build_id)
+    logger.warning("Waiting for build agent...")
+
+    if no_logs:
+        return get_build_with_polling(client, build_id, registry_name, resource_group_name)
+
     return acr_build_show_logs(client, build_id, registry_name, resource_group_name, True)
 
 

@@ -61,6 +61,8 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
     else:
         role_definition = shell_safe_json_parse(role_definition)
 
+    if not isinstance(role_definition, dict):
+        raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
     # to workaround service defects, ensure property names are camel case
     names = [p for p in role_definition if p[:1].isupper()]
     for n in names:
@@ -705,7 +707,7 @@ def create_service_principal(cmd, identifier):
 
 def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     client = _graph_client_factory(cli_ctx)
-
+    app_id = identifier
     if resolve_app:
         if _is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
@@ -713,11 +715,12 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
             result = list(client.applications.list(
                 filter="identifierUris/any(s:s eq '{}')".format(identifier)))
 
-        if not result:  # assume we get an object id
-            result = [client.applications.get(identifier)]
-        app_id = result[0].app_id
-    else:
-        app_id = identifier
+        try:
+            if not result:  # assume we get an object id
+                result = [client.applications.get(identifier)]
+            app_id = result[0].app_id
+        except GraphErrorException:
+            pass  # fallback to appid (maybe from an external tenant?)
 
     return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
 

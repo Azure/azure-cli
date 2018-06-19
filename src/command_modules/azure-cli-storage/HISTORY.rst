@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.35
+++++++
+* Changed table output for `storage blob download` to be more readable.
+
 2.0.34
 ++++++
 * Added extra mimetypes for json and javascript to be inferred from file extensions.
