@@ -1013,7 +1013,7 @@ def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
 
     # launch browser:
     url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
-           '&redirect_uri={3}&state={4}&resource={5}&prompt=login')
+           '&redirect_uri={3}&state={4}&resource={5}&prompt=select_account')
     url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
