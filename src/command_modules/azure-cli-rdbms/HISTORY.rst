@@ -5,7 +5,7 @@ Release History
 
 0.2.5
 +++++
-* Add support for virtual network operations.
+* Added 'postgres/myql server vnet-rule' commands.
 
 0.2.4
 +++++

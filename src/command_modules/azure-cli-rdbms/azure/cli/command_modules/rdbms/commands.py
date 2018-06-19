@@ -136,18 +136,14 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.command('list', 'list_by_server')
-        g.generic_update_command('update',
-                                 getter_name='_custom_vnet_update_get', getter_type=rdbms_custom,
-                                 setter_name='_custom_vnet_update_set', setter_type=rdbms_custom, setter_arg_name='parameters')
+        g.generic_update_command('update')
 
     with self.command_group('postgres server vnet-rule', postgres_vnet_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.command('list', 'list_by_server')
-        g.generic_update_command('update',
-                                 getter_name='_custom_vnet_update_get', getter_type=rdbms_custom,
-                                 setter_name='_custom_vnet_update_set', setter_type=rdbms_custom, setter_arg_name='parameters')
+        g.generic_update_command('update')
 
     with self.command_group('mysql server configuration', mysql_config_sdk) as g:
         g.command('set', 'create_or_update')

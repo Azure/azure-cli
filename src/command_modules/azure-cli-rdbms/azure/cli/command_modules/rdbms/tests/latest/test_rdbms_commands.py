@@ -359,14 +359,17 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         subnet_name_2 = 'clitestsubnet2'
         subnet_prefix_2 = '10.0.1.0/24'
 
+        subnet_name_3 = 'clitestsubnet3'
+        subnet_prefix_3 = '10.0.3.0/24'
+
         # pre create the dependent resources here
         # create vnet and subnet
-        execute(self.cli_ctx, 'az network vnet create -n {} -g {} -l {} '
-                '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1,
-                                                                                 subnet_prefix_1))
+        self.cmd('network vnet create -n {} -g {} -l {} '
+                 '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1, subnet_prefix_1))
         # add one more subnet
-        execute(self.cli_ctx, 'az network vnet subnet create --vnet-name {} -g {} '
-                '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+        self.cmd('network vnet subnet create --vnet-name {} -g {} '
+                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+
         # test vnet-rule create
         self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
                  '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
@@ -394,6 +397,19 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', vnet_firewall_rule_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', 'Ready')])
+        
+        # add one more subnet
+        self.cmd('network vnet subnet create --vnet-name {} -g {} '
+                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
+
+        self.cmd('{} server vnet-rule update -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server,
+                         vnet_name, subnet_name_3, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
 
         # test vnet-rule list
         self.cmd('{} server vnet-rule list -g {} -s {}'
@@ -408,6 +424,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, vnet_firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[NoneCheck()])
+        self.cmd('network vnet delete -n {} -g {}'.format(vnet_name, resource_group))
 
     def _test_db_mgmt(self, resource_group, server, database_engine):
         self.cmd('{} db list -g {} -s {}'.format(database_engine, resource_group, server),
