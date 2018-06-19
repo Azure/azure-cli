@@ -133,14 +133,14 @@ def load_command_table(self, _):
 
     with self.command_group('mysql server vnet-rule', mysql_vnet_sdk) as g:
         g.command('create', 'create_or_update')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update')
 
     with self.command_group('postgres server vnet-rule', postgres_vnet_sdk) as g:
         g.command('create', 'create_or_update')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update')
