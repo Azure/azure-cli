@@ -89,7 +89,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
         old_cu = 2
         new_cu = 4
         family = 'Gen5'
-        skuname = '{}_{}_{}'.format("GP", family, old_cu)
+        skuname = 'GP_{}_{}'.format(family, old_cu)
+        newskuname = 'GP_{}_{}'.format(family, new_cu)
         loc = 'koreasouth'
 
         geoGeoRedundantBackup = 'Disabled'
@@ -141,8 +142,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], new_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], newskuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -163,8 +164,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test update server per property
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], old_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -360,13 +361,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         # pre create the dependent resources here
         # create vnet and subnet
-        self.cmd('network vnet create -n {} -g {} -l {} '
+        execute(self.cli_ctx, 'az network vnet create -n {} -g {} -l {} '
                 '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1,
                                                                                  subnet_prefix_1))
         # add one more subnet
-        self.cmd('network vnet subnet create --vnet-name {} -g {} '
+        execute(self.cli_ctx, 'az network vnet subnet create --vnet-name {} -g {} '
                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
-
         # test vnet-rule create
         self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
                  '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
