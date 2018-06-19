@@ -34,6 +34,8 @@ Doc Sections
 
 - [Publishing](publishing.md) - How to publish an extension
 
+- [Summary Guidelines](extension_summary_guidelines.md) - Summary guidelines for extensions to be published
+
 - [Extension Metadata](metadata.md) - How to add additional extension metadata
 
 - [FAQ](faq.md) - Commonly asked questions
