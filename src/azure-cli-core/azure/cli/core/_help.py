@@ -55,7 +55,7 @@ class AzCliHelp(CLIHelp):
     def _print_extensions_msg(help_file):
         if help_file.type != 'command':
             return
-        if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
+        if isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
             if help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())

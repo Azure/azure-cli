@@ -22,6 +22,7 @@ def define_arguments(parser):
     parser.add_argument('--help-file-entries', dest='rule_types_to_run', action='append_const', const='help_entries',
                         help='Run linter on help-file-entries.')
     parser.add_argument('--modules', dest='modules', nargs='+', help='The modules on which the linter should run.')
+    parser.add_argument('--extensions', dest='extensions', nargs='+', help='The extensions on which the linter should run.')
     parser.add_argument('--rules', dest='rules', nargs='+', help='The rules which the linter should run.')
 
 
@@ -60,11 +61,11 @@ def main(args):
             mod_exclusions = yaml.load(open(exclusion_path))
             exclusions.update(mod_exclusions)
 
-    # only run linter on modules specified
-    if args.modules:
-        from .util import include_mods
-        command_table, help_file_entries = include_mods(command_table, help_file_entries, args.modules)
-
+    # only run linter on modules and extensions specified
+    if args.modules or args.extensions:
+        from .util import include_commands
+        command_table, help_file_entries = include_commands(
+            command_table, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
 
     # Instantiate and run Linter
     linter_manager = LinterManager(command_table=command_table,

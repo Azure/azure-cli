@@ -108,8 +108,6 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
 
-        cmd_to_mod_map = {}
-
         def _update_command_table_from_modules(args):
             '''Loads command table(s)
             When `module_name` is specified, only commands from that module will be loaded.
@@ -129,8 +127,9 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     start_time = timeit.default_timer()
                     module_command_table = _load_module_command_loader(self, args, mod)
+                    for cmd in module_command_table.values():
+                        cmd.command_source = mod
                     self.command_table.update(module_command_table)
-                    cmd_to_mod_map.update({cmd: mod for cmd in list(module_command_table.keys())})
                     elapsed_time = timeit.default_timer() - start_time
                     logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
                     cumulative_elapsed_time += elapsed_time
@@ -163,6 +162,7 @@ class MainCommandsLoader(CLICommandsLoader):
             if extensions:
                 logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
                 allowed_extensions = _handle_extension_suppressions(extensions)
+                module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
                     ext_name = ext.name
                     ext_dir = get_extension_path(ext_name)
@@ -178,7 +178,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
-                                overrides_command=cmd_name in cmd_to_mod_map,
+                                overrides_command=cmd_name in module_commands,
                                 preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
