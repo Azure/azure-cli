@@ -981,13 +981,14 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except ImportError:
             from urlparse import parse_qs  # pylint: disable=import-error
 
+        query = self.path.split('?', 1)[-1]
+        query = parse_qs(query, keep_blank_values=True)
+        self.server.query_params = query
+
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
 
-        self.server.query_params = query
         landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
                                     'ok.html' if 'code' in query else 'fail.html')
         with open(landing_file, 'rb') as html_file:
