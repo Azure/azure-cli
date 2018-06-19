@@ -397,7 +397,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', vnet_firewall_rule_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', 'Ready')])
-        
+
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
                  '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
