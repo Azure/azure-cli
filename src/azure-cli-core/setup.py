@@ -103,5 +103,6 @@ setup(
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )

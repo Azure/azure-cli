@@ -12,13 +12,14 @@ import os
 import os.path
 from copy import deepcopy
 from enum import Enum
+from six.moves import BaseHTTPServer
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -114,6 +115,7 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
+# pylint: disable=too-many-lines,too-many-instance-attributes
 class Profile(object):
 
     _global_creds_cache = None
@@ -137,6 +139,7 @@ class Profile(object):
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._msi_creds = None
 
     def find_subscriptions_on_login(self,
@@ -145,6 +148,7 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant,
+                                    use_device_code=False,
                                     allow_no_subscriptions=False,
                                     subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
@@ -156,8 +160,17 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
-            subscriptions = subscription_finder.find_through_interactive_flow(
-                tenant, self._ad_resource_uri)
+            if not use_device_code:
+                try:
+                    subscriptions = subscription_finder.find_through_authorization_code_flow(
+                        tenant, self._ad_resource_uri, self._ad)
+                except RuntimeError:
+                    use_device_code = True
+                    logger.warning('Not able to launch a browser to login you in, falling back to device code...')
+
+            if use_device_code:
+                subscriptions = subscription_finder.find_through_interactive_flow(
+                    tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
@@ -696,6 +709,27 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
+    def find_through_authorization_code_flow(self, tenant, resource, aad_endpoint):
+        # launch browser and get the code
+        results = _get_authorization_code(tenant, resource, aad_endpoint)
+
+        if not results.get('code'):
+            raise CLIError('Login failed')  # error detail is already displayed through previous steps
+
+        # exchange the code for the token
+        context = self._create_auth_context(tenant, use_token_cache=False)
+        token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                    resource, _CLIENT_ID, None)
+        new_token_entries = context.cache.read_items()
+        self._adal_token_cache.add([v for k, v in new_token_entries])
+        self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
+        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
+        if tenant is None:
+            result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+        else:
+            result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+        return result
+
     def find_through_interactive_flow(self, tenant, resource):
         context = self._create_auth_context(tenant)
         code = context.acquire_user_code(resource, _CLIENT_ID)
@@ -936,3 +970,90 @@ class ServicePrincipalAuth(object):
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
         return entry
+
+
+class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
+    query_params = {}
+
+
+class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    # pylint: disable=line-too-long
+
+    def do_GET(self):
+        try:
+            from urllib.parse import parse_qs
+        except ImportError:
+            from urlparse import parse_qs  # pylint: disable=import-error
+
+        query = self.path.split('?', 1)[-1]
+        query = parse_qs(query, keep_blank_values=True)
+        self.server.query_params = query
+
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                    'ok.html' if 'code' in query else 'fail.html')
+        with open(landing_file, 'rb') as html_file:
+            self.wfile.write(html_file.read())
+
+    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+        return  # this prevent http server from dumping messages to stdout
+
+
+def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
+    import socket
+    for port in range(8400, 9000):
+        try:
+            web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
+            reply_url = "http://localhost:{}".format(port)
+            break
+        except socket.error:
+            logger.warning("Port '%s' is taken. Trying with the next one", port)
+
+    if reply_url is None:
+        logger.warning("Error: can't reserve a port for authentication reply url")
+        return
+
+    # launch browser:
+    url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
+           '&redirect_uri={3}&state={4}&resource={5}&prompt=select_account')
+    url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
+    logger.info('Open browser with url: %s', url)
+    succ = open_page_in_browser(url)
+    if succ is False:
+        web_server.server_close()
+        results['no_browser'] = True
+        return
+    # wait for callback from browser.
+    web_server.handle_request()
+    if 'error' in web_server.query_params:
+        logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
+                       web_server.query_params.get('error_description'))
+        return
+    if 'code' in web_server.query_params:
+        code = web_server.query_params['code']
+    else:
+        logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
+                       web_server.query_params)
+        return
+    results['code'] = code[0]
+    results['reply_url'] = reply_url
+
+
+def _get_authorization_code(tenant, resource, aad_endpoint):
+    import threading
+    import time
+    results = {}
+    t = threading.Thread(target=_get_authorization_code_worker,
+                         args=(tenant, aad_endpoint, resource, results))
+    t.daemon = True
+    t.start()
+    while True:
+        time.sleep(2)  # so that ctrl+c can stop the command
+        if not t.is_alive():
+            break  # done
+    if results.get('no_browser'):
+        raise RuntimeError()
+    return results
