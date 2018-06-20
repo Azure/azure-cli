@@ -1596,7 +1596,7 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
-                raise CLIError("The addon {} is not installed.", addon)
+                raise CLIError("The addon {} is not installed.".format(addon))
         addon_profiles[addon].enabled = enable
 
     instance.addon_profiles = addon_profiles
@@ -1622,7 +1622,9 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _handle_addons_args(addons_str, addon_profiles={}, workspace_resource_id=None):
+def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=None):
+    if not addon_profiles:
+        addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
         addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
