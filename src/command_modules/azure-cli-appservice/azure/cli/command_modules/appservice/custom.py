@@ -35,6 +35,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console
+from azure.cli.core.util import open_page_in_browser
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
@@ -1207,22 +1208,9 @@ def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
     url = ('https' if ssl_host else 'http') + '://' + url
-    _open_page_in_browser(url)
+    open_page_in_browser(url)
     if logs:
         get_streaming_log(cmd, resource_group_name, name, provider=None, slot=slot)
-
-
-def _open_page_in_browser(url):
-    if sys.platform.lower() == 'darwin':
-        # handle 2 things:
-        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
-        #    understand the "open location" message"
-        # b. Python 2.x can't sniff out the default browser
-        import subprocess
-        subprocess.Popen(['open', url])
-    else:
-        import webbrowser
-        webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
 
 
 # TODO: expose new blob suport

@@ -252,3 +252,15 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'raw': True, 'polling': False})
     return func(*args, **kwargs)
+
+
+def open_page_in_browser(url):
+    if sys.platform.lower() == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        import subprocess
+        return subprocess.Popen(['open', url])
+    import webbrowser
+    return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
