@@ -5,7 +5,7 @@ Release History
 
 2.1.2
 ++++++
-* Updated the help text for the --node-osdisk-size parameter.
+* Minor fixes.
 
 2.1.1
 ++++++
