@@ -720,6 +720,7 @@ class SubscriptionFinder(object):
         new_token_entries = context.cache.read_items()
         self._adal_token_cache.add([v for k, v in new_token_entries])
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
+        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
