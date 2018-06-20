@@ -3,6 +3,11 @@
 Release History
 ===============
 
+1.1.2
++++++
+
+* Updated module definition.
+
 1.1.1
 +++++
 

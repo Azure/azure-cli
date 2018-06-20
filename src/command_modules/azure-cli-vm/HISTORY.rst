@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.0.35
++++++
+
+* Updated module definition.
+
 2.0.34
 ++++++
 * vm create: refine vm size check for accelerated networking support
