@@ -713,6 +713,9 @@ class SubscriptionFinder(object):
         # launch browser and get the code
         results = _get_authorization_code(tenant, resource, aad_endpoint)
 
+        if not results.get('code'):
+            raise CLIError('Login failed')  # error detail is already displayed through previous steps
+
         # exchange the code for the token
         context = self._create_auth_context(tenant, use_token_cache=False)
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
@@ -1010,7 +1013,8 @@ def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
             logger.warning("Port '%s' is taken. Trying with the next one", port)
 
     if reply_url is None:
-        raise CLIError("Too bad, can't reserve a port")
+        logger.warning("Error: can't reserve a port for authentication reply url")
+        return
 
     # launch browser:
     url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
@@ -1025,11 +1029,15 @@ def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
     # wait for callback from browser.
     web_server.handle_request()
     if 'error' in web_server.query_params:
-        raise CLIError('Login failed due to error of "{}"'.format(web_server.query_params['error']))
+        logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
+                       web_server.query_params.get('error_description'))
+        return
     if 'code' in web_server.query_params:
         code = web_server.query_params['code']
     else:
-        raise CLIError('Login failed as authorization code was not captured')
+        logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
+                       web_server.query_params)
+        return
     results['code'] = code[0]
     results['reply_url'] = reply_url
 
