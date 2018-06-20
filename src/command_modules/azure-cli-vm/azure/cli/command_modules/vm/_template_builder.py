@@ -247,7 +247,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
-        disk_info=None, boot_diagnostics_storage_uri=None):
+        disk_info=None, boot_diagnostics_storage_uri=None, disk_encryption_key_url=None,
+        disk_encryption_key_vault_id=None, key_encryption_key_url=None, key_encryption_key_vault_id=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -281,6 +282,29 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             os_profile['secrets'] = secrets
 
         return os_profile
+
+    def _build_encryption_settings():
+        if disk_encryption_key_url:
+            encryption_settings = {
+                'diskEncryptionKey': {
+                    'secretUrl': disk_encryption_key_url,
+                    'sourceVault': {
+                        'id': disk_encryption_key_vault_id
+                    }
+                },
+                'enabled': True
+            }
+            if key_encryption_key_url:
+                encryption_settings['keyEncryptionKey'] = {
+                    'secretUrl': key_encryption_key_url,
+                    'sourceVault': {
+                        'id': key_encryption_key_vault_id
+                    }
+                }
+            else:
+                encryption_settings['keyEncryptionKey'] = None
+            return encryption_settings
+        return None
 
     def _build_storage_profile():
 
@@ -360,6 +384,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disks:
             profile['dataDisks'] = data_disks
+
+        encryption_settings = _build_encryption_settings()
+        if encryption_settings:
+            profile['osDisk']['encryptionSettings'] = encryption_settings
 
         return profile
 
