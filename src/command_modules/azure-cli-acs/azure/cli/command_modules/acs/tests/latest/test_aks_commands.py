@@ -166,7 +166,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable http application routing addon
-        self.cmd('aks install-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
+        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),

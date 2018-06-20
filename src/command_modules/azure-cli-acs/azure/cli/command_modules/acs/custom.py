@@ -1449,6 +1449,25 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raise retry_exception
 
 
+def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=True,
+                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
 def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
@@ -1471,31 +1490,12 @@ ADDONS = {
 }
 
 
-def aks_install_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
-    instance = client.get(resource_group_name, name)
-
-    instance = _update_addons(instance, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
-
-    # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
-
-
 def aks_list(cmd, client, resource_group_name=None):
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
     else:
         managed_clusters = client.list()
     return _remove_nulls(list(managed_clusters))
-
-
-def aks_remove_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
-    instance = client.get(resource_group_name, name)
-
-    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
-
-    # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_show(cmd, client, resource_group_name, name):

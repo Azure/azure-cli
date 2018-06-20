@@ -173,13 +173,16 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
 
+    with self.argument_context('aks disable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
+    with self.argument_context('aks enable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
-
-    with self.argument_context('aks install-addons') as c:
-        c.argument('addons', options_list=['--addons', '-a'])
 
     with self.argument_context('aks install-cli') as c:
         c.argument('client_version', validator=validate_k8s_client_version)
@@ -195,9 +198,6 @@ def load_arguments(self, _):
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
         c.argument('service_principal',
                    help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-
-    with self.argument_context('aks remove-addons') as c:
-        c.argument('addons', options_list=['--addons', '-a'])
 
     with self.argument_context('aks remove-connector') as c:
         c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
