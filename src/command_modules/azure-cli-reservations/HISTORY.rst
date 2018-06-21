@@ -5,7 +5,7 @@ Release History
 
 0.2.1
 ++++++
-* minor fixes regarding enums.
+* Minor fixes.
 
 0.2.0
 +++++
