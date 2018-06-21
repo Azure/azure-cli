@@ -283,7 +283,12 @@ def list_available_extensions(index_url=None, show_details=False):
     installed_extension_names = [e.name for e in installed_extensions]
     results = []
     for name, items in OrderedDict(sorted(index_data.items())).items():
-        latest = sorted(items, key=lambda c: parse_version(c['metadata']['version']), reverse=True)[0]
+        # exclude extensions/versions incompatible with current CLI version
+        items = [item for item in items if ext_compat_with_cli(item['metadata'])[0]]
+        if not items:
+            continue
+
+        latest = max(items, key=lambda c: parse_version(c['metadata']['version']))
         installed = False
         if name in installed_extension_names:
             installed = True

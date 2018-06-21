@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.0
++++++
+* `extension list-available` will only show extensions compatible with CLI version.
+
 0.0.15
 ++++++
 * Minor fixes
