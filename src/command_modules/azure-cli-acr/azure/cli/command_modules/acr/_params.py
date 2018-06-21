@@ -37,7 +37,8 @@ from ._constants import (
     BUILD_TASK_RESOURCE_TYPE,
     BUILD_STEP_RESOURCE_TYPE,
     CLASSIC_REGISTRY_SKU,
-    MANAGED_REGISTRY_SKU
+    MANAGED_REGISTRY_SKU,
+    SUPPORTED_OS_TYPES
 )
 from ._validators import (
     validate_registry_name,
@@ -66,6 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
+        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', choices=SUPPORTED_OS_TYPES)
 
     with self.argument_context('acr import') as c:
         c.argument('source', help="The source identifier in the format '[registry.azurecr.io/]repository[:tag]' or '[registry.azurecr.io/]repository@digest'.")

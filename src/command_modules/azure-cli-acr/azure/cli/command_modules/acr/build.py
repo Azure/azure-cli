@@ -25,8 +25,12 @@ from azure.storage.blob import (
 )
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     QuickBuildRequest,
-    PlatformProperties
+    PlatformProperties,
+    OsType
 )
+
+from ._constants import SUPPORTED_OS_TYPES
+
 from ._utils import validate_managed_registry
 from ._client_factory import cf_acr_registries
 from ._build_polling import get_build_with_polling
@@ -260,9 +264,13 @@ def acr_build(cmd,
               secret_build_arg=None,
               docker_file_path='Dockerfile',
               no_push=False,
-              no_logs=False):
+              no_logs=False,
+              os_type=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)    
+
+    if os_type and os_type.lower() not in SUPPORTED_OS_TYPES:
+        raise CLIError("The os type is invalid. Supported values are '{!s}'".format(SUPPORTED_OS_TYPES))
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -308,9 +316,16 @@ def acr_build(cmd,
             is_push_enabled = False
             logger.warning("'--image -t' is not provided. Skipping image push after build.")
 
+    
+    
+    if os_type:
+        platform = PlatformProperties(os_type=os_type)
+    else:
+        platform = PlatformProperties(os_type='Linux')
+    
     build_request = QuickBuildRequest(
         source_location=source_location,
-        platform=PlatformProperties(os_type='Linux'),
+        platform=platform,
         docker_file_path=docker_file_path,
         image_names=image_names,
         is_push_enabled=is_push_enabled,
