@@ -68,6 +68,10 @@ def get_sql_encryption_protectors_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).encryption_protectors
 
 
+def get_sql_failover_groups_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).failover_groups
+
+
 def get_sql_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).firewall_rules
 
