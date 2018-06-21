@@ -33,6 +33,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume)
+from azure.cli.command_modules.acr._docker_utils import get_login_credentials
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
@@ -103,6 +104,15 @@ def create_container(cmd,
     ports = ports or [80]
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
+
+    if (len(image.split('/')) > 1) and image.split('/')[0].endswith('.azurecr.io'):
+
+     registry_login_server, registry_username, registry_password = get_login_credentials(
+        cli_ctx=cmd.cli_ctx,
+        registry_name=image.split('.azurecr.io/')[0],
+        resource_group_name=None,
+        username=None,
+        password=None)
 
     image_registry_credentials = _create_image_registry_credentials(registry_login_server=registry_login_server,
                                                                     registry_username=registry_username,
