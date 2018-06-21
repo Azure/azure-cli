@@ -161,12 +161,17 @@ popd
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
-    set FILENAME=%%~nf
-    set BASE_FILENAME=!FILENAME:~0,-11!
-    set pyc=!BASE_FILENAME!.pyc
-    del !PARENT_DIR!\!BASE_FILENAME!.py
-    copy %%~f !PARENT_DIR!\!pyc! >nul
-    del %%~f 
+    echo !PARENT_DIR! | findstr /C:"!BUILDING_DIR!\Lib\site-packages\pip" 1>nul
+    if errorlevel 1 (
+        set FILENAME=%%~nf
+        set BASE_FILENAME=!FILENAME:~0,-11!
+        set pyc=!BASE_FILENAME!.pyc
+        del !PARENT_DIR!\!BASE_FILENAME!.py
+        copy %%~f !PARENT_DIR!\!pyc! >nul
+        del %%~f
+    ) ELSE (
+        echo --SKIP any folders under pip
+    )
 )
 popd
 
