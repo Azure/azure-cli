@@ -267,7 +267,7 @@ def acr_build(cmd,
               no_logs=False,
               os_type=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)    
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
     if os_type and os_type.lower() not in SUPPORTED_OS_TYPES:
         raise CLIError("The os type is invalid. Supported values are '{!s}'".format(SUPPORTED_OS_TYPES))
@@ -316,13 +316,11 @@ def acr_build(cmd,
             is_push_enabled = False
             logger.warning("'--image -t' is not provided. Skipping image push after build.")
 
-    
-    
     if os_type:
         platform = PlatformProperties(os_type=os_type)
     else:
         platform = PlatformProperties(os_type='Linux')
-    
+
     build_request = QuickBuildRequest(
         source_location=source_location,
         platform=platform,
