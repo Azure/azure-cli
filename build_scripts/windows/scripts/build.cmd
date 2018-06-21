@@ -170,7 +170,7 @@ for /f %%f in ('dir /b /s *.pyc') do (
         copy %%~f !PARENT_DIR!\!pyc! >nul
         del %%~f
     ) ELSE (
-        echo --SKIP any folders under pip
+        echo --SKIP !PARENT_DIR! under pip
     )
 )
 popd
