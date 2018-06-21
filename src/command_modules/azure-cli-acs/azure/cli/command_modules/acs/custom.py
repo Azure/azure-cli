@@ -1597,6 +1597,7 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
         else:
             if addon not in addon_profiles:
                 raise CLIError("The addon {} is not installed.".format(addon))
+            addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
 
     instance.addon_profiles = addon_profiles
