@@ -218,7 +218,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._open_page_in_browser', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.open_page_in_browser', autospec=True)
     def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
         site = Site('antarctica')
         site.default_host_name = 'haha.com'
