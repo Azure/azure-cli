@@ -5,6 +5,7 @@ Release History
 0.3.1
 +++++
 * Fixed `-o table` option for `az batchai cluster node list` and `az batchai job node list` commands.
+* Fixed description and examples for `--setup-task` usage. The setup task is running under root account.
 
 0.3.0
 +++++
