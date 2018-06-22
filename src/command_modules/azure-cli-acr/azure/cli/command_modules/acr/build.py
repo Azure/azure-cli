@@ -25,8 +25,7 @@ from azure.storage.blob import (
 )
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     QuickBuildRequest,
-    PlatformProperties,
-    OsType
+    PlatformProperties
 )
 
 from ._constants import SUPPORTED_OS_TYPES
