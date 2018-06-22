@@ -1408,6 +1408,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     addon_profiles = _handle_addons_args({}, enable_addons, workspace_resource_id)
 
+    if 'omsagent' in addon_profiles:
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'], location)
+
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
         aad_profile = ManagedClusterAADProfile(
@@ -1689,6 +1692,87 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True
+
+
+def _ensure_container_insights_for_monitoring(cmd, addon, location):
+    workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+    if not workspace_resource_id.startswith('/'):
+        workspace_resource_id = '/' + workspace_resource_id
+
+    # extract resource group from workspace_resource_id URL
+    # TODO: catch this and raise a more friendly error
+    resource_group = workspace_resource_id.split('/')[4]
+
+    template = {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {
+            "workspaceResourceId": {
+                "type": "string",
+                "metadata": {
+                    "description": "Azure Monitor Log Analytics Resource ID"
+                }
+            },
+            "workspaceRegion": {
+                "type": "string",
+                "metadata": {
+                    "description": "Azure Monitor Log Analytics workspace region"
+                }
+            }
+        },
+        "resources": [
+            {
+                "type": "Microsoft.Resources/deployments",
+                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                "apiVersion": "2017-05-10",
+                "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
+                "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
+                "properties": {
+                    "mode": "Incremental",
+                    "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {},
+                        "variables": {},
+                        "resources": [
+                            {
+                                "apiVersion": "2015-11-01-preview",
+                                "type": "Microsoft.OperationsManagement/solutions",
+                                "location": "[parameters('workspaceRegion')]",
+                                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                "properties": {
+                                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                                },
+                                "plan": {
+                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                    "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
+                                    "promotionCode": "",
+                                    "publisher": "Microsoft"
+                                }
+                            }
+                        ]
+                    },
+                    "parameters": {}
+                }
+            }
+        ]
+    }
+
+    params = {
+        "workspaceResourceId": {
+            "value": workspace_resource_id
+        },
+        "workspaceRegion": {
+            "value": location
+        }
+    }
+
+    # TODO: does these need to be input by the user, or randomized?
+    deployment_name = 'aks-monitoring'
+
+    # publish the Container Insights solution to the Log Analytics workspace
+    return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
+                              validate=False, no_wait=False)
 
 
 def _ensure_aks_service_principal(cli_ctx,
