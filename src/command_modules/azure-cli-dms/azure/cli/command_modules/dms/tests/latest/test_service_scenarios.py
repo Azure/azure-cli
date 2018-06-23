@@ -13,19 +13,21 @@ class DmsServiceTests(ScenarioTest):
     service_random_name_prefix = 'dmsclitest'
     location_name = 'centralus'
     sku_name = 'Basic_2vCores'
-    vsubnet_id = '/subscriptions/{}/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1'
+    vsubnet_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/subnet1'
     name_exists_checks = [JMESPathCheck('nameAvailable', False),
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
-    def test_service_commands(self, resource_group):
+    def dms_test_service_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
+        vnet_name = self.create_random_name(self.service_random_name_prefix, 15)
 
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetname': vnet_name,
+            'vnetid': self.vsubnet_id.format(self.get_subscription_id(), resource_group, vnet_name),
             'sname': service_name
         })
 
@@ -33,6 +35,8 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms list-skus', checks=skus_checks)
 
         self.cmd('az dms show -g {rg} -n {sname}', expect_failure=True)
+
+        self.cmd('az network vnet create -n {vnetname} -g {rg} --subnet-name subnet1')
 
         create_checks = [JMESPathCheck('location', self.location_name),
                          JMESPathCheck('name', service_name),
@@ -71,21 +75,24 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms check-name -l {lname} -n {sname}', checks=self.name_available_checks)
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
-    def test_project_commands(self, resource_group):
+    def dms_test_project_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
+        vnet_name = self.create_random_name(self.service_random_name_prefix, 15)
         project_name1 = self.create_random_name('project1', 15)
         project_name2 = self.create_random_name('project2', 15)
 
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetname': vnet_name,
+            'vnetid': self.vsubnet_id.format(self.get_subscription_id(), resource_group, vnet_name),
             'sname': service_name,
             'pname1': project_name1,
             'pname2': project_name2
         })
 
         # Set up container service
+        self.cmd('az network vnet create -n {vnetname} -g {rg} --subnet-name subnet1')
         self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid}')
 
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pname1}', expect_failure=True)
@@ -120,8 +127,9 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms delete -g {rg} -n {sname} --delete-running-tasks true -y')
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
-    def test_task_commands(self, resource_group):
+    def dms_test_task_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
+        vnet_name = self.create_random_name(self.service_random_name_prefix, 15)
         project_name = self.create_random_name('project', 15)
         task_name1 = self.create_random_name('task1', 15)
         task_name2 = self.create_random_name('task2', 15)
@@ -133,7 +141,8 @@ class DmsServiceTests(ScenarioTest):
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetname': vnet_name,
+            'vnetid': self.vsubnet_id.format(self.get_subscription_id(), resource_group, vnet_name),
             'sname': service_name,
             'pname': project_name,
             'tname1': task_name1,
@@ -145,6 +154,7 @@ class DmsServiceTests(ScenarioTest):
         })
 
         # Set up container service and project
+        self.cmd('az network vnet create -n {vnetname} -g {rg} --subnet-name subnet1')
         self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid}')
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname} --source-platform SQL --target-platform SQLDB')
 

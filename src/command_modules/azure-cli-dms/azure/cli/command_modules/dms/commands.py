@@ -65,7 +65,7 @@ def load_command_table(self, _):
     with self.command_group('dms project', dms_projects_sdk, client_factory=dms_cf_projects) as g:
         g.custom_command('create', 'create_or_update_project')
         g.command('delete', 'delete', confirmation=True)
-        g.command('list', 'list')
+        g.command('list', 'list_by_resource_group')
         g.command('show', 'get')
 
     with self.command_group('dms project', dms_sdk, client_factory=dms_cf_services) as g:

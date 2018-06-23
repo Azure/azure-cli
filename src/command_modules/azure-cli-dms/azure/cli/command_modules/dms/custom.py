@@ -79,10 +79,10 @@ def stop_service(client, service_name, resource_group_name, no_wait=False):
 # region Project
 
 def check_project_name_availability(client, resource_group_name, service_name, project_name):
-    return client.check_children_name_availability(group_name=resource_group_name,
-                                                   service_name=service_name,
-                                                   name=project_name,
-                                                   type='projects')
+    return client.nested_check_name_availability(group_name=resource_group_name,
+                                                 service_name=service_name,
+                                                 name=project_name,
+                                                 type='projects')
 
 
 def create_or_update_project(client,
@@ -115,12 +115,12 @@ def create_or_update_project(client,
 def check_task_name_availability(client, resource_group_name, service_name, project_name, task_name):
     # because the URL to check for tasks needs to look like this:
     # /subscriptions/{subscription}/resourceGroups/{resourcegroup}/providers/Microsoft.DataMigration/services/{service}/projects/{project}/checkNameAvailability?api-version={version}  # pylint: disable=line-too-long
-    # But check_children_name_availability only builds a URL that would check for projects, so we cheat a little by
+    # But nested_check_name_availability only builds a URL that would check for projects, so we cheat a little by
     # making the service name include the project portion as well.
-    return client.check_children_name_availability(group_name=resource_group_name,
-                                                   service_name=service_name + '/projects/' + project_name,
-                                                   name=task_name,
-                                                   type='tasks')
+    return client.nested_check_name_availability(group_name=resource_group_name,
+                                                 service_name=service_name + '/projects/' + project_name,
+                                                 name=task_name,
+                                                 type='tasks')
 
 
 def create_task(client,
