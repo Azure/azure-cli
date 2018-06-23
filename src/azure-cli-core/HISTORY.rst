@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 2.0.39
 ++++++
 * authentication: support authorization code flow for interactive login
