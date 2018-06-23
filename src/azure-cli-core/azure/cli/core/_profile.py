@@ -717,11 +717,9 @@ class SubscriptionFinder(object):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
 
         # exchange the code for the token
-        context = self._create_auth_context(tenant, use_token_cache=False)
+        context = self._create_auth_context(tenant)
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
-        new_token_entries = context.cache.read_items()
-        self._adal_token_cache.add([v for k, v in new_token_entries])
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
         if tenant is None:
