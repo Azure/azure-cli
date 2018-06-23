@@ -7,7 +7,7 @@
 
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
 from ._client_factory import get_mysql_management_client, get_postgresql_management_client
 
@@ -58,16 +58,6 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
 # arguments and validators
 def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
-    parameters = None
-    if provider == 'Microsoft.DBForMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            properties=mysql.models.ServerPropertiesForRestore())
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            properties=postgresql.models.ServerPropertiesForRestore())
-
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(
@@ -79,17 +69,29 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    parameters.properties.source_server_id = source_server
-    parameters.properties.restore_point_in_time = restore_point_in_time
-
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
     id_parts = parse_resource_id(source_server)
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
-        parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
+
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            properties=mysql.models.ServerPropertiesForRestore(
+                source_server_id=source_server,
+                restore_point_in_time=restore_point_in_time),
+            location=source_server_object.location)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            properties=postgresql.models.ServerPropertiesForRestore(
+                source_server_id=source_server,
+                restore_point_in_time=restore_point_in_time),
+            location=source_server_object.location)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
@@ -100,28 +102,6 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
 def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, location, source_server,
                        backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
-    parameters = None
-    if provider == 'Microsoft.DBForMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=sku_name),
-            properties=mysql.models.ServerPropertiesForGeoRestore(
-                storage_profile=mysql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                )),
-            location=location)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForGeoRestore(
-                storage_profile=postgresql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                )),
-            location=location)
-
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
@@ -132,7 +112,29 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    parameters.properties.source_server_id = source_server
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=sku_name),
+            properties=mysql.models.ServerPropertiesForGeoRestore(
+                storage_profile=mysql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup
+                ),
+                source_server_id=source_server),
+            location=location)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=sku_name),
+            properties=postgresql.models.ServerPropertiesForGeoRestore(
+                storage_profile=postgresql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup
+                ),
+                source_server_id=source_server),
+            location=location)
 
     source_server_id_parts = parse_resource_id(source_server)
     try:
@@ -143,6 +145,56 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+# Custom functions for server replica, will add PostgreSQL part after backend ready in future
+def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, **kwargs):
+    provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
+    # set source server id
+    if not is_valid_resource_id(source_server):
+        if len(source_server.split('/')) == 1:
+            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                        resource_group=resource_group_name,
+                                        namespace=provider,
+                                        type='servers',
+                                        name=source_server)
+        else:
+            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+
+    source_server_id_parts = parse_resource_id(source_server)
+    try:
+        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+    except Exception as e:
+        raise CLIError('Unable to get source server: {}.'.format(str(e)))
+
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=source_server_object.sku.name),
+            properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=source_server_object.location)
+
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+def _replica_stop(client, resource_group_name, server_name):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise CLIError('Unable to get server: {}.'.format(str(e)))
+
+    if server_object.replication_role.lower() != "replica":
+        raise CLIError('Server {} is not a replica server.'.format(server_name))
+
+    from importlib import import_module
+    server_module_path = server_object.__module__
+    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
+
+    params = ServerUpdateParameters(replication_role='None')
+
+    return client.update(resource_group_name, server_name, params)
 
 
 def _server_update_custom_func(instance,

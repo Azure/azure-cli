@@ -13,8 +13,8 @@ from azure.cli.core.commands.validators import (
 def get_combined_validator(validators):
     def _final_validator_impl(cmd, namespace):
         # do additional creation validation
-        verb = cmd.name.rsplit(' ', 1)[1]
-        if verb == 'create':
+        verbs = cmd.name.rsplit(' ', 2)
+        if verbs[1] == 'server' and verbs[2] == 'create':
             password_validator(namespace)
             get_default_location_from_resource_group(cmd, namespace)
 

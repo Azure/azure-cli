@@ -45,6 +45,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The max days of retention, unit is days.')
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable Geo-redundant or not for server backup.')
 
+        with self.argument_context('mysql server replica') as c:
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the primary server to create replica for.')
+
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
             c.ignore('source')
@@ -97,3 +100,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
+
+    with self.argument_context('mysql server replica list') as c:
+        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the primary server.')
