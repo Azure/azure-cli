@@ -6,6 +6,7 @@ Release History
 2.0.28
 ++++++
 * Add polling build status.
+* Allow case-insensitive enum values.
 
 2.0.27
 ++++++

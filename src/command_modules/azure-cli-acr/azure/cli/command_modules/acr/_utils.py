@@ -7,7 +7,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
-from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName, Sku
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
