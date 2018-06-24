@@ -11,7 +11,7 @@ import json
 import unittest
 import mock
 
-from azure.mgmt.containerregistry.v2017_10_01.models import Registry, Sku
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import Registry, Sku
 
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,

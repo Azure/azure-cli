@@ -274,6 +274,21 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertEqual(res[0]['version'], '0.1.0')
             self.assertEqual(res[0]['preview'], False)
 
+    def test_list_available_extensions_incompatible_cli_version(self):
+        sample_index_extensions = {
+            'test_sample_extension1': [{
+                'metadata': {
+                    "azext.maxCliCoreVersion": "0.0.0",
+                    'name': 'test_sample_extension1',
+                    'summary': 'my summary',
+                    'version': '0.1.0'
+                }}]
+        }
+        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', return_value=sample_index_extensions):
+            res = list_available_extensions()
+            self.assertIsInstance(res, list)
+            self.assertEqual(len(res), 0)
+
     def test_add_list_show_remove_extension_extra_index_url(self):
         """
         Tests extension addition while specifying --extra-index-url parameter.

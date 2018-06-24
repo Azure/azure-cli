@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.2
+++++++
+* Minor fixes.
+
 2.1.1
 ++++++
 * Updated options of `az aks use-dev-spaces` command. Added `--update` support.

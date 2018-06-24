@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
+++++++
+* Minor fixes.
+
 0.2.0
 +++++
 **Breaking changes**
@@ -24,7 +28,6 @@ Release History
 
 0.1.2
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.1.1
