@@ -250,7 +250,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
-                                            template_file=None, template_uri=None, 
+                                            template_file=None, template_uri=None,
                                             deployment_name=None, deployment_location=None,
                                             parameters=None, mode=None, validate_only=False,
                                             no_wait=False):
@@ -279,9 +279,9 @@ def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope, 
+        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
                            deployment_name, properties, deployment_location)
-    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope, 
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
                        deployment_name, properties, deployment_location)
 
 
@@ -633,8 +633,8 @@ def create_applicationdefinition(cmd, resource_group_name,
             role_definition_id=roleDefinitionId)
         applicationAuthList.append(applicationAuth)
 
-    applicationDef = ApplicationDefinition(lock_level=lock_level, 
-                                           authorizations=applicationAuthList, 
+    applicationDef = ApplicationDefinition(lock_level=lock_level,
+                                           authorizations=applicationAuthList,
                                            package_file_uri=package_file_uri)
     applicationDef.display_name = display_name
     applicationDef.description = description
@@ -665,10 +665,10 @@ def deploy_arm_template(cmd, resource_group_name,
                                      deployment_name, parameters, mode, no_wait=no_wait)
 
 
-def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, 
+def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
                                               deployment_name=None, deployment_location=None,
                                               parameters=None, no_wait=False):
-    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri, 
+    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    deployment_name, deployment_location,
                                                    parameters, 'Incremental', no_wait=no_wait)
 
@@ -682,7 +682,7 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
                                                 parameters=None):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                                   'deployment_dry_run', deployment_location, 
+                                                   'deployment_dry_run', deployment_location,
                                                    parameters, 'Incremental', validate_only=True)
 
 
