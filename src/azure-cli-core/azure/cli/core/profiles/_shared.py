@@ -87,7 +87,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2017-07-29',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'

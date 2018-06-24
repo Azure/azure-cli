@@ -12,7 +12,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.7"
+VERSION = "0.1.8"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -30,7 +30,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-monitor==0.5.0',
-    'azure-mgmt-resource==1.2.1'
+    'azure-mgmt-resource==2.0.0rc2'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
