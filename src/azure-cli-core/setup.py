@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.38"
+VERSION = "2.0.39"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -103,5 +103,6 @@ setup(
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )

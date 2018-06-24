@@ -20,6 +20,8 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     DockerBuildStepUpdateParameters
 )
 from ._utils import validate_managed_registry
+from .build import acr_build_show_logs
+from ._build_polling import get_build_with_polling
 
 
 logger = get_logger(__name__)
@@ -271,13 +273,13 @@ def acr_build_task_run(cmd,
                                       registry_name,
                                       BuildTaskBuildRequest(build_task_name=build_task_name)))
 
-    if no_logs:
-        return queued_build
-
     build_id = queued_build.build_id
-    print("Queued a build with build ID: {}".format(build_id))
-    print("Waiting for a build agent...")
-    from .build import acr_build_show_logs
+    logger.warning("Queued a build with build ID: %s", build_id)
+    logger.warning("Waiting for build agent...")
+
+    if no_logs:
+        return get_build_with_polling(client, build_id, registry_name, resource_group_name)
+
     return acr_build_show_logs(client, build_id, registry_name, resource_group_name, True)
 
 
@@ -331,10 +333,9 @@ def acr_build_task_logs(cmd,
                                                   top=None, build_task_name=build_task_name)
         try:
             build_id = paged_builds.get(0)[0].build_id
-            print("Showing logs for the last updated build")
-            print("Build ID: {}".format(build_id))
+            logger.warning("Showing logs for the last created build")
+            logger.warning("Build ID: %s", build_id)
         except (AttributeError, KeyError, TypeError, IndexError):
-            raise CLIError('Could not get the last updated build.')
+            raise CLIError('Could not get the last created build.')
 
-    from .build import acr_build_show_logs
     return acr_build_show_logs(client, build_id, registry_name, resource_group_name)
