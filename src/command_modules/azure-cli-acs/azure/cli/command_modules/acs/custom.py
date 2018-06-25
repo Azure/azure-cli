@@ -35,7 +35,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
-from azure.cli.core._environment import get_config_dir
+from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
