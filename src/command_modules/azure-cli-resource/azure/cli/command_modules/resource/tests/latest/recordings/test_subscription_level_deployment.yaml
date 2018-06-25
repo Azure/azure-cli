@@ -1,0 +1,258 @@
+interactions:
+- request:
+    body: '{"location": "WestUS", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"storageAccountName": {"type": "string",
+      "defaultValue": "armbuilddemo1801"}}, "variables": {}, "resources": [{"type":
+      "Microsoft.Authorization/policyDefinitions", "name": "policy2", "apiVersion":
+      "2016-12-01", "properties": {"policyType": "Custom", "parameters": {}, "policyRule":
+      {"if": {"field": "location", "equals": "northeurope"}, "then": {"effect": "deny"}}}},
+      {"type": "Microsoft.Authorization/policyAssignments", "name": "location-lock",
+      "apiVersion": "2016-12-01", "dependsOn": ["policy2"], "properties": {"scope":
+      "[subscription().id]", "policyDefinitionId": "[resourceId(''Microsoft.Authorization/policyDefinitions'',
+      ''policy2'')]"}}, {"type": "Microsoft.Resources/deployments", "name": "rg-nested",
+      "apiVersion": "2017-05-10", "resourceGroup": "demo-rg", "properties": {"template":
+      {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Storage/storageAccounts", "name": "[parameters(''storageAccountName'')]",
+      "apiVersion": "2015-06-15", "location": "East US", "properties": {"accountType":
+      "Standard_LRS"}}]}, "mode": "Incremental"}}]}, "parameters": {"storageAccountName":
+      {"value": "armbuilddemo1802"}}, "mode": "Incremental"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment validate]
+      Connection: [keep-alive]
+      Content-Length: ['1466']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deployment_dry_run","name":"deployment_dry_run","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-14T00:39:48.9449839Z","duration":"PT0S","correlationId":"c2f7bed4-00ac-4b55-b7a9-da199f75a6a2","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"validatedResources":[{"apiVersion":"2016-12-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","name":"policy2","type":"Microsoft.Authorization/policyDefinitions","properties":{"policyType":"Custom","parameters":{},"policyRule":{"if":{"field":"location","equals":"northeurope"},"then":{"effect":"deny"}}}},{"dependsOn":["/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"],"apiVersion":"2016-12-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","name":"location-lock","type":"Microsoft.Authorization/policyAssignments","properties":{"scope":"/subscriptions/00000000-0000-0000-0000-000000000000","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"}},{"apiVersion":"2017-05-10","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Resources/deployments/rg-nested","name":"rg-nested","type":"Microsoft.Resources/deployments","properties":{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{},"variables":{},"resources":[{"type":"Microsoft.Storage/storageAccounts","name":"armbuilddemo1802","apiVersion":"2015-06-15","location":"East
+        US","properties":{"accountType":"Standard_LRS"}}]},"mode":"Incremental"}},{"apiVersion":"2015-06-15","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802","name":"armbuilddemo1802","type":"Microsoft.Storage/storageAccounts","location":"East
+        US","properties":{"accountType":"Standard_LRS"}}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3062']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:39:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "WestUS", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"storageAccountName": {"type": "string",
+      "defaultValue": "armbuilddemo1801"}}, "variables": {}, "resources": [{"type":
+      "Microsoft.Authorization/policyDefinitions", "name": "policy2", "apiVersion":
+      "2016-12-01", "properties": {"policyType": "Custom", "parameters": {}, "policyRule":
+      {"if": {"field": "location", "equals": "northeurope"}, "then": {"effect": "deny"}}}},
+      {"type": "Microsoft.Authorization/policyAssignments", "name": "location-lock",
+      "apiVersion": "2016-12-01", "dependsOn": ["policy2"], "properties": {"scope":
+      "[subscription().id]", "policyDefinitionId": "[resourceId(''Microsoft.Authorization/policyDefinitions'',
+      ''policy2'')]"}}, {"type": "Microsoft.Resources/deployments", "name": "rg-nested",
+      "apiVersion": "2017-05-10", "resourceGroup": "demo-rg", "properties": {"template":
+      {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Storage/storageAccounts", "name": "[parameters(''storageAccountName'')]",
+      "apiVersion": "2015-06-15", "location": "East US", "properties": {"accountType":
+      "Standard_LRS"}}]}, "mode": "Incremental"}}]}, "parameters": {"storageAccountName":
+      {"value": "armbuilddemo1802"}}, "mode": "Incremental"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment create]
+      Connection: [keep-alive]
+      Content-Length: ['1466']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deployment000001","name":"azure-cli-sub-level-deployment000001","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2018-06-14T00:39:51.4015999Z","duration":"PT0.241573S","correlationId":"95e9ad67-e837-4bc8-89ad-dcfb41b1be9c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}]}}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deployment000001/operationStatuses/08586726700943175950?api-version=2018-05-01']
+      cache-control: [no-cache]
+      content-length: ['1263']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:39:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586726700943175950?api-version=2018-05-01
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:21 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deployment000001","name":"azure-cli-sub-level-deployment000001","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:15.4459172Z","duration":"PT24.2858903S","correlationId":"95e9ad67-e837-4bc8-89ad-dcfb41b1be9c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1679']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:21 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/?api-version=2018-05-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deployment000001","name":"azure-cli-sub-level-deployment000001","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:15.4459172Z","duration":"PT24.2858903S","correlationId":"95e9ad67-e837-4bc8-89ad-dcfb41b1be9c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deploymentd2pdlgkfon","name":"azure-cli-sub-level-deploymentd2pdlgkfon","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-12T23:11:49.6075962Z","duration":"PT25.0927601S","correlationId":"9c6d57a3-5224-4a82-99e4-bfc77e111daf","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deploymentrzsobavdkp","name":"azure-cli-sub-level-deploymentrzsobavdkp","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-12T22:49:12.6967239Z","duration":"PT25.9536734S","correlationId":"feb0dedf-fa11-4a29-baea-4f68e50b9592","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/sub-deployment-01","name":"sub-deployment-01","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-12T19:25:43.8457333Z","duration":"PT58.072901S","correlationId":"ae492b8a-4c16-48fa-8e54-d7c3d5386312","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['6684']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-sub-level-deployment000001","name":"azure-cli-sub-level-deployment000001","location":"westus","properties":{"templateHash":"17096045936506685326","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo1802"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:15.4459172Z","duration":"PT24.2858903S","correlationId":"95e9ad67-e837-4bc8-89ad-dcfb41b1be9c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Storage/storageAccounts/armbuilddemo1802"}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1679']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment export]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/exportTemplate?api-version=2018-05-01
+  response:
+    body: {string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"storageAccountName":{"defaultValue":"armbuilddemo1801","type":"String"}},"variables":{},"resources":[{"type":"Microsoft.Authorization/policyDefinitions","name":"policy2","apiVersion":"2016-12-01","properties":{"policyType":"Custom","parameters":{},"policyRule":{"if":{"field":"location","equals":"northeurope"},"then":{"effect":"deny"}}}},{"type":"Microsoft.Authorization/policyAssignments","name":"location-lock","apiVersion":"2016-12-01","properties":{"scope":"[subscription().id]","policyDefinitionId":"[resourceId(''Microsoft.Authorization/policyDefinitions'',
+        ''policy2'')]"},"dependsOn":["policy2"]},{"type":"Microsoft.Resources/deployments","name":"rg-nested","apiVersion":"2017-05-10","resourceGroup":"demo-rg","properties":{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{},"variables":{},"resources":[{"type":"Microsoft.Storage/storageAccounts","name":"[parameters(''storageAccountName'')]","apiVersion":"2015-06-15","location":"East
+        US","properties":{"accountType":"Standard_LRS"}}]},"mode":"Incremental"}}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1258']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [deployment operation list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operations?api-version=2018-05-01
+  response:
+    body: {string: '{"value":[{"operationId":"6B92A94FEB319DC8","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:01.8923082Z","duration":"PT3.9537561S","trackingId":"da88a89d-65b9-4e90-bd15-7de468a4c757","serviceRequestId":"eastus:ebf1ecad-dbde-443b-8fd3-0630c0efec54","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}}},{"operationId":"52DA0AFF47BC5622","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2018-06-14T00:39:57.5595471Z","duration":"PT5.1289969S","trackingId":"46372bff-ed3f-4170-b424-73427ae9d681","serviceRequestId":"eastus:7bd11080-7fc3-411a-84b3-fe8a415fd2cc","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}}},{"operationId":"E91E6AB1F2A0B806","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:11.6659713Z","duration":"PT19.2511927S","trackingId":"8daaef73-068c-4ec1-9876-505108295f01","serviceRequestId":"c6cc63db-f81d-4815-b729-1421d8aa47d5","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-rg/providers/Microsoft.Resources/deployments/rg-nested","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested"}}},{"operationId":"08586726700943175950","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2018-06-14T00:40:15.2127995Z","duration":"PT3.477445S","trackingId":"31fa4952-3d75-4800-beb5-8c30eacbb0b8","statusCode":"OK","statusMessage":null}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1953']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 14 Jun 2018 00:40:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+version: 1
