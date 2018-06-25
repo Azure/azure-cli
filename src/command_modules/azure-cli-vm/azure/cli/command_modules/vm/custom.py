@@ -2392,7 +2392,7 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
         VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
                                                       operation_group='virtual_machine_scale_sets')
         if VirtualMachineScaleSetUpdate:
-            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity, sku=vmss_instance.sku)
+            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
             return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
 
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
