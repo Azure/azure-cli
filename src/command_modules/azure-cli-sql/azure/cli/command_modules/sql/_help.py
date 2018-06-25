@@ -328,6 +328,9 @@ helps['sql server'] = """
 helps['sql server create'] = """
     type: command
     short-summary: Create a server.
+    examples:
+        - name: Create a server.
+          text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword
     """
 helps['sql server list'] = """
     type: command
@@ -369,18 +372,35 @@ helps['sql server firewall-rule'] = """
 helps['sql server firewall-rule create'] = """
     type: command
     short-summary: Create a firewall rule.
+    examples:
+        - name: Create a firewall rule
+          text: az sql server firewall-rule create -g mygroup -s myserver -n myrule
+                --start-ip-address 1.2.3.4 --end-ip-address 5.6.7.8
+        - name: Create a firewall rule that allows access from Azure services
+          text: az sql server firewall-rule create -g mygroup -s myserver -n myrule
+                --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
     """
 helps['sql server firewall-rule update'] = """
     type: command
     short-summary: Update a firewall rule.
+    examples:
+        - name: Update a firewall rule
+          text: az sql server firewall-rule update -g mygroup -s myserver -n myrule
+                --start-ip-address 9.8.7.6 --end-ip-address 5.4.3.2
     """
 helps['sql server firewall-rule show'] = """
     type: command
     short-summary: Shows the details for a firewall rule.
+    examples:
+        - name: Show a firewall rule
+          text: az sql server firewall-rule show -g mygroup -s myserver -n myrule
     """
 helps['sql server firewall-rule list'] = """
     type: command
     short-summary: List a server's firewall rules.
+    examples:
+        - name: List a server's firewall rules
+          text: az sql server firewall-rule list -g mygroup -s myserver
     """
 helps['sql server key'] = """
     type: group

@@ -95,7 +95,8 @@ def load_command_table(self, _):
                          supports_no_wait=True,
                          transform=database_lro_transform)
         g.custom_command('restore', 'db_restore',
-                         supports_no_wait=True, transform=database_lro_transform)
+                         supports_no_wait=True,
+                         transform=database_lro_transform)
         g.custom_command('rename', 'db_rename',
                          transform=database_lro_transform)
         g.command('show', 'get',
@@ -147,7 +148,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'dw_list',
                          transform=db_list_transform)
         g.command('delete', 'delete',
-                  confirmation=True, supports_no_wait=True)
+                  confirmation=True,
+                  supports_no_wait=True)
         g.custom_command('pause', 'dw_pause')
         g.custom_command('resume', 'dw_resume')
         g.generic_update_command('update',
