@@ -1288,14 +1288,14 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if in_cloud_console():
         raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
 
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
-    proxy_url = 'http://127.0.0.1:8001/'
+    proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
@@ -1318,7 +1318,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
     if not disable_browser:
         wait_then_open_async(proxy_url)
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                     "port-forward", dashboard_pod, "8001:9090"])
+                     "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
 
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
