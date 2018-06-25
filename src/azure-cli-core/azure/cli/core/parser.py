@@ -152,7 +152,7 @@ class AzCliCommandParser(CLICommandParser):
         if action.choices is not None and value not in action.choices:
             if not self.command_source:
                 # parser has no `command_source`, value is part of command itself
-                error_msg = "{prog}: '{value}' is not in the '{prog}' command-group. See '{prog} --help'.".format(
+                error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'.".format(
                     prog=self.prog, value=value)
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
