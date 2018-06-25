@@ -175,6 +175,10 @@ for /f %%f in ('dir /b /s *.pyc') do (
 )
 popd
 
+for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
+    if exist %%d rmdir /s /q "%%d"
+)
+
 if %errorlevel% neq 0 goto ERROR
 
 echo Building MSI...
