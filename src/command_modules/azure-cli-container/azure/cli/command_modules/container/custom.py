@@ -34,7 +34,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume)
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
-from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
+from ._client_factory import cf_container_groups, cf_container
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -321,7 +321,7 @@ def _create_ip_address(ip_address, ports, dns_name_label):
 # pylint: disable=inconsistent-return-statements
 def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):
     """Tail a container instance log. """
-    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -330,7 +330,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
         container_name = container_group.containers[0].name
 
     if not follow:
-        log = logs_client.list(resource_group_name, name, container_name)
+        log = container_client.list_logs(resource_group_name, name, container_name)
         print(log.content)
     else:
         _start_streaming(
@@ -338,7 +338,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
             shupdown_grace_period=5,
             stream_target=_stream_logs,
-            stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
+            stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
 def container_export(cmd, resource_group_name, name, file):
@@ -376,7 +376,7 @@ def container_export(cmd, resource_group_name, name, file):
 def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
-    start_container_client = cf_start_container(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -387,7 +387,7 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
 
         terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
 
-        execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
+        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
 
         if platform.system() is WINDOWS_NAME:
             _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
@@ -467,7 +467,7 @@ def _cycle_exec_pipe(ws):
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
     """Attach to a container. """
-    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -480,7 +480,7 @@ def attach_to_container(cmd, resource_group_name, name, container_name=None):
         terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_container_events_and_logs,
-        stream_args=(container_group_client, logs_client, resource_group_name, name, container_name))
+        stream_args=(container_group_client, container_client, resource_group_name, name, container_name))
 
 
 def _start_streaming(terminate_condition, terminate_condition_args, shupdown_grace_period, stream_target, stream_args):
@@ -506,7 +506,7 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     """Stream logs for a container. """
     lastOutputLines = 0
     while True:
-        log = client.list(resource_group_name, name, container_name)
+        log = client.list_logs(resource_group_name, name, container_name)
         lines = log.content.split('\n')
         currentOutputLines = len(lines)
 
@@ -522,7 +522,7 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
         time.sleep(2)
 
 
-def _stream_container_events_and_logs(container_group_client, logs_client, resource_group_name, name, container_name):
+def _stream_container_events_and_logs(container_group_client, container_client, resource_group_name, name, container_name):
     """Stream container events and logs. """
     lastOutputLines = 0
     lastContainerState = None
@@ -553,7 +553,7 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
 
         time.sleep(2)
 
-    _stream_logs(logs_client, resource_group_name, name, container_name, container_group.restart_policy)
+    _stream_logs(container_client, resource_group_name, name, container_name, container_group.restart_policy)
 
 
 def _is_container_terminated(client, resource_group_name, name, container_name):
