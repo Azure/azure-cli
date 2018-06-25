@@ -122,29 +122,30 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
             profile.capacity.default = count
             profile.capacity.minimum = min_count
             profile.capacity.maximum = max_count
+            
+    if instance.notifications:
+        notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
 
-    notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
+        # process removals
+        if remove_actions is not None:
+            removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
+            notification.email.custom_emails = \
+                [x for x in notification.email.custom_emails if x not in removed_emails]
+            notification.webhooks = \
+                [x for x in notification.webhooks if x.service_uri not in removed_webhooks]
 
-    # process removals
-    if remove_actions is not None:
-        removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
-        notification.email.custom_emails = \
-            [x for x in notification.email.custom_emails if x not in removed_emails]
-        notification.webhooks = \
-            [x for x in notification.webhooks if x.service_uri not in removed_webhooks]
+        # process additions
+        for action in add_actions or []:
+            if isinstance(action, EmailNotification):
+                for email in action.custom_emails:
+                    notification.email.custom_emails.append(email)
+            elif isinstance(action, WebhookNotification):
+                notification.webhooks.append(action)
 
-    # process additions
-    for action in add_actions or []:
-        if isinstance(action, EmailNotification):
-            for email in action.custom_emails:
-                notification.email.custom_emails.append(email)
-        elif isinstance(action, WebhookNotification):
-            notification.webhooks.append(action)
-
-    if email_administrator is not None:
-        notification.email.send_to_subscription_administrator = email_administrator
-    if email_coadministrators is not None:
-        notification.email.send_to_subscription_co_administrators = email_coadministrators
+        if email_administrator is not None:
+            notification.email.send_to_subscription_administrator = email_administrator
+        if email_coadministrators is not None:
+            notification.email.send_to_subscription_co_administrators = email_coadministrators
 
     return instance
 
