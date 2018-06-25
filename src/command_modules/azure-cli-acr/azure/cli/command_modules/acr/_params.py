@@ -86,6 +86,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr repository show-manifests') as c:
         c.argument('repository', help='The repository to obtain manifests from.')
+        c.argument('top', type=int, help='Limit the number of manifests in the results.')
+        c.argument('orderby', help='Order the manifests in the results. Default to alphabetical order of manifest digests.', choices=['time_asc', 'time_desc'])
 
     with self.argument_context('acr repository show-tags') as c:
         c.argument('repository', help='The repository to obtain tags from.')

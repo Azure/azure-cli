@@ -7,6 +7,10 @@ import time
 from base64 import b64encode
 import requests
 from requests.utils import to_native_string
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from urllib import unquote
 
 from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
@@ -24,6 +28,8 @@ logger = get_logger(__name__)
 UNTAG_NOT_SUPPORTED = 'Untag is only supported for managed registries.'
 DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
 LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
+
+DEFAULT_PAGINATION = 20
 
 
 def _get_basic_auth_str(username, password):
@@ -47,10 +53,6 @@ def _get_authorization_header(username, password):
         auth = _get_basic_auth_str(username, password)
 
     return {'Authorization': auth}
-
-
-def _get_pagination_params(count):
-    return {'n': count}
 
 
 def _parse_error_message(error_message, response):
@@ -96,11 +98,11 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
             errorMessage = str(e)
             logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
             time.sleep(retry_interval)
-    if errorMessage:
-        raise CLIError(errorMessage)
+
+    raise CLIError(errorMessage)
 
 
-def _get_manifest_digest(login_server, path, username, password, retry_times=3, retry_interval=5):  # pylint: disable=inconsistent-return-statements
+def _get_manifest_digest(login_server, path, username, password, retry_times=3, retry_interval=5):
     for i in range(0, retry_times):
         errorMessage = None
         try:
@@ -128,8 +130,7 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
             time.sleep(retry_interval)
 
-    if errorMessage:
-        raise CLIError(errorMessage)
+    raise CLIError(errorMessage)
 
 
 def _obtain_data_from_registry(login_server,
@@ -139,19 +140,32 @@ def _obtain_data_from_registry(login_server,
                                result_index,
                                retry_times=3,
                                retry_interval=5,
-                               pagination=20):
+                               top=None,
+                               orderby=None):
     resultList = []
     executeNextHttpCall = True
+
+    url = 'https://{}{}'.format(login_server, path)
+    headers = _get_authorization_header(username, password)
+    params = {
+        'n': DEFAULT_PAGINATION,
+        'orderby': orderby
+    }
 
     while executeNextHttpCall:
         executeNextHttpCall = False
         for i in range(0, retry_times):
             errorMessage = None
             try:
+                # Override the default page size if top is provided
+                if top is not None:
+                    params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
+                    top -= params['n']
+
                 response = requests.get(
-                    'https://{}{}'.format(login_server, path),
-                    headers=_get_authorization_header(username, password),
-                    params=_get_pagination_params(pagination),
+                    url=url,
+                    headers=headers,
+                    params=params,
                     verify=(not should_disable_connection_verify())
                 )
                 log_registry_response(response)
@@ -159,7 +173,9 @@ def _obtain_data_from_registry(login_server,
                 if response.status_code == 200:
                     result = response.json()[result_index]
                     if result:
-                        resultList += response.json()[result_index]
+                        resultList += result
+                    if top is not None and top <= 0:
+                        break
                     if 'link' in response.headers and response.headers['link']:
                         linkHeader = response.headers['link']
                         # The registry is telling us there's more items in the list,
@@ -167,6 +183,8 @@ def _obtain_data_from_registry(login_server,
                         # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
                         # we should follow the next path indicated in the link header
                         path = linkHeader[(linkHeader.index('<') + 1):linkHeader.index('>')]
+                        tokens = path.split('?', 2)
+                        params = {y[0]: unquote(y[1]) for y in (x.split('=', 2) for x in tokens[1].split('&'))}
                         executeNextHttpCall = True
                     break
                 elif response.status_code == 401:
@@ -233,6 +251,8 @@ def acr_repository_show_tags(cmd,
 def acr_repository_show_manifests(cmd,
                                   registry_name,
                                   repository,
+                                  top=None,
+                                  orderby=None,
                                   resource_group_name=None,
                                   username=None,
                                   password=None):
@@ -250,7 +270,9 @@ def acr_repository_show_manifests(cmd,
         path='/v2/_acr/{}/manifests/list'.format(repository),
         username=username,
         password=password,
-        result_index='manifests')
+        result_index='manifests',
+        top=top,
+        orderby=orderby)
 
 
 def acr_repository_untag(cmd,
