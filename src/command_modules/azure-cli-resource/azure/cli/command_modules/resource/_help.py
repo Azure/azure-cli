@@ -666,6 +666,53 @@ helps['group deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.
 """
+helps['deployment'] = """
+    type: group
+    short-summary: Manage Azure Resource Manager deployments at subscription scope.
+"""
+helps['deployment create'] = """
+    type: command
+    short-summary: Start a deployment.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    examples:
+        - name: Create a deployment from a remote template file, using parameters from a local JSON file.
+          text: >
+            az deployment create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        - name: Create a deployment from a local template file, using parameters from a JSON string.
+          text: |
+            az deployment create --location WestUS --template-file azuredeploy.json --parameters '{
+                    "policyName": {
+                        "value": "policy2"
+                    }
+                }'
+        - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
+          text: >
+            az deployment create --location WestUS --template-file azuredeploy.json \\
+                --parameters @params.json --parameters MyValue=This MyArray=@array.json
+"""
+helps['deployment export'] = """
+    type: command
+    short-summary: Export the template used for a deployment.
+"""
+helps['deployment validate'] = """
+    type: command
+    short-summary: Validate whether a template is syntactically correct.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+"""
+helps['deployment operation'] = """
+    type: group
+    short-summary: Manage deployment operations.
+"""
 helps['group lock'] = """
     type: group
     short-summary: Manage Azure resource group locks.

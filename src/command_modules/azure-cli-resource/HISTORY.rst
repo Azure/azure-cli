@@ -3,9 +3,13 @@
 Release History
 ===============
 
+2.0.32
+++++++
+* Support deployment at subscription scope: new operation group `deployment`.
+
 2.0.31
 ++++++
-* Minor fixes
+* Minor changes
 
 2.0.30
 ++++++

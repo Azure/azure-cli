@@ -219,6 +219,18 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.custom_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
 
+    with self.command_group('deployment', resource_deployment_sdk) as g:
+        g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list, min_api='2018-05-01')
+        g.command('show', 'get_at_subscription_scope', exception_handler=empty_on_404)
+        g.command('delete', 'delete_at_subscription_scope')
+        g.custom_command('validate', 'validate_arm_template_at_subscription_scope', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('export', 'export_subscription_deployment_template')
+
+    with self.command_group('deployment operation', resource_deployment_operation_sdk) as g:
+        g.command('list', 'list_at_subscription_scope')
+        g.custom_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
+
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_assignment')
         g.custom_command('delete', 'delete_policy_assignment')

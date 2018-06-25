@@ -300,6 +300,37 @@ class DeploymentTest(ScenarioTest):
             self.check('[0].resourceGroup', '{rg}')
         ])
 
+    def test_subscription_level_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
+        })
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list -n {dn}', checks=[
+            self.check('length([])', 4)
+        ])
+
 
 class DeploymentLiveTest(LiveScenarioTest):
     @ResourceGroupPreparer()
@@ -593,7 +624,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
     def test_managedappdef(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'eastus2euap',
+            'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
@@ -638,7 +669,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
-            'loc': 'eastus2euap',
+            'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
