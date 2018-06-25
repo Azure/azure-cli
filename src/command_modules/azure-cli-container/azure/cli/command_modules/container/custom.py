@@ -34,6 +34,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume)
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
+from azure.cli.core.util import sdk_no_wait
 from ._client_factory import cf_container_groups, cf_container
 
 logger = get_logger(__name__)
@@ -88,7 +89,8 @@ def create_container(cmd,
                      gitrepo_mount_path=None,
                      secrets=None,
                      secrets_mount_path=None,
-                     file=None):
+                     file=None,
+                     no_wait=False):
     """Create a container group. """
 
     if file:
@@ -158,8 +160,7 @@ def create_container(cmd,
                             volumes=volumes or None)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
-    raw_response = container_group_client.create_or_update(resource_group_name, name, cgroup, raw=True)
-    return raw_response.output
+    return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
 
 
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
