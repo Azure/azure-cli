@@ -9,6 +9,7 @@ Release History
 * `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
 * expose read-only "nodeResourceGroup" property on managed clusters
 * fix `az acs browse` command error
+* Minor fixes
 
 2.1.0
 +++++
