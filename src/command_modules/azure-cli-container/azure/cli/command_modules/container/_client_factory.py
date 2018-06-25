@@ -9,6 +9,7 @@ def _container_instance_client_factory(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ContainerInstanceManagementClient)
 
+
 def cf_container_groups(cli_ctx, *_):
     return _container_instance_client_factory(cli_ctx).container_groups
 
@@ -21,6 +22,7 @@ def _log_analytics_client_factory(cli_ctx, *_):
     from azure.mgmt.loganalytics import LogAnalyticsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
+
 
 def cf_log_analytics(cli_ctx, *_):
     return _log_analytics_client_factory(cli_ctx).workspaces

@@ -33,7 +33,6 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
-from azure.mgmt.loganalytics import log_analytics_management_client
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
@@ -197,6 +196,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
             )
 
     return None
+
 
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
     resource_client = _resource_client_factory(cli_ctx)

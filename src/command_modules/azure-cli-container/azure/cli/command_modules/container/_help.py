@@ -39,6 +39,10 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/gitrepo" --gitrepo-url https://github.com/user/myrepo.git --gitrepo-dir ./dir1 --gitrepo-mount-path /mnt/gitrepo
         - name: Create a container in a container group using a yaml file.
           text: az container create -g MyResourceGroup -f containerGroup.yaml
+        - name: Create a container group using Log Analytics from a workspace name.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace myworkspace
+        - name: Create a container group using Log Analytics from a workspace id and key.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace-id workspaceid --log-analytics-workspace-key workspacekey
 """
 
 helps['container delete'] = """
