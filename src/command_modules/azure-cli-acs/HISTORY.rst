@@ -5,7 +5,8 @@ Release History
 
 2.1.2
 +++++
-* Enable Kubernetes role-based access control by default and add a `--disable-rbac` argument.
+* Breaking change: Enable Kubernetes role-based access control by default.
+* Add a `--disable-rbac` argument and deprecate `--enable-rbac` since it's the default now.
 * Updated options for `az aks browse` command. Added `--listen-port` support.
 
 2.1.1
