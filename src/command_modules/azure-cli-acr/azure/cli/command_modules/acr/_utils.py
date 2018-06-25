@@ -39,7 +39,7 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
         message = "The resource with name '{}' and type '{}' could not be found".format(
             resource_name, resource_type)
         try:
-            subscription = profile.get_subscription()
+            subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
             raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
         except (KeyError, TypeError):
             raise CLIError("{} in the current subscription.".format(message))
