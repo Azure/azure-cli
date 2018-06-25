@@ -68,6 +68,11 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_account_key', help='The storage account access key used to access the Azure File share')
         c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help="The path within the container where the azure file volume should be mounted. Must not contain colon ':'.")
 
+    with self.argument_context('container create', arg_group='Log Analytics') as c:
+        c.argument('log_analytics_workspace', help='The Log Analytics workspace. Must be in the currently set subscription.')
+        c.argument('log_analytics_workspace_id', help='The Log Analytics workspace id.')
+        c.argument('log_analytics_workspace_key', help='The Log Analytics workspace key.')
+
     with self.argument_context('container create', arg_group='Git Repo Volume') as c:
         c.argument('gitrepo_url', help='The URL of a git repository to be mounted as a volume')
         c.argument('gitrepo_dir', validator=validate_gitrepo_directory, help="The target directory path in the git repository. Must not contain '..'.")
