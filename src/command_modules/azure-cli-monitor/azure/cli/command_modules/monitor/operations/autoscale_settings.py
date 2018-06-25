@@ -122,7 +122,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
             profile.capacity.default = count
             profile.capacity.minimum = min_count
             profile.capacity.maximum = max_count
-            
+
     if instance.notifications:
         notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
 
