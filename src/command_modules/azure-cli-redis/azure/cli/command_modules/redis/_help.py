@@ -8,7 +8,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['redis'] = """
     type: group
-    short-summary: Access to a secure, dedicated Redis cache for your Azure applications.
+    short-summary: Manage dedicated Redis caches for your Azure applications.
 """
 
 helps['redis export'] = """
