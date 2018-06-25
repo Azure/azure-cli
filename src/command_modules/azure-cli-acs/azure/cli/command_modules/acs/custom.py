@@ -347,12 +347,10 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     if service_principal is not None and client_secret is None:
         raise CLIError('--client-secret must be specified when --service-principal is specified')
     # Validate if the RG exists
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(aci_resource_group or resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, aci_resource_group or resource_group_name)
     # Auto assign the location
     if location is None:
-        location = rgkaci.location  # pylint:disable=no-member
+        location = rg_location
     norm_location = location.replace(' ', '').lower()
     # Validate the location upon the ACI avaiable regions
     _validate_aci_location(norm_location)
@@ -422,12 +420,10 @@ def k8s_uninstall_connector(cmd, client, name, resource_group_name, connector_na
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
     # Validate if the RG exists
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     # Auto assign the location
     if location is None:
-        location = rgkaci.location  # pylint:disable=no-member
+        location = rg_location
     norm_location = location.replace(' ', '').lower()
 
     if os_type.lower() in ['linux', 'both']:
@@ -764,11 +760,9 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
-        location = rg.location  # pylint:disable=no-member
+        location = rg_location
 
     # if api-version is not specified, or specified in a version not supported
     # override based on location
@@ -1361,11 +1355,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
-        location = rg.location  # pylint:disable=no-member
+        location = rg_location
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
@@ -1406,10 +1398,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = _handle_addons_args({}, enable_addons, workspace_resource_id)
-
+    addon_profiles = _handle_addons_args(enable_addons, {}, workspace_resource_id)
     if 'omsagent' in addon_profiles:
-        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'], location)
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
@@ -1466,6 +1457,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
     instance = _update_addons(instance, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+
+    if 'omsagent' in instance.addon_profiles:
+        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
@@ -1694,7 +1688,7 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
     return True
 
 
-def _ensure_container_insights_for_monitoring(cmd, addon, location):
+def _ensure_container_insights_for_monitoring(cmd, addon):
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
     if not workspace_resource_id.startswith('/'):
         workspace_resource_id = '/' + workspace_resource_id
@@ -1702,6 +1696,9 @@ def _ensure_container_insights_for_monitoring(cmd, addon, location):
     # extract resource group from workspace_resource_id URL
     # TODO: catch this and raise a more friendly error
     resource_group = workspace_resource_id.split('/')[4]
+
+    # find the location from the resource group
+    location = _get_rg_location(cmd.cli_ctx, resource_group)
 
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
@@ -1767,7 +1764,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon, location):
         }
     }
 
-    # TODO: does these need to be input by the user, or randomized?
+    # TODO: does this name need to be randomized or input by the user?
     deployment_name = 'aks-monitoring'
 
     # publish the Container Insights solution to the Log Analytics workspace
@@ -1849,6 +1846,13 @@ def _ensure_service_principal(cli_ctx,
             raise CLIError('--client-secret is required if --service-principal is specified')
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
+
+
+def _get_rg_location(ctx, resource_group_name):
+    groups = cf_resource_groups(ctx)
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    rg = groups.get(resource_group_name)
+    return rg.location
 
 
 def _print_or_merge_credentials(path, kubeconfig):
