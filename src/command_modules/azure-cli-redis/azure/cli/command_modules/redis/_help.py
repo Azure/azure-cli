@@ -51,8 +51,3 @@ helps['redis patch-schedule'] = """
     type: group
     short-summary: Manage Redis patch schedules.
 """
-
-helps['redis patch-schedule patch-schedule'] = """
-    type: group
-    short-summary: Manage Redis patch schedules.
-"""

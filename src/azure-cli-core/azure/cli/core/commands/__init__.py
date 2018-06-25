@@ -178,6 +178,7 @@ class AzCliCommand(CLICommand):
             from knack.events import EVENT_COMMAND_CANCELLED
             self.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=self.name, command_args=cmd_args)
             raise CLIError('Operation cancelled.')
+
         return self.handler(*args, **kwargs)
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):

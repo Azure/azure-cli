@@ -22,16 +22,6 @@ from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupReg
 USER_HOME = expanduser('~')
 
 
-def exit():
-    import sys
-    sys.exit(1)
-
-
-def pprint(var):
-    from pprint import pprint
-    pprint(var, indent=2)
-
-
 def get_help_files(cli_ctx):
     cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation.commands_loader.load_command_table([])

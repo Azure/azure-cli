@@ -10,7 +10,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 import yaml
 import colorama
-from .util import get_command_groups, share_element, exclude_commands, LinterError
+from .util import share_element, exclude_commands, LinterError
 
 
 class Linter(object):
@@ -28,11 +28,11 @@ class Linter(object):
 
     @property
     def commands(self):
-        return self._command_loader.command_table
+        return self._command_loader.command_table.keys()
 
     @property
     def command_groups(self):
-        return self._command_loader.command_group_table
+        return self._command_loader.command_group_table.keys()
 
     @property
     def help_file_entries(self):
@@ -70,10 +70,10 @@ class Linter(object):
         return self._get_loaded_help_description(command_group_name)
 
     def get_parameter_options(self, command_name, parameter_name):
-        return self.commands.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+        return self.get_command_metadata(command_name).arguments.get(parameter_name).type.settings.get('options_list')
 
     def get_parameter_help(self, command_name, parameter_name):
-        options = self._command_loader.command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+        options = self.get_parameter_options(command_name, parameter_name)
         command_help = self._loaded_help.get(command_name, None)
 
         if not command_help:
@@ -118,8 +118,6 @@ class Linter(object):
             if isinstance(opt, Deprecated) and opt.expired():
                 expired_options_list.append(opt.target)
         return expired_options_list
-
-        return False
 
     def _get_loaded_help_description(self, entry):
         help_entry = self._loaded_help.get(entry, None)

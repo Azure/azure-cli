@@ -42,7 +42,3 @@ def load_command_table(self, _):
         g.command('set', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
-
-    with self.command_group('redis patch-schedule patch-schedule', redis_patch,
-                            deprecate_info=self.deprecate(redirect='redis patch-schedule', hide='2.0.34')) as g:
-        g.command('show', 'get')
