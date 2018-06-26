@@ -1095,7 +1095,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token_with_authorization_code.return_value = self.token_entry1
 
         # action
-        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/')
+        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/common')
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -1104,6 +1104,7 @@ class TestProfile(unittest.TestCase):
                                                                                         'http://localhost:8888',
                                                                                         mgmt_resource, mock.ANY,
                                                                                         None)
+        _get_authorization_code_mock.assert_called_once_with(mgmt_resource, 'https:/some_aad_point/common')
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_interactive_from_particular_tenent(self, mock_auth_context):
