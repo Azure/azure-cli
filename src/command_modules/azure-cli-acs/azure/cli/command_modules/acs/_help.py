@@ -212,9 +212,12 @@ helps['aks create'] = """
             These addons are available:
                 http_application_routing - configure ingress with automatic public DNS name creation.
                 monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+        - name: --disable-rbac
+          type: bool
+          short-summary: Disable Kubernetes Role-Based Access Control.
         - name: --enable-rbac -r
-          type: string
-          short-summary: Enable Kubernetes Role-Based Access Control.
+          type: bool
+          short-summary: "[DEPRECATED: RBAC is on by default. Use --disable-rbac to disable it.] Enable Kubernetes Role-Based Access Control."
         - name: --max-pods -m
           type: int
           short-summary: The maximum number of pods deployable to a node.
