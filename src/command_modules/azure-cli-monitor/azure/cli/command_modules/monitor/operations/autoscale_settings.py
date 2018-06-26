@@ -81,7 +81,6 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
                      add_actions=None, remove_actions=None, email_administrator=None,
                      email_coadministrators=None):
     import json
-    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
 
     if tags is not None:
@@ -123,7 +122,16 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
             profile.capacity.minimum = min_count
             profile.capacity.maximum = max_count
 
-    notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
+    if instance.notifications is not None:
+        notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
+        _update_notification(notification, remove_actions, add_actions, email_administrator, email_coadministrators)
+
+    return instance
+
+def _update_notification(notification, remove_actions, add_actions, email_administrator, email_coadministrators):
+    """ Update notification field with the specified add/remove actions and with admin/coadmin emails"""
+
+    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
 
     # process removals
     if remove_actions is not None:
@@ -145,9 +153,6 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
         notification.email.send_to_subscription_administrator = email_administrator
     if email_coadministrators is not None:
         notification.email.send_to_subscription_co_administrators = email_coadministrators
-
-    return instance
-
 
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
