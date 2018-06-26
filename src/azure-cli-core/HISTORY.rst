@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.0.39
+2.0.40
 ++++++
 * authentication: support authorization code flow for interactive login
+
+2.0.39
+++++++
+* MSI packaging change
 
 2.0.38
 ++++++
