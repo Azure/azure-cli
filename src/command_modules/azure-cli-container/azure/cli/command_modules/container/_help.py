@@ -21,6 +21,8 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name mywinapp --image winappimage:latest --os-type Windows --cpu 2 --memory 3.5
         - name: Create a container in a container group with public IP address and ports.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 80 443
+        - name: Create a container in a container group with public IP address and UDP port.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 8081 --protocol UDP
         - name: Create a container in a container group with public IP address, ports and DNS name label.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ports 80 443 --dns-name-label contoso
         - name: Create a container in a container group that invokes a script upon start.
@@ -39,6 +41,10 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/gitrepo" --gitrepo-url https://github.com/user/myrepo.git --gitrepo-dir ./dir1 --gitrepo-mount-path /mnt/gitrepo
         - name: Create a container in a container group using a yaml file.
           text: az container create -g MyResourceGroup -f containerGroup.yaml
+        - name: Create a container group using Log Analytics from a workspace name.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace myworkspace
+        - name: Create a container group using Log Analytics from a workspace id and key.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace workspaceid --log-analytics-workspace-key workspacekey
 """
 
 helps['container delete'] = """
