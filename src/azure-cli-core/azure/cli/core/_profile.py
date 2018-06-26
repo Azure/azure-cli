@@ -990,7 +990,8 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except ImportError:
             from urlparse import parse_qs  # pylint: disable=import-error
 
-        if self.path.endswith('/favicon.ico'):
+        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+            self.send_response(204)
             return
 
         query = self.path.split('?', 1)[-1]
