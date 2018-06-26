@@ -67,15 +67,20 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 
 
-def _authentication_context_factory(cli_ctx, tenant, cache):
+def _get_authority_url(cli_ctx, tenant):
     import re
-    import adal
     authority_url = cli_ctx.cloud.endpoints.active_directory
     is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
     if is_adfs:
         authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
     else:
         authority_url = authority_url.rstrip('/') + '/' + (tenant or _COMMON_TENANT)
+    return authority_url, is_adfs
+
+
+def _authentication_context_factory(cli_ctx, tenant, cache):
+    import adal
+    authority_url, is_adfs = _get_authority_url(cli_ctx, tenant)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
 
@@ -162,8 +167,9 @@ class Profile(object):
         if interactive:
             if not use_device_code:
                 try:
+                    authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad_resource_uri, self._ad)
+                        tenant, self._ad_resource_uri, authority_url)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to login you in, falling back to device code...')
@@ -709,19 +715,18 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_authorization_code_flow(self, tenant, resource, aad_endpoint):
+    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+
         # launch browser and get the code
-        results = _get_authorization_code(tenant, resource, aad_endpoint)
+        results = _get_authorization_code(resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
 
         # exchange the code for the token
-        context = self._create_auth_context(tenant, use_token_cache=False)
+        context = self._create_auth_context(tenant)
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
-        new_token_entries = context.cache.read_items()
-        self._adal_token_cache.add([v for k, v in new_token_entries])
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
         if tenant is None:
@@ -985,6 +990,10 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except ImportError:
             from urlparse import parse_qs  # pylint: disable=import-error
 
+        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+            self.send_response(204)
+            return
+
         query = self.path.split('?', 1)[-1]
         query = parse_qs(query, keep_blank_values=True)
         self.server.query_params = query
@@ -1002,7 +1011,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return  # this prevent http server from dumping messages to stdout
 
 
-def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
+def _get_authorization_code_worker(authority_url, resource, results):
     import socket
     for port in range(8400, 9000):
         try:
@@ -1017,21 +1026,31 @@ def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
         return
 
     # launch browser:
-    url = ('{0}/{1}/oauth2/authorize?response_type=code&client_id={2}'
-           '&redirect_uri={3}&state={4}&resource={5}&prompt=select_account')
-    url = url.format(aad_endpoint, tenant or _COMMON_TENANT, _CLIENT_ID, reply_url, 'code', resource)
+    url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
+           '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
+    url = url.format(authority_url, _CLIENT_ID, reply_url, 'code', resource)
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
     if succ is False:
         web_server.server_close()
         results['no_browser'] = True
         return
+
+    # emit a warning for transitioning to the new experience
+    logger.warning('Note, we have launched a browser for you to login. For old experience'
+                   ' with device code, use "az login --use-device-code"')
+
     # wait for callback from browser.
-    web_server.handle_request()
+    while True:
+        web_server.handle_request()
+        if 'error' in web_server.query_params or 'code' in web_server.query_params:
+            break
+
     if 'error' in web_server.query_params:
         logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
                        web_server.query_params.get('error_description'))
         return
+
     if 'code' in web_server.query_params:
         code = web_server.query_params['code']
     else:
@@ -1042,12 +1061,12 @@ def _get_authorization_code_worker(tenant, aad_endpoint, resource, results):
     results['reply_url'] = reply_url
 
 
-def _get_authorization_code(tenant, resource, aad_endpoint):
+def _get_authorization_code(resource, authority_url):
     import threading
     import time
     results = {}
     t = threading.Thread(target=_get_authorization_code_worker,
-                         args=(tenant, aad_endpoint, resource, results))
+                         args=(authority_url, resource, results))
     t.daemon = True
     t.start()
     while True:
