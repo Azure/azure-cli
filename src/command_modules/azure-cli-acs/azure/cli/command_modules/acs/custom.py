@@ -1540,7 +1540,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :type prompt: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
@@ -1563,7 +1563,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     :type prompt: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_remove_dev_spaces(name, resource_group_name, prompt)
@@ -1594,11 +1594,20 @@ def _install_dev_spaces_extension(extension_name):
     return True
 
 
-def _update_dev_spaces_extension(extension_name):
+def _update_dev_spaces_extension(extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
     try:
         from azure.cli.command_modules.extension import custom
         custom.update_extension(extension_name=extension_name)
+
+        # reloading the imported module to update
+        try:
+            from importlib import reload
+        except ImportError:
+            pass  # for python 2
+        reload(sys.modules[extension_module])
+    except CLIError as err:
+        logger.info(err)
     except ExtensionNotInstalledException as err:
         logger.debug(err)
         return False
@@ -1609,12 +1618,12 @@ def _update_dev_spaces_extension(extension_name):
     return True
 
 
-def _get_or_add_extension(extension_name, update=False):
+def _get_or_add_extension(extension_name, extension_module, update=False):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
         if update:
-            return _update_dev_spaces_extension(extension_name)
+            return _update_dev_spaces_extension(extension_name, extension_module)
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True
