@@ -203,7 +203,7 @@ class TestParser(unittest.TestCase):
         cmd_tbl = cli.loader.load_command_table(None)
 
         parser = cli.parser_cls(cli)
-        parser.load_command_table(cmd_tbl)
+        parser.load_command_table(cli.loader)
 
         logger_msgs = []
         choice_lists = []
