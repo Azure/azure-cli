@@ -1694,12 +1694,15 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         workspace_resource_id = '/' + workspace_resource_id
 
     # extract resource group from workspace_resource_id URL
-    # TODO: catch this and raise a more friendly error
-    resource_group = workspace_resource_id.split('/')[4]
+    try:
+        resource_group = workspace_resource_id.split('/')[4]
+    except IndexError:
+        raise CLIError('Could not locate resource group in workspace-resource-id URL.')
 
     # find the location from the resource group
     location = _get_rg_location(cmd.cli_ctx, resource_group)
 
+    # pylint: disable=line-too-long
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
