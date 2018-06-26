@@ -448,4 +448,4 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertFalse(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertTrue(routing_addon_profile.enabled)
-        self.assertSequenceEqual(list(instance.addon_profiles), ['httpApplicationRouting', 'omsagent'])
+        self.assertItemsEqual(list(instance.addon_profiles), ['httpApplicationRouting', 'omsagent'])
