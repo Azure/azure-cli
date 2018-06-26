@@ -42,12 +42,15 @@ def _filter_mods(command_loader, help_file_entries, modules=None, extensions=Non
         is_specified = source_name in extensions if is_extension else source_name in filtered_module_names
         if is_specified == exclude:
             # brute force method of ignoring commands from a module or extension
-            del command_loader.command_table[command_name]
+            command_loader.command_table.pop(command_name, None)
             help_file_entries.pop(command_name, None)
-            command_groups = [k for k in command_loader.command_group_table.keys()]
-            for group_name in command_groups:
-                command_loader.command_group_table.pop(group_name, None)
-                help_file_entries.pop(group_name, None)
+
+        # Remove unneeded command groups
+        retained_command_groups = set([' '.join(x.split(' ')[:-1]) for x in command_loader.command_table])
+        excluded_command_groups = set(command_loader.command_group_table.keys()) - retained_command_groups
+        for group_name in excluded_command_groups:
+            command_loader.command_group_table.pop(group_name, None)
+            help_file_entries.pop(group_name, None)
 
     return command_loader, help_file_entries
 

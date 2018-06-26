@@ -200,7 +200,7 @@ class TestParser(unittest.TestCase):
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
 
-        cmd_tbl = cli.loader.load_command_table(None)
+        cli.loader.load_command_table(None)
 
         parser = cli.parser_cls(cli)
         parser.load_command_table(cli.loader)

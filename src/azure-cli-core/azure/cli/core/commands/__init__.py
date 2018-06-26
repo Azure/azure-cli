@@ -338,7 +338,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 deprecations.append(ImplicitDeprecated(**deprecate_kwargs))
 
             for d in deprecations:
-                logger.warning(str(d.message))
+                logger.warning(d.message)
 
             try:
                 result = cmd(params)
