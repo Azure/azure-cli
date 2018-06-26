@@ -236,15 +236,13 @@ class TestParser(unittest.TestCase):
 
         # assert the right choices are matched as "close".
         # If these don't hold, matching algorithm should be deemed flawed.
-        print(choice_lists)
-        for x in choice_lists:
-            print(x)
         for choices in choice_lists[:2]:
             self.assertEqual(len(choices), 1)
         self.assertEqual(len(choice_lists[2]), 0)
         for choices in choice_lists[3:]:
             self.assertEqual(len(choices), 2)
-            self.assertCountEqual(choices, ['enum_1', 'enum_2'])
+            for choice in ['enum_1', 'enum_2']:
+                self.assertIn(choice, choices)
 
 
 class VerifyError(object):  # pylint: disable=too-few-public-methods
