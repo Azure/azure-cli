@@ -1095,7 +1095,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token_with_authorization_code.return_value = self.token_entry1
 
         # action
-        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/', False)
+        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/')
 
         # assert
         self.assertEqual([self.subscription1], subs)

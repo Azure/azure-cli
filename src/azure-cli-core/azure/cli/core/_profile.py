@@ -167,9 +167,9 @@ class Profile(object):
         if interactive:
             if not use_device_code:
                 try:
-                    authority_url, is_adfs = _get_authority_url(self.cli_ctx, tenant)
+                    authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad_resource_uri, authority_url, is_adfs)
+                        tenant, self._ad_resource_uri, authority_url)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to login you in, falling back to device code...')
@@ -715,10 +715,10 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_authorization_code_flow(self, tenant, resource, authority_url, is_adfs):
+    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
 
         # launch browser and get the code
-        results = _get_authorization_code(tenant, resource, authority_url)
+        results = _get_authorization_code(resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
@@ -1011,7 +1011,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return  # this prevent http server from dumping messages to stdout
 
 
-def _get_authorization_code_worker(tenant, authority_url, resource, results):
+def _get_authorization_code_worker(authority_url, resource, results):
     import socket
     for port in range(8400, 9000):
         try:
@@ -1061,12 +1061,12 @@ def _get_authorization_code_worker(tenant, authority_url, resource, results):
     results['reply_url'] = reply_url
 
 
-def _get_authorization_code(tenant, resource, authority_url):
+def _get_authorization_code(resource, authority_url):
     import threading
     import time
     results = {}
     t = threading.Thread(target=_get_authorization_code_worker,
-                         args=(tenant, authority_url, resource, results))
+                         args=(authority_url, resource, results))
     t.daemon = True
     t.start()
     while True:
