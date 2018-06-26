@@ -1596,7 +1596,10 @@ def _update_dev_spaces_extension(extension_name, extension_module):
         custom.update_extension(extension_name=extension_name)
 
         # reloading the imported module to update
-        from importlib import reload as reload
+        try:
+            from importlib import reload
+        except ImportError:
+            pass # for python 2
         reload(sys.modules[extension_module])
     except CLIError as err:
         logger.info(err)
