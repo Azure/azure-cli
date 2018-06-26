@@ -249,6 +249,42 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
+def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
+                                            template_file=None, template_uri=None,
+                                            deployment_name=None, deployment_location=None,
+                                            parameters=None, mode=None, validate_only=False,
+                                            no_wait=False):
+    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+    template = None
+    template_link = None
+    template_obj = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
+    else:
+        template = get_file_json(template_file, preserve_order=True)
+        template_obj = template
+
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    template = json.loads(json.dumps(template))
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode)
+
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
+                           deployment_name, properties, deployment_location)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
+                       deployment_name, properties, deployment_location)
+
+
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
                                          resource_type=None, name=None, tag=None, location=None):
     """Build up OData filter string from parameters """
@@ -592,10 +628,14 @@ def create_applicationdefinition(cmd, resource_group_name,
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applicationAuth = ApplicationProviderAuthorization(principalId, roleDefinitionId)
+        applicationAuth = ApplicationProviderAuthorization(
+            principal_id=principalId,
+            role_definition_id=roleDefinitionId)
         applicationAuthList.append(applicationAuth)
 
-    applicationDef = ApplicationDefinition(lock_level, applicationAuthList, package_file_uri)
+    applicationDef = ApplicationDefinition(lock_level=lock_level,
+                                           authorizations=applicationAuthList,
+                                           package_file_uri=package_file_uri)
     applicationDef.display_name = display_name
     applicationDef.description = description
     applicationDef.location = location
@@ -625,10 +665,31 @@ def deploy_arm_template(cmd, resource_group_name,
                                      deployment_name, parameters, mode, no_wait=no_wait)
 
 
+def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
+                                              deployment_name=None, deployment_location=None,
+                                              parameters=None, no_wait=False):
+    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
+                                                   deployment_name, deployment_location,
+                                                   parameters, 'Incremental', no_wait=no_wait)
+
+
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
+
+
+def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
+                                                parameters=None):
+    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
+                                                   'deployment_dry_run', deployment_location,
+                                                   parameters, 'Incremental', validate_only=True)
+
+
+def export_subscription_deployment_template(cmd, deployment_name):
+    smc = _resource_client_factory(cmd.cli_ctx)
+    result = smc.deployments.export_template_at_subscription_scope(deployment_name)
+    print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
@@ -815,6 +876,15 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
+def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
+    """get a deployment's operation."""
+    result = []
+    for op_id in operation_ids:
+        dep = client.get_at_subscription_scope(deployment_name, op_id)
+        result.append(dep)
+    return result
+
+
 def list_resources(cmd, resource_group_name=None,
                    resource_provider_namespace=None, resource_type=None, name=None, tag=None,
                    location=None):
@@ -910,7 +980,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
@@ -925,9 +995,9 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                     return
             assignment.not_scopes = kwargs_list
         PolicySku = cmd.get_models('PolicySku')
-        policySku = PolicySku('A0', 'Free')
+        policySku = PolicySku(name='A0', tier='Free')
         if sku:
-            policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
+            policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
         assignment.sku = policySku
 
     return policy_client.policy_assignments.create(scope,

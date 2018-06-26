@@ -35,7 +35,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
-from azure.cli.core._environment import get_config_dir
+from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -1288,14 +1288,14 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if in_cloud_console():
         raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
 
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
-    proxy_url = 'http://127.0.0.1:8001/'
+    proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
@@ -1318,7 +1318,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
     if not disable_browser:
         wait_then_open_async(proxy_url)
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                     "port-forward", dashboard_pod, "8001:9090"])
+                     "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
 
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
@@ -1331,7 +1331,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
-               enable_rbac=False,
+               disable_rbac=None,
+               enable_rbac=None,
                network_plugin=None,
                pod_cidr=None,
                service_cidr=None,
@@ -1434,11 +1435,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             tenant_id=aad_tenant_id
         )
 
+    # Check that both --disable-rbac and --enable-rbac weren't provided
+    if all([disable_rbac, enable_rbac]):
+        raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
+
     mc = ManagedCluster(
         location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
-        enable_rbac=enable_rbac,
+        enable_rbac=False if disable_rbac else True,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
         service_principal_profile=service_principal_profile,
@@ -1535,7 +1540,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :type prompt: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, update):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
@@ -1558,7 +1563,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     :type prompt: bool
     """
 
-    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME):
+    if _get_or_add_extension(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_remove_dev_spaces(name, resource_group_name, prompt)
@@ -1589,11 +1594,20 @@ def _install_dev_spaces_extension(extension_name):
     return True
 
 
-def _update_dev_spaces_extension(extension_name):
+def _update_dev_spaces_extension(extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
     try:
         from azure.cli.command_modules.extension import custom
         custom.update_extension(extension_name=extension_name)
+
+        # reloading the imported module to update
+        try:
+            from importlib import reload
+        except ImportError:
+            pass  # for python 2
+        reload(sys.modules[extension_module])
+    except CLIError as err:
+        logger.info(err)
     except ExtensionNotInstalledException as err:
         logger.debug(err)
         return False
@@ -1604,12 +1618,12 @@ def _update_dev_spaces_extension(extension_name):
     return True
 
 
-def _get_or_add_extension(extension_name, update=False):
+def _get_or_add_extension(extension_name, extension_module, update=False):
     from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
         if update:
-            return _update_dev_spaces_extension(extension_name)
+            return _update_dev_spaces_extension(extension_name, extension_module)
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True

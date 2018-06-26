@@ -21,7 +21,7 @@ from ._validators import (
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-0.1.3.tgz'
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -163,7 +163,8 @@ def load_arguments(self, _):
         c.argument('dns_service_ip')
         c.argument('docker_bridge_address')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
-        c.argument('enable_rbac', options_list=['--enable-rbac', '-r'])
+        c.argument('disable_rbac', action='store_true')
+        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'])
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
         c.argument('network_plugin')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])

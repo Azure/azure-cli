@@ -134,6 +134,9 @@ helps['aks browse'] = """
           type: bool
           short-summary: Don't launch a web browser after establishing port-forwarding.
           long-summary: Add this argument when launching a web browser manually, or for automated testing.
+        - name: --listen-port
+          short-summary: The listening port for the dashboard.
+          long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
 """
 
 helps['aks create'] = """
@@ -165,7 +168,7 @@ helps['aks create'] = """
                          size of its node pool with `az aks scale`.
         - name: --node-osdisk-size
           type: int
-          short-summary: Size in GB of the OS disk for each node in the node pool.
+          short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
         - name: --kubernetes-version -k
           type: string
           short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
@@ -209,9 +212,12 @@ helps['aks create'] = """
             These addons are available:
                 http_application_routing - configure ingress with automatic public DNS name creation.
                 monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+        - name: --disable-rbac
+          type: bool
+          short-summary: Disable Kubernetes Role-Based Access Control.
         - name: --enable-rbac -r
-          type: string
-          short-summary: Enable Kubernetes Role-Based Access Control.
+          type: bool
+          short-summary: "[DEPRECATED: RBAC is on by default. Use --disable-rbac to disable it.] Enable Kubernetes Role-Based Access Control."
         - name: --max-pods -m
           type: int
           short-summary: The maximum number of pods deployable to a node.

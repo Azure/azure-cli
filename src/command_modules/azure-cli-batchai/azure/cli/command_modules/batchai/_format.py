@@ -147,7 +147,7 @@ def remote_login_table_format(result):
         row = OrderedDict()
         row['ID'] = item['nodeId']
         row['IP'] = item['ipAddress']
-        row['Port'] = int(item['SSH Port'])
+        row['SSH Port'] = int(item['port'])
         table.append(row)
     return table
 

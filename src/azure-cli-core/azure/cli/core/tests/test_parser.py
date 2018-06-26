@@ -5,8 +5,10 @@
 
 import mock
 import unittest
+import difflib
 from six import StringIO
-from azure.cli.core import AzCommandsLoader
+from collections import namedtuple
+from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.parser import AzCliCommandParser
 
@@ -125,6 +127,122 @@ class TestParser(unittest.TestCase):
 
         args = parser.parse_args('test command --opt sNake_CASE'.split())
         self.assertEqual(args.opt, 'snake_case')
+
+    def _mock_import_lib(_):
+        mock_obj = mock.MagicMock()
+        mock_obj.__path__ = __name__
+        return mock_obj
+
+    def _mock_iter_modules(_):
+        return [(None, __name__, None)]
+
+    def _mock_extension_modname(ext_name, ext_dir):
+        return ext_name
+
+    def _mock_get_extensions():
+        MockExtension = namedtuple('Extension', ['name', 'preview'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False)]
+
+    def _mock_load_command_loader(loader, args, name, prefix):
+        from enum import Enum
+
+        class TestEnum(Enum):  # pylint: disable=too-few-public-methods
+            enum_1 = 'enum_1'
+            enum_2 = 'enum_2'
+
+        def test_handler():
+            pass
+
+        class TestCommandsLoader(AzCommandsLoader):
+            def load_command_table(self, args):
+                super(TestCommandsLoader, self).load_command_table(args)
+                command = AzCliCommand(loader, 'test module', test_handler)
+                command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
+                self.command_table['test module'] = command
+                return self.command_table
+
+        # A command from an extension
+        class ExtCommandsLoader(AzCommandsLoader):
+
+            def load_command_table(self, args):
+                super(ExtCommandsLoader, self).load_command_table(args)
+                command = AzCliCommand(loader, 'test extension', test_handler)
+                command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
+                self.command_table['test extension'] = command
+                return self.command_table
+
+        if prefix == 'azure.cli.command_modules.':
+            command_loaders = {'TestCommandsLoader': TestCommandsLoader}
+        else:
+            command_loaders = {'ExtCommandsLoader': ExtCommandsLoader}
+
+        module_command_table = {}
+        for _, loader_cls in command_loaders.items():
+            command_loader = loader_cls(cli_ctx=loader.cli_ctx)
+            command_table = command_loader.load_command_table(args)
+            if command_table:
+                module_command_table.update(command_table)
+                loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
+        return module_command_table
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_parser_error_spellchecker(self):
+        cli = TestCli()
+        main_loader = MainCommandsLoader(cli)
+        cli.loader = main_loader
+
+        cmd_tbl = cli.loader.load_command_table(None)
+
+        parser = cli.parser_cls(cli)
+        parser.load_command_table(cmd_tbl)
+
+        logger_msgs = []
+        choice_lists = []
+        original_get_close_matches = difflib.get_close_matches
+
+        def mock_log_error(_, msg):
+            logger_msgs.append(msg)
+
+        def mock_get_close_matches(*args, **kwargs):
+            choice_lists.append(original_get_close_matches(*args, **kwargs))
+
+        # run multiple faulty commands and save error logs, as well as close matches
+        with mock.patch('logging.Logger.error', mock_log_error), \
+                mock.patch('difflib.get_close_matches', mock_get_close_matches):
+            faulty_cmd_args = [
+                'test module1 --opt enum_1',
+                'test extension1 --opt enum_1',
+                'test foo_bar --opt enum_3',
+                'test module --opt enum_3',
+                'test extension --opt enum_3'
+            ]
+            for text in faulty_cmd_args:
+                with self.assertRaises(SystemExit):
+                    parser.parse_args(text.split())
+        parser.parse_args('test module --opt enum_1'.split())
+
+        # assert the right type of error msg is logged for command vs argument parsing
+        self.assertEqual(len(logger_msgs), 5)
+        for msg in logger_msgs[:3]:
+            self.assertIn("not in the", msg)
+            self.assertIn("command group", msg)
+        for msg in logger_msgs[3:]:
+            self.assertIn("not a valid value for '--opt'.", msg)
+
+        # assert the right choices are matched as "close".
+        # If these don't hold, matching algorithm should be deemed flawed.
+        for choices in choice_lists[:2]:
+            self.assertEqual(len(choices), 1)
+        self.assertEqual(len(choice_lists[2]), 0)
+        for choices in choice_lists[3:]:
+            self.assertEqual(len(choices), 2)
+            for choice in ['enum_1', 'enum_2']:
+                self.assertIn(choice, choices)
 
 
 class VerifyError(object):  # pylint: disable=too-few-public-methods

@@ -38,7 +38,7 @@ def load_arguments(self, _):
         c.argument('json_file', options_list=['--config-file', '-f'], help='A path to a json file containing cluster create parameters (json representation of azure.mgmt.batchai.models.ClusterCreateParameters).', arg_group='Advanced')
 
     with self.argument_context('batchai cluster create') as c:
-        c.argument('setup_task', help='A command line which should be executed on each compute node when it\'s got allocated or rebooted. The task is executed under a user account added into sudoers list (so, it can use `sudo`).', arg_group='Setup Task')
+        c.argument('setup_task', help='A command line which should be executed on each compute node when it\'s got allocated or rebooted. The task is executed in a bash subshell under root account.', arg_group='Setup Task')
         c.argument('setup_task_output', help='Directory path to store where setup-task\'s logs. Note, Batch AI will create several helper directories under this path. The created directories are reported as stdOutErrPathSuffix by \'az cluster show\' command.', arg_group='Setup Task')
 
     with self.argument_context('batchai cluster create', arg_group='Virtual Network') as c:

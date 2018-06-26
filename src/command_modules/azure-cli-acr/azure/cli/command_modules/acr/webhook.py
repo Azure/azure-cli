@@ -5,7 +5,7 @@
 
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2017_10_01.models import (
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     WebhookCreateParameters,
     WebhookUpdateParameters
 )

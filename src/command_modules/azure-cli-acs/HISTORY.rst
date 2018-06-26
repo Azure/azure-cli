@@ -3,8 +3,15 @@
 Release History
 ===============
 
+2.1.2
++++++
+* Breaking change: Enable Kubernetes role-based access control by default.
+* Add a `--disable-rbac` argument and deprecate `--enable-rbac` since it's the default now.
+* Updated options for `az aks browse` command. Added `--listen-port` support.
+* Update the default helm chart package for `az aks install-connector` command. Use virtual-kubelet-for-aks-latest.tgz.
+
 2.1.1
-++++++
++++++
 * Updated options of `az aks use-dev-spaces` command. Added `--update` support.
 * `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
 * expose read-only "nodeResourceGroup" property on managed clusters

@@ -74,7 +74,7 @@ helps['batchai cluster create'] = """
             az batchai cluster create -g MyResourceGroup -w MyWorkspace -n MyCluster \\
                 --use-auto-storage \\
                 -s Standard_NC6 -t 1 -k id_rsa.pub \\
-                --setup-task 'sudo apt update; sudo apt install unzip' \\
+                --setup-task 'apt update; apt install unzip -y' \\
                 --setup-task-output '$AZ_BATCHAI_MOUNT_ROOT/autoafs'
         - name: Create a cluster providing all parameters manually.
           text: |

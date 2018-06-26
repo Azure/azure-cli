@@ -384,7 +384,7 @@ helps['vm convert'] = """
 
 helps['vm'] = """
     type: group
-    short-summary: Provision Linux or Windows virtual machines.
+    short-summary: Manage Linux or Windows virtual machines.
 """
 helps['vm user'] = """
     type: group

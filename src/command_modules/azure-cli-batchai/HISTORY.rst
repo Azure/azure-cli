@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.3.1
++++++
+* Fixed `-o table` option for `az batchai cluster node list` and `az batchai job node list` commands.
+
 0.3.0
 +++++
 * Added support for 2018-05-01 API

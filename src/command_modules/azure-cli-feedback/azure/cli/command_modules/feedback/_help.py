@@ -7,5 +7,5 @@ from knack.help_files import helps
 
 helps['feedback'] = """
             type: command
-            short-summary: Loving or hating the CLI?  Let us know!
+            short-summary: Send feedback to the Azure CLI Team!
 """
