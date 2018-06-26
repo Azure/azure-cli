@@ -35,7 +35,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
-from azure.cli.core._environment import get_config_dir
+from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -1331,7 +1331,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
-               enable_rbac=False,
+               disable_rbac=None,
+               enable_rbac=None,
                network_plugin=None,
                pod_cidr=None,
                service_cidr=None,
@@ -1434,11 +1435,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             tenant_id=aad_tenant_id
         )
 
+    # Check that both --disable-rbac and --enable-rbac weren't provided
+    if all([disable_rbac, enable_rbac]):
+        raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
+
     mc = ManagedCluster(
         location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
-        enable_rbac=enable_rbac,
+        enable_rbac=False if disable_rbac else True,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
         service_principal_profile=service_principal_profile,
