@@ -1599,7 +1599,7 @@ def _update_dev_spaces_extension(extension_name, extension_module):
         try:
             from importlib import reload
         except ImportError:
-            pass # for python 2
+            pass  # for python 2
         reload(sys.modules[extension_module])
     except CLIError as err:
         logger.info(err)
