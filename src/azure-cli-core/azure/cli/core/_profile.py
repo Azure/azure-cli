@@ -78,7 +78,6 @@ def _get_authority_url(cli_ctx, tenant):
     return authority_url, is_adfs
 
 
-
 def _authentication_context_factory(cli_ctx, tenant, cache):
     import adal
     authority_url, is_adfs = _get_authority_url(cli_ctx, tenant)
@@ -991,6 +990,9 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except ImportError:
             from urlparse import parse_qs  # pylint: disable=import-error
 
+        if self.path.endswith('/favicon.ico'):
+            return
+
         query = self.path.split('?', 1)[-1]
         query = parse_qs(query, keep_blank_values=True)
         self.server.query_params = query
@@ -1032,12 +1034,18 @@ def _get_authorization_code_worker(tenant, authority_url, resource, results):
         web_server.server_close()
         results['no_browser'] = True
         return
+
     # wait for callback from browser.
-    web_server.handle_request()
+    while True:
+        web_server.handle_request()
+        if 'error' in web_server.query_params or 'code' in web_server.query_params:
+            break
+
     if 'error' in web_server.query_params:
         logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
                        web_server.query_params.get('error_description'))
         return
+
     if 'code' in web_server.query_params:
         code = web_server.query_params['code']
     else:
