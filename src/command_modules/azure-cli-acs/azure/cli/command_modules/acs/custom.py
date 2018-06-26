@@ -1592,13 +1592,14 @@ def _install_dev_spaces_extension(extension_name):
 def _update_dev_spaces_extension(extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
     try:
-        # unloading the imported module to update
-        del sys.modules[extension_module]
-
         from azure.cli.command_modules.extension import custom
         custom.update_extension(extension_name=extension_name)
+
+        # reloading the imported module to update
+        from importlib import reload as reload
+        reload(sys.modules[extension_module])
     except CLIError as err:
-        logger.debug(err)
+        logger.info(err)
     except ExtensionNotInstalledException as err:
         logger.debug(err)
         return False
