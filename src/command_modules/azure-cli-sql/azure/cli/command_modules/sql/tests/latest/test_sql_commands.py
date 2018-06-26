@@ -2287,11 +2287,11 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
     def test_sql_subscription_usages(self):
         self.cmd('sql list-usages -l westus',
-                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+                 checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+        self.cmd('sql show-usage -l westus -u ServerQuota',
                  checks=[
-                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheck('name', 'ServerQuota'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
 
