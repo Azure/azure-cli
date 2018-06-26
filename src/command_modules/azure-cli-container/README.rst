@@ -49,7 +49,7 @@ Commands to create an Azure container group
 
     Log Analytics Arguments
         --log-analytics-workspace       : The Log Analytics workspace name or id. If a name is
-                                        specified, it must be within the currently set subscription.
+                                        specified, use the --subscription flag to set the subscription if not current.
         --log-analytics-workspace-key   : The Log Analytics workspace key.
 
     Global Arguments

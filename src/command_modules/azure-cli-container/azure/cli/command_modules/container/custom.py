@@ -32,7 +32,7 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerNetworkProtocol)
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
@@ -107,7 +107,7 @@ def create_container(cmd,
         raise CLIError("error: the --image argument is required unless specified with a passed in file.")
 
     ports = ports or [80]
-    protocol = protocol or ContainerNetworkProtocol.tcp
+    protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
