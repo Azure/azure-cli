@@ -30,9 +30,9 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
 from azure.cli.core._config import DEFAULTS_SECTION
-from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+from azure.cli.core.api import get_config_dir
 from azure.cli.core.util import handle_exception
 
 from . import __version__
