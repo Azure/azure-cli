@@ -218,3 +218,9 @@ def log_registry_response(response):
     """
     log_request(None, response.request)
     log_response(None, response.request, response, result=response)
+
+
+def get_login_server_suffix(cli_ctx):
+    """Get the Azure Container Registry login server suffix in the current cloud.
+    """
+    return cli_ctx.cloud.suffixes.acr_login_server_endpoint
