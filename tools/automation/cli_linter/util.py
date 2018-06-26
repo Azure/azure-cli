@@ -45,12 +45,12 @@ def _filter_mods(command_loader, help_file_entries, modules=None, extensions=Non
             command_loader.command_table.pop(command_name, None)
             help_file_entries.pop(command_name, None)
 
-        # Remove unneeded command groups
-        retained_command_groups = set([' '.join(x.split(' ')[:-1]) for x in command_loader.command_table])
-        excluded_command_groups = set(command_loader.command_group_table.keys()) - retained_command_groups
-        for group_name in excluded_command_groups:
-            command_loader.command_group_table.pop(group_name, None)
-            help_file_entries.pop(group_name, None)
+    # Remove unneeded command groups
+    retained_command_groups = set([' '.join(x.split(' ')[:-1]) for x in command_loader.command_table])
+    excluded_command_groups = set(command_loader.command_group_table.keys()) - retained_command_groups
+    for group_name in excluded_command_groups:
+        command_loader.command_group_table.pop(group_name, None)
+        help_file_entries.pop(group_name, None)
 
     return command_loader, help_file_entries
 
