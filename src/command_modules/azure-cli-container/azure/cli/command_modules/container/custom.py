@@ -32,7 +32,7 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerNetworkProtocol)
 from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
@@ -72,6 +72,7 @@ def create_container(cmd,
                      memory=1.5,
                      restart_policy='Always',
                      ports=None,
+                     protocol=None,
                      os_type='Linux',
                      ip_address=None,
                      dns_name_label=None,
@@ -85,7 +86,6 @@ def create_container(cmd,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
-                     log_analytics_workspace_id=None,
                      log_analytics_workspace_key=None,
                      gitrepo_url=None,
                      gitrepo_dir='.',
@@ -107,6 +107,7 @@ def create_container(cmd,
         raise CLIError("error: the --image argument is required unless specified with a passed in file.")
 
     ports = ports or [80]
+    protocol = protocol or ContainerNetworkProtocol.tcp
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
@@ -139,19 +140,21 @@ def create_container(cmd,
         mounts.append(secrets_volume_mount)
 
     diagnostics = None
-    if log_analytics_workspace:
-        diagnostics = _get_diagnostics_from_workspace(cmd.cli_ctx, log_analytics_workspace)
-        if not diagnostics:
-            raise CLIError('Log Analytics workspace "' + log_analytics_workspace + '" not found.')
-    elif log_analytics_workspace_id and log_analytics_workspace_key:
-        log_analytics = LogAnalytics(workspace_id=log_analytics_workspace_id, workspace_key=log_analytics_workspace_key)
+    tags = {}
+    if log_analytics_workspace and log_analytics_workspace_key:
+        log_analytics = LogAnalytics(
+            workspace_id=log_analytics_workspace, workspace_key=log_analytics_workspace_key)
+
         diagnostics = ContainerGroupDiagnostics(
             log_analytics=log_analytics
         )
-    elif log_analytics_workspace_id and not log_analytics_workspace_key:
-        raise CLIError('"--log-analytics-workspace-id" requires "--log-analytics-workspace-key".')
-    elif not log_analytics_workspace_id and log_analytics_workspace_key:
-        raise CLIError('"--log-analytics-workspace-key" requires "--log-analytics-workspace-id".')
+    elif log_analytics_workspace and not log_analytics_workspace_key:
+        diagnostics, tags = _get_diagnostics_from_workspace(
+            cmd.cli_ctx, log_analytics_workspace)
+        if not diagnostics:
+            raise CLIError('Log Analytics workspace "' + log_analytics_workspace + '" not found.')
+    elif not log_analytics_workspace and log_analytics_workspace_key:
+        raise CLIError('"--log-analytics-workspace-key" requires "--log-analytics-workspace".')
 
     gitrepo_volume = _create_gitrepo_volume(gitrepo_url=gitrepo_url, gitrepo_dir=gitrepo_dir, gitrepo_revision=gitrepo_revision)
     gitrepo_volume_mount = _create_gitrepo_volume_mount(gitrepo_volume=gitrepo_volume, gitrepo_mount_path=gitrepo_mount_path)
@@ -160,13 +163,14 @@ def create_container(cmd,
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, dns_name_label)
+    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
 
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
                           command=command,
-                          ports=[ContainerPort(port=p) for p in ports] if cgroup_ip_address else None,
+                          ports=[ContainerPort(
+                              port=p, protocol=protocol) for p in ports] if cgroup_ip_address else None,
                           environment_variables=environment_variables,
                           volume_mounts=mounts or None)
 
@@ -177,7 +181,8 @@ def create_container(cmd,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None,
-                            diagnostics=diagnostics)
+                            diagnostics=diagnostics,
+                            tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
@@ -188,14 +193,18 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
     for workspace in log_analytics_client.list():
         if log_analytics_workspace == workspace.name:
-            keys = log_analytics_client.get_shared_keys(parse_resource_id(workspace.id)['resource_group'], workspace.name)
-            log_analytics = LogAnalytics(workspace_id=workspace.customer_id, workspace_key=keys.primary_shared_key)
+            keys = log_analytics_client.get_shared_keys(
+                parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
-            return ContainerGroupDiagnostics(
-                log_analytics=log_analytics
-            )
+            log_analytics = LogAnalytics(
+                workspace_id=workspace.customer_id, workspace_key=keys.primary_shared_key)
 
-    return None
+            diagnostics = ContainerGroupDiagnostics(
+                log_analytics=log_analytics)
+
+            return (diagnostics, {'oms-resource-link': workspace.id})
+
+    return None, {}
 
 
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
@@ -348,10 +357,10 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports, dns_name_label):
+def _create_ip_address(ip_address, ports, protocol, dns_name_label):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
-        return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports], dns_name_label=dns_name_label)
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
 
 
 # pylint: disable=inconsistent-return-statements

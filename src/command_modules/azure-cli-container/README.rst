@@ -48,8 +48,8 @@ Commands to create an Azure container group
         --registry-username           : The username to log in container image registry server.
 
     Log Analytics Arguments
-        --log-analytics-workspace       : The Log Analytics workspace. Must be in the currently set subscription.
-        --log-analytics-workspace-id    : The Log Analytics workspace id.
+        --log-analytics-workspace       : The Log Analytics workspace name or id. If a name is
+                                        specified, it must be within the currently set subscription.
         --log-analytics-workspace-key   : The Log Analytics workspace key.
 
     Global Arguments
@@ -73,6 +73,10 @@ Commands to create an Azure container group
         Create a container group with public IP address.
             az container create -g MyResourceGroup --name MyAlpine --image alpine:latest --ip-address
             public
+
+        Create a container in a container group with public IP address and UDP port.
+            az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address
+            public --ports 8081 --protocol UDP
 
         Create a container group with starting command line.
             az container create -g MyResourceGroup --name MyAlpine --image alpine:latest --command-line
@@ -109,7 +113,7 @@ Commands to create an Azure container group
             az container create -g MyResourceGroup --name myapp --log-analytics-workspace myworkspace
 
         Create a container group using Log Analytics from a workspace id and key.
-            az container create -g MyResourceGroup --name myapp --log-analytics-workspace-id workspaceid
+            az container create -g MyResourceGroup --name myapp --log-analytics-workspace workspaceid
             --log-analytics-workspace-key workspacekey
 
 
