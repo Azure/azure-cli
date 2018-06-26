@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.2.0
++++++
+* Default to long running operation for `az container create`
+* Add Log Analytics parameters '--log-analytics-workspace' and '--log-analytics-workspace-key'
+* Add --protocol parameter to specify which network protocol to use
+
 0.1.24
 ++++++
 * Allow exporting a container group in yaml format.
