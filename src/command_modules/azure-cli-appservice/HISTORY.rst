@@ -5,6 +5,7 @@ Release History
 0.1.36
 ++++++
 * Minor fixes
+* webapp/functionapp: Disabling identity is now accomplished by assigning type to 'None'. Preview tag removed.
 
 0.1.35
 ++++++
