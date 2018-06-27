@@ -290,15 +290,12 @@ def _list_app(cli_ctx, resource_group_name=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None, disable_msi=False):
+def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        if disable_msi:
-            webapp.identity = ManagedServiceIdentity(type='None')
-        else:
-            webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -309,6 +306,19 @@ def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=Non
 
 def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
+
+def remove_identity(cmd, resource_group_name, name, slot=None):
+    def getter():
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='None')
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    webapp = _assign_identity(cmd.cli_ctx, getter, setter)
+    return webapp.identity
 
 
 def get_auth_settings(cmd, resource_group_name, name, slot=None):

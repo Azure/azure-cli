@@ -50,10 +50,10 @@ helps['webapp identity assign'] = """
     examples:
         - name: assign local identity and assign a reader role to the current resource group.
           text: >
-            az webapp identity assign -g MyResourceGroup -n MyUniqueApp
-        - name: disable the identity when there is need.
+            az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        - name: enable identity for the webapp.
           text: >
-            az webapp identity assign -g MyResourceGroup -n MyUniqueApp--disable-msi
+            az webapp identity assign -g MyResourceGroup -n MyUniqueApp
 """
 
 helps['webapp identity'] = """
@@ -66,11 +66,18 @@ helps['webapp identity show'] = """
     short-summary: display webapp's managed service identity
 """
 
+helps['webapp identity remove'] = """
+    type: command
+    short-summary: Disable webapp's managed service identity
+"""
+
 helps['functionapp identity'] = helps['webapp identity'].replace('webapp', 'functionapp')
 
 helps['functionapp identity assign'] = helps['webapp identity assign'].replace('webapp', 'functionapp')
 
 helps['functionapp identity show'] = helps['webapp identity show'].replace('webapp', 'functionapp')
+
+helps['functionapp identity remove'] = helps['webapp identity remove'].replace('webapp', 'functionapp')
 
 helps['webapp config'] = """
 type: group
