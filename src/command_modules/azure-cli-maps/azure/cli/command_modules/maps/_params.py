@@ -33,8 +33,7 @@ def load_arguments(self, _):
     with self.argument_context('maps account') as c:
         c.argument('sku_name',
                    options_list=['--sku', '-s'],
-                   help='The name of the SKU.',
-                   arg_type=get_enum_type(['S0']))
+                   arg_type=get_enum_type(['S0', 'P1']))
         c.argument('tags',
                    arg_type=tags_type)
 
