@@ -296,7 +296,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
             if key_encryption_key_url:
                 encryption_settings['keyEncryptionKey'] = {
-                    'secretUrl': key_encryption_key_url,
+                    'keyUrl': key_encryption_key_url,
                     'sourceVault': {
                         'id': key_encryption_key_vault_id
                     }
