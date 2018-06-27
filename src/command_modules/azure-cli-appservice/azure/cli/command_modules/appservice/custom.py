@@ -295,13 +295,15 @@ def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=Non
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        if disable_msi:
+            webapp.identity = ManagedServiceIdentity(type='None')
+        else:
+            webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
     webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
-    update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)], slot)
     return webapp.identity
 
 
