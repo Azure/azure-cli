@@ -364,7 +364,7 @@ def load_arguments(self, _):
 
     for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
-            c.argument('identities', nargs='+', help="space-separated user assigned identities to remove")
+            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '[system]' to refer system assigned identity.")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
