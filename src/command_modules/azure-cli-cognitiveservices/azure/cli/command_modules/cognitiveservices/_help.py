@@ -45,7 +45,7 @@ helps['cognitiveservices account show'] = """
     short-summary: Get the details of an Azure Cognitive Services account.
     examples:
         - name: Show account information.
-          text: az cognitiveservices account show --name myresource --resourcegroup cognitive-services-resource-group
+          text: az cognitiveservices account show --name myresource --resource-group cognitive-services-resource-group
 """
 
 helps['cognitiveservices account update'] = """
