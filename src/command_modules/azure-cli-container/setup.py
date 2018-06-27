@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance==1.0.0',
     'azure-mgmt-loganalytics==0.2.0',
     'azure-cli-core',
-    'pyyaml',
+    'pyyaml~=3.12',
     'colorama',
     'websocket-client'
 ]
