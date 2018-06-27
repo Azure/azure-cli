@@ -44,7 +44,7 @@ class MapsScenarioTests(ScenarioTest):
 
         # Test 'az maps account update'
         # Test to add a new tag to an existing account.
-        self.cmd('az maps account update -n {name} -g {rg} --sku {sku} --tags {tags}',
+        self.cmd('az maps account update -n {name} -g {rg} --tags {tags}',
                  checks=[
                      self.check('id', account['id']),
                      self.check('name', '{name}'),

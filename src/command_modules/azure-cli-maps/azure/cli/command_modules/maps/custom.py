@@ -46,13 +46,11 @@ def list_accounts(client, resource_group_name=None):
     return client.list_by_resource_group(resource_group_name)
 
 
-def generic_update_account(instance, sku_name=None, tags=None):
+def generic_update_account(instance, tags=None):
     # Pre-populate with old instance
     maps_account_create_params = MapsAccountCreateParameters(location=ACCOUNT_LOCATION, sku=instance.sku,
                                                              tags=instance.tags)
     # Update fields with new parameter values
-    if sku_name:
-        maps_account_create_params.sku.name = sku_name
     if tags:
         maps_account_create_params.tags = tags
     return maps_account_create_params
