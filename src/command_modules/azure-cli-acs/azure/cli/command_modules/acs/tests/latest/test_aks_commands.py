@@ -121,7 +121,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create --no-wait
         create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
                      '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
-                     '--tags scenario_test --no-wait'
+                     '--tags scenario_test -c 1 --no-wait'
         self.cmd(create_cmd, checks=[self.is_empty()])
 
         # wait
@@ -131,10 +131,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles', None)
         ])
 
         # show k8s versions
@@ -162,6 +163,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
+        ])
+
+        # enable http application routing addon
+        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.httpApplicationRouting.enabled', True)
         ])
 
         # delete
