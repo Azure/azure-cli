@@ -36,7 +36,7 @@ DEPENDENCIES = [
     'azure-graphrbac==0.40.0',
     'azure-cli-core',
     'paramiko',
-    'pyyaml',
+    'pyyaml~=3.12',
     'six',
     'scp',
     'sshtunnel'
