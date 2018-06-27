@@ -307,6 +307,7 @@ def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=Non
 def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
+
 def remove_identity(cmd, resource_group_name, name, slot=None):
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
