@@ -56,6 +56,7 @@ class CloudCommandsLoader(AzCommandsLoader):
             c.argument('suffix_keyvault_dns', help='The Key Vault service dns suffix')
             c.argument('suffix_azure_datalake_store_file_system_endpoint', help='The Data Lake store filesystem service dns suffix')
             c.argument('suffix_azure_datalake_analytics_catalog_and_job_endpoint', help='The Data Lake analytics job and catalog service dns suffix')
+            c.argument('suffix_acr_login_server_endpoint', help='The Azure Container Registry login server suffix')
             c.ignore('_subscription')  # hide global subscription param
 
         with self.argument_context('cloud show') as c:
