@@ -21,7 +21,7 @@ class MapsScenarioTests(ScenarioTest):
             'name': self.create_random_name(prefix='cli-', length=20),
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
-            'sku': 'S0',
+            'sku': 's0',
             'tags': tag_key + '=' + tag_value,
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
