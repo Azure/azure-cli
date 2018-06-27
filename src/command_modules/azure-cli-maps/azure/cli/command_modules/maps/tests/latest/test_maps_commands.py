@@ -22,6 +22,7 @@ class MapsScenarioTests(ScenarioTest):
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
             'sku': 's0',
+            'sku1': 'p1',
             'tags': tag_key + '=' + tag_value,
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
@@ -82,9 +83,24 @@ class MapsScenarioTests(ScenarioTest):
             self.check('[0].tags', {tag_key: tag_value})
         ])
 
-        # Create two new accounts (One in separate resource group).
+        # Create two new accounts
+        # - Differing resource groups
+        # - Differing SKUs
         self.cmd('az maps account create -n {name1} -g {rg1} --sku {sku} --accept-tos')
-        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku} --accept-tos')
+        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku1} --accept-tos',
+                 checks=[
+                     self.check('name', '{name2}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('sku.name', '{sku1}')
+                 ])
+
+        # Double check Premium SKU for an account
+        self.cmd('az maps account show -n {name2} -g {rg}', checks=[
+            self.check('name', '{name2}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('sku.name', '{sku1}')
+        ])
+
         # Check that list command now shows two accounts in one resource group, and one in another.
         self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 2),
