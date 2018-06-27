@@ -347,12 +347,10 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     if service_principal is not None and client_secret is None:
         raise CLIError('--client-secret must be specified when --service-principal is specified')
     # Validate if the RG exists
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(aci_resource_group or resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, aci_resource_group or resource_group_name)
     # Auto assign the location
     if location is None:
-        location = rgkaci.location  # pylint:disable=no-member
+        location = rg_location
     norm_location = location.replace(' ', '').lower()
     # Validate the location upon the ACI avaiable regions
     _validate_aci_location(norm_location)
@@ -422,12 +420,10 @@ def k8s_uninstall_connector(cmd, client, name, resource_group_name, connector_na
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
     # Validate if the RG exists
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     # Auto assign the location
     if location is None:
-        location = rgkaci.location  # pylint:disable=no-member
+        location = rg_location
     norm_location = location.replace(' ', '').lower()
 
     if os_type.lower() in ['linux', 'both']:
@@ -764,11 +760,9 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
-        location = rg.location  # pylint:disable=no-member
+        location = rg_location
 
     # if api-version is not specified, or specified in a version not supported
     # override based on location
@@ -1321,7 +1315,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
                      "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
 
 
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals,too-many-statements
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -1361,11 +1355,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resource_groups(cmd.cli_ctx)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
-        location = rg.location  # pylint:disable=no-member
+        location = rg_location
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
@@ -1406,25 +1398,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = {}
-    addons = enable_addons.split(',') if enable_addons else []
-    if 'http_application_routing' in addons:
-        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
-        addons.remove('http_application_routing')
-    # TODO: can we help the user find a workspace resource ID?
-    if 'monitoring' in addons:
-        if not workspace_resource_id:
-            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
-        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
-            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
-        addons.remove('monitoring')
-    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-    elif workspace_resource_id:
-        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
-    # error out if any (unrecognized) addons remain
-    if addons:
-        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
-            ",".join(addons), "are" if len(addons) > 1 else "is"))
+    addon_profiles = _handle_addons_args(enable_addons, {}, workspace_resource_id)
+    if 'omsagent' in addon_profiles:
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
@@ -1467,6 +1443,28 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raise retry_exception
 
 
+def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+    instance = client.get(resource_group_name, name)
+
+    instance = _update_addons(instance, addons, enable=True,
+                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+
+    if 'omsagent' in instance.addon_profiles:
+        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+
+    # send the managed cluster representation to update the addon profiles
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
 def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
@@ -1481,6 +1479,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         kubeconfig = access_profile.kube_config.decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
+
+
+ADDONS = {
+    'http_application_routing': 'httpApplicationRouting',
+    'monitoring': 'omsagent'
+}
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -1571,6 +1575,37 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait=False):
+    # parse the comma-separated addons argument
+    addon_args = addons.split(',')
+
+    addon_profiles = instance.addon_profiles or {}
+
+    # for each addons argument
+    for addon_arg in addon_args:
+        addon = ADDONS[addon_arg]
+        if enable:
+            # add new addons or update existing ones and enable them
+            addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=True))
+            # special config handling for certain addons
+            if addon == 'omsagent' and workspace_resource_id:
+                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            addon_profiles[addon] = addon_profile
+        else:
+            if addon not in addon_profiles:
+                raise CLIError("The addon {} is not installed.".format(addon))
+            addon_profiles[addon].config = None
+        addon_profiles[addon].enabled = enable
+
+    instance.addon_profiles = addon_profiles
+
+    # null out the SP and AAD profile because otherwise validation complains
+    instance.service_principal_profile = None
+    instance.aad_profile = None
+
+    return instance
+
+
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
@@ -1583,6 +1618,30 @@ def _get_azext_module(extension_name, module_name):
         return azext_custom
     except ImportError as ie:
         raise CLIError(ie)
+
+
+def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=None):
+    if not addon_profiles:
+        addon_profiles = {}
+    addons = addons_str.split(',') if addons_str else []
+    if 'http_application_routing' in addons:
+        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('http_application_routing')
+    # TODO: can we help the user find a workspace resource ID?
+    if 'monitoring' in addons:
+        if not workspace_resource_id:
+            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
+        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
+            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+        addons.remove('monitoring')
+    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+    elif workspace_resource_id:
+        raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    # error out if any (unrecognized) addons remain
+    if addons:
+        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
+            ",".join(addons), "are" if len(addons) > 1 else "is"))
+    return addon_profiles
 
 
 def _install_dev_spaces_extension(extension_name):
@@ -1627,6 +1686,93 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True
+
+
+def _ensure_container_insights_for_monitoring(cmd, addon):
+    workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+    if not workspace_resource_id.startswith('/'):
+        workspace_resource_id = '/' + workspace_resource_id
+
+    # extract resource group from workspace_resource_id URL
+    try:
+        resource_group = workspace_resource_id.split('/')[4]
+    except IndexError:
+        raise CLIError('Could not locate resource group in workspace-resource-id URL.')
+
+    # find the location from the resource group
+    location = _get_rg_location(cmd.cli_ctx, resource_group)
+
+    # pylint: disable=line-too-long
+    template = {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {
+            "workspaceResourceId": {
+                "type": "string",
+                "metadata": {
+                    "description": "Azure Monitor Log Analytics Resource ID"
+                }
+            },
+            "workspaceRegion": {
+                "type": "string",
+                "metadata": {
+                    "description": "Azure Monitor Log Analytics workspace region"
+                }
+            }
+        },
+        "resources": [
+            {
+                "type": "Microsoft.Resources/deployments",
+                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                "apiVersion": "2017-05-10",
+                "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
+                "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
+                "properties": {
+                    "mode": "Incremental",
+                    "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {},
+                        "variables": {},
+                        "resources": [
+                            {
+                                "apiVersion": "2015-11-01-preview",
+                                "type": "Microsoft.OperationsManagement/solutions",
+                                "location": "[parameters('workspaceRegion')]",
+                                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                "properties": {
+                                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                                },
+                                "plan": {
+                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                    "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
+                                    "promotionCode": "",
+                                    "publisher": "Microsoft"
+                                }
+                            }
+                        ]
+                    },
+                    "parameters": {}
+                }
+            }
+        ]
+    }
+
+    params = {
+        "workspaceResourceId": {
+            "value": workspace_resource_id
+        },
+        "workspaceRegion": {
+            "value": location
+        }
+    }
+
+    # TODO: does this name need to be randomized or input by the user?
+    deployment_name = 'aks-monitoring'
+
+    # publish the Container Insights solution to the Log Analytics workspace
+    return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
+                              validate=False, no_wait=False)
 
 
 def _ensure_aks_service_principal(cli_ctx,
@@ -1703,6 +1849,13 @@ def _ensure_service_principal(cli_ctx,
             raise CLIError('--client-secret is required if --service-principal is specified')
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
+
+
+def _get_rg_location(ctx, resource_group_name):
+    groups = cf_resource_groups(ctx)
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    rg = groups.get(resource_group_name)
+    return rg.location
 
 
 def _print_or_merge_credentials(path, kubeconfig):

@@ -173,6 +173,12 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
 
+    with self.argument_context('aks disable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
+    with self.argument_context('aks enable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),

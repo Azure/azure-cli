@@ -259,6 +259,31 @@ helps['aks delete'] = """
     short-summary: Delete a managed Kubernetes cluster.
 """
 
+helps['aks disable-addons'] = """
+    type: command
+    short-summary: Disable Kubernetes addons.
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Disable the Kubernetes addons in a comma-separated list.
+"""
+
+helps['aks enable-addons'] = """
+    type: command
+    short-summary: Enable Kubernetes addons.
+    long-summary: |-
+      These addons are available:
+          http_application_routing - configure ingress with automatic public DNS name creation.
+          monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Enable the Kubernetes addons in a comma-separated list.
+        - name: --workspace-resource-id
+          type: string
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+"""
+
 helps['aks get-credentials'] = """
     type: command
     short-summary: Get access credentials for a managed Kubernetes cluster.
