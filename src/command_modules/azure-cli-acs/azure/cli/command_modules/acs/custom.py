@@ -903,7 +903,8 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait, subscription_id=None):
+def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
+                       subscription_id=None):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
@@ -1591,7 +1592,8 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
             if addon == 'omsagent':
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
-                                   'To change monitoring configuration, run "az aks disable-addons -monitoring" before enabling it again.')
+                                   'To change monitoring configuration, run "az aks disable-addons -monitoring"'
+                                   'before enabling it again.')
                 elif workspace_resource_id:
                     addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
