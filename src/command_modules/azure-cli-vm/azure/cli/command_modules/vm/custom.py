@@ -1218,8 +1218,12 @@ def list_vm_extension_images(
 # region VirtualMachines Identity
 def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
     ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
+    remove_system_assigned_identity = False
+    if '[system]' in identities:
+        remove_system_assigned_identity = True
+        identities.remove('[system]')
     resource = getter(cmd, resource_group_name, name)
-    existing = set([x.lower() for x in resource.identity.identity_ids])
+    existing = set([x.lower() for x in (resource.identity.identity_ids or [])])
     to_remove = set([x.lower() for x in identities])
     non_existing = to_remove.difference(existing)
     if non_existing:
@@ -1229,14 +1233,19 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         resource.identity.identity_ids = None
         if resource.identity.type == ResourceIdentityType.user_assigned:
             resource.identity.type = ResourceIdentityType.none
-        else:  # has to be 'system_assigned_user_assigned'
+        elif resource.identity.type == ResourceIdentityType.system_assigned_user_assigned:
             resource.identity.type = ResourceIdentityType.system_assigned
+
+    if remove_system_assigned_identity and resource.identity.type != ResourceIdentityType.none:
+        resource.identity.type = (ResourceIdentityType.none
+                                  if resource.identity.type == ResourceIdentityType.system_assigned
+                                  else ResourceIdentityType.user_assigned)
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
     return result.identity
 
 
-def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
+def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
     def setter(resource_group_name, vm_name, vm):
         client = _compute_client_factory(cmd.cli_ctx)
         VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
@@ -1244,6 +1253,10 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
             vm_update = VirtualMachineUpdate(identity=vm.identity)
             return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
         return client.virtual_machines.create_or_update(resource_group_name, vm_name, vm)
+
+    if identities is None:
+        from ._vm_utils import MSI_LOCAL_ID
+        identities = [MSI_LOCAL_ID]
 
     return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
 # endregion
@@ -2382,7 +2395,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
 
 # region VirtualMachineScaleSets Identity
-def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
+def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
     client = _compute_client_factory(cmd.cli_ctx)
 
     def _get_vmss(_, resource_group_name, vmss_name):
@@ -2397,6 +2410,10 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
 
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                                   vmss_name, vmss_instance)
+
+    if identities is None:
+        from ._vm_utils import MSI_LOCAL_ID
+        identities = [MSI_LOCAL_ID]
 
     return _remove_identities(cmd, resource_group_name, vmss_name, identities,
                               _get_vmss,

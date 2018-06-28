@@ -1217,10 +1217,14 @@ helps['vm identity assign'] = """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove user assigned identities from a VM.
+    short-summary: (PREVIEW) Remove managed service identities from a VM.
     examples:
+        - name: Remove system assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 
 helps['vm identity show'] = """
@@ -1261,8 +1265,12 @@ helps['vmss identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
     examples:
+        - name: Remove system assigned identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
-          text: az vmss identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities [system] readerId
 """
 
 helps['vmss identity show'] = """
