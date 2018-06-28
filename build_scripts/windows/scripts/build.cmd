@@ -18,11 +18,14 @@ if "%CLI_VERSION%"=="" (
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
 
+:: find the root window installer script folder
+for %%i in ("%~dp0..") do set "WIN_SCRIPT_FOLDER=%%~fi"
+
 set OUTPUT_DIR=%~dp0..\out
 if exist %OUTPUT_DIR% rmdir /s /q %OUTPUT_DIR%
 mkdir %OUTPUT_DIR%
 
-set ARTIFACTS_DIR=%~dp0..\artifacts
+set ARTIFACTS_DIR=%WIN_SCRIPT_FOLDER%\artifacts
 mkdir %ARTIFACTS_DIR%
 
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
@@ -171,7 +174,7 @@ for /f %%a in ('dir /b /s *_py3.*.pyc') do (
 popd
 
 :: Remove .py and only deploy .pyc files
-pushd %BUILDING_DIR%\Lib\site-packages\azure
+pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
     echo !PARENT_DIR! | findstr /C:"!BUILDING_DIR!\Lib\site-packages\pip" 1>nul
