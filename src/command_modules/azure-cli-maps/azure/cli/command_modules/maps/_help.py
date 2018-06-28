@@ -40,7 +40,11 @@ helps['maps account create'] = """
               By creating an Azure Maps account, you agree that you have read and agree to the
               License (https://azure.microsoft.com/en-us/support/legal/) and
               Privacy Statement (https://privacy.microsoft.com/en-us/privacystatement).
-
+        - name: --sku -s
+          short-summary: Pricing Tier (SKU)
+          long-summary: |
+              Standard Tier: S0
+              Premium Tier (Preview): P1
 """
 
 helps['maps account update'] = """

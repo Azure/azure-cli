@@ -1,36 +1,40 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-06-12T18:20:47Z"}}'
+    body: null
     headers:
-      Accept: [application/json]
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.37]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-12T18:20:47Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
+      date: ['Wed, 27 Jun 2018 22:00:36 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rsC7r--TggDQWyIodsnhnTDtlAO_4k8_IeH4c3UybeHAdMt-vcbu7AMYnZVfEuRV7pdVZRDMU0ydciIbPne_5lWH21BJrXuqtDB4XcOUEbN_BFfYWwAm2EpXRmZq1TTSRUpvW5rl0ZZ3dA8XYdo1jjlqW0WpBFBkmCUdJny-Ad9AgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-06-12T18:20:48Z"}}'
+      "date": "2018-06-27T22:00:36Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -39,24 +43,119 @@ interactions:
       Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.37]
+          msrest_azure/0.4.29 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-12T18:20:48Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-27T22:00:36Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:48 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
     status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:37 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rJQC4CF9__-Z27VucjBGrk2QCPRpdZ2fO7r7foUY7Eqf6KjyD0WwvaEg4oz1xbe9Tqwmuu4ejxqcJqZAUsh30qJm3i7SBYlXZxCPzX3pu1dMnkMIdw23fnqrz7EhThGz4TRsZHD-1WP7H3qgYEGFaAdjC2Vgr9K1zvdKpv7kz7XAgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-06-27T22:00:38Z"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-27T22:00:38Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:39 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rDU3Pja_FcpOkJ4t0gJ4Wm1beB88YpmnRsCFCogmlbW42UF0NcwAqUIY9fPYPFp8M7SNPzkQeGW7D5KgBM1CxOZtqdaK_ZhV_E5Otq17a3Rnjf6gN20J5z33JTncau1mFwTJxuONNzD_0yk1UKoUW6u0EejZbNUUg9ilEkjp7XZUgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: '{"location": "global", "sku": {"name": "S0"}}'
     headers:
@@ -67,27 +166,61 @@ interactions:
       Content-Length: ['45']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\
-        \n    \"tier\": \"Standard\"\r\n  }\r\n}"}
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\
+        \n    \"tier\": \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"8ee33719-69c6-4a29-816b-cac4985c9316\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['372']
+      content-length: ['453']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:53 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:42 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7ryrewVboYZyNZGA6ZiClForg2xN-evX3Fb0Pf8F7lOTbuwjonWb7ovZMRF_g21GIxNrPE0uauetZp-UyH-uYE2pvqfg-uSfVyKMLs_TJjkDohcAHIASaYGvswajq2aPyi6fp1_M-3AwLIU7xsn9txjdNdljCMhs0BZ2798AS_EyggAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: '{"location": "global", "sku": {"name": "S0"}}'
     headers:
@@ -98,20 +231,21 @@ interactions:
       Content-Length: ['45']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\
-        \n    \"tier\": \"Standard\"\r\n  }\r\n}"}
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\
+        \n    \"tier\": \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"8ee33719-69c6-4a29-816b-cac4985c9316\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['372']
+      content-length: ['453']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:54 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -119,7 +253,40 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:44 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rX0elRv4k_q-QJV4P3g9YU5neqakHoQmWX1YZdkLJCXPVJy6jyzPumPOF8dsorEEUzg8IY3xdN-FqTkwfPff488hs3-rQeJmGLmqRP185wYBJykZZjsq3xinmWw7dVAlTIDgrB48l7_dubbhm8hYG9czy5LTEltN6MsZe5_onrlggAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -130,20 +297,21 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\
-        \n    \"tier\": \"Standard\"\r\n  }\r\n}"}
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\
+        \n    \"tier\": \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"8ee33719-69c6-4a29-816b-cac4985c9316\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['372']
+      content-length: ['453']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:54 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -153,8 +321,41 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:46 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rr-dYs_IIBbY_vXvIE6yxg2BkXa0RL_4m5Q62jVL_qYxgWC5-p757bMMQ9-vzFaGurk7DepEecz12AKYMsriVOwCDvCvFyjSbv5yypt7-DXe9l_OQz2kMa7i2RVPrfv9bMN-QjrIPd5dl0RQrLbO8pJCJx7AWSHQRmQALkzjPTy8gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
     body: 'b''b\''{"location": "global", "tags": {"key-000003": "val-000004"}, "sku":
-      {"name": "S0"}}\'''''
+      {"name": "s0"}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -163,21 +364,22 @@ interactions:
       Content-Length: ['83']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n  \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"\
-        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\n    \"tier\"\
-        : \"Standard\"\r\n  }\r\n}"}
+        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\"\
+        : \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\": \"8ee33719-69c6-4a29-816b-cac4985c9316\"\
+        \r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['423']
+      content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:56 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -185,7 +387,40 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:48 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rMiYA17ybf1eh1D5lnBWl_8XYuzpWZX5y3uYip84PkYXcDbliYOBXAz1OhJzgrskFo06HbMi77lNZx4gKUKJyPRSPxHQdL6p5P4T9Hny7v7eir1HVNP49IppGYfHq1AGXlBe3uYLEDCGfDsoLPBUKT0M6HNM9VC3JL4QdmjY7O4cgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -196,21 +431,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n  \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"\
-        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\n    \"tier\"\
-        : \"Standard\"\r\n  }\r\n}"}
+        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\"\
+        : \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\": \"8ee33719-69c6-4a29-816b-cac4985c9316\"\
+        \r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['423']
+      content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:56 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:49 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -222,27 +458,61 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:50 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rDdkYncIDxgs7PCplRQVeoOGaQqQQDzpwDITOua6gkA1Cy1DPNFRWWCb_GFr4KlAj1ExX2vJaSJR8ScjzM6Ctxnj0S7u5zSwMK9-f8qpg4aIyKBQ5mb0ovGrTeZzGb1OPq0PnNTSEilLw9KGQF-WE0Lytrz0N1iWTp02CFxK_N30gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [maps account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n  \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n  \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"\
-        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\n    \"tier\"\
-        : \"Standard\"\r\n  }\r\n}"}
+        val-000004\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\"\
+        : \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\": \"8ee33719-69c6-4a29-816b-cac4985c9316\"\
+        \r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['423']
+      content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:57 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -250,6 +520,39 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:51 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rjQTIPbB0JI5_l2yl_FC3OxoKi3oNJU8qoPvDgOi3rU-JKh0e9S58V9Z2xqEZ52KusiB2nKiv0PIGMlofeIkEAahJAlHi80UXxvLjJC-KENMukFusi4Q9eUmGHsk1YYNEAppBjjEBQCm0zPgMcjLoUvEQUDBE0W5rbk-qnEjDGAUgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -260,21 +563,23 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
         ,\r\n      \"name\": \"cli-000005\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n      \"location\": \"global\",\r\n      \"tags\": {\r\n        \"key-000003\"\
-        : \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"S0\"\
-        ,\r\n        \"tier\": \"Standard\"\r\n      }\r\n    }\r\n  ]\r\n}"}
+        : \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"s0\"\
+        ,\r\n        \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\
+        \n        \"clientId\": \"8ee33719-69c6-4a29-816b-cac4985c9316\"\r\n     \
+        \ }\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['500']
+      content-length: ['593']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:20:58 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:52 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -282,6 +587,39 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:52 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rkUBFFNEvzRv4eVUVcVnfurxl7B1iDiVBMcUKbe0LAZLqf2v7ko0nJEVd5Q2sx6895uxhOtTycraXb9Xdobk1lYyZ2ZoNdoBip27tkFL_k6GNb0jqlgNQUZVvN6WCzfLxi2GFQc7Gc9ICgsWG0NbFeholO41aJx_GPGeDQ0zK9QkgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"location": "global", "sku": {"name": "S0"}}'
@@ -293,29 +631,63 @@ interactions:
       Content-Length: ['45']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006\"\
         ,\r\n  \"name\": \"cli-000006\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\
-        \n    \"tier\": \"Standard\"\r\n  }\r\n}"}
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\
+        \n    \"tier\": \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"cc732484-48d8-4db4-a64d-ee9e3bdc02b9\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['372']
+      content-length: ['453']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:00 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:54 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1185']
     status: {code: 201, message: Created}
 - request:
-    body: '{"location": "global", "sku": {"name": "S0"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:55 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r3jHdjBI2V8m9bopLjHNzsbBGgCsYH0iGW0krWg_Sv1InnsEIHu5RoopX4kwUM4l3Lv9aKzKvJTLlNBTS0hy1r3TWU8kZhgYC11Ng65AjMIqC8vkUZFIoI2wKxolmRjsOPDrCqrdaP4wnc8tCIaFMnq0lifIUZjPeZ3QBllx3C14gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "global", "sku": {"name": "P1"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -324,55 +696,85 @@ interactions:
       Content-Length: ['45']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\"\
         ,\r\n  \"name\": \"cli-000007\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"S0\",\r\
-        \n    \"tier\": \"Standard\"\r\n  }\r\n}"}
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"p1\",\r\
+        \n    \"tier\": \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"6a5d7109-19b2-4aa8-be61-1303a6aa8aa0\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['372']
+      content-length: ['452']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:02 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1185']
     status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:58 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rvIPySzzqz-VU0XGAnIE7JKbJNM-CPVE9cZ9ERWIibD-ILYCvUqGmY7Ad-C_ifTCNet0U7yH2ZWb30em7jUSEgzJFDEYfIHC2Zlm1R-nWdHWgUAxbxDDDNfJKzqhMByXab0Rnl3w74lytI1QtFAIBg0-_FsSYyXhQtRdm0BRmR2wgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [maps account list]
+      CommandName: [maps account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
   response:
-    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\"\
-        ,\r\n      \"name\": \"cli-000007\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n      \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\"\
-        : \"S0\",\r\n        \"tier\": \"Standard\"\r\n      }\r\n    },\r\n    {\r\
-        \n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
-        ,\r\n      \"name\": \"cli-000005\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
-        ,\r\n      \"location\": \"global\",\r\n      \"tags\": {\r\n        \"key-000003\"\
-        : \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"S0\"\
-        ,\r\n        \"tier\": \"Standard\"\r\n      }\r\n    }\r\n  ]\r\n}"}
+    body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\"\
+        ,\r\n  \"name\": \"cli-000007\",\r\n  \"type\": \"Microsoft.Maps/accounts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"p1\",\r\
+        \n    \"tier\": \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"clientId\"\
+        : \"6a5d7109-19b2-4aa8-be61-1303a6aa8aa0\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['915']
+      content-length: ['452']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:03 GMT']
+      date: ['Wed, 27 Jun 2018 22:00:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -384,27 +786,133 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:00:59 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rO61cN86cQ8ybrBmpp1Ld5Mx8lcCg_lOFr_mllcCikrYa-FYPYV9OreCcnquen3chepoZulcnc2fuspXxPnsbd2rF-DFDlnOKHAtGNztDtj8rsRtjFlXD6zBLjbOTWmHbs9iHN6j8lREiYJ2TjDriGNId4m_74K0N0y__eSnlfWYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [maps account list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+  response:
+    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
+        ,\r\n      \"name\": \"cli-000005\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
+        ,\r\n      \"location\": \"global\",\r\n      \"tags\": {\r\n        \"key-000003\"\
+        : \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"s0\"\
+        ,\r\n        \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\
+        \n        \"clientId\": \"8ee33719-69c6-4a29-816b-cac4985c9316\"\r\n     \
+        \ }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\"\
+        ,\r\n      \"name\": \"cli-000007\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
+        ,\r\n      \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\"\
+        : \"p1\",\r\n        \"tier\": \"Premium\"\r\n      },\r\n      \"properties\"\
+        : {\r\n        \"clientId\": \"6a5d7109-19b2-4aa8-be61-1303a6aa8aa0\"\r\n\
+        \      }\r\n    }\r\n  ]\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1100']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:00 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rTDOMV4vvCOcxZELaS61oxJ4B6BB3dfko8guiBB01Nk5UucrU0VTsni_vrhgtlpmgxtPqhyg4b4pMRvDuzn3DK8BpcS9VAXaEjCP4_WWsWZ3QStm82nCT7hedmqXPMae47LRI59nAz2HBphN_w2F9YJkjgeJ2QLgKnH9PntTpXxcgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [maps account list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006\"\
         ,\r\n      \"name\": \"cli-000006\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n      \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\"\
-        : \"S0\",\r\n        \"tier\": \"Standard\"\r\n      }\r\n    }\r\n  ]\r\n\
-        }"}
+        : \"s0\",\r\n        \"tier\": \"Standard\"\r\n      },\r\n      \"properties\"\
+        : {\r\n        \"clientId\": \"cc732484-48d8-4db4-a64d-ee9e3bdc02b9\"\r\n\
+        \      }\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['530']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:04 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -412,6 +920,39 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:02 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rIt5E_nnCONVAvDSYC-KLg9I9uka6koG_SYZQrOdFM-6oWfsofYI6YbLhhaTEiJOXjdKeJbWgc9FlivyPvMmM8MPrLakuMIw2WwVOL2VelfYxn7vhjJ_QLmDG_0rHybp4dg8ilV49Cbz5_zu-1xq3xenrmJvE94EbVm_1gYUISjsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -423,21 +964,21 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/listKeys?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/listKeys?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
-        ,\r\n  \"primaryKey\": \"2zi7dWxLN4d8GWAbe8adfTsFuocD5jrxy0ceV3gyH6k\",\r\n\
-        \  \"secondaryKey\": \"8hHhx0iLBLj_8yF8P2nrySCUzfZC_vRGUd45qBfPaGk\",\r\n\
-        \  \"primaryKeyLastUpdated\": \"2018-06-12T18:20:51.438263Z\",\r\n  \"secondaryKeyLastUpdated\"\
-        : \"2018-06-12T18:20:51.438263Z\"\r\n}"}
+        ,\r\n  \"primaryKey\": \"O9Y3FcpjBHHjlZZl5ayAUcb2b3aqFycpdnij_WzYBN0\",\r\n\
+        \  \"secondaryKey\": \"I3berWz27WUbqAOQ-STzvj3xg9RxJkeMPKKzazSK_p8\",\r\n\
+        \  \"primaryKeyLastUpdated\": \"2018-06-27T22:00:43.0853341Z\",\r\n  \"secondaryKeyLastUpdated\"\
+        : \"2018-06-27T22:00:43.0853341Z\"\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['463']
+      content-length: ['465']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:04 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -445,7 +986,40 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:03 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rPBtc5StfJ2V584XFVYKN1N09hOXHw3cm4kE3_DNDP2aXPl-KwNFU1ySPuTo5ZklpZBp2k8utcIyRbRE4idBWYKCKSLbX4INyQxqmuw2SiBT7er1x-XlFEg3s2Tv9xDgzwl6TOLucKM0msCiyq93umVLWRe6o6XjbmHT8Mh0uNzYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"keyType": "primary"}'
@@ -457,21 +1031,21 @@ interactions:
       Content-Length: ['22']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/regenerateKey?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/regenerateKey?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
-        ,\r\n  \"primaryKey\": \"O-KLUjZA9g-1fIjj0hhssFQ-ouOBmMOQk2lQdZifJ60\",\r\n\
-        \  \"secondaryKey\": \"8hHhx0iLBLj_8yF8P2nrySCUzfZC_vRGUd45qBfPaGk\",\r\n\
-        \  \"primaryKeyLastUpdated\": \"2018-06-12T18:21:06.1159049Z\",\r\n  \"secondaryKeyLastUpdated\"\
-        : \"2018-06-12T18:20:51.438263Z\"\r\n}"}
+        ,\r\n  \"primaryKey\": \"IAl6NNgMTy9ibFPr4I-8WlrsPVhGwvmg2eyoH5xFZY0\",\r\n\
+        \  \"secondaryKey\": \"I3berWz27WUbqAOQ-STzvj3xg9RxJkeMPKKzazSK_p8\",\r\n\
+        \  \"primaryKeyLastUpdated\": \"2018-06-27T22:01:05.8902924Z\",\r\n  \"secondaryKeyLastUpdated\"\
+        : \"2018-06-27T22:00:43.0853341Z\"\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['464']
+      content-length: ['465']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:06 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -479,7 +1053,40 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:05 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rl8L1eZ72e3kgLNE-x5gwD-IE7gpqSrudIMOfVlmEzWntcXh6TAShAL5It_nGjo4VAorcHjfiz567OmeqQ_uCBFkEHBCIpvzag_qQ4ZqNQA37r1QPNYl4NdpcI505ZzPMPCBRxbAciFIHsu7jf8yxCIsi5uU4nrXn5GDHEOXEnxYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: '{"keyType": "secondary"}'
@@ -491,21 +1098,21 @@ interactions:
       Content-Length: ['24']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/regenerateKey?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005/regenerateKey?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\"\
-        ,\r\n  \"primaryKey\": \"O-KLUjZA9g-1fIjj0hhssFQ-ouOBmMOQk2lQdZifJ60\",\r\n\
-        \  \"secondaryKey\": \"X0trXCMjKtXRWoUlmXAgmdn2xWEXR9nJFN3aHoEjXsM\",\r\n\
-        \  \"primaryKeyLastUpdated\": \"2018-06-12T18:21:06.1159049Z\",\r\n  \"secondaryKeyLastUpdated\"\
-        : \"2018-06-12T18:21:07.3591266Z\"\r\n}"}
+        ,\r\n  \"primaryKey\": \"IAl6NNgMTy9ibFPr4I-8WlrsPVhGwvmg2eyoH5xFZY0\",\r\n\
+        \  \"secondaryKey\": \"yZ5mu144oEGyEM4AOdgkozMdjA671BDBe4gBBl93NVQ\",\r\n\
+        \  \"primaryKeyLastUpdated\": \"2018-06-27T22:01:05.8902924Z\",\r\n  \"secondaryKeyLastUpdated\"\
+        : \"2018-06-27T22:01:07.3820153Z\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['465']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:07 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -513,7 +1120,40 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:06 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r1Ndk416pFCg9hKNWVs71eEuIyhXgro7AjGCy4R5r-YSfOpQAT7vJA7wHMTgkU9O1ukYFmCy2bUvz28lP8Mlhu9AlovBrzlak86HzcJdlxvrCmOn06erkwRrBzHL037PH4RYT-KRyeD0Snnv5waWqu9dAgWKE8agwrwWbn1Q2bPsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -525,22 +1165,55 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 12 Jun 2018 18:21:22 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14991']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:09 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rzc1YYHjMfol3YpjsZDYdp4lNhxlxxalE8gWWZ9yVqpI19fXNlnMUR5tVZx2HSEQw0brLkA341X8BwOSJM5yzTCcy5lMFa0DBnJeD1q0Ey2ZqNbU9Ef5NU90yTU8V8Ayvrl6SZdK1_ePh1CR3oznkWFUGulvMjmB00_fzU8YiUsMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -551,21 +1224,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\"\
         ,\r\n      \"name\": \"cli-000007\",\r\n      \"type\": \"Microsoft.Maps/accounts\"\
         ,\r\n      \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\"\
-        : \"S0\",\r\n        \"tier\": \"Standard\"\r\n      }\r\n    }\r\n  ]\r\n\
-        }"}
+        : \"p1\",\r\n        \"tier\": \"Premium\"\r\n      },\r\n      \"properties\"\
+        : {\r\n        \"clientId\": \"6a5d7109-19b2-4aa8-be61-1303a6aa8aa0\"\r\n\
+        \      }\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['529']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:24 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -573,6 +1247,39 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:10 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r7S-IoAFVNv063GdQ27z2c0Pk5Busia_8WhI5S96t6bQh4-QVCAXEx6UI29bm2TrYYZkWG23P43P7FJowb9tsXii0yUBtb1tF8tpNU0HsvZV2j4XJFTEl2fOTtZ8W-3D-kUT0d3We38lBZGZpgS1gFBKK0RdPV2c6PHnklwL33o0gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -584,22 +1291,55 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 12 Jun 2018 18:21:26 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14990']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:13 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7r5VQdiL3Zs5nuigy21xWh9LsBHHuReb1W6dTp7i3YHzc9HNXB-AmIQbO3HIIaatZgVY1xMU5Bjb5UAbN5E9AnYIuG3jxwKXvbDbZMbVt2oBVm_omPEASMMo7UCBUFq8GnZ818tQWQNQoUDMOTM-xfoovWn8XDj3zyE6ZKXCQ6QT8gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -611,22 +1351,55 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 12 Jun 2018 18:21:27 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14997']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:17 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rMXlK__YhEzkkwOq_gGRIz0HGc3UpHvIkT3QVSY7UjdPSO760IZ5-wqAFNdwopijiduLBF8kXmVFaYzdMH769HzUJudxRlEepp5Z1xXeB6gotav_ACrCOhKd1j7vkHG9Td5jJE1OK8KAdoF-vk5YYUVBKSwxAPVqB8NGO901AH6cgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -637,17 +1410,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"value\": []\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['19']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:28 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -659,23 +1432,56 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:18 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rtbGwnKnEc0J_pGHYDr77orxoMJ6C3cvhxhhb42cGe0KkxYiMSXO_gWmtvH7Il7iXrTcxzERphMq_FZK1HU2hBasywkXy_r4BbjvlGsiHpMkIKYRRFQjDIo5QOe_rpv2LGgwJbgym79WCsNWZdAQ16xjSDEyNcaNCvl9D0lFBMW4gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [maps account list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.37]
+          msrest_azure/0.4.29 azure-mgmt-maps/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts?api-version=2018-05-01
   response:
     body: {string: "{\r\n  \"value\": []\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['19']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 12 Jun 2018 18:21:29 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -683,6 +1489,39 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:19 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rZoUfrznE8ezx-NyCS5CODomzaoP6GVLdlf9N_wmMIZkUexeRRH8L3cUCBXy5x3vjsJat20Amdieq3csvB-TU4x_dmV5kUYhvJt0fJB2aw0wWbn5Pm8HF186zCMcNDZEPd34t-tBrJX0u8Kcru05WhO0BUjgP29VXOy76gec2PRsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -694,27 +1533,60 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.37]
+          msrest_azure/0.4.29 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 12 Jun 2018 18:21:30 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:21 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdWRUZLV0RXQ1FSRlBNSklNUDUzNkFNRkoyUTRBQjJJTkFSVXwyMEU5MkY3OTI1MTJFRDFDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc0Qk5SUjc1NUxaN0VJNUtLVTNMRkUyN0lER0NXS01OQ0c1SXwxMjRGNjI3RjkwQTBEQkY1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14995']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x86]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 27 Jun 2018 22:01:21 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAADX8GCi6Js6SK82TsD2Pb7rGb3cMz4WHYZSjmLWcSmhqk7_cI3dmaFFZb2u8SgUPWHYnqtrMcscW9yrfgRWRvtYGXiBOetBkzXxWu_HaYj_M6ELWSTyHfrleo9TosspLqpuk-z-ZY17qUPWx3CN_NVPSJIzLrTW78IUINz3fX-LuB3Skr30H-zDy7_zi_SEsuogAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group delete]
@@ -722,22 +1594,22 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.37]
+          msrest_azure/0.4.29 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 12 Jun 2018 18:21:30 GMT']
+      date: ['Wed, 27 Jun 2018 22:01:23 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdKN0pMSkxWNks1S1hBMlgzTDNYRVA0NVM0SkZVNjYzWkFTRXwyNUExNDJGQzVBNzI3RDcxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdWWlQ2UjVMVkxTVkRPVFhIREpLUEo1VkZPUVZWNVhLSldPMnw3NTg2Qzg1MzRFNjlCNjA4LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14994']
     status: {code: 202, message: Accepted}
 version: 1
