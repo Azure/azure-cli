@@ -308,6 +308,10 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
         })
 
+        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
         self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])

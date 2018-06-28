@@ -5,6 +5,10 @@
     "storageAccountName": {
       "type": "string",
       "defaultValue": "armbuilddemo1801"
+    },
+    "nestedRGName": {
+      "type": "string",
+      "defaultValue": "cli_test_subscription_level_deployment"
     }
   },
   "variables": {},
@@ -43,7 +47,7 @@
       "type": "Microsoft.Resources/deployments",
       "name": "rg-nested",
       "apiVersion": "2017-05-10",
-      "resourceGroup": "demo-rg",
+      "resourceGroup": "[parameters('nestedRGName')]",
       "properties": {
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
