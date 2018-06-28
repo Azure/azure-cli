@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -269,6 +269,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg}')
 
     @ResourceGroupPreparer()
+    @record_only()
     def test_acr_create_build_task(self, resource_group, resource_group_location):
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
@@ -402,6 +403,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg}')
 
     @ResourceGroupPreparer()
+    @record_only()
     def test_acr_image_import(self, resource_group):
         '''There are six test cases in the function.
         Case 1: Import image from a regsitry in a different subscription from the current one
