@@ -903,12 +903,12 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait):
+def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait, subscription_id=None):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient).deployments
+    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient, subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
@@ -1773,7 +1773,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
-                              validate=False, no_wait=False)
+                              validate=False, no_wait=False, subscription_id=subscription_id)
 
 
 def _ensure_aks_service_principal(cli_ctx,
