@@ -1588,7 +1588,7 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
             # special config handling for certain addons
-            if addon == 'omsgagent':
+            if addon == 'omsagent':
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
                                    'To change monitoring configuration, run "az aks disable-addons -monitoring" before enabling it again.')
