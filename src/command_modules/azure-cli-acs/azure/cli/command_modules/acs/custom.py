@@ -1693,14 +1693,15 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     if not workspace_resource_id.startswith('/'):
         workspace_resource_id = '/' + workspace_resource_id
 
-    # extract resource group from workspace_resource_id URL
+    # extract subscription ID and resource group from workspace_resource_id URL
     try:
+        subscription_id = workspace_resource_id.split('/')[2]
         resource_group = workspace_resource_id.split('/')[4]
     except IndexError:
         raise CLIError('Could not locate resource group in workspace-resource-id URL.')
 
     # find the location from the resource group
-    location = _get_rg_location(cmd.cli_ctx, resource_group)
+    location = _get_rg_location(cmd.cli_ctx, resource_group, subscription_id)
 
     # pylint: disable=line-too-long
     template = {
@@ -1851,8 +1852,8 @@ def _ensure_service_principal(cli_ctx,
     return load_acs_service_principal(subscription_id)
 
 
-def _get_rg_location(ctx, resource_group_name):
-    groups = cf_resource_groups(ctx)
+def _get_rg_location(ctx, resource_group_name, subscription_id=None):
+    groups = cf_resource_groups(ctx, subscription_id=subscription_id)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     return rg.location
