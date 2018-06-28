@@ -23,26 +23,28 @@ USER_HOME = expanduser('~')
 
 
 def get_help_files(cli_ctx):
-    invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
-    cli_ctx.invocation = invoker
-    cmd_table = invoker.commands_loader.load_command_table(None)
+    cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+    cli_ctx.invocation.commands_loader.load_command_table([])
+    cmd_table = cli_ctx.invocation.commands_loader.command_table
     for command in cmd_table:
-        invoker.commands_loader.load_arguments(command)
-    invoker.parser.load_command_table(invoker.commands_loader.command_table)
+        cli_ctx.invocation.commands_loader.load_arguments(command)
+    cli_ctx.invocation.parser.load_command_table(cli_ctx.invocation.commands_loader)
 
     parser_keys = []
     parser_values = []
     sub_parser_keys = []
     sub_parser_values = []
-    _store_parsers(invoker.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
+    _store_parsers(cli_ctx.invocation.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
     for cmd, parser in zip(parser_keys, parser_values):
         if cmd not in sub_parser_keys:
             sub_parser_keys.append(cmd)
             sub_parser_values.append(parser)
+
+    help_ctx = cli_ctx.help_cls(cli_ctx=cli_ctx)
     help_files = []
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
-            help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
+            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
         except Exception as ex:
@@ -70,6 +72,8 @@ class AzHelpGenDirective(Directive):
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
+            if help_file.deprecate_info:
+                yield '{}:deprecated: {}'.format(INDENT, help_file.deprecate_info._get_message(help_file.deprecate_info))
             if not is_command:
                 top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
@@ -89,6 +93,8 @@ class AzHelpGenDirective(Directive):
                     yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
                     yield ''
                     yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
+                    if arg.deprecate_info:
+                        yield '{}:deprecated: {}'.format(DOUBLEINDENT, arg.deprecate_info._get_message(arg.deprecate_info))
                     short_summary = arg.short_summary or ''
                     possible_values_index = short_summary.find(' Possible values include')
                     short_summary = short_summary[0:possible_values_index

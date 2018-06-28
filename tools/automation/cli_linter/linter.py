@@ -10,44 +10,48 @@ from importlib import import_module
 from pkgutil import iter_modules
 import yaml
 import colorama
-from .util import get_command_groups, share_element, exclude_commands, LinterError
+from .util import share_element, exclude_commands, LinterError
 
 
 class Linter(object):
-    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None):
-        self._command_table = command_table
+    def __init__(self, command_loader=None, help_file_entries=None, loaded_help=None):
         self._all_yaml_help = help_file_entries
         self._loaded_help = loaded_help
-        self._commands = set(command_table.keys())
-        self._command_groups = set()
+        self._command_loader = command_loader
         self._parameters = {}
         self._help_file_entries = set(help_file_entries.keys())
 
-        # get all unsupressed parameters
-        for command_name, command in command_table.items():
+        for command_name, command in self._command_loader.command_table.items():
             self._parameters[command_name] = set()
             for name, param in command.arguments.items():
-                if param.type.settings.get('help') != argparse.SUPPRESS:
-                    self._parameters[command_name].add(name)
-
-        # populate command groups
-        for command_name in self._commands:
-            self._command_groups.update(get_command_groups(command_name))
+                self._parameters[command_name].add(name)
 
     @property
     def commands(self):
-        return self._commands
+        return self._command_loader.command_table.keys()
 
     @property
     def command_groups(self):
-        return self._command_groups
+        return self._command_loader.command_group_table.keys()
 
     @property
     def help_file_entries(self):
         return self._help_file_entries
 
+    def get_command_metadata(self, command_name):
+        try:
+            return self._command_loader.command_table[command_name]
+        except KeyError:
+            return None
+
     def get_command_parameters(self, command_name):
         return self._parameters.get(command_name)
+
+    def get_command_group_metadata(self, command_group_name):
+        try:
+            return self._command_loader.command_group_table[command_group_name]
+        except KeyError:
+            return None
 
     def get_help_entry_type(self, entry_name):
         return self._all_yaml_help.get(entry_name).get('type')
@@ -56,8 +60,8 @@ class Linter(object):
         return [param_help.get('name', None) for param_help in \
             self._all_yaml_help.get(entry_name).get('parameters', [])]
 
-    def is_valid_parameter_help_name(self, entry_name, param_help_name):
-        return param_help_name in [param.name for param in self._loaded_help.get(entry_name).parameters]
+    def is_valid_parameter_help_name(self, entry_name, param_name):
+        return param_name in [param.name for param in getattr(self._loaded_help.get(entry_name), 'parameters', [])]
 
     def get_command_help(self, command_name):
         return self._get_loaded_help_description(command_name)
@@ -66,25 +70,66 @@ class Linter(object):
         return self._get_loaded_help_description(command_group_name)
 
     def get_parameter_options(self, command_name, parameter_name):
-        return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
+        return self.get_command_metadata(command_name).arguments.get(parameter_name).type.settings.get('options_list')
 
     def get_parameter_help(self, command_name, parameter_name):
         options = self.get_parameter_options(command_name, parameter_name)
-        parameter_helps = self._loaded_help.get(command_name).parameters
+        command_help = self._loaded_help.get(command_name, None)
+
+        if not command_help:
+            return None
+
+        parameter_helps = command_help.parameters
         param_help = next((param for param in parameter_helps if share_element(options, param.name.split())), None)
         # workaround for --ids which is not does not generate doc help (BUG)
         if not param_help:
-            return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
+            return self._command_loader.command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
         return param_help.short_summary or param_help.long_summary
 
+    def command_expired(self, command_name):
+        deprecate_info = self._command_loader.command_table[command_name].deprecate_info
+        if deprecate_info:
+            return deprecate_info.expired()
+        return False
+
+    def command_group_expired(self, command_group_name):
+        try:
+            deprecate_info = self._command_loader.command_group_table[command_group_name].group_kwargs.get('deprecate_info', None)
+            if deprecate_info:
+                return deprecate_info.expired()
+        except AttributeError:
+            # Items with only token presence in the command table will not have any data. They can't be expired.
+            pass
+        return False
+
+    def parameter_expired(self, command_name, parameter_name):
+        parameter = self._command_loader.command_table[command_name].arguments[parameter_name].type.settings
+        deprecate_info = parameter.get('deprecate_info', None)
+        if deprecate_info:
+            return deprecate_info.expired()
+        return False
+
+    def option_expired(self, command_name, parameter_name):
+        from knack.deprecation import Deprecated
+        parameter = self._command_loader.command_table[command_name].arguments[parameter_name].type.settings
+        options_list = parameter.get('options_list', [])
+        expired_options_list = []
+        for opt in options_list:
+            if isinstance(opt, Deprecated) and opt.expired():
+                expired_options_list.append(opt.target)
+        return expired_options_list
+
     def _get_loaded_help_description(self, entry):
-        return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
+        help_entry = self._loaded_help.get(entry, None)
+        if help_entry:
+            return help_entry.short_summary or help_entry.long_summary
+        return help_entry
 
 
 class LinterManager(object):
-    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions=None,
-            rule_inclusions=None):
-        self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
+    def __init__(self, command_loader=None, help_file_entries=None, loaded_help=None, exclusions=None,
+                 rule_inclusions=None):
+        self.linter = Linter(command_loader=command_loader, help_file_entries=help_file_entries, loaded_help=loaded_help)
         self._exclusions = exclusions or {}
         self._rules = {
             'help_file_entries': {},
@@ -95,7 +140,7 @@ class LinterManager(object):
         self._ci_exclusions = {}
         self._rule_inclusions = rule_inclusions
         self._loaded_help = loaded_help
-        self._command_table = command_table
+        self._command_loader = command_loader
         self._help_file_entries = help_file_entries
         self._exit_code = 0
         self._ci = False
@@ -106,9 +151,9 @@ class LinterManager(object):
             def get_linter():
                 if rule_name in self._ci_exclusions and self._ci:
                     mod_exclusions = self._ci_exclusions[rule_name]
-                    command_table, help_file_entries = exclude_commands(self._command_table, self._help_file_entries,
+                    command_loader, help_file_entries = exclude_commands(self._command_loader, self._help_file_entries,
                                                                         mod_exclusions)
-                    return Linter(command_table=command_table, help_file_entries=help_file_entries,
+                    return Linter(command_loader=command_loader, help_file_entries=help_file_entries,
                                   loaded_help=self._loaded_help)
                 return self.linter
             self._rules[rule_type][rule_name] = rule_callable, get_linter

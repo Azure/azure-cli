@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.36
+++++++
+* Minor fixes
+
 2.0.35
 ++++++
 * msi: support removing system assigned identity

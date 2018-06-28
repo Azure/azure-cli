@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
+++++++
+* Minor fixes
+
 0.2.0
 +++++
 * Default to long running operation for `az container create`
