@@ -1982,6 +1982,12 @@ class MSIScenarioTest(ScenarioTest):
             ])
             uuid.UUID(result.get_output_in_json()['systemAssignedIdentity'])
 
+            self.cmd('vm identity remove -g {rg} -n {vm3}')
+            self.cmd('vm identity show -g {rg} -n {vm3}', checks=[
+                self.check('role', None),
+                self.check('scope', None),
+            ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi')
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
@@ -2017,6 +2023,13 @@ class MSIScenarioTest(ScenarioTest):
                 self.check('scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['systemAssignedIdentity'])
+
+            self.cmd('vmss identity remove -g {rg} -n {vmss3}')
+            self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=[
+                self.check('role', None),
+                self.check('scope', None),
+                self.check('identityIds', None)
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_msi_no_scope(self, resource_group):

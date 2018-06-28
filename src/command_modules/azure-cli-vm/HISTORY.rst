@@ -5,7 +5,7 @@ Release History
 
 2.0.35
 ++++++
-* Minor fixes
+* msi: support removing system assigned identity
 
 2.0.34
 ++++++
