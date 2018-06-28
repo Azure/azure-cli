@@ -1,14 +1,17 @@
+#!/usr/bin/env python3
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-'''The Azure Command-line tool.
+# -*- coding: utf-8 -*-
 
-This tools provides a command-line interface to Azure's management and storage
-APIs.
-'''
-import pkg_resources
-pkg_resources.declare_namespace(__name__)
+from __future__ import print_function
 
-__author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.0.41"
+import os
+import sphinx
+
+BUILD_DIR = '_build'
+FORMAT = 'xml'
+
+argv = ['sphinx-build', '', 'xml', os.getcwd(), BUILD_DIR]
+sphinx.make_main(argv)

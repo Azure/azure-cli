@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.3
++++++
+* Minor fixes
+
 2.1.2
 +++++
 * Breaking change: Enable Kubernetes role-based access control by default.

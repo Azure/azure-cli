@@ -155,7 +155,8 @@ def load_command_table(self, _):
         g.custom_command('delete', 'autoscale_rule_delete')
         g.custom_command('copy', 'autoscale_rule_copy')
 
-    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom) as g:
+    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom,
+                            deprecate_info=self.deprecate(redirect='monitor autoscale', hide='2.0.34')) as g:
         g.command('create', 'create_or_update', deprecate_info='az monitor autoscale create')
         g.command('delete', 'delete', deprecate_info='az monitor autoscale delete')
         g.command('show', 'get', deprecate_info='az monitor autoscale show')

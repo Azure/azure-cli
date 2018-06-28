@@ -3,10 +3,13 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* Minor fixes
+
 2.0.23
 ++++++
-
-* Updated module definition.
+* Minor fixes.
 
 2.0.22
 ++++++

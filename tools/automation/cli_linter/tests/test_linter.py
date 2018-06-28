@@ -60,7 +60,7 @@ class TestExtensionsBase(unittest.TestCase):
         expected_cmd_table_size = 0
 
         def check_cmd_table(manager, **_):
-            command_table = manager._command_table
+            command_table = manager._command_loader.command_table
             self.assertEqual(len(command_table), expected_cmd_table_size)
             for command_name in expected_cmds:
                 self.assertIn(command_name, command_table)

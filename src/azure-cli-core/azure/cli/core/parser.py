@@ -11,6 +11,7 @@ import difflib
 import argparse
 import argcomplete
 
+from knack.deprecation import Deprecated
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
@@ -55,17 +56,23 @@ class AzCliCommandParser(CLICommandParser):
         self.command_source = kwargs.pop('_command_source', None)
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
-    def load_command_table(self, cmd_tbl):
+    def load_command_table(self, command_loader):
         """Load a command table into our parser."""
         # If we haven't already added a subparser, we
         # better do it.
+        cmd_tbl = command_loader.command_table
+        grp_tbl = command_loader.command_group_table
         if not self.subparsers:
             sp = self.add_subparsers(dest='_command_package')
             sp.required = True
             self.subparsers = {(): sp}
 
         for command_name, metadata in cmd_tbl.items():
-            subparser = self._get_subparser(command_name.split())
+            subparser = self._get_subparser(command_name.split(), grp_tbl)
+            deprecate_info = metadata.deprecate_info
+            if not subparser or (deprecate_info and deprecate_info.expired()):
+                continue
+
             command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
@@ -87,6 +94,11 @@ class AzCliCommandParser(CLICommandParser):
             argument_validators = []
             argument_groups = {}
             for _, arg in metadata.arguments.items():
+                # don't add deprecated arguments to the parser
+                deprecate_info = arg.type.settings.get('deprecate_info', None)
+                if deprecate_info and deprecate_info.expired():
+                    continue
+
                 if arg.validator:
                     argument_validators.append(arg.validator)
                 try:
@@ -105,6 +117,7 @@ class AzCliCommandParser(CLICommandParser):
                     raise CLIError("command authoring error for '{}': '{}' {}".format(
                         command_name, ex.args[0].dest, ex.message))  # pylint: disable=no-member
                 param.completer = arg.completer
+                param.deprecate_info = arg.deprecate_info
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -179,10 +192,27 @@ class AzCliCommandParser(CLICommandParser):
         """ Only pass valid argparse kwargs to argparse.ArgumentParser.add_argument """
         from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 
-        options_list = arg.options_list
         argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
-        if options_list:
-            return obj.add_argument(*options_list, **argparse_options)
+        if arg.options_list:
+
+            scrubbed_options_list = []
+            for item in arg.options_list:
+
+                if isinstance(item, Deprecated):
+                    # don't add expired options to the parser
+                    if item.expired():
+                        continue
+
+                    class _DeprecatedOption(str):
+                        def __new__(cls, *args, **kwargs):
+                            instance = str.__new__(cls, *args, **kwargs)
+                            return instance
+
+                    option = _DeprecatedOption(item.target)
+                    setattr(option, 'deprecate_info', item)
+                    item = option
+                scrubbed_options_list.append(item)
+            return obj.add_argument(*scrubbed_options_list, **argparse_options)
         else:
             if 'required' in argparse_options:
                 del argparse_options['required']

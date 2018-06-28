@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.3.2
++++++
+* Minor fixes
+
 0.3.1
 +++++
 * Fixed `-o table` option for `az batchai cluster node list` and `az batchai job node list` commands.

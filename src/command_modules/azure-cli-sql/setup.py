@@ -12,7 +12,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.27"
+VERSION = "2.0.29"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',

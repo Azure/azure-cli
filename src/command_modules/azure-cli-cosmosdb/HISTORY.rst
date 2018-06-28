@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.1.23
+++++++
+* Minor fixes
+
+0.1.22
+++++++
+* Minor fixes.
+
 0.1.21
 ++++++
 * Introducing VNET support for Azure CLI - Cosmos DB

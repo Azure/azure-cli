@@ -13,7 +13,7 @@ Release History
 
 0.3.22
 ++++++
-* Cap the dependencies
+* Fix dependency versions.
 
 0.3.21
 ++++++

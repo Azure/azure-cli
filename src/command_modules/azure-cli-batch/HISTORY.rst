@@ -3,6 +3,14 @@
 Release History
 ===============
 
+3.2.6
++++++
+* Minor fixes
+
+3.2.5
++++++
+* Minor fixes
+
 3.2.4
 +++++
 * Remove azure-batch-extensions dependency.
