@@ -34,7 +34,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
 
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
-    test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -93,8 +93,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
-                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
-                 '--bypass None --default-action Deny',
+                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment '
+                 '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
@@ -102,7 +102,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
-                     self.check('properties.networkAcls.bypass', 'None'),
+                     self.check('properties.networkAcls.bypass', 'AzureServices'),
                      self.check('properties.networkAcls.defaultAction', 'Deny')])
         # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
@@ -453,7 +453,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateDownloadScenarioTest(LiveScenarioTest):
+class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
     def test_keyvault_certificate_download(self, resource_group):
@@ -461,7 +461,7 @@ class KeyVaultCertificateDownloadScenarioTest(LiveScenarioTest):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         _create_keyvault(self, self.kwargs)
@@ -644,14 +644,14 @@ def _generate_certificate(path, keyfile=None, password=None):
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateImportScenario(LiveScenarioTest):
+class KeyVaultCertificateImportScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_certificate_import(self, resource_group):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         _create_keyvault(self, self.kwargs)
@@ -675,14 +675,14 @@ class KeyVaultCertificateImportScenario(LiveScenarioTest):
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
+class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_softdelete(self, resource_group):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
@@ -706,98 +706,48 @@ class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
 
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
-        # create, delete, restore, and purge a secret
+        # create secrets keys and certifictes to delete recover and purge
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
                  checks=self.check('value', 'ABC123'))
+        self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
+                 checks=self.check('value', 'ABC123'))
 
-        self._delete_entity('secret', 'secret1')
-        self._recover_entity('secret', 'secret1')
-        self._delete_entity('secret', 'secret1')
-        self._purge_entity('secret', 'secret1')
-
-        # create, delete, restore, and purge a key
         self.cmd('keyvault key create --vault-name {kv} -n key1 -p software',
                  checks=self.check('attributes.enabled', True))
+        self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
+                 checks=self.check('attributes.enabled', True))
 
-        self._delete_entity('key', 'key1')
-        self._recover_entity('key', 'key1')
-        self._delete_entity('key', 'key1')
-        self._purge_entity('key', 'key1')
-
-        # create, delete, restore, and purge a certificate
         self.kwargs.update({
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
-            'pem_policy_pat': os.path.join(TEST_DIR, 'policy_import_pem.json')
+            'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
         })
         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
-        self._delete_entity('certificate', 'cert1')
-        self._purge_entity('certificate', 'cert1')
+        self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
+        # delete the secrets keys and certficates
+        self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
+        self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
+        self.cmd('keyvault key delete --vault-name {kv} -n key1')
+        self.cmd('keyvault key delete --vault-name {kv} -n key2')
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+
+        if self.is_live:
+            time.sleep(20)
+
+        # recover secrets keys and certificates
+        self.cmd('keyvault secret recover --vault-name {kv} -n secret1')
+        self.cmd('keyvault key recover --vault-name {kv} -n key1')
+        self.cmd('keyvault certificate recover --vault-name {kv} -n cert1')
+
+        # purge secrets keys and certificates
+        self.cmd('keyvault secret purge --vault-name {kv} -n secret2')
+        self.cmd('keyvault key purge --vault-name {kv} -n key2')
+        self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
+
+        # delete and purge the vault
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
-
-    def _delete_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-        # delete the specified entity
-        self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
-        })
-        self.cmd('keyvault {ent} delete --vault-name {kv} -n {name}')
-
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}', expect_failure=True)
-                break
-            except AssertionError:
-                time.sleep(retry_wait)
-
-    def _recover_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-
-        # while getting the deleted entities returns a zero entities
-        self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
-        })
-
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} recover --vault-name {kv} -n {name}')
-                break
-            except AssertionError:
-                time.sleep(retry_wait)
-
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}')
-                return
-            except AssertionError:
-                time.sleep(retry_wait)
-
-        self.fail('{} {} not restored'.format(entity_type, entity_name))
-
-    def _purge_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-
-        # while getting the deleted entities returns a zero entities
-        self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
-        })
-
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} purge --vault-name {kv} -n {name}')
-                break
-            except AssertionError as ex:
-                time.sleep(retry_wait)
-
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}', expect_failure=True)
-                return
-            except AssertionError as ex:
-                time.sleep(retry_wait)
-
-        self.fail('{} {} not restored'.format(entity_type, entity_name))
 
 
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):
