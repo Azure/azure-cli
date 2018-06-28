@@ -1151,5 +1151,5 @@ def exec_on_job_node(client, resource_group, workspace_name, experiment_name, jo
     # find the cluster
     job = client.jobs.get(resource_group, workspace_name, experiment_name, job_name)  # type: models.Job
     cluster_id = parse_resource_id(job.cluster.id)
-    exec_on_node(client, cluster_id['resource_group'], cluster_id['name'],
+    exec_on_node(client.clusters, cluster_id['resource_group'], cluster_id['name'],
                  cluster_id['resource_name'], node_id, ports, cmdline, password, ssh_private_key)
