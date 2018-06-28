@@ -23,8 +23,8 @@ class BatchAILiveScenariosTests(ScenarioTest):
         self.cmd('batchai experiment create -g {0} -w workspace -n experiment'.format(resource_group))
 
         # Create a cluster to test the ssh connection
-        self.cmd('batchai cluster create -g {0} -w workspace -n simple -s Standard_D1 -t 1 --generate-ssh-keys'.format(
-            resource_group))
+        self.cmd('batchai cluster create -g {0} -w workspace -n simple -s Standard_D1 -t 1 '
+                 '-u alex --generate-ssh-keys'.format(resource_group))
 
         # Schedule a job to know when the cluster is ready
         self.cmd('batchai job create -g {0} -w workspace -e experiment -n nop -c simple -f {1}'.format(
