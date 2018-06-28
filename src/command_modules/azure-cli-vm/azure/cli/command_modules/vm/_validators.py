@@ -1265,10 +1265,14 @@ def process_assign_identity_namespace(cmd, namespace):
 
 
 def process_remove_identity_namespace(cmd, namespace):
-    from ._vm_utils import MSI_LOCAL_ID
-    namespace.identities = [_get_resource_id(cmd.cli_ctx, x, namespace.resource_group_name, 'userAssignedIdentities',
-                                             'Microsoft.ManagedIdentity') if x != MSI_LOCAL_ID else x
-                            for x in (namespace.identities or [])]
+    if namespace.identities:
+        from ._vm_utils import MSI_LOCAL_ID
+        for i in range(len(namespace.identities)):
+            if namespace.identities[i] != MSI_LOCAL_ID:
+                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, namespace.identities[i],
+                                                           namespace.resource_group_name,
+                                                           'userAssignedIdentities',
+                                                           'Microsoft.ManagedIdentity')
 
 
 # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
