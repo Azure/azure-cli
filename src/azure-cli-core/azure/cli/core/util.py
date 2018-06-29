@@ -255,12 +255,21 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
 
 
 def open_page_in_browser(url):
-    if sys.platform.lower() == 'darwin':
+    import platform
+    import subprocess
+    import webbrowser
+    uname = platform.uname()
+    platform_name = uname.system.lower()
+    release = uname.release.lower()
+    if platform_name == 'linux' and release.split('-')[-1] == 'microsoft':   # windows 10 linux subsystem
+        try:
+            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+        except FileNotFoundError:  # WSL might be too old
+            pass
+    elif platform_name == 'darwin':
         # handle 2 things:
         # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
         #    understand the "open location" message"
         # b. Python 2.x can't sniff out the default browser
-        import subprocess
         return subprocess.Popen(['open', url])
-    import webbrowser
     return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible

@@ -172,7 +172,7 @@ class Profile(object):
                         tenant, self._ad_resource_uri, authority_url)
                 except RuntimeError:
                     use_device_code = True
-                    logger.warning('Not able to launch a browser to login you in, falling back to device code...')
+                    logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
                 subscriptions = subscription_finder.find_through_interactive_flow(
