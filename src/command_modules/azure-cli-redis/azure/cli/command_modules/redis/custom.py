@@ -50,7 +50,6 @@ def cli_redis_list(cmd, client, resource_group_name=None):
 # pylint: disable=unused-argument
 def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_configuration):
     from azure.mgmt.redis.models import RedisUpdateParameters
-    logger.warning('This command is getting deprecated. Please use "redis update" command')
 
     existing = client.get(resource_group_name, name)
     existing.redis_configuration.update(redis_configuration)

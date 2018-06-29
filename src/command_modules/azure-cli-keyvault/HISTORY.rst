@@ -2,10 +2,19 @@
 
 Release History
 ===============
+
 Current
 +++++++
 * adding commands for managing storage accounts and sas-definitions
 * adding commands for network-rules
+
+2.0.24
+++++++
+* Minor fixes
+
+2.0.23
+++++++
+* Minor fixes.
 
 2.0.22
 ++++++

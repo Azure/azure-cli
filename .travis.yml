@@ -55,6 +55,10 @@ jobs:
       script: ./scripts/ci/test_ref_doc.sh
       env: PURPOSE='RefDocVerify'
       python: 3.6
+    - stage: verify
+      env: PURPOSE='Load extension commands'
+      script: ./scripts/ci/test_extensions.sh
+      python: 3.6
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6

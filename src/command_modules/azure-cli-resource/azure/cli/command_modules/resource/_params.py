@@ -13,7 +13,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
 
     from azure.cli.core.commands.parameters import (
-        resource_group_name_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
+        resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
 
@@ -21,7 +21,7 @@ def load_arguments(self, _):
 
     from azure.cli.command_modules.resource._completers import (
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
-        get_resource_types_completion_list, get_providers_completion_list)
+        get_resource_types_completion_list, get_providers_completion_list, get_subscription_id_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata)
 
@@ -144,6 +144,20 @@ def load_arguments(self, _):
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
+    with self.argument_context('deployment') as c:
+        c.argument('deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+        c.argument('template_uri', help='a uri to a remote template file')
+        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+
+    with self.argument_context('deployment create') as c:
+        c.argument('deployment_name', options_list=('--name', '-n'), required=False,
+                   help='The deployment name. Default to template file base name')
+
+    with self.argument_context('deployment operation show') as c:
+        c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
+
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
         c.argument('include_parameter_default_value', action='store_true')
@@ -209,3 +223,22 @@ def load_arguments(self, _):
         c.argument('authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
         c.argument('createUiDefinition', options_list=('--create-ui-definition', '-c'), help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=('--main-template', '-t'), help='JSON formatted string or a path to a file with such content', type=file_type)
+
+    with self.argument_context('account') as c:
+        c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
+
+    with self.argument_context('account management-group') as c:
+        c.argument('group_name', options_list=['--name', '-n'])
+        c.ignore('_subscription')  # hide global subscription parameter
+
+    with self.argument_context('account management-group show') as c:
+        c.argument('expand', options_list=['--expand', '-e'], action='store_true')
+        c.argument('recurse', options_list=['--recurse', '-r'], action='store_true')
+
+    with self.argument_context('account management-group create') as c:
+        c.argument('display_name', options_list=['--display-name', '-d'])
+        c.argument('parent', options_list=['--parent', '-p'])
+
+    with self.argument_context('account management-group update') as c:
+        c.argument('display_name', options_list=['--display-name', '-d'])
+        c.argument('parent_id', options_list=['--parent', '-p'])

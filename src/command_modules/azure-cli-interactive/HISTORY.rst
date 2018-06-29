@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.3.24
+++++++
+* Minor fixes
+
+0.3.23
+++++++
+* Minor fixes
+
+0.3.22
+++++++
+* Fix dependency versions.
+
 0.3.21
 ++++++
 * Mute logging from parser for completions.

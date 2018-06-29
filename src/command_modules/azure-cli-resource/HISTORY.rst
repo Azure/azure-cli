@@ -3,6 +3,22 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Minor fixes
+
+2.0.32
+++++++
+* Support deployment at subscription scope: new operation group `deployment`.
+
+2.0.31
+++++++
+* Minor changes
+
+2.0.30
+++++++
+*  add `account management-group` commands.
+
 2.0.29
 ++++++
 * Minor changes

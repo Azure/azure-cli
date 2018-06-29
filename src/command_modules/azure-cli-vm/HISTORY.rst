@@ -2,6 +2,28 @@
 
 Release History
 ===============
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* msi: support removing system assigned identity
+
+2.0.34
+++++++
+* vm create: refine vm size check for accelerated networking support
+* vmss create: warn about the default vm size will be switched from "Standard_D1_v2" to "Standard_DS1_v2"
+* vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
+
+2.0.33
+++++++
+* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
+* `vm create`: support `--accelerated-networking`
+* `vm/vmss extension image list`: absorb 404 when an image type is not found
+* `identity create`: support `--tags`
+
 2.0.32
 ++++++
 * BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support

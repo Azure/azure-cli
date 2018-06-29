@@ -36,12 +36,11 @@ def _write_config_file(user_name):
                   'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
                   'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
                   'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
-    config_file_name = 'private_config_{}.json'.format(datetime.utcnow().strftime('%H%M%S%f'))
     config = {
         'username': user_name,
         'ssh_key': public_key
     }
-    config_file = os.path.join(TEST_DIR, config_file_name)
+    _, config_file = tempfile.mkstemp()
     with open(config_file, 'w') as outfile:
         json.dump(config, outfile)
     return config_file
@@ -187,14 +186,6 @@ class VMImageListSkusScenarioTest(ScenarioTest):
 
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
-
-    @AllowLargeResponse(size_kb=2048)
-    def test_list_skus_contains_zone_info(self):
-        # we pick eastus2 as it is one of 3 regions so far with zone support
-        self.kwargs['loc'] = 'eastus2'
-        result = self.cmd('vm list-skus -otable -l {loc} -otable')
-        columns = next(l for l in result.output.splitlines() if '1,2,3' in l).split()
-        self.assertEqual(columns[3], '1,2,3')
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -599,7 +590,7 @@ class VMWriteAcceleratorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys --accelerated-network false')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
             self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', None)
@@ -767,7 +758,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -791,26 +782,29 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
 
 class ComputeListSkusScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_list_compute_skus_table_output(self):
-        result = self.cmd('vm list-skus -l westus -otable')
+        result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size'])
-        # spot check the first 3 entries
-        fd_found, ud_found, size_found = False, False, False
-        for l in lines[1:]:
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size', 'Restrictions'])
+        # spot check the first 4 entries
+        fd_found, ud_found, size_found, zone_found = False, False, False, False
+        for l in lines[2:]:
             parts = l.split()
-            if not fd_found and (parts == ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
                 fd_found = True
-            elif not ud_found and (parts == ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
                 ud_found = True
-            elif not size_found and (parts == ['virtualMachines', 'westus', 'Standard_DS1_v2', 'LowPriorityCapable=True', 'Standard', 'DS1_v2']):
+            elif not size_found and parts[:3] == ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
                 size_found = True
+            elif not zone_found and parts[3] == '1,2,3':
+                zone_found = True
 
         self.assertTrue(fd_found)
         self.assertTrue(ud_found)
         self.assertTrue(size_found)
+        self.assertTrue(zone_found)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
@@ -831,22 +825,20 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0')
 
-        try:
-            self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
-                     checks=self.check('length([])', 0))
-            self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}"')
-            self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
-                self.check('*.extensions[0].name', ['VMAccessForLinux']),
-                self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1']),
-            ])
-            self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
-                self.check('type(@)', 'object'),
-                self.check('name', '{ext}'),
-                self.check('resourceGroup', '{rg}')
-            ])
-            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
-        finally:
-            os.remove(config_file)
+        self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
+                 checks=self.check('length([])', 0))
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
+            self.check('*.extensions[0].name', ['VMAccessForLinux']),
+            self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
+        ])
+        result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext}'),
+            self.check('resourceGroup', '{rg}'),
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
@@ -1050,15 +1042,13 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        try:
-            self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}"')
-            self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
-                self.check('type(@)', 'object'),
-                self.check('name', '{ext}'),
-                self.check('publisher', '{pub}')
-            ])
-        finally:
-            os.remove(config_file)
+        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext}'),
+            self.check('publisher', '{pub}'),
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
 
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
@@ -1591,7 +1581,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
 
-class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
+class AcceleratedNetworkingTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_accelerated_networking')
     def test_vmss_accelerated_networking(self, resource_group):
@@ -1602,6 +1592,14 @@ class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
         self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
+
+    @ResourceGroupPreparer()
+    def test_vm_accelerated_networking(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
+        self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -1984,6 +1982,12 @@ class MSIScenarioTest(ScenarioTest):
             ])
             uuid.UUID(result.get_output_in_json()['systemAssignedIdentity'])
 
+            self.cmd('vm identity remove -g {rg} -n {vm3}')
+            self.cmd('vm identity show -g {rg} -n {vm3}', checks=[
+                self.check('role', None),
+                self.check('scope', None),
+            ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi')
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
@@ -2019,6 +2023,13 @@ class MSIScenarioTest(ScenarioTest):
                 self.check('scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['systemAssignedIdentity'])
+
+            self.cmd('vmss identity remove -g {rg} -n {vmss3}')
+            self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=[
+                self.check('role', None),
+                self.check('scope', None),
+                self.check('identityIds', None)
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_msi_no_scope(self, resource_group):
@@ -2066,8 +2077,9 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         # create a managed identity
-        emsi_result = self.cmd('identity create -g {rg} -n {emsi}',
-                               checks=self.check('name', '{emsi}')).get_output_in_json()
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with only user assigned identity
@@ -2174,7 +2186,6 @@ class VMLiveScenarioTest(LiveScenarioTest):
         # spot check we do have some relevant progress messages coming out
         # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
         # This has the consequence that it can't promise each resource's result wil be displayed)
-        self.assertTrue('Accepted:'.format(**self.kwargs) in lines)
         self.assertTrue('Succeeded:'.format(**self.kwargs) in lines)
 
 
@@ -2182,7 +2193,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2200,7 +2211,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group_location, self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='westus')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vm_error_on_zone_unavailable(self, resource_group, resource_group_location):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
@@ -2208,7 +2219,7 @@ class VMZoneScenarioTest(ScenarioTest):
             self.assertTrue('availablity zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2234,7 +2245,7 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_x_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2296,7 +2307,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group, resource_group_location, self.kwargs['disk'], self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=2048)
+    @AllowLargeResponse(size_kb=3072)
     def test_vmss_create_zonal_with_fd(self, resource_group, resource_group_location):
 
         self.kwargs.update({

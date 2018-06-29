@@ -3,9 +3,35 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Minor fixes
+
+0.2.1
++++++
+* Minor fixes.
+
+0.2.0
++++++
+**Breaking changes**
+
+* reservations catalog show
+    - Added required parameter ReservedResourceType.
+    - Added optional parameter Location.
+* Updated ReservationProperties model.
+    - Removed 'kind'.
+* Updated Catalog model.
+    - Renamed 'capabilities' to 'sku_properties'.
+    - Removed 'size' and 'tier'.
+
+**Notes**
+
+* reservations reservation update
+    - Added optional parameter InstanceFlexibility.
+* Support for InstanceFlexibility and ReservedResourceType.
+
 0.1.2
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.1.1

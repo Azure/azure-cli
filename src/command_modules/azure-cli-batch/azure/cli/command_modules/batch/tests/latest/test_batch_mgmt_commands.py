@@ -62,6 +62,10 @@ class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-inst
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}')])
 
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(100)
+
         # test create account with BYOS
         self.cmd('batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks([
             self.check('name', '{byos_n}'),

@@ -27,7 +27,10 @@ from ._utils import get_registry_by_name
 logger = get_logger(__name__)
 
 
-def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, permission='*'):
+ACCESS_TOKEN_PERMISSION = ['*', 'pull']
+
+
+def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, permission=None):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -98,7 +101,6 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     return access_token
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_credentials(cli_ctx,
                      registry_name,
                      resource_group_name,
@@ -106,7 +108,7 @@ def _get_credentials(cli_ctx,
                      password,
                      only_refresh_token,
                      repository=None,
-                     permission='*'):
+                     permission=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
@@ -159,12 +161,14 @@ def _get_credentials(cli_ctx,
                 'Unable to authenticate using AAD or admin login credentials. ' +
                 'Please specify both username and password in non-interactive mode.')
 
+    return login_server, None, None
+
 
 def get_login_credentials(cli_ctx,
                           registry_name,
-                          resource_group_name,
-                          username,
-                          password):
+                          resource_group_name=None,
+                          username=None,
+                          password=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
@@ -181,11 +185,11 @@ def get_login_credentials(cli_ctx,
 
 def get_access_credentials(cli_ctx,
                            registry_name,
-                           resource_group_name,
-                           username,
-                           password,
+                           resource_group_name=None,
+                           username=None,
+                           password=None,
                            repository=None,
-                           permission='*'):
+                           permission=None):
     """Try to get AAD authorization tokens or admin user credentials to access a registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
@@ -194,6 +198,10 @@ def get_access_credentials(cli_ctx,
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
+    if repository and permission not in ACCESS_TOKEN_PERMISSION:
+        raise ValueError("Permission is required for a repository. Allowed access token permission: {}".format(
+            ACCESS_TOKEN_PERMISSION))
+
     return _get_credentials(cli_ctx,
                             registry_name,
                             resource_group_name,
@@ -210,3 +218,8 @@ def log_registry_response(response):
     """
     log_request(None, response.request)
     log_response(None, response.request, response, result=response)
+
+
+def get_login_server_suffix(cli_ctx):
+    """Get the Azure Container Registry login server suffix in the current cloud."""
+    return cli_ctx.cloud.suffixes.acr_login_server_endpoint

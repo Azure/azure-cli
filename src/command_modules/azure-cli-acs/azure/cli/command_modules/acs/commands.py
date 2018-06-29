@@ -57,12 +57,15 @@ def load_command_table(self, _):
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
+        g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
         g.custom_command('install-connector', 'k8s_install_connector')
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
         g.custom_command('remove-connector', 'k8s_uninstall_connector')
+        g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
         g.custom_command('show', 'aks_show', table_transformer=aks_show_table_format)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True,
@@ -70,7 +73,6 @@ def load_command_table(self, _):
                          'Are you sure you want to perform this operation?')
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
-        g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.generic_wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:

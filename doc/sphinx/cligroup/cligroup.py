@@ -32,17 +32,21 @@ class CliBaseDirective(ObjectDescription):
 
 class CliGroupDirective(CliBaseDirective):
     doc_field_types = copy.copy(cli_field_types)
-    doc_field_types.append(
+    doc_field_types.extend([
         Field('docsource', label='Doc Source', has_arg=False,
-                   names=('docsource', 'documentsource'))
-    )
+                   names=('docsource', 'documentsource')),
+        Field('deprecated', label='Deprecated', has_arg=False,
+            names=('deprecated'))
+    ])
 
 class CliCommandDirective(CliBaseDirective):
     doc_field_types = copy.copy(cli_field_types)
-    doc_field_types.append(
+    doc_field_types.extend([
         Field('docsource', label='Doc Source', has_arg=False,
-                   names=('docsource', 'documentsource'))
-    )
+                   names=('docsource', 'documentsource')),
+        Field('deprecated', label='Deprecated', has_arg=False,
+            names=('deprecated'))
+    ])
 
 class CliArgumentDirective(CliBaseDirective):
     doc_field_types = copy.copy(cli_field_types)
@@ -54,7 +58,9 @@ class CliArgumentDirective(CliBaseDirective):
         Field('default', label='Default value', has_arg=False,
             names=('default')),
         Field('source', label='Values from', has_arg=False,
-            names=('source', 'sources'))
+            names=('source', 'sources')),
+        Field('deprecated', label='Deprecated', has_arg=False,
+            names=('deprecated'))
      ])
 
 class CliExampleDirective(CliBaseDirective):

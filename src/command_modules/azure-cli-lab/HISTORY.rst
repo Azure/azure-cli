@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.1.0
++++++
+* Minor fixes
+
+0.0.23
+++++++
+* Minor fixes.
+
 0.0.22
 ++++++
 * Fix regression from knack conversion that replaced table_transformers with transforms.

@@ -93,7 +93,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_command('list', 'list_blobs', transform=transform_storage_list_output,
                           table_transformer=transform_blob_output)
-        g.storage_command('download', 'get_blob_to_path')
+        g.storage_command('download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_command('generate-sas', 'generate_blob_shared_access_signature')
         g.storage_command('url', 'make_blob_url', transform=transform_url)
         g.storage_command('snapshot', 'snapshot_blob')

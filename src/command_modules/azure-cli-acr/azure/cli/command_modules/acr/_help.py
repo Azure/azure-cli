@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -170,19 +171,23 @@ helps['acr repository show-manifests'] = """
         - name: Show manifests of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository
+        - name: Show the latest 10 manifests ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
 """
 
 helps['acr repository delete'] = """
     type: command
     short-summary: Delete a repository or image in a container registry.
+    long-summary: This command deletes all associated layer data that are not referenced by any other manifest in the container registry.
     examples:
-        - name: Delete a repository from a container registry.
+        - name: Delete a repository from a container registry. This deletes all manifests and tags under 'hello-world'.
           text:
             az acr repository delete -n MyRegistry --repository hello-world
-        - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest', all other tags referencing the manifest, and any associated layer data.
+        - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --image hello-world:latest
-        - name: Delete an image by sha256-based manifest digest. This deletes all tags referencing the manifest and any associated layer data.
+        - name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
 """
@@ -428,4 +433,16 @@ helps['acr build'] = """
         - name: Queue a local context, validating the build is successful, without pushing to the registry.
           text: >
             az acr build -r MyRegistry .
+"""
+
+helps['acr import'] = """
+    type: command
+    short-summary: Imports an image to the container registry from source.
+    examples:
+        - name: Import an image to the target registry and inherits sourcerepository:sourcetag from source.
+          text: >
+            az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
+        - name: Import an image from a registry in a different subscription.
+          text: >
+            az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
 """

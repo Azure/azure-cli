@@ -3,6 +3,32 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* Minor fixes
+
+2.0.28
+++++++
+* Minor fixes.
+
+2.0.27
+++++++
+* Added new Managed instance and Managed database CRUD commands.
+    * Managed instance commands:
+        * az sql mi create
+        * az sql mi show
+        * az sql mi list
+        * az sql mi update
+        * az sql mi delete
+
+    * Managed database commands:
+        * az sql midb create
+        * az sql midb show
+        * az sql midb list
+        * az sql midb restore
+        * az sql midb delete
+* Fixed confusing error when running `az sql db list-editions` for a location that is not available to your subscription.
+
 2.0.26
 ++++++
 * BREAKING CHANGES: Updated database, data warehouse, and elastic pool commands to use Azure-standard SKU properties for configuring performance level. This has resulted in some changes to the respose objects returned from db, dw, and elastic-pool commands.

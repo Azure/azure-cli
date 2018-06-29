@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -269,6 +269,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg}')
 
     @ResourceGroupPreparer()
+    @record_only()
     def test_acr_create_build_task(self, resource_group, resource_group_location):
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
@@ -277,7 +278,7 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': 'e815be6cbd5fe8f6edaaf34f75a4e4c345b9573f',
+            'git_access_token': '934939417e99892b59660637cd4b4abeefccff04',
             'context': 'https://github.com/djyou/BuildTest',
             'image1': 'repo1:tag1',
             'image2': 'repo2:tag2',
@@ -308,7 +309,7 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('alias', '{build_task_name1}'),
                          self.check('platform.osType', 'Linux'),
-                         self.check('platform.cpu', 1),
+                         self.check('platform.cpu', 2),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', 'Enabled'),
                          self.check('timeout', 3600),
@@ -333,7 +334,7 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('alias', '{build_task_name2}'),
                          self.check('platform.osType', '{non_default_os_type}'),
-                         self.check('platform.cpu', 1),
+                         self.check('platform.cpu', 2),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', '{non_default_status}'),
                          self.check('timeout', '{non_default_timeout}'),
@@ -357,7 +358,7 @@ class AcrCommandsTests(ScenarioTest):
         # trigger a build from the build task
         self.cmd('acr build-task run -n {build_task_name1} -r {registry_name} --no-logs',
                  checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
-                         self.check('status', 'Queued')])
+                         self.check('status', 'Succeeded')])
 
         # list all builds from the build task
         self.cmd('acr build-task list-builds -n {build_task_name1} -r {registry_name}',
@@ -377,7 +378,7 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('alias', '{build_task_name1}'),
                          self.check('platform.osType', '{non_default_os_type}'),
-                         self.check('platform.cpu', 1),
+                         self.check('platform.cpu', 2),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', '{non_default_status}'),
                          self.check('timeout', '{non_default_timeout}'),
@@ -400,3 +401,67 @@ class AcrCommandsTests(ScenarioTest):
 
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @record_only()
+    def test_acr_image_import(self, resource_group):
+        '''There are six test cases in the function.
+        Case 1: Import image from a regsitry in a different subscription from the current one
+        Case 2: Import image from one regsitry to another where both registries belong to the same subscription
+        Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        Case 4: Import image to enable multiple tags in the target registry
+        Case 5: Import image within the same registry
+        Case 6: Import image by manifest digest
+        '''
+
+        registry_name = self.create_random_name("targetregsitry", 20)
+
+        '''
+        To be able to run the tests, we are assuming the following resources before the test:
+        Current active cloud account and subscription.
+        Two source registries, one in the subscription other than the current one and another in the subscription the same as the current one.
+        Two source images each of which stays in a different source registries mentioned above.
+        '''
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': 'eastus',
+            'sku': 'Standard',
+            'resource_id': '/subscriptions/a7ee80a4-3d5e-45c2-9378-36e8d98f4d13/resourceGroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'source_image_diff_sub': 'builder:latest',
+            'source_image_same_sub': 'sourceregistrysamesub.azurecr.io/builder:latest',
+            'source_image_same_registry': '{}.azurecr.io/builder:latest'.format(registry_name),
+            'source_image_by_digest': 'sourceregistrysamesub.azurecr.io/builder@sha256:bc3842ba36fcc182317c07a8643daa4a8e4e7aed45958b1f7e2a2b30c2f5a64f',
+            'tag_diff_sub': 'repository_diff_sub:tag_diff_sub',
+            'tag_same_sub': 'repository_same_sub:tag_same_sub',
+            'tag_multitag1': 'repository_multi1:tag_multi1',
+            'tag_multitag2': 'repository_multi2:tag_multi2',
+            'tag_same_registry': 'repository_same_registry:tag_same_registry',
+            'tag_by_digest': 'repository_by_digest:tag_by_digest'
+        })
+
+        # create a target registry to hold the imported images
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Case 1: Import image from a regsitry in a different subscription from the current one
+        self.cmd('acr import -n {registry_name} -r {resource_id} --source {source_image_diff_sub} -t {tag_diff_sub}')
+
+        # Case 2: Import image from one regsitry to another where both registries belong to the same subscription
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
+
+        # Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub}')
+
+        # Case 4: Import image to enable multiple tags in the target registry
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_multitag1} -t {tag_multitag2}')
+
+        # Case 5: Import image within the same registry
+        self.cmd('acr import -n {registry_name} --source {source_image_same_registry} -t {tag_same_registry}')
+
+        # Case 6: Import image by manifest digest
+        self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')

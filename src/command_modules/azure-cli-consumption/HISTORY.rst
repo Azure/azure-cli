@@ -2,6 +2,15 @@
 
 Release History
 ===============
+
+0.3.3
+++++++
+* Minor fixes
+
+0.3.2
+++++++
+* Minor fixes.
+
 0.3.1
 +++++
 * Added new commands for budget API.

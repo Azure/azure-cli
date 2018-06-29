@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.2.6
++++++
+* Minor fixes
+
+0.2.5
++++++
+* Added 'postgres/myql server vnet-rule' commands.
+
+0.2.4
++++++
+* Minor fix allowing elastic server update using skuname.
+
 0.2.3
 +++++
 * Minor fixes.

@@ -278,6 +278,35 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
         command_loaded_handler(command)
 
 
+def register_global_subscription_parameter(cli_ctx):
+
+    import knack.events as events
+
+    def add_subscription_parameter(_, **kwargs):
+        from azure.cli.command_modules.profile._completers import get_subscription_id_list
+
+        commands_loader = kwargs['commands_loader']
+        cmd_tbl = kwargs['cmd_tbl']
+        for command_name, cmd in cmd_tbl.items():
+            if 'subscription' not in cmd.arguments:
+                commands_loader.extra_argument_registry[command_name]['_subscription'] = CLICommandArgument(
+                    '_subscription', options_list=['--subscription'],
+                    help='Name or ID of subscription. You can configure the default subscription '
+                         'using `az account set -s NAME_OR_ID`"',
+                    completer=get_subscription_id_list, arg_group='Global', configured_default='subscription')
+        commands_loader._update_command_definitions()  # pylint: disable=protected-access
+
+    def parse_subscription_parameter(cli_ctx, args, **kwargs):  # pylint: disable=unused-argument
+        subscription = getattr(args, '_subscription', None)
+        if subscription:
+            from azure.cli.core._profile import Profile
+            subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id(subscription)
+            cli_ctx.data['subscription_id'] = subscription_id
+
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_subscription_parameter)
+
+
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -388,7 +417,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             try:
                 client = factory(context.cli_ctx)
             except TypeError:
-                client = factory(context.cli_ctx, None)
+                client = factory(context.cli_ctx, args)
 
         client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
@@ -560,7 +589,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
-            client = factory(context.cli_ctx, None) if factory else None
+            client = factory(context.cli_ctx, args) if factory else None
         if client and (client_arg_name in getter_args or client_arg_name == 'self'):
             args[client_arg_name] = client
 

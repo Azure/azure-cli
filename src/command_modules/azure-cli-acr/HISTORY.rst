@@ -2,9 +2,26 @@
 
 Release History
 ===============
+
+2.0.29
+++++++
+* Minor fixes
+
+2.0.28
+++++++
+* Add polling build status.
+* Allow case-insensitive enum values.
+* Add --top and --orderby parameters for show-manifests.
+
+2.0.27
+++++++
+* Add 'azure-storage-blob' as dependency.
+* Use 2 cores as the default CPU configuration in 'acr build-task create' command.
+
 2.0.26
 ++++++
 * Allow VSTS as a remote source location
+* Add 'acr import' command.
 
 2.0.25
 ++++++

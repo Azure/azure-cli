@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
-from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName, Sku
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -20,6 +21,8 @@ from ._client_factory import (
     get_storage_service_client,
     get_acr_service_client
 )
+
+logger = get_logger(__name__)
 
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
@@ -36,7 +39,7 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
         message = "The resource with name '{}' and type '{}' could not be found".format(
             resource_name, resource_type)
         try:
-            subscription = profile.get_subscription()
+            subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
             raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
         except (KeyError, TypeError):
             raise CLIError("{} in the current subscription.".format(message))
@@ -89,6 +92,27 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     client = get_acr_service_client(cli_ctx).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
+
+
+def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=None):
+    """Returns a Registry object for the specified name.
+    :param str name: either the registry name or the login server of the registry.
+    """
+    client = get_acr_service_client(cli_ctx).registries
+    registry_list = client.list()
+
+    if registry_name:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower() or item.name.lower() == registry_name.lower()]
+    else:
+        elements = [item for item in registry_list if
+                    item.login_server.lower() == login_server.lower()]
+
+    if len(elements) == 1:
+        return elements[0]
+    elif len(elements) > 1:
+        logger.warning("More than one registries were found by %s.", login_server)
+    return None
 
 
 def arm_deploy_template_new_storage(cli_ctx,
@@ -214,18 +238,20 @@ def _parameters(registry_name,
     return parameters
 
 
-# pylint: disable=inconsistent-return-statements
 def random_storage_account_name(cli_ctx, registry_name):
     from datetime import datetime
 
     client = get_storage_service_client(cli_ctx).storage_accounts
     prefix = registry_name[:18].lower()
 
-    while True:
+    for x in range(10):
         time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
         storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
+        logger.debug("Checking storage account %s with name '%s'.", x, storage_account_name)
         if client.check_name_availability(storage_account_name).name_available:  # pylint: disable=no-member
             return storage_account_name
+
+    raise CLIError("Could not find an available storage account name. Please try again later.")
 
 
 def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, message=None):

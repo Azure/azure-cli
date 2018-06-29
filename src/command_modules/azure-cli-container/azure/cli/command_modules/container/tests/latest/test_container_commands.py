@@ -18,7 +18,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         os_type = 'Linux'
         ip_address_type = 'Public'
         dns_name_label = container_group_name
-        fqdn = '{}.{}.azurecontainer.io'.format(container_group_name, resource_group_location)
+        fqdn = '{}.{}.azurecontainer.io'.format(
+            container_group_name, resource_group_location)
         port1 = 8000
         port2 = 8001
         ports = '{} {}'.format(port1, port2)
@@ -57,10 +58,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                  '--secrets {secrets} --secrets-mount-path {secrets_mount_path}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
-                         self.check('provisioningState', 'Creating'),
+                         self.check('provisioningState', 'Succeeded'),
                          self.check('osType', '{os_type}'),
                          self.check('restartPolicy', '{restart_policy}'),
-                         self.check('ipAddress.dnsNameLabel', '{container_group_name}'),
+                         self.check('ipAddress.dnsNameLabel',
+                                    '{container_group_name}'),
                          self.check('ipAddress.fqdn', '{fqdn}'),
                          self.exists('ipAddress.ip'),
                          self.exists('ipAddress.ports'),
@@ -69,13 +71,12 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].command'),
                          self.exists('containers[0].environmentVariables'),
-                         self.check('containers[0].resources.requests.cpu', cpu),
-                         self.check('containers[0].resources.requests.memoryInGb', memory),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
                          self.exists('volumes'),
                          self.check('volumes[0].secret', {})])
-
-        # Wait for container to be provisioned
-        time.sleep(30)
 
         # Test show
         self.cmd('container show -g {rg} -n {container_group_name}',
@@ -91,13 +92,15 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].command'),
                          self.exists('containers[0].environmentVariables'),
-                         self.check('containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
                          self.check('containers[0].resources.requests.memoryInGb', memory)])
 
         # Test list
         self.cmd('container list -g {rg}',
                  checks=[self.check('[0].name', '{container_group_name}'),
-                         self.check('[0].location', '{resource_group_location}'),
+                         self.check('[0].location',
+                                    '{resource_group_location}'),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].osType', '{os_type}'),
                          self.check('[0].restartPolicy', '{restart_policy}'),
@@ -108,7 +111,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('[0].containers[0].image', '{image}'),
                          self.exists('[0].containers[0].command'),
                          self.exists('[0].containers[0].environmentVariables'),
-                         self.check('[0].containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             '[0].containers[0].resources.requests.cpu', cpu),
                          self.check('[0].containers[0].resources.requests.memoryInGb', memory)])
 
     # Test create container with azure container registry image.
@@ -121,7 +125,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = '0IS50p79+vNF6Kt7nm33iNn0Q9Ds2T41'
+        password = 'UGHH=Ytqp9pMo7IprYJHz9LBKvy0Pwbk'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -135,16 +139,15 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.cmd('container create -g {rg} -n {container_group_name} --image {image} --registry-username {registry_username} --registry-password {password}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
-                         self.check('provisioningState', 'Creating'),
+                         self.check('provisioningState', 'Succeeded'),
                          self.check('osType', 'Linux'),
                          self.check('containers[0].image', '{image}'),
-                         self.check('imageRegistryCredentials[0].server', '{registry_server}'),
-                         self.check('imageRegistryCredentials[0].username', '{registry_username}'),
+                         self.check(
+                             'imageRegistryCredentials[0].server', '{registry_server}'),
+                         self.check(
+                             'imageRegistryCredentials[0].username', '{registry_username}'),
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
-
-        # Wait for container to be provisioned
-        time.sleep(60)
 
         self.cmd('container show -g {rg} -n {container_group_name}',
                  checks=[self.check('name', '{container_group_name}'),
@@ -152,8 +155,10 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('osType', 'Linux'),
                          self.check('containers[0].image', '{image}'),
-                         self.check('imageRegistryCredentials[0].server', '{registry_server}'),
-                         self.check('imageRegistryCredentials[0].username', '{registry_username}'),
+                         self.check(
+                             'imageRegistryCredentials[0].server', '{registry_server}'),
+                         self.check(
+                             'imageRegistryCredentials[0].username', '{registry_username}'),
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
 
@@ -183,17 +188,16 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                  '--azure-file-volume-mount-path {azure_file_volume_mount_path}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
-                         self.check('provisioningState', 'Creating'),
+                         self.check('provisioningState', 'Succeeded'),
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].azureFile'),
-                         self.check('volumes[0].azureFile.shareName', '{azure_file_volume_share_name}'),
-                         self.check('volumes[0].azureFile.storageAccountName', '{azure_file_volume_account_name}'),
+                         self.check(
+                             'volumes[0].azureFile.shareName', '{azure_file_volume_share_name}'),
+                         self.check(
+                             'volumes[0].azureFile.storageAccountName', '{azure_file_volume_account_name}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{azure_file_volume_mount_path}')])
-
-        # Wait for container to be provisioned
-        time.sleep(60)
 
         self.cmd('container show -g {rg} -n {container_group_name}',
                  checks=[self.check('name', '{container_group_name}'),
@@ -202,8 +206,10 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].azureFile'),
-                         self.check('volumes[0].azureFile.shareName', '{azure_file_volume_share_name}'),
-                         self.check('volumes[0].azureFile.storageAccountName', '{azure_file_volume_account_name}'),
+                         self.check(
+                             'volumes[0].azureFile.shareName', '{azure_file_volume_share_name}'),
+                         self.check(
+                             'volumes[0].azureFile.storageAccountName', '{azure_file_volume_account_name}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{azure_file_volume_mount_path}')])
 
@@ -232,18 +238,18 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                  '--gitrepo-mount-path {gitrepo_mount_path}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
-                         self.check('provisioningState', 'Creating'),
+                         self.check('provisioningState', 'Succeeded'),
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].gitRepo'),
-                         self.check('volumes[0].gitRepo.repository', '{gitrepo_url}'),
-                         self.check('volumes[0].gitRepo.directory', '{gitrepo_dir}'),
-                         self.check('volumes[0].gitRepo.revision', '{gitrepo_revision}'),
+                         self.check(
+                             'volumes[0].gitRepo.repository', '{gitrepo_url}'),
+                         self.check(
+                             'volumes[0].gitRepo.directory', '{gitrepo_dir}'),
+                         self.check(
+                             'volumes[0].gitRepo.revision', '{gitrepo_revision}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
-
-        # Wait for container to be provisioned
-        time.sleep(60)
 
         self.cmd('container show -g {rg} -n {container_group_name}',
                  checks=[self.check('name', '{container_group_name}'),
@@ -252,8 +258,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].gitRepo'),
-                         self.check('volumes[0].gitRepo.repository', '{gitrepo_url}'),
-                         self.check('volumes[0].gitRepo.directory', '{gitrepo_dir}'),
-                         self.check('volumes[0].gitRepo.revision', '{gitrepo_revision}'),
+                         self.check(
+                             'volumes[0].gitRepo.repository', '{gitrepo_url}'),
+                         self.check(
+                             'volumes[0].gitRepo.directory', '{gitrepo_dir}'),
+                         self.check(
+                             'volumes[0].gitRepo.revision', '{gitrepo_revision}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])

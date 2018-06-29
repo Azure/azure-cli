@@ -995,6 +995,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
     def test_network_lb_probes(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
+        self.kwargs['lb2'] = 'lb2'
         self.cmd('network lb create -g {rg} -n {lb}')
 
         for i in range(1, 4):
@@ -1020,6 +1021,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb probe delete -g {rg} --lb-name {lb} -n probe3')
         self.cmd('network lb probe list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 2))
+
+        # test standard LB supports https probe
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
+        self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_rules')
     def test_network_lb_rules(self, resource_group):
