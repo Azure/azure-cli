@@ -263,7 +263,8 @@ def open_page_in_browser(url):
     platform_name = uname.system.lower()
     release = uname.release.lower()
     if platform_name == 'linux' and release.split('-')[-1] == 'microsoft':   # windows 10 linux subsystem
-        return subprocess.call(['/mnt/c/Windows/System32/cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+        if os.path.exists('/mnt/c/Windows/System32/cmd.exe'):
+            return subprocess.call(['/mnt/c/Windows/System32/cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
     elif platform_name == 'darwin':
         # handle 2 things:
         # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
