@@ -226,6 +226,7 @@ def load_command_table(self, _):
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_subscription_deployment_template')
+        g.generic_wait_command('wait', getter_name='get_at_subscription_scope')
 
     with self.command_group('deployment operation', resource_deployment_operation_sdk) as g:
         g.command('list', 'list_at_subscription_scope')
