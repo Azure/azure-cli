@@ -2445,6 +2445,14 @@ helps['network nic show'] = """
           text: az network nic show -g MyResourceGroup -n MyNic --query "dnsSettings.internalDomainNameSuffix"
 """
 
+helps['network nic wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the network interface is met.
+    examples:
+        - name: Pause CLI until the network interface is created.
+          text: az network nic wait -g MyResourceGroup -n MyNic --created
+"""
+
 helps['network nic show-effective-route-table'] = """
     type: command
     short-summary: Show the effective route table applied to a network interface.

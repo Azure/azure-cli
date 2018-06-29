@@ -451,13 +451,14 @@ def load_command_table(self, _):
     # region NetworkInterfaces: (NIC)
 
     with self.command_group('network nic', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace)
-        g.command('delete', 'delete')
+        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
+        g.command('delete', 'delete', supports_no_wait=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('list', 'list_nics')
         g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01')
         g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01')
-        g.generic_update_command('update', custom_func_name='update_nic')
+        g.generic_update_command('update', custom_func_name='update_nic', supports_no_wait=True)
+        g.generic_wait_command('wait')
 
     resource = 'network_interfaces'
     subresource = 'ip_configurations'

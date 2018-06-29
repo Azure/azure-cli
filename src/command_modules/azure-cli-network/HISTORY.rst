@@ -5,7 +5,8 @@ Release History
 
 2.1.6
 +++++
-* Minor fixes
+* `network nic create/update/delete`: Add `--no-wait` support.
+* Added `network nic wait`.
 
 2.1.5
 ++++++
