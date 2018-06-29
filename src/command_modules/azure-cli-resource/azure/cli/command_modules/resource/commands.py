@@ -210,7 +210,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.command('show', 'get', exception_handler=empty_on_404)
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')
         g.generic_wait_command('wait')
@@ -222,10 +222,11 @@ def load_command_table(self, _):
     with self.command_group('deployment', resource_deployment_sdk) as g:
         g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list, min_api='2018-05-01')
         g.command('show', 'get_at_subscription_scope', exception_handler=empty_on_404)
-        g.command('delete', 'delete_at_subscription_scope')
+        g.command('delete', 'delete_at_subscription_scope', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_subscription_deployment_template')
+        g.generic_wait_command('wait', getter_name='get_at_subscription_scope')
 
     with self.command_group('deployment operation', resource_deployment_operation_sdk) as g:
         g.command('list', 'list_at_subscription_scope')

@@ -215,10 +215,11 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vm_encryption_status', exception_handler=empty_on_404)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', supports_no_wait=True)
         g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_extension_show_table_output)
-        g.custom_command('set', 'set_extension')
+        g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
+        g.generic_wait_command('wait')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
         g.command('show', 'get', exception_handler=empty_on_404)
@@ -301,9 +302,9 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vmss_encryption_status', exception_handler=empty_on_404)
 
     with self.command_group('vmss extension', compute_vmss_sdk) as g:
-        g.custom_command('delete', 'delete_vmss_extension')
+        g.custom_command('delete', 'delete_vmss_extension', supports_no_wait=True)
         g.custom_command('show', 'get_vmss_extension', exception_handler=empty_on_404)
-        g.custom_command('set', 'set_vmss_extension')
+        g.custom_command('set', 'set_vmss_extension', supports_no_wait=True)
         g.custom_command('list', 'list_vmss_extensions')
 
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
