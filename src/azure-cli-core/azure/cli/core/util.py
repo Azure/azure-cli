@@ -255,7 +255,6 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
 
 
 def open_page_in_browser(url):
-    import os
     import platform
     import subprocess
     import webbrowser
