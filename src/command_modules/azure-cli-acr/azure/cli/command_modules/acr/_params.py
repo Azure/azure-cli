@@ -66,6 +66,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
+        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
 
     with self.argument_context('acr import') as c:
         c.argument('source', help="The source identifier in the format '[registry.azurecr.io/]repository[:tag]' or '[registry.azurecr.io/]repository@digest'.")
@@ -129,7 +130,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task.', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
         c.argument('alias', help='The alternative name for build task. Default to the build task name.')
         c.argument('status', help='The current status of build task.', arg_type=get_enum_type(BuildTaskStatus))
-        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the build.')
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
