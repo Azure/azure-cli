@@ -285,7 +285,6 @@ class VMCustomImageTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_custom_image(self, resource_group):
-        subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'vm1': 'vm-unmanaged-disk',
             'vm2': 'vm-managed-disk',
@@ -294,7 +293,7 @@ class VMCustomImageTest(ScenarioTest):
             'image1': 'img-from-unmanaged',
             'image2': 'img-from-managed',
         })
-        
+
         self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --use-unmanaged-disk')
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
         self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
@@ -371,7 +370,7 @@ class VMImageWithPlanTest(ScenarioTest):
 
         # let us accept the term
         self.cmd('vm image accept-terms --urn {urn}', checks=self.check('accepted', True))
-       
+
         # create a vm and capture an image from it
         self.cmd('vm create -g {rg} -n {vm1} --image {urn}')
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
