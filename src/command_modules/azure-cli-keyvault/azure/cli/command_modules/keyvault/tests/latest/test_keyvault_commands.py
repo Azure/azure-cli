@@ -768,7 +768,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'sa': 'clitestkvsa0000001',
+            'sa': 'clitestkvsa0000002',
             'loc': 'westus'
         })
 
