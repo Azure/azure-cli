@@ -5,7 +5,9 @@ Release History
 
 2.0.33
 ++++++
-* Minor fixes
+* `group deployment delete`: Add `--no-wait` support.
+* `deployment delete`: Add `--no-wait` support.
+* Added `deployment wait` command.
 
 2.0.32
 ++++++

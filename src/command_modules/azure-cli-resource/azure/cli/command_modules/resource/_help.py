@@ -710,6 +710,10 @@ helps['deployment validate'] = """
             Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
             It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 """
+helps['deployment wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a deployment condition is met.
+"""
 helps['deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.

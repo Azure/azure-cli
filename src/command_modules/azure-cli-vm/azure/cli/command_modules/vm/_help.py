@@ -222,6 +222,11 @@ helps['vm extension set'] = """
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
 """
 
+helps['vm extension wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
+"""
+
 helps['vm availability-set delete'] = """
     type: command
     short-summary: Delete an availability set.
