@@ -281,7 +281,6 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
 
 
-# TODO: convert back to ScenarioTest when #5740 is fixed.
 class VMCustomImageTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
