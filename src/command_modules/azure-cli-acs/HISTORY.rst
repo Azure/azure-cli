@@ -5,7 +5,8 @@ Release History
 
 2.1.3
 +++++
-* Minor fixes
+* Update PyYAML dependency to 4.2b4
+* Handle monitoring solution through its subscription ID
 
 2.1.2
 +++++
