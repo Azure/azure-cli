@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.0.41
+2.0.42
 ++++++
 * login: support browser based login in WSL bash window
+
+2.0.41
+++++++
+* Minor fixes
 
 2.0.40
 ++++++
