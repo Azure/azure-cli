@@ -8,31 +8,24 @@
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
 
-import re
-
 
 # Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None):
-    from azure.mgmt.relay.models import RelayNamespace, Sku
+def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None):
+    from azure.mgmt.relay.models import RelayNamespace
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         parameters=RelayNamespace(
             location,
-            tags )
-        
+            tags)
+
     )
 
 
-def cli_namespace_update(instance, tags=None, sku=None, capacity=None):
+def cli_namespace_update(instance, tags=None):
 
     if tags is not None:
         instance.tags = tags
-
-    if sku is not None:
-        instance.sku.name = sku
-        instance.sku.tier = sku
 
     return instance
 
@@ -64,23 +57,23 @@ def cli_namespaceautho_update(instance, rights):
 
 # WCF Relay Region
 def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name, relay_type,
-    requires_client_authorization=None, user_metadata=None):
+                        requires_client_authorization=None, user_metadata=None):
 
     from azure.mgmt.relay.models import WcfRelay, Relaytype
 
     if relay_type is None:
         set_relay_type = Relaytype.net_tcp
     elif relay_type == "Http":
-        set_relay_type=Relaytype.http
+        set_relay_type = Relaytype.http
     else:
-         set_relay_type=Relaytype.net_tcp
+        set_relay_type = Relaytype.net_tcp
 
     wcfrelay_params = WcfRelay(
         relay_type=set_relay_type,
         requires_client_authorization=requires_client_authorization,
         user_metadata=user_metadata
     )
-    
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -88,14 +81,16 @@ def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name,
         parameters=wcfrelay_params)
 
 
-def cli_wcfrelay_update(instance, relay_type=None, 
-    requires_client_authorization=None, user_metadata=None, status=None):
+def cli_wcfrelay_update(instance, relay_type=None,
+                        requires_client_authorization=None, user_metadata=None, status=None):
 
     from azure.mgmt.relay.models import WcfRelay
-    returnobj = WcfRelay()
+    returnobj = WcfRelay(relay_type=instance.relay_type,
+                         requires_client_authorization=instance.requires_client_authorization,
+                         user_metadata=instance.user_metadata)
 
     if relay_type:
-      returnobj.relay_type = relay_type
+        returnobj.relay_type = relay_type
 
     if requires_client_authorization:
         returnobj.requires_client_authorization = requires_client_authorization
@@ -114,8 +109,8 @@ def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connecti
                     requires_client_authorization=None, user_metadata=None):
     from azure.mgmt.relay.models import HybridConnection
     hyco_params = HybridConnection(
-        requires_client_authorization = requires_client_authorization,
-        user_metadata = user_metadata
+        requires_client_authorization=requires_client_authorization,
+        user_metadata=user_metadata
     )
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -124,10 +119,11 @@ def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connecti
         parameters=hyco_params)
 
 
-def cli_hyco_update(instance, requires_client_authorization=None, status = None, user_metadata=None):
+def cli_hyco_update(instance, requires_client_authorization=None, status=None, user_metadata=None):
 
     from azure.mgmt.relay.models import HybridConnection
-    hyco_params = HybridConnection()
+    hyco_params = HybridConnection(requires_client_authorization=instance.requires_client_authorization,
+                                   user_metadata=instance.user_metadata)
 
     if requires_client_authorization:
         hyco_params.requires_client_authorization = requires_client_authorization

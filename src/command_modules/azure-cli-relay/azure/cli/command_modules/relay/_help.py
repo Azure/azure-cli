@@ -111,7 +111,7 @@ helps['relay namespace authorization-rule create'] = """
     type: command
     short-summary: Create Authorization Rule for the given Relay Service Namespace
     examples:
-        - name: Create Authorization Rule 'myauthorule' for the given Relay Service Namespace 'mynamepsace' in resourcegroup
+        - name: Create Authorization Rule 'myrule' for the given Relay Service Namespace 'mynamespace' in resourcegroup
           text: az relay namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
 """
 
@@ -119,7 +119,7 @@ helps['relay namespace authorization-rule update'] = """
     type: command
     short-summary: Updates Authorization Rule for the given Relay Service Namespace
     examples:
-        - name: Updates Authorization Rule 'myauthorule' for the given Relay Service Namespace 'mynamepsace' in resourcegroup
+        - name: Updates Authorization Rule 'myrule' for the given Relay Service Namespace 'mynamespace' in resourcegroup
           text: az relay namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
 """
 
