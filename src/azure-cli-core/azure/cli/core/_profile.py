@@ -255,18 +255,14 @@ class Profile(object):
         from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        msi_creds = MSIAuthentication()
 
-        token_entry = None
         if identity_id:
             if is_valid_resource_id(identity_id):
                 msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
-                msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                 try:
-                    msi_creds.set_token()
-                    token_entry = msi_creds.token
+                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
@@ -278,9 +274,7 @@ class Profile(object):
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
 
-        if not token_entry:
-            msi_creds.set_token()
-            token_entry = msi_creds.token
+        token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
