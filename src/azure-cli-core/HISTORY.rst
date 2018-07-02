@@ -6,6 +6,7 @@ Release History
 2.0.41
 ++++++
 * Minor fixes
+* Update PyYAML dependency to 4.2b4
 
 2.0.40
 ++++++

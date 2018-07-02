@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.1.3
++++++
+* Update PyYAML dependency to 4.2b4
+* Handle monitoring solution through its subscription ID
+
 2.1.2
 +++++
 * Breaking change: Enable Kubernetes role-based access control by default.
