@@ -903,12 +903,13 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait):
+def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
+                       subscription_id=None):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient).deployments
+    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient, subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
@@ -1586,10 +1587,15 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
         addon = ADDONS[addon_arg]
         if enable:
             # add new addons or update existing ones and enable them
-            addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=True))
+            addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
             # special config handling for certain addons
-            if addon == 'omsagent' and workspace_resource_id:
-                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            if addon == 'omsagent':
+                if addon_profile.enabled:
+                    raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
+                                   'To change monitoring configuration, run "az aks disable-addons -monitoring"'
+                                   'before enabling it again.')
+                elif workspace_resource_id:
+                    addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -1693,14 +1699,15 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     if not workspace_resource_id.startswith('/'):
         workspace_resource_id = '/' + workspace_resource_id
 
-    # extract resource group from workspace_resource_id URL
+    # extract subscription ID and resource group from workspace_resource_id URL
     try:
+        subscription_id = workspace_resource_id.split('/')[2]
         resource_group = workspace_resource_id.split('/')[4]
     except IndexError:
         raise CLIError('Could not locate resource group in workspace-resource-id URL.')
 
     # find the location from the resource group
-    location = _get_rg_location(cmd.cli_ctx, resource_group)
+    location = _get_rg_location(cmd.cli_ctx, resource_group, subscription_id)
 
     # pylint: disable=line-too-long
     template = {
@@ -1772,7 +1779,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
-                              validate=False, no_wait=False)
+                              validate=False, no_wait=False, subscription_id=subscription_id)
 
 
 def _ensure_aks_service_principal(cli_ctx,
@@ -1851,8 +1858,8 @@ def _ensure_service_principal(cli_ctx,
     return load_acs_service_principal(subscription_id)
 
 
-def _get_rg_location(ctx, resource_group_name):
-    groups = cf_resource_groups(ctx)
+def _get_rg_location(ctx, resource_group_name, subscription_id=None):
+    groups = cf_resource_groups(ctx, subscription_id=subscription_id)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     return rg.location
