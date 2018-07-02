@@ -4,8 +4,8 @@ Release History
 ===============
 
 0.2.1
-++++++
-* Minor fixes
++++++
+* Update PyYAML dependency to 4.2b4
 
 0.2.0
 +++++
