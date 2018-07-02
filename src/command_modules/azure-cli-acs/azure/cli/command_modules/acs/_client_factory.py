@@ -19,8 +19,9 @@ def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
 
 
-def cf_resource_groups(cli_ctx, *_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
+def cf_resource_groups(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   subscription_id=subscription_id).resource_groups
 
 
 def get_auth_management_client(cli_ctx, scope=None, **_):
