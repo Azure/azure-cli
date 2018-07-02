@@ -882,6 +882,10 @@ def load_arguments(self, _):
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
 
+    for scope in ['network vnet subnet list', 'network vnet peering list']:
+        with self.argument_context(scope) as c:
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+
     # endregion
 
     # region VirtualNetworkGateways
