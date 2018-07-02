@@ -312,17 +312,17 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 def _validate_vm_encryption_settings(cmd, namespace):
     #if there is no disk_encryption* parameter then none of the encryption params should be provided
     required = []
-    forbidden = ['disk_encryption_key_url', 'disk_encryption_key_vault_id', 'key_encryption_key_url', 'key_encryption_key_vault_id']
+    forbidden = ['disk_encryption_key', 'disk_encryption_keyvault', 'key_encryption_key', 'key_encryption_keyvault']
 
-    # if disk_encryption_key_url or disk_encryption_key_vault_id are present. They should both be required.
-    if getattr(namespace, 'disk_encryption_key_url', None) or getattr(namespace, 'disk_encryption_key_vault_id', None):
-        required = ['disk_encryption_key_url', 'disk_encryption_key_vault_id']
-        forbidden = ['key_encryption_key_url', 'key_encryption_key_vault_id']
+    # if disk_encryption_key or disk_encryption_keyvault are present. They should both be required.
+    if getattr(namespace, 'disk_encryption_key', None) or getattr(namespace, 'disk_encryption_keyvault', None):
+        required = ['disk_encryption_key', 'disk_encryption_keyvault']
+        forbidden = ['key_encryption_key', 'key_encryption_keyvault']
 
-    if getattr(namespace, 'key_encryption_key_url', None) or getattr(namespace, 'key_encryption_key_vault_id', None):
+    if getattr(namespace, 'key_encryption_key', None) or getattr(namespace, 'key_encryption_keyvault', None):
         # if any key_encryption_key stuff is present, then both params are required
         # else they are both forbidden
-        required = ['disk_encryption_key_url', 'disk_encryption_key_vault_id', 'key_encryption_key_url', 'key_encryption_key_vault_id']
+        required = ['disk_encryption_key', 'disk_encryption_keyvault', 'key_encryption_key', 'key_encryption_keyvault']
         forbidden = []
 
     # Now verify that the status of required and forbidden parameters
@@ -330,6 +330,15 @@ def _validate_vm_encryption_settings(cmd, namespace):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
+    if getattr(namespace, 'disk_encryption_keyvault', None):
+        namespace.disk_encryption_keyvault = _get_resource_id(cmd.cli_ctx, namespace.disk_encryption_keyvault,
+                                                              namespace.resource_group_name,
+                                                              'vaults', 'Microsoft.KeyVault')
+
+    if getattr(namespace, 'key_encryption_keyvault', None):
+        namespace.key_encryption_keyvault = _get_resource_id(cmd.cli_ctx, namespace.key_encryption_keyvault,
+                                                             namespace.resource_group_name,
+                                                             'vaults', 'Microsoft.KeyVault')
 
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):

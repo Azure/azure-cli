@@ -112,6 +112,10 @@ def get_key_vault_base_url(cli_ctx, vault_name):
     suffix = cli_ctx.cloud.suffixes.keyvault_dns
     return 'https://{}{}'.format(vault_name, suffix)
 
+def get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
+    client = create_keyvault_data_plane_client(cli_ctx)
+    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
+    return result.key.kid  # pylint: disable=no-member
 
 def list_sku_info(cli_ctx, location=None):
     from ._client_factory import _compute_client_factory

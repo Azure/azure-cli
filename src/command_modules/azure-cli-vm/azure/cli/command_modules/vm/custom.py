@@ -501,17 +501,18 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, disk_encryption_key_url=None, disk_encryption_key_vault_id=None,
-              key_encryption_key_url=None, key_encryption_key_vault_id=None):
+              boot_diagnostics_storage=None, disk_encryption_key=None, disk_encryption_keyvault=None,
+              key_encryption_key=None, key_encryption_keyvault=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.vm._vm_utils import get_keyvault_key_url
     from azure.cli.command_modules.vm._template_builder import (build_vm_resource,
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment)
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
@@ -611,6 +612,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
+    if key_encryption_key:
+        key_encryption_keyvault = key_encryption_keyvault
+        if '://' not in key_encryption_key:  # appears a key name
+            key_encryption_key = get_keyvault_key_url(
+                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
+
     vm_resource = build_vm_resource(
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
@@ -619,9 +626,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
-        boot_diagnostics_storage_uri=boot_diagnostics_storage, disk_encryption_key_url=disk_encryption_key_url,
-        disk_encryption_key_vault_id=disk_encryption_key_vault_id, key_encryption_key_url=key_encryption_key_url,
-        key_encryption_key_vault_id=key_encryption_key_vault_id)
+        boot_diagnostics_storage_uri=boot_diagnostics_storage, disk_encryption_key_url=disk_encryption_key,
+        disk_encryption_key_vault_id=disk_encryption_keyvault, key_encryption_key_url=key_encryption_key,
+        key_encryption_key_vault_id=key_encryption_keyvault)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
