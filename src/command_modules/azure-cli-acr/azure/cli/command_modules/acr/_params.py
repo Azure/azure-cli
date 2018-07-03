@@ -46,7 +46,6 @@ from ._validators import (
     validate_build_arg,
     validate_secret_build_arg
 )
-from ._docker_utils import IMAGE_BY_TAG_HELP, IMAGE_BY_TAG_OR_DIGEST_HELP
 
 
 image_by_tag_type = CLIArgumentType(
