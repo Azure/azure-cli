@@ -34,7 +34,7 @@ Release History
 
 2.0.35
 ++++++
-* Minor fixes
+* Added method of registering `show` commands to fail with exit code of 3.
 
 2.0.34
 ++++++
