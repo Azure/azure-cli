@@ -24,6 +24,7 @@ from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_a
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
+EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
 
 
 # pylint:disable=too-many-lines
@@ -447,8 +448,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
-        exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
-        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
+        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         op_args = {key: val for key, val in args.items() if key in raw_args}
         if client_arg_name in raw_args:
             op_args[client_arg_name] = client
@@ -607,13 +607,13 @@ def _cli_generic_wait_command(context, name, getter_op, custom_command=False, **
 
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
+                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, args) if factory else None
-        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+        if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
@@ -686,13 +686,14 @@ def _cli_generic_show_command(context, name, getter_op, custom_command=False, **
         cmd = args.get('cmd')
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
+                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, args) if factory else None
-        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+
+        if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
