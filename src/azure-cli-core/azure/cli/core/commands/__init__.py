@@ -849,7 +849,7 @@ class AzCommandGroup(CommandGroup):
                                getter_name='get', getter_type=None,
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
-                               custom_func_name=None, custom_func_type=None, **kwargs):
+                               custom_func_name=None, custom_func_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command
 
         self._check_stale()
@@ -871,9 +871,10 @@ class AzCommandGroup(CommandGroup):
             child_collection_prop_name=child_collection_prop_name,
             child_collection_key=child_collection_key,
             child_arg_name=child_arg_name,
+            custom_command=custom_command,
             **merged_kwargs)
 
-    def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
+    def generic_wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_wait_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
@@ -883,11 +884,8 @@ class AzCommandGroup(CommandGroup):
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
-        _cli_generic_wait_command(
-            self.command_loader,
-            '{} {}'.format(self.group_name, name),
-            getter_op=getter_op,
-            **merged_kwargs)
+        _cli_generic_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
+                                  custom_command=custom_command, **merged_kwargs)
 
     def generic_show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_show_command
@@ -899,8 +897,5 @@ class AzCommandGroup(CommandGroup):
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
-        _cli_generic_show_command(
-            self.command_loader,
-            '{} {}'.format(self.group_name, name),
-            getter_op=getter_op,
-            **merged_kwargs)
+        _cli_generic_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
+                                  custom_command=custom_command, **merged_kwargs)
