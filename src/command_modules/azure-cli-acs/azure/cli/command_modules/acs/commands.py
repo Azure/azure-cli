@@ -67,7 +67,7 @@ def load_command_table(self, _):
         g.custom_command('remove-connector', 'k8s_uninstall_connector')
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
-        g.custom_command('show', 'aks_show', table_transformer=aks_show_table_format)
+        g.generic_show_command('show', 'aks_show', table_transformer=aks_show_table_format, custom_command=True)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True,
                          confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
                          'Are you sure you want to perform this operation?')

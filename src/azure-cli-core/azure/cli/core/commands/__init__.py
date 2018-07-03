@@ -819,12 +819,8 @@ class AzCommandGroup(CommandGroup):
         return command_name
 
     # pylint: disable=no-self-use
-    def _resolve_operation(self, kwargs, name, command_type=None, source_kwarg='command_type'):
-
-        allowed_source_kwargs = ['command_type', 'custom_command_type']
-        if source_kwarg not in allowed_source_kwargs:
-            raise ValueError("command authoring error: 'source_kwarg' value '{}'. Allowed values: {}".format(
-                source_kwarg, ' '.join(allowed_source_kwargs)))
+    def _resolve_operation(self, kwargs, name, command_type=None, custom_type=False):
+        source_kwarg = 'custom_command_type' if custom_type else 'command_type'
 
         operations_tmpl = None
         if command_type:
@@ -857,10 +853,10 @@ class AzCommandGroup(CommandGroup):
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
-        setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_type=custom_command)
+        setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type, custom_type=custom_command)
         custom_func_op = self._resolve_operation(merged_kwargs, custom_func_name, custom_func_type,
-                                                 source_kwarg='custom_command_type') if custom_func_name else None
+                                                 custom_type=True) if custom_func_name else None
         _cli_generic_update_command(
             self.command_loader,
             '{} {}'.format(self.group_name, name),
@@ -883,7 +879,7 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_type=custom_command)
         _cli_generic_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                                   custom_command=custom_command, **merged_kwargs)
 
@@ -896,6 +892,6 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_type=custom_command)
         _cli_generic_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                                   custom_command=custom_command, **merged_kwargs)
