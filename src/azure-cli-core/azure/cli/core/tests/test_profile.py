@@ -927,6 +927,8 @@ class TestProfile(unittest.TestCase):
                 self.token = None
                 self.client_id = kwargs.get('client_id')
                 self.object_id = kwargs.get('object_id')
+                # since msrestazure 0.4.34, set_token in init
+                self.set_token()
 
             def set_token(self):
                 # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
