@@ -339,16 +339,20 @@ def _get_child(parent, collection_name, item_name, collection_key):
         return result
 
 
-def _get_operations_tmpl(cmd):
-    operations_tmpl = cmd.command_kwargs.get('operations_tmpl',
-                                             cmd.command_kwargs.get('command_type').settings['operations_tmpl'])
+def _get_operations_tmpl(cmd, custom_command=False):
+    if custom_command:
+        operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
+            cmd.command_kwargs.get('custom_command_type').settings['operations_tmpl']
+    else:
+        operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
+            cmd.command_kwargs.get('command_type').settings['operations_tmpl']
     if not operations_tmpl:
         raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
     return operations_tmpl
 
 
-def _get_client_factory(_, kwargs):
-    command_type = kwargs.get('command_type', None)
+def _get_client_factory(_, custom_command=False, **kwargs):
+    command_type = kwargs.get('custom_command_type', None) if custom_command else kwargs.get('command_type', None)
     factory = kwargs.get('client_factory', None)
     if not factory and command_type:
         factory = command_type.settings.get('client_factory', None)
@@ -366,7 +370,7 @@ def get_arguments_loader(context, getter_op, cmd_args=None):
 # pylint: disable=too-many-statements
 def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_name='parameters',
                                 child_collection_prop_name=None, child_collection_key='name',
-                                child_arg_name='item_name', custom_function_op=None, **kwargs):
+                                child_arg_name='item_name', custom_command=False, custom_function_op=None, **kwargs):
     if not isinstance(context, AzCommandsLoader):
         raise TypeError("'context' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(context)))
     if not isinstance(getter_op, string_types):
@@ -433,7 +437,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-        factory = _get_client_factory(name, commmand_kwargs)
+        factory = _get_client_factory(name, custom_command=custom_command, **commmand_kwargs)
         client = None
         if factory:
             try:
@@ -542,12 +546,12 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
     context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_wait_command(context, name, getter_op, **kwargs):
+def _cli_generic_wait_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
-    factory = _get_client_factory(name, kwargs)
+    factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
 
     def generic_wait_arguments_loader():
         cmd_args = get_arguments_loader(context, getter_op)
@@ -601,7 +605,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
 
         cmd = args.get('cmd')
 
-        operations_tmpl = _get_operations_tmpl(cmd)
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
@@ -665,12 +669,12 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_show_command(context, name, getter_op, **kwargs):
+def _cli_generic_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
-    factory = _get_client_factory(name, kwargs)
+    factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
 
     def generic_show_arguments_loader():
         cmd_args = get_arguments_loader(context, getter_op)
@@ -680,7 +684,7 @@ def _cli_generic_show_command(context, name, getter_op, **kwargs):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
 
         cmd = args.get('cmd')
-        operations_tmpl = _get_operations_tmpl(cmd)
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)

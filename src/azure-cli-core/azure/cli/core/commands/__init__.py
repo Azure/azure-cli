@@ -889,10 +889,13 @@ class AzCommandGroup(CommandGroup):
             getter_op=getter_op,
             **merged_kwargs)
 
-    def generic_show_command(self, name, getter_name='get', getter_type=None, **kwargs):
+    def generic_show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_show_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
+        # don't inherit deprecation info from command group
+        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
+
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
