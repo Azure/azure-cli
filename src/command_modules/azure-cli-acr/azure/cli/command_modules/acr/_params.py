@@ -51,12 +51,12 @@ from ._docker_utils import IMAGE_BY_TAG_HELP, IMAGE_BY_TAG_OR_DIGEST_HELP
 
 image_by_tag_type = CLIArgumentType(
     options_list=['--image', '-t'],
-    help=IMAGE_BY_TAG_HELP
+    help="The name of the image. May include a tag in the format 'name:tag'."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
-    help=IMAGE_BY_TAG_OR_DIGEST_HELP
+    help="The name of the image. May include a tag in the format 'name:tag' or digest in the format 'name@digest'."
 )
 
 

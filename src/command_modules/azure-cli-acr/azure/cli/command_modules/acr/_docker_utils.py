@@ -28,9 +28,6 @@ logger = get_logger(__name__)
 
 
 ACCESS_TOKEN_PERMISSION = ['*', 'pull']
-IMAGE_BY_TAG_HELP = "The name of the image. May include a tag in the format 'name:tag'."
-IMAGE_BY_TAG_OR_DIGEST_HELP = "The name of the image. May include a tag in the format 'name:tag' " \
-                              "or digest in the format 'name@digest'."
 
 
 def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, permission=None):
@@ -226,25 +223,3 @@ def log_registry_response(response):
 def get_login_server_suffix(cli_ctx):
     """Get the Azure Container Registry login server suffix in the current cloud."""
     return cli_ctx.cloud.suffixes.acr_login_server_endpoint
-
-
-def parse_image_name(image, allow_digest=False):
-    if allow_digest and '@' in image:
-        # This is probably an image name by manifest digest
-        tokens = image.split('@')
-        if len(tokens) == 2:
-            return tokens[0], None, tokens[1]
-
-    if ':' in image:
-        # This is probably an image name by tag
-        tokens = image.split(':')
-        if len(tokens) == 2:
-            return tokens[0], tokens[1], None
-    else:
-        # This is probably an image with implicit latest tag
-        return image, 'latest', None
-
-    if allow_digest:
-        raise CLIError(IMAGE_BY_TAG_OR_DIGEST_HELP)
-    else:
-        raise CLIError(IMAGE_BY_TAG_HELP)
