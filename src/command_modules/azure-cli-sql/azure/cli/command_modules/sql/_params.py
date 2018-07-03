@@ -56,7 +56,6 @@ from .custom import (
 
 from ._validators import (
     create_args_for_complex_type,
-    validate_elastic_pool_id,
     validate_managed_instance_storage_size,
     validate_subnet
 )
@@ -131,8 +130,7 @@ family_param_type = CLIArgumentType(
 
 elastic_pool_id_param_type = CLIArgumentType(
     arg_group=sku_arg_group,
-    options_list=['--elastic-pool'],
-    validator=validate_elastic_pool_id)
+    options_list=['--elastic-pool'])
 
 max_size_bytes_param_type = CLIArgumentType(
     options_list=['--max-size'],
@@ -436,8 +434,7 @@ def load_arguments(self, _):
 
         c.argument('elastic_pool_id',
                    arg_type=elastic_pool_id_param_type,
-                   help='The name or resource id of the elastic pool to move the database into.',
-                   validator=validate_elastic_pool_id)
+                   help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
