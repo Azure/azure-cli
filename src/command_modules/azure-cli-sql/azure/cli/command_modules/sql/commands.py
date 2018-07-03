@@ -375,7 +375,7 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete')
-        g.custom_command('show', 'server_key_get')
+        g.generic_show_command('show', 'server_key_get', custom_command=True)
         g.command('list', 'list_by_server')
 
     encryption_protectors_operations = CliCommandType(

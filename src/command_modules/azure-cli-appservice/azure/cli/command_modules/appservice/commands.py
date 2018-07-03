@@ -71,7 +71,7 @@ def load_command_table(self, _):
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.generic_show_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output, custom_command=True)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -85,12 +85,12 @@ def load_command_table(self, _):
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
-        g.custom_command('show', 'show_traffic_routing')
+        g.generic_show_command('show', 'show_traffic_routing', custom_command=True)
         g.custom_command('clear', 'clear_traffic_routing')
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
-        g.custom_command('show', 'get_site_configs', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_site_configs', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('webapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
@@ -111,7 +111,7 @@ def load_command_table(self, _):
     with self.command_group('webapp config container') as g:
         g.custom_command('set', 'update_container_settings')
         g.custom_command('delete', 'delete_container_settings')
-        g.custom_command('show', 'show_container_settings', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_container_settings', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('webapp config ssl') as g:
         g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
@@ -122,7 +122,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
-        g.custom_command('show', 'show_backup_configuration', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_backup_configuration', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
@@ -132,7 +132,7 @@ def load_command_table(self, _):
         g.custom_command('config-zip', 'enable_zip_deploy')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
-        g.custom_command('show', 'show_source_control', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_source_control', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('delete', 'delete_source_control')
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
@@ -140,7 +140,7 @@ def load_command_table(self, _):
         g.custom_command('tail', 'get_streaming_log')
         g.custom_command('download', 'download_historical_logs')
         g.custom_command('config', 'config_diagnostics')
-        g.custom_command('show', 'show_diagnostic_settings')
+        g.generic_show_command('show', 'show_diagnostic_settings', custom_command=True)
 
     with self.command_group('webapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
@@ -161,7 +161,7 @@ def load_command_table(self, _):
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
     with self.command_group('webapp auth') as g:
-        g.custom_command('show', 'get_auth_settings')
+        g.generic_show_command('show', 'get_auth_settings', custom_command=True)
         g.custom_command('update', 'update_auth_settings')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
@@ -176,7 +176,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.generic_show_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output, custom_command=True)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -210,7 +210,7 @@ def load_command_table(self, _):
         g.custom_command('config-zip', 'enable_zip_deploy')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo')
-        g.custom_command('show', 'show_source_control', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_source_control', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('delete', 'delete_source_control')
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 

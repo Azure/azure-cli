@@ -143,7 +143,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
-        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_lock', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('update', 'update_lock')
 
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -160,13 +160,13 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
-        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_lock', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('update', 'update_lock')
 
     with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
-        g.custom_command('show', 'show_resource', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_resource', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
@@ -178,7 +178,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
-        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_lock', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('update', 'update_lock')
 
     # Resource provider commands
@@ -217,7 +217,7 @@ def load_command_table(self, _):
 
     with self.command_group('group deployment operation', resource_deployment_operation_sdk) as g:
         g.command('list', 'list')
-        g.custom_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations, exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list)
@@ -230,33 +230,33 @@ def load_command_table(self, _):
 
     with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('list', 'list_at_subscription_scope')
-        g.custom_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations, exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_assignment')
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
-        g.custom_command('show', 'show_policy_assignment', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_policy_assignment', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
         g.command('delete', 'delete')
         g.command('list', 'list')
-        g.custom_command('show', 'get_policy_definition', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_policy_definition', exception_handler=empty_on_404, custom_command=True)
         g.generic_update_command('update', custom_func_name='update_policy_definition', custom_func_type=resource_custom)
 
     with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
         g.command('delete', 'delete')
         g.command('list', 'list')
-        g.custom_command('show', 'get_policy_setdefinition', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_policy_setdefinition', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('update', 'update_policy_setdefinition')
 
     with self.command_group('lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
-        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_lock', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('update', 'update_lock')
 
     with self.command_group('resource link', resource_link_sdk, resource_type=ResourceType.MGMT_RESOURCE_LINKS) as g:
@@ -269,18 +269,18 @@ def load_command_table(self, _):
     with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'delete')
-        g.custom_command('show', 'show_application', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_application', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('list', 'list_applications')
 
     with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_applicationdefinition')
         g.command('delete', 'delete')
-        g.custom_command('show', 'show_applicationdefinition')
+        g.generic_show_command('show', 'show_applicationdefinition', custom_command=True)
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
 
     with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
         g.custom_command('list', 'cli_managementgroups_group_list')
-        g.custom_command('show', 'cli_managementgroups_group_show')
+        g.generic_show_command('show', 'cli_managementgroups_group_show', custom_command=True)
         g.custom_command('create', 'cli_managementgroups_group_create')
         g.custom_command('delete', 'cli_managementgroups_group_delete')
         g.generic_update_command(

@@ -88,7 +88,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
-        g.custom_command('show', 'show_application')
+        g.generic_show_command('show', 'show_application', custom_command=True)
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
@@ -97,7 +97,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_service_principal')
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_sps', client_factory=get_graph_client_service_principals)
-        g.custom_command('show', 'show_service_principal', client_factory=get_graph_client_service_principals)
+        g.generic_show_command('show', 'show_service_principal', client_factory=get_graph_client_service_principals, custom_command=True)
 
     # RBAC related
     with self.command_group('ad sp', exception_handler=graph_err_handler) as g:

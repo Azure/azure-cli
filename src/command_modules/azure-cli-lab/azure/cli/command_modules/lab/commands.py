@@ -148,5 +148,5 @@ def load_command_table(self, _):
     # ARM Templates Operations Commands
     with self.command_group('lab arm-template', arm_template_operations) as g:
         g.command('list', 'list', table_transformer=transform_arm_template_list)
-        g.custom_command('show', 'show_arm_template', table_transformer=transform_arm_template,
-                         client_factory=get_devtestlabs_arm_template_operation)
+        g.generic_show_command('show', 'show_arm_template', table_transformer=transform_arm_template,
+                               client_factory=get_devtestlabs_arm_template_operation, custom_command=True)

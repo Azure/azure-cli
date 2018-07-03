@@ -280,7 +280,7 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway ssl-policy') as g:
         g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
         g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace)
-        g.custom_command('show', 'show_ag_ssl_policy', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_ag_ssl_policy', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
         g.command('list-options', 'list_available_ssl_options')
@@ -294,7 +294,7 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway waf-config') as g:
         g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
-        g.custom_command('show', 'show_ag_waf_config', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_ag_waf_config', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
 
     # endregion
@@ -530,11 +530,11 @@ def load_command_table(self, _):
 
     with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('configure', 'set_nsg_flow_logging', validator=process_nw_flow_log_set_namespace)
-        g.custom_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
+        g.generic_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace, custom_command=True)
 
     with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
-        g.custom_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
+        g.generic_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace, custom_command=True)
     # endregion
 
     # region PublicIPAddresses

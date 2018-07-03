@@ -181,7 +181,7 @@ def load_command_table(self, _):
         g.command('redeploy', 'redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.command('restart', 'restart', supports_no_wait=True)
-        g.custom_command('show', 'show_vm', table_transformer=transform_vm, exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_vm', table_transformer=transform_vm, exception_handler=empty_on_404, custom_command=True)
         g.command('start', 'start', supports_no_wait=True)
         g.command('stop', 'power_off', supports_no_wait=True)
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
@@ -212,7 +212,7 @@ def load_command_table(self, _):
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vm')
-        g.custom_command('show', 'show_vm_encryption_status', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_vm_encryption_status', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.command('delete', 'delete', supports_no_wait=True)
@@ -233,13 +233,13 @@ def load_command_table(self, _):
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
         g.custom_command('accept-terms', 'accept_market_ordering_terms')
-        g.custom_command('show', 'show_vm_image', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_vm_image', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')
         g.custom_command('remove', 'remove_vm_nic')
         g.custom_command('set', 'set_vm_nic')
-        g.custom_command('show', 'show_vm_nic', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_vm_nic', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('list', 'list_vm_nics')
 
     with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands') as g:
@@ -281,7 +281,7 @@ def load_command_table(self, _):
         g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
-        g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))
+        g.generic_show_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False), custom_command=True)
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True)
         g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom)
@@ -299,11 +299,11 @@ def load_command_table(self, _):
     with self.command_group('vmss encryption', custom_command_type=compute_disk_encryption_custom, min_api='2017-03-30') as g:
         g.custom_command('enable', 'encrypt_vmss', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vmss')
-        g.custom_command('show', 'show_vmss_encryption_status', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'show_vmss_encryption_status', exception_handler=empty_on_404, custom_command=True)
 
     with self.command_group('vmss extension', compute_vmss_sdk) as g:
         g.custom_command('delete', 'delete_vmss_extension', supports_no_wait=True)
-        g.custom_command('show', 'get_vmss_extension', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_vmss_extension', exception_handler=empty_on_404, custom_command=True)
         g.custom_command('set', 'set_vmss_extension', supports_no_wait=True)
         g.custom_command('list', 'list_vmss_extensions')
 

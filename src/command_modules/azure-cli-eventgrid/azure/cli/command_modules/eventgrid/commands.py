@@ -37,7 +37,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid event-subscription', client_factory=event_subscriptions_factory) as g:
         g.custom_command('create', 'cli_eventgrid_event_subscription_create')
-        g.custom_command('show', 'cli_eventgrid_event_subscription_get')
+        g.generic_show_command('show', 'cli_eventgrid_event_subscription_get', custom_command=True)
         g.custom_command('delete', 'cli_eventgrid_event_subscription_delete')
         g.custom_command('list', 'cli_event_subscription_list')
         g.generic_update_command('update',

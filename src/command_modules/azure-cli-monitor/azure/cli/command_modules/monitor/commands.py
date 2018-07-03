@@ -145,7 +145,7 @@ def load_command_table(self, _):
     with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_profile_create')
         g.custom_command('list', 'autoscale_profile_list')
-        g.custom_command('show', 'autoscale_profile_show')
+        g.generic_show_command('show', 'autoscale_profile_show', custom_command=True)
         g.custom_command('delete', 'autoscale_profile_delete')
         g.custom_command('list-timezones', 'autoscale_profile_list_timezones')
 
