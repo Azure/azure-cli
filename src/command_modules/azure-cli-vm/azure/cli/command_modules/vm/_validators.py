@@ -310,7 +310,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 
 
 def _validate_vm_encryption_settings(cmd, namespace):
-    #if there is no disk_encryption* parameter then none of the encryption params should be provided
+    # if there is no disk_encryption* parameter then none of the encryption params should be provided
     required = []
     forbidden = ['disk_encryption_key', 'disk_encryption_keyvault', 'key_encryption_key', 'key_encryption_keyvault']
 
@@ -339,6 +339,7 @@ def _validate_vm_encryption_settings(cmd, namespace):
         namespace.key_encryption_keyvault = _get_resource_id(cmd.cli_ctx, namespace.key_encryption_keyvault,
                                                              namespace.resource_group_name,
                                                              'vaults', 'Microsoft.KeyVault')
+
 
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):

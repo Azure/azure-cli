@@ -362,7 +362,6 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     return encryption_status
 
 
-
 def _check_encrypt_is_supported(image_reference, volume_type):
     offer = getattr(image_reference, 'offer', None)
     publisher = getattr(image_reference, 'publisher', None)
