@@ -583,12 +583,19 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name)
                  ])
 
-        # copy database to other server (max parameters)
+        # copy database to elastic pool in other server (max parameters)
+        pool_name = 'pool1'
+        pool_edition = 'Standard'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}',
+                 .format(resource_group_2, server2, pool_name, pool_edition))
+
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '--service-objective {}'
+                 '--service-objective {} --elastic-pool {}'
                  .format(rg, server1, database_name, database_copy_name,
-                         resource_group_2, server2, service_objective),
+                         resource_group_2, server2, service_objective,
+                         pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('name', database_copy_name),
