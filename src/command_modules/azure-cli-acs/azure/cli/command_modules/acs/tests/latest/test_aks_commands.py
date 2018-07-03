@@ -185,7 +185,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
-    def test_aks_bad_inputs(self, resource_group, resource_group_location):
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_bad_inputs(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         self.kwargs.update({
             'resource_group': resource_group,
