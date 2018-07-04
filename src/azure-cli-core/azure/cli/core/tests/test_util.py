@@ -125,10 +125,9 @@ class TestUtils(unittest.TestCase):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
         if platform == 'darwin':
-            sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])      
+            sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
-            webbrowser_open_mock.assert_called_once_with('http://foo', 2) 
-          
+            webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
 
 class TestBase64ToHex(unittest.TestCase):
