@@ -259,8 +259,13 @@ def open_page_in_browser(url):
     import subprocess
     import webbrowser
     uname = platform.uname()
-    platform_name = uname.system.lower()
-    release = uname.release.lower()
+    try:
+        platform_name = uname.system.lower()
+        release = uname.release.lower()
+    except AttributeError:
+        # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
+        platform_name = uname[0]
+        release = uname[2]
     if platform_name == 'linux' and release.split('-')[-1] == 'microsoft':   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
