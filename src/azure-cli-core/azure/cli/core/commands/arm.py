@@ -12,7 +12,7 @@ import re
 from six import string_types
 
 from knack.arguments import CLICommandArgument, ignore_type
-from knack.introspection import extract_args_from_signature
+from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import todict, CLIError
 
@@ -680,6 +680,9 @@ def _cli_generic_show_command(context, name, getter_op, custom_command=False, **
         cmd_args = get_arguments_loader(context, getter_op)
         return [(k, v) for k, v in cmd_args.items()]
 
+    def description_loader():
+        return extract_full_summary_from_signature(context.get_op_handler(getter_op))
+
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
 
@@ -705,7 +708,8 @@ def _cli_generic_show_command(context, name, getter_op, custom_command=False, **
                 import sys
                 sys.exit(3)
             raise
-    context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader, **kwargs)  # pylint: disable=protected-access
+    context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader,  # pylint: disable=protected-access
+                         description_loader=description_loader, **kwargs)
 
 
 def verify_property(instance, condition):
