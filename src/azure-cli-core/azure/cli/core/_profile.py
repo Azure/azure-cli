@@ -165,6 +165,13 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
+            if not use_device_code and ('SSH_CLIENT' in os.environ or
+                                        'SSH_TTY' in os.environ or
+                                        'SSH_CONNECTION' in os.environ or
+                                        in_cloud_console()):
+                logger.info('Detect we are in SSH or Cloud Shell, so fall back to device code')
+                use_device_code = True
+
             if not use_device_code:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
