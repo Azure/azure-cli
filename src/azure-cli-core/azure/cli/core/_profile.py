@@ -166,7 +166,7 @@ class Profile(object):
                                                      self._creds_cache.adal_token_cache)
         if interactive:
             if not use_device_code and (in_cloud_console() or not has_gui()):
-                logger.info('Detect we are in Cloud Shell or no GUI is available, so fall back to device code')
+                logger.info('Detect no GUI is available, so fall back to device code')
                 use_device_code = True
 
             if not use_device_code:

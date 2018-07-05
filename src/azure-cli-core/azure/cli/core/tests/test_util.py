@@ -12,7 +12,8 @@ import tempfile
 from datetime import date, time, datetime
 
 from azure.cli.core.util import \
-    (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string, open_page_in_browser)
+    (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
+     open_page_in_browser, has_gui)
 
 
 class TestUtils(unittest.TestCase):
@@ -128,6 +129,26 @@ class TestUtils(unittest.TestCase):
             sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
             webbrowser_open_mock.assert_called_once_with('http://foo', 2)
+
+    @mock.patch('azure.cli.core.util._get_platform_info', autospec=True)
+    def test_has_gui(self, get_platform_mock):
+        get_platform_mock.return_value = ('linux', '4.4.0-17134-microsoft')
+        result = has_gui()
+        self.assertTrue(result)
+
+        get_platform_mock.return_value = ('windows', '10')
+        result = has_gui()
+        self.assertTrue(result)
+
+        with mock.patch('os.environ', autospec=True) as env_mock:
+            get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
+            env_mock.get.return_value = None
+            result = has_gui()
+            self.assertFalse(result)
+
+            env_mock.get.return_value = 'foo'
+            result = has_gui()
+            self.assertTrue(result)
 
 
 class TestBase64ToHex(unittest.TestCase):

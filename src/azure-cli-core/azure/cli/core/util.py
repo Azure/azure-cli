@@ -293,6 +293,7 @@ def has_gui():
     if _is_wsl(platform_name, release) or platform_name != 'linux':
         return True
     # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
+    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
     # we can check a few env vars
-    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP']
+    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
     return any(os.getenv(v) for v in gui_env_vars)
