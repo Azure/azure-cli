@@ -284,7 +284,7 @@ def _get_platform_info():
 
 def _is_wsl(platform_name, release):
     platform_name, release = _get_platform_info()
-    return platform_name == 'linux' and release == 'microsoft'
+    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
 
 
 def has_gui():
