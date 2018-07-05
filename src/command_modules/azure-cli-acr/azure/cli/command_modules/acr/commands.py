@@ -150,5 +150,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                   table_transformer=build_output_format)
         g.command('show-build', 'acr_build_task_show_build', client_factory=cf_acr_builds,
                   table_transformer=build_output_format)
+        g.command('update-build', 'acr_build_task_update_build', client_factory=cf_acr_builds,
+                  table_transformer=build_output_format)
         g.command('logs', 'acr_build_task_logs', client_factory=cf_acr_builds,
                   table_transformer=None)

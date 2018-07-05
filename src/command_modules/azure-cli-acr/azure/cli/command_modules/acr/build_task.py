@@ -119,6 +119,7 @@ def acr_build_task_show(cmd,
                         client,
                         build_task_name,
                         registry_name,
+                        with_secure_properties=False,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -138,6 +139,30 @@ def acr_build_task_show(cmd,
             raise
         logger.warning("Could not get build task details. Build task basic information is printed.")
 
+    if not with_secure_properties:
+        return build_task
+
+    try:
+        source_repository = client.list_source_repository_properties(resource_group_name,
+                                                                     registry_name,
+                                                                     build_task_name)
+        setattr(build_task, 'sourceRepository', source_repository)
+    except CloudError as e:
+        if e.status_code != 403:
+            raise
+        # pylint: disable=line-too-long
+        logger.warning("No permission to get source repository secret properties.")
+
+    try:
+        build_arguments = client_build_steps.list_build_arguments(resource_group_name=resource_group_name,
+                                                                  registry_name=registry_name,
+                                                                  build_task_name=build_task_name,
+                                                                  step_name=_get_build_step_name(build_task_name))
+        setattr(getattr(build_task, 'properties'), 'buildArguments', list(build_arguments))
+    except CloudError as e:
+        if e.status_code != 403:
+            raise
+        logger.warning("No permission to get build arguments.")
     return build_task
 
 
@@ -250,6 +275,20 @@ def acr_build_task_update(cmd,  # pylint: disable=too-many-locals
         setattr(build_task, 'properties', build_step.properties)
 
     return build_task
+
+
+def acr_build_task_update_build(cmd,
+                                client,
+                                build_id,
+                                registry_name,
+                                no_archive=True,
+                                resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+    return client.update(resource_group_name=resource_group_name,
+                         registry_name=registry_name,
+                         build_id=build_id,
+                         is_archive_enabled=not no_archive)
 
 
 def _get_build_step_name(build_task_name):
