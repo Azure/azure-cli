@@ -14,15 +14,16 @@ from azure.cli.core.commands.parameters import (
     get_enum_type)
 from azure.cli.core.util import get_json_object
 
-from azure.cli.command_modules.keyvault._completers import (
+from ._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
-from azure.cli.command_modules.keyvault._validators import (
+from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, validate_key_import_source,
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values)
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
+    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
 
 
 # CUSTOM CHOICE LISTS
@@ -34,9 +35,9 @@ certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     from azure.keyvault.models import JsonWebKeyOperation
-    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType, SasDefinitionAttributes
     from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
-        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
+        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -55,6 +56,11 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
+
+    with self.argument_context('keyvault', arg_group='Network Rule') as c:
+        c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), help='Bypass traffic for space-separated uses.')
+        c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction), help='Default action to apply when no rule matches.')
 
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
@@ -73,27 +79,51 @@ def load_arguments(self, _):
         c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
         c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
+        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
+
+    with self.argument_context('keyvault network-rule') as c:
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
     # endregion
 
     # region Shared
     for item in ['key', 'secret', 'certificate']:
-        with self.argument_context('keyvault ' + item) as c:
+        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
             c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
+
+        for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
+
+        for cmd in ['purge', 'recover', 'show-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('identifier', options_list=['--id'], help='The recovery id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id('deleted' + item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
     # endregion
 
     # region keys
     with self.argument_context('keyvault key') as c:
         c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space-separated list of permitted JSON web key operations.')
-        c.argument('key_version', options_list=['--version', '-v'], help='The key version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('key'))
 
     for scope in ['keyvault key create', 'keyvault key import']:
         with self.argument_context(scope) as c:
-            c.argument('destination', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'], help='Specifies the type of key protection.', validator=validate_key_type)
+            c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'], help='Specifies the type of key protection.')
             c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
             c.argument('key_size', options_list=['--size'], type=int)
             c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
             c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+
+    with self.argument_context('keyvault key create') as c:
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type)
+        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName))
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
@@ -111,9 +141,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Secret
-    with self.argument_context('keyvault secret') as c:
-        c.argument('secret_version', options_list=['--version', '-v'], help='The secret version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('secret'))
-
     with self.argument_context('keyvault secret set') as c:
         c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
         c.attributes_argument('secret', SecretAttributes, create=True)
@@ -131,9 +158,53 @@ def load_arguments(self, _):
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
     # endregion
 
+    # region KeyVault Storage Account
+
+    with self.argument_context('keyvault storage', arg_group='Id') as c:
+        c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
+        c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+
+    for scope in ['keyvault storage add', 'keyvault storage update']:
+        with self.argument_context(scope) as c:
+            c.extra('disabled', arg_type=get_three_state_flag(), help='Add the storage account in a disabled state.', validator=validate_storage_disabled_attribute('storage_account_attributes', StorageAccountAttributes))
+            c.ignore('storage_account_attributes')
+            c.argument('auto_regenerate_key', arg_type=get_three_state_flag(), required=False)
+            c.argument('regeneration_period', help='The key regeneration time duration specified in ISO-8601 format, such as "P30D" for rotation every 30 days.')
+    for scope in ['backup', 'show', 'update', 'remove', 'regenerate-key']:
+        with self.argument_context('keyvault storage ' + scope, arg_group='Id') as c:
+            c.extra('identifier', options_list=['--id'], help='Id of the storage account.  If specified all other \'Id\' arguments should be omitted.', validator=validate_storage_account_id)
+            c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
+            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+
+    with self.argument_context('keyvault storage backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store storage account backup.')
+
+    with self.argument_context('keyvault storagerestore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore storage account.')
+
+    with self.argument_context('keyvault storage sas-definition', arg_group='Id') as c:
+        c.argument('storage_account_name', options_list=['--account-name'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
+        c.argument('sas_definition_name', options_list=['--name', '-n'], help='Name to identify the SAS definition in the vault.', id_part='child_name_2')
+
+    for scope in ['keyvault storage sas-definition create', 'keyvault storage sas-definition update']:
+        with self.argument_context(scope) as c:
+            c.extra('disabled', arg_type=get_three_state_flag(), help='Add the storage account in a disabled state.', validator=validate_storage_disabled_attribute('sas_definition_attributes', SasDefinitionAttributes))
+            c.ignore('sas_definition_attributes')
+            c.argument('sas_type', arg_type=get_enum_type(SasTokenType))
+            c.argument('template_uri', help='The SAS definition token template signed with the key 00000000.  In the case of an account token this is only the sas token itself, for service tokens, the full service endpoint url along with the sas token.  Tokens created according to the SAS definition will have the same properties as the template.')
+            c.argument('validity_period', help='The validity period of SAS tokens created according to the SAS definition in ISO-8601, such as "PT12H" for 12 hour tokens.')
+            c.argument('auto_regenerate_key', arg_type=get_three_state_flag())
+
+    for scope in ['keyvault storage sas-definition delete', 'keyvault storage sas-definition show', 'keyvault storage sas-definition update']:
+        with self.argument_context(scope, arg_group='Id') as c:
+            c.extra('identifier', options_list=['--id'], help='Id of the SAS definition.  If specified all other \'Id\' arguments should be omitted.', validator=validate_sas_definition_id)
+            c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
+            c.argument('sas_definition_name', required=False, help='Name to identify the SAS definition in the vault. Required if --id is not specified.')
+            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+    # endregion
+
     # KeyVault Certificate
     with self.argument_context('keyvault certificate') as c:
-        c.argument('certificate_version', options_list=['--version', '-v'], help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
         c.argument('validity', type=int, help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
 
     # TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
