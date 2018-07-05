@@ -5,12 +5,14 @@
 
 # pylint: disable=line-too-long
 from collections import namedtuple
+import sys
 import unittest
+import mock
 import tempfile
 from datetime import date, time, datetime
 
 from azure.cli.core.util import \
-    (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string)
+    (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string, open_page_in_browser)
 
 
 class TestUtils(unittest.TestCase):
@@ -116,6 +118,16 @@ class TestUtils(unittest.TestCase):
 
         # Test force_lower
         _run_test(16, True)
+
+    @mock.patch('webbrowser.open', autospec=True)
+    @mock.patch('subprocess.Popen', autospec=True)
+    def test_open_page_in_browser(self, sunprocess_open_mock, webbrowser_open_mock):
+        platform = sys.platform.lower()
+        open_page_in_browser('http://foo')
+        if platform == 'darwin':
+            sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
+        else:
+            webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
 
 class TestBase64ToHex(unittest.TestCase):
