@@ -22,6 +22,11 @@ for ext in $output; do
     echo
     echo "Verifying extension:" $ext
     az extension add -n $ext
+    if [ $? != 0 ]
+    then
+        exit_code=1
+        echo "Failed to load:" $ext
+    fi
     azdev verify load_all
     if [ $? != 0 ]
     then
