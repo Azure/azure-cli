@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.4
++++++
+* `az aks create` will error out if `--max-pods` is less than 5
+
 2.1.3
 +++++
 * Update PyYAML dependency to 4.2b4
