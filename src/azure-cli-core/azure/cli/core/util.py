@@ -287,8 +287,9 @@ def _is_wsl(platform_name, release):
     return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
 
 
-def has_gui():
+def can_launch_browser():
     import os
+    import webbrowser
     platform_name, release = _get_platform_info()
     if _is_wsl(platform_name, release) or platform_name != 'linux':
         return True
@@ -296,4 +297,16 @@ def has_gui():
     # and https://unix.stackexchange.com/questions/193827/what-is-display-0
     # we can check a few env vars
     gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
-    return any(os.getenv(v) for v in gui_env_vars)
+    result = True
+    if platform_name == 'linux':
+        if any(os.getenv(v) for v in gui_env_vars):
+            try:
+                default_browser = webbrowser.get()
+                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
+                    result = False
+            except webbrowser.Error:
+                result = False
+        else:
+            result = False
+
+    return result
