@@ -19,7 +19,7 @@ from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, has_gui
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -165,11 +165,8 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
-            if not use_device_code and ('SSH_CLIENT' in os.environ or
-                                        'SSH_TTY' in os.environ or
-                                        'SSH_CONNECTION' in os.environ or
-                                        in_cloud_console()):
-                logger.info('Detect we are in SSH or Cloud Shell, so fall back to device code')
+            if not use_device_code and (in_cloud_console() or not has_gui()):
+                logger.info('Detect we are in Cloud Shell or no GUI is available, so fall back to device code')
                 use_device_code = True
 
             if not use_device_code:
