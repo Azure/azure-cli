@@ -7,6 +7,8 @@ Release History
 +++++
 * `network nic create/update/delete`: Add `--no-wait` support.
 * Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
 
 2.1.5
 ++++++
