@@ -108,14 +108,14 @@ def load_command_table(self, _):
 
     with self.command_group('ad user', role_users_sdk, exception_handler=graph_err_handler) as g:
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.generic_show_command('show', 'get')
         g.custom_command('list', 'list_users', client_factory=get_graph_client_users)
         g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
     with self.command_group('ad group', role_group_sdk, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.generic_show_command('show', 'get')
         g.command('get-member-groups', 'get_member_groups')
         g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
 

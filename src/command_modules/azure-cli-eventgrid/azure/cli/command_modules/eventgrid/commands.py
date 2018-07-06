@@ -22,7 +22,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
         g.command('create', 'create_or_update')
-        g.command('show', 'get')
+        g.generic_show_command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
         g.command('key regenerate', 'regenerate_key')
         g.command('delete', 'delete')
@@ -49,5 +49,5 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid topic-type', topic_type_mgmt_util) as g:
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.generic_show_command('show', 'get')
         g.command('list-event-types', 'list_event_types')

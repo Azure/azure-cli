@@ -153,7 +153,7 @@ def load_command_table(self, _):
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
-        g.command('show', 'get_publishing_user', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_publishing_user', exception_handler=empty_on_404)
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment container') as g:
@@ -168,7 +168,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get', exception_handler=empty_on_404)
         g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
@@ -216,7 +216,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
-        g.command('show', 'get_publishing_user', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_publishing_user', exception_handler=empty_on_404)
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
