@@ -71,7 +71,7 @@ def load_command_table(self, _):
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.generic_show_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output, custom_command=True)
+        g.generic_show_command('show', 'show_webapp', table_transformer=transform_web_output, custom_command=True)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -90,7 +90,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
-        g.generic_show_command('show', 'get_site_configs', exception_handler=empty_on_404, custom_command=True)
+        g.generic_show_command('show', 'get_site_configs', custom_command=True)
 
     with self.command_group('webapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
@@ -111,7 +111,7 @@ def load_command_table(self, _):
     with self.command_group('webapp config container') as g:
         g.custom_command('set', 'update_container_settings')
         g.custom_command('delete', 'delete_container_settings')
-        g.generic_show_command('show', 'show_container_settings', exception_handler=empty_on_404, custom_command=True)
+        g.generic_show_command('show', 'show_container_settings', custom_command=True)
 
     with self.command_group('webapp config ssl') as g:
         g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
@@ -122,7 +122,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
-        g.generic_show_command('show', 'show_backup_configuration', exception_handler=empty_on_404, custom_command=True)
+        g.generic_show_command('show', 'show_backup_configuration', custom_command=True)
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
@@ -132,7 +132,7 @@ def load_command_table(self, _):
         g.custom_command('config-zip', 'enable_zip_deploy')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
-        g.generic_show_command('show', 'show_source_control', exception_handler=empty_on_404, custom_command=True)
+        g.generic_show_command('show', 'show_source_control', custom_command=True)
         g.custom_command('delete', 'delete_source_control')
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
@@ -153,7 +153,7 @@ def load_command_table(self, _):
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
-        g.generic_show_command('show', 'get_publishing_user', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_publishing_user')
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment container') as g:
@@ -168,7 +168,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
-        g.generic_show_command('show', 'get', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
@@ -176,7 +176,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.generic_show_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output, custom_command=True)
+        g.generic_show_command('show', 'show_webapp', table_transformer=transform_web_output, custom_command=True)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -210,13 +210,13 @@ def load_command_table(self, _):
         g.custom_command('config-zip', 'enable_zip_deploy')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo')
-        g.generic_show_command('show', 'show_source_control', exception_handler=empty_on_404, custom_command=True)
+        g.generic_show_command('show', 'show_source_control', custom_command=True)
         g.custom_command('delete', 'delete_source_control')
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
-        g.generic_show_command('show', 'get_publishing_user', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get_publishing_user')
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')

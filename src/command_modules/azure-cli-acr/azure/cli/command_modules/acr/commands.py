@@ -80,7 +80,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'acr_list')
         g.command('create', 'acr_create')
         g.command('delete', 'acr_delete')
-        g.generic_show_command('show', 'acr_show', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'acr_show')
         g.command('login', 'acr_login', table_transformer=None)
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
         g.generic_update_command('update',
@@ -95,7 +95,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('import', 'acr_import')
 
     with self.command_group('acr credential', acr_cred_util) as g:
-        g.generic_show_command('show', 'acr_credential_show', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'acr_credential_show')
         g.command('renew', 'acr_credential_renew')
 
     with self.command_group('acr repository', acr_repo_util) as g:

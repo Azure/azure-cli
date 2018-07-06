@@ -38,7 +38,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_container_services')
         g.custom_command('list-locations', 'list_acs_locations')
         g.custom_command('scale', 'update_acs')
-        g.generic_show_command('show', 'get', exception_handler=empty_on_404)
+        g.generic_show_command('show', 'get')
         g.generic_wait_command('wait')
 
     # ACS Mesos DC/OS commands
