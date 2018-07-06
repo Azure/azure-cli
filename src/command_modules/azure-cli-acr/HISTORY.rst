@@ -5,7 +5,7 @@ Release History
 
 2.0.29
 ++++++
-* Minor fixes
+* BREAKING CHANGE:: Update '--no-push' to a pure flag in 'acr build' command.
 
 2.0.28
 ++++++
