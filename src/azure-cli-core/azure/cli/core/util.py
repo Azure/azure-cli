@@ -255,18 +255,11 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
 
 
 def open_page_in_browser(url):
-    import platform
     import subprocess
     import webbrowser
-    uname = platform.uname()
-    try:
-        platform_name = uname.system.lower()
-        release = uname.release.lower()
-    except AttributeError:
-        # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
-        platform_name = uname[0]
-        release = uname[2]
-    if platform_name == 'linux' and release.split('-')[-1] == 'microsoft':   # windows 10 linux subsystem
+    platform_name, release = _get_platform_info()
+
+    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
         except FileNotFoundError:  # WSL might be too old
@@ -278,3 +271,42 @@ def open_page_in_browser(url):
         # b. Python 2.x can't sniff out the default browser
         return subprocess.Popen(['open', url])
     return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+
+
+def _get_platform_info():
+    import platform
+    uname = platform.uname()
+    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
+    platform_name = getattr(uname, 'system', None) or uname[0]
+    release = getattr(uname, 'release', None) or uname[2]
+    return platform_name.lower(), release.lower()
+
+
+def _is_wsl(platform_name, release):
+    platform_name, release = _get_platform_info()
+    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def can_launch_browser():
+    import os
+    import webbrowser
+    platform_name, release = _get_platform_info()
+    if _is_wsl(platform_name, release) or platform_name != 'linux':
+        return True
+    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
+    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
+    # we can check a few env vars
+    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
+    result = True
+    if platform_name == 'linux':
+        if any(os.getenv(v) for v in gui_env_vars):
+            try:
+                default_browser = webbrowser.get()
+                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
+                    result = False
+            except webbrowser.Error:
+                result = False
+        else:
+            result = False
+
+    return result
