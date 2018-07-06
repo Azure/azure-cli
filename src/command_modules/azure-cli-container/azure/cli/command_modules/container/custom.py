@@ -98,7 +98,7 @@ def create_container(cmd,
     """Create a container group. """
 
     if file:
-        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file)
+        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
 
     if not name:
         raise CLIError("error: the --name/-n argument is required unless specified with a passed in file.")
@@ -207,7 +207,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
-def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
+def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = _resource_client_factory(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
 
@@ -240,15 +240,15 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file)
 
     api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
-    resource = resource_client.resources.create_or_update(resource_group_name,
-                                                          "Microsoft.ContainerInstance",
-                                                          '',
-                                                          "containerGroups",
-                                                          name,
-                                                          api_version,
-                                                          cg_defintion,
-                                                          raw=True)
-    return resource.output
+    return sdk_no_wait(no_wait,
+                resource_client.resources.create_or_update,
+                resource_group_name,
+                "Microsoft.ContainerInstance",
+                '',
+                "containerGroups",
+                name,
+                api_version,
+                cg_defintion)
 
 
 # pylint: disable=inconsistent-return-statements

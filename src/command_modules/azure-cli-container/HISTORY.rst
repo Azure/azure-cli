@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Fix error when creating container groups from yaml file
+
 0.2.1
 +++++
 * Update PyYAML dependency to 4.2b4
