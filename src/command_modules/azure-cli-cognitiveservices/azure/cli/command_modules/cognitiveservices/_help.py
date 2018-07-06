@@ -28,7 +28,7 @@ helps['cognitiveservices account delete'] = """
     type: command
     short-summary: Delete an Azure Cognitive Services account.
     examples:
-        - name: Delete account. 
+        - name: Delete account.
           text: az cognitiveservices account delete --name myresource-luis -g cognitive-services-resource-group
 """
 
@@ -51,7 +51,7 @@ helps['cognitiveservices account show'] = """
 helps['cognitiveservices account update'] = """
     type: command
     short-summary: Update the properties of an Azure Cognitive Services account.
-    examples: 
+    examples:
         - name: Update sku and tags.
           text: az cognitiveservices account update --name myresource -g cognitive-services-resource-group --sku S0 --tags external-app=chatbot-HR azure-web-app-bot=HR-external azure-app-service=HR-external-app-service
 """
@@ -83,5 +83,5 @@ helps['cognitiveservices account keys list'] = """
     short-summary: List the keys of an Azure Cognitive Services account.
     examples:
         - name: Get current resource keys.
-          text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group 
+          text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group
 """
