@@ -16,6 +16,7 @@ from ._format import (
     elastic_pool_edition_table_format,
     firewall_rule_table_format,
     server_table_format,
+    usage_table_format,
     LongRunningOperationResultTransform,
 )
 
@@ -66,9 +67,11 @@ def load_command_table(self, _):
                             subscription_usages_operations,
                             client_factory=get_sql_subscription_usages_operations) as g:
 
-        g.command('list-usages', 'list_by_location')
+        g.command('list-usages', 'list_by_location',
+                  table_transformer=usage_table_format)
 
-        g.command('show-usage', 'get')
+        g.command('show-usage', 'get',
+                  table_transformer=usage_table_format)
 
     ###############################################
     #                sql db                       #

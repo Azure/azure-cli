@@ -73,6 +73,33 @@ def _apply_format(result, format_group):
 
 
 ###############################################
+#                sql server                   #
+###############################################
+
+
+def usage_table_format(result):
+    '''
+    Formats a usage or list of usage as summary results for display with "-o table".
+    '''
+
+    def _usage_table_format(result):
+        '''
+        Formats a usage as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('name', result['name']),
+            ('displayName', result['displayName']),
+            ('currentValue', result['currentValue']),
+            ('limit', result['limit']),
+            ('unit', result['unit'])
+        ])
+
+    return _apply_format(result, _usage_table_format)
+
+
+###############################################
 #                sql db                       #
 ###############################################
 
