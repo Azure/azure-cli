@@ -92,15 +92,19 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'db_create',
                          supports_no_wait=True,
-                         transform=database_lro_transform)
+                         transform=database_lro_transform,
+                         table_transformer=db_show_table_format)
         g.custom_command('copy', 'db_copy',
                          supports_no_wait=True,
-                         transform=database_lro_transform)
+                         transform=database_lro_transform,
+                         table_transformer=db_show_table_format)
         g.custom_command('restore', 'db_restore',
                          supports_no_wait=True,
-                         transform=database_lro_transform)
+                         transform=database_lro_transform,
+                         table_transformer=db_show_table_format)
         g.custom_command('rename', 'db_rename',
-                         transform=database_lro_transform)
+                         transform=database_lro_transform,
+                         table_transformer=db_show_table_format)
         g.command('show', 'get',
                   transform=db_show_transform,
                   table_transformer=db_show_table_format)
@@ -113,7 +117,8 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  custom_func_name='db_update',
                                  supports_no_wait=True,
-                                 transform=database_lro_transform)
+                                 transform=database_lro_transform,
+                                 table_transformer=db_show_table_format)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
@@ -136,7 +141,8 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'db_create_replica',
                          supports_no_wait=True,
-                         transform=database_lro_transform)
+                         transform=database_lro_transform,
+                         table_transformer=db_show_table_format)
 
     with self.command_group('sql dw',
                             database_operations,
@@ -255,7 +261,8 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'elastic_pool_create',
                          supports_no_wait=True,
-                         transform=elastic_pool_lro_transform)
+                         transform=elastic_pool_lro_transform,
+                         table_transformer=elastic_pool_show_table_format)
         g.command('delete', 'delete',
                   supports_no_wait=True)
         g.command('show', 'get',
@@ -267,7 +274,8 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  custom_func_name='elastic_pool_update',
                                  supports_no_wait=True,
-                                 transform=elastic_pool_lro_transform)
+                                 transform=elastic_pool_lro_transform,
+                                 table_transformer=elastic_pool_show_table_format)
 
     with self.command_group('sql elastic-pool', database_operations) as g:
 
