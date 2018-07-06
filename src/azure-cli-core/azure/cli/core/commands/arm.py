@@ -603,11 +603,10 @@ def _cli_generic_wait_command(context, name, getter_op, custom_command=False, **
         from msrest.exceptions import ClientException
         import time
 
-        cmd = args.get('cmd')
-
-        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
@@ -686,10 +685,10 @@ def _cli_generic_show_command(context, name, getter_op, custom_command=False, **
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
 
-        cmd = args.get('cmd')
-        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
