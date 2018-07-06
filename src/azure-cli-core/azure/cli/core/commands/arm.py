@@ -702,7 +702,7 @@ def _cli_generic_show_command(context, name, getter_op, custom_command=False, **
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
-            if getattr(ex, 'status_code', None) == 404:
+            if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
                 logger.error(getattr(ex, 'message', ex))
                 import sys
                 sys.exit(3)
