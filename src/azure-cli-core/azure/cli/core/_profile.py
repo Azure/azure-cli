@@ -19,7 +19,7 @@ from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -165,6 +165,10 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
+            if not use_device_code and (in_cloud_console() or not can_launch_browser()):
+                logger.info('Detect no GUI is available, so fall back to device code')
+                use_device_code = True
+
             if not use_device_code:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
