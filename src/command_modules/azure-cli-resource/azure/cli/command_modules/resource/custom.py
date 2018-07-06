@@ -488,6 +488,14 @@ def create_resource_group(cmd, rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
+def update_resource_group(instance, tags=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+
 def export_group_as_template(
         cmd, resource_group_name, include_comments=False, include_parameter_default_value=False):
     """Captures a resource group as a template.
