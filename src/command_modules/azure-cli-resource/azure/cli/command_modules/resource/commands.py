@@ -219,8 +219,8 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.custom_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
 
-    with self.command_group('deployment', resource_deployment_sdk) as g:
-        g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list, min_api='2018-05-01')
+    with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list)
         g.command('show', 'get_at_subscription_scope', exception_handler=empty_on_404)
         g.command('delete', 'delete_at_subscription_scope', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
@@ -228,7 +228,7 @@ def load_command_table(self, _):
         g.custom_command('export', 'export_subscription_deployment_template')
         g.generic_wait_command('wait', getter_name='get_at_subscription_scope')
 
-    with self.command_group('deployment operation', resource_deployment_operation_sdk) as g:
+    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('list', 'list_at_subscription_scope')
         g.custom_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
 
