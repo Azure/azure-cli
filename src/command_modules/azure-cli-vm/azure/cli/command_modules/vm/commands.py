@@ -23,7 +23,6 @@ from azure.cli.command_modules.vm._validators import (
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
-from azure.cli.core.util import empty_on_404
 
 
 # pylint: disable=line-too-long, too-many-statements

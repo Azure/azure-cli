@@ -8,7 +8,6 @@
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,

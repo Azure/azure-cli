@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 
 from ._format import (
     registry_output_format,

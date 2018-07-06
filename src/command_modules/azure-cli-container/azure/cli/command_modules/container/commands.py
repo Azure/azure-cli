@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_container_groups, cf_container
 from ._format import transform_container_group_list, transform_container_group
 

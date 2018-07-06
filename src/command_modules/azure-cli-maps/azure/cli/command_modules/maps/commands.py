@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 
