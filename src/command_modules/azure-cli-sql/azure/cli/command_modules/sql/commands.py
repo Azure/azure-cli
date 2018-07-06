@@ -7,19 +7,15 @@ from azure.cli.core.commands import CliCommandType
 
 from ._format import (
     db_list_transform,
-    db_show_transform,
-    db_list_table_format,
-    db_show_table_format,
-    db_edition_list_table_format,
+    db_transform,
+    db_table_format,
+    db_edition_table_format,
     elastic_pool_list_transform,
-    elastic_pool_show_transform,
-    elastic_pool_list_table_format,
-    elastic_pool_show_table_format,
-    elastic_pool_edition_list_table_format,
-    firewall_rule_list_table_format,
-    firewall_rule_show_table_format,
-    server_list_table_format,
-    server_show_table_format,
+    elastic_pool_transform,
+    elastic_pool_table_format,
+    elastic_pool_edition_table_format,
+    firewall_rule_table_format,
+    server_table_format,
     LongRunningOperationResultTransform,
 )
 
@@ -86,7 +82,7 @@ def load_command_table(self, _):
         client_factory=get_sql_databases_operations)
 
     database_lro_transform = LongRunningOperationResultTransform(
-        self.cli_ctx, db_show_transform)
+        self.cli_ctx, db_transform)
 
     with self.command_group('sql db',
                             database_operations,
@@ -95,24 +91,24 @@ def load_command_table(self, _):
         g.custom_command('create', 'db_create',
                          supports_no_wait=True,
                          transform=database_lro_transform,
-                         table_transformer=db_show_table_format)
+                         table_transformer=db_table_format)
         g.custom_command('copy', 'db_copy',
                          supports_no_wait=True,
                          transform=database_lro_transform,
-                         table_transformer=db_show_table_format)
+                         table_transformer=db_table_format)
         g.custom_command('restore', 'db_restore',
                          supports_no_wait=True,
                          transform=database_lro_transform,
-                         table_transformer=db_show_table_format)
+                         table_transformer=db_table_format)
         g.custom_command('rename', 'db_rename',
                          transform=database_lro_transform,
-                         table_transformer=db_show_table_format)
+                         table_transformer=db_table_format)
         g.command('show', 'get',
-                  transform=db_show_transform,
-                  table_transformer=db_show_table_format)
+                  transform=db_transform,
+                  table_transformer=db_table_format)
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
-                         table_transformer=db_list_table_format)
+                         table_transformer=db_table_format)
         g.command('delete', 'delete',
                   confirmation=True,
                   supports_no_wait=True)
@@ -120,7 +116,7 @@ def load_command_table(self, _):
                                  custom_func_name='db_update',
                                  supports_no_wait=True,
                                  transform=database_lro_transform,
-                                 table_transformer=db_show_table_format)
+                                 table_transformer=db_table_format)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
@@ -135,7 +131,7 @@ def load_command_table(self, _):
         g.custom_command(
             'list-editions',
             'db_list_capabilities',
-            table_transformer=db_edition_list_table_format)
+            table_transformer=db_edition_table_format)
 
     with self.command_group('sql db replica',
                             database_operations,
@@ -144,7 +140,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'db_create_replica',
                          supports_no_wait=True,
                          transform=database_lro_transform,
-                         table_transformer=db_show_table_format)
+                         table_transformer=db_table_format)
 
     with self.command_group('sql dw',
                             database_operations,
@@ -154,7 +150,7 @@ def load_command_table(self, _):
                          supports_no_wait=True,
                          transform=database_lro_transform)
         g.command('show', 'get',
-                  transform=db_show_transform)
+                  transform=db_transform)
         g.custom_command('list', 'dw_list',
                          transform=db_list_transform)
         g.command('delete', 'delete',
@@ -255,7 +251,7 @@ def load_command_table(self, _):
         client_factory=get_sql_elastic_pools_operations)
 
     elastic_pool_lro_transform = LongRunningOperationResultTransform(
-        self.cli_ctx, elastic_pool_show_transform)
+        self.cli_ctx, elastic_pool_transform)
 
     with self.command_group('sql elastic-pool',
                             elastic_pools_ops,
@@ -264,33 +260,33 @@ def load_command_table(self, _):
         g.custom_command('create', 'elastic_pool_create',
                          supports_no_wait=True,
                          transform=elastic_pool_lro_transform,
-                         table_transformer=elastic_pool_show_table_format)
+                         table_transformer=elastic_pool_table_format)
         g.command('delete', 'delete',
                   supports_no_wait=True)
         g.command('show', 'get',
-                  transform=elastic_pool_show_transform,
-                  table_transformer=elastic_pool_show_table_format)
+                  transform=elastic_pool_transform,
+                  table_transformer=elastic_pool_table_format)
         g.command('list', 'list_by_server',
                   transform=elastic_pool_list_transform,
-                  table_transformer=elastic_pool_list_table_format)
+                  table_transformer=elastic_pool_table_format)
         g.generic_update_command('update',
                                  custom_func_name='elastic_pool_update',
                                  supports_no_wait=True,
                                  transform=elastic_pool_lro_transform,
-                                 table_transformer=elastic_pool_show_table_format)
+                                 table_transformer=elastic_pool_table_format)
 
     with self.command_group('sql elastic-pool', database_operations) as g:
 
         g.command('list-dbs', 'list_by_elastic_pool',
                   transform=db_list_transform,
-                  table_transformer=db_list_table_format)
+                  table_transformer=db_table_format)
 
     with self.command_group('sql elastic-pool',
                             capabilities_operations,
                             client_factory=get_sql_capabilities_operations) as g:
 
         g.custom_command('list-editions', 'elastic_pool_list_capabilities',
-                         table_transformer=elastic_pool_edition_list_table_format)
+                         table_transformer=elastic_pool_edition_table_format)
 
     elastic_pool_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.elastic_pool_operations#ElasticPoolOperations.{}',
@@ -316,13 +312,13 @@ def load_command_table(self, _):
                             client_factory=get_sql_servers_operations) as g:
 
         g.custom_command('create', 'server_create',
-                        table_transformer=server_show_table_format)
+                         table_transformer=server_table_format)
         g.command('delete', 'delete',
                   confirmation=True)
         g.command('show', 'get',
-                  table_transformer=server_show_table_format)
+                  table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
-                         table_transformer=server_list_table_format)
+                         table_transformer=server_table_format)
         g.generic_update_command('update',
                                  custom_func_name='server_update')
 
@@ -343,14 +339,14 @@ def load_command_table(self, _):
                             client_factory=get_sql_firewall_rules_operations) as g:
 
         g.command('create', 'create_or_update',
-                  table_transformer=firewall_rule_show_table_format)
+                  table_transformer=firewall_rule_table_format)
         g.custom_command('update', 'firewall_rule_update',
-                         table_transformer=firewall_rule_show_table_format)
+                         table_transformer=firewall_rule_table_format)
         g.command('delete', 'delete')
         g.command('show', 'get',
-                  table_transformer=firewall_rule_show_table_format)
+                  table_transformer=firewall_rule_table_format)
         g.command('list', 'list_by_server',
-                  table_transformer=firewall_rule_list_table_format)
+                  table_transformer=firewall_rule_table_format)
 
     aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.server_azure_ad_administrators_operations#ServerAzureADAdministratorsOperations.{}',

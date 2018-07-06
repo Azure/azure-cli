@@ -56,6 +56,22 @@ class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disa
         return self._transform_func(result)
 
 
+def _apply_format(result, format_group):
+    '''
+    Applies the specified format_group function to the single result or list of results.
+    '''
+
+    # Optionally grab internal 'value' array
+    if 'value' in result and isinstance(result['value'], list):
+        result = result['value']
+
+    # Get list of results, or make singleton list from single list
+    obj_list = result if isinstance(result, list) else [result]
+
+    # Apply format function to list
+    return [format_group(item) for item in obj_list]
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -71,10 +87,10 @@ def db_list_transform(results):
     Transforms the json response for a list of databases.
     '''
 
-    return [db_show_transform(r) for r in results]
+    return [db_transform(r) for r in results]
 
 
-def db_show_transform(result):
+def db_transform(result):
     '''
     Transforms the json response for a database.
     '''
@@ -91,47 +107,38 @@ def db_show_transform(result):
 #####
 
 
-def db_list_table_format(results):
+def db_table_format(result):
     '''
-    Formats a list of databases as summary results for display with "-o table".
-    '''
-
-    return [_db_table_format(r) for r in results]
-
-
-def db_show_table_format(result):
-    '''
-    Formats a database as summary results for display with "-o table".
+    Formats a database or list of databases as summary results for display with "-o table".
     '''
 
-    return [_db_table_format(result)]
+    def _db_table_format(result):
+        '''
+        Formats a single database as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('name', result['name']),
+            ('tier', result['sku']['tier']),
+            ('family', result['sku']['family'] or ' '),
+            ('capacity', result['sku']['capacity'] or ' '),
+            ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes'])),
+            ('elasticPool', _last_segment(result['elasticPoolId']) or ' '),
+        ])
+
+    return _apply_format(result, _db_table_format)
 
 
-def _db_table_format(result):
-    '''
-    Formats a database as summary results for display with "-o table".
-    '''
-    from collections import OrderedDict
-
-    return OrderedDict([
-        ('name', result['name']),
-        ('tier', result['sku']['tier']),
-        ('family', result['sku']['family'] or ' '),
-        ('capacity', result['sku']['capacity'] or ' '),
-        ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes'])),
-        ('elasticPool', _last_segment(result['elasticPoolId']) or ' '),
-    ])
-
-
-def db_edition_list_table_format(editions):
+def db_edition_table_format(editions):
     '''
     Formats a list of database editions as summary results for display with "-o table".
     '''
 
-    return list(_db_edition_list_table_format(editions))
+    return list(_db_edition_table_format(editions))
 
 
-def _db_edition_list_table_format(editions):
+def _db_edition_table_format(editions):
     '''
     Formats a database edition as summary results for display with "-o table".
     '''
@@ -164,10 +171,10 @@ def _db_edition_list_table_format(editions):
 
 
 def elastic_pool_list_transform(results):
-    return [elastic_pool_show_transform(r) for r in results]
+    return [elastic_pool_transform(r) for r in results]
 
 
-def elastic_pool_show_transform(result):
+def elastic_pool_transform(result):
     '''
     Transforms the json response for an elastic pool.
     '''
@@ -194,46 +201,37 @@ def elastic_pool_show_transform(result):
 #####
 
 
-def elastic_pool_list_table_format(results):
+def elastic_pool_table_format(result):
     '''
-    Formats a list of elastic pools as summary results for display with "-o table".
-    '''
-
-    return [_elastic_pool_table_format(r) for r in results]
-
-
-def elastic_pool_show_table_format(result):
-    '''
-    Formats an elastic pool as summary results for display with "-o table".
+    Formats a single or list of elastic pools as summary results for display with "-o table".
     '''
 
-    return [_elastic_pool_table_format(result)]
+    def _elastic_pool_table_format(result):
+        '''
+        Formats a single elastic pool as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('name', result['name']),
+            ('tier', result['sku']['tier']),
+            ('family', result['sku']['family'] or ' '),
+            ('capacity', result['sku']['capacity'] or ' '),
+            ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes']))
+        ])
+
+    return _apply_format(result, _elastic_pool_table_format)
 
 
-def _elastic_pool_table_format(result):
-    '''
-    Formats an elastic pool as summary results for display with "-o table".
-    '''
-    from collections import OrderedDict
-
-    return OrderedDict([
-        ('name', result['name']),
-        ('tier', result['sku']['tier']),
-        ('family', result['sku']['family'] or ' '),
-        ('capacity', result['sku']['capacity'] or ' '),
-        ('maxSize', _bytes_to_friendly_string(result['maxSizeBytes']))
-    ])
-
-
-def elastic_pool_edition_list_table_format(editions):
+def elastic_pool_edition_table_format(editions):
     '''
     Formats a list of elastic pool editions as summary results for display with "-o table".
     '''
 
-    return list(_elastic_pool_edition_list_table_format(editions))
+    return list(_elastic_pool_edition_table_format(editions))
 
 
-def _elastic_pool_edition_list_table_format(editions):
+def _elastic_pool_edition_table_format(editions):
     '''
     Formats an elastic pool editions as summary results for display with "-o table".
     '''
@@ -257,73 +255,48 @@ def _elastic_pool_edition_list_table_format(editions):
 #                sql server                   #
 ###############################################
 
-#####
-#           sql server table formatters
-#####
 
-
-def server_list_table_format(results):
+def server_table_format(result):
     '''
-    Formats a list of server as summary results for display with "-o table".
+    Formats a server or list of servers as summary results for display with "-o table".
     '''
 
-    return [_server_table_format(r) for r in results]
+    def _server_table_format(result):
+        '''
+        Formats a server as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
 
+        return OrderedDict([
+            ('name', result['name']),
+            ('resourceGroup', result['resourceGroup']),
+            ('location', result['location']),
+            ('administratorLogin', result['administratorLogin'])
+        ])
 
-def server_show_table_format(result):
-    '''
-    Formats a server as summary results for display with "-o table".
-    '''
+    return _apply_format(result, _server_table_format)
 
-    return [_server_table_format(result)]
-
-
-def _server_table_format(result):
-    '''
-    Formats a server as summary results for display with "-o table".
-    '''
-    from collections import OrderedDict
-
-    return OrderedDict([
-        ('name', result['name']),
-        ('resourceGroup', result['resourceGroup']),
-        ('location', result['location']),
-        ('administratorLogin', result['administratorLogin'])
-    ])
 
 ###############################################
 #                sql server firewall-rule     #
 ###############################################
 
-#####
-#           sql server firewall-rule table formatters
-#####
 
-
-def firewall_rule_list_table_format(results):
+def firewall_rule_table_format(result):
     '''
-    Formats a list of server firewall rules as summary results for display with "-o table".
+    Formats a single or list of server firewall rules as summary results for display with "-o table".
     '''
 
-    return [_firewall_rule_table_format(r) for r in results]
+    def _firewall_rule_table_format(result):
+        '''
+        Formats a server firewall rule as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
 
+        return OrderedDict([
+            ('name', result['name']),
+            ('startIpAddress', result['startIpAddress']),
+            ('endIpAddress', result['endIpAddress'])
+        ])
 
-def firewall_rule_show_table_format(result):
-    '''
-    Formats a server firewall rule as summary results for display with "-o table".
-    '''
-
-    return [_firewall_rule_table_format(result)]
-
-
-def _firewall_rule_table_format(result):
-    '''
-    Formats a server firewall rule as summary results for display with "-o table".
-    '''
-    from collections import OrderedDict
-
-    return OrderedDict([
-        ('name', result['name']),
-        ('startIpAddress', result['startIpAddress']),
-        ('endIpAddress', result['endIpAddress'])
-    ])
+    return _apply_format(result, _firewall_rule_table_format)
