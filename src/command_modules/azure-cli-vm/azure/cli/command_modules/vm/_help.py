@@ -134,7 +134,7 @@ helps['vmss create'] = """
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
-            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
             az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
