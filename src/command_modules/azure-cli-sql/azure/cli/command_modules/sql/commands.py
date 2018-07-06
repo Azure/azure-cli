@@ -16,6 +16,8 @@ from ._format import (
     elastic_pool_list_table_format,
     elastic_pool_show_table_format,
     elastic_pool_edition_list_table_format,
+    server_list_table_format,
+    server_show_table_format,
     LongRunningOperationResultTransform,
 )
 
@@ -303,11 +305,14 @@ def load_command_table(self, _):
                             servers_operations,
                             client_factory=get_sql_servers_operations) as g:
 
-        g.custom_command('create', 'server_create')
+        g.custom_command('create', 'server_create',
+                        table_transformer=server_show_table_format)
         g.command('delete', 'delete',
                   confirmation=True)
-        g.command('show', 'get')
-        g.custom_command('list', 'server_list')
+        g.command('show', 'get',
+                  table_transformer=server_show_table_format)
+        g.custom_command('list', 'server_list',
+                         table_transformer=server_list_table_format)
         g.generic_update_command('update',
                                  custom_func_name='server_update')
 

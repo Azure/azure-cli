@@ -252,3 +252,41 @@ def _elastic_pool_edition_list_table_format(editions):
                 ('unit', slo['performanceLevel']['unit']),
                 ('available', is_available(slo['status'])),
             ])
+
+###############################################
+#                sql server                   #
+###############################################
+
+#####
+#           sql server table formatters
+#####
+
+
+def server_list_table_format(results):
+    '''
+    Formats a list of server as summary results for display with "-o table".
+    '''
+
+    return [_server_table_format(r) for r in results]
+
+
+def server_show_table_format(result):
+    '''
+    Formats a server as summary results for display with "-o table".
+    '''
+
+    return [_server_table_format(result)]
+
+
+def _server_table_format(result):
+    '''
+    Formats a server as summary results for display with "-o table".
+    '''
+    from collections import OrderedDict
+
+    return OrderedDict([
+        ('name', result['name']),
+        ('resourceGroup', result['resourceGroup']),
+        ('location', result['location']),
+        ('administratorLogin', result['administratorLogin'])
+    ])
