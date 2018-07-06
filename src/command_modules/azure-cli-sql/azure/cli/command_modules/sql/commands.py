@@ -16,6 +16,8 @@ from ._format import (
     elastic_pool_list_table_format,
     elastic_pool_show_table_format,
     elastic_pool_edition_list_table_format,
+    firewall_rule_list_table_format,
+    firewall_rule_show_table_format,
     server_list_table_format,
     server_show_table_format,
     LongRunningOperationResultTransform,
@@ -340,11 +342,15 @@ def load_command_table(self, _):
                             firewall_rules_operations,
                             client_factory=get_sql_firewall_rules_operations) as g:
 
-        g.command('create', 'create_or_update')
-        g.custom_command('update', 'firewall_rule_update')
+        g.command('create', 'create_or_update',
+                  table_transformer=firewall_rule_show_table_format)
+        g.custom_command('update', 'firewall_rule_update',
+                         table_transformer=firewall_rule_show_table_format)
         g.command('delete', 'delete')
-        g.command('show', 'get')
-        g.command('list', 'list_by_server')
+        g.command('show', 'get',
+                  table_transformer=firewall_rule_show_table_format)
+        g.command('list', 'list_by_server',
+                  table_transformer=firewall_rule_list_table_format)
 
     aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.server_azure_ad_administrators_operations#ServerAzureADAdministratorsOperations.{}',

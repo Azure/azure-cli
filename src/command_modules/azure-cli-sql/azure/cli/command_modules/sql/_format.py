@@ -290,3 +290,40 @@ def _server_table_format(result):
         ('location', result['location']),
         ('administratorLogin', result['administratorLogin'])
     ])
+
+###############################################
+#                sql server firewall-rule     #
+###############################################
+
+#####
+#           sql server firewall-rule table formatters
+#####
+
+
+def firewall_rule_list_table_format(results):
+    '''
+    Formats a list of server firewall rules as summary results for display with "-o table".
+    '''
+
+    return [_firewall_rule_table_format(r) for r in results]
+
+
+def firewall_rule_show_table_format(result):
+    '''
+    Formats a server firewall rule as summary results for display with "-o table".
+    '''
+
+    return [_firewall_rule_table_format(result)]
+
+
+def _firewall_rule_table_format(result):
+    '''
+    Formats a server firewall rule as summary results for display with "-o table".
+    '''
+    from collections import OrderedDict
+
+    return OrderedDict([
+        ('name', result['name']),
+        ('startIpAddress', result['startIpAddress']),
+        ('endIpAddress', result['endIpAddress'])
+    ])
