@@ -6,6 +6,7 @@ Release History
 2.0.29
 ++++++
 * Fixed 'The provided resource group name ... did not match the name in the Url' error when specifying elastic pool name for `sql db copy` and `sql db replica create` commands.
+* Allow configuring default sql server by executing `az configure --defaults sql-server=<name>`.
 
 2.0.28
 ++++++
