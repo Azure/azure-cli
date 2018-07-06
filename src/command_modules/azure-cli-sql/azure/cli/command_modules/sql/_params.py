@@ -106,7 +106,11 @@ sku_component_arg_group = 'Performance Level (components)'
 
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
-    help='Name of the Azure SQL server.')
+    configured_default='sql-server',
+    help='Name of the Azure SQL server. You can configure the default using '
+    '`az configure --defaults sql-server=<name>`',
+    # Allow --ids command line argument. id_part=name is 2nd name in uri
+    id_part='name')
 
 available_param_type = CLIArgumentType(
     options_list=['--available', '-a'],
@@ -286,9 +290,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -656,9 +658,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql dw') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -695,9 +695,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql elastic-pool') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('elastic_pool_name',
                    options_list=['--name', '-n'],
@@ -833,10 +831,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql server') as c:
         c.argument('server_name',
-                   help='The server name',
-                   options_list=['--name', '-n'],
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   options_list=['--name', '-n'])
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'])
@@ -878,7 +873,7 @@ def load_arguments(self, _):
     ######
     with self.argument_context('sql server ad-admin') as c:
         c.argument('server_name',
-                   options_list=['--server-name', '-s'],
+                   options_list=['--server-name', '--server', '-s'],
                    help='The name of the SQL Server')
 
         c.argument('login',
@@ -937,9 +932,7 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server firewall-rule update' is a custom
         # command.
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('firewall_rule_name',
                    options_list=['--name', '-n'],
