@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 import argparse
 from collections import OrderedDict
 import json
@@ -171,12 +173,12 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
 
 def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 
-    command_table = kwargs.get('cmd_tbl')
+    command_table = kwargs.get('commands_loader').command_table
 
     if not command_table:
         return
 
-    def split_action(arguments):
+    def split_action(arguments, deprecate_info):
         class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
             def __call__(self, parser, namespace, values, option_string=None):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
@@ -187,6 +189,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                 '''
                 from msrestazure.tools import parse_resource_id
                 import os
+
                 if isinstance(values, str):
                     values = [values]
                 expanded_values = []
@@ -209,6 +212,12 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                             self.set_argument_value(namespace, arg, parts)
                 except Exception as ex:
                     raise ValueError(ex)
+
+                if deprecate_info:
+                    if not hasattr(namespace, '_argument_deprecations'):
+                        setattr(namespace, '_argument_deprecations', [deprecate_info])
+                    else:
+                        namespace._argument_deprecations.append(deprecate_info)  # pylint: disable=protected-access
 
             @staticmethod
             def set_argument_value(namespace, arg, parts):
@@ -264,16 +273,20 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
             if command.arguments[key].type.settings.get('id_part'):
                 command.arguments[key].arg_group = group_name
 
-        command.add_argument('ids',
-                             '--ids',
-                             metavar='RESOURCE_ID',
-                             dest=argparse.SUPPRESS,
-                             help="One or more resource IDs (space-delimited). If provided, "
-                                  "no other 'Resource Id' arguments should be specified.",
-                             action=split_action(command.arguments),
-                             nargs='+',
-                             validator=required_values_validator,
-                             arg_group=group_name)
+        id_arg = command.loader.argument_registry.arguments[command.name].get('ids', None)
+        deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
+        id_kwargs = {
+            'metavar': 'RESOURCE_ID',
+            'help': "One or more resource IDs (space-delimited). If provided, "
+                    "no other 'Resource Id' arguments should be specified.",
+            'dest': argparse.SUPPRESS,
+            'action': split_action(command.arguments, deprecate_info),
+            'deprecate_info': deprecate_info,
+            'nargs': '+',
+            'validator': required_values_validator,
+            'arg_group': group_name
+        }
+        command.add_argument('ids', '--ids', **id_kwargs)
 
     for command in command_table.values():
         command_loaded_handler(command)
@@ -287,15 +300,17 @@ def register_global_subscription_parameter(cli_ctx):
         from azure.cli.command_modules.profile._completers import get_subscription_id_list
 
         commands_loader = kwargs['commands_loader']
-        cmd_tbl = kwargs['cmd_tbl']
-        for command_name, cmd in cmd_tbl.items():
+        cmd_tbl = commands_loader.command_table
+        subscription_kwargs = {
+            'help': 'Name or ID of subscription. You can configure the default subscription '
+                    'using `az account set -s NAME_OR_ID`',
+            'completer': get_subscription_id_list,
+            'arg_group': 'Global',
+            'configured_default': 'subscription'
+        }
+        for _, cmd in cmd_tbl.items():
             if 'subscription' not in cmd.arguments:
-                commands_loader.extra_argument_registry[command_name]['_subscription'] = CLICommandArgument(
-                    '_subscription', options_list=['--subscription'],
-                    help='Name or ID of subscription. You can configure the default subscription '
-                         'using `az account set -s NAME_OR_ID`"',
-                    completer=get_subscription_id_list, arg_group='Global', configured_default='subscription')
-        commands_loader._update_command_definitions()  # pylint: disable=protected-access
+                cmd.add_argument('_subscription', '--subscription', **subscription_kwargs)
 
     def parse_subscription_parameter(cli_ctx, args, **kwargs):  # pylint: disable=unused-argument
         subscription = getattr(args, '_subscription', None)
