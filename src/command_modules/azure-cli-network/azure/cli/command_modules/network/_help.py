@@ -1958,7 +1958,7 @@ helps['network lb create'] = """
             Create a standard zone flavored public-facing load balancer, through provisioning a
             zonal frontend ip configuration and Vnet.
           text: >
-            az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 -vnet-name MyVnet --subnet MySubnet
+            az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
 """
 
 helps['network lb delete'] = """
