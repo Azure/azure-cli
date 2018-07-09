@@ -9,6 +9,7 @@ Release History
 * Added `network nic wait`.
 * `network vnet subnet list`: Argument `--ids` is deprecated.
 * `network vnet peering list`: Argument `--ids` is deprecated.
+* `network nsg rule list`: Added `--include-default` flag to include default security rules in the output.
 
 2.1.5
 ++++++
