@@ -291,7 +291,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         if acr_server:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                   username=registry_username,
-                                                                  password=registry_password)]                                           
+                                                                  password=registry_password)]
     elif registry_username and registry_password and SERVER_DELIMITER in image.split("/")[0]:
         login_server = image.split("/")[0] if image.split("/") else None
         if login_server:
