@@ -492,7 +492,7 @@ def load_command_table(self, _):
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_nsg_rule_table_output)
-        g.command('list', 'list', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
+        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
         g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
                                  custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
