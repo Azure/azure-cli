@@ -5,6 +5,7 @@ Release History
 
 0.2.2
 +++++
+* Remove the requirement for username and password for non dockerhub registries
 * Fix error when creating container groups from yaml file
 
 0.2.1

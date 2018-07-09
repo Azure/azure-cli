@@ -41,6 +41,7 @@ from ._client_factory import cf_container_groups, cf_container, cf_log_analytics
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
 SERVER_DELIMITER = '.'
+ACR_SERVER_DELIMITER = '.azurecr.io'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -273,7 +274,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif SERVER_DELIMITER in image.split("/")[0]:
+    elif ACR_SERVER_DELIMITER in image.split("/")[0]:
         if not registry_username:
             try:
                 registry_username = prompt(msg='Image registry username: ')
@@ -290,9 +291,15 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         if acr_server:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                   username=registry_username,
+                                                                  password=registry_password)]                                           
+    elif registry_username and registry_password and SERVER_DELIMITER in image.split("/")[0]:
+        login_server = image.split("/")[0] if image.split("/") else None
+        if login_server:
+            image_registry_credentials = [ImageRegistryCredential(server=login_server,
+                                                                  username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server from image name; please explicitly specify --registry-server.')
+            raise CLIError('Failed to parse login server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 
