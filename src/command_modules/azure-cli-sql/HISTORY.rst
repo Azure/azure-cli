@@ -6,6 +6,7 @@ Release History
 2.0.29
 ++++++
 * Fixed 'The provided resource group name ... did not match the name in the Url' error when specifying elastic pool name for `sql db copy` and `sql db replica create` commands.
+* Implemented table formatters for 'sql server', 'sql server firewall-rule', 'sql list-usages', and 'sql show-usage' commands. Use '-o table' to format output as a table.
 
 2.0.28
 ++++++
