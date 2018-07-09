@@ -93,10 +93,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('top', type=int, help='Limit the number of items in the results.')
         c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
         c.argument('detail', help='Show detailed information.', action='store_true')
-        c.argument('delete_enabled', help='Indicates whether delete operation is enabled.', arg_type=get_three_state_flag())
-        c.argument('list_enabled', help='Indicates whether list operation is enabled.', arg_type=get_three_state_flag())
-        c.argument('read_enabled', help='Indicates whether read operation is enabled.', arg_type=get_three_state_flag())
-        c.argument('write_enabled', help='Indicates whether write operation is enabled.', arg_type=get_three_state_flag())
+        c.argument('delete_enabled', help='Indicates whether delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
+        c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
 
     with self.argument_context('acr repository delete') as c:
         c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
