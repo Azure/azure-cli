@@ -293,7 +293,7 @@ def load_arguments(self, _):
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
         c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
         c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
-        c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_D1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+        c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")

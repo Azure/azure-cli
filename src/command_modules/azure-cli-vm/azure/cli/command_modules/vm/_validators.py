@@ -1128,9 +1128,9 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
         if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-            logger.warning('In a future release, the default vm size will be changed from "Standard_D1_v2"'
-                           ' to "Standard_DS1_v2". You can use "--vm-sku" argument to maintain the same size')
-        namespace.vm_sku = 'Standard_D1_v2'
+            namespace.vm_sku = 'Standard_DS1_v2'
+        else:
+            namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)

@@ -5,6 +5,7 @@ Release History
 
 2.0.36
 ++++++
+* BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
 * `vm/vmss extension set/delete`: Added `--no-wait` support.
 * Added `vm extension wait`.
 
