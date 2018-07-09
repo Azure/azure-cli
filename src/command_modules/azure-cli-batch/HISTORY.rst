@@ -3,8 +3,9 @@
 Release History
 ===============
 
-3.2.7
+3.3.0
 +++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * Fix bug on using token credential on cloud shell mode
 * When use json file as input parameter, deserialize content with case insentive.
 

@@ -3,8 +3,9 @@
 Release History
 ===============
 
-0.2.2
+0.3.0
 +++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * Remove the requirement for username and password for non dockerhub registries
 * Fix error when creating container groups from yaml file
 
