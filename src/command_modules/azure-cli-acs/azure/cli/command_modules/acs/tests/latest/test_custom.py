@@ -17,7 +17,8 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
                                                    regions_in_prod)
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
-                                                  create_application)
+                                                  create_application, _update_addons,
+                                                  _ensure_container_insights_for_monitoring)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -419,3 +420,54 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # assert we handled such error
         self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+
+    def test_update_addons(self):
+        # http_application_routing enabled
+        instance = mock.Mock()
+        instance.addon_profiles = None
+        instance = _update_addons(instance, 'http_application_routing', enable=True)
+        self.assertIn('httpApplicationRouting', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(addon_profile.enabled)
+
+        # http_application_routing enabled
+        instance = _update_addons(instance, 'http_application_routing', enable=False)
+        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertFalse(addon_profile.enabled)
+
+        # monitoring added
+        instance = _update_addons(instance, 'monitoring', enable=True)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertTrue(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertFalse(routing_addon_profile.enabled)
+
+        # monitoring disabled, routing enabled
+        instance = _update_addons(instance, 'monitoring', enable=False)
+        instance = _update_addons(instance, 'http_application_routing', enable=True)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertFalse(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(routing_addon_profile.enabled)
+        self.assertEqual(sorted(list(instance.addon_profiles)), ['httpApplicationRouting', 'omsagent'])
+
+        # monitoring enabled and then enabled again should error
+        instance = mock.Mock()
+        instance.addon_profiles = None
+        instance = _update_addons(instance, 'monitoring', enable=True)
+        with self.assertRaises(CLIError):
+            instance = _update_addons(instance, 'monitoring', enable=True)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location')
+    @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
+    def test_ensure_container_insights_for_monitoring(self, invoke_def, rg_def):
+        cmd = mock.Mock()
+        addon = mock.Mock()
+        wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
+        addon.config = {
+            'logAnalyticsWorkspaceResourceID': wsID
+        }
+        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
+        args, kwargs = invoke_def.call_args
+        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
+        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)

@@ -927,6 +927,8 @@ class TestProfile(unittest.TestCase):
                 self.token = None
                 self.client_id = kwargs.get('client_id')
                 self.object_id = kwargs.get('object_id')
+                # since msrestazure 0.4.34, set_token in init
+                self.set_token()
 
             def set_token(self):
                 # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
@@ -1095,7 +1097,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token_with_authorization_code.return_value = self.token_entry1
 
         # action
-        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/')
+        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/common')
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -1104,6 +1106,7 @@ class TestProfile(unittest.TestCase):
                                                                                         'http://localhost:8888',
                                                                                         mgmt_resource, mock.ANY,
                                                                                         None)
+        _get_authorization_code_mock.assert_called_once_with(mgmt_resource, 'https:/some_aad_point/common')
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_interactive_from_particular_tenent(self, mock_auth_context):
@@ -1507,7 +1510,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
-        super(SubscriptionStub, self).__init__(policies, 'some_authorization_source')
+        super(SubscriptionStub, self).__init__(subscription_policies=policies, authorization_source='some_authorization_source')
         self.id = id
         self.display_name = display_name
         self.state = state

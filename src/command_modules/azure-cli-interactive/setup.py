@@ -14,7 +14,7 @@ except ImportError:
     cmdclass = {}
 
 # Version is also defined in azclishell.__init__.py.
-VERSION = "0.3.23"
+VERSION = "0.3.26"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -35,7 +35,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'jmespath~=0.9.3',
     'prompt_toolkit~=1.0.15',
-    'pyyaml~=3.12',
+    'pyyaml~=4.2b4',
     'six~=1.11.0',
 ]
 

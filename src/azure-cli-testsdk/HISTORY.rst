@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.4
+++++++
+* Minor fixes.
+
 0.1.3
 +++++
 * Update azure-devtools to 1.0.0

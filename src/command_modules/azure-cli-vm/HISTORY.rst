@@ -3,10 +3,14 @@
 Release History
 ===============
 
+2.0.36
+++++++
+* `vm/vmss extension set/delete`: Added `--no-wait` support.
+* Added `vm extension wait`.
+
 2.0.35
 ++++++
-
-* Updated module definition.
+* msi: support removing system assigned identity
 
 2.0.34
 ++++++

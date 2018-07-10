@@ -33,17 +33,9 @@ def run_tests(modules, parallel, run_live, tests):
     test_paths = tests or [p for _, _, p in modules]
 
     display('Drive test by nosetests')
-    from six import StringIO
-    old_stderr = sys.stderr
-    test_stderr = StringIO()
-    sys.stderr = test_stderr
     runner = get_nose_runner(parallel=parallel, process_timeout=3600 if run_live else 600)
     results = runner([path for path in test_paths])
-    stderr_val = test_stderr.getvalue()
-    sys.stderr = old_stderr
-    test_stderr.close()
-    failed_tests = summarize_tests(stderr_val)
-    return results, failed_tests
+    return results, []
 
 
 def collect_test():

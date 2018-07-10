@@ -31,26 +31,28 @@ class HelpTest(unittest.TestCase):
         cli = TestCli()
         parser_dict = {}
         cli = TestCli()
+        help_ctx = cli.help_cls(cli)
         try:
             cli.invoke(['-h'])
         except SystemExit:
             pass
         cmd_tbl = cli.invocation.commands_loader.command_table
-        cli.invocation.parser.load_command_table(cmd_tbl)
+        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         for cmd in cmd_tbl:
             try:
                 cmd_tbl[cmd].loader.command_name = cmd
                 cmd_tbl[cmd].loader.load_arguments(cmd)
             except KeyError:
                 pass
-        cli.register_event(events.EVENT_INVOKER_CMD_TBL_LOADED, add_id_parameters)
+        cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
         cli.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, command_table=cmd_tbl)
-        cli.invocation.parser.load_command_table(cmd_tbl)
+        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         _store_parsers(cli.invocation.parser, parser_dict)
 
         for name, parser in parser_dict.items():
             try:
-                help_file = GroupHelpFile(name, parser) if _is_group(parser) else CliCommandHelpFile(name, parser)
+                help_file = GroupHelpFile(help_ctx, name, parser) if _is_group(parser) \
+                    else CliCommandHelpFile(help_ctx, name, parser)
                 help_file.load(parser)
             except Exception as ex:
                 raise HelpAuthoringException('{}, {}'.format(name, ex))

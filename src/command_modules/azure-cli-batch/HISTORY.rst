@@ -3,6 +3,19 @@
 Release History
 ===============
 
+3.2.7
++++++
+* Fix bug on using token credential on cloud shell mode
+* When use json file as input parameter, deserialize content with case insentive.
+
+3.2.6
++++++
+* Minor fixes
+
+3.2.5
++++++
+* Minor fixes
+
 3.2.4
 +++++
 * Remove azure-batch-extensions dependency.

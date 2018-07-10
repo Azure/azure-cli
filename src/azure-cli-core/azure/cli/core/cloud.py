@@ -101,13 +101,15 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  keyvault_dns=None,
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
-                 azure_datalake_analytics_catalog_and_job_endpoint=None):
+                 azure_datalake_analytics_catalog_and_job_endpoint=None,
+                 acr_login_server_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
+        self.acr_login_server_endpoint = acr_login_server_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -163,7 +165,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         keyvault_dns='.vault.azure.net',
         sql_server_hostname='.database.windows.net',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
-        azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net'))
+        azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
+        acr_login_server_endpoint='.azurecr.io'))
 
 AZURE_CHINA_CLOUD = Cloud(
     'AzureChinaCloud',
@@ -180,7 +183,8 @@ AZURE_CHINA_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
-        sql_server_hostname='.database.chinacloudapi.cn'))
+        sql_server_hostname='.database.chinacloudapi.cn',
+        acr_login_server_endpoint='.azurecr.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
     'AzureUSGovernment',
@@ -197,7 +201,8 @@ AZURE_US_GOV_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
-        sql_server_hostname='.database.usgovcloudapi.net'))
+        sql_server_hostname='.database.usgovcloudapi.net',
+        acr_login_server_endpoint='.azurecr.us'))
 
 AZURE_GERMAN_CLOUD = Cloud(
     'AzureGermanCloud',

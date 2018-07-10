@@ -3,13 +3,25 @@
 Release History
 ===============
 
+0.3.26
+++++++
+* Minor fixes
+
+0.3.25
+++++++
+* Update PyYAML dependency to 4.2b4
+
+0.3.24
+++++++
+* Minor fixes
+
 0.3.23
 ++++++
 * Minor fixes
 
 0.3.22
 ++++++
-* Cap the dependencies
+* Fix dependency versions.
 
 0.3.21
 ++++++

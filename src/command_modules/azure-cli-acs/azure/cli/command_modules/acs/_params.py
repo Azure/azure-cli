@@ -17,11 +17,11 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name)
+    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-0.1.3.tgz'
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -163,14 +163,21 @@ def load_arguments(self, _):
         c.argument('dns_service_ip')
         c.argument('docker_bridge_address')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
-        c.argument('enable_rbac', options_list=['--enable-rbac', '-r'])
-        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
+        c.argument('disable_rbac', action='store_true')
+        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'])
+        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
         c.argument('network_plugin')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
+
+    with self.argument_context('aks disable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
+    with self.argument_context('aks enable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)

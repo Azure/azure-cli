@@ -7,6 +7,8 @@ import os
 import tempfile
 import unittest
 
+from knack.util import CLIError
+
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -121,7 +123,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create --no-wait
         create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
                      '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
-                     '--tags scenario_test --no-wait'
+                     '--tags scenario_test -c 1 --no-wait'
         self.cmd(create_cmd, checks=[self.is_empty()])
 
         # wait
@@ -131,10 +133,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles', None)
         ])
 
         # show k8s versions
@@ -164,11 +167,47 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck(k8s_upgrade_version)
         ])
 
+        # enable http application routing addon
+        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.httpApplicationRouting.enabled', True)
+        ])
+
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
 
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_bad_inputs(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliakstest', 16),
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+        })
+
+        # create with --max-pods set too small
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '--max-pods 3'
+        with self.assertRaises(CLIError) as err:
+            self.cmd(create_cmd)
+        self.assertIn('--max-pods', str(err.exception))
+
+        # create with monitoring addon but no log analytics workspace specified
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '--enable-addons monitoring'
+        with self.assertRaises(CLIError) as err:
+            self.cmd(create_cmd)
+        self.assertIn('--enable-addons monitoring', str(err.exception))
 
 
     @classmethod

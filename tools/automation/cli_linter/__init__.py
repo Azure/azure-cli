@@ -37,7 +37,7 @@ def main(args):
     # load commands, args, and help
     create_invoker_and_load_cmds_and_args(az_cli)
     loaded_help = get_all_help(az_cli)
-    command_table = az_cli.invocation.commands_loader.command_table
+    command_loader = az_cli.invocation.commands_loader
 
     # format loaded help
     loaded_help = {data.command: data for data in loaded_help if data.command}
@@ -64,11 +64,11 @@ def main(args):
     # only run linter on modules and extensions specified
     if args.modules or args.extensions:
         from .util import include_commands
-        command_table, help_file_entries = include_commands(
-            command_table, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
+        command_loader, help_file_entries = include_commands(
+            command_loader, help_file_entries, module_inclusions=args.modules, extensions=args.extensions)
 
     # Instantiate and run Linter
-    linter_manager = LinterManager(command_table=command_table,
+    linter_manager = LinterManager(command_loader=command_loader,
                                    help_file_entries=help_file_entries,
                                    loaded_help=loaded_help,
                                    exclusions=exclusions,

@@ -23,8 +23,8 @@ class RdbmsCommandsLoader(AzCommandsLoader):
             argument_context_cls=RdbmsArgumentContext,
             suppress_extension=ModExtensionSuppress(
                 __name__,
-                'rdbms',
-                '0.0.6',
+                'rdbms-vnet',
+                '10.0.1',
                 reason='These commands are now in the CLI.',
                 recommend_remove=True))
 

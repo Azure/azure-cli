@@ -51,11 +51,15 @@ class TestCli(AzCli):
         self.data['command'] = 'unknown'
         self.data['completer_active'] = ARGCOMPLETE_ENV_NAME in os.environ
         self.data['query_active'] = False
+
+        loader = self.commands_loader_cls(self)
+        setattr(self, 'commands_loader', loader)
+
         self.cloud = get_active_cloud(self)
 
     def get_cli_version(self):
-        from azure.cli.core.util import get_az_version_string
-        return get_az_version_string()
+        from azure.cli.core import __version__ as cli_version
+        return cli_version
 
 
 __version__ = '0.1.0'

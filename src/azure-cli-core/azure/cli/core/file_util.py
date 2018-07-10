@@ -6,12 +6,14 @@
 from __future__ import print_function
 from knack.util import CLIError
 from knack.help import GroupHelpFile
+
 from azure.cli.core._help import CliCommandHelpFile
 from azure.cli.core.commands.arm import add_id_parameters
 
 
 def get_all_help(cli_ctx):
     invoker = cli_ctx.invocation
+    help_ctx = cli_ctx.help_cls(cli_ctx)
     if not invoker:
         raise CLIError("CLI context does not contain invocation.")
 
@@ -27,7 +29,8 @@ def get_all_help(cli_ctx):
     help_files = []
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
-            help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
+            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
+                else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
         except Exception as ex:  # pylint: disable=broad-except
@@ -40,11 +43,11 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
                                      parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
-    cmd_table = invoker.commands_loader.load_command_table(None)
-    for command in cmd_table:
+    invoker.commands_loader.load_command_table(None)
+    for command in invoker.commands_loader.command_table:
         invoker.commands_loader.load_arguments(command)
-    invoker.parser.load_command_table(invoker.commands_loader.command_table)
-    add_id_parameters(None, cmd_tbl=cmd_table)
+    invoker.parser.load_command_table(invoker.commands_loader)
+    add_id_parameters(None, commands_loader=invoker.commands_loader)
 
 
 def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):

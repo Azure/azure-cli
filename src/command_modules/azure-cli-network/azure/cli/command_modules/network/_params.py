@@ -851,6 +851,9 @@ def load_arguments(self, _):
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
 
+    with self.argument_context('network vnet check-ip-address') as c:
+        c.argument('ip_address', required=True)
+
     with self.argument_context('network vnet create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.')
@@ -878,6 +881,10 @@ def load_arguments(self, _):
         c.argument('network_security_group', validator=get_nsg_validator())
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+
+    for scope in ['network vnet subnet list', 'network vnet peering list']:
+        with self.argument_context(scope) as c:
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
 
     # endregion
 

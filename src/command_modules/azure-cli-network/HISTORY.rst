@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.1.6
++++++
+* `network nic create/update/delete`: Add `--no-wait` support.
+* Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
+
 2.1.5
 ++++++
 * `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)

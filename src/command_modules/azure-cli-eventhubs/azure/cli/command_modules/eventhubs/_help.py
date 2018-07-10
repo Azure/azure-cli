@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -74,7 +75,7 @@ helps['eventhubs namespace create'] = """
     examples:
         - name: Creates a new namespace.
           text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus
-           --tags tag1=value1 tag2=value2 --sku-name Standard --sku-tier Standard --is-auto-inflate-enabled False --maximum-throughput-units 30
+           --tags tag1=value1 tag2=value2 --sku Standard --is-auto-inflate-enabled False --maximum-throughput-units 30
 """
 
 helps['eventhubs namespace update'] = """

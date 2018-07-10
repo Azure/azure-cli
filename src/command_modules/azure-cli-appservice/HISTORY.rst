@@ -2,9 +2,18 @@
 
 Release History
 ===============
-0.1.36
+
+0.1.38
+++++++
+* appservice: allow PremiumV2 skus
+
+0.1.37
 ++++++
 * Minor fixes
+
+0.1.36
+++++++
+* webapp/functionapp: Adding support for disabling identity az webapp identity remove. Preview tag removed for Identity feature.
 
 0.1.35
 ++++++

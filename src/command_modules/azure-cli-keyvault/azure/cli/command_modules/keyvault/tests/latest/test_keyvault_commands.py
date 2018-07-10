@@ -8,48 +8,33 @@ from __future__ import print_function
 import os
 import time
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import tz
-
-from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
-from azure.cli.command_modules.keyvault._params import secret_encoding_values
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, LiveScenarioTest
 
 from knack.util import CLIError
 
+secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
+secret_binary_encoding_values = ['base64', 'hex']
+secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
+
+
+def _asn1_to_iso8601(asn1_date):
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
+
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-def _create_keyvault(test, kwargs, retry_wait=30, max_retries=10, additional_args=None):
+def _create_keyvault(test, kwargs, additional_args=None):
 
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
-    vault = test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
-
-    retries = 0
-    while True:
-        try:
-            # if you can connect to the keyvault, proceed with test
-            time.sleep(10)
-            test.cmd('keyvault key list --vault-name {kv}')
-            return vault
-        except CLIError as ex:
-            # because it can take time for the DNS registration to propagate, periodically retry
-            # until we can connect to the keyvault. During the wait, you should try to manually
-            # flush the DNS cache in a separate terminal. Since this is OS dependent, we cannot
-            # reliably do this programmatically.
-            if 'Max retries exceeded attempting to connect to vault' in str(
-                    ex) and retries < max_retries:
-                retries += 1
-                print('\tWaiting for DNS changes to propagate. Please try manually flushing your')
-                print('\tDNS cache. (ex: \'ipconfig /flushdns\' on Windows)')
-                print(
-                    '\t\tRetrying ({}/{}) in {} seconds\n'.format(retries, max_retries, retry_wait))
-                time.sleep(retry_wait)
-            else:
-                raise ex
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -106,6 +91,19 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('name', '{kv}'),
             self.check('properties.sku.name', 'premium'),
         ])
+        # test updating updating other properties
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment '
+                 '--bypass AzureServices --default-action Deny',
+                 checks=[
+                     self.check('name', '{kv}'),
+                     self.check('properties.enableSoftDelete', True),
+                     self.check('properties.enablePurgeProtection', True),
+                     self.check('properties.enabledForDeployment', True),
+                     self.check('properties.enabledForDiskEncryption', True),
+                     self.check('properties.enabledForTemplateDeployment', True),
+                     self.check('properties.networkAcls.bypass', 'AzureServices'),
+                     self.check('properties.networkAcls.defaultAction', 'Deny')])
         # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
@@ -182,6 +180,10 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key show --vault-name {kv} -n {key} -v {version1}',
                  checks=self.check('key.kid', '{kid1}'))
 
+        # show key (by id)
+        self.cmd('keyvault key show --id {kid1}',
+                 checks=self.check('key.kid', '{kid1}'))
+
         # set key attributes
         self.cmd('keyvault key set-attributes --vault-name {kv} -n {key} --enabled true', checks=[
             self.check('key.kid', '{kid2}'),
@@ -211,6 +213,24 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+
+        # create ec keys
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
+                 checks=self.check('key.kty', 'EC'))
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --curve P-256',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key delete --vault-name {kv} -n eckey1')
+
+        # import ec PEM
+        self.kwargs.update({
+            'key_enc_file': os.path.join(TEST_DIR, 'ec521pw.pem'),
+            'key_enc_password': 'pass1234',
+            'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
+        })
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" -p software',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
@@ -279,25 +299,32 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret show --vault-name {kv} -n {sec} -v {ver1}',
                  checks=self.check('id', '{sid1}'))
 
+        # show secret (by id)
+        self.cmd('keyvault secret show --id {sid1}',
+                 checks=self.check('id', '{sid1}'))
+
         # set secret attributes
         self.cmd('keyvault secret set-attributes --vault-name {kv} -n {sec} --enabled false', checks=[
             self.check('id', '{sid2}'),
             self.check('attributes.enabled', False)
         ])
 
+        # TODO add backup / restore validation back when service routing bug is fixed
+        # TODO https://msazure.visualstudio.com/One/_workitems/edit/2330038?src=alerts&src-action=cta
+        # TODO Secret Backup and Restore REST API calls fail with MethodNotAllowed on 7.0-preview
         # backup and then delete secret
-        bak_file = 'backup.secret'
-        self.kwargs['bak_file'] = bak_file
-        self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
-        self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
-        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+        # bak_file = 'backup.secret'
+        # self.kwargs['bak_file'] = bak_file
+        # self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
+        # self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
+        # self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
         # restore key from backup
-        self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}')
-        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
-                 checks=self.check('length(@)', 2))
-        if os.path.isfile(bak_file):
-            os.remove(bak_file)
+        # self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}')
+        # self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
+        #          checks=self.check('length(@)', 2))
+        # if os.path.isfile(bak_file):
+        #     os.remove(bak_file)
 
         # delete secret
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
@@ -426,7 +453,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateDownloadScenarioTest(LiveScenarioTest):
+class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
     def test_keyvault_certificate_download(self, resource_group):
@@ -434,7 +461,7 @@ class KeyVaultCertificateDownloadScenarioTest(LiveScenarioTest):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         _create_keyvault(self, self.kwargs)
@@ -551,6 +578,11 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate show --vault-name {kv} -n cert1 -v {ver1}',
                  checks=self.check('id', versions[0]))
 
+        # show certificate (by id)
+        self.kwargs.update({'cert_id': versions[0]})
+        self.cmd('keyvault certificate show --id {cert_id}',
+                 checks=self.check('id', versions[0]))
+
         # update certificate attributes
         self.cmd('keyvault certificate set-attributes --vault-name {kv} -n cert1 --enabled false -p @"{policy_path}"', checks=[
             self.check('id', versions[1]),
@@ -564,15 +596,62 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+def _generate_certificate(path, keyfile=None, password=None):
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography import x509
+    from cryptography.x509.oid import NameOID
+    from cryptography.hazmat.primitives import hashes
+
+    if keyfile:
+        with open(path, "rb") as kf:
+            key_bytes = kf.read()
+            key = serialization.load_pem_private_key(key_bytes, password, default_backend())
+    else:
+        key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        key_bytes = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.BestAvailableEncryption(password) if password else serialization.NoEncryption(),
+        )
+
+    # Various details about who we are. For a self-signed certificate the
+    # Subject and issuer are always the same.
+    subject = issuer = x509.Name([
+        x509.NameAttribute(NameOID.COUNTRY_NAME, u'US'),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u'WA'),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, u'Redmond'),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
+        x509.NameAttribute(NameOID.COMMON_NAME, u"mysite.com")])
+
+    cert = x509.CertificateBuilder().subject_name(subject) \
+                                    .issuer_name(issuer) \
+                                    .public_key(key.public_key()) \
+                                    .serial_number(x509.random_serial_number()) \
+                                    .not_valid_before(datetime.utcnow()) \
+                                    .not_valid_after(datetime.utcnow() + timedelta(days=10)) \
+                                    .sign(key, hashes.SHA256(), default_backend())
+
+    # Write the cert out to disk
+    with open(path, "wb") as f:
+        f.write(key_bytes)
+        f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateImportScenario(LiveScenarioTest):
+class KeyVaultCertificateImportScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_certificate_import(self, resource_group):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         _create_keyvault(self, self.kwargs)
@@ -584,25 +663,26 @@ class KeyVaultCertificateImportScenario(LiveScenarioTest):
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
             'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
         })
+
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "{pem_encrypted_file}" --password {pem_encrypted_password} -p @"{pem_policy_path}"')
 
-        self.kwargs.update({
-            'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),
-            'pfx_policy_path': os.path.join(TEST_DIR, 'policy_import_pfx.json')
-        })
-        self.cmd('keyvault certificate import --vault-name {kv} -n pfx-cert --file "{pfx_plain_file}" -p @"{pfx_policy_path}"')
+        # self.kwargs.update({
+        #     'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),
+        #     'pfx_policy_path': os.path.join(TEST_DIR, 'policy_import_pfx.json')
+        # })
+        # self.cmd('keyvault certificate import --vault-name {kv} -n pfx-cert --file "{pfx_plain_file}" -p @"{pfx_policy_path}"')
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
+class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_softdelete(self, resource_group):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
-            'loc': 'westus'
+            'loc': 'eastus2'
         })
 
         vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
@@ -624,107 +704,193 @@ class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
             'cert_perms': ' '.join(cert_perms)
         })
 
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms`}')
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
-        # create, delete, restore, and purge a secret
+        # create secrets keys and certifictes to delete recover and purge
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
                  checks=self.check('value', 'ABC123'))
+        self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
+                 checks=self.check('value', 'ABC123'))
 
-        self._delete_entity('secret', 'secret1')
-        self._recover_entity('secret', 'secret1')
-        self._delete_entity('secret', 'secret1')
-        self._purge_entity('secret', 'secret1')
-
-        # create, delete, restore, and purge a key
         self.cmd('keyvault key create --vault-name {kv} -n key1 -p software',
                  checks=self.check('attributes.enabled', True))
+        self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
+                 checks=self.check('attributes.enabled', True))
 
-        self._delete_entity('key', 'key1')
-        self._recover_entity('key', 'key1')
-        self._delete_entity('key', 'key1')
-        self._purge_entity('key', 'key1')
-
-        # create, delete, restore, and purge a certificate
         self.kwargs.update({
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
-            'pem_policy_pat': os.path.join(TEST_DIR, 'policy_import_pem.json')
+            'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
         })
         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
-        self._delete_entity('certificate', 'cert1')
-        self._purge_entity('certificate', 'cert1')
+        self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
+        # delete the secrets keys and certficates
+        self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
+        self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
+        self.cmd('keyvault key delete --vault-name {kv} -n key1')
+        self.cmd('keyvault key delete --vault-name {kv} -n key2')
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+
+        if self.is_live:
+            time.sleep(20)
+
+        # recover secrets keys and certificates
+        self.cmd('keyvault secret recover --vault-name {kv} -n secret1')
+        self.cmd('keyvault key recover --vault-name {kv} -n key1')
+        self.cmd('keyvault certificate recover --vault-name {kv} -n cert1')
+
+        # purge secrets keys and certificates
+        self.cmd('keyvault secret purge --vault-name {kv} -n secret2')
+        self.cmd('keyvault key purge --vault-name {kv} -n key2')
+        self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
+
+        # delete and purge the vault
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
-    def _delete_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-        # delete the specified entity
+
+class KeyVaultStorageAccountScenarioTest(ScenarioTest):
+
+    def _create_managable_storage_account(self):
+        storageacct = self.cmd('az storage account create -g {rg} -n {sa}').get_output_in_json()
         self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
+            'sa_rid': storageacct['id']
         })
-        self.cmd('keyvault {ent} delete --vault-name {kv} -n {name}')
+        if self.is_live:
+            self.cmd('az role assignment create --role "Storage Account Key Operator Service Role" '
+                     '--assignee cfa8b339-82a2-471a-a3c9-0fc0be7a4093 --scope {sa_rid}',
+                     checks=[self.check('scope', storageacct['id'])])
+        return storageacct
 
-        # while getting the deleted entities returns a zero entities
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}')
-                time.sleep(retry_wait)
-            except Exception as ex:
-                if 'not found' in str(ex):
-                    return
-        self.fail('{} {} not deleted'.format(entity_type, entity_name))
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sa')
+    def test_keyvault_storage_account(self, resource_group):
 
-    def _recover_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-
-        # while getting the deleted entities returns a zero entities
         self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'sa': 'clitestkvsa0000002',
+            'loc': 'westus'
         })
 
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} recover --vault-name {kv} -n {name}')
-                break
-            except Exception as ex:
-                if 'currently being deleted' in str(ex):
-                    time.sleep(retry_wait)
+        _create_keyvault(self, self.kwargs)
 
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}')
-                return
-            except Exception as ex:
-                if 'not found' in str(ex) or 'currently being deleted' in str(ex):
-                    time.sleep(retry_wait)
-
-        self.fail('{} {} not restored'.format(entity_type, entity_name))
-
-    def _purge_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
-
-        # while getting the deleted entities returns a zero entities
+        # create a storage account
+        self._create_managable_storage_account()
+        kv_sa = self.cmd('keyvault storage add --vault-name {kv} -n {sa} --active-key-name key1 '
+                         '--auto-regenerate-key --regeneration-period P90D --resource-id {sa_rid}',
+                         checks=[self.check('activeKeyName', 'key1'),
+                                 self.check('attributes.enabled', True),
+                                 self.check('autoRegenerateKey', True),
+                                 self.check('regenerationPeriod', 'P90D'),
+                                 self.check('resourceId', '{sa_rid}')]).get_output_in_json()
         self.kwargs.update({
-            'ent': entity_type,
-            'name': entity_name
+            'sa_id': kv_sa['id']
         })
 
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} purge --vault-name {kv} -n {name}')
-                break
-            except Exception as ex:
-                if 'currently being deleted' in str(ex):
-                    time.sleep(retry_wait)
+        # create an account sas definition
+        acct_sas_template = self.cmd('storage account generate-sas --expiry 2020-01-01 --permissions acdlpruw '
+                                     '--resource-types sco --services bfqt --https-only --account-name {sa} '
+                                     '--account-key 00000000').output[1:-2]
+        self.kwargs.update({
+            'acct_temp': acct_sas_template,
+            'acct_sas_name': 'allacctaccess'
+        })
+        sas_def = self.cmd('keyvault storage sas-definition create --vault-name {kv} --account-name {sa} '
+                           '-n {acct_sas_name} --validity-period PT4H --sas-type account --template-uri "{acct_temp}"',
+                           checks=[self.check('attributes.enabled', True)]).get_output_in_json()
+        self.kwargs.update({
+            'acct_sas_sid': sas_def['secretId'],
+            'acct_sas_id': sas_def['id'],
+        })
 
-        for _ in range(max_retries):
-            try:
-                self.cmd('keyvault {ent} show --vault-name {kv} -n {name}')
-                time.sleep(retry_wait)
-            except Exception as ex:
-                if 'not found' in str(ex):
-                    return
+        # use the account sas token to create a container and a blob
+        acct_sas_token = self.cmd('keyvault secret show --id {acct_sas_sid} --query value').output
 
-        self.fail('{} {} not purged'.format(entity_type, entity_name))
+        self.kwargs.update({
+            'acct_sas': acct_sas_token,
+            'c': 'cont1',
+            'b': 'blob1',
+            'f': os.path.join(TEST_DIR, 'test_secret.txt')
+        })
+        self.cmd('storage container create -n {c} --account-name {sa} --sas-token {acct_sas}',
+                 checks=[self.check('created', True)])
+
+        self.cmd('storage blob upload -f "{f}" -c {c} -n {b} --account-name {sa} --sas-token {acct_sas}',
+                 checks=[self.exists('lastModified')])
+
+        # create a service sas token for the accessing the blob
+        blob_sas_template = self.cmd('storage blob generate-sas -c {c} -n {b} --account-name {sa}'
+                                     ' --account-key 00000000 --permissions r').output[1:-2]
+        blob_url = self.cmd('storage blob url -c {c} -n {b} --account-name {sa}').output[1:-2]
+
+        blob_temp = '{}?{}'.format(blob_url, blob_sas_template)
+        print('blob_temp', blob_temp)
+        self.kwargs.update({
+            'blob_temp': blob_temp,
+            'blob_sas_name': 'blob1r'
+        })
+
+        sas_def = self.cmd('keyvault storage sas-definition create --vault-name {kv} --account-name {sa} '
+                           '-n {blob_sas_name} --sas-type service --validity-period P1D --template-uri "{blob_temp}"',
+                           checks=[self.check('attributes.enabled', True)]).get_output_in_json()
+
+        self.kwargs.update({
+            'blob_sas_sid': sas_def['secretId'],
+            'blob_sas_id': sas_def['id']
+        })
+
+        # use the blob sas token to read the blob
+        blob_sas_token = self.cmd('keyvault secret show --id {blob_sas_sid} --query value').output
+        self.kwargs.update({
+            'blob_sas': blob_sas_token
+        })
+
+        self.cmd('storage blob show -c {c} -n {b} --account-name {sa} --sas-token {blob_sas}',
+                 checks=[self.check('name', '{b}')])
+
+        # regenerate the storage account key
+        self.cmd('keyvault storage regenerate-key --id {sa_id} --key-name key1')
+
+        # use the blob sas token to read the blob
+        blob_sas_token = self.cmd('keyvault secret show --id {blob_sas_sid} --query value').output
+        self.kwargs.update({
+            'blob_sas': blob_sas_token
+        })
+
+        self.cmd('storage blob show -c {c} -n {b} --account-name {sa} --sas-token {blob_sas}',
+                 checks=[self.check('name', '{b}')])
+
+        # list the sas definitions
+        self.cmd('keyvault storage sas-definition list --vault-name {kv} --account-name {sa}',
+                 checks=[self.check('length(@)', 2)])
+
+        # show a sas definition by (vault, account-name, name) and by id
+        self.cmd('keyvault storage sas-definition show --vault-name {kv} --account-name {sa} -n {blob_sas_name}',
+                 checks=[self.check('id', '{blob_sas_id}')])
+        self.cmd('keyvault storage sas-definition show --id {acct_sas_id}',
+                 checks=[self.check('id', '{acct_sas_id}')])
+
+        # delete a sas definition by (vault, account-name, name) and by id
+        self.cmd('keyvault storage sas-definition delete --vault-name {kv} --account-name {sa} -n {blob_sas_name}')
+        self.cmd('keyvault storage sas-definition delete --id {acct_sas_id}')
+
+        # list the sas definitions and secrets verfy none are left
+        self.cmd('keyvault storage sas-definition list --vault-name {kv} --account-name {sa}',
+                 checks=[self.check('length(@)', 0)])
+        self.cmd('keyvault secret list --vault-name {kv}', checks=[self.check('length(@)', 0)])
+
+        # list the storage accounts
+        self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 1)])
+
+        # show the storage account by vault and name and by id
+        self.cmd('keyvault storage show --vault-name {kv} -n {sa}',
+                 checks=[self.check('resourceId', '{sa_rid}')])
+        self.cmd('keyvault storage show --id {sa_id}',
+                 checks=[self.check('resourceId', '{sa_rid}')])
+
+        # delete the storage account and verify no storage accounts exist in the vault
+        self.cmd('keyvault storage remove --id {sa_id}')
+        self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
 
 
 if __name__ == '__main__':

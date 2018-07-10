@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -168,7 +169,7 @@ helps['aks create'] = """
                          size of its node pool with `az aks scale`.
         - name: --node-osdisk-size
           type: int
-          short-summary: Size in GB of the OS disk for each node in the node pool.
+          short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
         - name: --kubernetes-version -k
           type: string
           short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
@@ -212,9 +213,12 @@ helps['aks create'] = """
             These addons are available:
                 http_application_routing - configure ingress with automatic public DNS name creation.
                 monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+        - name: --disable-rbac
+          type: bool
+          short-summary: Disable Kubernetes Role-Based Access Control.
         - name: --enable-rbac -r
-          type: string
-          short-summary: Enable Kubernetes Role-Based Access Control.
+          type: bool
+          short-summary: "[DEPRECATED: RBAC is on by default. Use --disable-rbac to disable it.] Enable Kubernetes Role-Based Access Control."
         - name: --max-pods -m
           type: int
           short-summary: The maximum number of pods deployable to a node.
@@ -254,6 +258,31 @@ helps['aks create'] = """
 helps['aks delete'] = """
     type: command
     short-summary: Delete a managed Kubernetes cluster.
+"""
+
+helps['aks disable-addons'] = """
+    type: command
+    short-summary: Disable Kubernetes addons.
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Disable the Kubernetes addons in a comma-separated list.
+"""
+
+helps['aks enable-addons'] = """
+    type: command
+    short-summary: Enable Kubernetes addons.
+    long-summary: |-
+      These addons are available:
+          http_application_routing - configure ingress with automatic public DNS name creation.
+          monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+    parameters:
+        - name: --addons -a
+          type: string
+          short-summary: Enable the Kubernetes addons in a comma-separated list.
+        - name: --workspace-resource-id
+          type: string
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 """
 
 helps['aks get-credentials'] = """

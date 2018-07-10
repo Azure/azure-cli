@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -219,6 +220,11 @@ helps['vm extension set'] = """
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
                 --vm-name MyVm --resource-group MyResourceGroup \\
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+"""
+
+helps['vm extension wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
 """
 
 helps['vm availability-set delete'] = """
@@ -540,7 +546,7 @@ helps['vm diagnostics set'] = """
                 | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
-                --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
+                --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
             protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
@@ -1217,10 +1223,14 @@ helps['vm identity assign'] = """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove user assigned identities from a VM.
+    short-summary: (PREVIEW) Remove managed service identities from a VM.
     examples:
+        - name: Remove system assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 
 helps['vm identity show'] = """
@@ -1261,8 +1271,12 @@ helps['vmss identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
     examples:
+        - name: Remove system assigned identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
-          text: az vmss identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities [system] readerId
 """
 
 helps['vmss identity show'] = """

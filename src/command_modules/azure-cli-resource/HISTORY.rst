@@ -3,9 +3,20 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* `group deployment delete`: Add `--no-wait` support.
+* `deployment delete`: Add `--no-wait` support.
+* Added `deployment wait` command.
+* Fix issue where the subscription-level `az deployment` commands erroneously appeared for profile 2017-03-09-profile.
+
+2.0.32
+++++++
+* Support deployment at subscription scope: new operation group `deployment`.
+
 2.0.31
 ++++++
-* Minor fixes
+* Minor changes
 
 2.0.30
 ++++++
