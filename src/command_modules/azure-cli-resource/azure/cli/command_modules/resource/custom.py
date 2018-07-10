@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+# pylint: disable=line-too-long
 
 from __future__ import print_function
 from collections import OrderedDict
@@ -689,7 +690,6 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
                                                 parameters=None):
-    # pylint: disable=line-too-long
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
                                                    parameters,
