@@ -109,7 +109,7 @@ server_param_type = CLIArgumentType(
     configured_default='sql-server',
     help='Name of the Azure SQL server. You can configure the default using '
     '`az configure --defaults sql-server=<name>`',
-    # Allow --ids command line argument. id_part=name is 2nd name in uri
+    # Allow --ids command line argument. id_part=name is 1st name in uri
     id_part='name')
 
 available_param_type = CLIArgumentType(
