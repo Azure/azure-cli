@@ -692,7 +692,8 @@ def validate_arm_template_at_subscription_scope(cmd, template_file=None, templat
     # pylint: disable=line-too-long
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
-                                                   parameters, 'Incremental',
+                                                   parameters,
+                                                   'Incremental',
                                                    validate_only=True)
 
 
