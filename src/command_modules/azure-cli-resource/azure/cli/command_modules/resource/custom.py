@@ -220,7 +220,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, on_error_type=None, on_error_name=None, validate_only=False,
                               no_wait=False):
-    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', mod='models')
     template = None
     template_link = None
