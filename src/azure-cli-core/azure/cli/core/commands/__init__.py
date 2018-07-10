@@ -28,6 +28,7 @@ from azure.cli.core.commands.constants import (
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
+from azure.cli.core.util import get_source_kwarg, read_file_content, get_arg_list, poller_classes
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
@@ -60,7 +61,6 @@ def _explode_list_args(args):
 
 def _expand_file_prefixed_files(args):
     def _load_file(path):
-        from azure.cli.core.util import read_file_content
         if path == '-':
             content = sys.stdin.read()
         else:
@@ -380,7 +380,6 @@ class AzCliCommandInvoker(CommandInvoker):
             is_query_active=self.data['query_active'])
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
-        from azure.cli.core.util import get_arg_list
         arg_list = get_arg_list(func)
         kwargs = {}
         if 'cmd' in arg_list:
@@ -573,7 +572,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 class DeploymentOutputLongRunningOperation(LongRunningOperation):
     def __call__(self, result):
         from msrest.pipeline import ClientRawResponse
-        from azure.cli.core.util import poller_classes
 
         if isinstance(result, poller_classes()):
             # most deployment operations return a poller
@@ -677,7 +675,6 @@ def _is_paged(obj):
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
     if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller']:
-        from azure.cli.core.util import poller_classes
         return isinstance(obj, poller_classes())
     return False
 
@@ -749,42 +746,14 @@ class AzCommandGroup(CommandGroup):
 
     # pylint: disable=arguments-differ
     def command(self, name, method_name=None, **kwargs):
-        """
-        Register a CLI command
-        :param name: Name of the command as it will be called on the command line
-        :type name: str
-        :param method_name: Name of the method the command maps to
-        :type method_name: str
-        :param kwargs: Keyword arguments. Supported keyword arguments include:
-            - client_factory: Callable which returns a client needed to access the underlying command method. (function)
-            - confirmation: Prompt prior to the action being executed. This is useful if the action
-                            would cause a loss of data. (bool)
-            - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - supports_no_wait: The command supports no wait. (bool)
-            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
-              to skip long-running operation polling. (string)
-            - transform: Transform function for transforming the output of the command (function)
-            - table_transformer: Transform function or JMESPath query to be applied to table output to create a
-                                 better output format for tables. (function or string)
-            - resource_type: The ResourceType enum value to use with min or max API. (ResourceType)
-            - min_api: Minimum API version required for commands within the group (string)
-            - max_api: Maximum API version required for commands within the group (string)
-        :rtype: None
-        """
-        self._check_stale()
-        merged_kwargs = self._flatten_kwargs(kwargs, 'command_type')
-        # don't inherit deprecation info from command group
-        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        operations_tmpl = merged_kwargs['operations_tmpl']
-        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
-        operation = operations_tmpl.format(method_name) if operations_tmpl else None
-        self.command_loader._cli_command(command_name, operation, **merged_kwargs)  # pylint: disable=protected-access
+        return self._command(name, method_name=method_name, **kwargs)
 
-        return command_name
+    def custom_command(self, name, method_name=None, **kwargs):
+        return self._command(name, method_name=method_name, custom_command=True, **kwargs)
 
-    def custom_command(self, name, method_name, **kwargs):
+    def _command(self, name, method_name, custom_command=False, **kwargs):
         """
-        Register a custom CLI command.
+        Register a CLI command.
         :param name: Name of the command as it will be called on the command line
         :type name: str
         :param method_name: Name of the method the command maps to
@@ -806,7 +775,7 @@ class AzCommandGroup(CommandGroup):
         :rtype: None
         """
         self._check_stale()
-        merged_kwargs = self._flatten_kwargs(kwargs, 'custom_command_type')
+        merged_kwargs = self._flatten_kwargs(kwargs, get_source_kwarg(custom_command))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
@@ -820,7 +789,7 @@ class AzCommandGroup(CommandGroup):
 
     # pylint: disable=no-self-use
     def _resolve_operation(self, kwargs, name, command_type=None, custom_type=False):
-        source_kwarg = 'custom_command_type' if custom_type else 'command_type'
+        source_kwarg = get_source_kwarg(custom_type)
 
         operations_tmpl = None
         if command_type:

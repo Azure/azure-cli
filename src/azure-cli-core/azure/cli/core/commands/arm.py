@@ -20,7 +20,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_source_kwarg
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -341,19 +341,15 @@ def _get_child(parent, collection_name, item_name, collection_key):
 
 
 def _get_operations_tmpl(cmd, custom_command=False):
-    if custom_command:
-        operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
-            cmd.command_kwargs.get('custom_command_type').settings['operations_tmpl']
-    else:
-        operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
-            cmd.command_kwargs.get('command_type').settings['operations_tmpl']
+    operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
+        cmd.command_kwargs.get(get_source_kwarg(custom_command)).settings['operations_tmpl']
     if not operations_tmpl:
         raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
     return operations_tmpl
 
 
 def _get_client_factory(_, custom_command=False, **kwargs):
-    command_type = kwargs.get('custom_command_type', None) if custom_command else kwargs.get('command_type', None)
+    command_type = kwargs.get(get_source_kwarg(custom_command), None)
     factory = kwargs.get('client_factory', None)
     if not factory and command_type:
         factory = command_type.settings.get('client_factory', None)

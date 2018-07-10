@@ -96,7 +96,7 @@ def load_command_table(self, _):
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
-        g.custom_wait_command('wait', getter_name='_server_mysql_get')
+        g.custom_wait_command('wait', '_server_mysql_get')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
@@ -109,7 +109,7 @@ def load_command_table(self, _):
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
-        g.custom_wait_command('wait', getter_name='_server_postgresql_get')
+        g.custom_wait_command('wait', '_server_postgresql_get')
 
     with self.command_group('mysql server firewall-rule', mysql_firewall_rule_sdk) as g:
         g.command('create', 'create_or_update')
