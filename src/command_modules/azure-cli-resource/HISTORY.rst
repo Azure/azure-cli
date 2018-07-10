@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.34
+++++++
+* Support OnError group deployments.
+
 2.0.33
 ++++++
 * `group deployment delete`: Add `--no-wait` support.
