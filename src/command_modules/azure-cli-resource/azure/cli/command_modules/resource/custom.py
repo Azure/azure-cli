@@ -689,10 +689,11 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
                                                 parameters=None):
+    # pylint: disable=line-too-long
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
                                                    parameters, 'Incremental',
-                                                   validate_only=True)  # pylint: disable=line-too-long
+                                                   validate_only=True)
 
 
 def export_subscription_deployment_template(cmd, deployment_name):
