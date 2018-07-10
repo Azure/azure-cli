@@ -43,7 +43,8 @@ def process_deployment_group_create_namespace(namespace):
             if bool(namespace.on_error_name):
                 raise CLIError('OnErrorDeployment using LastSuccessful type shouldn not have a deployment name.')
         else:
-            raise CLIError('Unable to parse type: {0}, valid values are SpecificDeployment and LastSuccessful'.format(namespace.on_error_type))
+            raise CLIError('Unable to parse type: {}, valid values are SpecificDeployment and LastSuccessful'.format(
+                namespace.on_error_type))
 
     process_deployment_create_namespace(namespace)
 

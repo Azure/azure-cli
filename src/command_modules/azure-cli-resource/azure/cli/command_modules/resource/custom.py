@@ -221,7 +221,8 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
                               parameters=None, mode=None, on_error_type=None, on_error_name=None, validate_only=False,
                               no_wait=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                                    'DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', mod='models')
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
     template = None
     template_link = None
     template_obj = None
@@ -690,7 +691,8 @@ def validate_arm_template_at_subscription_scope(cmd, template_file=None, templat
                                                 parameters=None):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
-                                                   parameters, 'Incremental', validate_only=True)
+                                                   parameters, 'Incremental',
+                                                   validate_only=True)
 
 
 def export_subscription_deployment_template(cmd, deployment_name):
