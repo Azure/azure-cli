@@ -371,7 +371,7 @@ def get_arguments_loader(context, getter_op, cmd_args=None):
 # pylint: disable=too-many-statements
 def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_name='parameters',
                                 child_collection_prop_name=None, child_collection_key='name',
-                                child_arg_name='item_name', custom_command=False, custom_function_op=None, **kwargs):
+                                child_arg_name='item_name', custom_function_op=None, **kwargs):
     if not isinstance(context, AzCommandsLoader):
         raise TypeError("'context' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(context)))
     if not isinstance(getter_op, string_types):
@@ -438,7 +438,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-        factory = _get_client_factory(name, custom_command=custom_command, **commmand_kwargs)
+        factory = _get_client_factory(name, **commmand_kwargs)
         client = None
         if factory:
             try:

@@ -13,7 +13,7 @@ def load_command_table(self, _):
         client_factory=cf_accounts)
 
     with self.command_group('maps account', mgmt_type) as g:
-        g.generic_show_command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', 'list_accounts')
         g.custom_command('create', 'create_account')
         g.command('delete', 'delete')

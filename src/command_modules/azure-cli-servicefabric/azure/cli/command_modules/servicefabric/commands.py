@@ -15,7 +15,7 @@ def load_command_table(self, _):
     )
 
     with self.command_group('sf cluster', cluster_mgmt_util, client_factory=servicefabric_fabric_client_factory) as g:
-        g.generic_show_command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', 'list_cluster')
         g.custom_command('create', 'new_cluster')
         g.custom_command('certificate add', 'add_cluster_cert')
