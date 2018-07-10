@@ -1,6 +1,6 @@
 **MICROSOFT SOFTWARE LICENSE TERMS**
 
-**Microsoft CLI 2.0 for Azure**
+**Microsoft CLI for Azure**
 
 These license terms are an agreement between Microsoft Corporation (or
 based on where you live, one of its affiliates) and you. They apply to
