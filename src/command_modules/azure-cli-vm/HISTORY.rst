@@ -5,6 +5,7 @@ Release History
 
 2.0.36
 ++++++
+* `vm create`: add params '--disk-encryption-key', '--disk-encryption-keyvault', '--key-encryption-key', '--key-encryption-keyvault'. The params are useful when building VMs out of custom images that were encrypted with Azure Disk Encryption (az vm encryption).
 * `vm/vmss extension set/delete`: Added `--no-wait` support.
 * Added `vm extension wait`.
 

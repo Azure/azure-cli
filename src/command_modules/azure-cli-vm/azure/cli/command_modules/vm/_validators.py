@@ -309,6 +309,38 @@ def _validate_location(cmd, namespace, zone_info, size_info):
                                "used to find such locations".format(namespace.resource_group_name))
 
 
+def _validate_vm_encryption_settings(cmd, namespace):
+    # if there is no disk_encryption* parameter then none of the encryption params should be provided
+    required = []
+    forbidden = ['disk_encryption_key', 'disk_encryption_keyvault', 'key_encryption_key', 'key_encryption_keyvault']
+
+    # if disk_encryption_key or disk_encryption_keyvault are present. They should both be required.
+    if getattr(namespace, 'disk_encryption_key', None) or getattr(namespace, 'disk_encryption_keyvault', None):
+        required = ['disk_encryption_key', 'disk_encryption_keyvault']
+        forbidden = ['key_encryption_key', 'key_encryption_keyvault']
+
+    if getattr(namespace, 'key_encryption_key', None) or getattr(namespace, 'key_encryption_keyvault', None):
+        # if any key_encryption_key stuff is present, then both params are required
+        # else they are both forbidden
+        required = ['disk_encryption_key', 'disk_encryption_keyvault', 'key_encryption_key', 'key_encryption_keyvault']
+        forbidden = []
+
+    # Now verify that the status of required and forbidden parameters
+    validate_parameter_set(
+        namespace, required, forbidden,
+        description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
+
+    if getattr(namespace, 'disk_encryption_keyvault', None):
+        namespace.disk_encryption_keyvault = _get_resource_id(cmd.cli_ctx, namespace.disk_encryption_keyvault,
+                                                              namespace.resource_group_name,
+                                                              'vaults', 'Microsoft.KeyVault')
+
+    if getattr(namespace, 'key_encryption_keyvault', None):
+        namespace.key_encryption_keyvault = _get_resource_id(cmd.cli_ctx, namespace.key_encryption_keyvault,
+                                                             namespace.resource_group_name,
+                                                             'vaults', 'Microsoft.KeyVault')
+
+
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
@@ -948,6 +980,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
+    _validate_vm_encryption_settings(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
                                      StorageProfile.SAPirImage]:
         _validate_vm_create_storage_account(cmd, namespace)

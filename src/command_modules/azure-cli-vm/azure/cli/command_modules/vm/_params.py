@@ -427,6 +427,13 @@ def load_arguments(self, _):
             c.argument('plan_publisher', help='plan publisher')
             c.argument('plan_promotion_code', help='plan promotion code')
 
+    for scope in ['vm create']:
+        with self.argument_context(scope) as c:
+            c.argument('disk_encryption_key', help='The URL of the disk encryption key')
+            c.argument('disk_encryption_keyvault', help='The resource ID or name of the Key Vault containing the disk encryption key')
+            c.argument('key_encryption_key', help='The URL or name of the key encryption key')
+            c.argument('key_encryption_keyvault', help='The resource ID or name of the Key Vault containing the key encryption key')
+
     for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None

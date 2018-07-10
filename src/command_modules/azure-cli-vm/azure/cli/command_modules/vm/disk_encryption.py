@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os
-from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
+from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, get_keyvault_key_url
 
 _DATA_VOLUME_TYPE = 'DATA'
 _ALL_VOLUME_TYPE = 'ALL'
@@ -118,7 +118,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
         if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
+            key_encryption_key = get_keyvault_key_url(
                 cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
@@ -362,12 +362,6 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     return encryption_status
 
 
-def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
-    client = create_keyvault_data_plane_client(cli_ctx)
-    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
-    return result.key.kid  # pylint: disable=no-member
-
-
 def _check_encrypt_is_supported(image_reference, volume_type):
     offer = getattr(image_reference, 'offer', None)
     publisher = getattr(image_reference, 'publisher', None)
@@ -467,7 +461,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
         if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
+            key_encryption_key = get_keyvault_key_url(
                 cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     #  to avoid bad server errors, ensure the vault has the right configurations
