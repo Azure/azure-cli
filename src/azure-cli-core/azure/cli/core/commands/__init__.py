@@ -838,13 +838,14 @@ class AzCommandGroup(CommandGroup):
             child_arg_name=child_arg_name,
             **merged_kwargs)
 
-    def wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type,
-                                   custom_command=False, **kwargs)
+    def wait_command(self, name, getter_name='get', **kwargs):
+        self._generic_wait_command(name, getter_name=getter_name, custom_command=False, **kwargs)
 
-    def custom_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type,
-                                   custom_command=True, **kwargs)
+    def custom_wait_command(self, name, getter_name='get', **kwargs):
+        self._generic_wait_command(name, getter_name=getter_name, custom_command=True, **kwargs)
+
+    def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
+        self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
 
     def _generic_wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_wait_command
@@ -859,13 +860,11 @@ class AzCommandGroup(CommandGroup):
         _cli_generic_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                                   custom_command=custom_command, **merged_kwargs)
 
-    def show_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type,
-                                   custom_command=False, **kwargs)
+    def show_command(self, name, getter_name='get', **kwargs):
+        self._generic_show_command(name, getter_name=getter_name, custom_command=False, **kwargs)
 
-    def custom_show_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type,
-                                   custom_command=True, **kwargs)
+    def custom_show_command(self, name, getter_name='get', **kwargs):
+        self._generic_show_command(name, getter_name=getter_name, custom_command=True, **kwargs)
 
     def _generic_show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_show_command
