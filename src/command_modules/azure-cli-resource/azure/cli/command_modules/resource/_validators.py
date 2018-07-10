@@ -33,6 +33,7 @@ def process_deployment_create_namespace(namespace):
         raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
     _validate_deployment_name(namespace)
 
+
 def process_deployment_group_create_namespace(namespace):
     if bool(namespace.on_error_type):
         if namespace.on_error_type.lower() == 'specificdeployment':
