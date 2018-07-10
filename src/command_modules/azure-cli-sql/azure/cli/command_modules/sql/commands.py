@@ -107,8 +107,8 @@ def load_command_table(self, _):
                          transform=database_lro_transform,
                          table_transformer=db_table_format)
         g.show_command('show', 'get',
-                               transform=db_transform,
-                               table_transformer=db_table_format)
+                       transform=db_transform,
+                       table_transformer=db_table_format)
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
                          table_transformer=db_table_format)
@@ -153,7 +153,7 @@ def load_command_table(self, _):
                          supports_no_wait=True,
                          transform=database_lro_transform)
         g.show_command('show', 'get',
-                               transform=db_transform)
+                       transform=db_transform)
         g.custom_command('list', 'dw_list',
                          transform=db_list_transform)
         g.command('delete', 'delete',
@@ -267,8 +267,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete',
                   supports_no_wait=True)
         g.show_command('show', 'get',
-                               transform=elastic_pool_transform,
-                               table_transformer=elastic_pool_table_format)
+                       transform=elastic_pool_transform,
+                       table_transformer=elastic_pool_table_format)
         g.command('list', 'list_by_server',
                   transform=elastic_pool_list_transform,
                   table_transformer=elastic_pool_table_format)
@@ -319,7 +319,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete',
                   confirmation=True)
         g.show_command('show', 'get',
-                               table_transformer=server_table_format)
+                       table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
@@ -330,7 +330,6 @@ def load_command_table(self, _):
         client_factory=get_sql_server_usages_operations)
 
     with self.command_group('sql server', server_usages_operations) as g:
-
         g.command('list-usages', 'list_by_server')
 
     firewall_rules_operations = CliCommandType(
@@ -347,7 +346,7 @@ def load_command_table(self, _):
                          table_transformer=firewall_rule_table_format)
         g.command('delete', 'delete')
         g.show_command('show', 'get',
-                               table_transformer=firewall_rule_table_format)
+                       table_transformer=firewall_rule_table_format)
         g.command('list', 'list_by_server',
                   table_transformer=firewall_rule_table_format)
 

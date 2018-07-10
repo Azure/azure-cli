@@ -110,7 +110,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('show-connection-string', 'iot_device_show_connection_string',
                          deprecate_info='az iot hub device-identity show-connection-string (via IoT Extension)')
         g.custom_show_command('show', 'iot_device_get',
-                               deprecate_info='az iot hub device-identity show (via IoT Extension)')
+                              deprecate_info='az iot hub device-identity show (via IoT Extension)')
         g.generic_update_command('update', getter_name='iot_device_get', setter_name='iot_device_update',
                                  command_type=update_custom_util,
                                  deprecate_info='az iot hub device-identity update (via IoT Extension)')
