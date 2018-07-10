@@ -218,10 +218,10 @@ def _urlretrieve(url):
 
 def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode=None, on_error_type = None, on_error_name = None, validate_only=False,
+                              parameters=None, mode=None, on_error_type=None, on_error_name=None, validate_only=False,
                               no_wait=False):
-    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', mod='models')
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 
+                                                                    'DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', mod='models')
     template = None
     template_link = None
     template_obj = None
@@ -681,7 +681,7 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None, on_error_type = None, on_error_name = None):
+                          parameters=None, mode=None, on_error_type=None, on_error_name=None):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, on_error_type, on_error_name, validate_only=True)
 
