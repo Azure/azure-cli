@@ -870,7 +870,8 @@ class AzCommandGroup(CommandGroup):
             **merged_kwargs)
 
     def wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
+        self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type,
+                                   custom_command=False, **kwargs)
 
     def custom_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
         self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type,
@@ -890,7 +891,8 @@ class AzCommandGroup(CommandGroup):
                                   custom_command=custom_command, **merged_kwargs)
 
     def show_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
+        self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type,
+                                   custom_command=False, **kwargs)
 
     def custom_show_command(self, name, getter_name='get', getter_type=None, **kwargs):
         self._generic_show_command(name, getter_name=getter_name, getter_type=getter_type,
