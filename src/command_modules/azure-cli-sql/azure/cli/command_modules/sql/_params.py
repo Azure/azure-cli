@@ -831,6 +831,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql server') as c:
         c.argument('server_name',
+                   arg_type=server_param_type,
                    options_list=['--name', '-n'])
 
         c.argument('administrator_login',
