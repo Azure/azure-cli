@@ -416,11 +416,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('length(@)', 2)])
 
-        self.cmd('{} server vnet-rule delete --name {} -g {} --server {} --yes'
+        self.cmd('{} server vnet-rule delete --name {} -g {} --server {}'
                  .format(database_engine, vnet_firewall_rule_1, resource_group, server), checks=NoneCheck())
         self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
-        self.cmd('{} server vnet-rule delete -n {} -g {} -s {} --yes'
+        self.cmd('{} server vnet-rule delete -n {} -g {} -s {}'
                  .format(database_engine, vnet_firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[NoneCheck()])
