@@ -153,7 +153,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
         g.custom_command('create', 'create_resource_group')
         g.custom_command('export', 'export_group_as_template')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_resource_group', custom_func_type=resource_custom)
         g.generic_wait_command('wait')
 
     with self.command_group('group lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:

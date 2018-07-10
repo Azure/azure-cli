@@ -41,6 +41,7 @@ from ._client_factory import cf_container_groups, cf_container, cf_log_analytics
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
 SERVER_DELIMITER = '.'
+ACR_SERVER_DELIMITER = '.azurecr.io'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -98,7 +99,7 @@ def create_container(cmd,
     """Create a container group. """
 
     if file:
-        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file)
+        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
 
     if not name:
         raise CLIError("error: the --name/-n argument is required unless specified with a passed in file.")
@@ -207,7 +208,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
-def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
+def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = _resource_client_factory(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
 
@@ -240,15 +241,15 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file)
 
     api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
-    resource = resource_client.resources.create_or_update(resource_group_name,
-                                                          "Microsoft.ContainerInstance",
-                                                          '',
-                                                          "containerGroups",
-                                                          name,
-                                                          api_version,
-                                                          cg_defintion,
-                                                          raw=True)
-    return resource.output
+    return sdk_no_wait(no_wait,
+                       resource_client.resources.create_or_update,
+                       resource_group_name,
+                       "Microsoft.ContainerInstance",
+                       '',
+                       "containerGroups",
+                       name,
+                       api_version,
+                       cg_defintion)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -273,7 +274,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif SERVER_DELIMITER in image.split("/")[0]:
+    elif ACR_SERVER_DELIMITER in image.split("/")[0]:
         if not registry_username:
             try:
                 registry_username = prompt(msg='Image registry username: ')
@@ -291,8 +292,14 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                   username=registry_username,
                                                                   password=registry_password)]
+    elif registry_username and registry_password and SERVER_DELIMITER in image.split("/")[0]:
+        login_server = image.split("/")[0] if image.split("/") else None
+        if login_server:
+            image_registry_credentials = [ImageRegistryCredential(server=login_server,
+                                                                  username=registry_username,
+                                                                  password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server from image name; please explicitly specify --registry-server.')
+            raise CLIError('Failed to parse login server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 

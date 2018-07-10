@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.38
+++++++
+* appservice: allow PremiumV2 skus
+
 0.1.37
 ++++++
 * Minor fixes
