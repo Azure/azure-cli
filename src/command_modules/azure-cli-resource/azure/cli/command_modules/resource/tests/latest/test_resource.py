@@ -335,6 +335,75 @@ class DeploymentTest(ScenarioTest):
             self.check('length([])', 4)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
+    def test_group_on_error_deployment_lastsuccessful(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-deployment', 30),
+            'onErrorType': 'LastSuccessful',
+            'sdn': self.create_random_name('azure-cli-deployment', 30)
+        })
+
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --on-error-type {onErrorType}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
+            self.check('properties.onErrorDeployment.type', '{onErrorType}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_specificdeployment')
+    def test_group_on_error_deployment_specificdeployment(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-deployment', 30),
+            'onErrorType': 'SpecificDeployment',
+            'sdn': self.create_random_name('azure-cli-deployment', 30)
+        })
+
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --on-error-type {onErrorType} --on-error-name {dn}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
+            self.check('properties.onErrorDeployment.type', '{onErrorType}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_specificdeployment_implicit')
+    def test_group_on_error_deployment_specificdeployment_implicit(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-deployment', 30),
+            'onErrorType': 'SpecificDeployment',
+            'sdn': self.create_random_name('azure-cli-deployment', 30)
+        })
+
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --on-error-name {dn}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
+            self.check('properties.onErrorDeployment.type', '{onErrorType}')
+        ])
+
 
 class DeploymentLiveTest(LiveScenarioTest):
     @ResourceGroupPreparer()

@@ -11,6 +11,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.resources.models import DeploymentMode
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
+    from azure.mgmt.resource.resources.v2018_05_01.models import OnErrorDeploymentType
 
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
@@ -136,6 +137,8 @@ def load_arguments(self, _):
         c.argument('template_uri', help='a uri to a remote template file')
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('on_error_type', arg_type=get_enum_type(OnErrorDeploymentType), help='The OnErrorDeployment type to be used, LastSuccessful (last deployment that succedded in the resource group) or SpecificDeployment (specific deployment to be used in case of an error)')
+        c.argument('on_error_name', help='The OnErrorDeployment to be used with SpecificDeployment type.')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=('--name', '-n'), required=False,

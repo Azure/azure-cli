@@ -218,19 +218,26 @@ def _urlretrieve(url):
 
 def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode=None, validate_only=False,
+                              parameters=None, mode=None, on_error_type = None, on_error_name = None, validate_only=False,
                               no_wait=False):
-    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                 'DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', mod='models')
     template = None
     template_link = None
     template_obj = None
+    on_error_deployment = None
+
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
+
+    if on_error_type:
+        on_error_deployment = OnErrorDeployment(type=on_error_type, deployment_name=on_error_name)
+    elif on_error_name:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=on_error_name)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
@@ -241,7 +248,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template, template_link=template_link,
-                                      parameters=parameters, mode=mode)
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
@@ -660,9 +667,9 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, no_wait=False):
+                        parameters=None, mode=None, on_error_type=None, on_error_name=None, no_wait=False):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode, no_wait=no_wait)
+                                     deployment_name, parameters, mode, on_error_type, on_error_name, no_wait=no_wait)
 
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
@@ -674,9 +681,9 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None):
+                          parameters=None, mode=None, on_error_type = None, on_error_name = None):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     'deployment_dry_run', parameters, mode, validate_only=True)
+                                     'deployment_dry_run', parameters, mode, on_error_type, on_error_name, validate_only=True)
 
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
