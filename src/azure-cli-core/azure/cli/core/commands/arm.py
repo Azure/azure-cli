@@ -425,6 +425,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
             metavar='LIST INDEX', arg_group=group_name
         )
+        arguments['force_string'] = CLICommandArgument(
+            'force_string', action='store_true', arg_group=group_name,
+            help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON."
+        )
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
@@ -448,6 +452,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         cmd = args.get('cmd')
+        force_string = args.get('force_string', False)
         ordered_arguments = args.pop('ordered_arguments', [])
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
@@ -483,12 +488,12 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             if arg_type == '--set':
                 try:
                     for expression in arg_values:
-                        set_properties(instance, expression)
+                        set_properties(instance, expression, force_string)
                 except ValueError:
                     raise CLIError('invalid syntax: {}'.format(set_usage))
             elif arg_type == '--add':
                 try:
-                    add_properties(instance, arg_values)
+                    add_properties(instance, arg_values, force_string)
                 except ValueError:
                     raise CLIError('invalid syntax: {}'.format(add_usage))
             elif arg_type == '--remove':
@@ -741,13 +746,14 @@ def _split_key_value_pair(expression):
     return _find_split()
 
 
-def set_properties(instance, expression):
+def set_properties(instance, expression, force_string):
     key, value = _split_key_value_pair(expression)
 
-    try:
-        value = shell_safe_json_parse(value)
-    except:  # pylint:disable=bare-except
-        pass
+    if not force_string:
+        try:
+            value = shell_safe_json_parse(value)
+        except:  # pylint:disable=bare-except
+            pass
 
     # name should be the raw casing as it could refer to a property OR a dictionary key
     name, path = _get_name_path(key)
@@ -756,7 +762,7 @@ def set_properties(instance, expression):
     instance = _find_property(instance, path)
     if instance is None:
         parent = _find_property(root, path[:-1])
-        set_properties(parent, '{}={{}}'.format(parent_name))
+        set_properties(parent, '{}={{}}'.format(parent_name), force_string)
         instance = _find_property(root, path)
 
     match = index_or_filter_regex.match(name)
@@ -786,14 +792,14 @@ def set_properties(instance, expression):
         throw_and_show_options(instance, name, key.split('.'))
 
 
-def add_properties(instance, argument_values):
+def add_properties(instance, argument_values, force_string):
     # The first argument indicates the path to the collection to add to.
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
 
     if list_to_add_to is None:
         parent = _find_property(instance, list_attribute_path[:-1])
-        set_properties(parent, '{}=[]'.format(list_attribute_path[-1]))
+        set_properties(parent, '{}=[]'.format(list_attribute_path[-1]), force_string)
         list_to_add_to = _find_property(instance, list_attribute_path)
 
     if not isinstance(list_to_add_to, list):
@@ -813,11 +819,12 @@ def add_properties(instance, argument_values):
                 list_to_add_to.append(dict_entry)
                 dict_entry = {}
 
-            # attempt to convert anything else to JSON and fallback to string if error
-            try:
-                argument = shell_safe_json_parse(argument)
-            except (ValueError, CLIError):
-                pass
+            if not force_string:
+                # attempt to convert anything else to JSON and fallback to string if error
+                try:
+                    argument = shell_safe_json_parse(argument)
+                except (ValueError, CLIError):
+                    pass
             list_to_add_to.append(argument)
 
     # if only key=value pairs used, must check at the end to append the dictionary
