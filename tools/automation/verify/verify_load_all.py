@@ -10,7 +10,7 @@ FAILED_TO_LOAD = []
 EXTENSION_FAILURE_EXCLUSIONS = []
 
 def init(root):
-    parser = root.add_parser('load_all', help='Load the full command table, command arguments and help.')
+    parser = root.add_parser('load-all', help='Load the full command table, command arguments and help.')
     parser.set_defaults(func=verify_load_all)
 
 
@@ -19,7 +19,7 @@ def verify_load_all(_):
     from azure.cli.core.file_util import get_all_help, create_invoker_and_load_cmds_and_args
 
     print('Loading all commands, arguments, and help...')
-    # setup CLI to enable command loader
+    # setup CLI to enable command loader and register event
     az_cli = get_default_cli()
     az_cli.register_event(EVENT_FAILED_EXTENSION_LOAD, extension_failed_load_handler)
 
