@@ -61,6 +61,7 @@ from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
+from ._client_factory import cf_resources
 
 logger = get_logger(__name__)
 
@@ -1399,7 +1400,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = _handle_addons_args(enable_addons, {}, workspace_resource_id)
+    addon_profiles = _handle_addons_args(cmd, subscription_id, resource_group_name, enable_addons, {}, workspace_resource_id)
     if 'omsagent' in addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
@@ -1446,8 +1447,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
+    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=False, no_wait=no_wait)
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
@@ -1455,8 +1457,9 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
 
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
     instance = client.get(resource_group_name, name)
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(instance, addons, enable=True,
+    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
@@ -1576,7 +1579,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
-def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait=False):
+def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None, no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
@@ -1594,8 +1597,9 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
                                    'To change monitoring configuration, run "az aks disable-addons -monitoring"'
                                    'before enabling it again.')
-                elif workspace_resource_id:
-                    addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+                if not workspace_resource_id:
+                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name)
+                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -1626,7 +1630,7 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=None):
+def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None, workspace_resource_id=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -1636,7 +1640,8 @@ def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=N
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
         if not workspace_resource_id:
-            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
+            # use default workspace if exists else create default workspace
+            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name)
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
             enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
         addons.remove('monitoring')
@@ -1692,6 +1697,76 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(extension_name)
     return True
+
+
+def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
+    AzureLocationToOmsRegionCodeMap = {
+        "eastus": "EUS",
+        "westeurope": "WEU",
+        "southeastasia": "SEA",
+        "australiasoutheast": "ASE",
+        "usgovvirginia": "USGV",
+        "westcentralus": "WCUS",
+        "japaneast": "EJP",
+        "uksouth": "SUK",
+        "canadacentral": "CCA",
+        "centralindia": "CIN",
+        "eastus2euap": "EAP"
+    }
+    AzureRegionToOmsRegionMap = {
+        "australiaeast": "australiasoutheast",
+        "australiasoutheast": "australiasoutheast",
+        "brazilsouth": "eastus",
+        "canadacentral": "canadacentral",
+        "canadaeast": "canadacentral",
+        "centralus": "eastus",
+        "eastasia": "southeastasia",
+        "eastus": "eastus",
+        "eastus2": "eastus",
+        "japaneast": "japaneast",
+        "japanwest": "japaneast",
+        "northcentralus": "eastus",
+        "northeurope": "westeurope",
+        "southcentralus": "eastus",
+        "southeastasia": "southeastasia",
+        "uksouth": "uksouth",
+        "ukwest": "uksouth",
+        "westcentralus": "westcentralus",
+        "westeurope": "westeurope",
+        "westus": "eastus",
+        "westus2": "eastus",
+        "centralindia": "centralindia",
+        "southindia": "centralindia",
+        "westindia": "centralindia",
+        "koreacentral": "southeastasia",
+        "koreasouth": "southeastasia",
+        "francecentral": "westeurope",
+        "francesouth": "westeurope"
+    }
+
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    default_region_name = "eastus"
+    default_region_code = "EUS"
+
+    workspace_region = AzureRegionToOmsRegionMap[rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
+    workspace_regionCode = AzureLocationToOmsRegionCodeMap[workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+
+    default_workspace_resource_group = "DefaultResourceGroup-" + workspace_regionCode
+    default_workspace_name = "DefaultWorkspace-{0}-{1}".format(subscription_id, workspace_regionCode)
+
+    default_workspace_resource_Id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}".format(subscription_id, default_workspace_resource_group, default_workspace_name)
+    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
+
+    # check if default RG exists
+    if resource_groups.check_existence(default_workspace_resource_group):
+        if resources.check_existence_by_id(default_workspace_resource_Id, '2018-05-01'):
+            return default_workspace_resource_Id
+    else:
+        resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
+    resources.create_or_update_by_id(default_workspace_resource_Id, '2017-05-10', {'location': workspace_region})
+
+    return default_workspace_resource_Id
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
