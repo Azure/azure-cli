@@ -74,8 +74,8 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
 
         self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
                  checks=[JMESPathCheck('properties.contentLength', file_size_kb * 1024),
-                         JMESPathCheckExists('properties.pageRanges') if blob_type == 'page' else \
-                             JMESPathCheck('properties.pageRanges', None)])
+                         JMESPathCheckExists('properties.pageRanges') if blob_type == 'page' else
+                         JMESPathCheck('properties.pageRanges', None)])
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
