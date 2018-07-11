@@ -28,7 +28,7 @@ from azure.cli.core.commands.constants import (
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
-from azure.cli.core.util import get_source_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
@@ -746,12 +746,6 @@ class AzCommandGroup(CommandGroup):
 
     # pylint: disable=arguments-differ
     def command(self, name, method_name=None, **kwargs):
-        return self._command(name, method_name=method_name, **kwargs)
-
-    def custom_command(self, name, method_name=None, **kwargs):
-        return self._command(name, method_name=method_name, custom_command=True, **kwargs)
-
-    def _command(self, name, method_name, custom_command=False, **kwargs):
         """
         Register a CLI command.
         :param name: Name of the command as it will be called on the command line
@@ -774,8 +768,36 @@ class AzCommandGroup(CommandGroup):
             - max_api: Maximum API version required for commands within the group (string)
         :rtype: None
         """
+        return self._command(name, method_name=method_name, **kwargs)
+
+    def custom_command(self, name, method_name=None, **kwargs):
+        """
+        Register a CLI command.
+        :param name: Name of the command as it will be called on the command line
+        :type name: str
+        :param method_name: Name of the method the command maps to
+        :type method_name: str
+        :param kwargs: Keyword arguments. Supported keyword arguments include:
+            - client_factory: Callable which returns a client needed to access the underlying command method. (function)
+            - confirmation: Prompt prior to the action being executed. This is useful if the action
+                            would cause a loss of data. (bool)
+            - exception_handler: Exception handler for handling non-standard exceptions (function)
+            - supports_no_wait: The command supports no wait. (bool)
+            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
+              to skip long running operation polling. (string)
+            - transform: Transform function for transforming the output of the command (function)
+            - table_transformer: Transform function or JMESPath query to be applied to table output to create a
+                                 better output format for tables. (function or string)
+            - resource_type: The ResourceType enum value to use with min or max API. (ResourceType)
+            - min_api: Minimum API version required for commands within the group (string)
+            - max_api: Maximum API version required for commands within the group (string)
+        :rtype: None
+        """
+        return self._command(name, method_name=method_name, custom_command=True, **kwargs)
+
+    def _command(self, name, method_name, custom_command=False, **kwargs):
         self._check_stale()
-        merged_kwargs = self._flatten_kwargs(kwargs, get_source_kwarg(custom_command))
+        merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
@@ -788,8 +810,8 @@ class AzCommandGroup(CommandGroup):
         return command_name
 
     # pylint: disable=no-self-use
-    def _resolve_operation(self, kwargs, name, command_type=None, custom_type=False):
-        source_kwarg = get_source_kwarg(custom_type)
+    def _resolve_operation(self, kwargs, name, command_type=None, custom_command=False):
+        source_kwarg = get_command_type_kwarg(custom_command)
 
         operations_tmpl = None
         if command_type:
@@ -825,7 +847,7 @@ class AzCommandGroup(CommandGroup):
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
         custom_func_op = self._resolve_operation(merged_kwargs, custom_func_name, custom_func_type,
-                                                 custom_type=True) if custom_func_name else None
+                                                 custom_command=True) if custom_func_name else None
         _cli_generic_update_command(
             self.command_loader,
             '{} {}'.format(self.group_name, name),
@@ -839,16 +861,16 @@ class AzCommandGroup(CommandGroup):
             **merged_kwargs)
 
     def wait_command(self, name, getter_name='get', **kwargs):
-        self._generic_wait_command(name, getter_name=getter_name, custom_command=False, **kwargs)
+        self._wait_command(name, getter_name=getter_name, custom_command=False, **kwargs)
 
     def custom_wait_command(self, name, getter_name='get', **kwargs):
-        self._generic_wait_command(name, getter_name=getter_name, custom_command=True, **kwargs)
+        self._wait_command(name, getter_name=getter_name, custom_command=True, **kwargs)
 
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        self._generic_wait_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
+        self._wait_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
 
-    def _generic_wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
-        from azure.cli.core.commands.arm import _cli_generic_wait_command
+    def _wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
+        from azure.cli.core.commands.arm import _cli_wait_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
         # don't inherit deprecation info from command group
@@ -856,18 +878,18 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_type=custom_command)
-        _cli_generic_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
-                                  custom_command=custom_command, **merged_kwargs)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        _cli_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
+                          custom_command=custom_command, **merged_kwargs)
 
     def show_command(self, name, getter_name='get', **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, custom_command=False, **kwargs)
+        self._show_command(name, getter_name=getter_name, custom_command=False, **kwargs)
 
     def custom_show_command(self, name, getter_name='get', **kwargs):
-        self._generic_show_command(name, getter_name=getter_name, custom_command=True, **kwargs)
+        self._show_command(name, getter_name=getter_name, custom_command=True, **kwargs)
 
-    def _generic_show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
-        from azure.cli.core.commands.arm import _cli_generic_show_command
+    def _show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
+        from azure.cli.core.commands.arm import _cli_show_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
         # don't inherit deprecation info from command group
@@ -875,6 +897,6 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_type=custom_command)
-        _cli_generic_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
-                                  custom_command=custom_command, **merged_kwargs)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        _cli_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
+                          custom_command=custom_command, **merged_kwargs)

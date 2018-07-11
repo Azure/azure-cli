@@ -20,7 +20,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_source_kwarg
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -342,14 +342,14 @@ def _get_child(parent, collection_name, item_name, collection_key):
 
 def _get_operations_tmpl(cmd, custom_command=False):
     operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
-        cmd.command_kwargs.get(get_source_kwarg(custom_command)).settings['operations_tmpl']
+        cmd.command_kwargs.get(get_command_type_kwarg(custom_command)).settings['operations_tmpl']
     if not operations_tmpl:
         raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
     return operations_tmpl
 
 
 def _get_client_factory(_, custom_command=False, **kwargs):
-    command_type = kwargs.get(get_source_kwarg(custom_command), None)
+    command_type = kwargs.get(get_command_type_kwarg(custom_command), None)
     factory = kwargs.get('client_factory', None)
     if not factory and command_type:
         factory = command_type.settings.get('client_factory', None)
@@ -542,7 +542,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
     context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_wait_command(context, name, getter_op, custom_command=False, **kwargs):
+def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
@@ -664,7 +664,7 @@ def _cli_generic_wait_command(context, name, getter_op, custom_command=False, **
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_show_command(context, name, getter_op, custom_command=False, **kwargs):
+def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
