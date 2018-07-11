@@ -18,7 +18,7 @@ def load_command_table(self, _):
     with self.command_group('cognitiveservices account', mgmt_type) as g:
         g.custom_command('create', 'create')
         g.command('delete', 'delete')
-        g.command('show', 'get_properties')
+        g.show_command('show', 'get_properties')
         g.custom_command('update', 'update')
         g.command('list-skus', 'list_skus')
 

@@ -106,9 +106,9 @@ def load_command_table(self, _):
         g.custom_command('rename', 'db_rename',
                          transform=database_lro_transform,
                          table_transformer=db_table_format)
-        g.command('show', 'get',
-                  transform=db_transform,
-                  table_transformer=db_table_format)
+        g.show_command('show', 'get',
+                       transform=db_transform,
+                       table_transformer=db_table_format)
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
                          table_transformer=db_table_format)
@@ -152,8 +152,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'dw_create',
                          supports_no_wait=True,
                          transform=database_lro_transform)
-        g.command('show', 'get',
-                  transform=db_transform)
+        g.show_command('show', 'get',
+                       transform=db_transform)
         g.custom_command('list', 'dw_list',
                          transform=db_list_transform)
         g.command('delete', 'delete',
@@ -182,7 +182,7 @@ def load_command_table(self, _):
     with self.command_group('sql db tde', transparent_data_encryptions_operations) as g:
 
         g.command('set', 'create_or_update')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     transparent_data_encryption_activities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.transparent_data_encryption_activities_operations#TransparentDataEncryptionActivitiesOperations.{}',
@@ -221,7 +221,7 @@ def load_command_table(self, _):
                             database_blob_auditing_policies_operations,
                             client_factory=get_sql_database_blob_auditing_policies_operations) as g:
 
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
 
@@ -233,7 +233,7 @@ def load_command_table(self, _):
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_threat_detection_policy_update')
 
@@ -266,9 +266,9 @@ def load_command_table(self, _):
                          table_transformer=elastic_pool_table_format)
         g.command('delete', 'delete',
                   supports_no_wait=True)
-        g.command('show', 'get',
-                  transform=elastic_pool_transform,
-                  table_transformer=elastic_pool_table_format)
+        g.show_command('show', 'get',
+                       transform=elastic_pool_transform,
+                       table_transformer=elastic_pool_table_format)
         g.command('list', 'list_by_server',
                   transform=elastic_pool_list_transform,
                   table_transformer=elastic_pool_table_format)
@@ -318,8 +318,8 @@ def load_command_table(self, _):
                          table_transformer=server_table_format)
         g.command('delete', 'delete',
                   confirmation=True)
-        g.command('show', 'get',
-                  table_transformer=server_table_format)
+        g.show_command('show', 'get',
+                       table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
@@ -330,7 +330,6 @@ def load_command_table(self, _):
         client_factory=get_sql_server_usages_operations)
 
     with self.command_group('sql server', server_usages_operations) as g:
-
         g.command('list-usages', 'list_by_server')
 
     firewall_rules_operations = CliCommandType(
@@ -346,8 +345,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'firewall_rule_update',
                          table_transformer=firewall_rule_table_format)
         g.command('delete', 'delete')
-        g.command('show', 'get',
-                  table_transformer=firewall_rule_table_format)
+        g.show_command('show', 'get',
+                       table_transformer=firewall_rule_table_format)
         g.command('list', 'list_by_server',
                   table_transformer=firewall_rule_table_format)
 
@@ -375,7 +374,7 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete')
-        g.custom_command('show', 'server_key_get')
+        g.custom_show_command('show', 'server_key_get')
         g.command('list', 'list_by_server')
 
     encryption_protectors_operations = CliCommandType(
@@ -386,7 +385,7 @@ def load_command_table(self, _):
                             encryption_protectors_operations,
                             client_factory=get_sql_encryption_protectors_operations) as g:
 
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('set', 'encryption_protector_update')
 
     virtual_network_rules_operations = CliCommandType(
@@ -399,7 +398,7 @@ def load_command_table(self, _):
 
         g.command('create', 'create_or_update',
                   validator=validate_subnet)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.command('delete', 'delete')
         g.generic_update_command('update')
@@ -412,7 +411,7 @@ def load_command_table(self, _):
                             server_connection_policies_operations,
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
-        c.command('show', 'get')
+        c.show_command('show', 'get')
         c.generic_update_command('update')
 
     server_dns_aliases_operations = CliCommandType(
@@ -423,7 +422,7 @@ def load_command_table(self, _):
                             server_dns_aliases_operations,
                             client_factory=get_sql_server_dns_aliases_operations) as c:
 
-        c.command('show', 'get')
+        c.show_command('show', 'get')
         c.command('list', 'list_by_server')
         c.command('create', 'create_or_update')
         c.command('delete', 'delete')
@@ -443,7 +442,7 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'managed_instance_create', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', 'managed_instance_list')
         g.generic_update_command('update', custom_func_name='managed_instance_update', supports_no_wait=True)
 
@@ -461,6 +460,6 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'managed_db_create', supports_no_wait=True)
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)

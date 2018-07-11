@@ -261,6 +261,14 @@ class ExecutionResult(object):
             self.exit_code = 1
             self.output = stdout_buf.getvalue()
             self.process_error = ex
+        except SystemExit as ex:
+            # SystemExit not caught by broad exception, check for sys.exit(3)
+            if ex.code == 3 and expect_failure:
+                self.exit_code = 1
+                self.output = stdout_buf.getvalue()
+                self.applog = logging_buf.getvalue()
+            else:
+                raise
         finally:
             stdout_buf.close()
             logging_buf.close()

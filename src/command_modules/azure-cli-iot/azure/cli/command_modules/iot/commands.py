@@ -35,7 +35,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot dps commands
     with self.command_group('iot dps', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_list')
-        g.custom_command('show', 'iot_dps_get')
+        g.custom_show_command('show', 'iot_dps_get')
         g.custom_command('create', 'iot_dps_create')
         g.custom_command('delete', 'iot_dps_delete')
         g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
@@ -44,7 +44,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot dps access-policy commands
     with self.command_group('iot dps access-policy', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_access_policy_list')
-        g.custom_command('show', 'iot_dps_access_policy_get')
+        g.custom_show_command('show', 'iot_dps_access_policy_get')
         g.custom_command('create', 'iot_dps_access_policy_create', supports_no_wait=True)
         g.custom_command('update', 'iot_dps_access_policy_update', supports_no_wait=True)
         g.custom_command('delete', 'iot_dps_access_policy_delete', supports_no_wait=True)
@@ -52,7 +52,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot dps linked-hub commands
     with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_linked_hub_list')
-        g.custom_command('show', 'iot_dps_linked_hub_get')
+        g.custom_show_command('show', 'iot_dps_linked_hub_get')
         g.custom_command('create', 'iot_dps_linked_hub_create', supports_no_wait=True)
         g.custom_command('update', 'iot_dps_linked_hub_update', supports_no_wait=True)
         g.custom_command('delete', 'iot_dps_linked_hub_delete', supports_no_wait=True)
@@ -60,7 +60,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot dps certificate commands
     with self.command_group('iot dps certificate', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_certificate_list')
-        g.custom_command('show', 'iot_dps_certificate_get')
+        g.custom_show_command('show', 'iot_dps_certificate_get')
         g.custom_command('create', 'iot_dps_certificate_create')
         g.custom_command('delete', 'iot_dps_certificate_delete')
         g.custom_command('generate-verification-code', 'iot_dps_certificate_gen_code')
@@ -70,7 +70,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
         g.custom_command('list', 'iot_hub_certificate_list')
-        g.custom_command('show', 'iot_hub_certificate_get')
+        g.custom_show_command('show', 'iot_hub_certificate_get')
         g.custom_command('create', 'iot_hub_certificate_create')
         g.custom_command('delete', 'iot_hub_certificate_delete')
         g.custom_command('generate-verification-code', 'iot_hub_certificate_gen_code')
@@ -82,7 +82,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('create', 'iot_hub_create')
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string')
-        g.custom_command('show', 'iot_hub_get')
+        g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util)
         g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx))
@@ -109,8 +109,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                          deprecate_info='az iot hub device-identity list (via IoT Extension)')
         g.custom_command('show-connection-string', 'iot_device_show_connection_string',
                          deprecate_info='az iot hub device-identity show-connection-string (via IoT Extension)')
-        g.custom_command('show', 'iot_device_get',
-                         deprecate_info='az iot hub device-identity show (via IoT Extension)')
+        g.custom_show_command('show', 'iot_device_get',
+                              deprecate_info='az iot hub device-identity show (via IoT Extension)')
         g.generic_update_command('update', getter_name='iot_device_get', setter_name='iot_device_update',
                                  command_type=update_custom_util,
                                  deprecate_info='az iot hub device-identity update (via IoT Extension)')

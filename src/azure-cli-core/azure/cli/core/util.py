@@ -310,3 +310,7 @@ def can_launch_browser():
             result = False
 
     return result
+
+
+def get_command_type_kwarg(custom_command):
+    return 'custom_command_type' if custom_command else 'command_type'
