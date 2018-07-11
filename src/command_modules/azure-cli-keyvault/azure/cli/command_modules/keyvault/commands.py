@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.keyvault._client_factory import (
     keyvault_client_vaults_factory, keyvault_data_plane_factory)
@@ -41,7 +40,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_keyvault', doc_string_source='azure.mgmt.keyvault.models#VaultProperties')
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('purge', 'purge_deleted')
         g.custom_command('set-policy', 'set_policy')

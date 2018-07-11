@@ -162,6 +162,12 @@ helps['acr repository show-tags'] = """
         - name: Show tags of a repository in a container registry.
           text:
             az acr repository show-tags -n MyRegistry --repository MyRepository
+        - name: Show the detailed information of tags of a repository in a container registry.
+          text:
+            az acr repository show-tags -n MyRegistry --repository MyRepository --detail
+        - name: Show the detailed information of the latest 10 tags ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-tags -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
 """
 
 helps['acr repository show-manifests'] = """
@@ -174,6 +180,39 @@ helps['acr repository show-manifests'] = """
         - name: Show the latest 10 manifests ordered by timestamp of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
+        - name: Show the detailed information of the latest 10 manifests ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+"""
+
+helps['acr repository show'] = """
+    type: command
+    short-summary: Get the attributes of a repository or image in a container registry.
+    examples:
+        - name: Get the attributes of the repository 'hello-world'.
+          text:
+            az acr repository show -n MyRegistry --repository hello-world
+        - name: Get the attributes of the image referenced by tag 'hello-world:latest'.
+          text:
+            az acr repository show -n MyRegistry --image hello-world:latest
+        - name: Get the attributes of the image referenced by digest 'hello-world@sha256:abc123'.
+          text:
+            az acr repository show -n MyRegistry --image hello-world@sha256:abc123
+"""
+
+helps['acr repository update'] = """
+    type: command
+    short-summary: Update the attributes of a repository or image in a container registry.
+    examples:
+        - name: Update the attributes of the repository 'hello-world' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --repository hello-world --write-enabled false
+        - name: Update the attributes of the image referenced by tag 'hello-world:latest' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --image hello-world:latest --write-enabled false
+        - name: Update the attributes of the image referenced by digest 'hello-world@sha256:abc123' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
 helps['acr repository delete'] = """

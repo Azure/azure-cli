@@ -997,8 +997,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('length(tags)', 0),
             self.check('location', '{loc}')
         ])
-        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -1371,7 +1370,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
-            self.check('virtualMachineProfile.priority', None)
+            self.check('virtualMachineProfile.priority', None),
+            self.check('sku.name', 'Standard_DS1_v2'),
         ])
 
         self.cmd('vmss list',
@@ -1512,8 +1512,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.test=success',
                  checks=self.check('tags.test', 'success'))
-        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ag')
     def test_vmss_create_with_app_gateway(self, resource_group):

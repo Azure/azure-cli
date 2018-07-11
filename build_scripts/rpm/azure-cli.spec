@@ -1,4 +1,4 @@
-# RPM spec file for Azure CLI 2.0
+# RPM spec file for Azure CLI
 # Definition of macros used - https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros
 
 # .el7.centos -> .el7
@@ -14,7 +14,7 @@
 %define venv_sha256    70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19
 %define cli_lib_dir    %{_libdir}/az
 
-Summary:        Azure CLI 2.0
+Summary:        Azure CLI
 License:        MIT
 Name:           %{name}
 Version:        %{version}
@@ -32,7 +32,7 @@ BuildRequires:  openssl-devel
 %global _python_bytecompile_errors_terminate_build 0
 
 %description
-A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
+A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
 
 %prep

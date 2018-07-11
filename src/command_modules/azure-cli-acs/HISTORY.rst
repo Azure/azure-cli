@@ -3,8 +3,9 @@
 Release History
 ===============
 
-2.1.4
+2.2.0
 +++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * `az aks create` will error out if `--max-pods` is less than 5
 
 2.1.3

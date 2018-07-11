@@ -12,7 +12,7 @@ import re
 from six import string_types
 
 from knack.arguments import CLICommandArgument, ignore_type
-from knack.introspection import extract_args_from_signature
+from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import todict, CLIError
 
@@ -20,10 +20,11 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
+EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
 
 
 # pylint:disable=too-many-lines
@@ -339,16 +340,16 @@ def _get_child(parent, collection_name, item_name, collection_key):
         return result
 
 
-def _get_operations_tmpl(cmd):
-    operations_tmpl = cmd.command_kwargs.get('operations_tmpl',
-                                             cmd.command_kwargs.get('command_type').settings['operations_tmpl'])
+def _get_operations_tmpl(cmd, custom_command=False):
+    operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
+        cmd.command_kwargs.get(get_command_type_kwarg(custom_command)).settings['operations_tmpl']
     if not operations_tmpl:
         raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
     return operations_tmpl
 
 
-def _get_client_factory(_, kwargs):
-    command_type = kwargs.get('command_type', None)
+def _get_client_factory(_, custom_command=False, **kwargs):
+    command_type = kwargs.get(get_command_type_kwarg(custom_command), None)
     factory = kwargs.get('client_factory', None)
     if not factory and command_type:
         factory = command_type.settings.get('client_factory', None)
@@ -425,11 +426,15 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
             metavar='LIST INDEX', arg_group=group_name
         )
+        arguments['force_string'] = CLICommandArgument(
+            'force_string', action='store_true', arg_group=group_name,
+            help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON."
+        )
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-        factory = _get_client_factory(name, commmand_kwargs)
+        factory = _get_client_factory(name, **commmand_kwargs)
         client = None
         if factory:
             try:
@@ -439,8 +444,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
-        exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
-        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
+        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         op_args = {key: val for key, val in args.items() if key in raw_args}
         if client_arg_name in raw_args:
             op_args[client_arg_name] = client
@@ -448,6 +452,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         cmd = args.get('cmd')
+        force_string = args.get('force_string', False)
         ordered_arguments = args.pop('ordered_arguments', [])
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
@@ -483,12 +488,12 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             if arg_type == '--set':
                 try:
                     for expression in arg_values:
-                        set_properties(instance, expression)
+                        set_properties(instance, expression, force_string)
                 except ValueError:
                     raise CLIError('invalid syntax: {}'.format(set_usage))
             elif arg_type == '--add':
                 try:
-                    add_properties(instance, arg_values)
+                    add_properties(instance, arg_values, force_string)
                 except ValueError:
                     raise CLIError('invalid syntax: {}'.format(add_usage))
             elif arg_type == '--remove':
@@ -537,12 +542,12 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
     context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_wait_command(context, name, getter_op, **kwargs):
+def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
-    factory = _get_client_factory(name, kwargs)
+    factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
 
     def generic_wait_arguments_loader():
         cmd_args = get_arguments_loader(context, getter_op)
@@ -594,17 +599,16 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         from msrest.exceptions import ClientException
         import time
 
-        cmd = args.get('cmd')
-
-        operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
+                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, args) if factory else None
-        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+        if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
@@ -660,42 +664,47 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def _cli_generic_show_command(context, name, getter_op, **kwargs):
+def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
-    factory = _get_client_factory(name, kwargs)
+    factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
 
     def generic_show_arguments_loader():
         cmd_args = get_arguments_loader(context, getter_op)
         return [(k, v) for k, v in cmd_args.items()]
 
+    def description_loader():
+        return extract_full_summary_from_signature(context.get_op_handler(getter_op))
+
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
 
-        cmd = args.get('cmd')
-        operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
-                                                       excluded_params=EXCLUDED_PARAMS))
+                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, args) if factory else None
-        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+
+        if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
-            if getattr(ex, 'status_code', None) == 404:
+            if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
                 logger.error(getattr(ex, 'message', ex))
                 import sys
                 sys.exit(3)
             raise
-    context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader, **kwargs)  # pylint: disable=protected-access
+    context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader,  # pylint: disable=protected-access
+                         description_loader=description_loader, **kwargs)
 
 
 def verify_property(instance, condition):
@@ -741,13 +750,14 @@ def _split_key_value_pair(expression):
     return _find_split()
 
 
-def set_properties(instance, expression):
+def set_properties(instance, expression, force_string):
     key, value = _split_key_value_pair(expression)
 
-    try:
-        value = shell_safe_json_parse(value)
-    except:  # pylint:disable=bare-except
-        pass
+    if not force_string:
+        try:
+            value = shell_safe_json_parse(value)
+        except:  # pylint:disable=bare-except
+            pass
 
     # name should be the raw casing as it could refer to a property OR a dictionary key
     name, path = _get_name_path(key)
@@ -756,7 +766,7 @@ def set_properties(instance, expression):
     instance = _find_property(instance, path)
     if instance is None:
         parent = _find_property(root, path[:-1])
-        set_properties(parent, '{}={{}}'.format(parent_name))
+        set_properties(parent, '{}={{}}'.format(parent_name), force_string)
         instance = _find_property(root, path)
 
     match = index_or_filter_regex.match(name)
@@ -786,14 +796,14 @@ def set_properties(instance, expression):
         throw_and_show_options(instance, name, key.split('.'))
 
 
-def add_properties(instance, argument_values):
+def add_properties(instance, argument_values, force_string):
     # The first argument indicates the path to the collection to add to.
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
 
     if list_to_add_to is None:
         parent = _find_property(instance, list_attribute_path[:-1])
-        set_properties(parent, '{}=[]'.format(list_attribute_path[-1]))
+        set_properties(parent, '{}=[]'.format(list_attribute_path[-1]), force_string)
         list_to_add_to = _find_property(instance, list_attribute_path)
 
     if not isinstance(list_to_add_to, list):
@@ -813,11 +823,12 @@ def add_properties(instance, argument_values):
                 list_to_add_to.append(dict_entry)
                 dict_entry = {}
 
-            # attempt to convert anything else to JSON and fallback to string if error
-            try:
-                argument = shell_safe_json_parse(argument)
-            except (ValueError, CLIError):
-                pass
+            if not force_string:
+                # attempt to convert anything else to JSON and fallback to string if error
+                try:
+                    argument = shell_safe_json_parse(argument)
+                except (ValueError, CLIError):
+                    pass
             list_to_add_to.append(argument)
 
     # if only key=value pairs used, must check at the end to append the dictionary

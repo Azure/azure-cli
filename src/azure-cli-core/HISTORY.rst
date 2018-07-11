@@ -6,6 +6,7 @@ Release History
 2.0.42
 ++++++
 * login: support browser based login in WSL bash window
+* Adds `--force-string` flag to all generic update commands.
 
 2.0.41
 ++++++

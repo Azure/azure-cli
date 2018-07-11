@@ -28,7 +28,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         )
 
     with self.command_group('ams account', get_sdk('Mediaservices', get_mediaservices_client)) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  getter_name='mediaservice_update_getter',
@@ -53,7 +53,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('sp', get_mediaservices_client))
 
     with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.custom_command('create', 'create_transform',
@@ -73,7 +73,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('transform', get_transforms_client))
 
     with self.command_group('ams asset', get_sdk('Assets', get_assets_client)) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.generic_update_command('update',
@@ -85,7 +85,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('asset', get_assets_client))
 
     with self.command_group('ams job', get_sdk('Jobs', get_jobs_client)) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.custom_command('cancel', 'cancel_job',
@@ -97,7 +97,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_streaming_locator',
                          custom_command_type=get_custom_sdk('streaming', get_streaming_locators_client))
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('get-paths', 'list_paths')
 
@@ -105,7 +105,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_streaming_policy',
                          custom_command_type=get_custom_sdk('streaming', get_streaming_policies_client))
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     with self.command_group('ams streaming endpoint', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:

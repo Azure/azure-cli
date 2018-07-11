@@ -29,7 +29,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.command_group('account', profile_custom) as g:
             g.command('list', 'list_subscriptions', table_transformer=transform_account_list)
             g.command('set', 'set_active_subscription')
-            g.command('show', 'show_subscription')
+            g.show_command('show', 'show_subscription')
             g.command('clear', 'account_clear')
             g.command('list-locations', 'list_locations')
             g.command('get-access-token', 'get_access_token')
