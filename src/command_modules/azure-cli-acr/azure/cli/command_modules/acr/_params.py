@@ -157,6 +157,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')
         c.argument('build_status', help='The current status of build.', arg_type=get_enum_type(BuildStatus))
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
