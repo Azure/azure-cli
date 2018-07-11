@@ -67,7 +67,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_adla_account')
         g.custom_command('update', 'update_adla_account')
         g.custom_command('list', 'list_adla_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account fire wall operations
@@ -75,7 +75,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'add_adla_firewall_rule')
         g.command('update', 'update')
         g.command('list', 'list_by_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # job operations
@@ -83,29 +83,29 @@ def load_command_table(self, _):
     with self.command_group('dla job', dla_job_sdk, client_factory=cf_dla_job) as g:
         g.custom_command('submit', 'submit_adla_job', validator=process_dla_job_submit_namespace)
         g.custom_command('wait', 'wait_adla_job')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('cancel', 'cancel')
         g.custom_command('list', 'list_adla_jobs')
 
     # job relationship operations
     with self.command_group('dla job pipeline', dla_job_pipeline_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
 
     with self.command_group('dla job recurrence', dla_job_recurrence_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
 
     # account data source operations
     with self.command_group('dla account blob-storage', dla_storage_sdk, client_factory=cf_dla_account_storage) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('add', 'add_adla_blob_storage')
         g.custom_command('update', 'update_adla_blob_storage')
         g.command('delete', 'delete')
         g.command('list', 'list_by_account')
 
     with self.command_group('dla account data-lake-store', dla_dls_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_account')
         g.command('add', 'add')
         g.command('delete', 'delete')
@@ -114,69 +114,69 @@ def load_command_table(self, _):
     # credential
     with self.command_group('dla catalog credential', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
         g.custom_command('create', 'create_adla_catalog_credential')
-        g.command('show', 'get_credential')
+        g.show_command('show', 'get_credential')
         g.custom_command('update', 'update_adla_catalog_credential')
         g.command('list', 'list_credentials')
         g.command('delete', 'delete_credential')
 
     # database
     with self.command_group('dla catalog database', dla_catalog_sdk) as g:
-        g.command('show', 'get_database')
+        g.show_command('show', 'get_database')
         g.command('list', 'list_databases')
 
     # schema
     with self.command_group('dla catalog schema', dla_catalog_sdk) as g:
-        g.command('show', 'get_schema')
+        g.show_command('show', 'get_schema')
         g.command('list', 'list_schemas')
 
     # table
     with self.command_group('dla catalog table', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
-        g.command('show', 'get_table')
+        g.show_command('show', 'get_table')
         g.custom_command('list', 'list_catalog_tables')
 
     # assembly
     with self.command_group('dla catalog assembly', dla_catalog_sdk) as g:
-        g.command('show', 'get_assembly')
+        g.show_command('show', 'get_assembly')
         g.command('list', 'list_assemblies')
 
     # external data source
     with self.command_group('dla catalog external-data-source', dla_catalog_sdk) as g:
-        g.command('show', 'get_external_data_source')
+        g.show_command('show', 'get_external_data_source')
         g.command('list', 'list_external_data_sources')
 
     # get procedure
     with self.command_group('dla catalog procedure', dla_catalog_sdk) as g:
-        g.command('show', 'get_procedure')
+        g.show_command('show', 'get_procedure')
         g.command('list', 'list_procedures')
 
     # get table partition
     with self.command_group('dla catalog table-partition', dla_catalog_sdk) as g:
-        g.command('show', 'get_table_partition')
+        g.show_command('show', 'get_table_partition')
         g.command('list', 'list_table_partitions')
 
     # get table statistics
     with self.command_group('dla catalog table-stats', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
-        g.command('show', 'get_table_statistic')
+        g.show_command('show', 'get_table_statistic')
         g.custom_command('list', 'list_catalog_table_statistics')
 
     # get table types
     with self.command_group('dla catalog table-type', dla_catalog_sdk) as g:
-        g.command('show', 'get_table_type')
+        g.show_command('show', 'get_table_type')
         g.command('list', 'list_table_types')
 
     # get table valued functions
     with self.command_group('dla catalog tvf', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
-        g.command('show', 'get_table_valued_function')
+        g.show_command('show', 'get_table_valued_function')
         g.custom_command('list', 'list_catalog_tvfs')
 
     # get views
     with self.command_group('dla catalog view', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
-        g.command('show', 'get_view')
+        g.show_command('show', 'get_view')
         g.custom_command('list', 'list_catalog_views')
 
     # get packages
     with self.command_group('dla catalog package', dla_catalog_sdk) as g:
-        g.command('show', 'get_package')
+        g.show_command('show', 'get_package')
         g.command('list', 'list_packages')
 
     # compute policy
@@ -184,5 +184,5 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_adla_compute_policy')
         g.custom_command('update', 'update_adla_compute_policy')
         g.command('list', 'list_by_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')

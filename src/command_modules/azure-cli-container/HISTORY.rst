@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Remove the requirement for username and password for non dockerhub registries
+* Fix error when creating container groups from yaml file
+
 0.2.1
 +++++
 * Update PyYAML dependency to 4.2b4

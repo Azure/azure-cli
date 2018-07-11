@@ -281,39 +281,46 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
 
 
-# TODO: convert back to ScenarioTest when #5740 is fixed.
-class VMCustomImageTest(LiveScenarioTest):
+class VMCustomImageTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_custom_image(self, resource_group):
-        # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made generalized vms
-        subscription_id = self.get_subscription_id()
         self.kwargs.update({
-            'prepared_vm_unmanaged': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um'.format(subscription_id),
-            'prepared_vm': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m'.format(subscription_id),
-            'image': 'image1'  # for image captured from vm with unmanaged disk
+            'vm1': 'vm-unmanaged-disk',
+            'vm2': 'vm-managed-disk',
+            'newvm1': 'fromimage1',
+            'newvm2': 'fromimage2',
+            'image1': 'img-from-unmanaged',
+            'image2': 'img-from-managed',
         })
 
-        self.cmd('image create -g {rg} -n {image} --source {prepared_vm_unmanaged}',
-                 checks=self.check('name', '{image}'))
-        self.cmd('vm create -g {rg} -n vm1 --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password',
-                 checks=self.check('resourceGroup', resource_group))  # spot check ensuring the VM was created
-        self.cmd('vm show -g {rg} -n vm1', checks=[
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --use-unmanaged-disk')
+        # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1')
+        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.cmd('image create -g {rg} -n {image2} --source {vm2}')
+
+        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
 
-        self.kwargs['image'] = 'image2'  # for image captured from vm with managed os disk and data disk
-        self.cmd('image create -g {rg} -n {image} --source {prepared_vm}',
-                 checks=self.check('name', '{image}'))
-
-        self.cmd('vm create -g {rg} -n vm2 --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password',
-                 checks=self.check('resourceGroup', '{rg}'))  # spot check enusing the VM was created
-        self.cmd('vm show -g {rg} -n vm2', checks=[
+        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(storageProfile.dataDisks)", 1),
@@ -321,7 +328,7 @@ class VMCustomImageTest(LiveScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vm create -g {rg} -n vm3 --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS')
+        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -330,7 +337,7 @@ class VMCustomImageTest(LiveScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
@@ -339,37 +346,42 @@ class VMCustomImageTest(LiveScenarioTest):
         ])
 
 
-# TODO: convert back to ScenarioTest when #5740 is fixed.
-class VMImageWithPlanTest(LiveScenarioTest):
-
-    @ResourceGroupPreparer()
-    def test_custom_image_with_plan(self, resource_group):
-        # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
-        subscription_id = self.get_subscription_id()
-        self.kwargs.update({
-            'prepared_image_with_plan_info': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'.format(subscription_id),
-            'plan': 'linuxdsvmubuntu'
-        })
-
-        self.cmd('vm create -g {rg} -n vm1 --admin-username cliuser --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
-        self.cmd('vm show -g {rg} -n vm1',
-                 checks=self.check('plan.name', '{plan}'))
+class VMImageWithPlanTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
+        # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
         self.kwargs.update({
             'location': resource_group_location,
-            'publisher': 'kemptech',
-            'offer': 'vlm-azure',
-            'sku': 'basic-byol',
-            'plan': 'basic-byol'
+            'publisher': 'microsoft-ads',
+            'offer': 'linux-data-science-vm-ubuntu',
+            'sku': 'linuxdsvmubuntu',
+            'vm1': 'vm1',
+            'vm2': 'vm2',
+            'image': 'image1'
         })
-        self.kwargs['urn'] = '{publisher}:{offer}:{sku}:7.2.362142710'.format(**self.kwargs)
-        self.cmd('vm image show --urn {urn}', checks=self.check('plan.name', '{plan}'))
-        self.cmd('vm image accept-terms -p {publisher} --offer {offer} --plan {plan}', checks=self.check('accepted', True))
-        # repeat the same command using --urn
+        self.kwargs['urn'] = '{publisher}:{offer}:{sku}:latest'.format(**self.kwargs)
+
+        # extract out the plan info to be used when create the vm from the captured image
+        plan = self.cmd('vm image show --urn {urn}').get_output_in_json()['plan']
+        self.kwargs['plan_name'] = plan['name']
+        self.kwargs['plan_product'] = plan['product']
+        self.kwargs['plan_publisher'] = plan['publisher']
+
+        # let us accept the term
         self.cmd('vm image accept-terms --urn {urn}', checks=self.check('accepted', True))
-        self.cmd('vm create -g {rg} -n vm1 --no-wait --image {urn}')
+
+        # create a vm and capture an image from it
+        self.cmd('vm create -g {rg} -n {vm1} --image {urn}')
+        # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')
+        self.cmd('image create -g {rg} -n {image} --source {vm1}')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --plan-publisher {plan_publisher} --plan-name {plan_name} --plan-product {plan_product}')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=self.check('provisioningState', 'Succeeded'))
 
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
@@ -985,8 +997,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('length(tags)', 0),
             self.check('location', '{loc}')
         ])
-        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -1359,7 +1370,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
-            self.check('virtualMachineProfile.priority', None)
+            self.check('virtualMachineProfile.priority', None),
+            self.check('sku.name', 'Standard_DS1_v2'),
         ])
 
         self.cmd('vmss list',
@@ -1500,8 +1512,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.test=success',
                  checks=self.check('tags.test', 'success'))
-        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ag')
     def test_vmss_create_with_app_gateway(self, resource_group):
@@ -2186,7 +2197,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
         # spot check we do have some relevant progress messages coming out
         # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
         # This has the consequence that it can't promise each resource's result wil be displayed)
-        self.assertTrue('Succeeded:'.format(**self.kwargs) in lines)
+        self.assertTrue('Succeeded:'.format(**self.kwargs) in lines or 'Accepted:'.format(**self.kwargs) in lines)
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')

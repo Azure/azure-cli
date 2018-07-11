@@ -42,7 +42,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             g.command('add', 'add_extension', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
             g.command('remove', 'remove_extension')
             g.command('list', 'list_extensions')
-            g.command('show', 'show_extension')
+            g.show_command('show', 'show_extension')
             g.command('list-available', 'list_available_extensions', table_transformer=transform_extension_list_available)
             g.command('update', 'update_extension')
 

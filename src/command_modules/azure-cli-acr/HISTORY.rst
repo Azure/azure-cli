@@ -3,9 +3,12 @@
 Release History
 ===============
 
-2.0.29
-++++++
-* Minor fixes
+2.1.0
++++++
+* BREAKING CHANGE: Update '--no-push' to a pure flag in 'acr build' command.
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Add 'show' and 'update' commands under 'acr repository' group.
+* Add '--detail' flag for 'show-manifests' and 'show-tags' to show more detailed information.
 
 2.0.28
 ++++++

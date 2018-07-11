@@ -58,8 +58,8 @@ class TestCli(AzCli):
         self.cloud = get_active_cloud(self)
 
     def get_cli_version(self):
-        from azure.cli.core.util import get_az_version_string
-        return get_az_version_string()
+        from azure.cli.core import __version__ as cli_version
+        return cli_version
 
 
 __version__ = '0.1.0'

@@ -84,7 +84,7 @@ class FreshTable(object):
 
         main_loader.load_command_table(None)
         main_loader.load_arguments(None)
-        add_id_parameters(None, cmd_tbl=main_loader.command_table)
+        add_id_parameters(None, commands_loader=main_loader)
         cmd_table = main_loader.command_table
 
         cmd_table_data = {}

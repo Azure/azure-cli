@@ -24,7 +24,7 @@ class CloudCommandsLoader(AzCommandsLoader):
 
         with self.command_group('cloud', cloud_custom) as g:
             g.command('list', 'list_clouds')
-            g.command('show', 'show_cloud')
+            g.show_command('show', 'show_cloud')
             g.command('register', 'register_cloud')
             g.command('unregister', 'unregister_cloud')
             g.command('set', 'set_cloud')

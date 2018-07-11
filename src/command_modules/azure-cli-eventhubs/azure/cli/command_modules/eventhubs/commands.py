@@ -40,7 +40,7 @@ def load_command_table(self, _):
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_namespace_create')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list', exception_handler=empty_on_404)
         g.command('delete', 'delete')
         g.command('exists', 'check_name_availability')
@@ -48,7 +48,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventhubs namespace authorization-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
-        g.command('show', 'get_authorization_rule', exception_handler=empty_on_404)
+        g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules', exception_handler=empty_on_404)
         g.command('keys list', 'list_keys')
         g.command('keys renew', 'regenerate_keys')
@@ -58,14 +58,14 @@ def load_command_table(self, _):
 # EventHub Region
     with self.command_group('eventhubs eventhub', eh_event_hub_util, client_factory=event_hub_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_eheventhub_create')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.command('list', 'list_by_namespace', exception_handler=empty_on_404)
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
 
     with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, client_factory=event_hub_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
-        g.command('show', 'get_authorization_rule', exception_handler=empty_on_404)
+        g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules', exception_handler=empty_on_404)
         g.command('keys list', 'list_keys')
         g.command('keys renew', 'regenerate_keys')
@@ -75,7 +75,7 @@ def load_command_table(self, _):
 # ConsumerGroup Region
     with self.command_group('eventhubs eventhub consumer-group', eh_consumer_groups_util, client_factory=consumer_groups_mgmt_client_factory) as g:
         g.command('create', 'create_or_update')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.command('list', 'list_by_event_hub', exception_handler=empty_on_404)
         g.command('delete', 'delete')
         g.generic_update_command('update')
@@ -83,7 +83,7 @@ def load_command_table(self, _):
 # DisasterRecoveryConfigs Region
     with self.command_group('eventhubs georecovery-alias', eh_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.command('set', 'create_or_update')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.command('list', 'list', exception_handler=empty_on_404)
         g.command('break-pair', 'break_pairing')
         g.command('fail-over', 'fail_over')
@@ -92,5 +92,5 @@ def load_command_table(self, _):
 
     with self.command_group('eventhubs georecovery-alias authorization-rule', eh_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.command('list', 'list_authorization_rules')
-        g.command('show', 'get_authorization_rule')
+        g.show_command('show', 'get_authorization_rule')
         g.command('keys list', 'list_keys')

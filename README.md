@@ -1,10 +1,10 @@
-# Microsoft Azure CLI 2.0
+# Microsoft Azure CLI
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
 [![Slack](https://azureclislackin.azurewebsites.net/badge.svg)](https://azurecli.slack.com)
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
 
 Take a test run now from Azure Cloud Shell!
 
@@ -41,9 +41,9 @@ $ az vm create -h
 
 ### Highlights
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
+Here are a few features and concepts that can help you get the most out of the Azure CLI.
 
-![Azure CLI 2.0 Highlight Reel](doc/assets/AzBlogAnimation4.gif)
+![Azure CLI Highlight Reel](doc/assets/AzBlogAnimation4.gif)
 
 The following examples are showing using the `--output table` format, you can change your default using the `az configure` command.
 
@@ -100,6 +100,13 @@ Usage of /:  39.6% of 1.94GB   Swap usage:   0%   Users logged in: 0
 
 jasonsha@MyVM:~$
 ```
+
+#### Exit Codes
+For scripting purposes, we output certain exit codes for differing scenarios.
+`0`: Command ran successfully.
+`1`: Generic error; server returned bad status code, CLI validation failed, etc.
+`2`: Parser error; check input to command line.
+`3`: Missing ARM resource; used for existence check from `show` commands.
 
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).

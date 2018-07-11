@@ -38,8 +38,8 @@ def load_command_table(self, _):
                          exception_handler=consumption_exception_handler, client_factory=reservation_detail_mgmt_client_factory)
 
     with self.command_group('consumption pricesheet') as p:
-        p.custom_command('show', 'cli_consumption_list_pricesheet_show', transform=transform_pricesheet_show_output,
-                         exception_handler=consumption_exception_handler, client_factory=pricesheet_mgmt_client_factory)
+        p.custom_show_command('show', 'cli_consumption_list_pricesheet_show', transform=transform_pricesheet_show_output,
+                              exception_handler=consumption_exception_handler, client_factory=pricesheet_mgmt_client_factory)
 
     with self.command_group('consumption marketplace') as m:
         m.custom_command('list', 'cli_consumption_list_marketplace', transform=transform_marketplace_list_output,
@@ -48,7 +48,7 @@ def load_command_table(self, _):
     with self.command_group('consumption budget', exception_handler=consumption_exception_handler, client_factory=budget_mgmt_client_factory) as p:
         p.custom_command('list', 'cli_consumption_list_budgets', transform=transform_budget_list_output)
 
-        p.custom_command('show', 'cli_consumption_show_budget', transform=transform_budget_show_output)
+        p.custom_show_command('show', 'cli_consumption_show_budget', transform=transform_budget_show_output)
 
         p.custom_command('create', 'cli_consumption_create_budget', transform=transform_budget_create_update_output, validator=validate_budget_parameters)
 
