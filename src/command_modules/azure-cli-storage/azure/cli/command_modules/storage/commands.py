@@ -112,6 +112,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('delete-batch', 'storage_blob_delete_batch')
         g.storage_custom_command('show', 'show_blob', table_transformer=transform_blob_output,
                                  client_factory=page_blob_service_factory,
+                                 doc_string_source='blob#PageBlobService.get_blob_properties',
                                  exception_handler=g.get_handler_suppress_404())
 
         g.storage_command('metadata show', 'get_blob_metadata', exception_handler=g.get_handler_suppress_404())
