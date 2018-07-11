@@ -34,7 +34,8 @@ from azure.cli.command_modules.network._format import (
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output)
+    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
+    transform_vnet_table_output)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -668,8 +669,8 @@ def load_command_table(self, _):
     # region VirtualNetworks
     with self.command_group('network vnet', network_vnet_sdk) as g:
         g.command('delete', 'delete')
+        g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
         g.show_command('show', 'get')
-        g.custom_command('list', 'list_vnet')
         g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
         g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
         g.generic_update_command('update', custom_func_name='update_vnet')
