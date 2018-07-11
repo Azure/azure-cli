@@ -9,6 +9,7 @@ Release History
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * Add 'show' and 'update' commands under 'acr repository' group.
 * Add '--detail' flag for 'show-manifests' and 'show-tags' to show more detailed information.
+* Add '--image' parameter to support get build details or logs by an image.
 
 2.0.28
 ++++++

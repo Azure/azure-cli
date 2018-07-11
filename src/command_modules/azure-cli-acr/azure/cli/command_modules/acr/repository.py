@@ -698,3 +698,27 @@ def _user_confirmation(message, yes=False):
             raise CLIError('Operation cancelled.')
     except NoTTYException:
         raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def get_image_digest(cli_ctx, registry_name, resource_group_name, image):
+    repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+
+    if manifest:
+        return repository, tag, manifest
+
+    # If we don't have manifest yet, try to get it from tag.
+    login_server, username, password = get_access_credentials(
+        cli_ctx=cli_ctx,
+        registry_name=registry_name,
+        resource_group_name=resource_group_name,
+        repository=repository,
+        permission='pull')
+
+    manifest = _get_manifest_digest(
+        login_server=login_server,
+        repository=repository,
+        tag=tag,
+        username=username,
+        password=password)
+
+    return repository, tag, manifest
