@@ -3,13 +3,10 @@
 Release History
 ===============
 
-0.1.38
-++++++
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * appservice: allow PremiumV2 skus
-
-0.1.37
-++++++
-* Minor fixes
 
 0.1.36
 ++++++

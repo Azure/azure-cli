@@ -997,8 +997,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('length(tags)', 0),
             self.check('location', '{loc}')
         ])
-        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -1513,8 +1512,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.test=success',
                  checks=self.check('tags.test', 'success'))
-        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}',
-                 checks=self.is_empty())
+        self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ag')
     def test_vmss_create_with_app_gateway(self, resource_group):
