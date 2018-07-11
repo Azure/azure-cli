@@ -1,18 +1,21 @@
-# Migrating from Azure XPlat CLI to Azure CLI 2.0
+# Migrating from Azure classic CLI to Azure CLI
 
-With the introduction of our Azure CLI 2.0 preview, customers now have a
-choice of Azure command-line tools.  While our Azure CLI 2.0 is built to be
-easier to use and automate, please consider the following before starting:
+If you still use the original Azure classic CLI for your scripts and deployments,
+you should consider switching to the new Azure CLI. Azure CLI is designed
+for working with the Resource Manager deployment style, while Azure classic CLI
+is recommended for only the classic (Azure Service Manager) deployment.
 
-* Both Azure CLI's can be installed and used side-by-side
-* The Azure CLI 2.0 will not support ASM/Classic mode services
+If you are ready to switch, please consider the following before starting:
+
+* Both Azure CLIs can be installed and used side-by-side
+* The Azure CLI will not support ASM/Classic mode services
 * Scripts are not compatible between both CLIs
 
-## Why consider trying the Azure CLI 2.0?
-Regardless of the tool or vendor, it is important to ensure you benefit when
-adding a new tool to your toolbox.  While the following covers only a small
-number of difference between these two products, we expect customers to benefit
-from the following:
+## Why switch?
+
+The major reason to switch is that Azure classic CLI is currently only planned
+to have support through the end of 2018. The new Azure CLI also offers the following
+benefits:
 
 * Clean outputs for common workflows
   * `--out table` for simplified human output
@@ -26,29 +29,27 @@ from the following:
   * Use `[tab][tab]` to lookup parameters, including resource groups and names (only supported in BASH and BASH on Windows)
   * Work with either Azure resource ID values (`--ids`) _or_ resource group and name (`-g -n`)
   * Built in client-side query engine powered by JMESPath
-* Service support
-  * Our preview meets or exceeds XPlat CLI functionality for Compute, Storage, Network, RBAC, and ARM
-  * More services coming online soon!
 
 While we believe the above list is compelling, it's important to remember
-**the Azure CLI 2.0 only supports ARM mode**.  If you are managing ASM/Classic 
-resources, you must use the Azure XPlat CLI.
+**the Azure CLI only supports ARM mode**.  If you are managing ASM/Classic 
+resources, you must use the Azure classic CLI.
 
-## Getting both CLI's setup side-by-side
+## Getting both CLIs set up side-by-side
 
-First, you run `azure --version` and ensure you are using `0.10.5` or later, as
+First, run `azure --version` and ensure you are using `0.10.5` or later, as
 this is required for sharing your credentials between both CLIs.  If you installed
 using NPM, upgrade with `npm upgrade -g azure-cli`.  If you used an installer,
 we recommend downloading the latest installer to upgrade.
 
-To install the Azure CLI 2.0, follow the steps for your preferred platform or
-environment on our [Installation Guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+To install the latest Azure CLI, follow the steps for your preferred platform or
+environment in our [Installation Guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 
-Once installed, you can run `az configure` and follow the steps to setup your default output format.  
+Once installed, you run `az configure` and follow the steps to setup your default output format.  
 
 Then run `az login` to login using device authentication.  Once this step is complete you should be authenticated to use both CLIs.  
 
-## Important new concepts in the Azure CLI 2.0
+## Important new concepts in the Azure CLI
+
 Here is a quick list of some new and changed concepts that can help you understand the new tool.
 
 * Interactive Concepts
@@ -63,9 +64,9 @@ Here is a quick list of some new and changed concepts that can help you understa
 * Service Specific Concepts
   * VM power state is no longer included in `az vm list`, use `az vm get-instance-view` instead
 
-## Moving scripts from XPlat CLI to Azure CLI 2.0
+## Moving scripts from Azure classic CLI to Azure CLI 
 
-Generally, converting a script from XPlat to Az follows these steps:
+Generally, converting a script from Azure classic CLI to Azure CLI follows these steps:
 
 1. Switch `azure` commands to `az` commands
 2. Update commands to use new input values
@@ -76,11 +77,12 @@ Below, we break down each of these steps.
 
 ### Finding and switching to `az` commands
 
-While most commands keep the same group and command names between the Azure XPlat CLI and the Azure CLI 2.0, we've built a [azure to az conversion table](https://github.com/Azure/azure-cli/blob/master/doc/azure2az_commands.rst) for common commands.
+While most commands keep the same group and command names between the Azure classic CLI and the latest Azure CLI, we've built a
+[azure to az conversion table](https://github.com/Azure/azure-cli/blob/master/doc/azure2az_commands.rst) for common commands.
 
 #### Set vs. Update
 
-Mutate operations now use the `update` verb instead of `set`.  While the XPlat CLI
+Mutate operations now use the `update` verb instead of `set`.  While the classic CLI
 exposed some common operations as parameters, such as:
 
 ```
@@ -88,7 +90,7 @@ $ azure vm set -g MyGroup -n MyName --nic-ids $MyNicID
 $ azure vm set -g MyGroup -n MyName --tags myTagName=MyTagValue
 ```
 
-The Azure CLI 2.0 `update` commands work generically against the resource, for example:
+The Azure CLI `update` commands work generically against the resource, for example:
 ```
 $ az vm update -g MyGroup -n MyName --add networkProfile.networkInterfaces primary=false id=$MyNicID
 $ az vm update -g MyGroup -n MyName --set tags.myTagName=MyTagValue
@@ -106,8 +108,8 @@ An example of this is `azure storage cors set` being replaced by `az storage cor
 ### Updating input values
 
 Once you have identified the `az` commands required for your script, you immediately
-notice changes to how inputs are handled.  The Azure CLI 2.0 does not accept
-'positional parameters' such as `azure vm show MyRG MyName`, but instead require
+notice changes to how inputs are handled.  The Azure CLI does not accept
+'positional parameters' such as `azure vm show MyRG MyName`, but instead requires
 parameter flags: `az vm show -g MyRG -n MyName`.  
 
 In addition, when an input value is missing, we will show an error indicating the
@@ -118,7 +120,7 @@ $ az vm show
 az vm show: error: (--name --resource-group | --ids) are required
 ```
 
-In addition to using resource groups and names (`-g -n`), you can also refer to
+In addition to using resource groups and names (`-g`, `-n`), you can also refer to
 resources directly by ID value using `--ids`:
 
 ```
@@ -141,7 +143,7 @@ $ az role create --role-definition @MyOnCallRoleDef.json
 
 ### Working with output formats
 
-The Azure CLI 2.0 supports 4 primary output formats:
+The Azure CLI supports 4 primary output formats:
 
 1. json  - standard JSON formatted object graphs
 2. jsonc - colorized JSON
@@ -170,7 +172,7 @@ VM-Data
 
 ### Filtering down output values
 
-A common pattern in Azure XPlat CLI scripts is using command-line tools, such as
+A common pattern in Azure classic CLI scripts is using command-line tools, such as
 AWK, grep, and jq, to extract values from output documents:
 
 ```
@@ -184,7 +186,7 @@ $ azure vm list --json \
 $ MY_SUBSCRIPTION_ID=$(azure account show --json | jq -r '.[0].id')
 ```
 
-With the Azure CLI 2.0, you can now use the `--query '[expression]'` parameter and the [JMESPath](http://jmespath.org/)
+With the Azure CLI, you can now use the `--query '[expression]'` parameter and the [JMESPath](http://jmespath.org/)
 query language to extract values.
 
 ```

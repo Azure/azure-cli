@@ -17,7 +17,7 @@ def load_command_table(self, _):
         client_factory=cf_db_accounts)
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list-keys', 'list_keys')
         g.command('list-read-only-keys', 'list_read_only_keys')
         g.command('list-connection-strings', 'list_connection_strings')

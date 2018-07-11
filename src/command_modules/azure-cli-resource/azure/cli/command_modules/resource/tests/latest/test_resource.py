@@ -36,6 +36,14 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('[0].name', '{rg}'),
             self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
+        # test --force-string
+        self.kwargs.update({'tag': "\"{\\\"k\\\":\\\"v\\\"}\""})
+        self.cmd('group update -g {rg} --tags ""',
+                 checks=self.check('tags', {}))
+        self.cmd('group update -g {rg} --set tags.a={tag}',
+                 checks=self.check('tags.a', "{{'k': 'v'}}"))
+        self.cmd('group update -g {rg} --set tags.b={tag} --force-string',
+                 checks=self.check('tags.b', '{{\"k\":\"v\"}}'))
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):

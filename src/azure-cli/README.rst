@@ -1,7 +1,7 @@
-Microsoft Azure CLI 2.0
-=======================
+Microsoft Azure CLI
+===================
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
 
 Usage
 =====
@@ -29,7 +29,7 @@ For usage and help content, pass in the ``-h`` parameter, for example:
 Highlights
 ===========
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
+Here are a few features and concepts that can help you get the most out of the Azure CLI.
 
 The following examples are showing using the ``--output table`` format, you can change your default using the ``$ az configure`` command.
 

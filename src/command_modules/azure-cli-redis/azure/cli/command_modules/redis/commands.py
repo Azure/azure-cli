@@ -32,7 +32,7 @@ def load_command_table(self, _):
         g.command('list-all', 'list', deprecate_info=g.deprecate(redirect='redis list', hide='2.0.34'))
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('update-settings', 'cli_redis_update_settings',
                          deprecate_info=g.deprecate(redirect='redis update', hide='2.0.34'))
         g.generic_update_command('update', exception_handler=wrong_vmsize_argument_exception_handler,
@@ -41,4 +41,4 @@ def load_command_table(self, _):
     with self.command_group('redis patch-schedule', redis_patch) as g:
         g.command('set', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')

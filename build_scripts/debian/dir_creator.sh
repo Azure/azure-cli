@@ -59,8 +59,8 @@ Homepage: https://github.com/azure/azure-cli
 Package: azure-cli
 Architecture: all
 Depends: \${shlibs:Depends}, \${misc:Depends}
-Description: Azure CLI 2.0
- A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
+Description: Azure CLI
+ A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
 
 EOM
