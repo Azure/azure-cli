@@ -240,7 +240,7 @@ class TestVmCustom(unittest.TestCase):
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm._vm_utils.get_keyvault_key_url', autospec=True)
     def test_enable_encryption_error_cases_handling(self, mock_get_keyvault_key_url, mock_compute_client_factory):
         faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
         os_disk = OSDisk(create_option=None, os_type=OperatingSystemTypes.linux)

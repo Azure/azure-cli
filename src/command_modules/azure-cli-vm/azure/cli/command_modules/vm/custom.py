@@ -506,13 +506,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
-    from azure.cli.command_modules.vm._vm_utils import get_keyvault_key_url
     from azure.cli.command_modules.vm._template_builder import (build_vm_resource,
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment)
-    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
@@ -611,12 +610,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
-
-    if key_encryption_key:
-        key_encryption_keyvault = key_encryption_keyvault
-        if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = get_keyvault_key_url(
-                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     vm_resource = build_vm_resource(
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
