@@ -1400,7 +1400,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = _handle_addons_args(cmd, subscription_id, resource_group_name, enable_addons, {}, workspace_resource_id)
+    addon_profiles = _handle_addons_args(cmd, enable_addons, subscription_id, resource_group_name, {}, workspace_resource_id)
     if 'omsagent' in addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 

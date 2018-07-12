@@ -212,7 +212,7 @@ helps['aks create'] = """
           long-summary: |-
             These addons are available:
                 http_application_routing - configure ingress with automatic public DNS name creation.
-                monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one. Specify the "--workspace-resource-id" to use existing workspace.
         - name: --disable-rbac
           type: bool
           short-summary: Disable Kubernetes Role-Based Access Control.
