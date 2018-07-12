@@ -5,6 +5,7 @@
 
 import os
 import re
+import argparse
 
 from knack.util import CLIError
 try:
@@ -164,7 +165,6 @@ def validate_metadata(namespace):
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 
-import argparse
 class RollbackAction(argparse.Action):
-   def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, 'rollback_on_error', '' if not values else values)
