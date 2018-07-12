@@ -1700,13 +1700,14 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
 
 
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
+    #log analytics workspaces cannot be created in WCUS region due to capacity limits so mapped to EUS per discussion with log analytics team
     AzureLocationToOmsRegionCodeMap = {
         "eastus": "EUS",
         "westeurope": "WEU",
         "southeastasia": "SEA",
         "australiasoutheast": "ASE",
         "usgovvirginia": "USGV",
-        "westcentralus": "WCUS",
+        "westcentralus": "EUS",
         "japaneast": "EJP",
         "uksouth": "SUK",
         "canadacentral": "CCA",
@@ -1731,7 +1732,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "southeastasia": "southeastasia",
         "uksouth": "uksouth",
         "ukwest": "uksouth",
-        "westcentralus": "westcentralus",
+        "westcentralus": "eastus",
         "westeurope": "westeurope",
         "westus": "eastus",
         "westus2": "eastus",
@@ -1751,10 +1752,10 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     workspace_region = AzureRegionToOmsRegionMap[rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
     workspace_regionCode = AzureLocationToOmsRegionCodeMap[workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
 
-    default_workspace_resource_group = "DefaultResourceGroup-" + workspace_regionCode
-    default_workspace_name = "DefaultWorkspace-{0}-{1}".format(subscription_id, workspace_regionCode)
+    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_regionCode
+    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_regionCode)
 
-    default_workspace_resource_Id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}".format(subscription_id, default_workspace_resource_group, default_workspace_name)
+    default_workspace_resource_Id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
     resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
@@ -1764,9 +1765,18 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
             return default_workspace_resource_Id
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
-    resources.create_or_update_by_id(default_workspace_resource_Id, '2017-05-10', {'location': workspace_region})
+    
+    default_workspace_params = {
+        'location': workspace_region,
+         'properties': {
+             'sku': {
+                  'name': 'standalone'
+                 }
+        }
+    }
+    result = resources.create_or_update_by_id(default_workspace_resource_Id, '2015-11-01-preview', default_workspace_params)
 
-    return default_workspace_resource_Id
+    return result._operation.resource.id
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
