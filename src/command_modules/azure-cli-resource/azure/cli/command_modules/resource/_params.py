@@ -11,7 +11,6 @@ def load_arguments(self, _):
     from azure.mgmt.resource.resources.models import DeploymentMode
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.resources.v2018_05_01.models import OnErrorDeploymentType
 
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,

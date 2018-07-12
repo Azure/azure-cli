@@ -35,21 +35,6 @@ def process_deployment_create_namespace(namespace):
     _validate_deployment_name(namespace)
 
 
-def process_deployment_group_create_namespace(namespace):
-    if bool(namespace.on_error_type):
-        if namespace.on_error_type.lower() == 'specificdeployment':
-            if not bool(namespace.on_error_name):
-                raise CLIError('OnErrorDeployment using SpecificDeployment type should have a deployment name.')
-        elif namespace.on_error_type.lower() == 'lastsuccessful':
-            if bool(namespace.on_error_name):
-                raise CLIError('OnErrorDeployment using LastSuccessful type shouldn not have a deployment name.')
-        else:
-            raise CLIError('Unable to parse type: {}, valid values are SpecificDeployment and LastSuccessful'.format(
-                namespace.on_error_type))
-
-    process_deployment_create_namespace(namespace)
-
-
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,
                                       parent_resource_path, resource_type, resource_name):
     if resource_group is None:
@@ -165,6 +150,7 @@ def validate_metadata(namespace):
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 
+# pylint: disable=too-few-public-methods
 class RollbackAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, 'rollback_on_error', '' if not values else values)

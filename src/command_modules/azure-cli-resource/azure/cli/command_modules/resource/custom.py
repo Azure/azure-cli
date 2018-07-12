@@ -236,7 +236,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
-    if rollback_on_error is '':
+    if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
     elif rollback_on_error:
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
