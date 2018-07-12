@@ -13,6 +13,7 @@ from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
 
@@ -290,6 +291,7 @@ class DataLakeStoreFileScenarioTest(LiveScenarioTest):
 class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_adls_mgmt')
+    @AllowLargeResponse()
     def test_dls_account_mgmt(self, resource_group):
 
         self.kwargs.update({
@@ -363,6 +365,34 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
         ])
         self.cmd('dls account firewall delete -g {rg} -n {dls} --firewall-rule-name {fw}')
         self.cmd('dls account firewall list -g {rg} -n {dls}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 0),
+        ])
+
+        # test virtual network rule crud
+        self.kwargs.update({
+            'vnet': 'lewuVNET',
+            'subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/default',
+            'updated_subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/updatedSubnetId'
+        })
+        self.cmd('dls account virtual-network create -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet-id {subnet_id}')
+        self.cmd('dls account virtual-network show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
+            self.check('name', '{vnet}'),
+            self.check('subnetId', '{subnet_id}'),
+        ])
+
+        self.cmd('dls account virtual-network update -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet-id {updated_subnet_id}')
+        self.cmd('dls account virtual-network show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
+            self.check('name', '{vnet}'),
+            self.check('subnetId', '{subnet_id}'),
+        ])
+
+        self.cmd('dls account virtual-network list -g {rg} -n {dls}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+        ])
+        self.cmd('dls account virtual-network delete -g {rg} -n {dls} --virtual-network-rule-name {vnet}')
+        self.cmd('dls account virtual-network list -g {rg} -n {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 0),
         ])

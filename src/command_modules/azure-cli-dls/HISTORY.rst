@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.1
+++++++
+* Added commands for virtual network rules.
+
 0.1.0
 ++++++
 * Minor fixes

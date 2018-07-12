@@ -7,8 +7,9 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.mgmt.datalake.store.models import (
-    DataLakeStoreAccountUpdateParameters,
+    UpdateDataLakeStoreAccountParameters,
     FirewallRule,
+    VirtualNetworkRule,
     DataLakeStoreAccount,
     EncryptionConfigType,
     EncryptionIdentity,
@@ -51,7 +52,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
                         key_version=None, disable_encryption=False, tier=None):
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    create_params = DataLakeStoreAccount(location,
+    create_params = DataLakeStoreAccount(location=location,
                                          tags=tags,
                                          default_group=default_group,
                                          new_tier=tier)
@@ -81,7 +82,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
 
 def update_adls_account(client, account_name, resource_group_name, tags=None, default_group=None, firewall_state=None,
                         allow_azure_ips=None, trusted_id_provider_state=None, tier=None, key_version=None):
-    update_params = DataLakeStoreAccountUpdateParameters(
+    update_params = UpdateDataLakeStoreAccountParameters(
         tags=tags,
         default_group=default_group,
         firewall_state=firewall_state,
@@ -109,6 +110,20 @@ def add_adls_firewall_rule(client,
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    firewall_rule_name,
+                                   create_params)
+# endregion
+
+
+# region virtual network
+def add_adls_virtual_network_rule(client,
+                           account_name,
+                           virtual_network_rule_name,
+                           subnet_id,
+                           resource_group_name):
+    create_params = VirtualNetworkRule(subnet_id)
+    return client.create_or_update(resource_group_name,
+                                   account_name,
+                                   virtual_network_rule_name,
                                    create_params)
 # endregion
 
