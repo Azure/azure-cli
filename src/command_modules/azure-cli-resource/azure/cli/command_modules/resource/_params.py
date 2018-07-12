@@ -24,7 +24,7 @@ def load_arguments(self, _):
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
         get_resource_types_completion_list, get_providers_completion_list, get_subscription_id_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -137,8 +137,7 @@ def load_arguments(self, _):
         c.argument('template_uri', help='a uri to a remote template file')
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
-        c.argument('on_error_type', arg_type=get_enum_type(OnErrorDeploymentType), help='The OnErrorDeployment type to be used, LastSuccessful (last deployment that succedded in the resource group) or SpecificDeployment (specific deployment to be used in case of an error)')
-        c.argument('on_error_name', help='The OnErrorDeployment to be used with SpecificDeployment type.')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=('--name', '-n'), required=False,

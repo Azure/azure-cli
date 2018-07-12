@@ -162,3 +162,9 @@ def validate_resource_lock(namespace):
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+
+
+import argparse
+class RollbackAction(argparse.Action):
+   def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, 'rollback_on_error', '' if not values else values)

@@ -5,7 +5,7 @@ Release History
 
 2.1.1
 ++++++
-* Support OnError group deployments.
+* `group deployment create`: Add `--rollback-on-error` to execute a known-good deployment on error.
 
 2.1.0
 +++++

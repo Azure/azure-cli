@@ -16,9 +16,7 @@ from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
     cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions)
-from azure.cli.command_modules.resource._validators import (
-    process_deployment_create_namespace,
-    process_deployment_group_create_namespace)
+from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
 
@@ -208,7 +206,7 @@ def load_command_table(self, _):
         g.command('remove-value', 'delete_value')
 
     with self.command_group('group deployment', resource_deployment_sdk) as g:
-        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_group_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.show_command('show', 'get')

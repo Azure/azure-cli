@@ -219,7 +219,7 @@ def _urlretrieve(url):
 
 def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode=None, on_error_type=None, on_error_name=None, validate_only=False,
+                              parameters=None, mode=None, rollback_on_error=None, validate_only=False,
                               no_wait=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
@@ -236,10 +236,10 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
-    if on_error_type:
-        on_error_deployment = OnErrorDeployment(type=on_error_type, deployment_name=on_error_name)
-    elif on_error_name:
-        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=on_error_name)
+    if rollback_on_error is '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
@@ -677,9 +677,9 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, on_error_type=None, on_error_name=None, no_wait=False):
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode, on_error_type, on_error_name, no_wait=no_wait)
+                                     deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
@@ -691,9 +691,9 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None, on_error_type=None, on_error_name=None):
+                          parameters=None, mode=None, rollback_on_error=None):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     'deployment_dry_run', parameters, mode, on_error_type, on_error_name, validate_only=True)
+                                     'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
