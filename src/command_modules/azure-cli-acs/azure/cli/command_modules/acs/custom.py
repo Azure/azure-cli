@@ -1700,7 +1700,7 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
 
 
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
-    #log analytics workspaces cannot be created in WCUS region due to capacity limits so mapped to EUS per discussion with log analytics team
+    # log analytics workspaces cannot be created in WCUS region due to capacity limits so mapped to EUS per discussion with log analytics team
     AzureLocationToOmsRegionCodeMap = {
         "eastus": "EUS",
         "westeurope": "WEU",
@@ -1761,22 +1761,32 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
-        if resources.check_existence_by_id(default_workspace_resource_Id, '2018-05-01'):
-            return default_workspace_resource_Id
+        try:
+                resource = resources.get_by_id(default_workspace_resource_Id, '2015-11-01-preview')
+                return resource.id
+        except:
+                pass
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
-    
+
     default_workspace_params = {
         'location': workspace_region,
-         'properties': {
-             'sku': {
-                  'name': 'standalone'
-                 }
+        'properties': {
+            'sku': {
+                'name': 'standalone'
+            }
         }
     }
-    result = resources.create_or_update_by_id(default_workspace_resource_Id, '2015-11-01-preview', default_workspace_params)
+    async_poller = resources.create_or_update_by_id(default_workspace_resource_Id, '2015-11-01-preview', default_workspace_params)
 
-    return result._operation.resource.id
+    ws_resource_id = ''
+    while True:
+        result = async_poller.result(15)
+        if async_poller.done():
+            ws_resource_id = result.id
+            break
+
+    return ws_resource_id
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
