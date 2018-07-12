@@ -10,18 +10,15 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.relay._help import helps
 
 
-class relayCommandsLoader(AzCommandsLoader):
+class RelayCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         relay_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.relay.custom#{}')
-        super(relayCommandsLoader, self).__init__(
+        super(RelayCommandsLoader, self).__init__(
             cli_ctx=cli_ctx, custom_command_type=relay_custom,
-            min_profile='2017-03-10-profile',
-            suppress_extension=ModExtensionSuppress(__name__, 'relay', '0.1.0',
-                                                    reason='These commands are now in the CLI.',
-                                                    recommend_remove=True))
+            min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.relay.commands import load_command_table
@@ -33,4 +30,4 @@ class relayCommandsLoader(AzCommandsLoader):
         load_arguments_sb(self, command)
 
 
-COMMAND_LOADER_CLS = relayCommandsLoader
+COMMAND_LOADER_CLS = RelayCommandsLoader
