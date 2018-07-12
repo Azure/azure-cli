@@ -1400,7 +1400,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = _handle_addons_args(cmd, enable_addons, subscription_id, resource_group_name, {}, workspace_resource_id)
+    addon_profiles = _handle_addons_args(
+        cmd,
+        enable_addons,
+        subscription_id,
+        resource_group_name,
+        {},
+        workspace_resource_id
+    )
     if 'omsagent' in addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
@@ -1449,7 +1456,15 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     instance = client.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=False, no_wait=no_wait)
+    instance = _update_addons(
+        cmd,
+        instance,
+        subscription_id,
+        resource_group_name,
+        addons,
+        enable=False,
+        no_wait=no_wait
+    )
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
@@ -1579,6 +1594,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+# pylint: disable=line-too-long
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None, no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
@@ -1598,7 +1614,10 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                                    'To change monitoring configuration, run "az aks disable-addons -monitoring"'
                                    'before enabling it again.')
                 if not workspace_resource_id:
-                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name)
+                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                        cmd,
+                        subscription_id,
+                        resource_group_name)
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
         else:
@@ -1762,10 +1781,10 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
         try:
-                resource = resources.get_by_id(default_workspace_resource_Id, '2015-11-01-preview')
-                return resource.id
-        except:
-                pass
+            resource = resources.get_by_id(default_workspace_resource_Id, '2015-11-01-preview')
+            return resource.id
+        except CloudError:
+            pass
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
 
