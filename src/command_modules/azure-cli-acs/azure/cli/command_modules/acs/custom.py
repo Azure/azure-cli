@@ -1769,22 +1769,23 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     default_region_code = "EUS"
 
     workspace_region = AzureRegionToOmsRegionMap[rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
-    workspace_regionCode = AzureLocationToOmsRegionCodeMap[workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+    workspace_region_code = AzureLocationToOmsRegionCodeMap[workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
 
-    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_regionCode
-    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_regionCode)
+    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
+    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
 
-    default_workspace_resource_Id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
+    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
     resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
         try:
-            resource = resources.get_by_id(default_workspace_resource_Id, '2015-11-01-preview')
+            resource = resources.get_by_id(default_workspace_resource_id, '2015-11-01-preview')
             return resource.id
-        except CloudError:
-            pass
+        except CloudError as ex:
+            if ex.status_code != 404:
+                raise ex
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
 
@@ -1796,7 +1797,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
             }
         }
     }
-    async_poller = resources.create_or_update_by_id(default_workspace_resource_Id, '2015-11-01-preview', default_workspace_params)
+    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview', default_workspace_params)
 
     ws_resource_id = ''
     while True:
