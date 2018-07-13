@@ -10,6 +10,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, blob_data_
                                                                multi_service_properties_factory)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.arm import show_exception_handler
 from azure.cli.core.profiles import ResourceType
 
 
@@ -66,14 +67,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('update', 'set_logging')
         g.storage_command('show', 'get_logging',
                           table_transformer=transform_logging_list_output,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
 
     with self.command_group('storage metrics', get_custom_sdk('metrics', multi_service_properties_factory)) as g:
         from ._transformers import transform_metrics_list_output
         g.storage_command('update', 'set_metrics')
         g.storage_command('show', 'get_metrics',
                           table_transformer=transform_metrics_list_output,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
 
     block_blob_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
@@ -113,9 +114,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('show', 'show_blob', table_transformer=transform_blob_output,
                                  client_factory=page_blob_service_factory,
                                  doc_string_source='blob#PageBlobService.get_blob_properties',
-                                 exception_handler=g.get_handler_suppress_404())
+                                 exception_handler=show_exception_handler)
 
-        g.storage_command('metadata show', 'get_blob_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_blob_metadata')
 
         g.storage_command('lease acquire', 'acquire_blob_lease')
@@ -147,11 +148,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
         g.storage_command('show', 'get_blob_service_properties',
                           transform=lambda x: getattr(x, 'delete_retention_policy', x),
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
         g.storage_custom_command('update', 'set_delete_policy')
 
     with self.command_group('storage blob service-properties', command_type=base_blob_sdk) as g:
-        g.storage_command('show', 'get_blob_service_properties', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('show', 'get_blob_service_properties', exception_handler=show_exception_handler)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('acl', blob_data_service_factory)) as g:
@@ -166,7 +167,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('delete', 'delete_container', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('show', 'get_container_properties', table_transformer=transform_container_show,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
         g.storage_command('create', 'create_container', transform=create_boolean_result_output_transformer('created'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('generate-sas', 'generate_container_shared_access_signature')
@@ -175,7 +176,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('set-permission', 'set_container_acl')
         g.storage_command('show-permission', 'get_container_acl', transform=transform_container_permission_output)
         g.storage_command('metadata update', 'set_container_metadata')
-        g.storage_command('metadata show', 'get_container_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_container_metadata', exception_handler=show_exception_handler)
 
         g.storage_command('lease acquire', 'acquire_container_lease')
         g.storage_command('lease renew', 'renew_container_lease')
@@ -186,7 +187,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('policy create', 'create_acl_policy')
         g.storage_custom_command('policy delete', 'delete_acl_policy')
         g.storage_custom_command('policy update', 'set_acl_policy', min_api='2017-04-17')
-        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=g.get_handler_suppress_404())
+        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
         g.storage_custom_command('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     file_sdk = CliCommandType(
@@ -205,12 +206,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           table_transformer=transform_boolean_for_table)
         g.storage_command('generate-sas', 'generate_share_shared_access_signature')
         g.storage_command('stats', 'get_share_stats')
-        g.storage_command('show', 'get_share_properties', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler)
         g.storage_command('update', 'set_share_properties')
         g.storage_command('snapshot', 'snapshot_share', min_api='2017-04-17')
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
 
-        g.storage_command('metadata show', 'get_share_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_share_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_share_metadata')
 
         g.storage_custom_command('policy create', 'create_acl_policy')
@@ -228,9 +229,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('delete', 'delete_directory', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('show', 'get_directory_properties', table_transformer=transform_file_output,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command('metadata show', 'get_directory_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_directory_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_directory_metadata')
         g.storage_custom_command('list', 'list_share_directories',
                                  transform=transform_file_directory_result(self.cli_ctx),
@@ -250,12 +251,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('url', 'make_file_url', transform=transform_url)
         g.storage_command('generate-sas', 'generate_file_shared_access_signature')
         g.storage_command('show', 'get_file_properties', table_transformer=transform_file_output,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
         g.storage_command('update', 'set_file_properties')
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('download', 'get_file_to_path')
         g.storage_command('upload', 'create_file_from_path')
-        g.storage_command('metadata show', 'get_file_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_file_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_file_metadata')
         g.storage_command('copy start', 'copy_file')
         g.storage_command('copy cancel', 'abort_copy_file')
@@ -289,12 +290,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('stats', 'get_queue_service_stats', min_api='2016-05-31')
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
 
-        g.storage_command('metadata show', 'get_queue_metadata', exception_handler=g.get_handler_suppress_404())
+        g.storage_command('metadata show', 'get_queue_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_queue_metadata')
 
         g.storage_custom_command('policy create', 'create_acl_policy')
         g.storage_custom_command('policy delete', 'delete_acl_policy')
-        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=g.get_handler_suppress_404())
+        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
         g.storage_custom_command('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
 
@@ -335,7 +336,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command('policy create', 'create_acl_policy')
         g.storage_custom_command('policy delete', 'delete_acl_policy')
-        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=g.get_handler_suppress_404())
+        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
         g.storage_custom_command('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
 
@@ -350,5 +351,5 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('delete', 'delete_entity', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('show', 'get_entity', table_transformer=transform_entity_show,
-                          exception_handler=g.get_handler_suppress_404())
+                          exception_handler=show_exception_handler)
         g.storage_custom_command('insert', 'insert_table_entity')
