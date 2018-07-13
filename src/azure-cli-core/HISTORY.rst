@@ -39,6 +39,7 @@ Release History
 
 2.0.35
 ++++++
+<<<<<<< HEAD
 * Added method of registering `show` commands to fail with exit code of 3.
 
 2.0.34
@@ -47,6 +48,13 @@ Release History
 * Improve telemetry upload reliability
   1. Remove retry. Once failed stop uploading.
   2. Update the process start configuration to prevent upload process from blocking the CLI process.
+=======
+* Minor fixes
+
+2.0.34
+++++++
+* Minor fixes
+>>>>>>> squashing nrp tests & storage tests commits
 
 2.0.33
 ++++++
