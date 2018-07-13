@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.1
+++++++
+* Consuming multi api azure.mgmt.authorization package
+
 2.1.0
 ++++++
 * BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
