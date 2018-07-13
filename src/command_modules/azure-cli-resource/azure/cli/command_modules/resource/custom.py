@@ -91,7 +91,7 @@ def _process_parameters(template_param_defs, parameter_lists):
             param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
             if param_obj:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(template_param_defs, parameters, item):
+            elif parameters and not _try_parse_key_value_object(template_param_defs, parameters, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters
