@@ -35,7 +35,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerservice==4.1.0',
     'azure-graphrbac==0.40.0',
     'azure-cli-core',
-    'paramiko',
+    'paramiko>=2.0.8',
     'pyyaml~=4.2b4',
     'six',
     'scp',
