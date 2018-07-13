@@ -12,7 +12,7 @@ from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.parser import AzCliCommandParser
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.arguments import enum_choice_list
 
@@ -32,7 +32,7 @@ class TestParser(unittest.TestCase):
         def test_handler2():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
@@ -57,7 +57,7 @@ class TestParser(unittest.TestCase):
         def test_handler(args):  # pylint: disable=unused-argument
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
@@ -80,7 +80,7 @@ class TestParser(unittest.TestCase):
         def test_handler():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
@@ -111,7 +111,7 @@ class TestParser(unittest.TestCase):
         def test_handler():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
@@ -196,7 +196,7 @@ class TestParser(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_parser_error_spellchecker(self):
-        cli = TestCli()
+        cli = DummyCli()
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
 
