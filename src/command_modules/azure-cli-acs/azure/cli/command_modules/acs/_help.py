@@ -244,7 +244,7 @@ helps['aks create'] = """
           short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
         - name: --workspace-resource-id
           type: string
-          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+          short-summary: If not specified, uses default Log Analytics workspace if exists else creates one. Specify resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 
     examples:
         - name: Create a Kubernetes cluster with an existing SSH public key.
