@@ -294,7 +294,7 @@ class VMCustomImageTest(ScenarioTest):
             'image2': 'img-from-managed',
         })
 
-        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --use-unmanaged-disk')
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --use-unmanaged-disk --admin-username sdk-test-admin --admin-password testPassword0')
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
         self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
@@ -302,7 +302,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm generalize -g {rg} -n {vm1}')
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1')
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1 --admin-username sdk-test-admin --admin-password testPassword0')
         self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm2}')
@@ -372,7 +372,7 @@ class VMImageWithPlanTest(ScenarioTest):
         self.cmd('vm image accept-terms --urn {urn}', checks=self.check('accepted', True))
 
         # create a vm and capture an image from it
-        self.cmd('vm create -g {rg} -n {vm1} --image {urn}')
+        self.cmd('vm create -g {rg} -n {vm1} --image {urn} --admin-username sdk-test-admin --admin-password testPassword0')
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
         self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
@@ -1994,10 +1994,7 @@ class MSIScenarioTest(ScenarioTest):
             uuid.UUID(result.get_output_in_json()['systemAssignedIdentity'])
 
             self.cmd('vm identity remove -g {rg} -n {vm3}')
-            self.cmd('vm identity show -g {rg} -n {vm3}', checks=[
-                self.check('role', None),
-                self.check('scope', None),
-            ])
+            self.cmd('vm identity show -g {rg} -n {vm3}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi')
     def test_vmss_msi(self, resource_group):
@@ -2036,11 +2033,7 @@ class MSIScenarioTest(ScenarioTest):
             uuid.UUID(result['systemAssignedIdentity'])
 
             self.cmd('vmss identity remove -g {rg} -n {vmss3}')
-            self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=[
-                self.check('role', None),
-                self.check('scope', None),
-                self.check('identityIds', None)
-            ])
+            self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_msi_no_scope(self, resource_group):
@@ -2197,7 +2190,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
         # spot check we do have some relevant progress messages coming out
         # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
         # This has the consequence that it can't promise each resource's result wil be displayed)
-        self.assertTrue('Succeeded:'.format(**self.kwargs) in lines or 'Accepted:'.format(**self.kwargs) in lines)
+        self.assertTrue(any(l.startswith('Succeeded:') or l.startswith('Accepted:') for l in lines))
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
