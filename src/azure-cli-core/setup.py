@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.42"
+VERSION = "2.0.43"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,7 +58,7 @@ DEPENDENCIES = [
     'knack==0.4.1',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
-    'paramiko',
+    'paramiko>=2.0.8',
     'pip',
     'pygments',
     'PyJWT',
