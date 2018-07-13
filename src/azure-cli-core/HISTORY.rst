@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.43
+++++++
+* Comnsuming mult api azure.mgmt.azutorization package for stack support
 
 2.0.43
 ++++++
@@ -32,10 +35,6 @@ Release History
 2.0.37
 ++++++
 * Minor fixes
-
-2.0.36
-++++++
-* Add Authorization Resource into the stack profile
 
 2.0.35
 ++++++
