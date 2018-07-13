@@ -1996,7 +1996,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm identity remove -g {rg} -n {vm3}')
             self.cmd('vm identity show -g {rg} -n {vm3}', checks=self.is_empty())
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi')
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
