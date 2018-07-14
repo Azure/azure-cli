@@ -3,12 +3,22 @@
 Release History
 ===============
 
+2.2.0
++++++
+* REVERT: adding commands for managing storage accounts and sas-definitions
+* REVERT: adding commands for network-rules
+* REVERT: adding id parameter to secret, key, and certificate operations
+
 2.1.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * adding commands for managing storage accounts and sas-definitions
 * adding commands for network-rules
 * adding id parameter to secret, key, and certificate operations
+
+2.0.24
+++++++
+* Minor fixes
 
 2.0.23
 ++++++
