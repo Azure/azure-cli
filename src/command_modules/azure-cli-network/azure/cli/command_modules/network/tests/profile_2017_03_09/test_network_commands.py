@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -1042,10 +1042,10 @@ class NetworkDnsScenarioTest(ScenarioTest):
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.is_empty())
+                 expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}')
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
