@@ -82,6 +82,11 @@ helps['servicebus georecovery-alias authorization-rule keys'] = """
     short-summary: Manage Azure Authorization Rule keys for Service Bus Namespace
 """
 
+helps['servicebus migration'] = """
+    type: group
+    short-summary: Manage Azure Service Bus Migration of Standard to Premium
+"""
+
 helps['servicebus namespace exists'] = """
     type: command
     short-summary: check for the availability of the given name for the Namespace
@@ -526,4 +531,44 @@ helps['servicebus georecovery-alias delete'] = """
     examples:
         - name:  Delete Service Bus Geo-Disaster Recovery Configuration Alias request accepted
           text: az servicebus georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+"""
+
+helps['servicebus migration create'] = """
+    type: command
+    short-summary: Creates and Start Service Bus Migration of Standard to Premium
+    examples:
+        - name:  Creates and Start Service Bus Migration of Standard to Premium
+          text: az servicebus migration create --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
+"""
+
+helps['servicebus migration show'] = """
+    type: command
+    short-summary: shows properties of properties of Service Bus Migration
+    examples:
+        - name:  shows properties of properties of Service Bus Migration
+          text: az servicebus migration show --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus migration commit'] = """
+    type: command
+    short-summary: Completes the Service Bus Migration of Standard to Premium namespace
+    examples:
+        - name:  Completes the Service Bus Migration of Standard to Premium namespace
+          text: az servicebus migration commit --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus migration abort'] = """
+    type: command
+    short-summary: Disable the Service Bus Migration of Standard to Premium namespace
+    examples:
+        - name:  Disable Service Bus Migration of Standard to Premium namespace
+          text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus migration delete'] = """
+    type: command
+    short-summary: Deletes Service Bus Migration Configuration
+    examples:
+        - name: Deletes Service Bus Migration Configuration
+          text: az servicebus migration delete --resource-group myresourcegroup --name standardnamespace
 """

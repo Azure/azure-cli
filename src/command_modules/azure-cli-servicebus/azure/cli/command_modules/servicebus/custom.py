@@ -19,12 +19,12 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         parameters=SBNamespace(
-            location,
-            tags,
+            location=location,
+            tags=tags,
             sku=SBSku(
-                sku,
-                sku,
-                capacity)
+                name=sku,
+                tier=sku,
+                capacity=capacity)
         )
     )
 

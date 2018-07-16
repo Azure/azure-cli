@@ -15,7 +15,7 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
 
     from knack.arguments import CLIArgumentType
     from azure.mgmt.servicebus.models.service_bus_management_client_enums import SkuName, AccessRights, KeyType, FilterType
@@ -83,6 +83,7 @@ def load_arguments_sb(self, _):
         c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
         c.argument('forward_to', help='Queue/Topic name to forward the messages')
         c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Value that indicates whether server-side batched operations are enabled.')
 
     with self.argument_context('servicebus queue update') as c:
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
@@ -100,6 +101,7 @@ def load_arguments_sb(self, _):
         c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
         c.argument('forward_to', help='Queue/Topic name to forward the messages')
         c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Value that indicates whether server-side batched operations are enabled.')
 
     with self.argument_context('servicebus queue list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
@@ -196,6 +198,7 @@ def load_arguments_sb(self, _):
         c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
         c.argument('forward_to', help='Queue/Topic name to forward the messages')
         c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+        c.argument('dead_lettering_on_filter_evaluation_exceptions', arg_type=get_three_state_flag(), help='A boolean value that indicates whether dead lettering on filter evaluation exceptions is enabled or not.')
 
     with self.argument_context('servicebus topic subscription update') as c:
         c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription.')
@@ -208,6 +211,7 @@ def load_arguments_sb(self, _):
         c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
         c.argument('forward_to', help='Queue/Topic name to forward the messages')
         c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+        c.argument('dead_lettering_on_filter_evaluation_exceptions', arg_type=get_three_state_flag(), help='A boolean value that indicates whether dead lettering on filter evaluation exceptions is enabled or not.')
 
     with self.argument_context('servicebus topic subscription list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
@@ -255,7 +259,7 @@ def load_arguments_sb(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
 
     with self.argument_context('servicebus georecovery-alias set') as c:
-        c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
+        c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
     for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
@@ -273,3 +277,15 @@ def load_arguments_sb(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+    # Standard to Premium Migration: Region
+
+    with self.argument_context('servicebus migration start') as c:
+        c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
+        c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of Premium Service Bus namespace name, which is part of migration')
+        c.argument('post_migration_name', options_list=['--post-migration-name'],
+                   help='Name of Standard Namespace post migration')
+
+    for scope in ['servicebus migration show', 'servicebus migration delete', 'servicebus migration complete', 'servicebus migration stop']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
