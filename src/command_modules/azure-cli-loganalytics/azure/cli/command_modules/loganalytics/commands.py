@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
+
 
 def load_command_table(self, _):
+
     from azure.cli.core.commands import CliCommandType
     from azure.cli.command_modules.loganalytics._client_factory import loganalytics_data_plane_client
 

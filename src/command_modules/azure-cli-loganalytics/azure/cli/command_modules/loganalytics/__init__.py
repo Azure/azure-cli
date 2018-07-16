@@ -13,7 +13,6 @@ class LogAnalyticsCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.loganalytics._client_factory import loganalytics_data_plane_client
-        
         loganalytics_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.loganalytics.custom#{}',
             client_factory=loganalytics_data_plane_client

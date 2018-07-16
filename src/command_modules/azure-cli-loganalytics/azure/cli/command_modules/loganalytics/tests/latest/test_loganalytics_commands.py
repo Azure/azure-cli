@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 from azure.cli.testsdk import ScenarioTest
 
+
 class LogAnalyticsDataClientTests(ScenarioTest):
     """Test class for Log Analytics data client."""
     def test_query(self):
