@@ -2,6 +2,15 @@
 
 Release History
 ===============
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+2.0.27
+++++++
+* Minor fixes.
+
 2.0.26
 ++++++
 * Minor fixes.
@@ -10,6 +19,10 @@ Release History
 ++++++
 * ad: remove stack traces from graph exceptions before surface to users
 * ad sp create: do not throw if CLI can't resolve app id
+
+2.0.25
+++++++
+* Minor fixes.
 
 2.0.24
 ++++++

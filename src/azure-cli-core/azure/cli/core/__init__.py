@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.41"
+__version__ = "2.0.43"
 
 import os
 import sys
 import timeit
+
+import six
 
 from knack.arguments import ArgumentsContext
 from knack.cli import CLI
@@ -18,12 +20,12 @@ from knack.introspection import extract_args_from_signature, extract_full_summar
 from knack.log import get_logger
 from knack.util import CLIError
 
-import six
 
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
+EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
 
 class AzCli(CLI):
@@ -76,6 +78,9 @@ class AzCli(CLI):
         self.progress_controller.init_progress(progress.get_progress_view(det))
         return self.progress_controller
 
+    def get_cli_version(self):
+        return __version__
+
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
         print(get_az_version_string())
@@ -126,10 +131,11 @@ class MainCommandsLoader(CLICommandsLoader):
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
                 try:
                     start_time = timeit.default_timer()
-                    module_command_table = _load_module_command_loader(self, args, mod)
+                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
                     for cmd in module_command_table.values():
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
+                    self.command_group_table.update(module_group_table)
                     elapsed_time = timeit.default_timer() - start_time
                     logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
                     cumulative_elapsed_time += elapsed_time
@@ -173,7 +179,8 @@ class MainCommandsLoader(CLICommandsLoader):
                         # from an extension requires this map to be up-to-date.
                         # self._mod_to_ext_map[ext_mod] = ext_name
                         start_time = timeit.default_timer()
-                        extension_command_table = _load_extension_command_loader(self, args, ext_mod)
+                        extension_command_table, extension_group_table = \
+                            _load_extension_command_loader(self, args, ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
@@ -182,9 +189,11 @@ class MainCommandsLoader(CLICommandsLoader):
                                 preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
+                        self.command_group_table.update(extension_group_table)
                         elapsed_time = timeit.default_timer() - start_time
                         logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
                     except Exception:  # pylint: disable=broad-except
+                        self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
                         logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
                         logger.debug(traceback.format_exc())
 
@@ -384,12 +393,18 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
             kwargs['command_type'] = command_type
+        if 'deprecate_info' in kwargs:
+            kwargs['deprecate_info'].target = group_name
         return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
+
+        from knack.deprecation import Deprecated
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
         if operation and not isinstance(operation, six.string_types):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
@@ -439,6 +454,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                       min_api=kwargs.get('min_api'),
                                       max_api=kwargs.get('max_api'),
                                       operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
             self.command_table[name] = self.command_cls(self, name,
                                                         handler or default_command_handler,
                                                         **kwargs)

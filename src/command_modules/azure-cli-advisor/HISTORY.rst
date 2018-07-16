@@ -3,9 +3,16 @@
 Release History
 ===============
 
+0.6.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.5.2
+++++++
+* Minor fixes.
+
 0.5.1
 +++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.5.0

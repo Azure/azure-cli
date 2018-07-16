@@ -102,7 +102,7 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
-        g.command('show', 'get', table_transformer=action_group_list_table)
+        g.show_command('show', 'get', table_transformer=action_group_list_table)
         g.command('create', 'create_or_update', table_transformer=action_group_list_table)
         g.command('delete', 'delete')
         g.command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
@@ -117,7 +117,7 @@ def load_command_table(self, _):
     with self.command_group('monitor activity-log alert', activity_log_alerts_sdk, custom_command_type=activity_log_alerts_custom) as g:
         g.custom_command('list', 'list_activity_logs_alert')
         g.custom_command('create', 'create')
-        g.command('show', 'get', exception_handler=missing_resource_handler)
+        g.show_command('show', 'get', exception_handler=missing_resource_handler)
         g.command('delete', 'delete', exception_handler=missing_resource_handler)
         g.generic_update_command('update', custom_func_name='update', setter_arg_name='activity_log_alert')
         g.custom_command('action-group add', 'add_action_group')
@@ -128,7 +128,7 @@ def load_command_table(self, _):
     with self.command_group('monitor alert', alert_sdk, custom_command_type=alert_custom) as g:
         g.custom_command('create', 'create_metric_rule')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_resource_group')
         g.command('show-incident', 'get', command_type=alert_rule_incidents_sdk)
         g.command('list-incidents', 'list_by_alert_rule', command_type=alert_rule_incidents_sdk)
@@ -139,13 +139,13 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom,
                                  exception_handler=monitor_exception_handler)
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_resource_group')
 
     with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_profile_create')
         g.custom_command('list', 'autoscale_profile_list')
-        g.custom_command('show', 'autoscale_profile_show')
+        g.custom_show_command('show', 'autoscale_profile_show')
         g.custom_command('delete', 'autoscale_profile_delete')
         g.custom_command('list-timezones', 'autoscale_profile_list_timezones')
 
@@ -155,10 +155,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'autoscale_rule_delete')
         g.custom_command('copy', 'autoscale_rule_copy')
 
-    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom) as g:
+    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom,
+                            deprecate_info=self.deprecate(redirect='monitor autoscale', hide='2.0.34')) as g:
         g.command('create', 'create_or_update', deprecate_info='az monitor autoscale create')
         g.command('delete', 'delete', deprecate_info='az monitor autoscale delete')
-        g.command('show', 'get', deprecate_info='az monitor autoscale show')
+        g.show_command('show', 'get', deprecate_info='az monitor autoscale show')
         g.command('list', 'list_by_resource_group', deprecate_info='az monitor autoscale list')
         g.custom_command('get-parameters-template', 'scaffold_autoscale_settings_parameters', deprecate_info='az monitor autoscale show')
         g.generic_update_command('update', deprecate_info='az monitor autoscale update')
@@ -166,19 +167,19 @@ def load_command_table(self, _):
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk, custom_command_type=diagnostics_custom) as g:
         from .validators import validate_diagnostic_settings
         g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.generic_update_command('update')
 
     with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command('update')
 

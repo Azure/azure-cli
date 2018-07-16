@@ -34,12 +34,12 @@ def load_command_table(self, _):
 
     with self.command_group('billing invoice', billing_invoice_util, client_factory=invoices_mgmt_client_factory) as g:
         g.custom_command('list', 'cli_billing_list_invoices')
-        g.custom_command('show', 'cli_billing_get_invoice')
+        g.custom_show_command('show', 'cli_billing_get_invoice')
 
     with self.command_group('billing period', billing_period_util, client_factory=billing_periods_mgmt_client_factory) as g:
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     with self.command_group('billing enrollment-account', enrollment_account_util, client_factory=enrollment_accounts_mgmt_client_factory) as g:
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')

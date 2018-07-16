@@ -9,6 +9,7 @@ import os
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
@@ -19,8 +20,8 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    TestCli,
-    LiveScenarioTest)
+    LiveScenarioTest,
+    record_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -52,13 +53,13 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(TestCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(DummyCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute(TestCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(DummyCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -583,16 +584,33 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name)
                  ])
 
-        # copy database to other server (max parameters)
+        # copy database to same server (min parameters, plus service_objective)
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --service-objective {}'
+                 .format(rg, server1, database_name, database_copy_name, service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                 ])
+
+        # copy database to elastic pool in other server (max parameters, other than
+        # service_objective)
+        pool_name = 'pool1'
+        pool_edition = 'Standard'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}'
+                 .format(resource_group_2, server2, pool_name, pool_edition))
+
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '--service-objective {}'
+                 '--elastic-pool {}'
                  .format(rg, server1, database_name, database_copy_name,
-                         resource_group_2, server2, service_objective),
+                         resource_group_2, server2, pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('name', database_copy_name),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)
+                     JMESPathCheck('elasticPoolName', pool_name)
                  ])
 
 
@@ -1178,16 +1196,34 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
-        # create replica in third server with max params
-        # --elastic-pool is untested
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 ' --partner-resource-group {} --service-objective {}'
+        # Delete replica in second server and recreate with explicit service objective
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'
+                 .format(s2.group, s2.name, database_name))
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {}'
                  .format(s1.group, s1.name, database_name,
-                         s3.name, s3.group, service_objective),
+                         s2.name, service_objective),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'pool1'
+        pool_edition = 'Standard'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}'
+                 .format(s3.group, s3.name, pool_name, pool_edition))
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, pool_name),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s3.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+                     JMESPathCheck('elasticPoolName', pool_name)])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'
@@ -2287,11 +2323,11 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
     def test_sql_subscription_usages(self):
         self.cmd('sql list-usages -l westus',
-                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+                 checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+        self.cmd('sql show-usage -l westus -u ServerQuota',
                  checks=[
-                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheck('name', 'ServerQuota'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
 
@@ -2511,6 +2547,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_instance_mgmt(self):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
@@ -2629,6 +2667,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_db_mgmt(self):
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"

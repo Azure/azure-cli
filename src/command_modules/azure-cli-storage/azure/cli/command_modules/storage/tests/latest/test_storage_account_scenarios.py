@@ -253,6 +253,25 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--encryption-key-name testkey '
                  '--encryption-key-version {ver} ')
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_account_show_exit_codes(self, resource_group, storage_account):
+        self.kwargs = {'rg': resource_group, 'sa': storage_account}
+
+        self.assertEqual(self.cmd('storage account show -g {rg} -n {sa}').exit_code, 0)
+
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage account show text_causing_parsing_error')
+        self.assertEqual(ex.exception.code, 2)
+
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage account show -g fake_group -n {sa}')
+        self.assertEqual(ex.exception.code, 3)
+
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage account show -g {rg} -n fake_account')
+        self.assertEqual(ex.exception.code, 3)
+
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, max_api='2016-01-01')
 class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):

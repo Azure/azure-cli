@@ -7,6 +7,8 @@ import os
 import tempfile
 import unittest
 
+from knack.util import CLIError
+
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -181,6 +183,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_bad_inputs(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliakstest', 16),
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+        })
+
+        # create with --max-pods set too small
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '--max-pods 3'
+        with self.assertRaises(CLIError) as err:
+            self.cmd(create_cmd)
+        self.assertIn('--max-pods', str(err.exception))
+
+        # create with monitoring addon but no log analytics workspace specified
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '--enable-addons monitoring'
+        with self.assertRaises(CLIError) as err:
+            self.cmd(create_cmd)
+        self.assertIn('--enable-addons monitoring', str(err.exception))
 
 
     @classmethod

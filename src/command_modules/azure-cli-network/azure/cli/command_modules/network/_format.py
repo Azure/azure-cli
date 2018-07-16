@@ -113,7 +113,9 @@ def transform_traffic_manager_create_output(result):
 
 
 def transform_nic_create_output(result):
-    return {'NewNIC': result.result()}
+    if result:
+        return {'NewNIC': result.result()}
+    return None
 
 
 def transform_nsg_create_output(result):

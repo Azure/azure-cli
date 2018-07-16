@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `network nic create/update/delete`: Add `--no-wait` support.
+* Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
+* `network nsg rule list`: Added `--include-default` flag to include default security rules in the output.
+
 2.1.5
 ++++++
 * `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)

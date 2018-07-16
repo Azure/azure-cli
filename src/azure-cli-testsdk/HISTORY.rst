@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.2.0
++++++
+* Removes dependency on azure-cli
+* Using explict import_module to import azure.cli.core components
+
+0.1.4
+++++++
+* Minor fixes.
+
 0.1.3
 +++++
 * Update azure-devtools to 1.0.0

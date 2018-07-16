@@ -32,8 +32,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.engine_type = engine_type
         self.engine_parameter_name = engine_parameter_name
         self.location = location
@@ -416,11 +416,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('length(@)', 2)])
 
-        self.cmd('{} server vnet-rule delete --name {} -g {} --server {} --yes'
+        self.cmd('{} server vnet-rule delete --name {} -g {} --server {}'
                  .format(database_engine, vnet_firewall_rule_1, resource_group, server), checks=NoneCheck())
         self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
-        self.cmd('{} server vnet-rule delete -n {} -g {} -s {} --yes'
+        self.cmd('{} server vnet-rule delete -n {} -g {} -s {}'
                  .format(database_engine, vnet_firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('{} server vnet-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[NoneCheck()])

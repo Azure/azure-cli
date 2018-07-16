@@ -619,6 +619,7 @@ def load_arguments(self, _):
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
+        c.argument('include_default', help='Include default security rules in the output.')
 
     with self.argument_context('network nsg rule create') as c:
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
@@ -881,6 +882,10 @@ def load_arguments(self, _):
         c.argument('network_security_group', validator=get_nsg_validator())
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+
+    for scope in ['network vnet subnet list', 'network vnet peering list']:
+        with self.argument_context(scope) as c:
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
 
     # endregion
 

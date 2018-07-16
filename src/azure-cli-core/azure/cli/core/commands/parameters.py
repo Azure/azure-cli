@@ -339,18 +339,18 @@ class AzArgumentContext(ArgumentsContext):
             logger.error(message)
             raise CLIError(message)
 
-    def _flatten_kwargs(self, kwargs, arg_type, supported_kwargs=None):
-        merged_kwargs = self._merge_kwargs(kwargs, supported_kwargs=supported_kwargs)
+    def _flatten_kwargs(self, kwargs, arg_type):
+        merged_kwargs = self._merge_kwargs(kwargs)
         if arg_type:
             arg_type_copy = arg_type.settings.copy()
             arg_type_copy.update(merged_kwargs)
             return arg_type_copy
         return merged_kwargs
 
-    def _merge_kwargs(self, kwargs, base_kwargs=None, supported_kwargs=None):
+    def _merge_kwargs(self, kwargs, base_kwargs=None):
         from azure.cli.core.commands import _merge_kwargs as merge_kwargs
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return merge_kwargs(kwargs, base, supported_kwargs or CLI_PARAM_KWARGS)
+        return merge_kwargs(kwargs, base, CLI_PARAM_KWARGS)
 
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
@@ -363,8 +363,10 @@ class AzArgumentContext(ArgumentsContext):
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
         operation_group = merged_kwargs.get('operation_group', None)
-        if merged_kwargs.get('options_list') == []:
+
+        if merged_kwargs.get('options_list', None) == []:
             del merged_kwargs['options_list']
+
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
                                                      max_api=max_api,
@@ -390,7 +392,7 @@ class AzArgumentContext(ArgumentsContext):
             raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
                            "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
 
-        merged_kwargs = self._flatten_kwargs(kwargs, arg_type, supported_kwargs=CLI_POSITIONAL_PARAM_KWARGS)
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         merged_kwargs = {k: v for k, v in merged_kwargs.items() if k in CLI_POSITIONAL_PARAM_KWARGS}
         merged_kwargs['options_list'] = []
 

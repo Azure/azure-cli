@@ -2,9 +2,14 @@
 
 Release History
 ===============
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* appservice: allow PremiumV2 skus
+
 0.1.36
 ++++++
-* Minor fixes
 * webapp/functionapp: Adding support for disabling identity az webapp identity remove. Preview tag removed for Identity feature.
 
 0.1.35

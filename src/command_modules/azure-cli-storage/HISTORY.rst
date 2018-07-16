@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Added `pageRanges` property to `storage blob show` output that will be populated for page blobs.
+
+2.0.36
+++++++
+* Minor fixes
+
 2.0.35
 ++++++
 * Changed table output for `storage blob download` to be more readable.

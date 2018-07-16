@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.35"
+VERSION = "2.1.0"
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-multiapi-storage==0.2.0',
+    'azure-multiapi-storage==0.2.1',
     'azure-mgmt-storage==1.5.0',
     'azure-cli-core'
 ]

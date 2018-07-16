@@ -25,19 +25,20 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
-        g.custom_command('import-method', 'cli_redis_import_method', deprecate_info='az redis import')
+        g.custom_command('import-method', 'cli_redis_import_method',
+                         deprecate_info=g.deprecate(redirect='redis import', hide='2.0.34'))
         g.custom_command('import', 'cli_redis_import_method')
         g.custom_command('list', 'cli_redis_list')
-        g.command('list-all', 'list', deprecate_info='az redis list')
+        g.command('list-all', 'list', deprecate_info=g.deprecate(redirect='redis list', hide='2.0.34'))
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
-        g.command('show', 'get')
-        g.custom_command('update-settings', 'cli_redis_update_settings', deprecate_info='az redis update')
+        g.show_command('show', 'get')
+        g.custom_command('update-settings', 'cli_redis_update_settings',
+                         deprecate_info=g.deprecate(redirect='redis update', hide='2.0.34'))
         g.generic_update_command('update', exception_handler=wrong_vmsize_argument_exception_handler,
                                  setter_name='update', custom_func_name='cli_redis_update')
 
     with self.command_group('redis patch-schedule', redis_patch) as g:
         g.command('set', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
-        g.command('patch-schedule show', 'get', deprecate_info="az redis patch-schedule show")
+        g.show_command('show', 'get')

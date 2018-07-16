@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.1.0
+++++++
+* BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `vm/vmss extension set/delete`: Added `--no-wait` support.
+* Added `vm extension wait`.
+
 2.0.35
 ++++++
 * msi: support removing system assigned identity

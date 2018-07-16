@@ -19,7 +19,7 @@ from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -165,6 +165,10 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
+            if not use_device_code and (in_cloud_console() or not can_launch_browser()):
+                logger.info('Detect no GUI is available, so fall back to device code')
+                use_device_code = True
+
             if not use_device_code:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
@@ -172,7 +176,7 @@ class Profile(object):
                         tenant, self._ad_resource_uri, authority_url)
                 except RuntimeError:
                     use_device_code = True
-                    logger.warning('Not able to launch a browser to login you in, falling back to device code...')
+                    logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
                 subscriptions = subscription_finder.find_through_interactive_flow(
@@ -255,18 +259,14 @@ class Profile(object):
         from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        msi_creds = MSIAuthentication()
 
-        token_entry = None
         if identity_id:
             if is_valid_resource_id(identity_id):
                 msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
-                msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                 try:
-                    msi_creds.set_token()
-                    token_entry = msi_creds.token
+                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
@@ -278,9 +278,7 @@ class Profile(object):
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
 
-        if not token_entry:
-            msi_creds.set_token()
-            token_entry = msi_creds.token
+        token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -728,7 +726,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
+        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
 0.2.5
 +++++
 * Added 'postgres/myql server vnet-rule' commands.

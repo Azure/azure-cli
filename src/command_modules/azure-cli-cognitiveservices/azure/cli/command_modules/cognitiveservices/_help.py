@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -27,6 +28,9 @@ helps['cognitiveservices account'] = """
 helps['cognitiveservices account delete'] = """
     type: command
     short-summary: Delete an Azure Cognitive Services account.
+    examples:
+        - name: Delete account.
+          text: az cognitiveservices account delete --name myresource-luis -g cognitive-services-resource-group
 """
 
 helps['cognitiveservices account create'] = """
@@ -40,16 +44,25 @@ helps['cognitiveservices account create'] = """
 helps['cognitiveservices account show'] = """
     type: command
     short-summary: Get the details of an Azure Cognitive Services account.
+    examples:
+        - name: Show account information.
+          text: az cognitiveservices account show --name myresource --resource-group cognitive-services-resource-group
 """
 
 helps['cognitiveservices account update'] = """
     type: command
     short-summary: Update the properties of an Azure Cognitive Services account.
+    examples:
+        - name: Update sku and tags.
+          text: az cognitiveservices account update --name myresource -g cognitive-services-resource-group --sku S0 --tags external-app=chatbot-HR azure-web-app-bot=HR-external azure-app-service=HR-external-app-service
 """
 
 helps['cognitiveservices account list-skus'] = """
     type: command
     short-summary: List the SKUs avaiable for an Azure Cognitive Services account.
+    examples:
+        - name: Show SKUs.
+          text: az cognitiveservices account list-skus --name myresource -g cognitive-services-resource-group
 """
 
 
@@ -61,9 +74,15 @@ helps['cognitiveservices account keys'] = """
 helps['cognitiveservices account keys regenerate'] = """
     type: command
     short-summary: Regenerate the keys of an Azure Cognitive Services account.
+    examples:
+        - name: Get new keys for resource.
+          text: az cognitiveservices account keys regenerate --name myresource -g cognitive-services-resource-group --key-name key1
 """
 
 helps['cognitiveservices account keys list'] = """
     type: command
     short-summary: List the keys of an Azure Cognitive Services account.
+    examples:
+        - name: Get current resource keys.
+          text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group
 """

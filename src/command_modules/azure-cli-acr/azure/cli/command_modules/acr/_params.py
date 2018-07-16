@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 import argparse
 from argcomplete.completers import FilesCompleter
+from knack.arguments import CLIArgumentType
 
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     PasswordName,
@@ -47,6 +48,17 @@ from ._validators import (
 )
 
 
+image_by_tag_type = CLIArgumentType(
+    options_list=['--image', '-t'],
+    help="The name of the image. May include a tag in the format 'name:tag'."
+)
+
+image_by_tag_or_digest_type = CLIArgumentType(
+    options_list=['--image', '-t'],
+    help="The name of the image. May include a tag in the format 'name:tag' or digest in the format 'name@digest'."
+)
+
+
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -59,38 +71,39 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')
-        c.argument('image_names', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.", action='append')
+        c.argument('image_names', arg_type=image_by_tag_type, action='append')
         c.argument('timeout', type=int, help='The build timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
         c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_build_arg)
         c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
-        c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
+        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
 
     with self.argument_context('acr import') as c:
         c.argument('source', help="The source identifier in the format '[registry.azurecr.io/]repository[:tag]' or '[registry.azurecr.io/]repository@digest'.")
         c.argument('source_registry', options_list=['--registry', '-r'], help='The source container registry can be name, login server or resource ID of the source registry.')
-        c.argument('target_tags', options_list=['--image', '-t'], help="The repository and optionally a tag in the 'repository:tag' format for target images.", action='append')
+        c.argument('target_tags', arg_type=image_by_tag_type, action='append')
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
+    with self.argument_context('acr repository') as c:
+        c.argument('repository', help="The name of the repository.")
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('top', type=int, help='Limit the number of items in the results.')
+        c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
+        c.argument('detail', help='Show detailed information.', action='store_true')
+        c.argument('delete_enabled', help='Indicates whether delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
+        c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+
     with self.argument_context('acr repository delete') as c:
         c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
-        c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
-        c.argument('repository', help="The name of the repository to delete")
         c.argument('tag', help=argparse.SUPPRESS)
-        c.argument('image', help="The name of the image to delete. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.")
 
     with self.argument_context('acr repository untag') as c:
-        c.argument('image', help="The name of the image to untag. May include a tag in the format 'name:tag'.")
-
-    with self.argument_context('acr repository show-manifests') as c:
-        c.argument('repository', help='The repository to obtain manifests from.')
-        c.argument('top', type=int, help='Limit the number of manifests in the results.')
-        c.argument('orderby', help='Order the manifests in the results. Default to alphabetical order of manifest digests.', choices=['time_asc', 'time_desc'])
-
-    with self.argument_context('acr repository show-tags') as c:
-        c.argument('repository', help='The repository to obtain tags from.')
+        c.argument('image', arg_type=image_by_tag_type)
 
     with self.argument_context('acr create') as c:
         c.argument('registry_name', completer=None, validator=validate_registry_name)
@@ -122,6 +135,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+        c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
 
     with self.argument_context('acr build-task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -129,7 +143,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task.', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
         c.argument('alias', help='The alternative name for build task. Default to the build task name.')
         c.argument('status', help='The current status of build task.', arg_type=get_enum_type(BuildTaskStatus))
-        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the build.')
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
@@ -137,12 +150,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # build step parameters
         c.argument('step_name', help='The name of the build step.', completer=get_resource_name_completion_list(BUILD_STEP_RESOURCE_TYPE))
         c.argument('branch', help="The source control branch name.")
+        c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
         c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
         # build parameters
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')
         c.argument('build_status', help='The current status of build.', arg_type=get_enum_type(BuildStatus))
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)

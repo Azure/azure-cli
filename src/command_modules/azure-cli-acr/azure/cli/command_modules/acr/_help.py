@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -161,6 +162,12 @@ helps['acr repository show-tags'] = """
         - name: Show tags of a repository in a container registry.
           text:
             az acr repository show-tags -n MyRegistry --repository MyRepository
+        - name: Show the detailed information of tags of a repository in a container registry.
+          text:
+            az acr repository show-tags -n MyRegistry --repository MyRepository --detail
+        - name: Show the detailed information of the latest 10 tags ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-tags -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
 """
 
 helps['acr repository show-manifests'] = """
@@ -173,6 +180,39 @@ helps['acr repository show-manifests'] = """
         - name: Show the latest 10 manifests ordered by timestamp of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
+        - name: Show the detailed information of the latest 10 manifests ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+"""
+
+helps['acr repository show'] = """
+    type: command
+    short-summary: Get the attributes of a repository or image in a container registry.
+    examples:
+        - name: Get the attributes of the repository 'hello-world'.
+          text:
+            az acr repository show -n MyRegistry --repository hello-world
+        - name: Get the attributes of the image referenced by tag 'hello-world:latest'.
+          text:
+            az acr repository show -n MyRegistry --image hello-world:latest
+        - name: Get the attributes of the image referenced by digest 'hello-world@sha256:abc123'.
+          text:
+            az acr repository show -n MyRegistry --image hello-world@sha256:abc123
+"""
+
+helps['acr repository update'] = """
+    type: command
+    short-summary: Update the attributes of a repository or image in a container registry.
+    examples:
+        - name: Update the attributes of the repository 'hello-world' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --repository hello-world --write-enabled false
+        - name: Update the attributes of the image referenced by tag 'hello-world:latest' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --image hello-world:latest --write-enabled false
+        - name: Update the attributes of the image referenced by digest 'hello-world@sha256:abc123' to disable write operation.
+          text:
+            az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
 helps['acr repository delete'] = """
@@ -382,6 +422,12 @@ helps['acr build-task list-builds'] = """
         - name: List all of the builds for a registry and show the results in a table.
           text: >
             az acr build-task list-builds -r MyRegistry -o table
+        - name: List the last 10 successful builds for a registry and show the results in a table.
+          text: >
+            az acr build-task list-builds -r MyRegistry --build-status Succeeded --top 10 -o table
+        - name: List all of the builds that built the image 'hello-world:latest' for a registry and show the results in a table.
+          text: >
+            az acr build-task list-builds -r MyRegistry --image hello-world:latest -o table
 """
 
 helps['acr build-task show-build'] = """
@@ -404,17 +450,20 @@ helps['acr build-task run'] = """
 
 helps['acr build-task logs'] = """
     type: command
-    short-summary: Show logs for a particular build. If no build-id is supplied, it shows logs for the last updated build.
+    short-summary: Show logs for a particular build. If no build-id is supplied, it shows logs for the last created build.
     examples:
-        - name: Show logs for the last updated build in the registry.
+        - name: Show logs for the last created build in the registry.
           text: >
             az acr build-task logs -r MyRegistry
-        - name: Show logs for the last updated build in the registry, filtered by build task.
+        - name: Show logs for the last created build in the registry, filtered by build task.
           text: >
             az acr build-task logs -r MyRegistry -n MyBuildTask
         - name: Show logs for a particular build.
           text: >
             az acr build-task logs -r MyRegistry --build-id buildId
+        - name: Show logs for the last created build in the registry that built the image 'hello-world:latest'.
+          text: >
+            az acr build-task logs -r MyRegistry --image hello-world:latest
 """
 
 helps['acr build'] = """

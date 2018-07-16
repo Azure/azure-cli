@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.14
+++++++
+* Minor fixes.
+
 0.1.13
 ++++++
 * Fix typo with example for `az cognitiveservices account create` [#5603](https://github.com/Azure/azure-cli/issues/5603)

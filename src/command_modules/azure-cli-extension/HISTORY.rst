@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
 0.1.0
 +++++
 * `extension list-available` will only show extensions compatible with CLI version.

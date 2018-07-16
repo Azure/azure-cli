@@ -2,6 +2,15 @@
 
 Release History
 ===============
+
+0.4.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.3.2
+++++++
+* Minor fixes.
+
 0.3.1
 +++++
 * Added new commands for budget API.

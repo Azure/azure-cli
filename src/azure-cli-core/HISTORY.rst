@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.43
+++++++
+* Minor fixes
+
+2.0.42
+++++++
+* login: support browser based login in WSL bash window
+* Adds `--force-string` flag to all generic update commands.
+
 2.0.41
 ++++++
 * Minor fixes
@@ -30,7 +39,7 @@ Release History
 
 2.0.35
 ++++++
-* Minor fixes
+* Added method of registering `show` commands to fail with exit code of 3.
 
 2.0.34
 ++++++

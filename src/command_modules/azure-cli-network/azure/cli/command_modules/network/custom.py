@@ -108,6 +108,15 @@ def list_nsgs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
 
 
+def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
+    client = network_client_factory(cmd.cli_ctx).network_security_groups
+    nsg = client.get(resource_group_name, network_security_group_name)
+    rules = nsg.security_rules
+    if include_default:
+        rules = rules + nsg.default_security_rules
+    return rules
+
+
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
@@ -1940,7 +1949,7 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
-               application_security_groups=None):
+               application_security_groups=None, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     (NetworkInterface, NetworkInterfaceDnsSettings, NetworkInterfaceIPConfiguration, NetworkSecurityGroup,
      PublicIPAddress, Subnet) = cmd.get_models(
@@ -1975,7 +1984,7 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
     if public_ip_address:
         ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
     nic.ip_configurations = [ip_config]
-    return client.create_or_update(resource_group_name, network_interface_name, nic)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_interface_name, nic)
 
 
 def update_nic(cmd, instance, network_security_group=None, enable_ip_forwarding=None,

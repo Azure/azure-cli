@@ -2,6 +2,16 @@
 
 Release History
 ===============
+
+0.4.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Fixed `az batchai job exec` command
+
+0.3.2
++++++
+* Minor fixes
+
 0.3.1
 +++++
 * Fixed `-o table` option for `az batchai cluster node list` and `az batchai job node list` commands.

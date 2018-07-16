@@ -12,7 +12,7 @@ from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.parser import AzCliCommandParser
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.arguments import enum_choice_list
 
@@ -32,16 +32,17 @@ class TestParser(unittest.TestCase):
         def test_handler2():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
         command = AzCliCommand(cli.loader, 'command the-name', test_handler1)
         command2 = AzCliCommand(cli.loader, 'sub-command the-second-name', test_handler2)
         cmd_table = {'command the-name': command, 'sub-command the-second-name': command2}
+        cli.commands_loader.command_table = cmd_table
 
         parser = AzCliCommandParser(cli)
-        parser.load_command_table(cmd_table)
+        parser.load_command_table(cli.commands_loader)
         args = parser.parse_args('command the-name'.split())
         self.assertIs(args.func, command)
 
@@ -56,16 +57,17 @@ class TestParser(unittest.TestCase):
         def test_handler(args):  # pylint: disable=unused-argument
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
         command = AzCliCommand(cli.loader, 'test command', test_handler)
         command.add_argument('req', '--req', required=True)
         cmd_table = {'test command': command}
+        cli.commands_loader.command_table = cmd_table
 
         parser = AzCliCommandParser(cli)
-        parser.load_command_table(cmd_table)
+        parser.load_command_table(cli.commands_loader)
 
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, command)
@@ -78,16 +80,17 @@ class TestParser(unittest.TestCase):
         def test_handler():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
         command = AzCliCommand(cli.loader, 'test command', test_handler)
         command.add_argument('req', '--req', required=True, nargs=2)
         cmd_table = {'test command': command}
+        cli.commands_loader.command_table = cmd_table
 
         parser = AzCliCommandParser(cli)
-        parser.load_command_table(cmd_table)
+        parser.load_command_table(cli.commands_loader)
 
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, command)
@@ -108,16 +111,17 @@ class TestParser(unittest.TestCase):
         def test_handler():
             pass
 
-        cli = TestCli()
+        cli = DummyCli()
         cli.loader = mock.MagicMock()
         cli.loader.cli_ctx = cli
 
         command = AzCliCommand(cli.loader, 'test command', test_handler)
         command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
         cmd_table = {'test command': command}
+        cli.commands_loader.command_table = cmd_table
 
         parser = AzCliCommandParser(cli)
-        parser.load_command_table(cmd_table)
+        parser.load_command_table(cli.commands_loader)
 
         args = parser.parse_args('test command --opt alL_cAps'.split())
         self.assertEqual(args.opt, 'ALL_CAPS')
@@ -184,7 +188,7 @@ class TestParser(unittest.TestCase):
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table
+        return module_command_table, command_loader.command_group_table
 
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
@@ -192,14 +196,14 @@ class TestParser(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_parser_error_spellchecker(self):
-        cli = TestCli()
+        cli = DummyCli()
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
 
-        cmd_tbl = cli.loader.load_command_table(None)
+        cli.loader.load_command_table(None)
 
         parser = cli.parser_cls(cli)
-        parser.load_command_table(cmd_tbl)
+        parser.load_command_table(cli.loader)
 
         logger_msgs = []
         choice_lists = []

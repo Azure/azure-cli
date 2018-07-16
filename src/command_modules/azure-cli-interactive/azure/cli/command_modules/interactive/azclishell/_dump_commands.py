@@ -7,6 +7,7 @@ import json
 import os
 import yaml
 
+from knack.help import REQUIRED_TAG
 from knack.help_files import helps
 from knack.log import get_logger
 from azure.cli.core import MainCommandsLoader
@@ -68,7 +69,7 @@ class FreshTable(object):
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    command_table = None
+    loader = None
 
     def __init__(self, shell_ctx):
         self.shell_ctx = shell_ctx
@@ -83,7 +84,7 @@ class FreshTable(object):
 
         main_loader.load_command_table(None)
         main_loader.load_arguments(None)
-        add_id_parameters(None, cmd_tbl=main_loader.command_table)
+        add_id_parameters(None, commands_loader=main_loader)
         cmd_table = main_loader.command_table
 
         cmd_table_data = {}
@@ -96,15 +97,15 @@ class FreshTable(object):
 
                 # checking all the parameters for a single command
                 parameter_metadata = {}
-                for key in cmd.arguments:
+                for arg in cmd.arguments.values():
                     options = {
-                        'name': [name for name in cmd.arguments[key].options_list],
-                        'required': '[REQUIRED]' if cmd.arguments[key].type.settings.get('required') else '',
-                        'help': cmd.arguments[key].type.settings.get('help') or ''
+                        'name': [name for name in arg.options_list],
+                        'required': REQUIRED_TAG if arg.type.settings.get('required') else '',
+                        'help': arg.type.settings.get('help') or ''
                     }
                     # the key is the first alias option
-                    if cmd.arguments[key].options_list:
-                        parameter_metadata[cmd.arguments[key].options_list[0]] = options
+                    if arg.options_list:
+                        parameter_metadata[arg.options_list[0]] = options
 
                 cmd_table_data[command_name] = {
                     'parameters': parameter_metadata,
@@ -117,7 +118,7 @@ class FreshTable(object):
         load_help_files(cmd_table_data)
         elapsed = timeit.default_timer() - start_time
         logger.debug('Command table dumped: %s sec', elapsed)
-        FreshTable.command_table = main_loader.command_table
+        FreshTable.loader = main_loader
 
         # dump into the cache file
         command_file = shell_ctx.config.get_help_files()

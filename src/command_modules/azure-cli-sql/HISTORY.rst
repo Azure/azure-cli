@@ -3,6 +3,17 @@
 Release History
 ===============
 
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Fixed 'The provided resource group name ... did not match the name in the Url' error when specifying elastic pool name for `sql db copy` and `sql db replica create` commands.
+* Allow configuring default sql server by executing `az configure --defaults sql-server=<name>`.
+* Implemented table formatters for 'sql server', 'sql server firewall-rule', 'sql list-usages', and 'sql show-usage' commands. Use '-o table' to format output as a table.
+
+2.0.28
+++++++
+* Minor fixes.
+
 2.0.27
 ++++++
 * Added new Managed instance and Managed database CRUD commands.

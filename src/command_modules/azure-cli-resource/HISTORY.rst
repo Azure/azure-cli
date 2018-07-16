@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.1.1
+++++++
+* `group deployment create`: Add `--rollback-on-error` to execute a known-good deployment on error.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `group deployment delete`: Add `--no-wait` support.
+* `deployment delete`: Add `--no-wait` support.
+* Added `deployment wait` command.
+* Fix issue where the subscription-level `az deployment` commands erroneously appeared for profile 2017-03-09-profile.
+
 2.0.32
 ++++++
 * Support deployment at subscription scope: new operation group `deployment`.

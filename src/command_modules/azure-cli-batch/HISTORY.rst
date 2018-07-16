@@ -3,6 +3,20 @@
 Release History
 ===============
 
+3.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Fix bug on using token credential on cloud shell mode
+* When use json file as input parameter, deserialize content with case insentive.
+
+3.2.6
++++++
+* Minor fixes
+
+3.2.5
++++++
+* Minor fixes
+
 3.2.4
 +++++
 * Remove azure-batch-extensions dependency.

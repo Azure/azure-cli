@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.1.0
+++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
 2.0.27
 ++++++
 * login: use browser for interactive login
