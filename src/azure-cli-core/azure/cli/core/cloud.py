@@ -61,7 +61,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory_resource_id=None,
                  active_directory_graph_resource_id=None,
                  active_directory_data_lake_resource_id=None,
-                 vm_image_alias_doc=None):
+                 vm_image_alias_doc=None,
+                 log_analytics_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -73,6 +74,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
         self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
         self.vm_image_alias_doc = vm_image_alias_doc
+        self.log_analytics_resource_id = log_analytics_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -159,7 +161,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.windows.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json', # pylint: disable=line-too-long
+        log_analytics_resource_id='https://api.loganalytics.io'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -197,7 +200,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',   # pylint: disable=line-too-long
+        log_analytics_resource_id='https://api.loganalytics.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
