@@ -79,13 +79,12 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        loc = 'westeurope'
         user = admin_login
 
         # test create sql server with minimal required parameters
         server_1 = self.cmd('sql server create -g {} --name {} -l {} '
                             '--admin-user {} --admin-password {}'
-                            .format(resource_group_1, server_name_1, loc, user, admin_passwords[0]),
+                            .format(resource_group_1, server_name_1, resource_group_location, user, admin_passwords[0]),
                             checks=[
                                 JMESPathCheck('name', server_name_1),
                                 JMESPathCheck('resourceGroup', resource_group_1),
@@ -117,7 +116,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test create another sql server, with identity this time
         self.cmd('sql server create -g {} --name {} -l {} -i '
                  '--admin-user {} --admin-password {}'
-                 .format(resource_group_2, server_name_2, loc, user, admin_passwords[0]),
+                 .format(resource_group_2, server_name_2, resource_group_location, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('resourceGroup', resource_group_2),
@@ -284,7 +283,6 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = 'eastus2'
 
         # test sql db commands
         db1 = self.cmd('sql db create -g {} --server {} --name {}'
@@ -292,7 +290,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                        checks=[
                            JMESPathCheck('resourceGroup', rg),
                            JMESPathCheck('name', database_name),
-                           JMESPathCheck('location', loc_display),
+                           JMESPathCheck('location', resource_group_location),
                            JMESPathCheck('elasticPoolId', None),
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
@@ -562,7 +560,6 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'S1'
 
         rg = resource_group_1
-        loc_display = 'westus'
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -570,7 +567,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online')])
 
@@ -914,7 +911,6 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = 'westus'
 
         # test sql db commands
         dw = self.cmd('sql dw create -g {} --server {} --name {}'
@@ -922,7 +918,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                       checks=[
                           JMESPathCheck('resourceGroup', rg),
                           JMESPathCheck('name', database_name),
-                          JMESPathCheck('location', loc_display),
+                          JMESPathCheck('location', resource_group_location),
                           JMESPathCheck('edition', 'DataWarehouse'),
                           JMESPathCheck('sku.tier', 'DataWarehouse'),
                           JMESPathCheck('status', 'Online')]).get_output_in_json()
@@ -1337,7 +1333,6 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         db_service_objective = 'S1'
 
         rg = resource_group
-        loc_display = 'East US 2'
 
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
@@ -1348,7 +1343,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                   checks=[
                                       JMESPathCheck('resourceGroup', rg),
                                       JMESPathCheck('name', self.pool_name),
-                                      JMESPathCheck('location', loc_display),
+                                      JMESPathCheck('location', resource_group_location),
                                       JMESPathCheck('state', 'Ready'),
                                       JMESPathCheck('dtu', dtu),
                                       JMESPathCheck('sku.capacity', dtu),
@@ -1447,7 +1442,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', pool_name2),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('state', 'Ready')])
 
         self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, server),
@@ -1883,7 +1878,6 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     @StorageAccountPreparer()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -1913,7 +1907,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name),
-                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('location', resource_group_location),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
@@ -1921,7 +1915,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name2),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name2),
-                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('location', resource_group_location),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
@@ -1929,7 +1923,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name3),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name3),
-                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('location', resource_group_location),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
@@ -2341,7 +2335,6 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         database_name_4 = "updateNoParamForZonedDb"
 
         rg = resource_group
-        loc_display = "centralus"
 
         # Test creating database with zone resilience set to false.  Expect regular database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
@@ -2349,7 +2342,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('edition', 'Premium'),
                      JMESPathCheck('sku.tier', 'Premium'),
@@ -2372,7 +2365,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_2),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('edition', 'Premium'),
                      JMESPathCheck('sku.tier', 'Premium'),
@@ -2395,7 +2388,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_3),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('edition', 'Premium'),
                      JMESPathCheck('sku.tier', 'Premium'),
@@ -2418,7 +2411,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_4),
-                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('edition', 'Premium'),
                      JMESPathCheck('sku.tier', 'Premium'),
