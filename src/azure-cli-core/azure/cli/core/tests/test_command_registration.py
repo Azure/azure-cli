@@ -12,7 +12,7 @@ from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.arguments import CLICommandArgument, CLIArgumentType
 
@@ -77,7 +77,7 @@ class TestCommandRegistration(unittest.TestCase):
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         command = 'test register sample-vm-get'
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
@@ -110,7 +110,7 @@ class TestCommandRegistration(unittest.TestCase):
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         command = 'test command sample-vm-get'
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
@@ -206,7 +206,7 @@ class TestCommandRegistration(unittest.TestCase):
     def test_register_command_from_extension(self):
 
         from azure.cli.core.commands import _load_command_loader
-        cli = TestCli()
+        cli = DummyCli()
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
 
@@ -249,7 +249,7 @@ class TestCommandRegistration(unittest.TestCase):
                 with self.argument_context('test command vm-get-2') as c:
                     c.argument('vm_name', derived_vm_name_type, help='second modification')
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, 'test vm-get')
         self.assertEqual(len(loader.command_table), 3,
                          'We expect exactly three commands in the command table')
@@ -279,7 +279,7 @@ class TestCommandRegistration(unittest.TestCase):
                 with self.argument_context('test command sample-vm-get') as c:
                     c.extra('added_param', options_list=['--added-param'], metavar='ADDED', help='Just added this right now!', required=True)
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         command = 'test command sample-vm-get'
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
@@ -324,7 +324,7 @@ class TestCommandRegistration(unittest.TestCase):
         setattr(sys.modules[__name__], sample_sdk_method_with_weird_docstring.__name__,
                 sample_sdk_method_with_weird_docstring)  # pylint: disable=line-too-long
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         command = 'test command foo'
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
@@ -384,7 +384,7 @@ class TestCommandRegistration(unittest.TestCase):
                                validator=test_validator_completer, completer=test_validator_completer)
 
         setattr(sys.modules[__name__], sample_sdk_method.__name__, sample_sdk_method)
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
         command = 'override_using_register_cli_argument foo'
         loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 

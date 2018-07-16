@@ -51,8 +51,8 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_provider_backup(self):
         # Verifies provider is used as backup if api-version not specified.
-        from azure.cli.testsdk import TestCli
-        cli = TestCli()
+        from azure.cli.core.mock import DummyCli
+        cli = DummyCli()
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(cli, resource_type='Mock/test', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)
@@ -60,8 +60,8 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_provider_with_parent_backup(self):
         # Verifies provider (with parent) is used as backup if api-version not specified.
-        from azure.cli.testsdk import TestCli
-        cli = TestCli()
+        from azure.cli.core.mock import DummyCli
+        cli = DummyCli()
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(cli, parent_resource_path='foo/testfoo123', resource_group_name='rg',
                                    resource_provider_namespace='Mock', resource_type='test',
@@ -71,8 +71,8 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_all_previews(self):
         # Verifies most recent preview version returned only if there are no non-preview versions.
-        from azure.cli.testsdk import TestCli
-        cli = TestCli()
+        from azure.cli.core.mock import DummyCli
+        cli = DummyCli()
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(cli, resource_type='Mock/preview', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)

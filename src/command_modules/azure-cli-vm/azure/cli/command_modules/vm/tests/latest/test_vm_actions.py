@@ -20,7 +20,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_vm_vmss_msi,
                                                       _validate_vm_vmss_accelerated_networking)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 from azure.mgmt.compute.models import CachingTypes
 from knack.util import CLIError
 
@@ -71,7 +71,7 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(TestCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
@@ -85,7 +85,7 @@ class TestActions(unittest.TestCase):
     def test_source_storage_account_err_case(self):
         np = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         np._cmd = cmd
         np.source_storage_account_id = '/subscriptions/123/resourceGroups/ygsrc/providers/Microsoft.Storage/storageAccounts/s123'
         np.source = '/subscriptions/123/resourceGroups/yugangw/providers/Microsoft.Compute/disks/d2'
@@ -168,7 +168,7 @@ class TestActions(unittest.TestCase):
         compute_client = mock.MagicMock()
         image = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         image.plan.name = 'plan1'
         image.plan.product = 'product1'
         image.plan.publisher = 'publisher1'
@@ -195,7 +195,7 @@ class TestActions(unittest.TestCase):
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
@@ -274,7 +274,7 @@ class TestActions(unittest.TestCase):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
@@ -316,7 +316,7 @@ class TestActions(unittest.TestCase):
         # check throw on : az vm/vmss assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 

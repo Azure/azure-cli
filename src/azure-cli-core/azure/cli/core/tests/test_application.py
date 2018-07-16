@@ -13,18 +13,18 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.commands.validators import IterateAction
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
 
 
 class TestApplication(unittest.TestCase):
     def test_client_request_id_is_not_assigned_when_application_is_created(self):
-        cli = TestCli()
+        cli = DummyCli()
         self.assertNotIn('x-ms-client-request-id', cli.data['headers'])
 
     def test_client_request_id_is_refreshed_correctly(self):
-        cli = TestCli()
+        cli = DummyCli()
         cli.refresh_request_id()
         self.assertIn('x-ms-client-request-id', cli.data['headers'])
 
@@ -45,7 +45,7 @@ class TestApplication(unittest.TestCase):
                 self.command_table = {'test': AzCliCommand(self, 'test', _handler)}
                 return self.command_table
 
-        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+        cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         cli.invoke(['test'])
         self.assertIn('x-ms-client-request-id', cli.data['headers'])
@@ -64,7 +64,7 @@ class TestApplication(unittest.TestCase):
         def other_handler(*args, **kwargs):
             self.assertEqual(kwargs['args'], 'secret sauce')
 
-        cli = TestCli()
+        cli = DummyCli()
 
         cli.raise_event('was_handler_called', args=handler_called)
         self.assertFalse(handler_called[0], "Raising event with no handlers registered somehow failed...")
