@@ -166,6 +166,7 @@ def get_api_version(api_profile, resource_type, as_sdk_profile=False):
     except KeyError:
         raise APIVersionException(resource_type, api_profile)
 
+
 @total_ordering
 class _SemVerAPIFormat(object):
     """Basic semver x.y.z API format.
@@ -240,13 +241,16 @@ class _DateAPIFormat(object):
                         return True
         return False
 
+
 def _cross_api_format_lt(api_version, other):
     """LT strategy that supports if types are different.
 
     For now, let's assume that any Semver is higher than any DateAPI
     This fits KeyVault, if later we have a counter-example we'll update
     """
-    is_semver = lambda x: "." in x # Keep it stupid and simple
+    def is_semver(version):
+        # Keep it stupid and simple
+        return "." in version
 
     api_version = _SemVerAPIFormat(api_version) if is_semver(api_version) else _DateAPIFormat(api_version)
     other = _SemVerAPIFormat(other) if is_semver(other) else _DateAPIFormat(other)
@@ -256,6 +260,7 @@ def _cross_api_format_lt(api_version, other):
     elif isinstance(api_version, _DateAPIFormat) and isinstance(other, _SemVerAPIFormat):
         return True
     return False
+
 
 def _validate_api_version(api_version_str, min_api=None, max_api=None):
     """Validate if api_version is inside the interval min_api/max_api.
