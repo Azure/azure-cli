@@ -20,7 +20,8 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    LiveScenarioTest)
+    LiveScenarioTest,
+    record_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
