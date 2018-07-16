@@ -421,7 +421,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.cmd('keyvault certificate pending merge --vault-name {kv} -n pending-cert --file "{fake_cert_path}"')
         self.cmd('keyvault certificate pending delete --vault-name {kv} -n pending-cert')
 
-        with self.assertRaises(CLIError):
+        with self.assertRaises(SystemExit):
             self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert')
 
 
