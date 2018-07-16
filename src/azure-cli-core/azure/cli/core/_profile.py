@@ -726,7 +726,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
+        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
