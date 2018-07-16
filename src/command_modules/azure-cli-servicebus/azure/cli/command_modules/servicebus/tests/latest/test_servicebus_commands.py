@@ -685,13 +685,16 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get all queues from Premium namespace
-        listqueues = self.cmd('servicebus queue list --resource-group {rg} --namespace-name {namespacenamepremium}')
+        listqueues1 = self.cmd(
+            'servicebus queue list --resource-group {rg} --namespace-name {namespacenamepremium}').get_output_in_json()
+        self.assertIsNotNone(listqueues1)
+        self.assertGreaterEqual(len(listqueues1), 10, 'Premium - get all queues count not 10')
 
         # Get all queues from Premium namespace
-        listqueues1 = self.cmd('servicebus queue list --resource-group {rg} --namespace-name {namespacenamepremium}').get_output_in_json()
-
-        # Get all queues from Premium namespace
-        listtopics = self.cmd('servicebus topic list --resource-group {rg} --namespace-name {namespacenamepremium}')
+        listtopics = self.cmd(
+            'servicebus topic list --resource-group {rg} --namespace-name {namespacenamepremium}').get_output_in_json()
+        self.assertIsNotNone(listtopics)
+        self.assertGreaterEqual(len(listtopics), 10, 'Premium - get all topics count not 10')
 
         time.sleep(30)
 

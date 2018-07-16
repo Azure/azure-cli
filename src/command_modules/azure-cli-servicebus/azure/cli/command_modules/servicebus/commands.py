@@ -8,6 +8,7 @@
 
 from azure.cli.core.commands import CliCommandType
 
+
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import namespaces_mgmt_client_factory, \
         queues_mgmt_client_factory, topics_mgmt_client_factory, subscriptions_mgmt_client_factory, \

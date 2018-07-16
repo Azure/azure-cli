@@ -36,4 +36,3 @@ def disaster_recovery_mgmt_client_factory(cli_ctx, _):
 
 def migration_mgmt_client_factory(cli_ctx, _):
     return cf_servicebus(cli_ctx).migration_configs
-
