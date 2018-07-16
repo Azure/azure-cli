@@ -534,12 +534,12 @@ helps['servicebus georecovery-alias delete'] = """
           text: az servicebus georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
-helps['servicebus migration create'] = """
+helps['servicebus migration start'] = """
     type: command
     short-summary: Creates and Start Service Bus Migration of Standard to Premium
     examples:
         - name:  Creates and Start Service Bus Migration of Standard to Premium
-          text: az servicebus migration create --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
+          text: az servicebus migration start --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
 """
 
 helps['servicebus migration show'] = """
@@ -550,20 +550,20 @@ helps['servicebus migration show'] = """
           text: az servicebus migration show --resource-group myresourcegroup --name standardnamespace
 """
 
-helps['servicebus migration commit'] = """
+helps['servicebus migration complete'] = """
     type: command
     short-summary: Completes the Service Bus Migration of Standard to Premium namespace
     examples:
         - name:  Completes the Service Bus Migration of Standard to Premium namespace
-          text: az servicebus migration commit --resource-group myresourcegroup --name standardnamespace
+          text: az servicebus migration complete --resource-group myresourcegroup --name standardnamespace
 """
 
-helps['servicebus migration abort'] = """
+helps['servicebus migration stop'] = """
     type: command
     short-summary: Disable the Service Bus Migration of Standard to Premium namespace
     examples:
         - name:  Disable Service Bus Migration of Standard to Premium namespace
-          text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
+          text: az servicebus migration stop --resource-group myresourcegroup --name standardnamespace
 """
 
 helps['servicebus migration delete'] = """

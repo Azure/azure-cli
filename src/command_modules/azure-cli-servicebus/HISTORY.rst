@@ -3,6 +3,16 @@
 Release History
 ===============
 
+0.3.0
++++++
+* Added New cmdlets for Service Bus Standard to Premium namespace:
+    'az servicebus migration start', 'az servicebus migration show', 'az servicebus migration complete', 'az servicebus migration stop',
+    'az servicebus migration delete'
+
+* Added new optional properties to Service Bus queue and Subscription
+    - enable_batched_operations and dead_lettering_on_filter_evaluation_exceptions in queue
+    - dead_lettering_on_filter_evaluation_exceptions in subscriptions
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
