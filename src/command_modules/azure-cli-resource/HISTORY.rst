@@ -4,8 +4,9 @@ Release History
 ===============
 
 2.1.1
-++++++
++++++
 * `group deployment create`: Add `--rollback-on-error` to execute a known-good deployment on error.
+* `group deployment create`: Fix issue where `--parameters {}` resulted in an error.
 
 2.1.0
 +++++
