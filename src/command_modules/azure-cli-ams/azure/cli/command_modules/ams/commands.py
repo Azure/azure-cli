@@ -6,7 +6,8 @@
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_assets_client, get_jobs_client, get_streaming_locators_client,
-                              get_streaming_policies_client, get_streaming_endpoints_client)
+                              get_streaming_policies_client, get_streaming_endpoints_client,
+                              get_locations_client)
 from ._exception_handler import ams_exception_handler
 
 
@@ -39,6 +40,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('create', 'create_mediaservice',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.custom_command('check-name-availability', 'check_name_availability',
+                         custom_command_type=get_custom_sdk('account', get_locations_client))
 
     with self.command_group('ams account storage', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('add', 'add_mediaservice_secondary_storage',
