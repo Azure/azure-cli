@@ -46,15 +46,3 @@ def get_resource_types_completion_list(cmd, prefix, namespace, **kwargs):  # pyl
         for r in p.resource_types:
             types.append(p.namespace + '/' + r.resource_type)
     return types
-
-
-@Completer
-def get_subscription_id_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    from azure.cli.core.api import load_subscriptions
-
-    subscriptions = load_subscriptions(cmd.cli_ctx)
-    result = []
-    for subscription in subscriptions:
-        result.append(subscription['id'])
-        result.append(subscription['name'])
-    return result
