@@ -21,13 +21,12 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
-from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord,
                                    NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_api_version, supported_api_version
 
 logger = get_logger(__name__)
 
@@ -902,8 +901,9 @@ def list_ddos_plans(cmd, resource_group_name=None):
 
 
 # region DNS Commands
-def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
+def create_dns_zone(cmd, client, resource_group_name, zone_name, location='global', tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
+    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     zone = Zone(location=location, tags=tags)
 
     if hasattr(zone, 'zone_type'):
@@ -936,7 +936,7 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
 
 
 def list_dns_zones(cmd, resource_group_name=None):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient).zones
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).zones
     if resource_group_name:
         return ncf.list_by_resource_group(resource_group_name)
     return ncf.list()
@@ -944,7 +944,7 @@ def list_dns_zones(cmd, resource_group_name=None):
 
 def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient).record_sets
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = RecordSet(ttl=ttl, metadata=metadata)
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_set_type, record_set, if_match=if_match,
@@ -984,7 +984,7 @@ def _type_to_property_name(key):
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):
     from time import localtime, strftime
 
-    client = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
 
     zone_obj = OrderedDict({
@@ -1058,14 +1058,14 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
 
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements
-def _build_record(data):
+def _build_record(cmd, data, version):
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
             return AaaaRecord(ipv6_address=data['ip'])
         elif record_type == 'a':
             return ARecord(ipv4_address=data['ip'])
-        elif record_type == 'caa':
+        elif record_type == 'caa' and supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview'):
             return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
         elif record_type == 'cname':
             return CnameRecord(cname=data['alias'])
@@ -1093,6 +1093,7 @@ def _build_record(data):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
+    dns_api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
@@ -1113,22 +1114,25 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 record_set_ttl = entry['ttl']
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
-                record = _build_record(entry)
-                record_set = record_sets.get(record_set_key, None)
-                if not record_set:
+                record = _build_record(cmd, entry, dns_api_version)
+                if not record:
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
+                else:
+                    record_set = record_sets.get(record_set_key, None)
+                    if not record_set:
 
-                    # Workaround for issue #2824
-                    relative_record_set_name = record_set_name.rstrip('.')
-                    if not relative_record_set_name.endswith(origin):
-                        logger.warning(
-                            'Cannot import %s. Only records relative to origin may be '
-                            'imported at this time. Skipping...', relative_record_set_name)
-                        continue
+                        # Workaround for issue #2824
+                        relative_record_set_name = record_set_name.rstrip('.')
+                        if not relative_record_set_name.endswith(origin):
+                            logger.warning(
+                                'Cannot import %s. Only records relative to origin may be '
+                                'imported at this time. Skipping...', relative_record_set_name)
+                            continue
 
-                    record_set = RecordSet(ttl=record_set_ttl)
-                    record_sets[record_set_key] = record_set
-                _add_record(record_set, record, record_set_type,
-                            is_list=record_set_type.lower() not in ['soa', 'cname'])
+                        record_set = RecordSet(ttl=record_set_ttl)
+                        record_sets[record_set_key] = record_set
+                    _add_record(record_set, record, record_set_type,
+                                is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
     for key, rs in record_sets.items():
@@ -1141,9 +1145,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         total_records += record_count
     cum_records = 0
 
-    client = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
-    client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
+    client.zones.create_or_update(resource_group_name, zone_name, Zone(location='global'))
     for key, rs in record_sets.items():
 
         rs_name, rs_type = key.lower().rsplit('.', 1)
@@ -1226,7 +1230,7 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record_set_name = '@'
     record_type = 'soa'
 
-    ncf = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient).record_sets
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     record = record_set.soa_record
 
@@ -1352,7 +1356,7 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 def _add_save_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True):
-    ncf = get_mgmt_service_client(cli_ctx, DnsManagementClient).record_sets
+    ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
@@ -1366,7 +1370,7 @@ def _add_save_record(cli_ctx, record, record_type, record_set_name, resource_gro
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
-    ncf = get_mgmt_service_client(cli_ctx, DnsManagementClient).record_sets
+    ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     record_property = _type_to_property_name(record_type)
 
