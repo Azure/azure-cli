@@ -5,7 +5,7 @@ Release History
 
 2.1.1
 +++++
-* Minor fixes.
+* Allows download of large files using a single connection.
 
 2.1.0
 +++++
