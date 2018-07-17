@@ -8,7 +8,7 @@ from azure.cli.core.decorators import Completer
 
 @Completer
 def get_subscription_id_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    from azure.cli.core.api import load_subscriptions
+    from azure.cli.core._profile import load_subscriptions
 
     subscriptions = load_subscriptions(cmd.cli_ctx)
     result = []

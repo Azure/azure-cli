@@ -298,7 +298,7 @@ def register_global_subscription_parameter(cli_ctx):
     import knack.events as events
 
     def add_subscription_parameter(_, **kwargs):
-        from azure.cli.command_modules.profile._completers import get_subscription_id_list
+        from azure.cli.core._completers import get_subscription_id_list
 
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table

@@ -9,3 +9,5 @@
 
 from ._environment import get_config_dir
 from ._profile import load_subscriptions
+
+from ._completers import get_subscription_id_list
