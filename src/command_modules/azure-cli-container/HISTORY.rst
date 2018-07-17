@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Do not require '--log-analytics-workspace-key' for name or ID when in set subscription
+
 0.3.1
 +++++
 * Update PyYAML dependency to 3.13
