@@ -60,7 +60,7 @@ def _process_parameters(template_param_defs, parameter_lists):
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
         # support situation where empty JSON "{}" is provided
-        if value is '{}' and not parameters:
+        if value == '{}' and not parameters:
             return True
 
         try:
