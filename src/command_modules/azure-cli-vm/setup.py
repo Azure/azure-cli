@@ -15,7 +15,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -39,7 +39,7 @@ DEPENDENCIES = [
     'azure-keyvault==0.3.7',
     'azure-mgmt-network==2.0.0rc3',
     'azure-mgmt-resource==2.0.0rc2',
-    'azure-multiapi-storage==0.2.1',
+    'azure-multiapi-storage==0.2.2',
     'azure-mgmt-marketplaceordering==0.1.0',
     'azure-cli-core'
 ]
