@@ -8,3 +8,4 @@
 # pylint: disable=unused-import
 
 from ._environment import get_config_dir
+from ._profile import load_subscriptions

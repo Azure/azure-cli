@@ -67,6 +67,14 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 
 
+def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
+    profile = Profile(cli_ctx=cli_ctx)
+    if refresh:
+        profile.refresh_accounts()
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
+    return subscriptions
+
+
 def _get_authority_url(cli_ctx, tenant):
     import re
     authority_url = cli_ctx.cloud.endpoints.active_directory
