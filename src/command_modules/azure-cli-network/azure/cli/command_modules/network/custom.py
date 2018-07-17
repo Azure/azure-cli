@@ -903,7 +903,6 @@ def list_ddos_plans(cmd, resource_group_name=None):
 # region DNS Commands
 def create_dns_zone(cmd, client, resource_group_name, zone_name, location='global', tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     zone = Zone(location=location, tags=tags)
 
     if hasattr(zone, 'zone_type'):
@@ -1065,7 +1064,8 @@ def _build_record(cmd, data, version):
             return AaaaRecord(ipv6_address=data['ip'])
         elif record_type == 'a':
             return ARecord(ipv4_address=data['ip'])
-        elif record_type == 'caa' and supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview'):
+        elif (record_type == 'caa' and
+              supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
             return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
         elif record_type == 'cname':
             return CnameRecord(cname=data['alias'])
@@ -1115,24 +1115,21 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
                 record = _build_record(cmd, entry, dns_api_version)
-                if not record:
-                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
-                else:
-                    record_set = record_sets.get(record_set_key, None)
-                    if not record_set:
+                record_set = record_sets.get(record_set_key, None)
+                if not record_set:
 
-                        # Workaround for issue #2824
-                        relative_record_set_name = record_set_name.rstrip('.')
-                        if not relative_record_set_name.endswith(origin):
-                            logger.warning(
-                                'Cannot import %s. Only records relative to origin may be '
-                                'imported at this time. Skipping...', relative_record_set_name)
-                            continue
+                    # Workaround for issue #2824
+                    relative_record_set_name = record_set_name.rstrip('.')
+                    if not relative_record_set_name.endswith(origin):
+                        logger.warning(
+                            'Cannot import %s. Only records relative to origin may be '
+                            'imported at this time. Skipping...', relative_record_set_name)
+                        continue
 
-                        record_set = RecordSet(ttl=record_set_ttl)
-                        record_sets[record_set_key] = record_set
-                    _add_record(record_set, record, record_set_type,
-                                is_list=record_set_type.lower() not in ['soa', 'cname'])
+                    record_set = RecordSet(ttl=record_set_ttl)
+                    record_sets[record_set_key] = record_set
+                _add_record(record_set, record, record_set_type,
+                            is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
     for key, rs in record_sets.items():
@@ -1342,16 +1339,19 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 
 def _add_record(record_set, record, record_type, is_list=False):
-    record_property = _type_to_property_name(record_type)
-
-    if is_list:
-        record_list = getattr(record_set, record_property)
-        if record_list is None:
-            setattr(record_set, record_property, [])
-            record_list = getattr(record_set, record_property)
-        record_list.append(record)
+    if not record:
+        logger.warning('Cannot import %s. RecordType is not found. Skipping...', record_set)
     else:
-        setattr(record_set, record_property, record)
+        record_property = _type_to_property_name(record_type)
+
+        if is_list:
+            record_list = getattr(record_set, record_property)
+            if record_list is None:
+                setattr(record_set, record_property, [])
+                record_list = getattr(record_set, record_property)
+            record_list.append(record)
+        else:
+            setattr(record_set, record_property, record)
 
 
 def _add_save_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
