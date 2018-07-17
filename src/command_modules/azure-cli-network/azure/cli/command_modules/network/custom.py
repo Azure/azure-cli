@@ -1115,6 +1115,10 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
                 record = _build_record(cmd, entry, dns_api_version)
+                if not record:
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
+                    continue
+
                 record_set = record_sets.get(record_set_key, None)
                 if not record_set:
 
@@ -1339,19 +1343,16 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 
 def _add_record(record_set, record, record_type, is_list=False):
-    if not record:
-        logger.warning('Cannot import %s. RecordType is not found. Skipping...', record_set)
-    else:
-        record_property = _type_to_property_name(record_type)
+    record_property = _type_to_property_name(record_type)
 
-        if is_list:
+    if is_list:
+        record_list = getattr(record_set, record_property)
+        if record_list is None:
+            setattr(record_set, record_property, [])
             record_list = getattr(record_set, record_property)
-            if record_list is None:
-                setattr(record_set, record_property, [])
-                record_list = getattr(record_set, record_property)
-            record_list.append(record)
-        else:
-            setattr(record_set, record_property, record)
+        record_list.append(record)
+    else:
+        setattr(record_set, record_property, record)
 
 
 def _add_save_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
