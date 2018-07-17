@@ -22,7 +22,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord,
-                                   NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
+                                   NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord)
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
@@ -903,6 +903,7 @@ def list_ddos_plans(cmd, resource_group_name=None):
 # region DNS Commands
 def create_dns_zone(cmd, client, resource_group_name, zone_name, location='global', tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
+    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     zone = Zone(location=location, tags=tags)
 
     if hasattr(zone, 'zone_type'):
@@ -1148,6 +1149,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
+
+    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     client.zones.create_or_update(resource_group_name, zone_name, Zone(location='global'))
     for key, rs in record_sets.items():
 
