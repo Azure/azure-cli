@@ -191,6 +191,8 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     for i in results:
         if role_dics.get(i['roleDefinitionId']):
             i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
+        else:
+            i['roleDefinitionName'] = ' '  # the role definition might have been deleted
 
     # fill in principal names
     principal_ids = set(i['principalId'] for i in results if i['principalId'])
