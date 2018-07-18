@@ -53,7 +53,7 @@ def update_role_definition(cmd, role_definition):
 
 
 def _get_role_property(obj, property_name):
-    if isinstance(obj) is dict:
+    if isinstance(obj, dict):
         if 'properties' in obj:
             return obj['properties'][property_name]
         return obj[property_name]
@@ -64,7 +64,7 @@ def _get_role_property(obj, property_name):
 
 
 def _set_role_definition_property(obj, property_name, property_value):
-    if isinstance(obj) is dict:
+    if isinstance(obj, dict):
         if 'properties' in obj:
             obj['properties'][property_name] = property_value
         else:
@@ -77,7 +77,7 @@ def _set_role_definition_property(obj, property_name, property_value):
 
 
 def _create_update_role_definition(cmd, role_definition, for_update):
-    from azure.cli.core.profiles import ResourceType, get_sdk
+    from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
     definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
@@ -119,7 +119,8 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         raise CLIError('"Permission" configuration is unavailable from the current profile. Please use "az cloud set"'
                        ' command to use correct one')
 
-    if cmd.supported_api_version(max_api='2015-07-01'):
+    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_definitions')
+    if version == '2015-07-01':
         permission = Permission(actions=role_definition.get('actions', None),
                                 not_actions=role_definition.get('notActions', None))
 
@@ -485,7 +486,7 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         assignments = [a for a in assignments if (
             not scope or
             include_inherited and re.match(_get_role_property(a, 'scope'), scope, re.I) or
-            _get_role_property(a, scope).lower() == scope.lower()
+            _get_role_property(a, 'scope').lower() == scope.lower()
         )]
 
         if role:
