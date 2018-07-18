@@ -19,11 +19,6 @@ def create_mediaservice(client, resource_group_name, account_name, storage_accou
                                          tags)
 
 
-def check_name_availability(client, location_name, name):
-
-    return client.check_name_availability(location_name, name, 'MICROSOFT.MEDIA/MEDIASERVICES')
-
-
 def add_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
     ams = client.get(resource_group_name, account_name)
 
@@ -79,3 +74,13 @@ def update_mediaservice(instance, tags=None):
         instance.tags = tags
 
     return instance
+
+
+def check_name_availability(client, location, account_name):
+    availability = client.check_name_availability(location_name=location, name=account_name,
+                                                  type='MICROSOFT.MEDIA/MEDIASERVICES')
+
+    if availability.name_available:
+        return 'Name available.'
+
+    return availability.message
