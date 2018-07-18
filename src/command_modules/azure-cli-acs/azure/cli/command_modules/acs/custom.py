@@ -1594,8 +1594,8 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
-# pylint: disable=line-too-long
-def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None, no_wait=False):
+def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
+                   no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
@@ -1649,7 +1649,8 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None, workspace_resource_id=None):
+def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
+                        workspace_resource_id=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -1660,7 +1661,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'monitoring' in addons:
         if not workspace_resource_id:
             # use default workspace if exists else create default workspace
-            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name)
+            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                cmd, subscription_id, resource_group_name)
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
             enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
         addons.remove('monitoring')
@@ -1719,7 +1721,8 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
 
 
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
-    # log analytics workspaces cannot be created in WCUS region due to capacity limits so mapped to EUS per discussion with log analytics team
+    # log analytics workspaces cannot be created in WCUS region due to capacity limits
+    # so mapped to EUS per discussion with log analytics team
     AzureLocationToOmsRegionCodeMap = {
         "eastus": "EUS",
         "westeurope": "WEU",
@@ -1768,13 +1771,16 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     default_region_name = "eastus"
     default_region_code = "EUS"
 
-    workspace_region = AzureRegionToOmsRegionMap[rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
-    workspace_region_code = AzureLocationToOmsRegionCodeMap[workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+    workspace_region = AzureRegionToOmsRegionMap[
+        rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
+    workspace_region_code = AzureLocationToOmsRegionCodeMap[
+        workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
 
-    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
+    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
+        '/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
     resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
@@ -1797,7 +1803,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
             }
         }
     }
-    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview', default_workspace_params)
+    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
+                                                    default_workspace_params)
 
     ws_resource_id = ''
     while True:
