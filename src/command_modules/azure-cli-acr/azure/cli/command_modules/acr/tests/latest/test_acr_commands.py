@@ -437,7 +437,6 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('isArchiveEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
 
-
         # test build task delete
         self.cmd('acr build-task delete -n {build_task_name1} -r {registry_name}')
         self.cmd('acr build-task delete -n {build_task_name2} -r {registry_name}')
