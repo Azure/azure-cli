@@ -2,13 +2,13 @@
 
 Release History
 ===============
+2.1.2
+++++++
+* support for stack profile 2017-03-09-profile
+
 2.1.1
 +++++
 * Minor fix
-
-2.1.1
-++++++
-* support for stack profile 2017-03-09-profile
 
 2.1.0
 +++++
