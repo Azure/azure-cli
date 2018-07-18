@@ -1006,7 +1006,7 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
         self.cmd('vmss deallocate --resource-group {rg} --name {vmss}')
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
-        self.cmd('vmss list --resource-group {rg}', expect_failure=True)
+        self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
 
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
