@@ -150,8 +150,7 @@ def acr_build_task_show(cmd,
     except CloudError as e:
         if e.status_code != 403:
             raise
-        # pylint: disable=line-too-long
-        logger.warning("No permission to get source repository secret properties.")
+        logger.warning("No permission to get source repository secure properties.")
 
     try:
         build_arguments = client_build_steps.list_build_arguments(resource_group_name=resource_group_name,
@@ -162,7 +161,7 @@ def acr_build_task_show(cmd,
     except CloudError as e:
         if e.status_code != 403:
             raise
-        logger.warning("No permission to get build arguments.")
+        logger.warning("No permission to get secure build arguments.")
     return build_task
 
 
@@ -281,14 +280,20 @@ def acr_build_task_update_build(cmd,
                                 client,
                                 build_id,
                                 registry_name,
-                                no_archive=True,
+                                no_archive=None,
                                 resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+    
+    if no_archive is not None:
+        is_archive_enabled = not no_archive
+    else:
+        is_archive_enabled = None
+    
     return client.update(resource_group_name=resource_group_name,
                          registry_name=registry_name,
                          build_id=build_id,
-                         is_archive_enabled=not no_archive)
+                         is_archive_enabled=is_archive_enabled)
 
 
 def _get_build_step_name(build_task_name):
