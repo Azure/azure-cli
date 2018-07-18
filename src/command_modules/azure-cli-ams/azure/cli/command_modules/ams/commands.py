@@ -40,7 +40,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('create', 'create_mediaservice',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
-        g.custom_command('check-name-availability', 'check_name_availability',
+        g.command('check-name', 'check_name_availability')
+        g.custom_command('check-name', 'check_name_availability',
                          custom_command_type=get_custom_sdk('account', get_locations_client))
 
     with self.command_group('ams account storage', get_sdk('Mediaservices', get_mediaservices_client)) as g:

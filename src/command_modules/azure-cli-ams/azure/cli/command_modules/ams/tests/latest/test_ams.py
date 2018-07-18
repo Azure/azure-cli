@@ -448,3 +448,31 @@ class AmsTests(ScenarioTest):
 
         list = self.cmd('az ams streaming endpoint list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_check_name_availability(self, resource_group, storage_account_for_create, location_name, name):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams account check-name --location {location} -n {amsname}', checks=[
+            self.check('nameAvailable', 'false'),
+            self.check('reason', 'AlreadyExists')
+        ])
+
+        list = self.cmd('az ams account list -g {}'.format(resource_group)).get_output_in_json()
+        assert len(list) > 0
+
+        self.cmd('az ams account show -n {amsname} -g {rg}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
