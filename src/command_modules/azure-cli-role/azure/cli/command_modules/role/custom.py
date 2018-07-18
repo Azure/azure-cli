@@ -613,6 +613,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
+    from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
@@ -621,15 +622,22 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
-    app_patch_param = ApplicationUpdateParameters(display_name=display_name,
-                                                  homepage=homepage,
-                                                  identifier_uris=identifier_uris,
-                                                  reply_urls=reply_urls,
-                                                  key_credentials=key_creds,
-                                                  password_credentials=password_creds,
-                                                  available_to_other_tenants=available_to_other_tenants,
-                                                  required_resource_access=required_accesses,
-                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
+    # Workaround until https://github.com/Azure/azure-rest-api-specs/issues/3437 is fixed
+    def _get_property(name):
+        try:
+            return getattr(instance, make_snake_case(name))
+        except AttributeError:
+            return instance.additional_properties.get(make_camel_case(name), None)
+
+    app_patch_param = ApplicationUpdateParameters(display_name=display_name or _get_property('display_name'),
+                                                  homepage=homepage or _get_property('homepage'),
+                                                  identifier_uris=identifier_uris or _get_property('identifier_uris'),
+                                                  reply_urls=reply_urls or _get_property('reply_urls'),
+                                                  key_credentials=key_creds or _get_property('key_credentials'),
+                                                  password_credentials=password_creds or _get_property('password_credentials'),
+                                                  available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
+                                                  required_resource_access=required_accesses or _get_property('required_resource_access'),
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
 
     return app_patch_param
 

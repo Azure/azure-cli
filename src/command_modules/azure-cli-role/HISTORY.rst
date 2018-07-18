@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 2.1.1
 +++++
-* Minor fix
+* `ad app update`: Fixes issue where generic update parameters would not work correctly.
 
 2.1.0
 +++++
