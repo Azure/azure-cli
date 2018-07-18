@@ -721,7 +721,7 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         from azure.cli.core.profiles import ResourceType
         PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
                                                                     resource_type=ResourceType.MGMT_NETWORK)
-        if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
+        if PublicIPAddressSkuName is not None and namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
             if not namespace.public_ip_address_allocation:
                 namespace.public_ip_address_allocation = IPAllocationMethod.static.value
 
