@@ -1058,7 +1058,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
 
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements
-def _build_record(cmd, data, version):
+def _build_record(cmd, data):
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
@@ -1094,7 +1094,6 @@ def _build_record(cmd, data, version):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
-    dns_api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
@@ -1115,7 +1114,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 record_set_ttl = entry['ttl']
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
-                record = _build_record(cmd, entry, dns_api_version)
+                record = _build_record(cmd, entry)
                 if not record:
                     logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
                     continue

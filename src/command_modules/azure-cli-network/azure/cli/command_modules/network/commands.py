@@ -336,7 +336,10 @@ def load_command_table(self, _):
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
 
-    for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']
+    if self.supported_api_version(resource_type=ResourceType.MGMT_NETWORK_DNS, min_api='2018-02-01'):
+        supported_records.append('caa')
+    for record in supported_records:
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk) as g:
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
             g.command('delete', 'delete', confirmation=True)
@@ -346,14 +349,14 @@ def load_command_table(self, _):
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.generic_update_command('update', custom_func_name='update_dns_record_set', transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set caa', network_dns_record_set_sdk) as g:
-        g.show_command('show', 'get', min_api='2018-02-01', transform=transform_dns_record_set_output)
-        g.command('delete', 'delete', min_api='2018-02-01', confirmation=True)
-        g.custom_command('list', 'list_dns_record_set', min_api='2018-02-01', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-        g.custom_command('create', 'create_dns_record_set', min_api='2018-02-01', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
-        g.custom_command('add-record', 'add_dns_caa_record', min_api='2018-02-01', transform=transform_dns_record_set_output)
-        g.custom_command('remove-record', 'remove_dns_caa_record', min_api='2018-02-01', transform=transform_dns_record_set_output)
-        g.generic_update_command('update', custom_func_name='update_dns_record_set', min_api='2018-02-01', transform=transform_dns_record_set_output)
+    # with self.command_group('network dns record-set caa', network_dns_record_set_sdk) as g:
+    #     g.show_command('show', 'get', min_api='2018-02-01', transform=transform_dns_record_set_output)
+    #     g.command('delete', 'delete', min_api='2018-02-01', confirmation=True)
+    #     g.custom_command('list', 'list_dns_record_set', min_api='2018-02-01', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
+    #     g.custom_command('create', 'create_dns_record_set', min_api='2018-02-01', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
+    #     g.custom_command('add-record', 'add_dns_caa_record', min_api='2018-02-01', transform=transform_dns_record_set_output)
+    #     g.custom_command('remove-record', 'remove_dns_caa_record', min_api='2018-02-01', transform=transform_dns_record_set_output)
+    #     g.generic_update_command('update', custom_func_name='update_dns_record_set', min_api='2018-02-01', transform=transform_dns_record_set_output)
 
     with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
         g.show_command('show', 'get', transform=transform_dns_record_set_output)
