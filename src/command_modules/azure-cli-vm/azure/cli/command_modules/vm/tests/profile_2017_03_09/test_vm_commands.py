@@ -141,7 +141,6 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string')
         ])
 
-
 class VMSizeListScenarioTest(ScenarioTest):
 
     def test_vm_size_list(self):
@@ -654,7 +653,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('location', '{loc}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}',
-                 checks=self.is_empty())
+                 expect_failure=True)
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -1034,7 +1033,7 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
         self.cmd('vmss deallocate --resource-group {rg} --name {vmss}')
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
-        self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
+        self.cmd('vmss list --resource-group {rg}', expect_failure=True)
 
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -1056,7 +1055,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.test=success',
                  checks=self.check('tags.test', 'success'))
         self.cmd('network public-ip show -n {vmss}PublicIP -g {rg}',
-                 checks=self.is_empty())
+                 expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ag')
     def test_vmss_create_with_app_gateway(self, resource_group):
