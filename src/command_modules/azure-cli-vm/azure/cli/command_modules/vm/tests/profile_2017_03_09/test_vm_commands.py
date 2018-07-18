@@ -870,34 +870,6 @@ class VMCreateExistingIdsOptions(ScenarioTest):
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
-class VMCreateCustomIP(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_ip')
-    def test_vm_create_custom_ip(self, resource_group):
-
-        self.kwargs.update({
-            'vm': 'vrfvmz',
-            'vm2': 'vrfvmz2',
-            'dns': 'vrfmyvm00110011z',
-            'public_ip_sku': 'Standard'
-        })
-
-        self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys --use-unmanaged-disk')
-
-        self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
-            self.check('dnsSettings.domainNameLabel', '{dns}')
-        ])
-        self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
-
-        # verify the default should be "Basic" sku with "Dynamic" allocation method
-        self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys --use-unmanaged-disk')
-        self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic')
-        ])
-
-
 class VMUnmanagedDataDiskTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli-test-disk')
