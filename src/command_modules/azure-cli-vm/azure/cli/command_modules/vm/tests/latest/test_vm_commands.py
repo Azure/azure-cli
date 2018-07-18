@@ -1281,6 +1281,29 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
+    def test_vm_disk_storage_sku(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-storage-sku-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'disk3': 'd3',
+        })
+
+        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku StandardSSD_LRS --data-disk-sizes-gb 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --new --size-gb 1 --sku premium_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
+        self.cmd('disk create -g {rg} -n {disk3} --size-gb 4 --sku StandardSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+            self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 

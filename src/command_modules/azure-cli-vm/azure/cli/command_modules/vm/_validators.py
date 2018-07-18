@@ -291,7 +291,7 @@ def _get_storage_profile_description(profile):
 
 def _validate_managed_disk_sku(sku):
 
-    allowed_skus = ['Premium_LRS', 'Standard_LRS']
+    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']
     if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
