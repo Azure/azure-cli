@@ -298,7 +298,7 @@ def register_global_subscription_parameter(cli_ctx):
     import knack.events as events
 
     def add_subscription_parameter(_, **kwargs):
-        from azure.cli.command_modules.profile._completers import get_subscription_id_list
+        from azure.cli.core._completers import get_subscription_id_list
 
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
@@ -698,13 +698,17 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
-            if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
-                logger.error(getattr(ex, 'message', ex))
-                import sys
-                sys.exit(3)
-            raise
+            show_exception_handler(ex)
     context._cli_command(name, handler=handler, argument_loader=generic_show_arguments_loader,  # pylint: disable=protected-access
                          description_loader=description_loader, **kwargs)
+
+
+def show_exception_handler(ex):
+    if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
+        logger.error(getattr(ex, 'message', ex))
+        import sys
+        sys.exit(3)
+    raise ex
 
 
 def verify_property(instance, condition):

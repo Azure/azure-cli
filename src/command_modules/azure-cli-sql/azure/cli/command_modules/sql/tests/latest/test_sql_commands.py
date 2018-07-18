@@ -20,7 +20,8 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    LiveScenarioTest)
+    LiveScenarioTest,
+    record_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -2322,11 +2323,11 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
     def test_sql_subscription_usages(self):
         self.cmd('sql list-usages -l westus',
-                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+                 checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+        self.cmd('sql show-usage -l westus -u ServerQuota',
                  checks=[
-                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheck('name', 'ServerQuota'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
 
@@ -2546,6 +2547,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_instance_mgmt(self):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
@@ -2664,6 +2667,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_db_mgmt(self):
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
