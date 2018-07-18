@@ -189,8 +189,11 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
     role_dics = {i.id: i.role_name for i in role_defs}
     for i in results:
-        if role_dics.get(i['roleDefinitionId']):
-            i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
+        if not i.get('roleDefinitionName'):
+            if role_dics.get(i['roleDefinitionId']):
+                i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
+            else:
+                i['roleDefinitionName'] = None  # the role definition might have been deleted
 
     # fill in principal names
     principal_ids = set(i['principalId'] for i in results if i['principalId'])
