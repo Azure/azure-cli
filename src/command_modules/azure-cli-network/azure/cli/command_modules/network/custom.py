@@ -26,7 +26,7 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, Cn
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import ResourceType, get_api_version, supported_api_version
+from azure.cli.core.profiles import ResourceType, supported_api_version
 
 logger = get_logger(__name__)
 
