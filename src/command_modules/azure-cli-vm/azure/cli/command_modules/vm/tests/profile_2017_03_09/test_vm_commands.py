@@ -141,6 +141,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string')
         ])
 
+
 class VMSizeListScenarioTest(ScenarioTest):
 
     def test_vm_size_list(self):
