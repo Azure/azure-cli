@@ -8,12 +8,29 @@ from knack.util import CLIError
 # pylint: disable=line-too-long
 
 
-def create_transform(client, account_name, resource_group_name,
-                     transform_name, preset_names, description=None):
+def create_transform(cmd, client, account_name, resource_group_name,
+                     transform_name, preset_names=None, description=None,
+                     custom_preset_path=None):
     outputs = []
 
-    for preset in preset_names:
-        outputs.append(get_transform_output(preset))
+    if custom_preset_path is None and preset_names is None:
+            raise CLIError("Missing required arguments.\nEither --preset-names "
+                           "or --custom-preset must be specified.")
+
+    if preset_names:
+        for preset in preset_names:
+            outputs.append(get_transform_output(preset))
+
+    if custom_preset_path:
+        import json
+        try:
+            with open(custom_preset_path) as json_data:
+                custom_preset_json = json.load(json_data)
+                from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
+                standard_encoder_preset = StandardEncoderPreset()
+                outputs.append(TransformOutput(preset=standard_encoder_preset))
+        except (OSError, IOError) as e:
+            raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, outputs, description)
 
