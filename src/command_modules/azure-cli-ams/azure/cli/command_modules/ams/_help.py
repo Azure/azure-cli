@@ -46,7 +46,7 @@ helps['ams account delete'] = """
 
 helps['ams account check-name'] = """
     type: command
-    short-summary: Checks the availability of the name for an Azure Media Services account.
+    short-summary: Checks whether the Media Service resource name is available.
 """
 
 helps['ams account storage'] = """
