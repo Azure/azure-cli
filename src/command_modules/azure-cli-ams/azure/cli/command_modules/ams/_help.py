@@ -44,6 +44,11 @@ helps['ams account delete'] = """
     short-summary: Delete an Azure Media Services account.
 """
 
+helps['ams account check-name'] = """
+    type: command
+    short-summary: Checks the availability of the name for an Azure Media Services account.
+"""
+
 helps['ams account storage'] = """
     type: group
     short-summary: Manage secondary storage for an Azure Media Services account.
