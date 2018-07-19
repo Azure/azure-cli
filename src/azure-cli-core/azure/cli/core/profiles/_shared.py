@@ -242,18 +242,24 @@ class _DateAPIFormat(object):
         return False
 
 
+def _parse_api_version(api_version):
+    """Will try to parse it as a date, and if not working
+    as semver, and if still not working raise.
+    """
+    try:
+        return _DateAPIFormat(api_version)
+    except ValueError:
+        return _SemVerAPIFormat(api_version)
+
+
 def _cross_api_format_lt(api_version, other):
     """LT strategy that supports if types are different.
 
     For now, let's assume that any Semver is higher than any DateAPI
     This fits KeyVault, if later we have a counter-example we'll update
     """
-    def is_semver(version):
-        # Keep it stupid and simple
-        return "." in version
-
-    api_version = _SemVerAPIFormat(api_version) if is_semver(api_version) else _DateAPIFormat(api_version)
-    other = _SemVerAPIFormat(other) if is_semver(other) else _DateAPIFormat(other)
+    api_version = _parse_api_version(api_version)
+    other = _parse_api_version(other)
 
     if type(api_version) is type(other):
         return api_version < other
