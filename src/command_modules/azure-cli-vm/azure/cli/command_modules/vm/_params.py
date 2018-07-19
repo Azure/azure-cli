@@ -216,7 +216,7 @@ def load_arguments(self, _):
         c.argument('plan', help='image billing plan')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('version', help="image sku's version")
-        c.argument('urn', help="URN, in format of 'publisher:offer:sku:versin'. If specified, other argument values can be omitted")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
