@@ -284,12 +284,12 @@ def acr_build_task_update_build(cmd,
                                 resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
-    
+
     if no_archive is not None:
         is_archive_enabled = not no_archive
     else:
         is_archive_enabled = None
-    
+
     return client.update(resource_group_name=resource_group_name,
                          registry_name=registry_name,
                          build_id=build_id,
