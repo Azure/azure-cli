@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import importlib
+
 from knack.util import CLIError
 
 # pylint: disable=line-too-long
@@ -26,8 +28,18 @@ def create_transform(cmd, client, account_name, resource_group_name,
         try:
             with open(custom_preset_path) as json_data:
                 custom_preset_json = json.load(json_data)
+                models_module = importlib.import_module('azure.mgmt.media.models')
+                codecs = []
+                for codec in custom_preset_json['Codecs']:
+                    codec_type = getattr(models_module, codec['Type'])
+                    codec_instance = codec_type()
+                    from azure.mgmt.media.models import H264Layer
+                    if codec['Type'] is not 'CopyAudio':
+                        codec_instance.layers = [H264Layer()]
+                    codecs.append(codec_instance)
+
                 from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
-                standard_encoder_preset = StandardEncoderPreset()
+                standard_encoder_preset = StandardEncoderPreset(codecs=codecs)
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
         except (OSError, IOError) as e:
             raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
