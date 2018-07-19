@@ -33,7 +33,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-media==1.0.0rc1',
+    'azure-mgmt-media==1.0.0rc2',
     'azure-graphrbac==0.40.0'
 ]
 
