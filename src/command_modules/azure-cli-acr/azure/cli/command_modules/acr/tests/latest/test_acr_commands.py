@@ -278,7 +278,7 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': 'b7285a8f94b76f8b929bac4418d92de8fc937626',
+            'git_access_token': 'b67dce55c2d8a654a4c823751a58aac1e59d9641',
             'context': 'https://github.com/xiadu94/BuildTest',
             'image1': 'repo1:tag1',
             'image2': 'repo2:tag2',

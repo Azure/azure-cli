@@ -146,7 +146,9 @@ def acr_build_task_show(cmd,
         source_repository = client.list_source_repository_properties(resource_group_name,
                                                                      registry_name,
                                                                      build_task_name)
-        setattr(build_task, 'sourceRepository', source_repository)
+        setattr(getattr(build_task, 'source_repository'),
+                'source_control_auth_properties',
+                getattr(source_repository, 'source_control_auth_properties'))
     except CloudError as e:
         if e.status_code != 403:
             raise
