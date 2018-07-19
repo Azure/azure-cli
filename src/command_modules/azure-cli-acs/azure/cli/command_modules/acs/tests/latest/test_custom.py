@@ -422,8 +422,10 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertTrue(
             'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location')
-    def test_update_addons(self, rg_def):
+    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
+    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
