@@ -629,15 +629,16 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         except AttributeError:
             return instance.additional_properties.get(make_camel_case(name), None)
 
-    app_patch_param = ApplicationUpdateParameters(display_name=display_name or _get_property('display_name'),
-                                                  homepage=homepage or _get_property('homepage'),
-                                                  identifier_uris=identifier_uris or _get_property('identifier_uris'),
-                                                  reply_urls=reply_urls or _get_property('reply_urls'),
-                                                  key_credentials=key_creds or _get_property('key_credentials'),
-                                                  password_credentials=password_creds or _get_property('password_credentials'),
-                                                  available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
-                                                  required_resource_access=required_accesses or _get_property('required_resource_access'),
-                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
+    app_patch_param = ApplicationUpdateParameters(
+        display_name=display_name or _get_property('display_name'),
+        homepage=homepage or _get_property('homepage'),
+        identifier_uris=identifier_uris or _get_property('identifier_uris'),
+        reply_urls=reply_urls or _get_property('reply_urls'),
+        key_credentials=key_creds or _get_property('key_credentials'),
+        password_credentials=password_creds or _get_property('password_credentials'),
+        available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
+        required_resource_access=required_accesses or _get_property('required_resource_access'),
+        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
 
     return app_patch_param
 

@@ -310,7 +310,11 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
 
     def test_update_application_to_be_single_tenant(self):
-        instance = update_application(None, 'http://any-client', available_to_other_tenants=True)
+        test_app_id = 'app_id_123'
+        app = Application(app_id=test_app_id)
+        setattr(app, 'additional_properties', {})
+        instance = update_application(app, 'http://any-client',
+                                      available_to_other_tenants=True)
         self.assertTrue(isinstance(instance, ApplicationUpdateParameters))
         self.assertEqual(instance.available_to_other_tenants, True)
 
