@@ -21,7 +21,7 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -988,8 +988,6 @@ def _find_property(instance, path):
 
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
     from msrestazure.azure_exceptions import CloudError
 
     # get
@@ -1001,7 +999,10 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         principal_id = resource.identity.principal_id
 
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
-        assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
+        assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
+        RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                                 'RoleAssignmentCreateParameters', mod='models',
+                                                 operation_group='role_assignments')
         parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
@@ -1028,8 +1029,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
 def resolve_role_id(cli_ctx, role, scope):
     import uuid
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_definitions
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_definitions
 
     role_id = None
     if re.match(r'/subscriptions/[^/]+/providers/Microsoft.Authorization/roleDefinitions/',

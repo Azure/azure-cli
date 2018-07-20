@@ -32,7 +32,6 @@ Release History
 ++++++
 * Minor changes
 
-
 2.0.28
 ++++++
 * Minor changes

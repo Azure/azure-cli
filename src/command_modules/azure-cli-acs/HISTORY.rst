@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.2
++++++
+* changes for consuming multi api azure.mgmt.authorization package
+
 2.2.1
 +++++
 * Depdendency update: paramiko >= 2.0.8
