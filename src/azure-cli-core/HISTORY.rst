@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.44
+++++++
+* Comnsuming mult api azure.mgmt.azutorization package for stack support
+
 2.0.43
 ++++++
 * Minor fixes
@@ -33,8 +37,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36
-++++++
+2.0.36	
+++++++	
 * Minor fixes
 
 2.0.35
