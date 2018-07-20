@@ -1611,7 +1611,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
             if addon == 'omsagent':
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
-                                   'To change monitoring configuration, run "az aks disable-addons -monitoring"'
+                                   'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
                                    'before enabling it again.')
                 if not workspace_resource_id:
                     workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
