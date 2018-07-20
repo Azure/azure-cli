@@ -113,7 +113,8 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         raise CLIError("please provide 'assignableScopes'")
 
     Permission, RoleDefinition, RoleDefinitionProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                                                   'Permission', 'RoleDefinition', 'RoleDefinitionProperties', mod='models',
+                                                                   'Permission', 'RoleDefinition',
+                                                                   'RoleDefinitionProperties', mod='models',
                                                                    operation_group='role_definitions')
     if not Permission:
         raise CLIError('"Permission" configuration is unavailable from the current profile. Please use "az cloud set"'
@@ -162,9 +163,9 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
     roles = list(definitions_client.list(scope))
     if name:
-        roles = [r for r in roles if r.name == name or r.role_name == name]
+        roles = [r for r in roles if r.name == name or _get_role_property(r, 'role_name') == name]
     if custom_role_only:
-        roles = [r for r in roles if r.role_type == _CUSTOM_RULE]
+        roles = [r for r in roles if  _get_role_property(r, 'role_type') == _CUSTOM_RULE]
     return roles
 
 
@@ -178,22 +179,31 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
-    from azure.cli.core.profiles import ResourceType, get_sdk
+    from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
+    RoleAssignmentCreateParameters, RoleAssignmentProperties = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                                                       'RoleAssignmentCreateParameters',
+                                                                       'RoleAssignmentProperties', mod='models',
+                                                                       operation_group='role_assignments')
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
-    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
+    version = getattr(get_api_version(cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_assignments')
     assignment_name = _gen_guid()
     custom_headers = None
+
+    if version == '2015-07-01':
+        properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
+        return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
+                                         properties=properties,
+                                         custom_headers=custom_headers)
+
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
                                      parameters=parameters,
                                      custom_headers=custom_headers)
@@ -237,10 +247,10 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
     role_dics = {i.id: _get_role_property(i, 'role_name') for i in role_defs}
     for i in results:
-
         if not i.get('roleDefinitionName'):
-            if role_dics.get(i['roleDefinitionId']):
-                i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
+            if role_dics.get(_get_role_property(i, 'roleDefinitionId')):
+                _set_role_definition_property(i, 'roleDefinitionName',
+                                              role_dics[_get_role_property(i, 'roleDefinitionId')])
             else:
                 i['roleDefinitionName'] = None  # the role definition might have been deleted
 
