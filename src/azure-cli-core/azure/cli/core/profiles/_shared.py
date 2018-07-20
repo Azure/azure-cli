@@ -32,6 +32,7 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
+    MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
@@ -41,6 +42,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
 
@@ -188,9 +190,7 @@ class _SemVerAPIFormat(object):
         return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
 
     def __lt__(self, other):
-        return self.major < other.major or \
-            (self.major == other.major and self.minor < other.minor) or \
-            (self.major == other.major and self.minor == other.minor and self.patch < other.patch)
+        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
 
 
 @total_ordering  # pylint: disable=too-few-public-methods
@@ -252,7 +252,7 @@ def _parse_api_version(api_version):
         return _SemVerAPIFormat(api_version)
 
 
-def _cross_api_format_lt(api_version, other):
+def _cross_api_format_less_then(api_version, other):
     """LT strategy that supports if types are different.
 
     For now, let's assume that any Semver is higher than any DateAPI
@@ -263,17 +263,15 @@ def _cross_api_format_lt(api_version, other):
 
     if type(api_version) is type(other):
         return api_version < other
-    elif isinstance(api_version, _DateAPIFormat) and isinstance(other, _SemVerAPIFormat):
-        return True
-    return False
+    return isinstance(api_version, _DateAPIFormat) and isinstance(other, _SemVerAPIFormat)
 
 
 def _validate_api_version(api_version_str, min_api=None, max_api=None):
     """Validate if api_version is inside the interval min_api/max_api.
     """
-    if min_api and _cross_api_format_lt(api_version_str, min_api):
+    if min_api and _cross_api_format_less_then(api_version_str, min_api):
         return False
-    if max_api and _cross_api_format_lt(max_api, api_version_str):
+    if max_api and _cross_api_format_less_then(max_api, api_version_str):
         return False
     return True
 
