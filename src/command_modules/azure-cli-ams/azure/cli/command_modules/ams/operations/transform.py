@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import importlib
+import importlib, json, re, isodate
+from datetime import datetime, timedelta
 
 from knack.util import CLIError
 
@@ -24,22 +25,11 @@ def create_transform(cmd, client, account_name, resource_group_name,
             outputs.append(get_transform_output(preset))
 
     if custom_preset_path:
-        import json
         try:
-            with open(custom_preset_path) as json_data:
-                custom_preset_json = json.load(json_data)
-                models_module = importlib.import_module('azure.mgmt.media.models')
-                codecs = []
-                for codec in custom_preset_json['Codecs']:
-                    codec_type = getattr(models_module, codec['Type'])
-                    codec_instance = codec_type()
-                    from azure.mgmt.media.models import H264Layer
-                    if codec['Type'] is not 'CopyAudio':
-                        codec_instance.layers = [H264Layer()]
-                    codecs.append(codec_instance)
-
+            with open(custom_preset_path) as custom_preset_json_stream:
+                custom_preset_json = json.load(custom_preset_json_stream)
                 from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
-                standard_encoder_preset = StandardEncoderPreset(codecs=codecs)
+                standard_encoder_preset = StandardEncoderPreset(codecs=build_codecs_for_preset(custom_preset_json['Codecs']))
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
         except (OSError, IOError) as e:
             raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
@@ -111,3 +101,44 @@ def get_transform_output(preset):
 
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output
+
+
+def camel_to_snake(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+models_module = importlib.import_module('azure.mgmt.media.models')
+
+def build_codecs_for_preset(codecs):
+    codec_instance_list = []
+    for codec in codecs:
+        codec_instance = getattr(models_module, codec['Type'])()
+        layers = []
+        for key, value in codec.items():
+            if isinstance(value, list) and 'Layers' in key:
+                layer_type = key[:-1]
+                layer_instance = getattr(models_module, layer_type)()
+                for layer_group in value:
+                    for layer_prop_key, layer_prop_value in layer_group.items():
+                        parse_custom_preset_value(layer_prop_key, layer_prop_value, layer_instance)
+                    layers.append(layer_instance)
+            else:
+                parse_custom_preset_value(key, value, codec_instance)
+        if len(layers) > 0:
+            codec_instance.layers = layers
+
+        codec_instance_list.append(codec_instance)
+    return codec_instance_list
+
+
+def parse_custom_preset_value(key, value, instance):
+    if hasattr(instance, camel_to_snake(key)):
+        try:
+            datetime_duration = datetime.strptime(value,'%H:%M:%S')
+            iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
+                                                                             minutes=datetime_duration.minute,
+                                                                             seconds=datetime_duration.second))
+            setattr(instance, camel_to_snake(key), iso_duration_format_value)
+        except:
+            setattr(instance, camel_to_snake(key), value)
