@@ -3,7 +3,7 @@
 Release History
 ===============
 
-3.4.0
+3.3.1
 +++++
 * Fix bug when show AAD token in cloudshell
 
