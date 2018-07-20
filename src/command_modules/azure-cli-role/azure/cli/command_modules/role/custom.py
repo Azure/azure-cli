@@ -116,9 +116,6 @@ def _create_update_role_definition(cmd, role_definition, for_update):
                                                                    'Permission', 'RoleDefinition',
                                                                    'RoleDefinitionProperties', mod='models',
                                                                    operation_group='role_definitions')
-    if not Permission:
-        raise CLIError('"Permission" configuration is unavailable from the current profile. Please use "az cloud set"'
-                       ' command to use correct one')
 
     version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_definitions')
     if version == '2015-07-01':
