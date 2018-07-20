@@ -1831,6 +1831,11 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     # find the location from the resource group
     location = _get_rg_location(cmd.cli_ctx, resource_group, subscription_id)
 
+    unix_time_in_millis = int(
+        (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
+
+    solution_deployment_name = 'ContainerInsights-' + str(unix_time_in_millis)
+
     # pylint: disable=line-too-long
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
@@ -1847,12 +1852,18 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                 "metadata": {
                     "description": "Azure Monitor Log Analytics workspace region"
                 }
+            },
+            "solutionDeploymentName": {
+                "type": "string",
+                "metadata": {
+                    "description": "Name of the solution deployment"
+                }
             }
         },
         "resources": [
             {
                 "type": "Microsoft.Resources/deployments",
-                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                "name": "[parameters('solutionDeploymentName')]",
                 "apiVersion": "2017-05-10",
                 "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
                 "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
@@ -1893,12 +1904,13 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         },
         "workspaceRegion": {
             "value": location
+        },
+        "solutionDeploymentName": {
+            "value": solution_deployment_name
         }
     }
 
-    # TODO: does this name need to be randomized or input by the user?
-    deployment_name = 'aks-monitoring'
-
+    deployment_name = 'aks-monitoring-' + str(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
