@@ -6,6 +6,7 @@
 import mock
 import os
 
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
@@ -195,14 +196,17 @@ class AmsTests(ScenarioTest):
 
         self.kwargs.update({
             'transformName': transformName,
-            'presetName': self._get_test_data_file('customPreset.json')
+            'presetName': self._get_test_data_file('customPreset.json'),
+            'invalidPresetName': self._get_test_data_file('invalidCustomPreset.json')
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset {presetName}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
+        with self.assertRaises(CLIError):
+            self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset {invalidPresetName}')
 
+    #    self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset {presetName}', checks=[
+    #        self.check('name', '{transformName}'),
+    #        self.check('resourceGroup', '{rg}')
+    #    ])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
