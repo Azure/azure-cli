@@ -46,39 +46,17 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     return _client.create_or_update(resource_group_name, search_service_name, _search)
 
 
-def update_search_service(cmd, resource_group_name, search_service_name, partition_count=0, replica_count=0):
+def update_search_service(instance, partition_count=0, replica_count=0):
     """
     Update partition and replica of the given search service.
 
-    :param resource_group_name: Name of resource group.
-    :param search_service_name: Name of the search service.
     :param partition_count: Number of partitions in the search service.
     :param replica_count: Number of replicas in the search service.
     """
-    from azure.cli.command_modules.search._client_factory import cf_search_services
-
-    _client = cf_search_services(cmd.cli_ctx, None)
-
-    _search = _client.get(resource_group_name, search_service_name)
-
     replica_count = int(replica_count)
     partition_count = int(partition_count)
     if replica_count > 0:
-        _search.replica_count = replica_count
+        instance.replica_count = replica_count
     if partition_count > 0:
-        _search.partition_count = partition_count
-    return _client.update(resource_group_name, search_service_name, _search)
-
-
-def create_search_querykey(cmd, resource_group_name, search_service_name, key_name):
-    """
-    Creates a query key in the given search service.
-
-    :param resource_group_name: Name of resource group.
-    :param search_service_name: Name of the search service.
-    :param key_name: Name of the query key.
-    """
-    from azure.cli.command_modules.search._client_factory import cf_search_query_keys
-
-    _client = cf_search_query_keys(cmd.cli_ctx, None)
-    return _client.create(resource_group_name, search_service_name, key_name)
+        instance.partition_count = partition_count
+    return instance

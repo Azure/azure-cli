@@ -10,8 +10,7 @@ import unittest
 class AzureSearchServicesTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_create_skus(self, resource_group):
-        # kwargs will already have resource_group with the key 'rg'
+    def test_service_create_skus(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -19,7 +18,7 @@ class AzureSearchServicesTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
@@ -33,14 +32,14 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search services create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_create_multi_partition(self, resource_group):
+    def test_service_create_multi_partition(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -49,14 +48,14 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search services create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_create_multi_replica(self, resource_group):
+    def test_service_create_multi_replica(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -65,15 +64,14 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search services create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_update(self, resource_group):
-        # kwargs will already have resource_group with the key 'rg'
+    def test_service_update(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -81,7 +79,7 @@ class AzureSearchServicesTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
@@ -93,7 +91,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search services update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -105,7 +103,7 @@ class AzureSearchServicesTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
@@ -117,16 +115,14 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search services update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_create_delete_show(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
-
+    def test_service_create_delete_show(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -134,24 +130,21 @@ class AzureSearchServicesTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}')])
 
-        self.cmd('az search services show -n {name} -g {rg}')
+        self.cmd('az search service show -n {name} -g {rg}')
 
-        self.cmd('az search services delete -n {name} -g {rg}')
+        self.cmd('az search service delete -n {name} -g {rg}')
 
-        with self.assertRaises(CloudError) as err:
-            self.cmd('az search services show -n {name} -g {rg}')
-
-        self.assertEqual(str(err.exception.error.error), 'ResourceNotFound')
+        self.cmd('az search service show -n {name} -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_services_create_delete_list(self, resource_group):
-        _services = self.cmd('az search services list -g {rg}').get_output_in_json()
+    def test_service_create_delete_list(self, resource_group):
+        _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
 
         self.kwargs.update({
@@ -162,35 +155,35 @@ class AzureSearchServicesTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name1} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name1} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name1}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}')])
 
-        _services = self.cmd('az search services list -g {rg}').get_output_in_json()
+        _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 1)
         self.assertTrue(self.kwargs['name1'] in [x['name'] for x in _services])
 
-        self.cmd('az search services create -n {name2} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name2} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name2}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}')])
 
-        _services = self.cmd('az search services list -g {rg}').get_output_in_json()
+        _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 2)
         self.assertTrue(self.kwargs['name1'] in [x['name'] for x in _services])
         self.assertTrue(self.kwargs['name2'] in [x['name'] for x in _services])
 
-        self.cmd('az search services delete -n {name1} -g {rg}')
-        _services = self.cmd('az search services list -g {rg}').get_output_in_json()
+        self.cmd('az search service delete -n {name1} -g {rg}')
+        _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 1)
         self.assertTrue(self.kwargs['name2'] in [x['name'] for x in _services])
         self.assertFalse(self.kwargs['name1'] in [x['name'] for x in _services])
 
-        self.cmd('az search services delete -n {name2} -g {rg}')
-        _services = self.cmd('az search services list -g {rg}').get_output_in_json()
+        self.cmd('az search service delete -n {name2} -g {rg}')
+        _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
 
 

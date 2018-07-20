@@ -12,17 +12,22 @@ helps['search'] = """
     short-summary: Manage Azure Search services, admin keys and query keys.
 """
 
-helps['search services'] = """
+helps['search service'] = """
     type: group
     short-summary: Manage Azure Search services.
 """
 
-helps['search adminkeys'] = """
+helps['search service update'] = """
+    type: command
+    short-summary: Update partition and replica of the given search service.
+"""
+
+helps['search admin-key'] = """
     type: group
     short-summary: Manage Azure Search admin keys.
 """
 
-helps['search querykeys'] = """
+helps['search query-key'] = """
     type: group
     short-summary: Manage Azure Search query keys.
 """

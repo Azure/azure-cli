@@ -10,7 +10,7 @@ import unittest
 class AzureSearchAdminKeysTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_adminkeys_show_renew(self, resource_group):
+    def test_admin_key_show_renew(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
             'name': self.create_random_name(prefix='test', length=24),
@@ -18,23 +18,23 @@ class AzureSearchAdminKeysTests(ScenarioTest):
             'partition_count': 1,
         })
 
-        self.cmd('az search services create -n {name} -g {rg} --sku {sku_name}',
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}')])
 
-        _adminkey = self.cmd('az search adminkeys show -n {name} -g {rg}').get_output_in_json()
+        _adminkey = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
         self.assertTrue(len(_adminkey['primaryKey']) > 0)
         self.assertTrue(len(_adminkey['secondaryKey']) > 0)
 
-        self.cmd('az search adminkeys renew -n {name} -g {rg} --key-kind primary')
-        _adminkey_1 = self.cmd('az search adminkeys show -n {name} -g {rg}').get_output_in_json()
+        self.cmd('az search admin-key renew --search-service-name {name} -g {rg} --key primary')
+        _adminkey_1 = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
         self.assertNotEquals(_adminkey['primaryKey'], _adminkey_1['primaryKey'])
         self.assertEquals(_adminkey['secondaryKey'], _adminkey_1['secondaryKey'])
 
-        self.cmd('az search adminkeys renew -n {name} -g {rg} --key-kind secondary')
-        _adminkey_2 = self.cmd('az search adminkeys show -n {name} -g {rg}').get_output_in_json()
+        self.cmd('az search admin-key renew --search-service-name {name} -g {rg} --key secondary')
+        _adminkey_2 = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
         self.assertNotEquals(_adminkey_2['secondaryKey'], _adminkey_1['secondaryKey'])
         self.assertEquals(_adminkey_2['primaryKey'], _adminkey_1['primaryKey'])
 
