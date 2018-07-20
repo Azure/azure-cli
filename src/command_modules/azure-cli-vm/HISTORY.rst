@@ -1,6 +1,7 @@
 .. :changelog:
 
 Release History
+===============
 
 2.1.2
 ++++++

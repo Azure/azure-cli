@@ -165,7 +165,7 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
     if name:
         roles = [r for r in roles if r.name == name or _get_role_property(r, 'role_name') == name]
     if custom_role_only:
-        roles = [r for r in roles if  _get_role_property(r, 'role_type') == _CUSTOM_RULE]
+        roles = [r for r in roles if _get_role_property(r, 'role_type') == _CUSTOM_RULE]
     return roles
 
 
