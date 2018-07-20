@@ -521,7 +521,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
-    def test_set_os_disk_size(self, resource_group):
+    def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
         self.cmd('vm create -g {rg} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {sa}')
@@ -537,7 +537,7 @@ class VMOSDiskSize(ScenarioTest):
 class VMManagedDiskScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_managed_disk')
-    def test_managed_disk(self, resource_group):
+    def test_vm_managed_disk(self, resource_group):
 
         self.kwargs.update({
             'loc': 'westus',
@@ -2296,7 +2296,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue('Welcome to nginx' in str(r.content))
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zones', location='eastus2')
-    def test_disk_create_zones(self, resource_group, resource_group_location):
+    def test_vm_disk_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'zones': '2',
@@ -2359,7 +2359,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.assertTrue('Welcome to nginx' in str(r.content))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_w_params')
-    def test_run_command_with_parameters(self, resource_group):
+    def test_vm_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vm': 'test-run-command-vm2'})
         self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
@@ -2598,30 +2598,16 @@ class VMGenericUpdate(ScenarioTest):
     def test_vm_generic_update(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
-            'id': 'id',
-            'id2': 'id2'
         })
 
-        self.cmd('identity create -g {rg} -n {id}')
-        result = self.cmd('identity create -g {rg} -n {id2}').get_output_in_json()
-        id_path = result['id'].rsplit('/', 1)[0]
         self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys')
-        result = self.cmd('vm identity assign -g {rg} -n {vm} --identities {id} {id2}', checks=[
-            self.check('systemAssignedIdentity', ''),
-        ]).get_output_in_json()
-        self.assertEqual(2, len(result['userAssignedIdentities'].keys()))
 
         # we will try all kinds of generic updates we can
-        self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned, UserAssigned"', checks=[
-            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned"', checks=[
+            self.check('identity.type', 'SystemAssigned')
         ])
-
-        left = self.cmd('vm update -g {rg} -n {vm} --remove identity.userAssignedIdentities 1', checks=[
-            self.check('length(identity.identityIds)', 1)
-        ]).get_output_in_json()
-        removed = id_path + '/' + ('id2' if left == 'id' else 'id')
-        self.cmd('vm update -g {rg} -n {vm} --add identity.identityIds ' + removed, checks=[
-            self.check('length(identity.identityIds)', 2)
+        self.cmd('vm update -g {rg} -n {vm} --set storageProfile.dataDisks[0].caching="ReadWrite"', checks=[
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite')
         ])
         self.cmd('vm update -g {rg} -n {vm} --remove storageProfile.dataDisks', checks=[
             self.check('storageProfile.dataDisks', [])
