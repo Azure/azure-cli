@@ -1,14 +1,14 @@
 .. :changelog:
 
 Release History
-===============
+
 2.1.2
 ++++++
 * support for stack profile 2017-03-09-profile
 
 2.1.1
 +++++
-* Minor fix
+* `ad app update`: Fixes issue where generic update parameters would not work correctly.
 
 2.1.0
 +++++

@@ -193,7 +193,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     log_analytics_client = cf_log_analytics(cli_ctx)
 
     for workspace in log_analytics_client.list():
-        if log_analytics_workspace == workspace.name:
+        if log_analytics_workspace == workspace.name or log_analytics_workspace == workspace.customer_id:
             keys = log_analytics_client.get_shared_keys(
                 parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
