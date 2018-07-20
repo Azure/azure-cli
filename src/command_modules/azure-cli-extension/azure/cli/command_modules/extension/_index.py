@@ -19,6 +19,7 @@ ERR_TMPL_BAD_JSON = '{}Response body does not contain valid json. Error detail: 
 ERR_UNABLE_TO_GET_EXTENSIONS = 'Unable to get extensions from index. Improper index format.'
 TRIES = 3
 
+
 # pylint: disable=inconsistent-return-statements
 def get_index(index_url=None):
     from azure.cli.core.util import should_disable_connection_verify
