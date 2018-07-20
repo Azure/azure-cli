@@ -5,7 +5,7 @@ Release History
 
 3.3.1
 +++++
-* Minor fixes
+* Fix bug when show AAD token in cloudshell
 
 3.3.0
 +++++

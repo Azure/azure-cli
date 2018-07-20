@@ -9,7 +9,9 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
-DEFAULT_INDEX_URL = "https://aka.ms/azure-cli-extension-index-v1"
+# "https://aka.ms/azure-cli-extension-index-v1" fails to redirect properly to the storage blob url below
+# a good portion of the time. Will replace back once fixed.
+DEFAULT_INDEX_URL = "https://azurecliextensionsync.blob.core.windows.net/index1/index.json"
 
 ERR_TMPL_EXT_INDEX = 'Unable to get extension index.\n'
 ERR_TMPL_NON_200 = '{}Server returned status code {{}} for {{}}'.format(ERR_TMPL_EXT_INDEX)
