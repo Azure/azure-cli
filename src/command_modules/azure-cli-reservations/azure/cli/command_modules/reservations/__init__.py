@@ -17,7 +17,9 @@ class ReservationsCommandsLoader(AzCommandsLoader):
         reservations_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.reservations.custom#{}',
                                              client_factory=reservation_mgmt_client_factory,
                                              exception_handler=reservations_exception_handler)
-        super(ReservationsCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=reservations_custom)
+        super(ReservationsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                         custom_command_type=reservations_custom,
+                                                         min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.reservations.commands import load_command_table
