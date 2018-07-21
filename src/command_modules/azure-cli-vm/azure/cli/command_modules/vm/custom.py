@@ -478,9 +478,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                                                 overwrite_vhds=overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    output = getattr(result, 'output', None)
-    if output is None:  # handling swagger api breaking change
-        output = result.additional_properties['properties']['output']
+    output = getattr(result, 'output', None) or result.resources[0]
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
 
 

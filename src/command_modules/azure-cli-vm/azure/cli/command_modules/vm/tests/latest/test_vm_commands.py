@@ -2340,7 +2340,7 @@ class VMZoneScenarioTest(ScenarioTest):
 class VMRunCommandScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command')
-    def test_run_command_e2e(self, resource_group, resource_group_location):
+    def test_vm_run_command_e2e(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'vm': 'test-run-command-vm',
