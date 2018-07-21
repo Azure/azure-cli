@@ -470,9 +470,9 @@ class AcsCustomCommandTest(unittest.TestCase):
             instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                       'clitest000001', 'monitoring', enable=True)
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location')
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
-    def test_ensure_container_insights_for_monitoring(self, invoke_def, rg_def):
+    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
         cmd = mock.Mock()
         addon = mock.Mock()
         wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
