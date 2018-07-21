@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.2.2
++++++
+* changes for consuming multi api azure.mgmt.authorization package
+
+2.2.1
++++++
+* Depdendency update: paramiko >= 2.0.8
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `az aks create` will error out if `--max-pods` is less than 5
+
 2.1.3
 +++++
 * Update PyYAML dependency to 4.2b4

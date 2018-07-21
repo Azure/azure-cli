@@ -108,6 +108,15 @@ def list_nsgs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
 
 
+def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
+    client = network_client_factory(cmd.cli_ctx).network_security_groups
+    nsg = client.get(resource_group_name, network_security_group_name)
+    rules = nsg.security_rules
+    if include_default:
+        rules = rules + nsg.default_security_rules
+    return rules
+
+
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 

@@ -52,7 +52,7 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
         # but they should still fail if there was a CLI-level regression.
         with self.assertRaises(CloudError):
             self.cmd('cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         with self.assertRaises(ErrorResponseException):

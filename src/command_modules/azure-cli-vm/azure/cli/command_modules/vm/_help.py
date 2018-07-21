@@ -135,7 +135,7 @@ helps['vmss create'] = """
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
-            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
             az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
@@ -546,7 +546,7 @@ helps['vm diagnostics set'] = """
                 | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
-                --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
+                --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
             protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\

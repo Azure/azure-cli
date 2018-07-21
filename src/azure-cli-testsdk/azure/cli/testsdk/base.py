@@ -22,6 +22,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_progress_controller)
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir
+from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
 
@@ -73,8 +74,7 @@ class CheckerMixin(object):
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
                  recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
@@ -167,8 +167,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
     def __init__(self, method_name):
         super(LiveScenarioTest, self).__init__(method_name)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
 
     def cmd(self, command, checks=None, expect_failure=False):
@@ -261,6 +260,14 @@ class ExecutionResult(object):
             self.exit_code = 1
             self.output = stdout_buf.getvalue()
             self.process_error = ex
+        except SystemExit as ex:
+            # SystemExit not caught by broad exception, check for sys.exit(3)
+            if ex.code == 3 and expect_failure:
+                self.exit_code = 1
+                self.output = stdout_buf.getvalue()
+                self.applog = logging_buf.getvalue()
+            else:
+                raise
         finally:
             stdout_buf.close()
             logging_buf.close()

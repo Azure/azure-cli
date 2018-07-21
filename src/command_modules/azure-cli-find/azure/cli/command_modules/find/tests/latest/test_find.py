@@ -11,7 +11,7 @@ import six
 from six import StringIO
 
 from azure.cli.command_modules.find.custom import _purge, find
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 
 @contextlib.contextmanager
@@ -31,7 +31,7 @@ class SearchIndexTest(unittest.TestCase):
     def setUp(self):
         _purge()
         self.loader = mock.MagicMock()
-        self.loader.cli_ctx = TestCli()
+        self.loader.cli_ctx = DummyCli()
 
     def execute(self, args, reindex=False):
         with capture() as out:

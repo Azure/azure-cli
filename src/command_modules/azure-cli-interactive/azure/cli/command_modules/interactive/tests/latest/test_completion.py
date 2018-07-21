@@ -7,7 +7,7 @@ import os
 import unittest
 import mock
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.interactive.azclishell.configuration import Configuration
 from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
 
@@ -22,7 +22,7 @@ class CompletionTest(unittest.TestCase):
         super(CompletionTest, self).__init__(methodName)
         with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
             with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
-                shell_ctx = AzInteractiveShell(TestCli(), None)
+                shell_ctx = AzInteractiveShell(DummyCli(), None)
                 self.completer = shell_ctx.completer
                 self.shell_ctx = shell_ctx
 

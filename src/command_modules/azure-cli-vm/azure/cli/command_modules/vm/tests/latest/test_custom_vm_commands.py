@@ -26,12 +26,12 @@ from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm
                                                           encrypt_vmss, decrypt_vmss)
 from azure.cli.core.profiles import get_sdk, ResourceType
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 
 NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
     VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
-    CachingTypes = get_sdk(TestCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+    CachingTypes = get_sdk(DummyCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
                            'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
                            'CachingTypes',
@@ -39,7 +39,7 @@ NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, Instance
 
 
 def _get_test_cmd():
-    cli_ctx = TestCli()
+    cli_ctx = DummyCli()
     loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
     cmd = AzCliCommand(loader, 'test', None)
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE, 'operation_group': 'virtual_machines'}

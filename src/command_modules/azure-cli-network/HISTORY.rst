@@ -3,10 +3,18 @@
 Release History
 ===============
 
-2.1.6
+2.2.1
+++++++
+* Minor fixes
+
+2.2.0
 +++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * `network nic create/update/delete`: Add `--no-wait` support.
 * Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
+* `network nsg rule list`: Added `--include-default` flag to include default security rules in the output.
 
 2.1.5
 ++++++

@@ -5,7 +5,7 @@
 
 import os
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, api_version_constraint)
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 
 
@@ -73,7 +73,9 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
                  checks=JMESPathCheck('exists', True))
 
         self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('properties.contentLength', file_size_kb * 1024))
+                 checks=[JMESPathCheck('properties.contentLength', file_size_kb * 1024),
+                         JMESPathCheckExists('properties.pageRanges') if blob_type == 'page' else
+                         JMESPathCheck('properties.pageRanges', None)])
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')

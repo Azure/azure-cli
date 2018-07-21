@@ -203,14 +203,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.cmd(create_cmd)
         self.assertIn('--max-pods', str(err.exception))
 
-        # create with monitoring addon but no log analytics workspace specified
-        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
-                     '--enable-addons monitoring'
-        with self.assertRaises(CLIError) as err:
-            self.cmd(create_cmd)
-        self.assertIn('--enable-addons monitoring', str(err.exception))
-
-    @unittest.skip("It works in --live mode but fails in replay mode.Need to investigate")
+    # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
+    @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_monitoring_addon(self, resource_group, resource_group_location, sp_name, sp_password):

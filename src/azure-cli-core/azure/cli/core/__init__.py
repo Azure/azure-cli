@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.42"
+__version__ = "2.0.44"
 
 import os
 import sys
@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
+EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
 
 class AzCli(CLI):
@@ -192,6 +193,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         elapsed_time = timeit.default_timer() - start_time
                         logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
                     except Exception:  # pylint: disable=broad-except
+                        self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
                         logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
                         logger.debug(traceback.format_exc())
 

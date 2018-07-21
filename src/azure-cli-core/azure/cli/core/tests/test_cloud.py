@@ -27,28 +27,28 @@ from azure.cli.core.cloud import (Cloud,
 
 from azure.cli.core._profile import Profile
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
 
 
 def _helper_get_clouds(_):
     """ Helper method for multiprocessing.Pool.map func that uses throwaway arg """
-    get_clouds(TestCli())
+    get_clouds(DummyCli())
 
 
 class TestCloud(unittest.TestCase):
 
     def test_endpoint_none(self):
         with self.assertRaises(CloudEndpointNotSetException):
-            cli = TestCli()
+            cli = DummyCli()
             cli.cloud = Cloud('AzureCloud')
             profile = Profile(cli_ctx=cli)
             profile.get_login_credentials()
 
     @mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: [])
     def test_add_get_delete_custom_cloud(self):
-        cli = TestCli()
+        cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         suffix_storage = 'core.contoso.com'
         suffix_acr_login_server = '.azurecr-test.io'
@@ -81,7 +81,7 @@ class TestCloud(unittest.TestCase):
             self.assertEqual(len(custom_clouds), 0)
 
     def test_add_get_cloud_with_profile(self):
-        cli = TestCli()
+        cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
         profile = '2017-03-09-profile'
@@ -102,7 +102,7 @@ class TestCloud(unittest.TestCase):
 
     def test_add_get_cloud_with_invalid_profile(self):
         # Cloud has profile that doesn't exist so an exception should be raised
-        cli = TestCli()
+        cli = DummyCli()
         profile = 'none-existent-profile'
         c = Cloud('MyOwnCloud', profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
@@ -117,14 +117,14 @@ class TestCloud(unittest.TestCase):
 
     def test_get_default_latest_profile(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
-            cli = TestCli()
+            cli = DummyCli()
             clouds = get_clouds(cli)
             for c in clouds:
                 self.assertEqual(c.profile, 'latest')
 
     def test_custom_cloud_management_endpoint_set(self):
         # We have set management endpoint so don't override it
-        cli = TestCli()
+        cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
@@ -142,7 +142,7 @@ class TestCloud(unittest.TestCase):
 
     def test_custom_cloud_no_management_endpoint_set(self):
         # Use ARM 'resource manager' endpoint as 'management' (old ASM) endpoint if only ARM endpoint is set
-        cli = TestCli()
+        cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
         profile = '2017-03-09-profile'
@@ -158,13 +158,13 @@ class TestCloud(unittest.TestCase):
                              c.endpoints.resource_manager)
 
     def test_get_active_cloud_name_default(self):
-        cli = TestCli()
+        cli = DummyCli()
         expected = AZURE_PUBLIC_CLOUD.name
         actual = get_active_cloud_name(cli)
         self.assertEqual(expected, actual)
 
     def test_get_known_clouds(self):
-        cli = TestCli()
+        cli = DummyCli()
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             # Check that we can get all the known clouds without any exceptions
             for kc in KNOWN_CLOUDS:
@@ -172,7 +172,7 @@ class TestCloud(unittest.TestCase):
 
     def test_modify_known_cloud(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
-            cli = TestCli()
+            cli = DummyCli()
             config = cli.config.config_parser
             cloud_name = AZURE_PUBLIC_CLOUD.name
             cloud = get_cloud(cli, cloud_name)
@@ -189,7 +189,7 @@ class TestCloud(unittest.TestCase):
             self.assertEqual(items[0], ('endpoint_gallery', 'https://mynewcustomgallery.azure.com'))
 
     def test_remove_known_cloud(self):
-        cli = TestCli()
+        cli = DummyCli()
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             with self.assertRaises(CannotUnregisterCloudException):
                 remove_cloud(cli, AZURE_PUBLIC_CLOUD.name)
@@ -202,14 +202,14 @@ class TestCloud(unittest.TestCase):
             p.close()
             p.join()
             # Check we can read the file with no exceptions
-            cli = TestCli()
+            cli = DummyCli()
             config = cli.config
             config.config_parser.read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(cli, kc.name)
 
     def test_cloud_is_registered(self):
-        cli = TestCli()
+        cli = DummyCli()
         self.assertTrue(cloud_is_registered(cli, AZURE_PUBLIC_CLOUD.name))
         self.assertFalse(cloud_is_registered(cli, 'MyUnknownCloud'))
 

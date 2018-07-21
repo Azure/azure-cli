@@ -19,7 +19,7 @@ from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -65,6 +65,14 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+
+
+def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
+    profile = Profile(cli_ctx=cli_ctx)
+    if refresh:
+        profile.refresh_accounts()
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
+    return subscriptions
 
 
 def _get_authority_url(cli_ctx, tenant):
@@ -165,6 +173,10 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
+            if not use_device_code and (in_cloud_console() or not can_launch_browser()):
+                logger.info('Detect no GUI is available, so fall back to device code')
+                use_device_code = True
+
             if not use_device_code:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
@@ -722,7 +734,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
+        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
