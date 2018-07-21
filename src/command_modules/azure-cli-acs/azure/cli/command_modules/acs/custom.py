@@ -1828,13 +1828,18 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     except IndexError:
         raise CLIError('Could not locate resource group in workspace-resource-id URL.')
 
-    # find the location from the resource group
-    location = _get_rg_location(cmd.cli_ctx, resource_group, subscription_id)
+    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    try:
+        resource = resources.get_by_id(workspace_resource_id, '2015-11-01-preview')
+        location = resource.location
+    except CloudError as ex:
+        raise ex
 
     unix_time_in_millis = int(
         (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
 
-    solution_deployment_name = 'ContainerInsights-' + str(unix_time_in_millis)
+    solution_deployment_name = 'ContainerInsights-{}'.format(unix_time_in_millis)
 
     # pylint: disable=line-too-long
     template = {
@@ -1910,7 +1915,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         }
     }
 
-    deployment_name = 'aks-monitoring-' + str(unix_time_in_millis)
+    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
