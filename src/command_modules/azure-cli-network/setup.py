@@ -33,7 +33,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==2.0.0rc3',
     'azure-mgmt-trafficmanager==0.40.0',
     'azure-mgmt-dns==2.0.0rc1',
-    'azure-mgmt-resource==2.0.0rc2',
+    'azure-mgmt-resource==2.0.0',
     'azure-cli-core',
     'mock'
 ]
