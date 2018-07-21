@@ -2,14 +2,11 @@
 
 Release History
 ===============
-
-2.1.2
+2.2.0
 ++++++
+* BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
+                   in dictionary format
 * Consuming multi api azure.mgmt.authorization package for azure stack support
-
-2.1.1
-+++++
-* Minor fixes.
 
 2.1.0
 +++++
