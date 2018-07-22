@@ -4,6 +4,8 @@ Release History
 ===============
 2.2.0
 ++++++
+* vm/vmss: support StandardSSD_LRS
+* vm/vmss: support application security group on creating VM scale set
 * BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
                    in dictionary format
 * Consuming multi api azure.mgmt.authorization package for azure stack support

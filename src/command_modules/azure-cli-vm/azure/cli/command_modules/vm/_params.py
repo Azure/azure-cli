@@ -25,7 +25,6 @@ from azure.cli.command_modules.vm._validators import (
 # pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
     from azure.mgmt.compute.models import CachingTypes, UpgradeMode
-    from azure.mgmt.storage.models import SkuName
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -45,7 +44,6 @@ def load_arguments(self, _):
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
     else:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
-
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:

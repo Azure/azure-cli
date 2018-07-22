@@ -648,8 +648,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_configuration['properties']['applicationSecurityGroups'] =[{'id': x.id}
-                                                                      for x in application_security_groups]
+        ip_configuration['properties']['applicationSecurityGroups'] = [{'id': x.id}
+                                                                       for x in application_security_groups]
     # Build storage profile
     storage_properties = {}
     os_caching = disk_info['os'].get('caching')
