@@ -1821,8 +1821,14 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+
+    workspace_resource_id = workspace_resource_id.strip()
+
     if not workspace_resource_id.startswith('/'):
         workspace_resource_id = '/' + workspace_resource_id
+
+    if workspace_resource_id.endswith('/'):
+        workspace_resource_id = workspace_resource_id.rstrip('/')
 
     # extract subscription ID and resource group from workspace_resource_id URL
     try:
