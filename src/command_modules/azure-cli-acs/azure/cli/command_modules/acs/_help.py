@@ -212,7 +212,7 @@ helps['aks create'] = """
           long-summary: |-
             These addons are available:
                 http_application_routing - configure ingress with automatic public DNS name creation.
-                monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one. Specify "--workspace-resource-id" to use an existing workspace.
         - name: --disable-rbac
           type: bool
           short-summary: Disable Kubernetes Role-Based Access Control.
@@ -244,7 +244,7 @@ helps['aks create'] = """
           short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
         - name: --workspace-resource-id
           type: string
-          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+          short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
 
     examples:
         - name: Create a Kubernetes cluster with an existing SSH public key.
