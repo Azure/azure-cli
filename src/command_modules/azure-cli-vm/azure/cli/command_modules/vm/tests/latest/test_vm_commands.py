@@ -759,6 +759,8 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].name', '{availset}')
         ])
+        result = self.cmd('vm availability-set list --query "[?name==\'availset-test\']"').get_output_in_json()
+        self.assertEquals(1, len(result))
         self.cmd('vm availability-set list-sizes -g {rg} -n {availset}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('vm availability-set show -g {rg} -n {availset}',
@@ -1634,6 +1636,22 @@ class AcceleratedNetworkingTest(ScenarioTest):
         })
         self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
         self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
+
+
+class ApplicationSecurityGroup(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_asg')
+    def test_vmss_asg(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vm': 'vm1',
+            'asg': 'asg1'
+        })
+        asg_id = self.cmd('network asg create -g {rg} -n {asg}').get_output_in_json()['id']
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --instance-count 1 --asgs {asg} --admin-username clittester --generate-ssh-keys').get_output_in_json()
+        self.cmd('vm create -g {rg} -n {vm} --image debian --asgs {asg} --admin-username clittester --generate-ssh-keys').get_output_in_json()
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationSecurityGroups[0].id', asg_id))
+        self.cmd('network nic show -g {rg} -n {vm}VMNIC', checks=self.check('ipConfigurations[0].applicationSecurityGroups[0].id', asg_id))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes

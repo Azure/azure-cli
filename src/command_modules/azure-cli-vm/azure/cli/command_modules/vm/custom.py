@@ -983,6 +983,13 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def list_av_sets(cmd, resource_group_name=None):
+    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
+    if resource_group_name:
+        return op_group.list(resource_group_name)
+    return op_group.list_by_subscription()
 # endregion
 
 

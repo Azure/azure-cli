@@ -4,6 +4,7 @@ Release History
 ===============
 2.2.0
 ++++++
+* availability set: support list by subscription
 * vm/vmss: support StandardSSD_LRS
 * vm/vmss: support application security group on creating VM scale set
 * BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
