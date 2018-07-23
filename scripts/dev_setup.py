@@ -43,6 +43,7 @@ pip_command('install -e ./tools')
 
 # command modules have dependency on azure-cli-core so install this first
 pip_command('install -e src/azure-cli-nspkg')
+pip_command('install -e src/azure-cli-telemetry')
 pip_command('install -e src/azure-cli-core')
 py_command('-m automation.setup.install_modules')
 

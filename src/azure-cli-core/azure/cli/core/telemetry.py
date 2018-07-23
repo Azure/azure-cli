@@ -12,20 +12,16 @@ import re
 import sys
 import traceback
 import uuid
-import subprocess
 from collections import defaultdict
 from functools import wraps
 
 import azure.cli.core.decorators as decorators
-import azure.cli.core.telemetry_upload as telemetry_core
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
-
-decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
@@ -73,7 +69,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
         self.exceptions.append((fault_name, details))
 
-    @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
+    @decorators.suppress_all_exceptions(fallback_return=None)
     def generate_payload(self):
         if not self.suppress_new_event:
             base = self._get_base_properties()
@@ -98,7 +94,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                     'properties': props
                 })
 
-        payload = json.dumps(self.events)
+        payload = json.dumps(self.events, separators=(',', ':'))
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
@@ -156,6 +152,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                               lambda: self.application.data['headers'][
                                   'x-ms-client-request-id'])
         set_custom_properties(result, 'CoreVersion', _get_core_version)
+        set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
         set_custom_properties(result, 'ShellType', _get_shell_type)
         set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
@@ -217,7 +214,7 @@ def _user_agrees_to_telemetry(func):
 # public api
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def start(mode=None):
     if mode:
         _session.mode = mode
@@ -225,61 +222,35 @@ def start(mode=None):
 
 
 @_user_agrees_to_telemetry
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def flush():
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.telemetry import save
+
     # flush out current information
     _session.end_time = datetime.datetime.utcnow()
-
-    payload = _session.generate_payload()
-    if payload:
-        _upload_telemetry_with_user_agreement(payload)
+    save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
     _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
 
 
 @_user_agrees_to_telemetry
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def conclude():
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.telemetry import save
+
     _session.end_time = datetime.datetime.utcnow()
-
-    payload = _session.generate_payload()
-    if payload:
-        kwargs = dict()
-        if os.name == 'nt':
-            # Windows process creation flag to not reuse the parent console.
-            # Without this, the background service is associated with the
-            # starting process's console, and will block that console from
-            # exiting until the background service self-terminates.
-            # Elsewhere, fork just does the right thing.
-            kwargs['creationflags'] = 0x00000010  # CREATE_NEW_CONSOLE
-
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-            kwargs['startupinfo'] = startupinfo
-        else:
-            if sys.version_info >= (3, 3):
-                kwargs['stdin'] = subprocess.DEVNULL
-                if not telemetry_core.in_diagnostic_mode:
-                    kwargs['stdout'] = subprocess.DEVNULL
-                    kwargs['stderr'] = subprocess.STDOUT
-        _upload_telemetry_with_user_agreement(payload, **kwargs)
+    save(get_config_dir(), _session.generate_payload())
 
 
-# This includes a final user-agreement-check; ALL methods sending telemetry MUST call this.
-@_user_agrees_to_telemetry
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def _upload_telemetry_with_user_agreement(payload, **kwargs):
-    subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload], **kwargs)
-
-
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def suppress_new_events(unsuppress=False):
     _session.suppress_new_event = not unsuppress
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_custom_properties(prop, name, value):
     actual_value = value() if hasattr(value, '__call__') else value
 
@@ -287,7 +258,7 @@ def set_custom_properties(prop, name, value):
         prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_exception(exception, fault_type, summary=None):
     if not summary:
         _session.result_summary = summary
@@ -295,7 +266,7 @@ def set_exception(exception, fault_type, summary=None):
     _session.add_exception(exception, fault_type=fault_type, description=summary)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_failure(summary=None):
     if _session.result != 'None':
         return
@@ -305,7 +276,7 @@ def set_failure(summary=None):
         _session.result_summary = _remove_cmd_chars(summary)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_success(summary=None):
     if _session.result != 'None':
         return
@@ -315,7 +286,7 @@ def set_success(summary=None):
         _session.result_summary = _remove_cmd_chars(summary)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_user_fault(summary=None):
     if _session.result != 'None':
         return
@@ -325,25 +296,25 @@ def set_user_fault(summary=None):
         _session.result_summary = _remove_cmd_chars(summary)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_application(application, arg_complete_env_name):
     _session.application, _session.arg_complete_env_name = application, arg_complete_env_name
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_feedback(feedback):
     """ This method is used for modules in which user feedback is collected. The data can be an arbitrary string but it
     will be truncated at 512 characters to avoid abusing the telemetry."""
     _session.feedback = feedback[:512]
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_extension_management_detail(ext_name, ext_version):
     content = '{}@{}'.format(ext_name, ext_version)
     _session.extension_management_detail = content[:512]
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_command_details(command, output_type=None, parameters=None, extension_name=None, extension_version=None):
     _session.command = command
     _session.output_type = output_type
@@ -352,29 +323,29 @@ def set_command_details(command, output_type=None, parameters=None, extension_na
     _session.extension_version = extension_version
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_module_correlation_data(correlation_data):
     _session.module_correlation = correlation_data[:512]
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def set_raw_command_name(command):
     # the raw command name user inputs
     _session.raw_command = command
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     set_custom_properties(properties, 'ExtensionName', extension_name)
     _add_event('extension', properties, instrumentation_key=instrumentation_key)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def add_interactive_event(properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     _add_event('interactive', properties, instrumentation_key=instrumentation_key)
 
 
-@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+@decorators.suppress_all_exceptions()
 def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     # Inject correlation ID into the new event
     properties.update({

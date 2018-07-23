@@ -2,13 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import pkg_resources
 
-"""The programming interfaces which 3rd party application can depend on."""
-
-# pylint: disable=unused-import
-
-from ._environment import get_config_dir
-from ._profile import load_subscriptions
-
-from ._completers import get_subscription_id_list
-from .decorators import suppress_all_exceptions
+pkg_resources.declare_namespace(__name__)
