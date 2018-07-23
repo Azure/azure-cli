@@ -29,7 +29,7 @@ def create_transform(cmd, client, account_name, resource_group_name,
             with open(custom_preset_path) as custom_preset_json_stream:
                 custom_preset_json = json.load(custom_preset_json_stream)
                 from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
-                standard_encoder_preset = StandardEncoderPreset(codecs=build_codecs_for_preset(custom_preset_json['Codecs']))
+                standard_encoder_preset = StandardEncoderPreset(codecs=map_codecs(custom_preset_json['Codecs']))
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
         except (OSError, IOError) as e:
             raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
@@ -110,7 +110,7 @@ def camel_to_snake(name):
 
 models_module = importlib.import_module('azure.mgmt.media.models')
 
-def build_codecs_for_preset(codecs):
+def map_codecs(codecs):
     codec_instance_list = []
     for codec in codecs:
         codec_instance = getattr(models_module, codec['Type'])()
