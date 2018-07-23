@@ -262,7 +262,7 @@ def _parse_api_version(api_version):
         return _SemVerAPIFormat(api_version)
 
 
-def _cross_api_format_less_then(api_version, other):
+def _cross_api_format_less_than(api_version, other):
     """LT strategy that supports if types are different.
 
     For now, let's assume that any Semver is higher than any DateAPI
@@ -279,9 +279,9 @@ def _cross_api_format_less_then(api_version, other):
 def _validate_api_version(api_version_str, min_api=None, max_api=None):
     """Validate if api_version is inside the interval min_api/max_api.
     """
-    if min_api and _cross_api_format_less_then(api_version_str, min_api):
+    if min_api and _cross_api_format_less_than(api_version_str, min_api):
         return False
-    if max_api and _cross_api_format_less_then(max_api, api_version_str):
+    if max_api and _cross_api_format_less_than(max_api, api_version_str):
         return False
     return True
 
