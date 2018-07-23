@@ -8,6 +8,7 @@
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
@@ -331,12 +332,19 @@ def load_command_table(self, _):
     with self.command_group('network dns record-set') as g:
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
 
-    for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']:
+    api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
+    api_version = api_version.replace('-', '_')
+    dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
+
+    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']
+    if self.supported_api_version(resource_type=ResourceType.MGMT_NETWORK_DNS, min_api='2018-02-01'):
+        supported_records.append('caa')
+    for record in supported_records:
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk) as g:
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
             g.command('delete', 'delete', confirmation=True)
             g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-            g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source='azure.mgmt.dns.operations#RecordSetsOperations.create_or_update')
+            g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.generic_update_command('update', custom_func_name='update_dns_record_set', transform=transform_dns_record_set_output)
@@ -349,7 +357,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get', transform=transform_dns_record_set_output)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-        g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source='azure.mgmt.dns.operations#RecordSetsOperations.create_or_update')
+        g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
 
