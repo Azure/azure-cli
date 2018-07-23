@@ -30,7 +30,8 @@ def create_transform(cmd, client, account_name, resource_group_name,
                 custom_preset_json = json.load(custom_preset_json_stream)
                 from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
                 standard_encoder_preset = StandardEncoderPreset(codecs=map_codecs(custom_preset_json['Codecs']),
-                                                                filters=map_filters(custom_preset_json))
+                                                                filters=map_filters(custom_preset_json),
+                                                                formats=map_formats(custom_preset_json['Outputs']))
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
         except (OSError, IOError) as e:
             raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
@@ -193,6 +194,21 @@ def map_filters(custom_preset_json):
 
 
     return filters_instance
+
+
+def map_formats(outputs):
+    formats = []
+    for output in outputs:
+        format_instance = getattr(models_module, get_format_type(output))()
+        format_instance.filename_pattern = output['FileName']
+        formats.append(format_instance)
+    return formats
+
+
+def get_format_type(output):
+    # TODO: check other exceptions
+    format_type = output['Format']['Type']
+    return 'Mp4Format' if 'MP4Format' in format_type else format_type
 
 
 def parse_custom_preset_value(key, value, instance):
