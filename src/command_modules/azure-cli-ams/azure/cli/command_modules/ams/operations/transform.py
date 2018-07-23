@@ -29,7 +29,7 @@ def create_transform(cmd, client, account_name, resource_group_name,
             with open(custom_preset_path) as custom_preset_json_stream:
                 custom_preset_json = json.load(custom_preset_json_stream)
                 from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
-                standard_encoder_preset = StandardEncoderPreset(codecs=map_codecs(custom_preset_json['Codecs']))
+                standard_encoder_preset = StandardEncoderPreset(codecs=map_codecs(custom_preset_json['Codecs'], filters=map_filters(custom_preset_json)))
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
         except (OSError, IOError) as e:
             raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
@@ -102,7 +102,6 @@ def get_transform_output(preset):
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output
 
-
 def camel_to_snake(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -132,13 +131,99 @@ def map_codecs(codecs):
     return codec_instance_list
 
 
+def map_filters(custom_preset_json):
+    filters_instance = None
+
+    sources = custom_preset_json.get('Sources')
+    if sources:
+        for source in sources:
+            filters = source.get('Filters')
+            if filters:
+                from azure.mgmt.media.models import Filters
+                filters_instance = Filters()
+            
+                overlays = []
+
+                video_overlay = filters.get('VideoOverlay')
+                if video_overlay:
+                    from azure.mgmt.media.models import VideoOverlay
+                    video_overlay_instance = VideoOverlay()
+
+                    position = video_overlay.get('Position')
+                    video_overlay_instance.position = map_position(position)
+
+                    video_overlay_instance.audio_gain_level = video_overlay.get('AudioGainLevel')
+                    video_overlay_instance.input_label = video_overlay.get('Source')
+
+                    video_overlay_instance.fade_in_duration = map_fade_in_out_duration(video_overlay.get('FadeInDuration'))
+                    video_overlay_instance.fade_out_duration = map_fade_in_out_duration(video_overlay.get('FadeOutDuration'))
+
+                    overlays.append(video_overlay_instance)
+
+                    # TODO: start, end, opacity, crop_rectangle parameters
+            
+                audio_overlay = filters.get('AudioOverlay')
+                if audio_overlay:
+                    from azure.mgmt.media.models import AudioOverlay
+                    audio_overlay_instance = AudioOverlay()
+
+                    position = audio_overlay.get('Position')
+                    audio_overlay_instance.position = map_position(position)
+
+                    audio_overlay_instance.audio_gain_level = audio_overlay.get('AudioGainLevel')
+                    audio_overlay_instance.input_label = audio_overlay.get('Source')
+
+                    audio_overlay_instance.fade_in_duration = map_fade_in_out_duration(audio_overlay.get('FadeInDuration'))
+                    audio_overlay_instance.fade_out_duration = map_fade_in_out_duration(audio_overlay.get('FadeOutDuration'))
+
+                    overlays.append(audio_overlay_instance)
+
+                    # TODO: start, end parameters
+            
+                filters_instance.deinterlace = filters.get('Deinterlace')
+            
+                rotation = filters.get('Rotation')
+                if rotation:
+                    filters_instance.rotation = 'Rotate{}'.format(rotation)
+            
+                # TODO: crop parameter
+
+                filters_instance.overlays = overlays
+
+
+    return filters_instance
+
+
 def parse_custom_preset_value(key, value, instance):
     if hasattr(instance, camel_to_snake(key)):
         try:
-            datetime_duration = datetime.strptime(value,'%H:%M:%S')
-            iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
-                                                                             minutes=datetime_duration.minute,
-                                                                             seconds=datetime_duration.second))
-            setattr(instance, camel_to_snake(key), iso_duration_format_value)
+            iso_duration = parse_iso_duration(value)
+            setattr(instance, camel_to_snake(key), iso_duration)
         except:
             setattr(instance, camel_to_snake(key), value)
+
+
+def map_position(position):
+    rectangle = None
+    if position:
+        from azure.mgmt.media.models import Rectangle
+        rectangle = Rectangle(left=position.get('X'), top=position.get('Y'),
+                              width=position.get('Width'), height=position.get('Height'))
+    return rectangle
+
+
+def map_fade_in_out_duration(obj):
+    iso_duration = None
+    if obj:
+        iso_duration = parse_iso_duration(obj.get('Duration'))
+    return iso_duration
+
+
+def parse_iso_duration(str_duration):
+    iso_duration_format_value = None
+    if str_duration:
+        datetime_duration = datetime.strptime(str_duration,'%H:%M:%S')
+        iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
+                                                                         minutes=datetime_duration.minute,
+                                                                         seconds=datetime_duration.second))
+    return iso_duration_format_value
