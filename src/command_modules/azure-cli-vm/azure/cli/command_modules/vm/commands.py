@@ -92,8 +92,7 @@ def load_command_table(self, _):
     compute_vm_run_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
         client_factory=cf_run_commands,
-        min_api='2017-03-30',
-        max_api='2017-03-30'
+        min_api='2017-03-30'
     )
 
     compute_vm_size_sdk = CliCommandType(

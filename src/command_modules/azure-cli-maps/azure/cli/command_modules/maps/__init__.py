@@ -17,7 +17,8 @@ class MapsCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.maps.custom#{}',
             client_factory=cf_accounts)
         super(MapsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                 custom_command_type=custom_type)
+                                                 custom_command_type=custom_type,
+                                                 min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.maps.commands import load_command_table

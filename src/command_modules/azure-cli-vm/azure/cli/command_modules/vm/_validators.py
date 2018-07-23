@@ -917,8 +917,8 @@ def _resolve_role_id(cli_ctx, role, scope):
     import re
     import uuid
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_definitions
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_definitions
 
     role_id = None
     if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',

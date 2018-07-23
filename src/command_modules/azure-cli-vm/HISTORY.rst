@@ -2,9 +2,14 @@
 
 Release History
 ===============
+2.2.0
+++++++
+* BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
+                   in dictionary format
+* Consuming multi api azure.mgmt.authorization package for azure stack support
 
 2.1.0
-++++++
++++++
 * BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * `vm/vmss extension set/delete`: Added `--no-wait` support.
