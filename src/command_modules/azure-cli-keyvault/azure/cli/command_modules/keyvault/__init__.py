@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-
+from azure.cli.core.profiles import ResourceType
 import azure.cli.command_modules.keyvault._help  # pylint: disable=unused-import
 
 
@@ -19,6 +19,7 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
             client_factory=keyvault_client_factory
         )
         super(KeyVaultCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                     resource_type= ResourceType.MGMT_KEYVAULT,
                                                      custom_command_type=keyvault_custom,
                                                      command_group_cls=KeyVaultCommandGroup,
                                                      argument_context_cls=KeyVaultArgumentContext)

@@ -17,15 +17,24 @@ from OpenSSL import crypto
 import azure.cli.core.telemetry as telemetry
 
 from ._validators import secret_text_encoding_values
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)
 
 
-def _default_certificate_profile():
+def _default_certificate_profile(cmd):
 
-    from azure.keyvault.models import \
-        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
-         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, Trigger)
+    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
+    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -73,11 +82,20 @@ def _default_certificate_profile():
     return template
 
 
-def _scaffold_certificate_profile():
-    from azure.keyvault.models import \
-        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
-         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, SubjectAlternativeNames, Trigger)
-
+def _scaffold_certificate_profile(cmd):
+    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
+    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    SubjectAlternativeNames = cmd.get_models('SubjectAlternativeNames', resource_type=ResourceType.DATA_KEYVAULT)
+    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
+    
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
@@ -199,7 +217,7 @@ def _create_network_rule_set(bypass=None, default_action=None):
 
 
 # region KeyVault Vault
-def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argument
+def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
     :param client:
@@ -207,7 +225,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
+    return _scaffold_certificate_profile(cmd) if scaffold else _default_certificate_profile(cmd)
 
 
 def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
@@ -523,9 +541,9 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
+def create_key(cmd, client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
-    from azure.keyvault.models import KeyAttributes
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
@@ -543,12 +561,12 @@ def restore_key(client, vault_base_url, file_path):
     return client.restore_key(vault_base_url, data)
 
 
-def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+def import_key(cmd, client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium KeyVaults. """
-    from azure.keyvault.models import KeyAttributes, JsonWebKey
-
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
     def _to_bytes(hex_string):
         # zero pads and decodes a hex string
         if len(hex_string) % 2:
@@ -671,9 +689,9 @@ def restore_secret(client, vault_base_url, file_path):
 
 # region KeyVault Certificate
 # pylint: disable=inconsistent-return-statements
-def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
+def create_certificate(cmd, client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
-    from azure.keyvault.models import CertificateAttributes
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
@@ -721,11 +739,12 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def import_certificate(client, vault_base_url, certificate_name, certificate_data,
+def import_certificate(cmd, client, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
     import binascii
-    from azure.keyvault.models import CertificateAttributes, SecretProperties, CertificatePolicy
-
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
     x509 = None
     content_type = None
     try:
@@ -813,11 +832,12 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
         raise ex
 
 
-def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
+def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
-    from azure.keyvault.models import \
-        (Contact, Contacts, KeyVaultErrorException)
+    Contact = cmd.get_models('Contact', resource_type=ResourceType.DATA_KEYVAULT)
+    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
     try:
         contacts = client.get_certificate_contacts(vault_base_url)
     except KeyVaultErrorException:
@@ -829,9 +849,9 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
     return client.set_certificate_contacts(vault_base_url, contacts.contact_list)
 
 
-def delete_certificate_contact(client, vault_base_url, contact_email):
+def delete_certificate_contact(cmd, client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
-    from azure.keyvault.models import Contacts
+    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
     orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
     remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list
                           if x.email_address != contact_email]
@@ -843,7 +863,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
     return client.delete_certificate_contacts(vault_base_url)
 
 
-def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
+def create_certificate_issuer(cmd, client, vault_base_url, issuer_name, provider_name, account_id=None,
                               password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
@@ -853,7 +873,9 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import IssuerCredentials, OrganizationDetails, IssuerAttributes
+    IssuerCredentials = cmd.get_models('IssuerCredentials', resource_type=ResourceType.DATA_KEYVAULT)
+    OrganizationDetails = cmd.get_models('OrganizationDetails', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerAttributes = cmd.get_models('IssuerAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     credentials = IssuerCredentials(account_id=account_id, password=password)
     issuer_attrs = IssuerAttributes(enabled=not disabled)
     org_details = OrganizationDetails(id=organization_id, admin_details=[])
@@ -896,11 +918,10 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
         vault_base_url, issuer_name).organization_details.admin_details
 
 
-def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
+def add_certificate_issuer_admin(cmd, client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    from azure.keyvault.models import AdministratorDetails
-
+    AdministratorDetails = cmd.get_models('AdministratorDetails', resource_type=ResourceType.DATA_KEYVAULT)
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details
     admins = org_details.admin_details

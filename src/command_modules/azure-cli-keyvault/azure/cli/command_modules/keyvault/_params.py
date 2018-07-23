@@ -23,7 +23,7 @@ from ._validators import (
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet)
-
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 # CUSTOM CHOICE LISTS
 
@@ -33,11 +33,23 @@ certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    from azure.keyvault.models import JsonWebKeyOperation
+    #from azure.keyvault.models import JsonWebKeyOperation
+    JsonWebKeyOperation = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyOperation')#self.get_models('JsonWebKeyOperation', resource_type=ResourceType.DATA_KEYVAULT)
+    #from azure.keyvault.models import SecretAttributes, CertificateAttributes, StorageAccountAttributes
     from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes
-    from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
-        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
-
+    #KeyAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_attributes')
+    #SecretAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_attributes')
+    #CertificateAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes')
+    #StorageAccountAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.storage_account_attributes')
+    #from azure.mgmt.keyvault.v2018_02_14.models.key_vault_management_client_enums import (
+    #    SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
+    SkuName = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SkuName')
+    KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
+    SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
+    CertificatePermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#CertificatePermissions')
+    StoragePermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#StoragePermissions')
+    NetworkRuleBypassOptions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
+    NetworkRuleAction = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleAction')
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
         help='Name of the key vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,

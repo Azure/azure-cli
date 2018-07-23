@@ -29,9 +29,10 @@ def _encode_hex(item):
     return item
 
 
-def keyvault_exception_handler(ex):
+def keyvault_exception_handler(cmd, ex):
     from msrest.exceptions import ValidationError, ClientRequestError
-    from azure.keyvault.models import KeyVaultErrorException
+    from azure.cli.core.profiles import ResourceType
+    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
     if isinstance(ex, (ValidationError, KeyVaultErrorException)):
         try:
             raise CLIError(ex.inner_exception.error.message)
@@ -113,7 +114,8 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 else:
                     return _encode_hex(result)
             except Exception as ex:  # pylint: disable=broad-except
-                return keyvault_exception_handler(ex)
+                return keyvault_exception_handler(self.command_loader, ex)
+                #return keyvault_exception_handler(ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access
                                          argument_loader=keyvault_arguments_loader,

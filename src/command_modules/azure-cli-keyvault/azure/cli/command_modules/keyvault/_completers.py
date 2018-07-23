@@ -15,7 +15,9 @@ def get_keyvault_name_completion_list(resource_name):
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-        from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+        from azure.keyvault import KeyVaultAuthentication
+        from azure.cli.core.profiles import ResourceType, get_sdk
+        KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
         client = KeyVaultClient(KeyVaultAuthentication(_get_token))
         func_name = 'get_{}s'.format(resource_name)
         vault = namespace.vault_base_url
@@ -32,7 +34,9 @@ def get_keyvault_version_completion_list(resource_name):
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-        from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+        from azure.keyvault import KeyVaultAuthentication
+        from azure.cli.core.profiles import ResourceType, get_sdk
+        KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
         client = KeyVaultClient(KeyVaultAuthentication(_get_token))
         func_name = 'get_{}_versions'.format(resource_name)
         vault = namespace.vault_base_url

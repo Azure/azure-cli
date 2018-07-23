@@ -21,7 +21,8 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+from azure.cli.core._profile import ResourceType, get_sdk
+from azure.keyvault import KeyVaultAuthentication
 from azure.mgmt.keyvault.models import (VaultProperties,
                                         Sku as KeyVaultSku,
                                         AccessPolicyEntry,
@@ -82,7 +83,7 @@ from ._client_factory import (resource_client_factory,
                               compute_client_factory,
                               storage_client_factory,
                               network_client_factory)
-
+KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
 logger = get_logger(__name__)
 
 DEFAULT_ADMIN_USER_NAME = "adminuser"
