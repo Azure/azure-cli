@@ -11,8 +11,7 @@ from azure.cli.core.mock import DummyCli
 
 
 class ProfileCommandTest(unittest.TestCase):
-
-    @mock.patch('azure.cli.command_modules.profile.custom._load_subscriptions', autospec=True)
+    @mock.patch('azure.cli.core.api.load_subscriptions', autospec=True)
     @mock.patch('azure.cli.command_modules.profile.custom.logger', autospec=True)
     def test_list_only_enabled_one(self, logger_mock, load_subscription_mock):
         cmd = mock.MagicMock()

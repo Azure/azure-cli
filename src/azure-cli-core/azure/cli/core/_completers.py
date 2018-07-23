@@ -5,12 +5,12 @@
 
 from azure.cli.core.decorators import Completer
 
-from azure.cli.command_modules.profile.custom import _load_subscriptions
-
 
 @Completer
 def get_subscription_id_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    subscriptions = _load_subscriptions(cmd.cli_ctx)
+    from azure.cli.core._profile import load_subscriptions
+
+    subscriptions = load_subscriptions(cmd.cli_ctx)
     result = []
     for subscription in subscriptions:
         result.append(subscription['id'])

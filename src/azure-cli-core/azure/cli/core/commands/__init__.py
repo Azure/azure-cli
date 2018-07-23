@@ -587,6 +587,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
 
 def _load_command_loader(loader, args, name, prefix):
+    from azure.cli.core.profiles import PROFILE_TYPE
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
@@ -594,7 +595,8 @@ def _load_command_loader(loader, args, name, prefix):
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
         loader.loaders.append(command_loader)  # This will be used by interactive
-        if command_loader.supported_api_version():
+        if command_loader.supported_api_version(min_api=command_loader.min_profile, max_api=command_loader.max_profile,
+                                                resource_type=PROFILE_TYPE):
             command_table = command_loader.load_command_table(args)
             if command_table:
                 for cmd in list(command_table.keys()):

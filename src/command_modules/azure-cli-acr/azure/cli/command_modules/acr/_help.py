@@ -383,6 +383,10 @@ helps['acr build-task show'] = """
         - name: Get the details of a build task, displaying the results in a table.
           text: >
             az acr build-task show -n MyBuildTask -r MyRegistry -o table
+
+        - name: Get the details of a build task including secure properties.
+          text: >
+            az acr build-task show -n MyBuildTask -r MyRegistry --with-secure-properties
 """
 
 helps['acr build-task list'] = """
@@ -446,6 +450,15 @@ helps['acr build-task run'] = """
         - name: Trigger a build task.
           text: >
             az acr build-task run -n MyBuildTask -r MyRegistry
+"""
+
+helps['acr build-task update-build'] = """
+    type: command
+    short-summary: Patch the build properties.
+    examples:
+        - name: Update an existing build to be archived.
+          text: >
+            az acr build-task update-build -r MyRegistry --build-id MyBuild --no-archive false
 """
 
 helps['acr build-task logs'] = """

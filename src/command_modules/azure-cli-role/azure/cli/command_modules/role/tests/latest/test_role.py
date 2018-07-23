@@ -219,7 +219,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + '@msazurestack.onmicrosoft.com',
                 'nsg': 'nsg1'
             })
 

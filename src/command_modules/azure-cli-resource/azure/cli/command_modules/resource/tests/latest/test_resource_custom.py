@@ -205,6 +205,10 @@ class TestCustom(unittest.TestCase):
 
         # test different ways of passing in parameters
         tests = [
+            {  # empty JSON works
+                "parameter_list": [["{}"]],
+                "expected": {},
+            },
             {  # empty parameters works
                 "parameter_list": [],
                 "expected": {},
@@ -235,10 +239,10 @@ class TestCustom(unittest.TestCase):
             }
         ]
 
-        for test in tests:
+        for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
             result_parameters = _process_parameters(template_param_defs, parameter_list)
-            self.assertEqual(result_parameters, test['expected'])
+            self.assertEqual(result_parameters, test['expected'], i)
 
     def test_deployment_missing_values(self):
 

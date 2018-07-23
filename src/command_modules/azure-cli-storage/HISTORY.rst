@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.1.1
++++++
+* Allows download of large files using a single connection.
+* Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
+
 2.1.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

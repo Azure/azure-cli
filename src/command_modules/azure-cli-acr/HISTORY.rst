@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.1.1
++++++
+* Minor fixes
+
+2.1.1
++++++
+* Add --with-secure-properties flag in 'acr build-task show' command.
+* Add 'acr build-task update-build' command.
 
 2.1.0
 +++++

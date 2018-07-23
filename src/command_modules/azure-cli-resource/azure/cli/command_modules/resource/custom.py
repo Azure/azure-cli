@@ -59,6 +59,10 @@ def _process_parameters(template_param_defs, parameter_lists):
         return None
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
+        # support situation where empty JSON "{}" is provided
+        if value == '{}' and not parameters:
+            return True
+
         try:
             key, value = value.split('=', 1)
         except ValueError:
@@ -90,7 +94,7 @@ def _process_parameters(template_param_defs, parameter_lists):
     for params in parameter_lists or []:
         for item in params:
             param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
-            if param_obj:
+            if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))

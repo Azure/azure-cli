@@ -303,7 +303,7 @@ helps['servicebus topic update'] = """
     short-summary: Updates the Service Bus Topic
     examples:
         - name: Updates existing Service Bus Topic.
-          text: az servicebus topic update --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --support-ordering True
+          text: az servicebus topic update --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --enable-ordering True
 """
 
 helps['servicebus topic show'] = """

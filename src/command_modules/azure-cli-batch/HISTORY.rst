@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.3.1
++++++
+* Fix bug when show AAD token in cloudshell
+
 3.3.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
