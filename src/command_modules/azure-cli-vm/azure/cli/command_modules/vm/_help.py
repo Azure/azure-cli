@@ -1250,7 +1250,7 @@ helps['vm run-command invoke'] = """
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
         - name: invoke command with parameters
-          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
+          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
 """
 
 helps['vmss identity'] = """
