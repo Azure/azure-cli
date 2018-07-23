@@ -147,6 +147,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('git_access_token', help="The access token used to access the source control provider.")
+        c.argument('with_secure_properties', help="Indicates whether the secure properties of a build task should be returned.", action='store_true')
         # build step parameters
         c.argument('step_name', help='The name of the build step.', completer=get_resource_name_completion_list(BUILD_STEP_RESOURCE_TYPE))
         c.argument('branch', help="The source control branch name.")
@@ -158,6 +159,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('build_id', help='The unique build identifier.')
         c.argument('build_status', help='The current status of build.', arg_type=get_enum_type(BuildStatus))
         c.argument('image', arg_type=image_by_tag_or_digest_type)
+        c.argument('no_archive', help='Indicates whether the build should be archived.', arg_type=get_three_state_flag())
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)

@@ -6,6 +6,11 @@ Release History
 +++++
 * Minor fixes
 
+2.1.1
++++++
+* Add --with-secure-properties flag in 'acr build-task show' command.
+* Add 'acr build-task update-build' command.
+
 2.1.0
 +++++
 * BREAKING CHANGE: Update '--no-push' to a pure flag in 'acr build' command.
