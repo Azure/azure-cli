@@ -138,8 +138,7 @@ def load_command_table(self, _):
 
 # MigrationConfigs Region
     with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory) as g:
-        g.command('start', 'create_and_start_migration')
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.custom_command('start', 'cli_migration_start')
+        g.show_command('show', 'get', exception_handler=empty_on_404)
         g.command('complete', 'complete_migration', exception_handler=empty_on_404)
-        g.command('stop', 'revert')
-        g.command('delete', 'delete')
+        g.command('abort', 'revert')

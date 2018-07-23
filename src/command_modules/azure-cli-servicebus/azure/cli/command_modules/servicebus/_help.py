@@ -537,6 +537,7 @@ helps['servicebus georecovery-alias delete'] = """
 helps['servicebus migration start'] = """
     type: command
     short-summary: Creates and Start Service Bus Migration of Standard to Premium
+    long-summary: pre-requisit - A Service Bus empty Premium namespace is required.
     examples:
         - name:  Creates and Start Service Bus Migration of Standard to Premium
           text: az servicebus migration start --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
@@ -553,23 +554,17 @@ helps['servicebus migration show'] = """
 helps['servicebus migration complete'] = """
     type: command
     short-summary: Completes the Service Bus Migration of Standard to Premium namespace
+    long-summary: This command completes the migration and connection strings are modified to point Premium namespace. Standard namespace can be accssed using Post-migration-name.
     examples:
         - name:  Completes the Service Bus Migration of Standard to Premium namespace
           text: az servicebus migration complete --resource-group myresourcegroup --name standardnamespace
 """
 
-helps['servicebus migration stop'] = """
+helps['servicebus migration abort'] = """
     type: command
     short-summary: Disable the Service Bus Migration of Standard to Premium namespace
+    long-summary: abort command stops the replication of entities from standard to premium namespaces. The entities replicated to premium namespace before abort command will be also available under premium namespace.
     examples:
         - name:  Disable Service Bus Migration of Standard to Premium namespace
-          text: az servicebus migration stop --resource-group myresourcegroup --name standardnamespace
-"""
-
-helps['servicebus migration delete'] = """
-    type: command
-    short-summary: Deletes Service Bus Migration Configuration
-    examples:
-        - name: Deletes Service Bus Migration Configuration
-          text: az servicebus migration delete --resource-group myresourcegroup --name standardnamespace
+          text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
 """

@@ -3,15 +3,13 @@
 Release History
 ===============
 
-0.3.0
+0.2.1
 +++++
-* Added New cmdlets for Service Bus Standard to Premium namespace:
-    'az servicebus migration start', 'az servicebus migration show', 'az servicebus migration complete', 'az servicebus migration stop',
-    'az servicebus migration delete'
+* Added migration command group to migrate a namespace from Service Bus Standard to Premium:
 
 * Added new optional properties to Service Bus queue and Subscription
-    - enable_batched_operations and dead_lettering_on_filter_evaluation_exceptions in queue
-    - dead_lettering_on_filter_evaluation_exceptions in subscriptions
+    --enable-batched-operations and --enable-dead-lettering-on-message-expiration in queue
+    --enable-dead-lettering-on-message-expiration in subscriptions
 
 0.2.0
 +++++

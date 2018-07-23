@@ -9,6 +9,7 @@
 # pylint: disable=unused-variable
 
 import re
+import time
 
 
 # Namespace Region
@@ -75,7 +76,7 @@ def cli_sbqueue_create(client, resource_group_name, namespace_name, queue_name, 
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
-                       forward_to=None, forward_dead_lettered_messages_to=None):
+                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
     from azure.mgmt.servicebus.models import SBQueue
 
@@ -93,7 +94,8 @@ def cli_sbqueue_create(client, resource_group_name, namespace_name, queue_name, 
         enable_partitioning=enable_partitioning,
         enable_express=enable_express,
         forward_to=forward_to,
-        forward_dead_lettered_messages_to=forward_dead_lettered_messages_to
+        forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
+        enable_batched_operations=enable_batched_operations
     )
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -107,7 +109,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
-                       forward_to=None, forward_dead_lettered_messages_to=None):
+                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
     from azure.mgmt.servicebus.models import SBQueue
     returnobj = SBQueue()
@@ -153,6 +155,9 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if forward_dead_lettered_messages_to:
         returnobj.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+
+    if enable_batched_operations:
+        returnobj.enable_batched_operations = enable_batched_operations
 
     return returnobj
 
@@ -381,6 +386,24 @@ def cli_rules_update(instance,
         instance.correlation_filter.requires_preprocessing = requires_preprocessing
 
     return instance
+
+
+def cli_migration_start(client, resource_group_name, namespace_name, target_namespace, post_migration_name):
+
+    client.create_and_start_migration(resource_group_name, namespace_name, target_namespace, post_migration_name)
+    getresponse = client.get(resource_group_name, namespace_name)
+
+    # pool till Provisioning state is succeeded
+    while getresponse.provisioning_state != 'Succeeded':
+        time.sleep(30)
+        getresponse = client.get(resource_group_name, namespace_name)
+
+    # poll on the 'pendingReplicationOperationsCount' to be 0 or none
+    while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
+        time.sleep(30)
+        getresponse = client.get(resource_group_name, namespace_name)
+
+    return client.get(resource_group_name, namespace_name)
 
 
 def empty_on_404(ex):
