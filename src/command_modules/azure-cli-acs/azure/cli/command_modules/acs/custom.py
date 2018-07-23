@@ -1621,6 +1621,11 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                         cmd,
                         subscription_id,
                         resource_group_name)
+                workspace_resource_id = workspace_resource_id.strip()
+                if not workspace_resource_id.startswith('/'):
+                    workspace_resource_id = '/' + workspace_resource_id
+                if workspace_resource_id.endswith('/'):
+                    workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
         else:
@@ -1666,6 +1671,12 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             # use default workspace if exists else create default workspace
             workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
                 cmd, subscription_id, resource_group_name)
+
+        workspace_resource_id = workspace_resource_id.strip()
+        if not workspace_resource_id.startswith('/'):
+            workspace_resource_id = '/' + workspace_resource_id
+        if workspace_resource_id.endswith('/'):
+            workspace_resource_id = workspace_resource_id.rstrip('/')
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
             enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
         addons.remove('monitoring')
