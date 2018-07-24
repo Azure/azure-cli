@@ -1316,8 +1316,12 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(proxy_url)
-    subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                     "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
+    try:
+        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                         "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
+    except KeyboardInterrupt:
+        # Let command processing finish gracefully after the user presses [Ctrl+C]
+        return
 
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
