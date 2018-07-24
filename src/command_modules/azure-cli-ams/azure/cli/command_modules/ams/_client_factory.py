@@ -65,3 +65,7 @@ def get_streaming_endpoints_client(cli_ctx, *_):
 
 def get_locations_client(cli_ctx, *_):
     return cf_media(cli_ctx).locations
+
+
+def get_live_events_client(cli_ctx, *_):
+    return cf_media(cli_ctx).live_events
