@@ -4,15 +4,12 @@
 # license information.
 # --------------------------------------------------------------------------------------------
 
-import importlib
 import json
-import re
-import isodate
 
-from datetime import datetime, timedelta
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._sdk_utils import map_format_type
+from azure.cli.command_modules.ams._sdk_utils import (map_format_type, map_codec_type, get_sdk_model_class)
+from azure.cli.command_modules.ams._utils import (parse_iso_duration, camel_to_snake)
 
 # pylint: disable=line-too-long
 
@@ -109,28 +106,26 @@ def get_transform_output(preset):
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output
 
-def camel_to_snake(name):
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-
-
-models_module = importlib.import_module('azure.mgmt.media.models')
 
 def map_codecs(codecs):
     codec_instance_list = []
     for codec in codecs:
-        codec_instance = getattr(models_module, codec['Type'])()
-        layers = []
-        for key, value in codec.items():
-            if isinstance(value, list) and 'Layers' in key:
-                layer_type = key[:-1]
-                layer_instance = getattr(models_module, layer_type)()
-                for layer_group in value:
-                    for layer_prop_key, layer_prop_value in layer_group.items():
-                        parse_custom_preset_value(layer_prop_key, layer_prop_value, layer_instance)
-                    layers.append(layer_instance)
-            else:
-                parse_custom_preset_value(key, value, codec_instance)
+        try:
+            codec_instance = get_sdk_model_class(map_codec_type(codec['Type']))()
+            layers = []
+            for key, value in codec.items():
+                if isinstance(value, list) and 'Layers' in key:
+                    layer_type = key[:-1]
+                    layer_instance = get_sdk_model_class(layer_type)()
+                    for layer_group in value:
+                        for layer_prop_key, layer_prop_value in layer_group.items():
+                            parse_custom_preset_value(layer_prop_key, layer_prop_value, layer_instance)
+                        layers.append(layer_instance)
+                else:
+                    parse_custom_preset_value(key, value, codec_instance)
+        except Exception as ex:
+            raise CLIError("Invalid or unsupported codec type in your custom preset JSON file.")
+
         if len(layers) > 0:
             codec_instance.layers = layers
 
@@ -205,7 +200,7 @@ def map_formats(outputs):
     formats = []
     for output in outputs:
         try:
-            format_instance = getattr(models_module, map_format_type(output['Format']['Type']))()
+            format_instance = get_sdk_model_class(map_format_type(output['Format']['Type']))()
             format_instance.filename_pattern = output['FileName']
         except:
             raise CLIError("Invalid or unsupported format type in your custom preset JSON file.")
@@ -236,13 +231,3 @@ def map_fade_in_out_duration(obj):
     if obj:
         iso_duration = parse_iso_duration(obj.get('Duration'))
     return iso_duration
-
-
-def parse_iso_duration(str_duration):
-    iso_duration_format_value = None
-    if str_duration:
-        datetime_duration = datetime.strptime(str_duration,'%H:%M:%S')
-        iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
-                                                                         minutes=datetime_duration.minute,
-                                                                         seconds=datetime_duration.second))
-    return iso_duration_format_value
