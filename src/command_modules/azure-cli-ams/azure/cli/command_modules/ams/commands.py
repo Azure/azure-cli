@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_assets_client, get_jobs_client, get_streaming_locators_client,
                               get_streaming_policies_client, get_streaming_endpoints_client,
-                              get_locations_client)
+                              get_locations_client, get_live_events_client)
 from ._exception_handler import ams_exception_handler
 
 
@@ -115,3 +115,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('list', 'list')
         g.command('start', 'start')
         g.command('stop', 'stop')
+
+    with self.command_group('ams live event', get_sdk('LiveEvents', get_live_events_client)) as g:
+        g.command('create', 'create')
