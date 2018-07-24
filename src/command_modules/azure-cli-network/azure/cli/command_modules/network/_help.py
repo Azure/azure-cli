@@ -2376,6 +2376,10 @@ helps['network local-gateway update'] = """
 helps['network local-gateway wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the local gateway is met.
+    examples:
+        - name: Wait for Local Network Gateway to return as created.
+          text: |
+            az network local-gateway wait -g MyResourceGroup -n MyLocalGateway --created
 """
 # endregion
 
