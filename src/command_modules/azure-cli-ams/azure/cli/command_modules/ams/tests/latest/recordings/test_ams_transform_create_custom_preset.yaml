@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-07-20T20:37:23Z"}}'
+      "date": "2018-07-26T18:54:34Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -14,19 +14,19 @@ interactions:
           AZURECLI/2.0.43]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-07-20T20:37:23Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-07-26T18:54:34Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 20 Jul 2018 20:37:28 GMT']
+      date: ['Thu, 26 Jul 2018 18:54:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 201, message: Created}
 - request:
     body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus",
@@ -42,22 +42,22 @@ interactions:
           msrest_azure/0.4.34 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.43]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
       content-type: [text/plain; charset=utf-8]
-      date: ['Fri, 20 Jul 2018 20:37:32 GMT']
+      date: ['Thu, 26 Jul 2018 18:54:40 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2440fc86-5c10-4e4f-8e1c-1789c0f08a8c?monitor=true&api-version=2017-10-01']
+      location: ['https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/8f38453d-84c3-4554-8487-432e5fe3be40?monitor=true&api-version=2017-10-01']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
           Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -71,42 +71,14 @@ interactions:
           msrest_azure/0.4.34 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.43]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2440fc86-5c10-4e4f-8e1c-1789c0f08a8c?monitor=true&api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/8f38453d-84c3-4554-8487-432e5fe3be40?monitor=true&api-version=2017-10-01
   response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      content-type: [text/plain; charset=utf-8]
-      date: ['Fri, 20 Jul 2018 20:37:50 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2440fc86-5c10-4e4f-8e1c-1789c0f08a8c?monitor=true&api-version=2017-10-01']
-      pragma: [no-cache]
-      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
-          Microsoft-HTTPAPI/2.0']
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.43]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2440fc86-5c10-4e4f-8e1c-1789c0f08a8c?monitor=true&api-version=2017-10-01
-  response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["23334f88-cf95-4787-b1ea-3b99f09ca852"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-07-20T20:37:32.5155309Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-07-20T20:37:32.5155309Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-07-20T20:37:32.3905125Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["479473dc-cfef-474c-ba12-cba2854af0f6"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-07-26T18:54:40.0709491Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-07-26T18:54:40.0709491Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-07-26T18:54:39.9614958Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1231']
       content-type: [application/json]
-      date: ['Fri, 20 Jul 2018 20:38:08 GMT']
+      date: ['Thu, 26 Jul 2018 18:54:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -129,14 +101,14 @@ interactions:
           msrest_azure/0.4.34 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.43]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","value":"bgnmf9UAAtEtkf8xvfLJbn8nZVYiU/fQhYtNcdlDzUmn25N9ifGz5uLvFeqeflQpJNVX19ICDz+/TlQVW8++KQ==","permissions":"FULL"},{"keyName":"key2","value":"rimj85P+g36BDXgWOUSP+CvUBq+zX7GiyTYBOwYZB3TF4L8b0ecRr1Xvv85yGNIFoH8Kk6zLgTTpD/rQqPGu2g==","permissions":"FULL"}]}'}
+    body: {string: '{"keys":[{"keyName":"key1","value":"2a0kliKF5Xtzxf0kyewyeDbKNpvgEIq2cMyLugg7OSP1/8M+jbh609Fn32ykoIOnrJ/qLHVvpwBsm9rxGZqpmQ==","permissions":"FULL"},{"keyName":"key2","value":"HnBDl9RpbJn3j2LJm/0aLSrT3QY0lSAsGMTymPTmGaZkdI6okdQF26ke6CT5AN7Jfvn0/M/hhmyd9J13vMlWSA==","permissions":"FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Fri, 20 Jul 2018 20:38:09 GMT']
+      date: ['Thu, 26 Jul 2018 18:55:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -145,7 +117,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1182']
     status: {code: 200, message: OK}
 - request:
     body: 'b''b\''{"location": "westus2", "properties": {"storageAccounts": [{"id":
@@ -159,28 +131,79 @@ interactions:
       Content-Length: ['302']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-media/1.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.43]
+          msrest_azure/0.4.34 azure-mgmt-media/1.0.0rc2 Azure-SDK-For-Python AZURECLI/2.0.43]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-03-30-preview
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-06-01-preview
   response:
-    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\"\
-        ,\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West US 2\",\"\
-        properties\":{\r\n    \"mediaServiceId\":\"6f8e6186-8f25-41c0-8f95-5c863c1928f7\"\
-        ,\"storageAccounts\":[\r\n      {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
-        ,\"type\":\"Primary\"\r\n      }\r\n    ]\r\n  }\r\n}"}
+    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West
+        US 2\",\"properties\":{\r\n    \"mediaServiceId\":\"238a2810-6761-4660-b33a-9763d28947bf\",\"storageAccounts\":[\r\n
+        \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['665']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Fri, 20 Jul 2018 20:38:19 GMT']
+      date: ['Thu, 26 Jul 2018 18:55:03 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1183']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"outputs": [{"preset": {"@odata.type": "#Microsoft.Media.StandardEncoderPreset",
+      "filters": {"overlays": [{"inputLabel": "Image001.png", "fadeInDuration": "PT1S",
+      "fadeOutDuration": "PT4S", "audioGainLevel": 0.0, "@odata.type": "#Microsoft.Media.VideoOverlay",
+      "position": {"left": "100", "top": "100", "width": "100", "height": "50"}}]},
+      "codecs": [{"@odata.type": "#Microsoft.Media.H264Video", "keyFrameInterval":
+      "PT2S", "layers": [{"width": "640", "height": "360", "@odata.type": "#Microsoft.Media.H264Layer",
+      "bitrate": 1045, "maxBitrate": 1045, "frameRate": "0/1", "profile": "Auto",
+      "level": "auto", "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode":
+      "Cavlc"}]}, {"@odata.type": "#Microsoft.Media.CopyAudio"}], "formats": [{"filenamePattern":
+      "{Basename}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format"}]}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ams transform create]
+      Connection: [keep-alive]
+      Content-Length: ['851']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 azure-mgmt-media/1.0.0rc2 Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-06-01-preview
+  response:
+    body: {string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
+        \   \"created\":\"2018-07-26T18:55:04.818806Z\",\"description\":null,\"lastModified\":\"2018-07-26T18:55:04.818806Z\",\"outputs\":[\r\n
+        \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.StandardEncoderPreset\",\"filters\":{\r\n
+        \           \"deinterlace\":null,\"rotation\":\"Auto\",\"crop\":null,\"overlays\":[\r\n
+        \             {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"Image001.png\",\"start\":null,\"end\":null,\"fadeInDuration\":\"PT1S\",\"fadeOutDuration\":\"PT4S\",\"audioGainLevel\":0.0,\"position\":{\r\n
+        \                 \"left\":\"100\",\"top\":\"100\",\"width\":\"100\",\"height\":\"50\"\r\n
+        \               },\"opacity\":1.0,\"cropRectangle\":null\r\n              }\r\n
+        \           ]\r\n          },\"codecs\":[\r\n            {\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"label\":null,\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"640\",\"height\":\"360\",\"label\":null,\"bitrate\":1045,\"maxBitrate\":1045,\"bFrames\":3,\"frameRate\":\"0\",\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cavlc\"\r\n
+        \               }\r\n              ]\r\n            },{\r\n              \"@odata.type\":\"#Microsoft.Media.CopyAudio\",\"label\":null\r\n
+        \           }\r\n          ],\"formats\":[\r\n            {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}{Extension}\",\"outputFiles\":[\r\n
+        \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
+        \     }\r\n    ]\r\n  }\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1936']
+      content-type: [application/json; odata.metadata=minimal]
+      date: ['Thu, 26 Jul 2018 18:55:04 GMT']
+      expires: ['-1']
+      odata-version: ['4.0']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1183']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -197,18 +220,18 @@ interactions:
           AZURECLI/2.0.43]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 20 Jul 2018 20:38:22 GMT']
+      date: ['Thu, 26 Jul 2018 18:55:06 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc0UU1LUk9XU1BUSk9OVTNFR0VOQTJQMlFBWVY3T1JKQ0tNRnwzRDZDRjRFNUQyRDY2QUM5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdYWko3SVBUWjJDTE1BSlRTVVFIMzdIRk0yTzdSTEJKQjNGM3w0OERDRjZDQUMwRUFCREQ5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
     status: {code: 202, message: Accepted}
 version: 1
