@@ -1,15 +1,20 @@
 # --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+# Licensed under the MIT License.  See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------------------------
 
-import importlib, json, re, isodate
-from datetime import datetime, timedelta
+import importlib
+import json
+import re
+import isodate
 
+from datetime import datetime, timedelta
 from knack.util import CLIError
 
-# pylint: disable=line-too-long
+from azure.cli.command_modules.ams._sdk_utils import map_format_type
 
+# pylint: disable=line-too-long
 
 def create_transform(cmd, client, account_name, resource_group_name,
                      transform_name, preset_names=None, description=None,
@@ -17,7 +22,7 @@ def create_transform(cmd, client, account_name, resource_group_name,
     outputs = []
 
     if custom_preset_path is None and preset_names is None:
-            raise CLIError("Missing required arguments.\nEither --preset-names "
+        raise CLIError("Missing required arguments.\nEither --preset-names "
                            "or --custom-preset must be specified.")
 
     if preset_names:
@@ -199,16 +204,13 @@ def map_filters(custom_preset_json):
 def map_formats(outputs):
     formats = []
     for output in outputs:
-        format_instance = getattr(models_module, get_format_type(output))()
-        format_instance.filename_pattern = output['FileName']
+        try:
+            format_instance = getattr(models_module, map_format_type(output['Format']['Type']))()
+            format_instance.filename_pattern = output['FileName']
+        except:
+            raise CLIError("Invalid or unsupported format type in your custom preset JSON file.")
         formats.append(format_instance)
     return formats
-
-
-def get_format_type(output):
-    # TODO: check other exceptions
-    format_type = output['Format']['Type']
-    return 'Mp4Format' if 'MP4Format' in format_type else format_type
 
 
 def parse_custom_preset_value(key, value, instance):
