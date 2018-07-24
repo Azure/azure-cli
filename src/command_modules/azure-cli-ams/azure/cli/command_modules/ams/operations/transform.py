@@ -35,8 +35,9 @@ def create_transform(cmd, client, account_name, resource_group_name,
                                                                 filters=map_filters(custom_preset_json),
                                                                 formats=map_formats(custom_preset_json['Outputs']))
                 outputs.append(TransformOutput(preset=standard_encoder_preset))
-        except (OSError, IOError) as e:
-            raise CLIError("Can't find a valid custom preset JSON definition in '{}'".format(custom_preset_path))
+        except:
+            raise CLIError("Couldn't find a valid custom preset JSON definition in '{}'. Check the schema is correct."
+                           .format(custom_preset_path))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, outputs, description)
 

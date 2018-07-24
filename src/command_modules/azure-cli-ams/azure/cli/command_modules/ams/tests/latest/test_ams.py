@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import mock
-import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
@@ -53,11 +52,6 @@ class AmsSpTests(ScenarioTest):
 
 
 class AmsTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_create_show(self, resource_group, storage_account_for_create):
@@ -118,95 +112,6 @@ class AmsTests(ScenarioTest):
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_transform(self, resource_group, storage_account_for_create):
-        amsname = self.create_random_name(prefix='ams', length=12)
-
-        self.kwargs.update({
-            'amsname': amsname,
-            'storageAccount': storage_account_for_create,
-            'location': 'westus2'
-        })
-
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
-        ])
-
-        transformName = self.create_random_name(prefix='tra', length=10)
-
-        self.kwargs.update({
-            'transformName': transformName,
-            'presetName': 'AACGoodQualityAudio'
-        })
-
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-names {presetName}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
-
-        self.cmd('az ams transform show -a {amsname} -n {transformName} -g {rg}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
-
-        self.cmd('az ams transform update --preset-names H264MultipleBitrate720p --description mydesc -a {amsname} -n {transformName} -g {rg}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('description', 'mydesc')
-        ])
-
-        self.cmd('az ams transform output add --preset-names AACGoodQualityAudio AdaptiveStreaming -a {amsname} -n {transformName} -g {rg}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('length(outputs)', 3)
-        ])
-
-        self.cmd('az ams transform output remove --preset-names AACGoodQualityAudio AdaptiveStreaming -a {amsname} -n {transformName} -g {rg}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('length(outputs)', 1)
-        ])
-
-        list = self.cmd('az ams transform list -a {amsname} -g {rg}').get_output_in_json()
-        assert len(list) > 0
-
-        self.cmd('az ams transform delete -n {transformName} -a {amsname} -g {rg}')
-
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_transform_create_custom_preset(self, resource_group, storage_account_for_create):
-        amsname = self.create_random_name(prefix='ams', length=12)
-
-        self.kwargs.update({
-            'amsname': amsname,
-            'storageAccount': storage_account_for_create,
-            'location': 'westus2'
-        })
-
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
-        ])
-
-        transformName = self.create_random_name(prefix='tra', length=10)
-
-        self.kwargs.update({
-            'transformName': transformName,
-            'presetName': self._get_test_data_file('customPreset.json'),
-            'invalidPresetName': self._get_test_data_file('invalidCustomPreset.json')
-        })
-
-        with self.assertRaises(CLIError):
-            self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset {invalidPresetName}')
-
-    #    self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset {presetName}', checks=[
-    #        self.check('name', '{transformName}'),
-    #        self.check('resourceGroup', '{rg}')
-    #    ])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
