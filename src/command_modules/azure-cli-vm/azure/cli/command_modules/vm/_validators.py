@@ -291,7 +291,7 @@ def _get_storage_profile_description(profile):
 
 def _validate_managed_disk_sku(sku):
 
-    allowed_skus = ['Premium_LRS', 'Standard_LRS']
+    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']
     if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
@@ -1132,6 +1132,7 @@ def process_vmss_create_namespace(cmd, namespace):
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
+    validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 

@@ -983,6 +983,13 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def list_av_sets(cmd, resource_group_name=None):
+    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
+    if resource_group_name:
+        return op_group.list(resource_group_name)
+    return op_group.list_by_subscription()
 # endregion
 
 
@@ -1784,7 +1791,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
-                identity_role_id=None, zones=None, priority=None, eviction_policy=None):
+                identity_role_id=None, zones=None, priority=None, eviction_policy=None,
+                application_security_groups=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1983,7 +1991,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy)
+        eviction_policy=eviction_policy, application_security_groups=application_security_groups)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
