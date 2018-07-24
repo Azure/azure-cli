@@ -606,7 +606,7 @@ helps['vm unmanaged-disk attach'] = """
 
 helps['vm unmanaged-disk detach'] = """
     type: command
-    short-summary: Detatch an unmanaged disk from a VM.
+    short-summary: Detach an unmanaged disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
@@ -627,7 +627,7 @@ helps['vm unmanaged-disk list'] = """
 
 helps['vm disk detach'] = """
     type: command
-    short-summary: Detatch a managed disk from a VM.
+    short-summary: Detach a managed disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
