@@ -5,11 +5,11 @@ Release History
 
 0.2.1
 +++++
-* Added migration command group to migrate a namespace from Service Bus Standard to Premium:
+* Added migration command group to migrate a namespace from Service Bus Standard to Premium
 
 * Added new optional properties to Service Bus queue and Subscription
     --enable-batched-operations and --enable-dead-lettering-on-message-expiration in queue
-    --enable-dead-lettering-on-message-expiration in subscriptions
+    --dead-lettering-filter-evaluation-exceptions in subscriptions
 
 0.2.0
 +++++

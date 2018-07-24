@@ -158,7 +158,7 @@ def load_arguments_sb(self, _):
 
     # region - Subscription Create and update
     for scope in ['servicebus topic subscription create', 'servicebus topic subscription update']:
-        with self.argument_context('servicebus topic subscription create') as c:
+        with self.argument_context(scope) as c:
             c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription. The default value is 1 minute.')
             c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
@@ -169,7 +169,7 @@ def load_arguments_sb(self, _):
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('forward_to', help='Queue/Topic name to forward the messages')
             c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-            c.argument('dead_lettering_on_filter_evaluation_exceptions', arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
+            c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-lettering-filter-evaluation-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
 
     with self.argument_context('servicebus topic subscription list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
@@ -241,7 +241,7 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus migration start') as c:
         c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
         c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
-        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Name of Standard Namespace post migration')
+        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to ‘standard’ namespace after migration is complete.')
 
     for scope in ['servicebus migration show', 'servicebus migration complete', 'servicebus migration abort']:
         with self.argument_context(scope) as c:

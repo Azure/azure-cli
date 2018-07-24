@@ -234,7 +234,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
 def cli_sbsubscription_create(client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
                               requires_session=None, default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
-                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None):
+                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
 
     from azure.mgmt.servicebus.models import SBSubscription
     subscription_params = SBSubscription(
@@ -247,7 +247,8 @@ def cli_sbsubscription_create(client, resource_group_name, namespace_name, topic
         enable_batched_operations=enable_batched_operations,
         auto_delete_on_idle=return_valid_duration_create(auto_delete_on_idle),
         forward_to=forward_to,
-        forward_dead_lettered_messages_to=forward_dead_lettered_messages_to
+        forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
+        dead_lettering_on_filter_evaluation_exceptions=dead_lettering_on_filter_evaluation_exceptions
     )
 
     return client.create_or_update(
@@ -262,7 +263,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
                               requires_session=None, default_message_time_to_live=None,
                               dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
-                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None):
+                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
     from azure.mgmt.servicebus.models import SBSubscription
     subscription_params = SBSubscription()
 
@@ -294,6 +295,9 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if forward_dead_lettered_messages_to:
         subscription_params.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+
+    if dead_lettering_on_filter_evaluation_exceptions:
+        subscription_params.dead_lettering_on_filter_evaluation_exceptions = dead_lettering_on_filter_evaluation_exceptions
 
     return subscription_params
 

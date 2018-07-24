@@ -662,8 +662,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
         # check for the migration PendingReplicationOperationsCount is 0 or null
-        while getmigration['pendingReplicationOperationsCount'] != 0 and getmigration[
-            'pendingReplicationOperationsCount'] is not None:
+        while getmigration['pendingReplicationOperationsCount'] != 0 and getmigration['pendingReplicationOperationsCount'] is not None:
             time.sleep(30)
             getmigration = self.cmd(
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
@@ -712,4 +711,3 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete Namespace - Premium
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamepremium}')
-

@@ -536,8 +536,8 @@ helps['servicebus georecovery-alias delete'] = """
 
 helps['servicebus migration start'] = """
     type: command
-    short-summary: Creates and Start Service Bus Migration of Standard to Premium
-    long-summary: pre-requisit - A Service Bus empty Premium namespace is required.
+    short-summary: Creates and Start Service Bus Migration of Standard to Premium namespace
+    long-summary: A Service Bus migration requires an empty Premium namespace to replicate entities into from Standard namespace.
     examples:
         - name:  Creates and Start Service Bus Migration of Standard to Premium
           text: az servicebus migration start --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
@@ -554,7 +554,9 @@ helps['servicebus migration show'] = """
 helps['servicebus migration complete'] = """
     type: command
     short-summary: Completes the Service Bus Migration of Standard to Premium namespace
-    long-summary: This command completes the migration and connection strings are modified to point Premium namespace. Standard namespace can be accssed using Post-migration-name.
+    long-summary: After completing migration, the existing connection strings to ‘standard’ namespace will connect to
+    ‘premium’ namespace automatically. Post migration name is the name that can be used to connect to ‘standard’
+    namespace after migration is complete.
     examples:
         - name:  Completes the Service Bus Migration of Standard to Premium namespace
           text: az servicebus migration complete --resource-group myresourcegroup --name standardnamespace
@@ -563,7 +565,7 @@ helps['servicebus migration complete'] = """
 helps['servicebus migration abort'] = """
     type: command
     short-summary: Disable the Service Bus Migration of Standard to Premium namespace
-    long-summary: abort command stops the replication of entities from standard to premium namespaces. The entities replicated to premium namespace before abort command will be also available under premium namespace.
+    long-summary: abort command stops the replication of entities from standard to premium namespaces. The entities replicated to premium namespace before abort command will be available under premium namespace. The aborted migration can not be resumed, its has to restarted.
     examples:
         - name:  Disable Service Bus Migration of Standard to Premium namespace
           text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
