@@ -536,7 +536,7 @@ helps['servicebus georecovery-alias delete'] = """
 
 helps['servicebus migration start'] = """
     type: command
-    short-summary: Create and Start Service Bus Migration of Standard to Premium namespace
+    short-summary: Create and Start Service Bus Migration of Standard to Premium namespace.
     long-summary: Service Bus Migration requires an empty Premium namespace to replicate entities from Standard namespace.
     examples:
         - name: Create and Start Service Bus Migration of Standard to Premium namespace
