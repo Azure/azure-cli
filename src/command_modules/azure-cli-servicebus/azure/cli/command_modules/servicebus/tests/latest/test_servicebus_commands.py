@@ -639,6 +639,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
                 'servicebus topic create --resource-group {rg} --namespace-name {namespacenamestandard} --name {topicname}',
                 checks=[self.check('name', self.kwargs['topicname'])])
 
+        time.sleep(20)
+
         # Create Migration
         self.cmd(
             'servicebus migration start  --resource-group {rg} --name {namespacenamestandard} --target-namespace {id} --post-migration-name {postmigrationname}')
