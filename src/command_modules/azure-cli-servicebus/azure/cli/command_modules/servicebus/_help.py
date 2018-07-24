@@ -554,9 +554,7 @@ helps['servicebus migration show'] = """
 helps['servicebus migration complete'] = """
     type: command
     short-summary: Completes the Service Bus Migration of Standard to Premium namespace
-    long-summary: After completing migration, the existing connection strings to ‘standard’ namespace will connect to
-    ‘premium’ namespace automatically. Post migration name is the name that can be used to connect to ‘standard’
-    namespace after migration is complete.
+    long-summary: After completing migration, the existing connection strings to standard namespace will connect to premium namespace automatically. Post migration name is the name that can be used to connect to standard namespace after migration is complete.
     examples:
         - name:  Completes the Service Bus Migration of Standard to Premium namespace
           text: az servicebus migration complete --resource-group myresourcegroup --name standardnamespace
