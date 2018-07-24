@@ -5,8 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import get_api_version, ResourceType, get_sdk
-
+from azure.cli.core.profiles import get_api_version, ResourceType
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_data_plane_factory)
 
@@ -16,7 +15,10 @@ from ._validators import (
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
-
+    mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_KEYVAULT))
+    mgmt_api_version = mgmt_api_version.replace('-', '_')
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
+    data_api_version = data_api_version.replace('-', '_')
     # region Command Types
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -25,23 +27,20 @@ def load_command_table(self, _):
 
     kv_vaults_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.keyvault.operations.vaults_operations#VaultsOperations.{}',
-        client_factory=keyvault_client_vaults_factory
+        client_factory=keyvault_client_vaults_factory,
+        resource_type=ResourceType.MGMT_KEYVAULT
     )
-    
+
     kv_data_sdk = CliCommandType(
         operations_tmpl='azure.keyvault.key_vault_client#KeyVaultClient.{}',
-        client_factory=keyvault_data_plane_factory
+        client_factory=keyvault_data_plane_factory,
+        resource_type=ResourceType.DATA_KEYVAULT
     )
     # endregion
 
     def _data_sdk_path(method):
         return kv_data_sdk.settings['operations_tmpl'].format(method)
-    
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
-    mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_KEYVAULT))
-    data_api_version = data_api_version.replace('-', '_')
-    mgmt_api_version = mgmt_api_version.replace('-', '_')
-    l = 'azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.create_certificate'
+
     # Management Plane Commands
     with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('create', 'create_keyvault', doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
@@ -56,7 +55,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
                                  custom_func_name='update_keyvault')
 
-    with self.command_group('keyvault network-rule', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
+    with self.command_group('keyvault network-rule', kv_vaults_sdk, min_api='2018-02-14', client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('add', 'add_network_rule')
         g.custom_command('remove', 'remove_network_rule')
         g.custom_command('list', 'list_network_rules')
@@ -68,7 +67,6 @@ def load_command_table(self, _):
         g.keyvault_command('list-versions', 'get_key_versions')
         g.keyvault_command('list-deleted', 'get_deleted_keys')
         g.keyvault_custom('create', 'create_key')#, doc_string_source=_data_sdk_path('create_key'))
-        #g.keyvault_custom('create', 'create_key', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.create_key'))
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
@@ -76,9 +74,7 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key')#, doc_string_source=_data_sdk_path('backup_key'))
-        #g.keyvault_custom('backup', 'backup_key', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.backup_key'))
         g.keyvault_custom('restore', 'restore_key')#, doc_string_source=_data_sdk_path('restore_key'))
-        #g.keyvault_custom('restore', 'restore_key', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.restore_key'))
         g.keyvault_custom('import', 'import_key')
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
@@ -94,13 +90,11 @@ def load_command_table(self, _):
         g.keyvault_command('recover', 'recover_deleted_secret')
         g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret')#, doc_string_source=_data_sdk_path('backup_secret'))
-        #g.keyvault_custom('backup', 'backup_secret', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.backup_secret'))
         g.keyvault_custom('restore', 'restore_secret')#, doc_string_source=_data_sdk_path('restore_secret'))
-        #g.keyvault_custom('restore', 'restore_secret', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.restore_secret'))
-
+    
+    doc_11 = 'azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.create_certificate'
     with self.command_group('keyvault certificate', kv_data_sdk) as g:
         g.keyvault_custom('create', 'create_certificate')#, doc_string_source=_data_sdk_path('create_certificate'))
-        #g.keyvault_custom('create', 'create_certificate', doc_string_source='azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.create_certificate'))
         g.keyvault_command('list', 'get_certificates')
         g.keyvault_command('list-versions', 'get_certificate_versions')
         g.keyvault_command('list-deleted', 'get_deleted_certificates')

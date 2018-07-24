@@ -22,8 +22,8 @@ def resource_client_factory(cli_ctx, **_):
 
 def keyvault_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.keyvault import KeyVaultManagementClient
-    return get_mgmt_service_client(cli_ctx, KeyVaultManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
 
 
 def compute_client_factory(cli_ctx, **_):

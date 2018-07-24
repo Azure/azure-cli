@@ -136,7 +136,6 @@ class KeyVaultCommandGroup(AzCommandGroup):
             kwargs[command_type_name] = command_type
         self._create_keyvault_command(name, method_name, command_type_name, **kwargs)
 
-
 class KeyVaultArgumentContext(AzArgumentContext):
 
     def attributes_argument(self, name, attr_class, create=False, ignore=None):

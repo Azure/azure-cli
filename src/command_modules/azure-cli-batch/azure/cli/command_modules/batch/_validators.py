@@ -123,7 +123,7 @@ def storage_account_id(cmd, namespace):
 
 def keyvault_id(cmd, namespace):
     """Validate storage account name"""
-    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     if not namespace.keyvault:
         return
@@ -135,7 +135,7 @@ def keyvault_id(cmd, namespace):
         kv_name = namespace.keyvault
         kv_rg = namespace.resource_group_name
     try:
-        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient)
+        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
         vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
             raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".

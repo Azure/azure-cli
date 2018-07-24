@@ -211,7 +211,8 @@ def new_cluster(cmd,
     if parameter_file is None:
         vm_os = os_dic[vm_os]
         reliability_level = _get_reliability_level(cluster_size)
-        result = _create_certificate(cli_ctx,
+        result = _create_certificate(cmd,
+                                     cli_ctx,
                                      resource_group_name,
                                      certificate_file,
                                      certificate_password,
@@ -243,7 +244,8 @@ def new_cluster(cmd,
                                                           os_type=vm_os,
                                                           linux=linux)
     else:
-        parameters, output_file = _set_parameters_for_customize_template(cli_ctx,
+        parameters, output_file = _set_parameters_for_customize_template(cmd,
+                                                                         cli_ctx,
                                                                          resource_group_name,
                                                                          certificate_file,
                                                                          certificate_password,
@@ -306,7 +308,8 @@ def add_app_cert(cmd,
                  certificate_subject_name=None,
                  secret_identifier=None):
     cli_ctx = cmd.cli_ctx
-    result = _create_certificate(cli_ctx,
+    result = _create_certificate(cmd,
+                                 cli_ctx,
                                  resource_group_name,
                                  certificate_file,
                                  certificate_password,
@@ -478,7 +481,8 @@ def add_cluster_cert(cmd,
     if cluster.certificate is None:
         raise CLIError("Unsecure cluster is not allowed to add certificate")
 
-    result = _create_certificate(cli_ctx,
+    result = _create_certificate(cmd,
+                                 cli_ctx,
                                  resource_group_name,
                                  certificate_file,
                                  certificate_password,
@@ -1091,7 +1095,8 @@ def _verify_cert_function_parameter(certificate_file=None,
                 raise CLIError("Invalid input")
 
 
-def _create_certificate(cli_ctx,
+def _create_certificate(cmd,
+                        cli_ctx,
                         resource_group_name,
                         certificate_file=None,
                         certificate_password=None,
@@ -1126,7 +1131,7 @@ def _create_certificate(cli_ctx,
             vault_name = _get_vault_name(resource_group_name, vault_name)
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+                cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
             logger.info("Import certificate")
@@ -1146,7 +1151,7 @@ def _create_certificate(cli_ctx,
 
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+                cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             logger.info("Wait for key vault ready")
             time.sleep(20)
             vault_uri = vault.properties.vault_uri
@@ -1588,7 +1593,8 @@ def _get_keyVault_not_arm_client(cli_ctx):
     return client
 
 
-def _create_keyvault(cli_ctx,
+def _create_keyvault(cmd,
+                     cli_ctx,
                      resource_group_name,
                      vault_name,
                      location=None,
@@ -1597,7 +1603,7 @@ def _create_keyvault(cli_ctx,
                      enabled_for_disk_encryption=None,
                      enabled_for_template_deployment=None,
                      no_self_perms=None, tags=None):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     profile = Profile(cli_ctx=cli_ctx)
@@ -1607,6 +1613,7 @@ def _create_keyvault(cli_ctx,
                                              tenant_id,
                                              base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
     if no_self_perms:
         access_policies = []
     else:
@@ -1774,7 +1781,8 @@ def _set_parameters_for_default_template(cluster_location,
     return parameters
 
 
-def _set_parameters_for_customize_template(cli_ctx,
+def _set_parameters_for_customize_template(cmd,
+                                           cli_ctx,
                                            resource_group_name,
                                            certificate_file,
                                            certificate_password,
@@ -1790,7 +1798,8 @@ def _set_parameters_for_customize_template(cli_ctx,
         raise CLIError('Invalid parameters file')
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found primary certificate parameters in parameters file')
-        result = _create_certificate(cli_ctx,
+        result = _create_certificate(cmd,
+                                     cli_ctx,
                                      resource_group_name,
                                      certificate_file,
                                      certificate_password,
@@ -1813,7 +1822,8 @@ def _set_parameters_for_customize_template(cli_ctx,
 
     if SEC_SOURCE_VAULT_VALUE in parameters and SEC_CERTIFICATE_THUMBPRINT in parameters and SEC_CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found secondary certificate parameters in parameters file')
-        result = _create_certificate(cli_ctx,
+        result = _create_certificate(cmd,
+                                     cli_ctx,
                                      resource_group_name,
                                      certificate_file,
                                      certificate_password,
