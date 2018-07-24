@@ -189,7 +189,7 @@ def load_command_table(self, _):
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
         g.command('delete', 'delete')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_av_sets')
         g.command('list-sizes', 'list_available_sizes')
         g.show_command('show', 'get')
         g.generic_update_command('update')
