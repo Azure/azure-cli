@@ -921,21 +921,33 @@ helps['network ddos-protection create'] = """
             This parameter can only be used if all the VNets are within the same subscription as
             the DDoS protection plan. If this is not the case, set the protection plan on the VNet
             directly using the `az network vnet update` command.
+    examples:
+        - name: Create a DDoS protection plan.
+          text: az network ddos-protection create -g MyResourceGroup -n MyDdosPlan
 """
 
 helps['network ddos-protection delete'] = """
     type: command
     short-summary: Delete a DDoS protection plan.
+    examples:
+        - name: Delete a DDoS protection plan.
+          text: az network ddos-protection delete -g MyResourceGroup -n MyDdosPlan
 """
 
 helps['network ddos-protection list'] = """
     type: command
     short-summary: List DDoS protection plans.
+    examples:
+        - name: List DDoS protection plans
+          text: az network ddos-protection list
 """
 
 helps['network ddos-protection show'] = """
     type: command
     short-summary: Show details of a DDoS protection plan.
+    examples:
+        - name: Show details of a DDoS protection plan.
+          text: az network ddos-protection show -g MyResourceGroup -n MyDdosPlan
 """
 
 helps['network ddos-protection update'] = """
@@ -947,6 +959,9 @@ helps['network ddos-protection update'] = """
             This parameter can only be used if all the VNets are within the same subscription as
             the DDoS protection plan. If this is not the case, set the protection plan on the VNet
             directly using the `az network vnet update` command.
+    examples:
+        - name: Add a Vnet to a DDoS protection plan in the same subscription.
+          text: az network ddos-protection update -g MyResourceGroup -n MyDdosPlan --vnets MyVnet
 """
 # endregion
 
