@@ -122,4 +122,9 @@ class AmsTransformTests(ScenarioTest):
             'presetPath': self._get_test_data_file('customPreset.json')
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset "{presetPath}"')
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset "{presetPath}"', checks=[
+            self.check('name', '{transformName}'),
+            self.check('length(outputs[0].preset.codecs)', 2),
+            self.check('length(outputs[0].preset.filters.overlays)', 1),
+            self.check('length(outputs[0].preset.formats)', 1)
+        ])
