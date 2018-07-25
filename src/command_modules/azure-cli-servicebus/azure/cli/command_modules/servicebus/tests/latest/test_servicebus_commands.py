@@ -639,7 +639,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
                 'servicebus topic create --resource-group {rg} --namespace-name {namespacenamestandard} --name {topicname}',
                 checks=[self.check('name', self.kwargs['topicname'])])
 
-        time.sleep(20)
+        time.sleep(10)
 
         # Create Migration
         self.cmd(
