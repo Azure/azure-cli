@@ -30,7 +30,7 @@ def load_command_table(self, _):
         # right now list_by_resource_group is the only way to list, so directly map to list_by_resource_group.
         g.command('list', 'list_by_resource_group')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.generic_update_command('update', custom_func_name='update_search_service', setter_arg_name='service')
         g.custom_command('create', 'create_search_service')
 

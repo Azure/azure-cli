@@ -8,15 +8,15 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.search._help import helps  # pylint: disable=unused-import
 
 
-class ExampleCommandsLoader(AzCommandsLoader):
+class AzureSearchCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        example_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.search.custom#{}')
+        azure_search_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.search.custom#{}')
 
-        super(ExampleCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    min_profile='2017-03-10-profile',
-                                                    custom_command_type=example_custom)
+        super(AzureSearchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                        min_profile='2017-03-10-profile',
+                                                        custom_command_type=azure_search_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.search.commands import load_command_table
@@ -28,4 +28,4 @@ class ExampleCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS = ExampleCommandsLoader
+COMMAND_LOADER_CLS = AzureSearchCommandsLoader

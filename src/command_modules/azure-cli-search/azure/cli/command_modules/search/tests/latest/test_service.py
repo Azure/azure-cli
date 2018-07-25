@@ -32,7 +32,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -48,7 +49,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -64,7 +66,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -91,7 +94,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service update -n {name} -g {rg}'
+            ' --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -115,7 +119,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --replica-count {replica_count} --partition-count {partition_count}',
+            'az search service update -n {name} -g {rg}'
+            ' --replica-count {replica_count} --partition-count {partition_count}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
@@ -138,7 +143,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         self.cmd('az search service show -n {name} -g {rg}')
 
-        self.cmd('az search service delete -n {name} -g {rg}')
+        self.cmd('az search service delete -n {name} -g {rg} -y')
 
         self.cmd('az search service show -n {name} -g {rg}', expect_failure=True)
 
@@ -176,13 +181,13 @@ class AzureSearchServicesTests(ScenarioTest):
         self.assertTrue(self.kwargs['name1'] in [x['name'] for x in _services])
         self.assertTrue(self.kwargs['name2'] in [x['name'] for x in _services])
 
-        self.cmd('az search service delete -n {name1} -g {rg}')
+        self.cmd('az search service delete -n {name1} -g {rg} -y')
         _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 1)
         self.assertTrue(self.kwargs['name2'] in [x['name'] for x in _services])
         self.assertFalse(self.kwargs['name1'] in [x['name'] for x in _services])
 
-        self.cmd('az search service delete -n {name2} -g {rg}')
+        self.cmd('az search service delete -n {name2} -g {rg} -y')
         _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
 

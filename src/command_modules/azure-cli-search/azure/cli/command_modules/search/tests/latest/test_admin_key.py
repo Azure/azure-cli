@@ -24,17 +24,17 @@ class AzureSearchAdminKeysTests(ScenarioTest):
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}')])
 
-        _adminkey = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
+        _adminkey = self.cmd('az search admin-key show --service-name {name} -g {rg}').get_output_in_json()
         self.assertTrue(len(_adminkey['primaryKey']) > 0)
         self.assertTrue(len(_adminkey['secondaryKey']) > 0)
 
-        self.cmd('az search admin-key renew --search-service-name {name} -g {rg} --key primary')
-        _adminkey_1 = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
+        self.cmd('az search admin-key renew --service-name {name} -g {rg} --key-kind primary')
+        _adminkey_1 = self.cmd('az search admin-key show --service-name {name} -g {rg}').get_output_in_json()
         self.assertNotEquals(_adminkey['primaryKey'], _adminkey_1['primaryKey'])
         self.assertEquals(_adminkey['secondaryKey'], _adminkey_1['secondaryKey'])
 
-        self.cmd('az search admin-key renew --search-service-name {name} -g {rg} --key secondary')
-        _adminkey_2 = self.cmd('az search admin-key show --search-service-name {name} -g {rg}').get_output_in_json()
+        self.cmd('az search admin-key renew --service-name {name} -g {rg} --key-kind secondary')
+        _adminkey_2 = self.cmd('az search admin-key show --service-name {name} -g {rg}').get_output_in_json()
         self.assertNotEquals(_adminkey_2['secondaryKey'], _adminkey_1['secondaryKey'])
         self.assertEquals(_adminkey_2['primaryKey'], _adminkey_1['primaryKey'])
 
