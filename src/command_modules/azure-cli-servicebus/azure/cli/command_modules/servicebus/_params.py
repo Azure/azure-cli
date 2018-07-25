@@ -67,8 +67,8 @@ def load_arguments_sb(self, _):
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
 
     # region - Queue Create
-    for scope in ['servicebus queue create', 'servicebus queue update']:
-        with self.argument_context(scope) as c:
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus queue {}'.format(scope)) as c:
             c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
             c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers. The maximum value for LockDuration is 5 minutes; the default value is 1 minute.')
             c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='The maximum size of queue in megabytes, which is the size of memory allocated for the queue. Default is 1024.')
@@ -113,8 +113,8 @@ def load_arguments_sb(self, _):
             c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
 
     # region - Topic Create
-    for scope in ['servicebus topic create', 'servicebus topic update']:
-        with self.argument_context(scope) as c:
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus topic {}'.format(scope)) as c:
             c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
             c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.')
@@ -157,8 +157,8 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', id_part='child_name_1', options_list=['--topic-name'], help='Name of Topic')
 
     # region - Subscription Create and update
-    for scope in ['servicebus topic subscription create', 'servicebus topic subscription update']:
-        with self.argument_context(scope) as c:
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus topic subscription {}'.format(scope)) as c:
             c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription. The default value is 1 minute.')
             c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
@@ -243,6 +243,6 @@ def load_arguments_sb(self, _):
         c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
         c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
 
-    for scope in ['servicebus migration show', 'servicebus migration complete', 'servicebus migration abort']:
-        with self.argument_context(scope) as c:
+    for scope in ['show', 'complete', 'abort']:
+        with self.argument_context('servicebus migration {}'.format(scope)) as c:
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
