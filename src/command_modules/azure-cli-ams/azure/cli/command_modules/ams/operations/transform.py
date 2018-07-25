@@ -4,12 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------------------------
 
-import json
+import json, os
 
 from knack.util import CLIError
 
 from azure.cli.command_modules.ams._sdk_utils import (map_format_type, map_codec_type, get_sdk_model_class)
 from azure.cli.command_modules.ams._utils import (parse_iso_duration, camel_to_snake)
+
+from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
 
 # pylint: disable=line-too-long
 
@@ -20,38 +22,39 @@ def create_transform(cmd, client, account_name, resource_group_name,
 
     if custom_preset_path is None and preset_names is None:
         raise CLIError("Missing required arguments.\nEither --preset-names "
-                           "or --custom-preset must be specified.")
+                       "or --custom-preset must be specified.")
 
     if preset_names:
         for preset in preset_names:
             outputs.append(get_transform_output(preset))
 
     if custom_preset_path:
-        try:
-            with open(custom_preset_path) as custom_preset_json_stream:
-                custom_preset_json = json.load(custom_preset_json_stream)
-                from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
-                standard_encoder_preset = StandardEncoderPreset(codecs=map_codecs(custom_preset_json['Codecs']),
-                                                                filters=map_filters(custom_preset_json),
-                                                                formats=map_formats(custom_preset_json['Outputs']))
-                outputs.append(TransformOutput(preset=standard_encoder_preset))
-        except:
-            raise CLIError("Couldn't find a valid custom preset JSON definition in '{}'. Check the schema is correct."
-                           .format(custom_preset_path))
+        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
+        outputs.append(TransformOutput(preset=standard_encoder_preset))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, outputs, description)
 
 
-def add_transform_output(client, account_name, resource_group_name, transform_name, preset_names):
+def add_transform_output(client, account_name, resource_group_name, transform_name, preset_names=None,
+                         custom_preset_path=None):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    set_preset_names = set(preset_names)
-    set_existent_preset_names = set(map(lambda x: x.preset.preset_name.value, transform.outputs))
+    if custom_preset_path is None and preset_names is None:
+        raise CLIError("Missing required arguments.\nEither --preset-names "
+                       "or --custom-preset must be specified.")
 
-    set_preset_names = set_preset_names.difference(set_existent_preset_names)
+    if preset_names:
+        set_preset_names = [x for x in set(preset_names) if hasattr(x, 'preset')]
+        set_existent_preset_names = set(map(lambda x: x.preset.preset_name.value, transform.outputs))
 
-    for preset in set_preset_names:
-        transform.outputs.append(get_transform_output(preset))
+        set_preset_names = set_preset_names.difference(set_existent_preset_names)
+
+        for preset in set_preset_names:
+            transform.outputs.append(get_transform_output(preset))
+
+    if custom_preset_path:
+        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
+        transform.outputs.append(TransformOutput(preset=standard_encoder_preset))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
 
@@ -77,23 +80,32 @@ def transform_update_setter(client, resource_group_name,
                                    parameters.outputs, parameters.description)
 
 
-def update_transform(instance, description=None, preset_names=None):
+def update_transform(instance, description=None, preset_names=None, custom_preset_path=None):
     if not instance:
         raise CLIError('The transform resource was not found.')
+    
+    if custom_preset_path is None and preset_names is None:
+        raise CLIError("Missing required arguments.\nEither --preset-names "
+                       "or --custom-preset must be specified.")
 
     if description:
         instance.description = description
 
+    instance.outputs = []
+
     if preset_names:
-        instance.outputs = []
         for preset in preset_names:
             instance.outputs.append(get_transform_output(preset))
+
+    if custom_preset_path:
+        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
+        instance.outputs.append(TransformOutput(preset=standard_encoder_preset))
 
     return instance
 
 
 def get_transform_output(preset):
-    from azure.mgmt.media.models import (TransformOutput, BuiltInStandardEncoderPreset, VideoAnalyzerPreset, AudioAnalyzerPreset)
+    from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, VideoAnalyzerPreset, AudioAnalyzerPreset)
     from azure.cli.command_modules.ams._completers import (get_stand_alone_presets, is_audio_analyzer)
 
     if preset in get_stand_alone_presets():
@@ -232,3 +244,18 @@ def map_fade_in_out_duration(obj):
     if obj:
         iso_duration = parse_iso_duration(obj.get('Duration'))
     return iso_duration
+
+
+def parse_standard_encoder_preset(custom_preset_path):
+    try:
+        with open(custom_preset_path) as custom_preset_json_stream:
+            custom_preset_json = json.load(custom_preset_json_stream)
+            codecs_json = custom_preset_json['Codecs']
+            outputs_json = custom_preset_json['Outputs']
+    except:
+        raise CLIError("Couldn't find a valid custom preset JSON definition in '{}'. Check the schema is correct."
+                       .format(custom_preset_path))
+
+    return StandardEncoderPreset(codecs=map_codecs(codecs_json),
+                                 filters=map_filters(custom_preset_json),
+                                 formats=map_formats(outputs_json))
