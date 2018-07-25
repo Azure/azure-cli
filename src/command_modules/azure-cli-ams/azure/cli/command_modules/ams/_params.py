@@ -169,5 +169,5 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams live event') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('name', help='The name of the Live Event.')
-        c.argument('parameters', help='Live Event properties needed for creation.')
+        c.argument('name', help='The name of the live event.')
+        c.argument('streaming_protocol', help='The streaming protocol for the live event.')

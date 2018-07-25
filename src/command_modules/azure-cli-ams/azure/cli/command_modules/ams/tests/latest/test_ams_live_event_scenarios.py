@@ -18,7 +18,7 @@ class AmsLiveEventTests(ScenarioTest):
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
             'location': 'westus2',
-            'parameters': 'FragmentedMP4',
+            'streaming_protocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })
 
@@ -27,7 +27,8 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
-        self.cmd('az ams live event create -a {amsname} --name {liveEventName} --parameters {parameters} -g {rg} -l {location}', checks=[
+        self.cmd('az ams live event create -a {amsname} --name {liveEventName} --streaming-protocol {streaming_protocol} -g {rg} -l {location}', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'West US 2'),
+            self.check('input.streamingProtocol', 'FragmentedMP4')
         ])
