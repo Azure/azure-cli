@@ -5,6 +5,7 @@ Release History
 
 2.2.2
 +++++
+* Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
 * changes for consuming multi api azure.mgmt.authorization package
 
 2.2.1
