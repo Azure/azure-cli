@@ -169,7 +169,7 @@ def load_arguments_sb(self, _):
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('forward_to', help='Queue/Topic name to forward the messages')
             c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-            c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-lettering-filter-evaluation-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
+            c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
 
     with self.argument_context('servicebus topic subscription list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
