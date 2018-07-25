@@ -9,7 +9,7 @@ Release History
 
 * Added new optional properties to Service Bus queue and Subscription
     --enable-batched-operations and --enable-dead-lettering-on-message-expiration in queue
-    --dead-lettering-filter-evaluation-exceptions in subscriptions
+    --dead-letter-on-filter-exceptions in subscriptions
 
 0.2.0
 +++++
