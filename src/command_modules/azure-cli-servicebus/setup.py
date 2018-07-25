@@ -15,6 +15,7 @@ except ImportError:
 
 VERSION = "0.2.1"
 
+
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -34,7 +35,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'six',
-    'azure-mgmt-servicebus==0.4.0',
+    'azure-mgmt-servicebus==0.5.1',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

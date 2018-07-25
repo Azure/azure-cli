@@ -12,7 +12,7 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import namespaces_mgmt_client_factory, \
         queues_mgmt_client_factory, topics_mgmt_client_factory, subscriptions_mgmt_client_factory, \
-        rules_mgmt_client_factory, disaster_recovery_mgmt_client_factory
+        rules_mgmt_client_factory, disaster_recovery_mgmt_client_factory, migration_mgmt_client_factory
     from azure.cli.command_modules.servicebus.custom import empty_on_404
 
     sb_namespace_util = CliCommandType(
@@ -43,6 +43,11 @@ def load_command_table(self, _):
     sb_geodr_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations.disaster_recovery_configs_operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory
+    )
+
+    sb_migration_util = CliCommandType(
+        operations_tmpl='azure.mgmt.servicebus.operations.migration_configs_operations#MigrationConfigsOperations.{}',
+        client_factory=migration_mgmt_client_factory
     )
 
 # Namespace Region
@@ -130,3 +135,10 @@ def load_command_table(self, _):
         g.command('list', 'list_authorization_rules')
         g.show_command('show', 'get_authorization_rule')
         g.command('keys list', 'list_keys')
+
+# MigrationConfigs Region
+    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory) as g:
+        g.custom_command('start', 'cli_migration_start')
+        g.show_command('show', 'get')
+        g.command('complete', 'complete_migration', exception_handler=empty_on_404)
+        g.command('abort', 'revert')

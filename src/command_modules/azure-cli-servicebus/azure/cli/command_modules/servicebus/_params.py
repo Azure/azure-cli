@@ -15,7 +15,7 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
 
     from knack.arguments import CLIArgumentType
     from azure.mgmt.servicebus.models.service_bus_management_client_enums import SkuName, AccessRights, KeyType, FilterType
@@ -67,39 +67,24 @@ def load_arguments_sb(self, _):
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
 
     # region - Queue Create
-    with self.argument_context('servicebus queue create') as c:
-        c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
-        c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers. The maximum value for LockDuration is 5 minutes; the default value is 1 minute.')
-        c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='The maximum size of queue in megabytes, which is the size of memory allocated for the queue. Default is 1024.')
-        c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this queue requires duplicate detection.')
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 timespan or duration time format for default message to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether this queue has dead letter support when a message expires.')
-        c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
-        c.argument('max_delivery_count', type=int, help='The maximum delivery count. A message is automatically deadlettered after this number of deliveries. default value is 10.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timeSpan or duration time format for idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.')
-        c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.')
-        c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
-        c.argument('forward_to', help='Queue/Topic name to forward the messages')
-        c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-
-    with self.argument_context('servicebus queue update') as c:
-        c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
-        c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers.')
-        c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='The maximum size of queue in megabytes, which is the size of memory allocated for the queue.')
-        c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this queue requires duplicate detection.')
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 timespan or duration time format for default message to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether this queue has dead letter support when a message expires.')
-        c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timeSpan structure that defines the duration of the duplicate detection history.')
-        c.argument('max_delivery_count', type=int, help='The maximum delivery count. A message is automatically deadlettered after this number of deliveries.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timeSpan or duration time format for idle interval after which the queue is automatically deleted.')
-        c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.')
-        c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
-        c.argument('forward_to', help='Queue/Topic name to forward the messages')
-        c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus queue {}'.format(scope)) as c:
+            c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
+            c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers. The maximum value for LockDuration is 5 minutes; the default value is 1 minute.')
+            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='The maximum size of queue in megabytes, which is the size of memory allocated for the queue. Default is 1024.')
+            c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this queue requires duplicate detection.')
+            c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.')
+            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 timespan or duration time format for default message to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
+            c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether this queue has dead letter support when a message expires.')
+            c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
+            c.argument('max_delivery_count', type=int, help='The maximum delivery count. A message is automatically deadlettered after this number of deliveries. default value is 10.')
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
+            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timeSpan or duration time format for idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.')
+            c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.')
+            c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
+            c.argument('forward_to', help='Queue/Topic name to forward the messages')
+            c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
 
     with self.argument_context('servicebus queue list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
@@ -128,32 +113,19 @@ def load_arguments_sb(self, _):
             c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
 
     # region - Topic Create
-    with self.argument_context('servicebus topic create') as c:
-        c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.')
-        c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this topic requires duplicate detection.')
-        c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timespan or duration time format for structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
-        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Value that indicates whether server-side batched operations are enabled.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('support_ordering', options_list=['--enable-ordering'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic supports ordering.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
-        c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
-        c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
-
-    # region - Topic Update
-    with self.argument_context('servicebus topic update') as c:
-        c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic.')
-        c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this topic requires duplicate detection.')
-        c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timespan or duration time format for structure that defines the duration of the duplicate detection history.')
-        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Value that indicates whether server-side batched operations are enabled.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('support_ordering', options_list=['--enable-ordering'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic supports ordering.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted.')
-        c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
-        c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus topic {}'.format(scope)) as c:
+            c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
+            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
+            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.')
+            c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this topic requires duplicate detection.')
+            c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timespan or duration time format for structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
+            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
+            c.argument('support_ordering', options_list=['--enable-ordering'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic supports ordering.')
+            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
+            c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
+            c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
 
     for scope in ['servicebus topic show', 'servicebus topic delete']:
         with self.argument_context(scope) as c:
@@ -184,30 +156,20 @@ def load_arguments_sb(self, _):
         c.argument('subscription_name', arg_type=name_type, id_part='child_name_2', completer=get_subscriptions_command_completion_list, help='Name of Subscription')
         c.argument('topic_name', id_part='child_name_1', options_list=['--topic-name'], help='Name of Topic')
 
-    # region - Subscription Create
-    with self.argument_context('servicebus topic subscription create') as c:
-        c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription. The default value is 1 minute.')
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean Value that indicates whether a subscription has dead letter support when a message expires.')
-        c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']))
-        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='A boolean value that indicates whether server-side batched operations are enabled.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
-        c.argument('forward_to', help='Queue/Topic name to forward the messages')
-        c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-
-    with self.argument_context('servicebus topic subscription update') as c:
-        c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription.')
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
-        c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-        c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean Value that indicates whether a subscription has dead letter support when a message expires.')
-        c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']))
-        c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='A boolean value that indicates whether server-side batched operations are enabled.')
-        c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
-        c.argument('forward_to', help='Queue/Topic name to forward the messages')
-        c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+    # region - Subscription Create and update
+    for scope in ['create', 'update']:
+        with self.argument_context('servicebus topic subscription {}'.format(scope)) as c:
+            c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription. The default value is 1 minute.')
+            c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
+            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
+            c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean Value that indicates whether a subscription has dead letter support when a message expires.')
+            c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']))
+            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
+            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
+            c.argument('forward_to', help='Queue/Topic name to forward the messages')
+            c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
+            c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
 
     with self.argument_context('servicebus topic subscription list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
@@ -255,7 +217,7 @@ def load_arguments_sb(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
 
     with self.argument_context('servicebus georecovery-alias set') as c:
-        c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
+        c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
     for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
@@ -273,3 +235,14 @@ def load_arguments_sb(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+    # Standard to Premium Migration: Region
+
+    with self.argument_context('servicebus migration start') as c:
+        c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
+        c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
+        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
+
+    for scope in ['show', 'complete', 'abort']:
+        with self.argument_context('servicebus migration {}'.format(scope)) as c:
+            c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
