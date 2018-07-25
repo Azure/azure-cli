@@ -164,7 +164,8 @@ def load_arguments(self, _):
         c.argument('docker_bridge_address')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('disable_rbac', action='store_true')
-        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'])
+        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
+                   deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
         c.argument('network_plugin')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
