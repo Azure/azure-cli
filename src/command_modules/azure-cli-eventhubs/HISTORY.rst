@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
++++++
+* updated help for the parameter --partition-count of eventhub
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
