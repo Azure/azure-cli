@@ -21,5 +21,3 @@ def get_presets_definition_name_completion_list():
     encoder_name_presets_list = [e.value for e in EncoderNamedPreset]
     encoder_name_presets_list.extend(get_stand_alone_presets())
     return encoder_name_presets_list
-
-

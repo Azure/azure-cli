@@ -4,7 +4,8 @@
 # license information.
 # --------------------------------------------------------------------------------------------
 
-import json, os
+import json
+import os
 
 from knack.util import CLIError
 
@@ -16,7 +17,8 @@ from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput, Bui
 
 # pylint: disable=line-too-long
 
-def create_transform(cmd, client, account_name, resource_group_name,
+
+def create_transform(client, account_name, resource_group_name,
                      transform_name, preset_names=None, description=None,
                      custom_preset_path=None):
     outputs = []
@@ -111,6 +113,15 @@ def get_transform_output(preset):
 
 
 def map_codecs(codecs):
+    def get_layers(layer_type, layers_list_from_json):
+        layers = []
+        for layer_group in layers_list_from_json:
+            layer_instance = get_sdk_model_class(layer_type)()
+            for layer_prop_key, layer_prop_value in layer_group.items():
+                parse_custom_preset_value(layer_prop_key, layer_prop_value, layer_instance)
+            layers.append(layer_instance)
+        return layers
+
     codec_instance_list = []
     for codec in codecs:
         try:
@@ -119,17 +130,13 @@ def map_codecs(codecs):
             for key, value in codec.items():
                 if isinstance(value, list) and 'Layers' in key:
                     layer_type = key[:-1]
-                    layer_instance = get_sdk_model_class(layer_type)()
-                    for layer_group in value:
-                        for layer_prop_key, layer_prop_value in layer_group.items():
-                            parse_custom_preset_value(layer_prop_key, layer_prop_value, layer_instance)
-                        layers.append(layer_instance)
+                    layers = get_layers(layer_type, value)
                 else:
                     parse_custom_preset_value(key, value, codec_instance)
-        except Exception as ex:
+        except Exception:
             raise CLIError("Invalid or unsupported codec type in your custom preset JSON file.")
 
-        if len(layers) > 0:
+        if layers:
             codec_instance.layers = layers
 
         codec_instance_list.append(codec_instance)
@@ -146,7 +153,7 @@ def map_filters(custom_preset_json):
             if filters:
                 from azure.mgmt.media.models import Filters
                 filters_instance = Filters()
-            
+
                 overlays = []
 
                 video_overlay = filters.get('VideoOverlay')
@@ -166,7 +173,7 @@ def map_filters(custom_preset_json):
                     overlays.append(video_overlay_instance)
 
                     # TODO: start, end, opacity, crop_rectangle parameters
-            
+
                 audio_overlay = filters.get('AudioOverlay')
                 if audio_overlay:
                     from azure.mgmt.media.models import AudioOverlay
@@ -184,17 +191,16 @@ def map_filters(custom_preset_json):
                     overlays.append(audio_overlay_instance)
 
                     # TODO: start, end parameters
-            
+
                 filters_instance.deinterlace = filters.get('Deinterlace')
-            
+
                 rotation = filters.get('Rotation')
                 if rotation:
                     filters_instance.rotation = 'Rotate{}'.format(rotation)
-            
+
                 # TODO: crop parameter
 
                 filters_instance.overlays = overlays
-
 
     return filters_instance
 
@@ -216,7 +222,7 @@ def parse_custom_preset_value(key, value, instance):
         try:
             iso_duration = parse_iso_duration(value)
             setattr(instance, camel_to_snake(key), iso_duration)
-        except:
+        except (ValueError, TypeError):
             setattr(instance, camel_to_snake(key), value)
 
 

@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid, re, isodate, os
-
 from datetime import datetime, timedelta
+
+import uuid
+import re
+import isodate
 
 
 def _gen_guid():
@@ -24,7 +26,7 @@ def _is_guid(guid):
 def parse_iso_duration(str_duration):
     iso_duration_format_value = None
     if str_duration:
-        datetime_duration = datetime.strptime(str_duration,'%H:%M:%S')
+        datetime_duration = datetime.strptime(str_duration, '%H:%M:%S')
         iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
                                                                          minutes=datetime_duration.minute,
                                                                          seconds=datetime_duration.second))
