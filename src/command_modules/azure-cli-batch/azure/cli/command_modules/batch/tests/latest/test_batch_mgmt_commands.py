@@ -12,18 +12,19 @@ from azure.cli.testsdk import TestCli
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
-from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
-
-# Key Vault permissions
-ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
-ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
-
 
 # TODO: Convert back to ScenarioTest and re-record when issue #5142 is fixed.
 class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
+        
+        SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
+        KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
+        ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
+        ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
+
+        
         self.kwargs.update({
             'rg': resource_group,
             'str_n': 'clibatchteststorage1',

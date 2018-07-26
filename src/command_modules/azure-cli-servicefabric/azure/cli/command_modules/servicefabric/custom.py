@@ -21,27 +21,9 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.cli.core._profile import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.keyvault import KeyVaultAuthentication
-from azure.mgmt.keyvault.models import (VaultProperties,
-                                        Sku as KeyVaultSku,
-                                        AccessPolicyEntry,
-                                        Permissions,
-                                        CertificatePermissions,
-                                        KeyPermissions,
-                                        SecretPermissions,
-                                        SkuName as KeyVaultSkuName)
-from azure.keyvault.models import (CertificateAttributes,
-                                   CertificatePolicy,
-                                   ActionType,
-                                   KeyUsageType,
-                                   IssuerParameters,
-                                   KeyProperties,
-                                   LifetimeAction,
-                                   SecretProperties,
-                                   X509CertificateProperties,
-                                   Trigger,
-                                   Action)
+
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
                                              ClientCertificateCommonName,
@@ -83,7 +65,6 @@ from ._client_factory import (resource_client_factory,
                               compute_client_factory,
                               storage_client_factory,
                               network_client_factory)
-KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
 logger = get_logger(__name__)
 
 DEFAULT_ADMIN_USER_NAME = "adminuser"
@@ -1150,14 +1131,18 @@ def _create_certificate(cmd,
                 vault_name = resource_group_name
 
             logger.info("Creating key vault")
-            vault = _create_keyvault(
-                cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+            if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
+                vault = _create_keyvault(
+                    cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+            else:
+                vault = _create_keyvault(
+                    cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
             logger.info("Wait for key vault ready")
             time.sleep(20)
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
 
-            policy = _get_default_policy(certificate_subject_name)
+            policy = _get_default_policy(cli_ctx, certificate_subject_name)
             logger.info("Creating self-signed certificate")
             result = _create_self_signed_key_vault_certificate(
                 cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
@@ -1396,6 +1381,9 @@ def _get_certificate(client, vault_base_url, certificate_name):
 
 def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
+    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
     import binascii
     certificate_data = open(certificate_data, 'rb').read()
     x509 = None
@@ -1506,13 +1494,24 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
             raise ex
 
 
-def _get_default_policy(subject):
+def _get_default_policy(cli_ctx, subject):
     if subject.lower().startswith('cn') is not True:
         subject = "CN={0}".format(subject)
-    return _default_certificate_profile(subject)
+    return _default_certificate_profile(cli_ctx, subject)
 
 
-def _default_certificate_profile(subject):
+def _default_certificate_profile(cli_ctx, subject):
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
+    ActionType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#ActionType')
+    KeyUsageType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#KeyUsageType')
+    IssuerParameters = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.issuer_parameters#IssuerParameters')
+    KeyProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_properties#KeyProperties')
+    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.lifetime_action#LifetimeAction')
+    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
+    X509CertificateProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.x509_certificate_properties#X509CertificateProperties')
+    Trigger = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.trigger#Trigger')
+    Action = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.action#Action')
     template = CertificatePolicy(key_properties=KeyProperties(exportable=True,
                                                               key_type=u'RSA',
                                                               key_size=2048,
@@ -1537,7 +1536,8 @@ def _default_certificate_profile(subject):
 
 
 def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
-    cert_attrs = CertificateAttributes(not disabled)
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
     if validity is not None:
         certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
@@ -1580,12 +1580,12 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
     return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
 
 
-_create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
+#_create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
 def _get_keyVault_not_arm_client(cli_ctx):
     from azure.cli.core._profile import Profile
-
+    KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
@@ -1598,7 +1598,7 @@ def _create_keyvault(cmd,
                      resource_group_name,
                      vault_name,
                      location=None,
-                     sku=KeyVaultSkuName.standard.value,
+                     sku=None,
                      enabled_for_deployment=True,
                      enabled_for_disk_encryption=None,
                      enabled_for_template_deployment=None,
@@ -1614,6 +1614,18 @@ def _create_keyvault(cmd,
                                              base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
+    KeyVaultSku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
+    AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
+    Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    CertificatePermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#CertificatePermissions')
+    KeyPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
+    SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
+    KeyVaultSkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    if not sku:
+        sku= KeyVaultSkuName.standard.value
+
     if no_self_perms:
         access_policies = []
     else:
@@ -1674,7 +1686,7 @@ def _create_keyvault(cmd,
                                    parameters=parameters)
 
 
-_create_keyvault.__doc__ = VaultProperties.__doc__
+#_create_keyvault.__doc__ = VaultProperties.__doc__
 
 
 # pylint: disable=inconsistent-return-statements
