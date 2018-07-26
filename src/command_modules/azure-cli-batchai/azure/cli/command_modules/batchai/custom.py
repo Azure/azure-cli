@@ -532,7 +532,7 @@ def _configure_auto_storage(cli_ctx, location):
         logger.warning('BatchAI will use existing %s resource group for auto-storage account',
                        resource_group)
     else:
-        logger.warning('Creating %s resource for auto-storage account', resource_group)
+        logger.warning('Creating %s resource group for auto-storage account', resource_group)
         resource_client.resource_groups.create_or_update(
             resource_group, ResourceGroup(location=location))
     storage_client = _get_storage_management_client(cli_ctx)
