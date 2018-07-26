@@ -298,6 +298,7 @@ def _validate_managed_disk_sku(sku):
 
 def _validate_location(cmd, namespace, zone_info, size_info):
     from ._vm_utils import list_sku_info
+    from azure.cli.core.profiles import supported_api_version, ResourceType
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info:
