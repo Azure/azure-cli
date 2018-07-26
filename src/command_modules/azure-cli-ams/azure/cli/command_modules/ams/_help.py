@@ -285,5 +285,5 @@ helps['ams live event start'] = """
 
 helps['ams live event show'] = """
     type: command
-    short-summary: Show an existing Live Event.
+    short-summary: Show the details of a live event.
 """
