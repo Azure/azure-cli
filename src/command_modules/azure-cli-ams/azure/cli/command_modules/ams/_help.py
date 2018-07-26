@@ -264,12 +264,12 @@ helps['ams streaming endpoint list'] = """
 """
 
 helps['ams live'] = """
-    type: command
+    type: group
     short-summary: Manage live streaming operations for an Azure Media Service account.
 """
 
 helps['ams live event'] = """
-    type: command
+    type: group
     short-summary: Manage live events for an Azure Media Service account.
 """
 
