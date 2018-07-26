@@ -6,7 +6,7 @@
 # AZURE CLI SERVICEBUS - CURD TEST DEFINITIONS
 
 import time
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.mgmt.servicebus.models import ProvisioningStateDR
 
 
@@ -562,6 +562,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Delete Namespace - secondary
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary}')
 
+    # Test playback fails and the live-only flag will be removed once it is addressed
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_migration')
     def test_sb_migration(self, resource_group):
 
