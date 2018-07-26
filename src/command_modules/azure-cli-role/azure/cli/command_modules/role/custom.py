@@ -211,7 +211,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                           show_all=False, include_groups=False, include_classic_administrators=False):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively). Supported only for a user principal.
+    member(transitively).
     '''
     graph_client = _graph_client_factory(cmd.cli_ctx)
     factory = _auth_client_factory(cmd.cli_ctx, scope)
