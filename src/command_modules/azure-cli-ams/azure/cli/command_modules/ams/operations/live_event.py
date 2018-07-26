@@ -15,3 +15,9 @@ def create(client, resource_group_name, account_name, name, streaming_protocol, 
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
                          live_event_name=name, parameters=live_event)
+
+
+def start(client, resource_group_name, account_name, name):
+
+    return client.start(resource_group_name=resource_group_name, account_name=account_name,
+                        live_event_name=name)
