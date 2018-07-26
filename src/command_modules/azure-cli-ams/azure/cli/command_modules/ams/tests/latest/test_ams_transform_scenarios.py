@@ -74,7 +74,6 @@ class AmsTransformTests(ScenarioTest):
 
         self.cmd('az ams transform delete -n {transformName} -a {amsname} -g {rg}')
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_transform_create_custom_preset_invalid(self, storage_account_for_create):
@@ -100,7 +99,6 @@ class AmsTransformTests(ScenarioTest):
 
         with self.assertRaises(CLIError):
             self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --custom-preset "{invalidPresetPath}"')
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
