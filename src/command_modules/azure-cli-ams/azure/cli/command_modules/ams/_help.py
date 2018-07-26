@@ -275,5 +275,15 @@ helps['ams live event'] = """
 
 helps['ams live event create'] = """
     type: command
-    short-summary: Creates a live event.
+    short-summary: Create a live event.
+"""
+
+helps['ams live event start'] = """
+    type: command
+    short-summary: Start an existing Live Event.
+"""
+
+helps['ams live event show'] = """
+    type: command
+    short-summary: Show an existing Live Event.
 """
