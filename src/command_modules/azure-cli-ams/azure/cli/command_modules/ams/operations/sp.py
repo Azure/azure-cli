@@ -108,7 +108,7 @@ def _get_displayable_name(graph_object):
 def list_role_assignments(cmd, assignee_object_id):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively). Supported only for a user principal.
+    member(transitively).
     '''
     graph_client = _graph_client_factory(cmd.cli_ctx)
     factory = _auth_client_factory(cmd.cli_ctx)
