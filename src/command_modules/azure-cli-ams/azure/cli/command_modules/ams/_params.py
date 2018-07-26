@@ -67,8 +67,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    nargs='+',
                    help='Space-separated list of built-in preset names.')
         c.argument('description', help='The description of the transform.')
-
-    with self.argument_context('ams transform create') as c:
         c.argument('custom_preset_path', options_list=['--custom-preset'],
                    help='The local full path to the custom presest JSON definition file.')
 

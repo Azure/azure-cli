@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid, re, isodate
+import uuid, re, isodate, os
 
 from datetime import datetime, timedelta
 

@@ -8,10 +8,11 @@ import json, os
 
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._sdk_utils import (map_format_type, map_codec_type, get_sdk_model_class)
+from azure.cli.command_modules.ams._sdk_utils import (map_format_type, map_codec_type,
+                                                      get_sdk_model_class, get_stand_alone_presets)
 from azure.cli.command_modules.ams._utils import (parse_iso_duration, camel_to_snake)
 
-from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput)
+from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput, BuiltInStandardEncoderPreset)
 
 # pylint: disable=line-too-long
 
@@ -39,17 +40,11 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
                          custom_preset_path=None):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    if custom_preset_path is None and preset_names is None:
-        raise CLIError("Missing required arguments.\nEither --preset-names "
-                       "or --custom-preset must be specified.")
+    if not transform.outputs and (preset_names or custom_preset_path):
+        transform.outputs = []
 
     if preset_names:
-        set_preset_names = [x for x in set(preset_names) if hasattr(x, 'preset')]
-        set_existent_preset_names = set(map(lambda x: x.preset.preset_name.value, transform.outputs))
-
-        set_preset_names = set_preset_names.difference(set_existent_preset_names)
-
-        for preset in set_preset_names:
+        for preset in preset_names:
             transform.outputs.append(get_transform_output(preset))
 
     if custom_preset_path:
@@ -62,12 +57,7 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
 def remove_transform_output(client, account_name, resource_group_name, transform_name, preset_names):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    set_preset_names = set(preset_names)
-    set_existent_preset_names = set(map(lambda x: x.preset.preset_name.value, transform.outputs))
-
-    set_existent_preset_names = set_existent_preset_names.difference(set_preset_names)
-
-    transform_output_list = list(filter(lambda x: x.preset.preset_name.value in set_existent_preset_names,
+    transform_output_list = list(filter(lambda x: not hasattr(x.preset, 'preset_name') or x.preset.preset_name.value not in preset_names,
                                         transform.outputs))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform_output_list)
@@ -83,15 +73,12 @@ def transform_update_setter(client, resource_group_name,
 def update_transform(instance, description=None, preset_names=None, custom_preset_path=None):
     if not instance:
         raise CLIError('The transform resource was not found.')
-    
-    if custom_preset_path is None and preset_names is None:
-        raise CLIError("Missing required arguments.\nEither --preset-names "
-                       "or --custom-preset must be specified.")
 
     if description:
         instance.description = description
 
-    instance.outputs = []
+    if preset_names or custom_preset_path:
+        instance.outputs = []
 
     if preset_names:
         for preset in preset_names:
@@ -105,16 +92,19 @@ def update_transform(instance, description=None, preset_names=None, custom_prese
 
 
 def get_transform_output(preset):
-    from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, VideoAnalyzerPreset, AudioAnalyzerPreset)
-    from azure.cli.command_modules.ams._completers import (get_stand_alone_presets, is_audio_analyzer)
+    transform_preset = None
 
-    if preset in get_stand_alone_presets():
-        if is_audio_analyzer(preset_name=preset):
-            transform_preset = AudioAnalyzerPreset()
+    try:
+        if os.path.exists(preset):
+            transform_preset = parse_standard_encoder_preset(preset)
         else:
-            transform_preset = VideoAnalyzerPreset()
-    else:
-        transform_preset = BuiltInStandardEncoderPreset(preset_name=preset)
+            if preset in get_stand_alone_presets():
+                transform_preset = get_sdk_model_class("{}Preset".format(preset))()
+            else:
+                transform_preset = BuiltInStandardEncoderPreset(preset_name=preset)
+
+    except:
+        raise CLIError("Couldn't create a preset from '{}'.".format(preset))
 
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output

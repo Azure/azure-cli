@@ -6,6 +6,7 @@
 from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.ams.operations.sp import list_role_definitions
+from azure.cli.command_modules.ams._sdk_utils import get_stand_alone_presets
 
 from azure.mgmt.media.models import (EncoderNamedPreset)
 
@@ -22,9 +23,3 @@ def get_presets_definition_name_completion_list():
     return encoder_name_presets_list
 
 
-def get_stand_alone_presets():
-    return ['AudioAnalyzer', 'VideoAnalyzer']
-
-
-def is_audio_analyzer(preset_name):
-    return preset_name == 'AudioAnalyzer'

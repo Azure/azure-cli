@@ -35,12 +35,14 @@ class AmsTransformTests(ScenarioTest):
 
         self.kwargs.update({
             'transformName': transformName,
-            'presetName': 'AACGoodQualityAudio'
+            'presetName': 'AACGoodQualityAudio',
+            'presetPath': self._get_test_data_file('customPreset.json')
         })
 
         self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-names {presetName}', checks=[
             self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(outputs)', 1)
         ])
 
         self.cmd('az ams transform show -a {amsname} -n {transformName} -g {rg}', checks=[
@@ -48,22 +50,23 @@ class AmsTransformTests(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('az ams transform update --preset-names H264MultipleBitrate720p --description mydesc -a {amsname} -n {transformName} -g {rg}', checks=[
+        self.cmd('az ams transform update --preset-names H264MultipleBitrate720p --description mydesc -a {amsname} -n {transformName} -g {rg} --custom-preset "{presetPath}"', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('description', 'mydesc')
+            self.check('description', 'mydesc'),
+            self.check('length(outputs)', 2)
         ])
 
-        self.cmd('az ams transform output add --preset-names AACGoodQualityAudio AdaptiveStreaming -a {amsname} -n {transformName} -g {rg}', checks=[
+        self.cmd('az ams transform output add --preset-names AACGoodQualityAudio AdaptiveStreaming -a {amsname} -n {transformName} -g {rg} --custom-preset "{presetPath}"', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('length(outputs)', 3)
+            self.check('length(outputs)', 5)
         ])
 
         self.cmd('az ams transform output remove --preset-names AACGoodQualityAudio AdaptiveStreaming -a {amsname} -n {transformName} -g {rg}', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('length(outputs)', 1)
+            self.check('length(outputs)', 3)
         ])
 
         list = self.cmd('az ams transform list -a {amsname} -g {rg}').get_output_in_json()

@@ -25,3 +25,7 @@ def map_codec_type(codec_type):
 
 def get_sdk_model_class(class_name):
     return getattr(models_module, class_name)
+
+
+def get_stand_alone_presets():
+    return ['AudioAnalyzer', 'VideoAnalyzer']
