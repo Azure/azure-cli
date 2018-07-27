@@ -91,7 +91,7 @@ def load_command_table(self, _):
         g.keyvault_custom('backup', 'backup_secret')#, doc_string_source=_data_sdk_path('backup_secret'))
         g.keyvault_custom('restore', 'restore_secret')#, doc_string_source=_data_sdk_path('restore_secret'))
     
-    with self.command_group('keyvault certificate', kv_data_sdk, min_api='2018-02-14') as g:
+    with self.command_group('keyvault certificate', kv_data_sdk) as g:
         g.keyvault_custom('create', 'create_certificate')#, doc_string_source=_data_sdk_path('create_certificate'))
         g.keyvault_command('list', 'get_certificates')
         g.keyvault_command('list-versions', 'get_certificate_versions')
@@ -106,24 +106,24 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    with self.command_group('keyvault certificate pending', kv_data_sdk, min_api='2018-02-14') as g:
+    with self.command_group('keyvault certificate pending', kv_data_sdk) as g:
         g.keyvault_command('merge', 'merge_certificate')
         g.keyvault_command('show', 'get_certificate_operation')
         g.keyvault_command('delete', 'delete_certificate_operation', validator=process_certificate_cancel_namespace)
 
-    with self.command_group('keyvault certificate contact', kv_data_sdk, min_api='2018-02-14') as g:
+    with self.command_group('keyvault certificate contact', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_certificate_contacts')
         g.keyvault_custom('add', 'add_certificate_contact')
         g.keyvault_custom('delete', 'delete_certificate_contact')
 
-    with self.command_group('keyvault certificate issuer', kv_data_sdk, min_api='2018-02-14') as g:
+    with self.command_group('keyvault certificate issuer', kv_data_sdk) as g:
         g.keyvault_custom('update', 'update_certificate_issuer')
         g.keyvault_command('list', 'get_certificate_issuers')
         g.keyvault_custom('create', 'create_certificate_issuer')
         g.keyvault_command('show', 'get_certificate_issuer')
         g.keyvault_command('delete', 'delete_certificate_issuer')
 
-    with self.command_group('keyvault certificate issuer admin', kv_data_sdk, min_api='2018-02-14') as g:
+    with self.command_group('keyvault certificate issuer admin', kv_data_sdk) as g:
         g.keyvault_custom('list', 'list_certificate_issuer_admins')
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')

@@ -22,7 +22,9 @@ from ._validators import (
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet)
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
+    validate_vault_id, validate_storage_disabled_attribute, validate_storage_account_id,
+    validate_sas_definition_id)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 # CUSTOM CHOICE LISTS
@@ -34,6 +36,10 @@ certificate_format_values = ['PEM', 'DER']
 def load_arguments(self, _):
     JsonWebKeyOperation = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyOperation')
     KeyAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_attributes#KeyAttributes')
+    JsonWebKeyType = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyType')
+    JsonWebKeyCurveName = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyCurveName')
+    SasTokenType = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#SasTokenType')
+    SasDefinitionAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.sas_definition_attributes#SasDefinitionAttributes')
     SecretAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_attributes#SecretAttributes')
     CertificateAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
     StorageAccountAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.storage_account_attributes#StorageAccountAttributes')
