@@ -60,7 +60,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams live event start -a {amsname} --name {liveEventName} -g {rg}')
 
-        self.cmd('az ams live event show -a {amsname} --live-event-name {liveEventName} -g {rg}', checks=[
+        self.cmd('az ams live event show -a {amsname} -n {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'West US 2'),
             self.check('input.streamingProtocol', 'FragmentedMP4'),
