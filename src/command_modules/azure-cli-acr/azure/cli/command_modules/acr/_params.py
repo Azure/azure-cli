@@ -38,7 +38,8 @@ from ._constants import (
     BUILD_TASK_RESOURCE_TYPE,
     BUILD_STEP_RESOURCE_TYPE,
     CLASSIC_REGISTRY_SKU,
-    MANAGED_REGISTRY_SKU
+    MANAGED_REGISTRY_SKU,
+    POLICY_STATUS
 )
 from ._validators import (
     validate_registry_name,
@@ -85,6 +86,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('target_tags', arg_type=image_by_tag_type, action='append')
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
+
+    with self.argument_context('acr config content-trsut') as c:
+        c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(POLICY_STATUS))
 
     with self.argument_context('acr repository') as c:
         c.argument('repository', help="The name of the repository.")

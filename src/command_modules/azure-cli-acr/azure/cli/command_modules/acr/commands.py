@@ -20,6 +20,7 @@ from ._format import (
 )
 from ._client_factory import (
     cf_acr_registries,
+    cf_acr_registries_stable,
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_build_tasks,
@@ -38,6 +39,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_import_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.import#{}',
         client_factory=cf_acr_registries
+    )
+
+    acr_policy_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.policy#{}',
+        client_factory=cf_acr_registries_stable
     )
 
     acr_cred_util = CliCommandType(
@@ -154,3 +160,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                   table_transformer=build_output_format)
         g.command('logs', 'acr_build_task_logs', client_factory=cf_acr_builds,
                   table_transformer=None)
+
+    with self.command_group('acr config content-trust', acr_policy_util) as g:
+        g.show_command('show', 'acr_config_content_trust_show')
+        g.show_command('update', 'acr_config_content_trust_update')
