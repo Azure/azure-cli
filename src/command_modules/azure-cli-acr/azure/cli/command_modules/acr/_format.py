@@ -4,6 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def registry_output_format(result):
@@ -36,6 +40,18 @@ def webhook_ping_output_format(result):
 
 def replication_output_format(result):
     return _output_format(result, _replication_format_group)
+
+
+def build_task_output_format(result):
+    return _output_format(result, _build_task_format_group)
+
+
+def build_task_detail_output_format(result):
+    return _output_format(result, _build_task_detail_format_group)
+
+
+def build_output_format(result):
+    return _output_format(result, _build_format_group)
 
 
 def _output_format(result, format_group):
@@ -121,12 +137,40 @@ def _replication_format_group(item):
     ])
 
 
-def _format_datetime(date_string):
-    from dateutil.parser import parse
-    try:
-        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return date_string or ' '
+def _build_task_format_group(item):
+    return OrderedDict([
+        ('Name', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'osType')),
+        ('STATUS', _get_value(item, 'status')),
+        ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
+        ('SOURCE REPOSITORY', _get_value(item, 'sourceRepository', 'repositoryUrl'))
+    ])
+
+
+def _build_task_detail_format_group(item):
+    return OrderedDict([
+        ('Name', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'osType')),
+        ('STATUS', _get_value(item, 'status')),
+        ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
+        ('SOURCE REPOSITORY', _get_value(item, 'sourceRepository', 'repositoryUrl')),
+        ('BRANCH', _get_value(item, 'properties', 'branch')),
+        ('BASE IMAGE TRIGGER', _get_value(item, 'properties', 'baseImageTrigger')),
+        ('IMAGE NAMES', _get_value(item, 'properties', 'imageNames')),
+        ('PUSH ENABLED', _get_value(item, 'properties', 'isPushEnabled'))
+    ])
+
+
+def _build_format_group(item):
+    return OrderedDict([
+        ('BUILD ID', _get_value(item, 'buildId')),
+        ('TASK', _get_value(item, 'buildTask')),
+        ('PLATFORM', _get_value(item, 'platform', 'osType')),
+        ('STATUS', _get_value(item, 'status')),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'gitCommitTrigger'))),
+        ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+    ])
 
 
 def _get_value(item, *args):
@@ -138,4 +182,34 @@ def _get_value(item, *args):
             item = item[arg]
         return str(item) if item else ' '
     except (KeyError, TypeError, IndexError):
+        return ' '
+
+
+def _get_build_trigger(image_update_trigger, git_commit_trigger):
+    if git_commit_trigger.strip():
+        return 'Git Commit'
+    if image_update_trigger.strip():
+        return 'Image Update'
+    return 'Manual'
+
+
+def _format_datetime(date_string):
+    from dateutil.parser import parse
+    try:
+        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        logger.debug("Unable to parse date_string '%s'", date_string)
+        return date_string or ' '
+
+
+def _get_duration(start_time, finish_time):
+    from dateutil.parser import parse
+    try:
+        duration = parse(finish_time) - parse(start_time)
+        hours = "{0:02d}".format((24 * duration.days) + (duration.seconds // 3600))
+        minutes = "{0:02d}".format((duration.seconds % 3600) // 60)
+        seconds = "{0:02d}".format(duration.seconds % 60)
+        return "{0}:{1}:{2}".format(hours, minutes, seconds)
+    except ValueError:
+        logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '

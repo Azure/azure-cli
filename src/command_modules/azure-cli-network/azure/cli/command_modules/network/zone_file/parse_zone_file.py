@@ -386,8 +386,8 @@ def _parse_record(parser, record_token):
     record_type = None
     for i in range(3):
         try:
-            if record_token[i] in SUPPORTED_RECORDS:
-                record_type = record_token[i]
+            if record_token[i].upper() in SUPPORTED_RECORDS:
+                record_type = record_token[i].upper()
                 break
         except KeyError:
             break

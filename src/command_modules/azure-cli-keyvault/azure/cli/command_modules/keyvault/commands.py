@@ -59,7 +59,6 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_network_rule')
         g.custom_command('remove', 'remove_network_rule')
         g.custom_command('list', 'list_network_rules')
-        g.custom_command('list', 'list_network_rules')
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
@@ -135,9 +134,11 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
         g.keyvault_command('show', 'get_storage_account')
         g.keyvault_command('show-deleted', 'get_deleted_storage_account')
+        g.keyvault_command('update', 'update_storage_account')
         g.keyvault_command('remove', 'delete_storage_account')
         g.keyvault_command('purge', 'purge_deleted_storage_account')
         g.keyvault_command('recover', 'recover_deleted_storage_account')
+        g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
         g.keyvault_custom('backup',
                           'backup_storage_account',
                           doc_string_source=_data_sdk_path('backup_storage_account'))
@@ -146,10 +147,11 @@ def load_command_table(self, _):
                           doc_string_source=_data_sdk_path('restore_storage_account'))
 
     with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
-        g.keyvault_command('create', 'set_sas_definition')
+        g.keyvault_command('create', 'set_sas_definition', doc_string_source=_data_sdk_path('set_sas_definition'))
         g.keyvault_command('list', 'get_sas_definitions')
         g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
         g.keyvault_command('show', 'get_sas_definition')
         g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
+        g.keyvault_command('update', 'update_sas_definition', doc_string_source=_data_sdk_path('update_sas_definition'))
         g.keyvault_command('delete', 'delete_sas_definition')
         g.keyvault_command('recover', 'recover_deleted_sas_definition')

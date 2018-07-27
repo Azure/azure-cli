@@ -51,6 +51,10 @@ class TestCli(AzCli):
         self.data['command'] = 'unknown'
         self.data['completer_active'] = ARGCOMPLETE_ENV_NAME in os.environ
         self.data['query_active'] = False
+
+        loader = self.commands_loader_cls(self)
+        setattr(self, 'commands_loader', loader)
+
         self.cloud = get_active_cloud(self)
 
     def get_cli_version(self):

@@ -11,7 +11,8 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.util import shell_safe_json_parse
 
 from azure.cli.command_modules.cosmosdb._validators import (
-    validate_locations, validate_ip_range_filter, validate_failover_policies, validate_capabilities)
+    validate_locations, validate_ip_range_filter, validate_failover_policies, validate_capabilities,
+    validate_virtual_network_rules)
 
 
 def load_arguments(self, _):
@@ -35,6 +36,8 @@ def load_arguments(self, _):
             c.argument('kind', arg_type=get_enum_type(DatabaseAccountKind), help='The type of Cosmos DB database account to create')
             c.argument('enable_automatic_failover', arg_type=get_three_state_flag(), help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.')
             c.argument('capabilities', nargs='+', validator=validate_capabilities, help='set custom capabilities on the Cosmos DB database account.')
+            c.argument('enable_virtual_network', arg_type=get_three_state_flag(), help='Enables virtual network on the Cosmos DB database account')
+            c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
 
     with self.argument_context('cosmosdb regenerate-key') as c:
         c.argument('key_kind', arg_type=get_enum_type(KeyKind))

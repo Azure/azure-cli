@@ -2,10 +2,21 @@
 
 Release History
 ===============
-2.0.22
+
+2.0.24
 ++++++
 * adding commands for managing storage accounts and sas-definitions
 * adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* Minor fixes
+
+2.0.23
+++++++
+* Minor fixes.
+
+2.0.22
+++++++
+* make keyvault commands work in cloud shell or vms with identity
 
 2.0.21
 ++++++

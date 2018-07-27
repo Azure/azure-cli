@@ -38,7 +38,6 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         self._cleanup(name, self.resource_group)
 
     def _get_resource_group(self, **kwargs):
@@ -90,13 +89,16 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-password %j^VYw9Q3Z@Cu$*h'
-            execute(self.cli_ctx, cmd.format(name, self.resource_group))
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {}'
+            param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
+                                               '%j^VYw9Q3Z@Cu$*h')
+            cmd = 'az vm create {}'.format(param_string)
+            execute(self.cli_ctx, cmd.format(name, self.resource_group, name))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Resource group deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -146,7 +148,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -208,7 +210,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -260,7 +262,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):

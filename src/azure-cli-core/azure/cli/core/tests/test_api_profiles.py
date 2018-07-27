@@ -6,7 +6,8 @@
 import unittest
 import mock
 
-from azure.cli.core.profiles import ResourceType, PROFILE_TYPE, get_api_version, supported_api_version
+from azure.cli.core.profiles import (ResourceType, PROFILE_TYPE, CustomResourceType,
+                                     get_api_version, supported_api_version, register_resource_type)
 from azure.cli.core.profiles._shared import APIVersionException
 from azure.cli.core.cloud import Cloud
 from azure.cli.testsdk import TestCli
@@ -153,6 +154,34 @@ class TestAPIProfiles(unittest.TestCase):
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             with self.assertRaises(APIVersionException):
                 supported_api_version(cli, ResourceType.MGMT_COMPUTE, min_api='2020-01-01')
+
+    def test_register_resource_type_valid(self):
+        test_profile = {'latest': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
+        with mock.patch('azure.cli.core.profiles.API_PROFILES', test_profile):
+            custom_rt = CustomResourceType('mysdkpath', 'myClient')
+            register_resource_type('latest', custom_rt, '2020-12-12-preview')
+            from azure.cli.core.profiles import API_PROFILES
+            self.assertDictEqual(API_PROFILES, {'latest': {ResourceType.MGMT_STORAGE: '2020-10-10',
+                                                           custom_rt: '2020-12-12-preview'}})
+
+    def test_register_resource_type_bad_profile(self):
+        test_profile = {'latest': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
+        with mock.patch('azure.cli.core.profiles.API_PROFILES', test_profile):
+            custom_rt = CustomResourceType('mysdkpath', 'myClient')
+            with self.assertRaises(ValueError):
+                register_resource_type('doesnotexist', custom_rt, '2020-12-12-preview')
+
+    def test_register_resource_type_bad_rt_string(self):
+        test_profile = {'latest': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
+        with mock.patch('azure.cli.core.profiles.API_PROFILES', test_profile):
+            with self.assertRaises(TypeError):
+                register_resource_type('doesnotexist', 'ResourceType.MGMT_STORAGE', '2020-12-12-preview')
+
+    def test_register_resource_type_bad_rt_attempted_override(self):
+        test_profile = {'latest': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
+        with mock.patch('azure.cli.core.profiles.API_PROFILES', test_profile):
+            with self.assertRaises(TypeError):
+                register_resource_type('doesnotexist', ResourceType.MGMT_STORAGE, '2020-12-12-preview')
 
 
 if __name__ == '__main__':

@@ -3,6 +3,31 @@
 Release History
 ===============
 
+3.2.7
++++++
+* Fix bug on using token credential on cloud shell mode
+* When use json file as input parameter, deserialize content with case insentive.
+
+3.2.6
++++++
+* Minor fixes
+
+3.2.5
++++++
+* Minor fixes
+
+3.2.4
++++++
+* Remove azure-batch-extensions dependency.
+
+3.2.3
++++++
+* Fixed bug in Pool list table formatting: issue #4378.
+
+3.2.2
++++++
+* Updated to Batch SDK 4.1.2.
+
 3.2.1
 +++++
 * Minor fixes.

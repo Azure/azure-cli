@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-def network_client_factory(cli_ctx, **_):
+def network_client_factory(cli_ctx, aux_subscriptions=None, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK,
+                                   aux_subscriptions=aux_subscriptions)
 
 
 def resource_client_factory(cli_ctx, **_):

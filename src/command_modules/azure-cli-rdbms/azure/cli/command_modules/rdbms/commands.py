@@ -9,11 +9,13 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_servers,
     cf_mysql_db,
     cf_mysql_firewall_rules,
+    cf_mysql_virtual_network_rules_operations,
     cf_mysql_config,
     cf_mysql_log,
     cf_postgres_servers,
     cf_postgres_db,
     cf_postgres_firewall_rules,
+    cf_postgres_virtual_network_rules_operations,
     cf_postgres_config,
     cf_postgres_log)
 
@@ -41,6 +43,16 @@ def load_command_table(self, _):
     postgres_firewall_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.firewall_rules_operations#FirewallRulesOperations.{}',
         client_factory=cf_postgres_firewall_rules
+    )
+
+    mysql_vnet_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        client_factory=cf_mysql_virtual_network_rules_operations
+    )
+
+    postgres_vnet_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        client_factory=cf_postgres_virtual_network_rules_operations
     )
 
     mysql_config_sdk = CliCommandType(
@@ -118,6 +130,20 @@ def load_command_table(self, _):
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
                                  setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_firewall_rule_update_custom_func')
+
+    with self.command_group('mysql server vnet-rule', mysql_vnet_sdk) as g:
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.generic_update_command('update')
+
+    with self.command_group('postgres server vnet-rule', postgres_vnet_sdk) as g:
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.generic_update_command('update')
 
     with self.command_group('mysql server configuration', mysql_config_sdk) as g:
         g.command('set', 'create_or_update')

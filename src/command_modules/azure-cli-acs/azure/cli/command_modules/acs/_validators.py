@@ -30,6 +30,8 @@ def validate_connector_name(namespace):
 
 
 def validate_ssh_key(namespace):
+    if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
+        return
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
@@ -107,3 +109,9 @@ def validate_linux_host_name(namespace):
     if not found:
         raise CLIError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
+
+
+def validate_max_pods(namespace):
+    """Validates that max_pods is set to a reasonable minimum number."""
+    if namespace.max_pods != 0 and namespace.max_pods < 5:
+        raise CLIError('--max-pods must be at least 5 for a managed Kubernetes cluster to function.')

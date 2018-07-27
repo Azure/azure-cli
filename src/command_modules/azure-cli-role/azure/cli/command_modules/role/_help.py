@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -70,11 +71,6 @@ helps['ad sp credential list'] = """
 helps['ad sp credential delete'] = """
     type: command
     short-summary: delete a service principal's credential.
-"""
-
-helps['ad sp reset-credentials'] = """
-    type: command
-    short-summary: (Deprecated, use "az ad sp credential reset")
 """
 
 helps['ad sp credential reset'] = """
@@ -150,6 +146,10 @@ helps['ad app update'] = """
                         }
                    ]
                 }]
+        - name: update an application's group membership claims to "All"
+          text: >
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
+
 """
 helps['ad user list'] = """
     type: command
@@ -178,6 +178,10 @@ helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
     long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use `--all`.
+"""
+helps['role assignment list-changelogs'] = """
+    type: command
+    short-summary: List changelogs for role assignments.
 """
 helps['role definition'] = """
     type: group
@@ -237,35 +241,6 @@ helps['role definition update'] = """
         - name: --role-definition
           type: string
           short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
-    examples:
-        - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
-          text: |
-                az role definition create --role-definition '{
-                    "Name": "Contoso On-call",
-                    "Description": "Perform VM actions and read storage and network information."
-                    "Actions": [
-                        "Microsoft.Compute/*/read",
-                        "Microsoft.Compute/virtualMachines/start/action",
-                        "Microsoft.Compute/virtualMachines/restart/action",
-                        "Microsoft.Network/*/read",
-                        "Microsoft.Storage/*/read",
-                        "Microsoft.Authorization/*/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"
-                    ],
-                    "DataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
-                    ],
-                    "NotDataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-                    ],
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-                }'
-        - name: Create a role from a file containing a JSON description.
-          text: >
-            az role definition create --role-definition ad-role.json
 """
 helps['ad'] = """
     type: group
@@ -293,9 +268,17 @@ helps['ad group'] = """
     type: group
     short-summary: Manage Azure Active Directory groups.
 """
+helps['ad group create'] = """
+    type: command
+    short-summary: Create a group in the directory.
+"""
 helps['ad group member'] = """
     type: group
     short-summary: Manage Azure Active Directory group members.
+"""
+helps['ad group member check'] = """
+    type: command
+    short-summary: Check if a member is in a group.
 """
 helps['ad sp'] = """
     type: group

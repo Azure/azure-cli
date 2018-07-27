@@ -32,10 +32,9 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString', conn_str_pattern)
         ])
 
-        self.cmd('iot hub show-connection-string -g {0}'.format(rg), checks=[
-            self.check('length([*])', 1),
-            self.check('[0].name', hub),
-            self.check_pattern('[0].connectionString', conn_str_pattern)
+        self.cmd('iot hub show-connection-string -n {0} -g {1}'.format(hub, rg), checks=[
+            self.check('length(@)', 1),
+            self.check_pattern('connectionString', conn_str_pattern)
         ])
 
         # Test 'az iot hub update'
@@ -111,8 +110,8 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub consumer-group list'
         self.cmd('iot hub consumer-group list --hub-name {0}'.format(hub), checks=[
             self.check('length([*])', 2),
-            self.check('[0]', '$Default'),
-            self.check('[1]', consumer_group_name)
+            self.check('[0].name', '$Default'),
+            self.check('[1].name', consumer_group_name)
         ])
 
         # Test 'az iot hub consumer-group delete'
@@ -121,7 +120,7 @@ class IoTHubTest(ScenarioTest):
 
         self.cmd('iot hub consumer-group list --hub-name {0}'.format(hub), checks=[
             self.check('length([*])', 1),
-            self.check('[0]', '$Default')
+            self.check('[0].name', '$Default')
         ])
 
         # Test 'az iot hub job list'

@@ -995,6 +995,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
     def test_network_lb_probes(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
+        self.kwargs['lb2'] = 'lb2'
         self.cmd('network lb create -g {rg} -n {lb}')
 
         for i in range(1, 4):
@@ -1020,6 +1021,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb probe delete -g {rg} --lb-name {lb} -n probe3')
         self.cmd('network lb probe list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 2))
+
+        # test standard LB supports https probe
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
+        self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_rules')
     def test_network_lb_rules(self, resource_group):
@@ -1474,6 +1480,33 @@ class NetworkVNetScenarioTest(ScenarioTest):
                  checks=self.check("length([?name == '{vnet}'])", 1))
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
+    def test_network_vnet_ids_query(self, resource_group):
+        import json
+
+        # This test ensures that --query works with --ids
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2'
+        })
+        self.kwargs['id1'] = self.cmd('network vnet create -g {rg} -n {vnet1}').get_output_in_json()['newVNet']['id']
+        self.kwargs['id2'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
+        self.cmd('network vnet show --ids {id1} {id2} --query "[].name"', checks=[
+            self.check('length(@)', 2),
+            self.check('@[0]', '{vnet1}'),
+            self.check('@[1]', '{vnet2}')
+        ])
+
+        # This test ensures you can pipe a list of IDs to --ids
+        self.kwargs['ids'] = self.cmd('network vnet list -g {rg} --query "[].id" -otsv').output
+        self.cmd('network vnet show --ids {ids}',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids
+        self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
+        self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
 
 
 class NetworkVNetPeeringScenarioTest(ScenarioTest):

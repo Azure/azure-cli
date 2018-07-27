@@ -39,11 +39,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
         if offer:
-            offers = [o for o in offers if _partial_matched(offer, o.name)]
+            offers = [o for o in offers if _matched(offer, o.name)]
         for o in offers:
             skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
             if sku:
-                skus = [s for s in skus if _partial_matched(sku, s.name)]
+                skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
                 images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
                 for i in images:
@@ -55,7 +55,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
 
     publishers = client.virtual_machine_images.list_publishers(location)
     if publisher:
-        publishers = [p for p in publishers if _partial_matched(publisher, p.name)]
+        publishers = [p for p in publishers if _matched(publisher, p.name)]
 
     publisher_num = len(publishers)
     if publisher_num > 1:
@@ -96,15 +96,16 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
                     'version': vv['version']
                 })
 
-        all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
-                                                _partial_matched(offer, i['offer']) and
-                                                _partial_matched(sku, i['sku']))]
+        all_images = [i for i in all_images if (_matched(publisher, i['publisher']) and
+                                                _matched(offer, i['offer']) and
+                                                _matched(sku, i['sku']))]
         return all_images
     except KeyError:
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 
-def load_extension_images_thru_services(cli_ctx, publisher, name, version, location, show_latest=False):
+def load_extension_images_thru_services(cli_ctx, publisher, name, version, location,
+                                        show_latest=False, partial_match=True):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
     all_images = []
@@ -113,15 +114,19 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
         location = get_one_of_subscription_locations(cli_ctx)
 
     def _load_extension_images_from_publisher(publisher):
-        types = client.virtual_machine_extension_images.list_types(location, publisher)
+        from msrestazure.azure_exceptions import CloudError
+        try:
+            types = client.virtual_machine_extension_images.list_types(location, publisher)
+        except CloudError:  # PIR image publishers might not have any extension images, exception could raise
+            types = []
         if name:
-            types = [t for t in types if _partial_matched(name, t.name)]
+            types = [t for t in types if _matched(name, t.name, partial_match)]
         for t in types:
             versions = client.virtual_machine_extension_images.list_versions(location,
                                                                              publisher,
                                                                              t.name)
             if version:
-                versions = [v for v in versions if _partial_matched(version, v.name)]
+                versions = [v for v in versions if _matched(version, v.name, partial_match)]
 
             if show_latest:
                 # pylint: disable=no-member
@@ -139,7 +144,7 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
 
     publishers = client.virtual_machine_images.list_publishers(location)
     if publisher:
-        publishers = [p for p in publishers if _partial_matched(publisher, p.name)]
+        publishers = [p for p in publishers if _matched(publisher, p.name, partial_match)]
 
     publisher_num = len(publishers)
     if publisher_num > 1:
@@ -158,12 +163,11 @@ def get_vm_sizes(cli_ctx, location):
     return list(_compute_client_factory(cli_ctx).virtual_machine_sizes.list(location))
 
 
-def _partial_matched(pattern, string):
+def _matched(pattern, string, partial_match=True):
     if not pattern:
         return True  # empty pattern means wildcard-match
-    pattern = r'.*' + pattern
-    import re
-    return re.match(pattern, string, re.I)  # pylint: disable=no-member
+    pattern, string = pattern.lower(), string.lower()
+    return pattern in string if partial_match else pattern == string
 
 
 def _create_image_instance(publisher, offer, sku, version):

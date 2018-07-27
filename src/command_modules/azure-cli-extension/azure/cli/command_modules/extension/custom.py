@@ -211,12 +211,16 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
 
 
 def remove_extension(extension_name):
+    def log_err(func, path, exc_info):
+        logger.debug("Error occurred attempting to delete item from the extension '%s'.", extension_name)
+        logger.debug("%s: %s - %s", func, path, exc_info)
+
     try:
         # Get the extension and it will raise an error if it doesn't exist
         get_extension(extension_name)
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name)
-        shutil.rmtree(get_extension_path(extension_name))
+        shutil.rmtree(get_extension_path(extension_name), onerror=log_err)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -279,7 +283,12 @@ def list_available_extensions(index_url=None, show_details=False):
     installed_extension_names = [e.name for e in installed_extensions]
     results = []
     for name, items in OrderedDict(sorted(index_data.items())).items():
-        latest = sorted(items, key=lambda c: parse_version(c['metadata']['version']), reverse=True)[0]
+        # exclude extensions/versions incompatible with current CLI version
+        items = [item for item in items if ext_compat_with_cli(item['metadata'])[0]]
+        if not items:
+            continue
+
+        latest = max(items, key=lambda c: parse_version(c['metadata']['version']))
         installed = False
         if name in installed_extension_names:
             installed = True

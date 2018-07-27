@@ -92,18 +92,16 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, identity_port=None):
+          identity=False, use_device_code=False):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
 
     # quick argument usage check
-    if (any([password, service_principal, tenant, allow_no_subscriptions]) and identity):
+    if any([password, service_principal, tenant, allow_no_subscriptions]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
-
-    if identity_port:
-        logger.warning("'--identity-port' is no longer required to login using managed identity."
-                       " This flag will be removed in a future release of CLI.")
+    if any([password, service_principal, username, identity]) and use_device_code:
+        raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
 
     interactive = False
 
@@ -132,6 +130,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             password,
             service_principal,
             tenant,
+            use_device_code=use_device_code,
             allow_no_subscriptions=allow_no_subscriptions)
     except AdalError as err:
         # try polish unfriendly server errors

@@ -128,14 +128,19 @@ def validate_key_import_source(ns):
 
 
 def validate_key_type(ns):
-    if ns.destination:
-        dest_to_type_map = {
-            'software': 'RSA',
-            'hsm': 'RSA-HSM'
-        }
-        ns.destination = dest_to_type_map[ns.destination]
-        if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
+    crv = getattr(ns, 'curve', None)
+    kty = getattr(ns, 'kty', None) or ('EC' if crv else 'RSA')
+    protection = getattr(ns, 'protection', None)
+
+    if protection == 'hsm':
+        kty = kty if kty.endswith('-HSM') else kty + '-HSM'
+    elif protection == 'software':
+        if getattr(ns, 'byok_file', None):
             raise CLIError('BYOK keys are hardware protected. Omit --protection')
+        if kty.endswith('-HSM'):
+            raise CLIError('The key type {} is invalid for software protected keys. Omit --protection')
+
+    setattr(ns, 'kty', kty)
 
 
 def validate_policy_permissions(ns):
@@ -237,3 +242,60 @@ def validate_subnet(cmd, namespace):
             child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
+
+def validate_vault_id(entity_type):
+
+    def _validate(ns):
+        from azure.keyvault.custom.key_vault_id import KeyVaultIdentifier
+        name = getattr(ns, entity_type.replace('deleted', '') + '_name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            setattr(ns, entity_type + '_name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            setattr(ns, entity_type + '_version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
+
+    return _validate
+
+
+def validate_sas_definition_id(ns):
+    from azure.keyvault import StorageSasDefinitionId
+    acct_name = getattr(ns, 'storage_account_name', None)
+    sas_name = getattr(ns, 'sas_definition_name', None)
+    vault = getattr(ns, 'vault_base_url', None)
+    identifier = getattr(ns, 'identifier', None)
+
+    if identifier:
+        ident = StorageSasDefinitionId(uri=identifier)
+        setattr(ns, 'sas_definition_name', getattr(ident, 'sas_definition'))
+        setattr(ns, 'storage_account_name', getattr(ident, 'account_name'))
+        setattr(ns, 'vault_base_url', ident.vault)
+    elif not (acct_name and sas_name and vault):
+        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --account-name --name NAME')
+
+
+def validate_storage_account_id(ns):
+    from azure.keyvault import StorageAccountId
+    acct_name = getattr(ns, 'storage_account_name', None)
+    vault = getattr(ns, 'vault_base_url', None)
+    identifier = getattr(ns, 'identifier', None)
+
+    if identifier:
+        ident = StorageAccountId(uri=identifier)
+        setattr(ns, 'storage_account_name', ident.name)
+        setattr(ns, 'vault_base_url', ident.vault)
+    elif not (acct_name and vault):
+        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME')
+
+
+def validate_storage_disabled_attribute(attr_arg_name, attr_type):
+    def _validate(ns):
+        disabled = getattr(ns, 'disabled', None)
+        attr_arg = attr_type(enabled=(not disabled))
+        setattr(ns, attr_arg_name, attr_arg)
+    return _validate

@@ -27,6 +27,7 @@ class ConfigureCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('configure') as c:
             c.argument('defaults', nargs='+', options_list=('--defaults', '-d'))
+            c.ignore('_subscription')  # ignore the global subscription param
 
 
 COMMAND_LOADER_CLS = ConfigureCommandsLoader

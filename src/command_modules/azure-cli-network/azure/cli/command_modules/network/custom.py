@@ -1940,7 +1940,7 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
-               application_security_groups=None):
+               application_security_groups=None, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     (NetworkInterface, NetworkInterfaceDnsSettings, NetworkInterfaceIPConfiguration, NetworkSecurityGroup,
      PublicIPAddress, Subnet) = cmd.get_models(
@@ -1975,7 +1975,7 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
     if public_ip_address:
         ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
     nic.ip_configurations = [ip_config]
-    return client.create_or_update(resource_group_name, network_interface_name, nic)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_interface_name, nic)
 
 
 def update_nic(cmd, instance, network_security_group=None, enable_ip_forwarding=None,
@@ -2918,9 +2918,19 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
         allow_gateway_transit=allow_gateway_transit,
         allow_forwarded_traffic=allow_forwarded_traffic,
         use_remote_gateways=use_remote_gateways)
-    ncf = network_client_factory(cmd.cli_ctx)
+    aux_subscription = parse_resource_id(remote_virtual_network)['subscription']
+    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+
+
+def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name, **kwargs):
+    peering = kwargs['parameters']
+    aux_subscription = parse_resource_id(peering.remote_virtual_network.id)['subscription']
+    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
+    return ncf.virtual_network_peerings.create_or_update(
+        resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+
 # endregion
 
 

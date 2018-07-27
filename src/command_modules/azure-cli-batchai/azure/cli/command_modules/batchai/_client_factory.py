@@ -10,8 +10,16 @@ def batchai_client_factory(cli_ctx, _=None):
     return get_mgmt_service_client(cli_ctx, BatchAIManagementClient)
 
 
+def workspace_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).workspaces
+
+
 def cluster_client_factory(cli_ctx, _):
     return batchai_client_factory(cli_ctx).clusters
+
+
+def experiment_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).experiments
 
 
 def job_client_factory(cli_ctx, _):
@@ -23,4 +31,4 @@ def file_server_client_factory(cli_ctx, _):
 
 
 def usage_client_factory(cli_ctx, _):
-    return batchai_client_factory(cli_ctx).usage
+    return batchai_client_factory(cli_ctx).usages

@@ -25,18 +25,22 @@ except ImportError:
     # Not supported for Windows machines.
     pass
 import websocket
+import yaml
 from knack.log import get_logger
-from knack.prompting import prompt_pass, NoTTYException
+from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume)
-from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
+from azure.cli.command_modules.resource._client_factory import _resource_client_factory
+from azure.cli.core.util import sdk_no_wait
+from msrestazure.tools import parse_resource_id
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
-ACR_SERVER_SUFFIX = '.azurecr.io/'
+SERVER_DELIMITER = '.'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -59,15 +63,16 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.delete(resource_group_name, name)
 
 
-def create_container(client,
+def create_container(cmd,
                      resource_group_name,
-                     name,
-                     image,
+                     name=None,
+                     image=None,
                      location=None,
                      cpu=1,
                      memory=1.5,
                      restart_policy='Always',
                      ports=None,
+                     protocol=None,
                      os_type='Linux',
                      ip_address=None,
                      dns_name_label=None,
@@ -80,15 +85,29 @@ def create_container(client,
                      azure_file_volume_account_name=None,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None,
+                     log_analytics_workspace=None,
+                     log_analytics_workspace_key=None,
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
                      gitrepo_mount_path=None,
                      secrets=None,
-                     secrets_mount_path=None):
+                     secrets_mount_path=None,
+                     file=None,
+                     no_wait=False):
     """Create a container group. """
 
+    if file:
+        return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file)
+
+    if not name:
+        raise CLIError("error: the --name/-n argument is required unless specified with a passed in file.")
+
+    if not image:
+        raise CLIError("error: the --image argument is required unless specified with a passed in file.")
+
     ports = ports or [80]
+    protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
@@ -120,6 +139,23 @@ def create_container(client,
         volumes.append(secrets_volume)
         mounts.append(secrets_volume_mount)
 
+    diagnostics = None
+    tags = {}
+    if log_analytics_workspace and log_analytics_workspace_key:
+        log_analytics = LogAnalytics(
+            workspace_id=log_analytics_workspace, workspace_key=log_analytics_workspace_key)
+
+        diagnostics = ContainerGroupDiagnostics(
+            log_analytics=log_analytics
+        )
+    elif log_analytics_workspace and not log_analytics_workspace_key:
+        diagnostics, tags = _get_diagnostics_from_workspace(
+            cmd.cli_ctx, log_analytics_workspace)
+        if not diagnostics:
+            raise CLIError('Log Analytics workspace "' + log_analytics_workspace + '" not found.')
+    elif not log_analytics_workspace and log_analytics_workspace_key:
+        raise CLIError('"--log-analytics-workspace-key" requires "--log-analytics-workspace".')
+
     gitrepo_volume = _create_gitrepo_volume(gitrepo_url=gitrepo_url, gitrepo_dir=gitrepo_dir, gitrepo_revision=gitrepo_revision)
     gitrepo_volume_mount = _create_gitrepo_volume_mount(gitrepo_volume=gitrepo_volume, gitrepo_mount_path=gitrepo_mount_path)
 
@@ -127,13 +163,14 @@ def create_container(client,
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, dns_name_label)
+    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
 
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
                           command=command,
-                          ports=[ContainerPort(port=p) for p in ports] if cgroup_ip_address else None,
+                          ports=[ContainerPort(
+                              port=p, protocol=protocol) for p in ports] if cgroup_ip_address else None,
                           environment_variables=environment_variables,
                           volume_mounts=mounts or None)
 
@@ -143,10 +180,75 @@ def create_container(client,
                             restart_policy=restart_policy,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
-                            volumes=volumes or None)
+                            volumes=volumes or None,
+                            diagnostics=diagnostics,
+                            tags=tags)
 
-    raw_response = client.create_or_update(resource_group_name, name, cgroup, raw=True)
-    return raw_response.output
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
+
+
+def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
+    log_analytics_client = cf_log_analytics(cli_ctx)
+
+    for workspace in log_analytics_client.list():
+        if log_analytics_workspace == workspace.name:
+            keys = log_analytics_client.get_shared_keys(
+                parse_resource_id(workspace.id)['resource_group'], workspace.name)
+
+            log_analytics = LogAnalytics(
+                workspace_id=workspace.customer_id, workspace_key=keys.primary_shared_key)
+
+            diagnostics = ContainerGroupDiagnostics(
+                log_analytics=log_analytics)
+
+            return (diagnostics, {'oms-resource-link': workspace.id})
+
+    return None, {}
+
+
+def _create_update_from_file(cli_ctx, resource_group_name, name, location, file):
+    resource_client = _resource_client_factory(cli_ctx)
+    container_group_client = cf_container_groups(cli_ctx)
+
+    cg_defintion = None
+
+    try:
+        with open(file, 'r') as f:
+            cg_defintion = yaml.load(f)
+    except FileNotFoundError:
+        raise CLIError("No such file or directory: " + file)
+    except yaml.YAMLError as e:
+        raise CLIError("Error while parsing yaml file:\n\n" + str(e))
+
+    # Validate names match if both are provided
+    if name and cg_defintion.get('name', None):
+        if name != cg_defintion.get('name', None):
+            raise CLIError("The name parameter and name from yaml definition must match.")
+    else:
+        # Validate at least one name is provided
+        name = name or cg_defintion.get('name', None)
+        if cg_defintion.get('name', None) is None and not name:
+            raise CLIError("The name of the container group is required")
+
+    cg_defintion['name'] = name
+
+    location = location or cg_defintion.get('location', None)
+    if not location:
+        location = resource_client.resource_groups.get(resource_group_name).location
+    cg_defintion['location'] = location
+
+    api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
+
+    resource = resource_client.resources.create_or_update(resource_group_name,
+                                                          "Microsoft.ContainerInstance",
+                                                          '',
+                                                          "containerGroups",
+                                                          name,
+                                                          api_version,
+                                                          cg_defintion,
+                                                          raw=True)
+    return resource.output
 
 
 # pylint: disable=inconsistent-return-statements
@@ -171,7 +273,13 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif ACR_SERVER_SUFFIX in image:
+    elif SERVER_DELIMITER in image.split("/")[0]:
+        if not registry_username:
+            try:
+                registry_username = prompt(msg='Image registry username: ')
+            except NoTTYException:
+                raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
@@ -179,13 +287,12 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                 raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
-        acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
-        if acr_server and acr_username:
+        if acr_server:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                  username=acr_username,
+                                                                  username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
+            raise CLIError('Failed to parse ACR server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 
@@ -250,16 +357,16 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports, dns_name_label):
+def _create_ip_address(ip_address, ports, protocol, dns_name_label):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
-        return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports], dns_name_label=dns_name_label)
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
 
 
 # pylint: disable=inconsistent-return-statements
 def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):
     """Tail a container instance log. """
-    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -268,7 +375,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
         container_name = container_group.containers[0].name
 
     if not follow:
-        log = logs_client.list(resource_group_name, name, container_name)
+        log = container_client.list_logs(resource_group_name, name, container_name)
         print(log.content)
     else:
         _start_streaming(
@@ -276,13 +383,45 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
             shupdown_grace_period=5,
             stream_target=_stream_logs,
-            stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
+            stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
+
+
+def container_export(cmd, resource_group_name, name, file):
+    resource_client = _resource_client_factory(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+
+    resource = resource_client.resources.get(resource_group_name,
+                                             "Microsoft.ContainerInstance",
+                                             '',
+                                             "containerGroups",
+                                             name,
+                                             container_group_client.api_version,
+                                             False).__dict__
+
+    # Remove unwanted properites
+    resource['properties'].pop('instanceView', None)
+    resource.pop('sku', None)
+    resource.pop('id', None)
+    resource.pop('plan', None)
+    resource.pop('identity', None)
+    resource.pop('kind', None)
+    resource.pop('managed_by', None)
+    resource['properties'].pop('provisioningState', None)
+
+    for i in range(len(resource['properties']['containers'])):
+        resource['properties']['containers'][i]['properties'].pop('instanceView', None)
+
+    # Add the api version
+    resource['apiVersion'] = container_group_client.api_version
+
+    with open(file, 'w+') as f:
+        yaml.dump(resource, f, default_flow_style=False)
 
 
 def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
-    start_container_client = cf_start_container(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -293,7 +432,7 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
 
         terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
 
-        execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
+        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
 
         if platform.system() is WINDOWS_NAME:
             _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
@@ -373,7 +512,7 @@ def _cycle_exec_pipe(ws):
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
     """Attach to a container. """
-    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
@@ -386,7 +525,7 @@ def attach_to_container(cmd, resource_group_name, name, container_name=None):
         terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_container_events_and_logs,
-        stream_args=(container_group_client, logs_client, resource_group_name, name, container_name))
+        stream_args=(container_group_client, container_client, resource_group_name, name, container_name))
 
 
 def _start_streaming(terminate_condition, terminate_condition_args, shupdown_grace_period, stream_target, stream_args):
@@ -412,7 +551,7 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     """Stream logs for a container. """
     lastOutputLines = 0
     while True:
-        log = client.list(resource_group_name, name, container_name)
+        log = client.list_logs(resource_group_name, name, container_name)
         lines = log.content.split('\n')
         currentOutputLines = len(lines)
 
@@ -428,7 +567,7 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
         time.sleep(2)
 
 
-def _stream_container_events_and_logs(container_group_client, logs_client, resource_group_name, name, container_name):
+def _stream_container_events_and_logs(container_group_client, container_client, resource_group_name, name, container_name):
     """Stream container events and logs. """
     lastOutputLines = 0
     lastContainerState = None
@@ -459,7 +598,7 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
 
         time.sleep(2)
 
-    _stream_logs(logs_client, resource_group_name, name, container_name, container_group.restart_policy)
+    _stream_logs(container_client, resource_group_name, name, container_name, container_group.restart_policy)
 
 
 def _is_container_terminated(client, resource_group_name, name, container_name):

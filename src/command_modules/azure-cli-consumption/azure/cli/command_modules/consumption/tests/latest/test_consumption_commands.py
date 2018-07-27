@@ -88,6 +88,13 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNotNone(marketplace['billingPeriodId'])
 
+    def _validate_budget(self, output_budget):
+        self.assertIsNotNone(output_budget)
+        self.assertTrue(output_budget['amount'])
+        self.assertTrue(output_budget['timeGrain'])
+        self.assertTrue(output_budget['timePeriod'])
+        self.assertTrue(output_budget['name'])
+
     @AllowLargeResponse()
     def test_consumption_pricesheet_billing_period(self):
         pricesheet = self.cmd('consumption pricesheet show --billing-period-name 20171001').get_output_in_json()
@@ -192,3 +199,17 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         marketplace_list = self.cmd('consumption marketplace list --billing-period-name 201804-1').get_output_in_json()
         self.assertTrue(marketplace_list)
         all(self._validate_marketplace(marketplace_item, '201804-1') for marketplace_item in marketplace_list)
+
+    def test_consumption_budget_usage_create(self):
+        output_budget = self.cmd('az consumption budget create --budget-name usagetypebudget1 --amount 20 -s 2018-02-01 -e 2018-10-01 --time-grain annually --category usage --meter-filter 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
+        self.assertTrue(output_budget)
+        self._validate_budget(output_budget)
+
+    def test_consumption_budget_create(self):
+        output_budget = self.cmd('consumption budget create --budget-name "costbudget" --category "cost" --amount 100.0 -s "2018-02-01" -e "2018-10-01" --time-grain "monthly"').get_output_in_json()
+        self.assertTrue(output_budget)
+        self._validate_budget(output_budget)
+
+    def test_consumption_budget_delete(self):
+        output = self.cmd('consumption budget delete --budget-name "costbudget"')
+        self.assertTrue(output)

@@ -59,15 +59,6 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
 def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
     parameters = None
-    if provider == 'Microsoft.DBForMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            properties=mysql.models.ServerPropertiesForRestore())
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            properties=postgresql.models.ServerPropertiesForRestore())
-
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(
@@ -78,6 +69,21 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            properties=mysql.models.ServerPropertiesForRestore(
+                source_server_id=source_server,
+                restore_point_in_time=restore_point_in_time),
+            location=None)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            properties=postgresql.models.ServerPropertiesForRestore(
+                source_server_id=source_server,
+                restore_point_in_time=restore_point_in_time),
+            location=None)
 
     parameters.properties.source_server_id = source_server
     parameters.properties.restore_point_in_time = restore_point_in_time
@@ -101,26 +107,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                        backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
     parameters = None
-    if provider == 'Microsoft.DBForMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=sku_name),
-            properties=mysql.models.ServerPropertiesForGeoRestore(
-                storage_profile=mysql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                )),
-            location=location)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForGeoRestore(
-                storage_profile=postgresql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup
-                )),
-            location=location)
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -131,6 +117,27 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                                         name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=sku_name),
+            properties=mysql.models.ServerPropertiesForGeoRestore(
+                storage_profile=mysql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup),
+                source_server_id=source_server),
+            location=location)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=sku_name),
+            properties=postgresql.models.ServerPropertiesForGeoRestore(
+                storage_profile=postgresql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup),
+                source_server_id=source_server),
+            location=location)
 
     parameters.properties.source_server_id = source_server
 
@@ -146,7 +153,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 
 def _server_update_custom_func(instance,
-                               capacity=None,
+                               sku_name=None,
                                storage_mb=None,
                                backup_retention_days=None,
                                administrator_login_password=None,
@@ -158,16 +165,18 @@ def _server_update_custom_func(instance,
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
-    if capacity is not None:
-        instance.sku.name = _get_sku_name(instance.sku.tier, instance.sku.family, capacity)
-        instance.sku.capacity = capacity
+    if sku_name:
+        instance.sku.name = sku_name
+        instance.sku.capacity = None
+        instance.sku.family = None
+        instance.sku.tier = None
     else:
         instance.sku = None
 
-    if storage_mb is not None:
+    if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
 
-    if backup_retention_days is not None:
+    if backup_retention_days:
         instance.storage_profile.backup_retention_days = backup_retention_days
 
     params = ServerUpdateParameters(sku=instance.sku,
@@ -221,6 +230,18 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
     if end_ip_address is not None:
         instance.end_ip_address = end_ip_address
     return instance
+
+
+def _custom_vnet_update_get(client, resource_group_name, server_name, virtual_network_rule_name):
+    return client.get(resource_group_name, server_name, virtual_network_rule_name)
+
+
+def _custom_vnet_update_set(client, resource_group_name, server_name, virtual_network_rule_name,
+                            virtual_network_subnet_id,
+                            ignore_missing_vnet_service_endpoint=None):
+    return client.create_or_update(resource_group_name, server_name,
+                                   virtual_network_rule_name, virtual_network_subnet_id,
+                                   ignore_missing_vnet_service_endpoint)
 
 
 # Custom functions for server logs

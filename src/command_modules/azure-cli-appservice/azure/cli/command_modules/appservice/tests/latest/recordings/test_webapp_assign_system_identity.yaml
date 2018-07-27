@@ -1,31 +1,32 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-06-28T00:33:17Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-28T00:33:17Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:01 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -35,19 +36,19 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-06-28T00:33:17Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:01 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -55,8 +56,9 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"perSiteScaling": false, "name": "web-msi-plan000002"},
-      "sku": {"capacity": 1, "name": "B1", "tier": "BASIC"}, "location": "westus"}'''
+    body: 'b''{"location": "westus", "properties": {"name": "web-msi-plan000002",
+      "perSiteScaling": false}, "sku": {"name": "B1", "tier": "BASIC", "capacity":
+      1}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -64,20 +66,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['150']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","name":"web-msi-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"web-msi-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-095_599","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":4727,"name":"web-msi-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"mdmId":"waws-prod-bay-101_4727","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1365']
+      content-length: ['1436']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:14 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:33 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -86,7 +88,7 @@ interactions:
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -97,20 +99,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","name":"web-msi-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"web-msi-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-095_599","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":4727,"name":"web-msi-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"mdmId":"waws-prod-bay-101_4727","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1365']
+      content-length: ['1436']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:15 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:33 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -122,11 +124,10 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002",
-      "reserved": false, "siteConfig": {"http20Enabled": true, "localMySqlEnabled":
-      false, "appSettings": [{"value": "6.9.1", "name": "WEBSITE_NODE_DEFAULT_VERSION"}],
-      "netFrameworkVersion": "v4.6"}, "scmSiteAlsoStopped": false}, "location": "West
-      US"}\'''''
+    body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002",
+      "reserved": false, "siteConfig": {"netFrameworkVersion": "v4.6", "appSettings":
+      [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "6.9.1"}], "localMySqlEnabled":
+      false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -134,20 +135,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['481']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003","name":"web-msi000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-13T16:00:16.8133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-06-28T00:33:36.7","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109,52.224.50.250","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3111']
+      content-length: ['3175']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:21 GMT']
-      etag: ['"1D3BAE4615AE655"']
+      date: ['Thu, 28 Jun 2018 00:33:40 GMT']
+      etag: ['"1D40E77A752B720"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -156,7 +157,7 @@ interactions:
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1185']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['499']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -168,20 +169,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003/publishxml?api-version=2016-08-01
   response:
     body: {string: '<publishData><publishProfile profileName="web-msi000003 - Web
         Deploy" publishMethod="MSDeploy" publishUrl="web-msi000003.scm.azurewebsites.net:443"
-        msdeploySite="web-msi000003" userName="$web-msi000003" userPWD="l8PyGoYP10K0d1ucn5ns3898PQzaCd2PFqNKTggaf754xsFYlSemnv3oh3JC"
+        msdeploySite="web-msi000003" userName="$web-msi000003" userPWD="FW5vqdb0KD9ESicvkqRr9ewrnh74l0uckeSRk2zxfr0s7eWDhgNMpR6nHxgc"
         destinationAppUrl="http://web-msi000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-msi000003
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-095.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="web-msi000003\$web-msi000003" userPWD="l8PyGoYP10K0d1ucn5ns3898PQzaCd2PFqNKTggaf754xsFYlSemnv3oh3JC"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-101.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-msi000003\$web-msi000003" userPWD="FW5vqdb0KD9ESicvkqRr9ewrnh74l0uckeSRk2zxfr0s7eWDhgNMpR6nHxgc"
         destinationAppUrl="http://web-msi000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>'}
@@ -189,7 +190,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1114']
       content-type: [application/xml]
-      date: ['Tue, 13 Mar 2018 16:00:21 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -207,20 +208,20 @@ interactions:
       CommandName: [webapp identity assign]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003","name":"web-msi000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-13T16:00:17.2533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-06-28T00:33:37.17","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109,52.224.50.250","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3111']
+      content-length: ['3176']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:23 GMT']
-      etag: ['"1D3BAE4615AE655"']
+      date: ['Thu, 28 Jun 2018 00:33:41 GMT']
+      etag: ['"1D40E77A752B720"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -232,14 +233,13 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"properties": {"httpsOnly": false, "hostNameSslStates": [{"hostType":
-      "Standard", "sslState": "Disabled", "name": "web-msi000003.azurewebsites.net"},
-      {"hostType": "Repository", "sslState": "Disabled", "name": "web-msi000003.scm.azurewebsites.net"}],
-      "clientCertEnabled": false, "containerSize": 0, "clientAffinityEnabled": true,
-      "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002",
-      "reserved": false, "dailyMemoryTimeQuota": 0, "scmSiteAlsoStopped": false, "enabled":
-      true, "hostNamesDisabled": false}, "identity": {"type": "SystemAssigned"}, "location":
-      "West US", "kind": "app"}\\\''\'''''
+    body: 'b''b\''b\\\''{"kind": "app", "location": "West US", "properties": {"enabled":
+      true, "hostNameSslStates": [{"name": "web-msi000003.azurewebsites.net", "sslState":
+      "Disabled", "hostType": "Standard"}, {"name": "web-msi000003.scm.azurewebsites.net",
+      "sslState": "Disabled", "hostType": "Repository"}], "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002",
+      "reserved": false, "scmSiteAlsoStopped": false, "clientAffinityEnabled": true,
+      "clientCertEnabled": false, "hostNamesDisabled": false, "containerSize": 0,
+      "dailyMemoryTimeQuota": 0, "httpsOnly": false}, "identity": {"type": "SystemAssigned"}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -247,20 +247,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['761']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003","name":"web-msi000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-13T16:00:26.41","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"af59a9ae-df53-4870-82fb-bcbae8762c63"}}'}
+        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-06-28T00:33:46.5933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109,52.224.50.250","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false},"identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3246']
+      content-length: ['3321']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:28 GMT']
-      etag: ['"1D3BAE466D018A0"']
+      date: ['Thu, 28 Jun 2018 00:33:47 GMT']
+      etag: ['"1D40E77ACF09A15"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -269,7 +269,7 @@ interactions:
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['499']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -280,9 +280,9 @@ interactions:
       CommandName: [webapp identity assign]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Reader%27&api-version=2018-01-01-preview
@@ -293,7 +293,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['615']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:28 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -307,7 +307,7 @@ interactions:
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-      "principalId": "af59a9ae-df53-4870-82fb-bcbae8762c63"}}'
+      "principalId": "0f035dbc-4eb7-4a6b-8449-6e2627732b1b"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -315,97 +315,95 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668?api-version=2018-01-01-preview
   response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7","principalId":"af59a9ae-df53-4870-82fb-bcbae8762c63","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001","createdOn":"2018-03-13T16:00:30.1825205Z","updatedOn":"2018-03-13T16:00:30.1825205Z","createdBy":null,"updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668","type":"Microsoft.Authorization/roleAssignments","name":"88daaf5a-ea86-4a68-9d45-477538d46668"}'}
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 0f035dbc4eb74a6b84496e2627732b1b
+        does not exist in the directory 72f988bf-86f1-41af-91ab-2d7cd011db47."}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['903']
+      content-length: ['163']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:33 GMT']
+      date: ['Thu, 28 Jun 2018 00:33:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
-      x-ms-request-charge: ['4']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+    status: {code: 400, message: Bad Request}
 - request:
-    body: null
+    body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "principalId": "0f035dbc-4eb7-4a6b-8449-6e2627732b1b"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp identity assign]
       Connection: [keep-alive]
-      Content-Length: ['0']
+      Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003/config/appsettings/list?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['353']
-      content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:33 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"WEBSITE_NODE_DEFAULT_VERSION": "6.9.1", "WEBSITE_DISABLE_MSI":
-      "False"}, "kind": "<class ''str''>"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp identity assign]
-      Connection: [keep-alive]
-      Content-Length: ['114']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003/config/appsettings?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668?api-version=2018-01-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","WEBSITE_DISABLE_MSI":"False"}}'}
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 0f035dbc4eb74a6b84496e2627732b1b
+        does not exist in the directory 72f988bf-86f1-41af-91ab-2d7cd011db47."}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['383']
-      content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:35 GMT']
-      etag: ['"1D3BAE46B26EFA0"']
+      content-length: ['163']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 28 Jun 2018 00:33:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
+      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1164']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+    status: {code: 400, message: Bad Request}
+- request:
+    body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "principalId": "0f035dbc-4eb7-4a6b-8449-6e2627732b1b"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp identity assign]
+      Connection: [keep-alive]
+      Content-Length: ['233']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668?api-version=2018-01-01-preview
+  response:
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7","principalId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001","createdOn":"2018-06-28T00:34:04.1896918Z","updatedOn":"2018-06-28T00:34:04.1896918Z","createdBy":null,"updatedBy":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668","type":"Microsoft.Authorization/roleAssignments","name":"88daaf5a-ea86-4a68-9d45-477538d46668"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['903']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 28 Jun 2018 00:34:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-request-charge: ['3']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
@@ -414,20 +412,20 @@ interactions:
       CommandName: [webapp identity show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003","name":"web-msi000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-13T16:00:33.69","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"af59a9ae-df53-4870-82fb-bcbae8762c63"}}'}
+        US","properties":{"name":"web-msi000003","state":"Running","hostNames":["web-msi000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-msi000003","repositorySiteName":"web-msi000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-msi000003.azurewebsites.net","web-msi000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-msi000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-msi000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/web-msi-plan000002","reserved":false,"isXenon":false,"lastModifiedTimeUtc":"2018-06-28T00:33:46.5933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-msi000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109,52.224.50.250","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-msi000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false},"identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3246']
+      content-length: ['3321']
       content-type: [application/json]
-      date: ['Tue, 13 Mar 2018 16:00:36 GMT']
-      etag: ['"1D3BAE46B26EFA0"']
+      date: ['Thu, 28 Jun 2018 00:34:06 GMT']
+      etag: ['"1D40E77ACF09A15"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -446,12 +444,11 @@ interactions:
       CommandName: [role assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-graphrbac/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27af59a9ae-df53-4870-82fb-bcbae8762c63%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%270f035dbc-4eb7-4a6b-8449-6e2627732b1b%27%29&api-version=1.6
   response:
     body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[]}'}
     headers:
@@ -460,13 +457,13 @@ interactions:
       content-length: ['166']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Tue, 13 Mar 2018 16:00:36 GMT']
-      duration: ['2017855']
+      date: ['Thu, 28 Jun 2018 00:34:07 GMT']
+      duration: ['1021210']
       expires: ['-1']
-      ocp-aad-diagnostics-server-name: [MlbrZfekBTOqj0xiwX/mUIjW+C+8BEcgSCQcpx8/rGo=]
-      ocp-aad-session-key: [FD0lnIN2oTauHCJfrixGPyxB3ijKB3KYyMQ5jNsXfU9VSNFBj57We92njXfCEEX5N_IEGRIcEzcrBiFiWmoh8NwNjk1JDYCsIG6Fb71m74680EP0jdSYO1QlmrlpmjXe.MArPZPxIj6JP6CFY9bo2M6_KATTsrtW3Ihf15D3WMN8]
+      ocp-aad-diagnostics-server-name: [USO0vXsiH/WugU0+xVoguNv4Wxgbvvn8Zb8qUwfOkVw=]
+      ocp-aad-session-key: [-fDd8KSOK2qNAWkTHu8472enoTlJpOjkJ4B-krD8PsbAlefJTUkJ4QdV92s9IHOqXUxbboXPfpxVwCzKpq8fW8gdC_ZBdRT5CwTnOCq7VUgnc98F7RiX1SsklPtKUk5s.FlmATrPML48M4q5PcK2YVUSmSAwtbL5ejL1DnTpB0AY]
       pragma: [no-cache]
-      request-id: [fca069fa-3d97-48ae-8ed9-0b85b4a34578]
+      request-id: [993013ff-43c9-428f-8528-1986d62721e2]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -475,7 +472,8 @@ interactions:
       x-powered-by: [ASP.NET, ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"includeDirectoryObjectReferences": true, "objectIds": ["af59a9ae-df53-4870-82fb-bcbae8762c63"]}'
+    body: '{"objectIds": ["0f035dbc-4eb7-4a6b-8449-6e2627732b1b"], "includeDirectoryObjectReferences":
+      true}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -483,27 +481,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['97']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-graphrbac/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/getObjectsByObjectIds?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"af59a9ae-df53-4870-82fb-bcbae8762c63","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=False","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003"],"appDisplayName":null,"appId":"c053d505-6b35-4295-9cdb-4e9d49934ae3","appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"web-msi000003","errorUrl":null,"homepage":null,"keyCredentials":[{"customKeyIdentifier":null,"endDate":"2018-06-11T15:55:00Z","keyId":"4728dce6-7b1a-49e4-b6fd-0538a52580df","startDate":"2018-03-13T15:55:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"oauth2Permissions":[],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["c053d505-6b35-4295-9cdb-4e9d49934ae3","https://identity.azure.net/UT6/WtcS5roQP1OUvFcbc7WjdZ4c/xwrjT1F3Szs/2M="],"servicePrincipalType":"ServiceAccount","tags":[],"tokenEncryptionKeyId":null}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=False","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003"],"appDisplayName":null,"appId":"a45e32d6-7ef0-41b4-bced-1be5b1d1f189","appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"web-msi000003","errorUrl":null,"homepage":null,"keyCredentials":[{"customKeyIdentifier":null,"endDate":"2018-09-26T00:28:00Z","keyId":"c2692af2-71bf-4c4e-8780-369c80557a16","startDate":"2018-06-28T00:28:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"oauth2Permissions":[],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["a45e32d6-7ef0-41b4-bced-1be5b1d1f189","https://identity.azure.net/gDDp6EHaCAGi1XJIQ7bfajST7QCJD4nO2vctMalolvM="],"servicePrincipalType":"ServiceAccount","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'}
     headers:
       access-control-allow-origin: ['*']
       cache-control: [no-cache]
-      content-length: ['1373']
+      content-length: ['1395']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Tue, 13 Mar 2018 16:00:37 GMT']
-      duration: ['1477592']
+      date: ['Thu, 28 Jun 2018 00:34:07 GMT']
+      duration: ['536438']
       expires: ['-1']
-      ocp-aad-diagnostics-server-name: [G57Yk3WNLvoHnAQZbO/VLb7EEltFzonymMi2WhJ99Kk=]
-      ocp-aad-session-key: [Oo9PMkM8EhpCX1BEY9f0xqMvOIkZGkm1aO-OmVrCVbTF5TWFKsYt6hL_jQ_exP0N-0cbJlwc63kWJ5CBggirPAAPQ4CDJMZ6lmx05D5XdolDZ0Hwp5MwlrOBHKFwceFK.kQHkke-9qF_FtLtWbSFlZynHRs5wyy9jW4PgdGX4kqI]
+      ocp-aad-diagnostics-server-name: [6K8lWHvVsgBdTBM4xsdGPioJWlS7JXIeN4jkSphTepo=]
+      ocp-aad-session-key: [F5IPQvjvWJfWowyOL6XHX_upqWilK_ZBzl_dGC4lo1JoGf_Mr7_ULU9OH5XhO5WBdARNu0pzrB4UVEXRNwc8iTyN1OEDvloQbI7Etahqs0qNhZEhgBWwh3sX2nhbPq2D.bWiFEOUkqIdxHzd87B-feoEerLu6YEDSHvKWK-u424Q]
       pragma: [no-cache]
-      request-id: [85dbc47c-6eb5-4289-b7b4-bc45890b35ee]
+      request-id: [715b9b9c-dffb-41b2-a207-bbc9f30d87e1]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -519,19 +516,19 @@ interactions:
       CommandName: [role assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27af59a9ae-df53-4870-82fb-bcbae8762c63%27&api-version=2018-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%270f035dbc-4eb7-4a6b-8449-6e2627732b1b%27&api-version=2018-01-01-preview
   response:
-    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7","principalId":"af59a9ae-df53-4870-82fb-bcbae8762c63","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001","createdOn":"2018-03-13T16:00:32.8023731Z","updatedOn":"2018-03-13T16:00:32.8023731Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668","type":"Microsoft.Authorization/roleAssignments","name":"88daaf5a-ea86-4a68-9d45-477538d46668"}]}'}
+    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7","principalId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001","createdOn":"2018-06-28T00:34:05.8135173Z","updatedOn":"2018-06-28T00:34:05.8135173Z","createdBy":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","updatedBy":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Authorization/roleAssignments/88daaf5a-ea86-4a68-9d45-477538d46668","type":"Microsoft.Authorization/roleAssignments","name":"88daaf5a-ea86-4a68-9d45-477538d46668"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['949']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:37 GMT']
+      date: ['Thu, 28 Jun 2018 00:34:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -551,45 +548,115 @@ interactions:
       CommandName: [role assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Authorization/roleDefinitions?api-version=2018-01-01-preview
   response:
-    body: {string: "{\"value\":[{\"properties\":{\"roleName\":\"cli-test-roledhplqpd\"\
-        ,\"type\":\"CustomRole\",\"description\":\"Can monitor compute, network and\
-        \ storage, and restart virtual machines\",\"assignableScopes\":[\"/subscriptions/00000000-0000-0000-0000-000000000000\"\
-        ],\"permissions\":[{\"actions\":[\"Microsoft.Compute/*/read\",\"Microsoft.Compute/virtualMachines/start/action\"\
-        ,\"Microsoft.Compute/virtualMachines/restart/action\",\"Microsoft.Network/*/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Authorization/*/read\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
-        ,\"Microsoft.Resources/subscriptions/resourceGroups/resources/read\",\"Microsoft.Insights/alertRules/*\"\
+    body: {string: "{\"value\":[{\"properties\":{\"roleName\":\"Azure Service Deploy\
+        \ Release Management Contributor\",\"type\":\"CustomRole\",\"description\"\
+        :\"Contributor role for services deploying through Azure Service Deploy.\"\
+        ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"*\"],\"notActions\"\
+        :[\"Microsoft.Authorization/*/Delete\",\"Microsoft.Authorization/*/Write\"\
+        ],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\":\"2016-02-04T02:26:31.5413362Z\"\
+        ,\"updatedOn\":\"2018-01-08T20:20:16.3660174Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/21d96096-b162-414a-8302-d8354f9d91b2\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"21d96096-b162-414a-8302-d8354f9d91b2\"\
+        },{\"properties\":{\"roleName\":\"CAL-Custom-Role-67b91599-1e50-49eb-8780-881e4f7ca44e\"\
+        ,\"type\":\"CustomRole\",\"description\":\"Lets SAP Cloud Appliance Library\
+        \ application manage Network and Compute services, manage Resource Groups\
+        \ and Management locks.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"\
+        actions\":[\"Microsoft.Authorization/locks/*\",\"Microsoft.Authorization/roleAssignments/*\"\
+        ,\"Microsoft.Authorization/roleDefinitions/*\",\"Microsoft.Compute/*\",\"\
+        Microsoft.Features/*\",\"Microsoft.Network/*\",\"Microsoft.Resources/*\",\"\
+        Microsoft.Storage/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
+        :[]}],\"createdOn\":\"2018-05-14T19:30:51.0664585Z\",\"updatedOn\":\"2018-05-14T19:30:51.0664585Z\"\
+        ,\"createdBy\":\"dda50086-5e3d-4a4b-b8bc-f54771104d89\",\"updatedBy\":\"dda50086-5e3d-4a4b-b8bc-f54771104d89\"\
+        },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/7b266cd7-0bba-4ae2-8423-90ede5e1e898\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"7b266cd7-0bba-4ae2-8423-90ede5e1e898\"\
+        },{\"properties\":{\"roleName\":\"Dsms Role (deprecated)\",\"type\":\"CustomRole\"\
+        ,\"description\":\"Custom role used by Dsms to perform operations. Can list\
+        \ and regnerate storage account keys.\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.ClassicStorage/storageAccounts/listKeys/action\"\
+        ,\"Microsoft.ClassicStorage/storageAccounts/regenerateKey/action\",\"Microsoft.Storage/storageAccounts/listkeys/action\"\
+        ,\"Microsoft.Storage/storageAccounts/regeneratekey/action\"],\"notActions\"\
+        :[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\":\"2017-05-17T18:02:11.1225951Z\"\
+        ,\"updatedOn\":\"2018-01-13T00:21:52.7211696Z\",\"createdBy\":\"ca5f3715-e7dd-427b-b2db-45b6a4a2df87\"\
+        ,\"updatedBy\":\"ca5f3715-e7dd-427b-b2db-45b6a4a2df87\"},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b91f4c0b-46e3-47bb-a242-eecfe23b3b5b\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"b91f4c0b-46e3-47bb-a242-eecfe23b3b5b\"\
+        },{\"properties\":{\"roleName\":\"GenevaWarmPathResourceContributor\",\"type\"\
+        :\"CustomRole\",\"description\":\"Can manage service bus and storage accounts.\"\
+        ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.EventHub/namespaces/*\"\
+        ,\"Microsoft.Resources/subscriptions/resourceGroups/*\",\"Microsoft.ServiceBus/namespaces/*\"\
+        ,\"Microsoft.Storage/storageAccounts/*\"],\"notActions\":[],\"dataActions\"\
+        :[],\"notDataActions\":[]}],\"createdOn\":\"2017-03-14T22:30:10.1999436Z\"\
+        ,\"updatedOn\":\"2017-03-14T22:30:10.1999436Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/9f15f5f5-77bd-413a-aa88-4b9c68b1e7bc\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"9f15f5f5-77bd-413a-aa88-4b9c68b1e7bc\"\
+        },{\"properties\":{\"roleName\":\"masterreader\",\"type\":\"CustomRole\",\"\
+        description\":\"Lets you view everything, but not make any changes.\",\"assignableScopes\"\
+        :[\"/\"],\"permissions\":[{\"actions\":[\"*/read\"],\"notActions\":[],\"dataActions\"\
+        :[],\"notDataActions\":[]}],\"createdOn\":\"2017-11-14T23:38:05.3353858Z\"\
+        ,\"updatedOn\":\"2017-11-14T23:38:05.3353858Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/a48d7796-14b4-4889-afef-fbb65a93e5a2\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"a48d7796-14b4-4889-afef-fbb65a93e5a2\"\
+        },{\"properties\":{\"roleName\":\"Matt TEST\",\"type\":\"CustomRole\",\"description\"\
+        :\"Can add/remove hostname bindings from App Service\",\"assignableScopes\"\
+        :[\"/subscriptions/00000000-0000-0000-0000-000000000000\",\"/subscriptions/00000000-0000-0000-0000-000000000000\"\
+        ,\"/subscriptions/00000000-0000-0000-0000-000000000000\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.Web/sites/read\",\"Microsoft.Web/sites/hostnamebindings/read\"\
+        ,\"Microsoft.Web/sites/hostnamebindings/write\",\"Microsoft.Web/sites/hostnamebindings/delete\"\
+        ,\"Microsoft.Authorization/*/read\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
-        :[]}],\"createdOn\":\"2018-03-12T12:25:43.9942774Z\",\"updatedOn\":\"2018-03-12T12:25:43.9942774Z\"\
-        ,\"createdBy\":\"93a01e49-673a-4e15-8230-51214a737962\",\"updatedBy\":\"93a01e49-673a-4e15-8230-51214a737962\"\
-        },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88daaf5a-ea86-4a68-9d45-477538d41738\"\
-        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"88daaf5a-ea86-4a68-9d45-477538d41738\"\
-        },{\"properties\":{\"roleName\":\"cli-test-roledrprweb\",\"type\":\"CustomRole\"\
-        ,\"description\":\"Can monitor compute, network and storage, and restart virtual\
-        \ machines\",\"assignableScopes\":[\"/subscriptions/00000000-0000-0000-0000-000000000000\"\
-        ],\"permissions\":[{\"actions\":[\"Microsoft.Compute/*/read\",\"Microsoft.Compute/virtualMachines/start/action\"\
-        ,\"Microsoft.Compute/virtualMachines/restart/action\",\"Microsoft.Network/*/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Authorization/*/read\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
-        ,\"Microsoft.Resources/subscriptions/resourceGroups/resources/read\",\"Microsoft.Insights/alertRules/*\"\
-        ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
-        :[]}],\"createdOn\":\"2018-03-11T06:56:22.1770532Z\",\"updatedOn\":\"2018-03-11T06:56:22.1770532Z\"\
-        ,\"createdBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\",\"updatedBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\"\
-        },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/610de8da-84e1-4b87-a7b9-1f7190a82c08\"\
-        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"610de8da-84e1-4b87-a7b9-1f7190a82c08\"\
-        },{\"properties\":{\"roleName\":\"API Management Service Contributor\",\"\
-        type\":\"BuiltInRole\",\"description\":\"Can manage service and the APIs\"\
-        ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.ApiManagement/service/*\"\
-        ,\"Microsoft.Authorization/*/read\",\"Microsoft.Insights/alertRules/*\",\"\
-        Microsoft.ResourceHealth/availabilityStatuses/read\",\"Microsoft.Resources/deployments/*\"\
-        ,\"Microsoft.Resources/subscriptions/resourceGroups/read\",\"Microsoft.Support/*\"\
+        :[]}],\"createdOn\":\"2017-10-24T01:18:20.4681515Z\",\"updatedOn\":\"2018-01-12T17:10:31.0826928Z\"\
+        ,\"createdBy\":\"4e62a0e5-789c-4a28-bd94-6894204eb351\",\"updatedBy\":\"4e62a0e5-789c-4a28-bd94-6894204eb351\"\
+        },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/96bf174f-2705-4540-b53c-e2c4cd452507\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"96bf174f-2705-4540-b53c-e2c4cd452507\"\
+        },{\"properties\":{\"roleName\":\"Office DevOps\",\"type\":\"CustomRole\"\
+        ,\"description\":\"Custom access for developers to operations but not secrets.\"\
+        ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Compute/virtualMachineScaleSets/restart/action\"\
+        ,\"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/restart/action\"\
+        ,\"Microsoft.Sql/servers/databases/replicationLinks/delete\",\"Microsoft.Sql/servers/databases/replicationLinks/failover/action\"\
+        ,\"Microsoft.Sql/servers/databases/replicationLinks/forceFailoverAllowDataLoss/action\"\
+        ,\"Microsoft.Sql/servers/databases/replicationLinks/operationResults/read\"\
+        ,\"Microsoft.Sql/servers/databases/replicationLinks/read\",\"Microsoft.Sql/servers/databases/replicationLinks/unlink/action\"\
         ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2017-01-23T23:12:00.5823195Z\"\
+        :\"2016-10-07T08:11:46.1639398Z\",\"updatedOn\":\"2017-03-16T18:43:08.3234306Z\"\
+        ,\"createdBy\":\"25aea6be-b605-4347-a92d-33e178e412ec\",\"updatedBy\":\"25aea6be-b605-4347-a92d-33e178e412ec\"\
+        },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/7fd64851-3279-459b-b614-e2b2ba760f5b\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"7fd64851-3279-459b-b614-e2b2ba760f5b\"\
+        },{\"properties\":{\"roleName\":\"AcrImageSigner\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"acr image signer\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.ContainerRegistry/registries/*/read\",\"Microsoft.ContainerRegistry/registries/*/write\"\
+        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
+        :\"2018-03-15T23:23:08.4038322Z\",\"updatedOn\":\"2018-03-17T01:25:51.8758677Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/6cef56e8-d556-48e5-a04f-b8e64114680f\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"6cef56e8-d556-48e5-a04f-b8e64114680f\"\
+        },{\"properties\":{\"roleName\":\"AcrQuarantineReader\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"acr quarantine data reader\",\"assignableScopes\":[\"/\"\
+        ],\"permissions\":[{\"actions\":[\"Microsoft.ContainerRegistry/registries/*/read\"\
+        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
+        :\"2018-03-16T00:27:39.9596835Z\",\"updatedOn\":\"2018-03-17T01:26:48.6387319Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/cdda3590-29a3-44f6-95f2-9f980659eb04\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"cdda3590-29a3-44f6-95f2-9f980659eb04\"\
+        },{\"properties\":{\"roleName\":\"AcrQuarantineWriter\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"acr quarantine data writer\",\"assignableScopes\":[\"/\"\
+        ],\"permissions\":[{\"actions\":[\"Microsoft.ContainerRegistry/registries/*/write\"\
+        ,\"Microsoft.ContainerRegistry/registries/*/read\"],\"notActions\":[],\"dataActions\"\
+        :[],\"notDataActions\":[]}],\"createdOn\":\"2018-03-16T00:26:37.5871820Z\"\
+        ,\"updatedOn\":\"2018-03-17T01:27:36.3941651Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/c8d4ff99-41c3-41a8-9f60-21dfdad59608\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"c8d4ff99-41c3-41a8-9f60-21dfdad59608\"\
+        },{\"properties\":{\"roleName\":\"API Management Service Contributor\",\"\
+        type\":\"BuiltInRole\",\"description\":\"Lets you manage API Management services,\
+        \ but not access to them.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"\
+        actions\":[\"Microsoft.ApiManagement/service/*\",\"Microsoft.Authorization/*/read\"\
+        ,\"Microsoft.Insights/alertRules/*\",\"Microsoft.ResourceHealth/availabilityStatuses/read\"\
+        ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
+        ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
+        :[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2017-01-23T23:12:00.5823195Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         },{\"properties\":{\"roleName\":\"API Management Service Operator Role\",\"\
@@ -653,18 +720,18 @@ interactions:
         },{\"properties\":{\"roleName\":\"Automation Operator\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Automation Operators are able to start, stop, suspend,\
         \ and resume jobs\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\"\
-        :[\"Microsoft.Authorization/*/read\",\"Microsoft.Automation/automationAccounts/jobs/read\"\
-        ,\"Microsoft.Automation/automationAccounts/jobs/resume/action\",\"Microsoft.Automation/automationAccounts/jobs/stop/action\"\
-        ,\"Microsoft.Automation/automationAccounts/jobs/streams/read\",\"Microsoft.Automation/automationAccounts/jobs/suspend/action\"\
-        ,\"Microsoft.Automation/automationAccounts/jobs/write\",\"Microsoft.Automation/automationAccounts/jobSchedules/read\"\
-        ,\"Microsoft.Automation/automationAccounts/jobSchedules/write\",\"Microsoft.Automation/automationAccounts/linkedWorkspace/read\"\
-        ,\"Microsoft.Automation/automationAccounts/hybridRunbookWorkerGroups/read\"\
-        ,\"Microsoft.Automation/automationAccounts/read\",\"Microsoft.Automation/automationAccounts/runbooks/read\"\
-        ,\"Microsoft.Automation/automationAccounts/schedules/read\",\"Microsoft.Automation/automationAccounts/schedules/write\"\
-        ,\"Microsoft.Insights/alertRules/*\",\"Microsoft.ResourceHealth/availabilityStatuses/read\"\
-        ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
+        :[\"Microsoft.Authorization/*/read\",\"Microsoft.Automation/automationAccounts/hybridRunbookWorkerGroups/read\"\
+        ,\"Microsoft.Automation/automationAccounts/jobs/read\",\"Microsoft.Automation/automationAccounts/jobs/resume/action\"\
+        ,\"Microsoft.Automation/automationAccounts/jobs/stop/action\",\"Microsoft.Automation/automationAccounts/jobs/streams/read\"\
+        ,\"Microsoft.Automation/automationAccounts/jobs/suspend/action\",\"Microsoft.Automation/automationAccounts/jobs/write\"\
+        ,\"Microsoft.Automation/automationAccounts/jobSchedules/read\",\"Microsoft.Automation/automationAccounts/jobSchedules/write\"\
+        ,\"Microsoft.Automation/automationAccounts/linkedWorkspace/read\",\"Microsoft.Automation/automationAccounts/read\"\
+        ,\"Microsoft.Automation/automationAccounts/runbooks/read\",\"Microsoft.Automation/automationAccounts/schedules/read\"\
+        ,\"Microsoft.Automation/automationAccounts/schedules/write\",\"Microsoft.Insights/alertRules/*\"\
+        ,\"Microsoft.ResourceHealth/availabilityStatuses/read\",\"Microsoft.Resources/deployments/*\"\
+        ,\"Microsoft.Automation/automationAccounts/jobs/output/read\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
-        :[]}],\"createdOn\":\"2015-08-18T01:05:03.3916130Z\",\"updatedOn\":\"2018-03-06T02:10:10.7101464Z\"\
+        :[]}],\"createdOn\":\"2015-08-18T01:05:03.3916130Z\",\"updatedOn\":\"2018-05-10T20:12:39.6978200Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/d3881f73-407a-4167-8283-e981cbba0404\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"d3881f73-407a-4167-8283-e981cbba0404\"\
         },{\"properties\":{\"roleName\":\"Automation Runbook Operator\",\"type\":\"\
@@ -712,40 +779,41 @@ interactions:
         ,\"description\":\"Lets you manage backup services, except removal of backup,\
         \ vault creation and giving access to others\",\"assignableScopes\":[\"/\"\
         ],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\",\"Microsoft.Network/virtualNetworks/read\"\
+        ,\"Microsoft.RecoveryServices/locations/allocatedStamp/read\",\"Microsoft.RecoveryServices/Vaults/backupconfig/vaultconfig/*\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/operationResults/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/backup/action\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationResults/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationsStatus/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/provisionInstantItemRecovery/action\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/revokeInstantItemRecovery/action\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/write\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupJobs/*\",\"Microsoft.RecoveryServices/Vaults/backupJobs/cancel/action\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupJobs/operationResults/read\",\"\
         Microsoft.RecoveryServices/Vaults/backupJobs/read\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobsExport/operationResults/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/read\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/*\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationStatus/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/*\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/read\",\"\
-        Microsoft.RecoveryServices/Vaults/backupUsageSummaries/read\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/read\"\
-        ,\"Microsoft.RecoveryServices/Vaults/extendedInformation/write\",\"Microsoft.RecoveryServices/Vaults/read\"\
-        ,\"Microsoft.RecoveryServices/Vaults/refreshContainers/*\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
+        Microsoft.RecoveryServices/Vaults/backupUsageSummaries/read\",\"Microsoft.RecoveryServices/Vaults/certificates/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/extendedInformation/read\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/monitoringAlerts/read\",\"Microsoft.RecoveryServices/Vaults/monitoringConfigurations/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/read\",\"Microsoft.RecoveryServices/Vaults/backupFabrics/refreshContainers/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
         ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/read\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/write\"\
-        ,\"Microsoft.RecoveryServices/Vaults/usages/read\",\"Microsoft.Resources/deployments/*\"\
-        ,\"Microsoft.Resources/subscriptions/resourceGroups/read\",\"Microsoft.Storage/storageAccounts/read\"\
-        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/provisionInstantItemRecovery/action\"\
-        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/revokeInstantItemRecovery/action\"\
-        ,\"Microsoft.RecoveryServices/locations/allocatedStamp/read\",\"Microsoft.RecoveryServices/Vaults/monitoringConfigurations/*\"\
-        ,\"Microsoft.RecoveryServices/Vaults/monitoringAlerts/read\",\"Microsoft.RecoveryServices/Vaults/storageConfig/*\"\
-        ,\"Microsoft.RecoveryServices/Vaults/backupconfig/vaultconfig/*\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/operationResults/read\"\
-        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationStatus/read\"\
-        ,\"Microsoft.RecoveryServices/Vaults/certificates/write\",\"Microsoft.Support/*\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2017-01-03T13:21:11.8947640Z\",\"updatedOn\":\"2017-09-13T10:34:41.5049784Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/00c29273-979b-4161-815c-10b084fb9324\"\
+        ,\"Microsoft.RecoveryServices/Vaults/storageConfig/*\",\"Microsoft.RecoveryServices/Vaults/usages/read\"\
+        ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
+        ,\"Microsoft.Storage/storageAccounts/read\",\"Microsoft.Support/*\"],\"notActions\"\
+        :[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\":\"2017-01-03T13:21:11.8947640Z\"\
+        ,\"updatedOn\":\"2018-06-16T05:25:05.7455061Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/00c29273-979b-4161-815c-10b084fb9324\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"00c29273-979b-4161-815c-10b084fb9324\"\
         },{\"properties\":{\"roleName\":\"Backup Reader\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Can view backup services, but can't make changes\",\"assignableScopes\"\
@@ -776,12 +844,11 @@ interactions:
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
         },{\"properties\":{\"roleName\":\"Billing Reader\",\"type\":\"BuiltInRole\"\
-        ,\"description\":\"Allows read access to billing data\",\"assignableScopes\"\
-        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\"\
-        ,\"Microsoft.Billing/*/read\",\"Microsoft.Consumption/*/read\",\"Microsoft.Commerce/*/read\"\
-        ,\"Microsoft.Management/managementGroups/read\",\"Microsoft.Support/*\"],\"\
-        notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\":\"\
-        2017-04-25T02:13:38.9054151Z\",\"updatedOn\":\"2017-09-19T17:36:32.7624564Z\"\
+        ,\"description\":\"Lets you read billing data\",\"assignableScopes\":[\"/\"\
+        ],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\",\"Microsoft.Billing/*/read\"\
+        ,\"Microsoft.Consumption/*/read\",\"Microsoft.Commerce/*/read\",\"Microsoft.Management/managementGroups/read\"\
+        ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
+        :[]}],\"createdOn\":\"2017-04-25T02:13:38.9054151Z\",\"updatedOn\":\"2017-09-19T17:36:32.7624564Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/fa23ad8b-c56e-40d8-ac0c-ce449e1d2c64\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"fa23ad8b-c56e-40d8-ac0c-ce449e1d2c64\"\
         },{\"properties\":{\"roleName\":\"BizTalk Contributor\",\"type\":\"BuiltInRole\"\
@@ -894,9 +961,11 @@ interactions:
         description\":\"Lets you manage everything except access to resources.\",\"\
         assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"*\"],\"notActions\"\
         :[\"Microsoft.Authorization/*/Delete\",\"Microsoft.Authorization/*/Write\"\
-        ,\"Microsoft.Authorization/elevateAccess/Action\"],\"dataActions\":[],\"notDataActions\"\
-        :[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2016-12-14T02:04:45.1393855Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
+        ,\"Microsoft.Authorization/elevateAccess/Action\",\"Microsoft.Blueprint/blueprintAssignments/write\"\
+        ,\"Microsoft.Blueprint/blueprintAssignments/delete\"],\"dataActions\":[],\"\
+        notDataActions\":[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\"\
+        :\"2018-05-30T19:22:32.4538167Z\",\"createdBy\":null,\"updatedBy\":null},\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         },{\"properties\":{\"roleName\":\"Cosmos DB Account Reader Role\",\"type\"\
         :\"BuiltInRole\",\"description\":\"Can read Azure Cosmos DB Accounts data\"\
@@ -909,13 +978,13 @@ interactions:
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/fbdf93bf-df7d-467e-a4d2-9458aa1360c8\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"fbdf93bf-df7d-467e-a4d2-9458aa1360c8\"\
         },{\"properties\":{\"roleName\":\"Data Factory Contributor\",\"type\":\"BuiltInRole\"\
-        ,\"description\":\"Create and manage data factories, as well as child resources\
-        \ within them.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\"\
-        :[\"Microsoft.Authorization/*/read\",\"Microsoft.DataFactory/dataFactories/*\"\
+        ,\"description\":\"Lets you manage data factories, but not access to them.\"\
+        ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\"\
+        ,\"Microsoft.DataFactory/dataFactories/*\",\"Microsoft.DataFactory/factories/*\"\
         ,\"Microsoft.Insights/alertRules/*\",\"Microsoft.ResourceHealth/availabilityStatuses/read\"\
         ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/resourceGroups/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[],\"dataActions\":[],\"notDataActions\"\
-        :[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2016-09-12T19:16:42.3441035Z\"\
+        :[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2018-04-06T22:49:28.1118955Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/673868aa-7521-48a0-acc6-0f60742d39f5\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"673868aa-7521-48a0-acc6-0f60742d39f5\"\
         },{\"properties\":{\"roleName\":\"Data Lake Analytics Developer\",\"type\"\
@@ -937,8 +1006,16 @@ interactions:
         ,\"updatedOn\":\"2017-08-18T00:00:17.0411642Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/47b7735b-770e-4598-a7da-8b91488b4c88\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"47b7735b-770e-4598-a7da-8b91488b4c88\"\
+        },{\"properties\":{\"roleName\":\"Data Purger\",\"type\":\"BuiltInRole\",\"\
+        description\":\"Can purge analytics data\",\"assignableScopes\":[\"/\"],\"\
+        permissions\":[{\"actions\":[\"Microsoft.Insights/components/*/read\",\"Microsoft.Insights/components/purge/action\"\
+        ,\"Microsoft.OperationalInsights/workspaces/*/read\",\"Microsoft.OperationalInsights/workspaces/purge/action\"\
+        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
+        :\"2018-04-30T22:39:49.6167700Z\",\"updatedOn\":\"2018-04-30T22:44:15.1171162Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/150f5e0c-0603-4f03-8c7f-cf70034c4e90\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"150f5e0c-0603-4f03-8c7f-cf70034c4e90\"\
         },{\"properties\":{\"roleName\":\"DevTest Labs User\",\"type\":\"BuiltInRole\"\
-        ,\"description\":\"Lets you connect, start, restart, and shutdown your virtual\
+        ,\"description\":\"Lets you connect, start, restart, and shutdown virtual\
         \ machines in your Azure DevTest Labs.\",\"assignableScopes\":[\"/\"],\"permissions\"\
         :[{\"actions\":[\"Microsoft.Authorization/*/read\",\"Microsoft.Compute/availabilitySets/read\"\
         ,\"Microsoft.Compute/virtualMachines/*/read\",\"Microsoft.Compute/virtualMachines/deallocate/action\"\
@@ -1094,12 +1171,13 @@ interactions:
         Microsoft.Insights/DiagnosticSettings/*\",\"Microsoft.Insights/eventtypes/*\"\
         ,\"Microsoft.Insights/LogDefinitions/*\",\"Microsoft.Insights/MetricDefinitions/*\"\
         ,\"Microsoft.Insights/Metrics/*\",\"Microsoft.Insights/Register/Action\",\"\
-        Microsoft.Insights/webtests/*\",\"Microsoft.OperationalInsights/workspaces/intelligencepacks/*\"\
+        Microsoft.Insights/webtests/*\",\"Microsoft.Insights/actiongroups/*\",\"Microsoft.Insights/metricalerts/*\"\
+        ,\"Microsoft.Insights/scheduledqueryrules/*\",\"Microsoft.OperationalInsights/workspaces/intelligencepacks/*\"\
         ,\"Microsoft.OperationalInsights/workspaces/savedSearches/*\",\"Microsoft.OperationalInsights/workspaces/search/action\"\
         ,\"Microsoft.OperationalInsights/workspaces/sharedKeys/action\",\"Microsoft.OperationalInsights/workspaces/storageinsightconfigs/*\"\
         ,\"Microsoft.Support/*\",\"Microsoft.WorkloadMonitor/workloads/*\"],\"notActions\"\
         :[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\":\"2016-09-21T19:21:08.4345976Z\"\
-        ,\"updatedOn\":\"2018-01-30T18:08:28.4990834Z\",\"createdBy\":null,\"updatedBy\"\
+        ,\"updatedOn\":\"2018-04-02T19:04:30.9448972Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"749f88d5-cbae-40b8-bcfc-e573ddc772fa\"\
         },{\"properties\":{\"roleName\":\"Monitoring Reader\",\"type\":\"BuiltInRole\"\
@@ -1143,6 +1221,16 @@ interactions:
         ,\"updatedOn\":\"2018-01-30T18:08:25.4031403Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"acdd72a7-3385-48ef-bd42-f606fba81ae7\"\
+        },{\"properties\":{\"roleName\":\"Reader and Data Access\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Lets you view everything but will not let you delete or\
+        \ create a storage account or contained resource. It will also allow read/write\
+        \ access to all data contained in a storage account via access to storage\
+        \ account keys.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\"\
+        :[\"Microsoft.Storage/storageAccounts/listKeys/action\",\"Microsoft.Storage/storageAccounts/read\"\
+        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
+        :\"2018-03-27T23:20:46.1498906Z\",\"updatedOn\":\"2018-03-28T17:50:03.9656854Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/c12c1c16-33a1-487b-954d-41c89c60f349\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"c12c1c16-33a1-487b-954d-41c89c60f349\"\
         },{\"properties\":{\"roleName\":\"Redis Cache Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Lets you manage Redis caches, but not access to them.\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\"\
@@ -1398,45 +1486,45 @@ interactions:
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"81a9662b-bebf-436f-a333-f67b29880f12\"\
         },{\"properties\":{\"roleName\":\"Storage Blob Data Contributor (Preview)\"\
         ,\"type\":\"BuiltInRole\",\"description\":\"Allows for read, write and delete\
-        \ access to Azure Storage blob containers and data.\",\"assignableScopes\"\
-        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Storage/storageAccounts/blobServices/containers/read\"\
-        ,\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"Microsoft.Storage/storageAccounts/blobServices/containers/delete\"\
+        \ access to Azure Storage blob containers and data\",\"assignableScopes\"\
+        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Storage/storageAccounts/blobServices/containers/delete\"\
+        ,\"Microsoft.Storage/storageAccounts/blobServices/containers/read\",\"Microsoft.Storage/storageAccounts/blobServices/containers/write\"\
+        ],\"notActions\":[],\"dataActions\":[\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete\"\
         ,\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read\"\
         ,\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write\"\
-        ,\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2017-12-21T00:01:24.7972312Z\",\"updatedOn\":\"2017-12-21T00:01:24.7972312Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe\"\
+        ],\"notDataActions\":[]}],\"createdOn\":\"2017-12-21T00:01:24.7972312Z\",\"\
+        updatedOn\":\"2018-04-02T17:11:00.4629296Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"ba92f5b4-2d11-453d-a403-e96b0029c9fe\"\
         },{\"properties\":{\"roleName\":\"Storage Blob Data Reader (Preview)\",\"\
         type\":\"BuiltInRole\",\"description\":\"Allows for read access to Azure Storage\
-        \ blob containers and data.\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        \ blob containers and data\",\"assignableScopes\":[\"/\"],\"permissions\"\
         :[{\"actions\":[\"Microsoft.Storage/storageAccounts/blobServices/containers/read\"\
-        ,\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2017-12-21T00:01:24.7972312Z\",\"updatedOn\":\"2017-12-21T00:01:24.7972312Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1\"\
+        ],\"notActions\":[],\"dataActions\":[\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read\"\
+        ],\"notDataActions\":[]}],\"createdOn\":\"2017-12-21T00:01:24.7972312Z\",\"\
+        updatedOn\":\"2018-04-02T17:15:19.5080840Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"2a2b9908-6ea1-4ae2-8e65-a410df84e7d1\"\
         },{\"properties\":{\"roleName\":\"Storage Queue Data Contributor (Preview)\"\
         ,\"type\":\"BuiltInRole\",\"description\":\"Allows for read, write, and delete\
-        \ access to Azure Storage queues and queue messages.\",\"assignableScopes\"\
-        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Storage/storageAccounts/queueServices/queues/read\"\
-        ,\"Microsoft.Storage/storageAccounts/queueServices/queues/write\",\"Microsoft.Storage/storageAccounts/queueServices/queues/delete\"\
+        \ access to Azure Storage queues and queue messages\",\"assignableScopes\"\
+        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Storage/storageAccounts/queueServices/queues/delete\"\
+        ,\"Microsoft.Storage/storageAccounts/queueServices/queues/read\",\"Microsoft.Storage/storageAccounts/queueServices/queues/write\"\
+        ],\"notActions\":[],\"dataActions\":[\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/delete\"\
         ,\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/read\"\
         ,\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/write\"\
-        ,\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/delete\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2017-12-21T00:01:24.7972312Z\",\"updatedOn\":\"2017-12-21T00:01:24.7972312Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88\"\
+        ],\"notDataActions\":[]}],\"createdOn\":\"2017-12-21T00:01:24.7972312Z\",\"\
+        updatedOn\":\"2018-04-02T17:16:40.1371662Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"974c5e8b-45b9-4653-ba55-5f855dd0fb88\"\
         },{\"properties\":{\"roleName\":\"Storage Queue Data Reader (Preview)\",\"\
         type\":\"BuiltInRole\",\"description\":\"Allows for read access to Azure Storage\
-        \ queues and queue messages.\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        \ queues and queue messages\",\"assignableScopes\":[\"/\"],\"permissions\"\
         :[{\"actions\":[\"Microsoft.Storage/storageAccounts/queueServices/queues/read\"\
-        ,\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/read\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2017-12-21T00:01:24.7972312Z\",\"updatedOn\":\"2017-12-21T00:01:24.7972312Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/19e7f393-937e-4f77-808e-94535e297925\"\
+        ],\"notActions\":[],\"dataActions\":[\"Microsoft.Storage/storageAccounts/queueServices/queues/messages/read\"\
+        ],\"notDataActions\":[]}],\"createdOn\":\"2017-12-21T00:01:24.7972312Z\",\"\
+        updatedOn\":\"2018-04-02T17:19:30.5001463Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/19e7f393-937e-4f77-808e-94535e297925\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"19e7f393-937e-4f77-808e-94535e297925\"\
         },{\"properties\":{\"roleName\":\"Support Request Contributor\",\"type\":\"\
         BuiltInRole\",\"description\":\"Lets you create and manage Support requests\"\
@@ -1466,18 +1554,19 @@ interactions:
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"18d7d88d-d35e-4fb5-a5c3-7773c20a72d9\"\
         },{\"properties\":{\"roleName\":\"Virtual Machine Administrator Login\",\"\
-        type\":\"BuiltInRole\",\"description\":\"-\\tUsers with this role have the\
-        \ ability to login to a virtual machine with Windows administrator or Linux\
-        \ root user privileges.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"\
-        actions\":[\"Microsoft.Compute/virtualMachines/loginAsAdmin/action\",\"Microsoft.Compute/virtualMachines/login/action\"\
-        ,\"Microsoft.Compute/virtualMachine/loginAsAdmin/action\",\"Microsoft.Compute/virtualMachine/logon/action\"\
-        ],\"notActions\":[],\"dataActions\":[],\"notDataActions\":[]}],\"createdOn\"\
-        :\"2018-02-09T18:36:13.3315744Z\",\"updatedOn\":\"2018-02-09T18:36:13.3315744Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/1c0163c0-47e6-4577-8991-ea5c82e286e4\"\
+        type\":\"BuiltInRole\",\"description\":\"View Virtual Machines in the portal\
+        \ and login as administrator\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.Network/publicIPAddresses/read\",\"Microsoft.Network/virtualNetworks/read\"\
+        ,\"Microsoft.Network/loadBalancers/read\",\"Microsoft.Network/networkInterfaces/read\"\
+        ,\"Microsoft.Compute/virtualMachines/*/read\"],\"notActions\":[],\"dataActions\"\
+        :[\"Microsoft.Compute/virtualMachines/login/action\",\"Microsoft.Compute/virtualMachines/loginAsAdmin/action\"\
+        ],\"notDataActions\":[]}],\"createdOn\":\"2018-02-09T18:36:13.3315744Z\",\"\
+        updatedOn\":\"2018-05-09T22:17:57.0514548Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/1c0163c0-47e6-4577-8991-ea5c82e286e4\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"1c0163c0-47e6-4577-8991-ea5c82e286e4\"\
         },{\"properties\":{\"roleName\":\"Virtual Machine Contributor\",\"type\":\"\
         BuiltInRole\",\"description\":\"Lets you manage virtual machines, but not\
-        \ access to them, and not the virtual network or storage account they\uFFFD\
+        \ access to them, and not the virtual network or storage account they\u2019\
         re connected to.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\"\
         :[\"Microsoft.Authorization/*/read\",\"Microsoft.Compute/availabilitySets/*\"\
         ,\"Microsoft.Compute/locations/*\",\"Microsoft.Compute/virtualMachines/*\"\
@@ -1504,13 +1593,14 @@ interactions:
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"9980e02c-c2be-4d73-94e8-173b1dc7cf3c\"\
         },{\"properties\":{\"roleName\":\"Virtual Machine User Login\",\"type\":\"\
-        BuiltInRole\",\"description\":\"Users with this role have the ability to login\
-        \ to a virtual machine as a regular user.\",\"assignableScopes\":[\"/\"],\"\
-        permissions\":[{\"actions\":[\"Microsoft.Compute/virtualMachines/login/action\"\
-        ,\"Microsoft.Compute/virtualMachine/logon/action\"],\"notActions\":[],\"dataActions\"\
-        :[],\"notDataActions\":[]}],\"createdOn\":\"2018-02-09T18:36:13.3315744Z\"\
-        ,\"updatedOn\":\"2018-02-09T18:36:13.3315744Z\",\"createdBy\":null,\"updatedBy\"\
-        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/fb879df8-f326-4884-b1cf-06f3ad86be52\"\
+        BuiltInRole\",\"description\":\"View Virtual Machines in the portal and login\
+        \ as a regular user.\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\"\
+        :[\"Microsoft.Network/publicIPAddresses/read\",\"Microsoft.Network/virtualNetworks/read\"\
+        ,\"Microsoft.Network/loadBalancers/read\",\"Microsoft.Network/networkInterfaces/read\"\
+        ,\"Microsoft.Compute/virtualMachines/*/read\"],\"notActions\":[],\"dataActions\"\
+        :[\"Microsoft.Compute/virtualMachines/login/action\"],\"notDataActions\":[]}],\"\
+        createdOn\":\"2018-02-09T18:36:13.3315744Z\",\"updatedOn\":\"2018-05-09T22:18:52.2780979Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/fb879df8-f326-4884-b1cf-06f3ad86be52\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"fb879df8-f326-4884-b1cf-06f3ad86be52\"\
         },{\"properties\":{\"roleName\":\"Web Plan Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Lets you manage the web plans for websites, but not access\
@@ -1537,9 +1627,9 @@ interactions:
         }]}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['90704']
+      content-length: ['98931']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 16:00:37 GMT']
+      date: ['Thu, 28 Jun 2018 00:34:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -1552,7 +1642,8 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"includeDirectoryObjectReferences": true, "objectIds": ["af59a9ae-df53-4870-82fb-bcbae8762c63"]}'
+    body: '{"objectIds": ["0f035dbc-4eb7-4a6b-8449-6e2627732b1b"], "includeDirectoryObjectReferences":
+      true}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1560,27 +1651,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['97']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 azure-graphrbac/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.40]
       accept-language: [en-US]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/getObjectsByObjectIds?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"af59a9ae-df53-4870-82fb-bcbae8762c63","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=False","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003"],"appDisplayName":null,"appId":"c053d505-6b35-4295-9cdb-4e9d49934ae3","appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"web-msi000003","errorUrl":null,"homepage":null,"keyCredentials":[{"customKeyIdentifier":null,"endDate":"2018-06-11T15:55:00Z","keyId":"4728dce6-7b1a-49e4-b6fd-0538a52580df","startDate":"2018-03-13T15:55:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"oauth2Permissions":[],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["c053d505-6b35-4295-9cdb-4e9d49934ae3","https://identity.azure.net/UT6/WtcS5roQP1OUvFcbc7WjdZ4c/xwrjT1F3Szs/2M="],"servicePrincipalType":"ServiceAccount","tags":[],"tokenEncryptionKeyId":null}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"0f035dbc-4eb7-4a6b-8449-6e2627732b1b","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=False","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/web-msi000003"],"appDisplayName":null,"appId":"a45e32d6-7ef0-41b4-bced-1be5b1d1f189","appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"web-msi000003","errorUrl":null,"homepage":null,"keyCredentials":[{"customKeyIdentifier":null,"endDate":"2018-09-26T00:28:00Z","keyId":"c2692af2-71bf-4c4e-8780-369c80557a16","startDate":"2018-06-28T00:28:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"oauth2Permissions":[],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["a45e32d6-7ef0-41b4-bced-1be5b1d1f189","https://identity.azure.net/gDDp6EHaCAGi1XJIQ7bfajST7QCJD4nO2vctMalolvM="],"servicePrincipalType":"ServiceAccount","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'}
     headers:
       access-control-allow-origin: ['*']
       cache-control: [no-cache]
-      content-length: ['1373']
+      content-length: ['1395']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Tue, 13 Mar 2018 16:00:38 GMT']
-      duration: ['897200']
+      date: ['Thu, 28 Jun 2018 00:34:08 GMT']
+      duration: ['1047466']
       expires: ['-1']
-      ocp-aad-diagnostics-server-name: [p1lHTRPF/dam1vURl+wJyDtqEVscUuEPV/gvuR8Ob6o=]
-      ocp-aad-session-key: [MKlbzm2mHJl8YoYdXB_BnYsMx16SnEPrI5ITmJAL5FtGvhfrjyuTJtMvJQVBm4GtlqWaov3bgKqsqdI8ViD5AMeIrEl-0mTw74V65pj-O9eyRU6cS8zSYnjekHoN1S_L.OMwUK7JcbOGt6BSnVRNvE3cRp8CuD6-IaoZ_Db_sBNM]
+      ocp-aad-diagnostics-server-name: [R24SEsKL6l8WwGja0LsRtb5gfSEzPaANsccbqgL6qjQ=]
+      ocp-aad-session-key: [H4Lca-ypZ7dZy4OavhaUQweU7GbRYQRszBLTVK1Zo53mmewb8M9ICNJJU80KR0tKaI9BGjF6144aFkQhQ0Mveb8Ya4eWWyQY0kKLqIaH-RplGUFGtJ-Y5kv6kyQOIDbo.eb49SKhxYSVAgE69I6LdKfLMOQhj1DF6J4bk2cDUwFk]
       pragma: [no-cache]
-      request-id: [b0a6ae4f-1845-43fc-8e68-2766446539ca]
+      request-id: [3567f865-6367-4529-ad9f-9ef5e731648c]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -1597,23 +1687,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.28
+          msrest_azure/0.4.27 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.40]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 13 Mar 2018 16:00:38 GMT']
+      date: ['Thu, 28 Jun 2018 00:34:09 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDTldYRFVIWUtBU1dHVEJETFYzTUJZSTdYM0tUQ0lJSkVZN3wzMTM4MzVCMzdCMUExOUFDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLSlhNTFI3UkI1M0ZQUlVEVktHRElGT1pZNkZIUTdHQTNGNnwzNTMwRTgwQTBGNkVBOUZFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

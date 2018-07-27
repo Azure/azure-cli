@@ -16,6 +16,7 @@ import dateutil.parser
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
+from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models.graph_error import GraphErrorException
 
@@ -60,6 +61,8 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
     else:
         role_definition = shell_safe_json_parse(role_definition)
 
+    if not isinstance(role_definition, dict):
+        raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
     # to workaround service defects, ensure property names are camel case
     names = [p for p in role_definition if p[:1].isupper()]
     for n in names:
@@ -603,12 +606,10 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
-def update_application(client, identifier, display_name=None, homepage=None,
+def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
-    object_id = _resolve_application(client, identifier)
-
     password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
@@ -626,7 +627,14 @@ def update_application(client, identifier, display_name=None, homepage=None,
                                                   available_to_other_tenants=available_to_other_tenants,
                                                   required_resource_access=required_accesses,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
-    return client.patch(object_id, app_patch_param)
+
+    return app_patch_param
+
+
+def patch_application(cmd, identifier, parameters):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_application(graph_client.applications, identifier)
+    return graph_client.applications.patch(object_id, parameters)
 
 
 def _build_application_accesses(required_resource_accesses):
@@ -699,7 +707,7 @@ def create_service_principal(cmd, identifier):
 
 def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     client = _graph_client_factory(cli_ctx)
-
+    app_id = identifier
     if resolve_app:
         if _is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
@@ -707,11 +715,12 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
             result = list(client.applications.list(
                 filter="identifierUris/any(s:s eq '{}')".format(identifier)))
 
-        if not result:  # assume we get an object id
-            result = [client.applications.get(identifier)]
-        app_id = result[0].app_id
-    else:
-        app_id = identifier
+        try:
+            if not result:  # assume we get an object id
+                result = [client.applications.get(identifier)]
+            app_id = result[0].app_id
+        except GraphErrorException:
+            pass  # fallback to appid (maybe from an external tenant?)
 
     return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
 
@@ -884,7 +893,6 @@ def create_service_principal_for_rbac(
         scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
-    import pytz
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
@@ -904,7 +912,7 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    app_start_date = datetime.datetime.now(pytz.utc)
+    app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     app_display_name = app_display_name or ('azure-cli-' +
@@ -1146,7 +1154,6 @@ def _get_public(x509):
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
                                        cert=None, years=None, keyvault=None, append=False):
-    import pytz
     client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
@@ -1164,7 +1171,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             'app id guid, or app id uri')
     app = show_application(client.applications, aad_sps[0].app_id)
 
-    app_start_date = datetime.datetime.now(pytz.utc)
+    app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     # build a new password/cert credential and patch it

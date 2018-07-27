@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -21,6 +22,8 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name mywinapp --image winappimage:latest --os-type Windows --cpu 2 --memory 3.5
         - name: Create a container in a container group with public IP address and ports.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 80 443
+        - name: Create a container in a container group with public IP address and UDP port.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 8081 --protocol UDP
         - name: Create a container in a container group with public IP address, ports and DNS name label.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ports 80 443 --dns-name-label contoso
         - name: Create a container in a container group that invokes a script upon start.
@@ -37,6 +40,12 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/azfile/myfile" --azure-file-volume-share-name myshare --azure-file-volume-account-name mystorageaccount --azure-file-volume-account-key mystoragekey --azure-file-volume-mount-path /mnt/azfile
         - name: Create a container in a container group that mounts a git repo as volume.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/gitrepo" --gitrepo-url https://github.com/user/myrepo.git --gitrepo-dir ./dir1 --gitrepo-mount-path /mnt/gitrepo
+        - name: Create a container in a container group using a yaml file.
+          text: az container create -g MyResourceGroup -f containerGroup.yaml
+        - name: Create a container group using Log Analytics from a workspace name.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace myworkspace
+        - name: Create a container group using Log Analytics from a workspace id and key.
+          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace workspaceid --log-analytics-workspace-key workspacekey
 """
 
 helps['container delete'] = """
@@ -57,6 +66,14 @@ helps['container show'] = """
 helps['container logs'] = """
     type: command
     short-summary: Examine the logs for a container in a container group.
+"""
+
+helps['container export'] = """
+    type: command
+    short-summary: Export a container group in yaml format.
+    examples:
+        - name: Export a container group in yaml.
+          text: az container export -g MyResourceGroup --name mynginx -f output.yaml
 """
 
 helps['container exec'] = """

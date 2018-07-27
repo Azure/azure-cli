@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -34,7 +35,7 @@ helps['cognitiveservices account create'] = """
     short-summary: Create an Azure Cognitive Services account.
     examples:
         - name: Create an S0 face API Cognitive Services account in West Europe without confirmation required.
-          text: az cognitiveservices create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
+          text: az cognitiveservices account create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
 """
 
 helps['cognitiveservices account show'] = """

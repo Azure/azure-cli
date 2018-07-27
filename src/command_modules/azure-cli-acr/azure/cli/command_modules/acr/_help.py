@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -8,7 +9,7 @@ from knack.help_files import helps
 
 helps['acr'] = """
     type: group
-    short-summary: Manage Azure Container Registries.
+    short-summary: Manage Azure Container Registries for private registries within Azure.
     """
 
 helps['acr credential'] = """
@@ -18,7 +19,7 @@ helps['acr credential'] = """
 
 helps['acr repository'] = """
     type: group
-    short-summary: Manage repositories for Azure Container Registries.
+    short-summary: Manage repositories (image names) for Azure Container Registries.
     """
 
 helps['acr webhook'] = """
@@ -28,12 +29,17 @@ helps['acr webhook'] = """
 
 helps['acr replication'] = """
     type: group
-    short-summary: Manage replications for Azure Container Registries.
+    short-summary: Manage replications of Azure Container Registries across multiple regions.
+    """
+
+helps['acr build-task'] = """
+    type: group
+    short-summary: Manage build definitions, which can be triggered by git commits or base image updates.
     """
 
 helps['acr check-name'] = """
     type: command
-    short-summary: Checks if a container registry name is available for use.
+    short-summary: Checks if a container registry name is valid and available for use.
     examples:
         - name: Check if a registry name already exists.
           text: >
@@ -165,19 +171,23 @@ helps['acr repository show-manifests'] = """
         - name: Show manifests of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository
+        - name: Show the latest 10 manifests ordered by timestamp of a repository in a container registry.
+          text:
+            az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
 """
 
 helps['acr repository delete'] = """
     type: command
     short-summary: Delete a repository or image in a container registry.
+    long-summary: This command deletes all associated layer data that are not referenced by any other manifest in the container registry.
     examples:
-        - name: Delete a repository from a container registry.
+        - name: Delete a repository from a container registry. This deletes all manifests and tags under 'hello-world'.
           text:
             az acr repository delete -n MyRegistry --repository hello-world
-        - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest', all other tags referencing the manifest, and any associated layer data.
+        - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --image hello-world:latest
-        - name: Delete an image by sha256-based manifest digest. This deletes all tags referencing the manifest and any associated layer data.
+        - name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
 """
@@ -316,4 +326,123 @@ helps['acr replication update'] = """
         - name: Update tags for a replication
           text: >
             az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
+"""
+
+helps['acr build-task create'] = """
+    type: command
+    short-summary: Creates a new build definition which can be triggered by git commits or base image updates.
+    examples:
+        - name: Create a build definition which updates on git commits and base image updates.
+          text: >
+            az acr build-task create -t helloworld:{{.Build.ID}} -n helloworld -r myRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node --git-access-token 0000000000000000000000000000000000000000
+"""
+
+helps['acr build-task show'] = """
+    type: command
+    short-summary: Get the properties of a specified build task.
+    examples:
+        - name: Get the details of a build task, displaying the results in a table.
+          text: >
+            az acr build-task show -n MyBuildTask -r MyRegistry -o table
+"""
+
+helps['acr build-task list'] = """
+    type: command
+    short-summary: List the build tasks for a container registry.
+    examples:
+        - name: List build tasks and show the results in a table.
+          text: >
+            az acr build-task list -r MyRegistry -o table
+"""
+
+helps['acr build-task delete'] = """
+    type: command
+    short-summary: Delete a build task from a container registry.
+    examples:
+        - name: Delete a build task from a container registry.
+          text: >
+            az acr build-task delete -n MyBuildTask -r MyRegistry
+"""
+
+helps['acr build-task update'] = """
+    type: command
+    short-summary: Update a build task for a container registry.
+    examples:
+        - name: Update the git access token for a build definition in a container registry.
+          text: >
+            az acr build-task update -n MyBuildTask -r MyRegistry --git-access-token 0000000000000000000000000000000000000000
+"""
+
+helps['acr build-task list-builds'] = """
+    type: command
+    short-summary: List all of the executed builds for a registry, with the ability to filter by a specific build task.
+    examples:
+        - name: List builds for a build task and show the results in a table.
+          text: >
+            az acr build-task list-builds -n MyBuildTask -r MyRegistry -o table
+        - name: List all of the builds for a registry and show the results in a table.
+          text: >
+            az acr build-task list-builds -r MyRegistry -o table
+"""
+
+helps['acr build-task show-build'] = """
+    type: command
+    short-summary: Get the properties of a specified build.
+    examples:
+        - name:  Get the details of a build, displaying the results in a table.
+          text: >
+            az acr build-task show-build -n MyBuildTask -r MyRegistry --build-id MyBuild -o table
+"""
+
+helps['acr build-task run'] = """
+    type: command
+    short-summary: Trigger a build task that might otherwise be waiting for git commits or base image update triggers.
+    examples:
+        - name: Trigger a build task.
+          text: >
+            az acr build-task run -n MyBuildTask -r MyRegistry
+"""
+
+helps['acr build-task logs'] = """
+    type: command
+    short-summary: Show logs for a particular build. If no build-id is supplied, it shows logs for the last updated build.
+    examples:
+        - name: Show logs for the last updated build in the registry.
+          text: >
+            az acr build-task logs -r MyRegistry
+        - name: Show logs for the last updated build in the registry, filtered by build task.
+          text: >
+            az acr build-task logs -r MyRegistry -n MyBuildTask
+        - name: Show logs for a particular build.
+          text: >
+            az acr build-task logs -r MyRegistry --build-id buildId
+"""
+
+helps['acr build'] = """
+    type: command
+    short-summary: Queues a quick docker build providing interactive feedback.
+    examples:
+        - name: Queue a local context, pushed to ACR with streaming logs.
+          text: >
+            az acr build -t sample/helloworld:{{.Build.ID}} -r MyRegistry .
+    examples:
+        - name: Queue a local context, pushed to ACR without streaming logs.
+          text: >
+            az acr build -t sample/helloworld:{{.Build.ID}} -r MyRegistry --no-logs .
+    examples:
+        - name: Queue a local context, validating the build is successful, without pushing to the registry.
+          text: >
+            az acr build -r MyRegistry .
+"""
+
+helps['acr import'] = """
+    type: command
+    short-summary: Imports an image to the container registry from source.
+    examples:
+        - name: Import an image to the target registry and inherits sourcerepository:sourcetag from source.
+          text: >
+            az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
+        - name: Import an image from a registry in a different subscription.
+          text: >
+            az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
 """

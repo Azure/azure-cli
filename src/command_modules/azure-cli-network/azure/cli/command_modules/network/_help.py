@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -2442,6 +2443,14 @@ helps['network nic show'] = """
     examples:
         - name: Get the internal domain name suffix of a NIC.
           text: az network nic show -g MyResourceGroup -n MyNic --query "dnsSettings.internalDomainNameSuffix"
+"""
+
+helps['network nic wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the network interface is met.
+    examples:
+        - name: Pause CLI until the network interface is created.
+          text: az network nic wait -g MyResourceGroup -n MyNic --created
 """
 
 helps['network nic show-effective-route-table'] = """

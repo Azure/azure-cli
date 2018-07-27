@@ -196,7 +196,7 @@ class TestCommandRegistration(unittest.TestCase):
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table
+        return module_command_table, {}
 
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)

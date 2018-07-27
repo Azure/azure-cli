@@ -31,6 +31,15 @@ cp $dp0/a01/dockerfiles/py36/Dockerfile artifacts/
 cp -R $dp0/a01/* artifacts/
 
 #############################################
+# Move privates for docker
+if [ -d privates ]; then 
+    cp -R privates artifacts/privates
+else
+    mkdir -p artifacts/privates
+    echo 'placeholder' > artifacts/privates/placeholder
+fi
+
+#############################################
 # for travis repo slug, remove the suffix to reveal the owner
 # - the offical repo will generate image: azurecli-test-Azure
 # - the fork repo will generate image: azurecli-test-johnongithub

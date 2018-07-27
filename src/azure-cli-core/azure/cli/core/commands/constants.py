@@ -13,7 +13,8 @@ CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'excepti
                       'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
                       'client_arg_name', 'doc_string_source', 'deprecate_info'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
-    ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
+    ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type',
+     'deprecate_info'] \
     + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
 
 CLI_POSITIONAL_PARAM_KWARGS = \

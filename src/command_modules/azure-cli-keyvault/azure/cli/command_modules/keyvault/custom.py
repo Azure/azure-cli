@@ -6,13 +6,16 @@
 import codecs
 import json
 import os
-import re
 import time
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 from OpenSSL import crypto
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.exceptions import UnsupportedAlgorithm
 
 import azure.cli.core.telemetry as telemetry
 
@@ -563,11 +566,18 @@ def create_key(cmd, client, vault_base_url, key_name, destination, key_size=None
                disabled=False, expires=None, not_before=None, tags=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
-    return client.create_key(
-        vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
+    return client.create_key(vault_base_url=vault_base_url,
+                             key_name=key_name,
+                             kty=kty,
+                             key_size=key_size,
+                             key_ops=key_ops,
+                             key_attributes=key_attrs,
+                             tags=tags,
+                             curve=curve)
 
 
-def backup_key(client, vault_base_url, key_name, file_path):
+def backup_key(client, file_path, vault_base_url=None,
+               key_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -578,89 +588,85 @@ def restore_key(client, vault_base_url, file_path):
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
 
-
-def import_key(cmd, client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+def import_key(client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
-        Supports importing BYOK keys into HSM for premium KeyVaults. """
+        Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-    def _to_bytes(hex_string):
-        # zero pads and decodes a hex string
-        if len(hex_string) % 2:
-            hex_string = '0{}'.format(hex_string)
-        return codecs.decode(hex_string, 'hex_codec')
 
-    def _set_rsa_parameters(dest, src):
-        # map OpenSSL parameter names to JsonWebKey property names
-        conversion_dict = {
-            'modulus': 'n',
-            'publicExponent': 'e',
-            'privateExponent': 'd',
-            'prime1': 'p',
-            'prime2': 'q',
-            'exponent1': 'dp',
-            'exponent2': 'dq',
-            'coefficient': 'qi'
+    def _int_to_bytes(i):
+        h = hex(i)
+        if len(h) > 1 and h[0:2] == '0x':
+            h = h[2:]
+        # need to strip L in python 2.x
+        h = h.strip('L')
+        if len(h) % 2:
+            h = '0' + h
+        return codecs.decode(h, 'hex')
+
+    def _private_rsa_key_to_jwk(rsa_key, jwk):
+        jwk.n = _int_to_bytes(rsa_key.private_numbers().public_numbers.n)
+        jwk.e = _int_to_bytes(rsa_key.private_numbers().public_numbers.e)
+        jwk.q = _int_to_bytes(rsa_key.private_numbers().q)
+        jwk.p = _int_to_bytes(rsa_key.private_numbers().p)
+        jwk.d = _int_to_bytes(rsa_key.private_numbers().d)
+        jwk.dq = _int_to_bytes(rsa_key.private_numbers().dmql)
+        jwk.dp = _int_to_bytes(rsa_key.private_numbers().dmpl)
+        jwk.qi = _int_to_bytes(rsa_key.private_numbers().iqmp)
+
+    def _private_ec_key_to_jwk(ec_key, jwk):
+        supported_curves = {
+            'secp256r1': 'P-256',
+            'secp384r1': 'P-384',
+            'secp521r1': 'P-521',
+            'secp256k1': 'SECP256K1'
         }
-        # regex: looks for matches that fit the following patterns:
-        #   integerPattern: 65537 (0x10001)
-        #   hexPattern:
-        #      00:a0:91:4d:00:23:4a:c6:83:b2:1b:4c:15:d5:be:
-        #      d8:87:bd:c9:59:c2:e5:7a:f5:4a:e7:34:e8:f0:07:
-        # The desired match should always be the first component of the match
-        regex = re.compile(r'([^:\s]*(:[^\:)]+\))|([^:\s]*(:\s*[0-9A-Fa-f]{2})+))')
-        # regex2: extracts the hex string from a format like: 65537 (0x10001)
-        regex2 = re.compile(r'(?<=\(0x{1})([0-9A-Fa-f]*)(?=\))')
+        curve = ec_key.private_numbers().public_numbers.curve.name
 
-        key_params = crypto.dump_privatekey(crypto.FILETYPE_TEXT, src).decode('utf-8')
-        for match in regex.findall(key_params):
-            comps = match[0].split(':', 1)
-            name = conversion_dict.get(comps[0], None)
-            if name:
-                value = comps[1].replace(' ', '').replace('\n', '').replace(':', '')
-                try:
-                    value = _to_bytes(value)
-                except Exception:  # pylint:disable=broad-except
-                    # if decoding fails it is because of an integer pattern. Extract the hex
-                    # string and retry
-                    value = _to_bytes(regex2.findall(value)[0])
-                setattr(dest, name, value)
+        jwk.crv = supported_curves.get(curve, None)
+        if not jwk.crv:
+            raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
+
+        jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
+        jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
+        jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
-        key_obj.kty = 'RSA'
         logger.info('Reading %s', pem_file)
-        with open(pem_file, 'r') as f:
+        with open(pem_file, 'rb') as f:
             pem_data = f.read()
-        # load private key and prompt for password if encrypted
-        try:
             pem_password = str(pem_password).encode() if pem_password else None
-            # despite documentation saying password should be a string, it needs to actually
-            # be UTF-8 encoded bytes
-            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_data, pem_password)
-        except crypto.Error:
-            raise CLIError(
-                'Import failed: Unable to decrypt private key. --pem-password may be incorrect.')
-        except TypeError:
-            raise CLIError('Invalid --pem-password.')
-        logger.info('setting RSA parameters from PEM data')
-        _set_rsa_parameters(key_obj, pkey)
+
+            try:
+                pkey = load_pem_private_key(pem_data, pem_password, default_backend())
+            except (ValueError, TypeError, UnsupportedAlgorithm) as e:
+                print(e)
+
+            # populate key into jwk
+            if isinstance(pkey, rsa.RSAPrivateKey):
+                key_obj.kty = 'RSA'
+                _private_rsa_key_to_jwk(pkey, key_obj)
+            elif isinstance(pkey, ec.EllipticCurvePrivateKey):
+                key_obj.kty = 'EC'
+                _private_ec_key_to_jwk(pkey, key_obj)
+            else:
+                raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
     elif byok_file:
         with open(byok_file, 'rb') as f:
             byok_data = f.read()
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
-    return client.import_key(
-        vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 # endregion
 
 
 # region KeyVault Secret
-def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
-                    secret_version=''):
+def download_secret(client, file_path, vault_base_url=None, secret_name=None, encoding=None,
+                    secret_version='', identifier=None):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -692,7 +698,8 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
         raise ex
 
 
-def backup_secret(client, vault_base_url, secret_name, file_path):
+def backup_secret(client, file_path, vault_base_url=None,
+                  secret_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_secret(vault_base_url, secret_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -824,8 +831,8 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
     return result
 
 
-def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='PEM', certificate_version=''):
+def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
+                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -970,10 +977,10 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
         issuer.attributes)
 # endregion
 
+
 # region storage_account
-
-
-def backup_storage_account(client, vault_base_url, storage_account_name, file_path):
+def backup_storage_account(client, file_path, vault_base_url=None,
+                           storage_account_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_storage_account(vault_base_url, storage_account_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -983,5 +990,4 @@ def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
         return client.restore_storage_account(vault_base_url, data)
-
 # endregion

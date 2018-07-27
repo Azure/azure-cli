@@ -160,8 +160,6 @@ def ext_compat_with_cli(azext_metadata):
             is_compatible = False
         elif max_required and parsed_cli_version > parse_version(max_required):
             is_compatible = False
-        else:
-            is_compatible = True
     return is_compatible, core_version, min_required, max_required
 
 

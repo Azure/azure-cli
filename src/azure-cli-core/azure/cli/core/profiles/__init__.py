@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 #  pylint: disable=unused-import
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, PROFILE_TYPE
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, CustomResourceType, PROFILE_TYPE
 
 
 def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
@@ -89,3 +89,15 @@ API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
     '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile']
 }
+
+
+def register_resource_type(profile_name, resource_type, api_version):
+    err_msg = "Failed to add resource type to profile '{p}': "
+    if not isinstance(resource_type, CustomResourceType):
+        raise TypeError((err_msg + "resource_type should be of type {c}, got {r}.").format(p=profile_name,
+                                                                                           c=CustomResourceType,
+                                                                                           r=type(resource_type)))
+    try:
+        API_PROFILES[profile_name].update({resource_type: api_version})
+    except KeyError:
+        raise ValueError((err_msg + "Profile '{p}' not found.").format(p=profile_name))

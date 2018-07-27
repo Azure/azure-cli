@@ -44,7 +44,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('check-name', 'check_name_availability')
         g.custom_command('create', 'create_storage_account', min_api='2016-01-01')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get_properties', exception_handler=g.get_handler_suppress_404())
+        g.generic_show_command('show', 'get_properties')
         g.custom_command('list', 'list_storage_accounts')
         g.custom_command('show-usage', 'show_storage_account_usage')
         g.custom_command('show-connection-string', 'show_storage_account_connection_string')
@@ -93,7 +93,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_command('list', 'list_blobs', transform=transform_storage_list_output,
                           table_transformer=transform_blob_output)
-        g.storage_command('download', 'get_blob_to_path')
+        g.storage_command('download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_command('generate-sas', 'generate_blob_shared_access_signature')
         g.storage_command('url', 'make_blob_url', transform=transform_url)
         g.storage_command('snapshot', 'snapshot_blob')

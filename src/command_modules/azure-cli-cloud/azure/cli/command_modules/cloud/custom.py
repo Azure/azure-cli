@@ -84,7 +84,8 @@ def register_cloud(cmd,
                    suffix_storage_endpoint=None,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
-                   suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
+                   suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
+                   suffix_acr_login_server_endpoint=None):
     c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
@@ -110,7 +111,8 @@ def modify_cloud(cmd,
                  suffix_storage_endpoint=None,
                  suffix_keyvault_dns=None,
                  suffix_azure_datalake_store_file_system_endpoint=None,
-                 suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
+                 suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
+                 suffix_acr_login_server_endpoint=None):
     if not cloud_name:
         cloud_name = cmd.cli_ctx.cloud.name
     c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,

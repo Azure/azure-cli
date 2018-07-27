@@ -3,9 +3,20 @@
 Release History
 ===============
 
+2.0.16
+++++++
+* Minor fixes
+
+2.0.15
+++++++
+* Add acr login server suffix to cloud config.
+
+2.0.14
+++++++
+* Minor fixes
+
 2.0.13
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 2.0.12

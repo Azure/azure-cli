@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -477,6 +478,15 @@ helps['storage entity'] = """
 helps['storage entity query'] = """
     type: command
     short-summary: List entities which satisfy a query.
+    parameters:
+        - name: --marker
+          type: list
+          short-summary: Space-separated list of key=value pairs. Must contain a nextpartitionkey and a nextrowkey.
+          long-summary: This value can be retrieved from the
+                        next_marker field of a previous generator object if max_results was
+                        specified and that generator has finished enumerating results. If
+                        specified, this generator will begin returning results from the
+                        point where the previous generator stopped.
 """
 
 helps['storage file'] = """

@@ -166,7 +166,7 @@ def validate_diagnostic_settings(cmd, namespace):
                                           type='workspaces',
                                           name=namespace.workspace)
 
-    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub_name:
+    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub:
         raise CLIError(
             'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
 

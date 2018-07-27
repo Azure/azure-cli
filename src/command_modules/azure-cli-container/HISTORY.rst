@@ -3,6 +3,25 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Update PyYAML dependency to 4.2b4
+
+0.2.0
++++++
+* Default to long running operation for `az container create`
+* Add Log Analytics parameters '--log-analytics-workspace' and '--log-analytics-workspace-key'
+* Add --protocol parameter to specify which network protocol to use
+
+0.1.24
+++++++
+* Allow exporting a container group in yaml format.
+* Allow using a yaml file to create / update a container group.
+
+0.1.23
+++++++
+* Do not require --registry-server for `az container create` when a registry server is included in the image name.
+
 0.1.22
 ++++++
 * Add Git Repo volume mount parameters '--gitrepo-url' '--gitrepo-dir' '--gitrepo-revision' and '--gitrepo-mount-path'

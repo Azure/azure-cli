@@ -404,7 +404,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com.' + zn)])
         self._check_txt(zone, 'longtxt2.' + zn, [(100, 500, None)])
         self._check_txt(zone, 'longtxt.' + zn, [(999, 944, None)])
-        self._check_txt(zone, 'spf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
+        self._check_txt(zone, 'myspf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
         self._check_txt(zone, zn, [
             (200, None, 'this is another SPF, this time as TXT'),
             (200, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')  # pylint: disable=line-too-long
