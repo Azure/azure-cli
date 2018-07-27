@@ -275,10 +275,10 @@ def acr_build(cmd,
             raise CLIError("Source location should be a local directory path or remote URL.")
 
         _check_local_docker_file(source_location, docker_file_path)
-        
+
         try:
             source_location = _upload_source_code(
-                client_registries, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path)            
+                client_registries, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path)
         except Exception as err:
             raise CLIError(err)
         finally:
@@ -393,7 +393,7 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
             unit = S
             break
         size = size / 1024.0
-    
+
     logger.debug("Uploading archived source code from '%s'.", tar_file_path)
     logger.warning("Sending build context ({0:.3f} {1}) to ACR...".format(size, unit))
 
