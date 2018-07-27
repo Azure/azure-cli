@@ -660,13 +660,12 @@ class AzInteractiveShell(object):
 
             self.last_exit = 0
             if result and result.result is not None:
-                from azure.cli.core._output import OutputProducer
                 if self.output:
                     self.output.write(result)
                     self.output.flush()
                 else:
-                    formatter = OutputProducer.get_formatter(self.cli_ctx.invocation.data['output'])
-                    OutputProducer(formatter=formatter).out(result)
+                    formatter = self.cli_ctx.output.get_formatter(self.cli_ctx.invocation.data['output'])
+                    self.cli_ctx.output.out(result, formatter=formatter)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
