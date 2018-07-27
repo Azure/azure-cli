@@ -280,7 +280,7 @@ helps['ams live event create'] = """
 
 helps['ams live event start'] = """
     type: command
-    short-summary: Start an existing live event.
+    short-summary: Start a live event.
 """
 
 helps['ams live event show'] = """
