@@ -91,8 +91,7 @@ def load_command_table(self, _):
 
     compute_vm_run_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
-        client_factory=cf_run_commands,
-        min_api='2017-03-30'
+        client_factory=cf_run_commands
     )
 
     compute_vm_size_sdk = CliCommandType(
@@ -240,7 +239,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands') as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
         g.custom_command('invoke', 'run_command_invoke')
         g.command('list', 'list')
         g.show_command('show', 'get')
