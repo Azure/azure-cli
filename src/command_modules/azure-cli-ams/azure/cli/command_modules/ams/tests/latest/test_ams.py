@@ -115,7 +115,8 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_asset(self, resource_group, storage_account_for_create):
+    @StorageAccountPreparer(parameter_name='storage_account_for_asset')
+    def test_ams_asset(self, resource_group, storage_account_for_create, storage_account_for_asset):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
@@ -181,6 +182,11 @@ class AmsTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
+        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccountForAsset}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
         assetName = self.create_random_name(prefix='asset', length=12)
         alternateId = self.create_random_name(prefix='aid', length=12)
         description = self.create_random_name(prefix='desc', length=12)
@@ -191,7 +197,7 @@ class AmsTests(ScenarioTest):
             'description': description
         })
 
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description {description} --alternate-id {alternateId}', checks=[
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description {description} --alternate-id {alternateId} --storage-account {storageAccountForAsset}', checks=[
             self.check('name', '{assetName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('alternateId', '{alternateId}'),
