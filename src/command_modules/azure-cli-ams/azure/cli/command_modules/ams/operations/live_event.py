@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def create(client, resource_group_name, account_name, name, streaming_protocol, location):
+def create(client, resource_group_name, account_name, live_event_name, streaming_protocol, location):
     from azure.mgmt.media.models import LiveEventInputProtocol
     from azure.mgmt.media.models import LiveEventInput
     from azure.mgmt.media.models import LiveEvent
@@ -14,4 +14,4 @@ def create(client, resource_group_name, account_name, name, streaming_protocol, 
     live_event = LiveEvent(input=liveeventinput, location=location)
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                         live_event_name=name, parameters=live_event)
+                         live_event_name=live_event_name, parameters=live_event)
