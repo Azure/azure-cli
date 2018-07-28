@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.1.3
+++++++
+* Add content-trust policy commands.
+
 2.1.2
 +++++
 * Minor fixes
@@ -10,10 +15,6 @@ Release History
 +++++
 * Add --with-secure-properties flag in 'acr build-task show' command.
 * Add 'acr build-task update-build' command.
-
-2.1.3
-++++++
-* Add content-trust policy commands.
 
 2.1.0
 +++++
