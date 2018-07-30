@@ -328,7 +328,7 @@ helps['webapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az webapp source-control config-local-git \\
+            az webapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
