@@ -167,6 +167,75 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
+def add_azure_storage_account(cmd, resource_group_name, name, id, storage_type, account_name,
+                              share_name, access_key, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    if id in azure_storage_accounts.properties:
+        raise CLIError("Site already configured with an Azure storage account with the id '{}'. " +
+                       "Use 'az webapp config azure-storage-accounts update' to update an existing " +
+                       "Azure storage account configuration.".format(id))
+
+    azure_storage_accounts.properties[id] = AzureStorageInfoValue(storage_type, account_name,
+                                                                  share_name, access_key, mount_path)
+
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
+def update_azure_storage_account(cmd, resource_group_name, name, id, storage_type=None, account_name=None,
+                                 share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    existing_account_config = azure_storage_accounts.properties.pop(id, None)
+
+    if not existing_account_config:
+        raise CLIError("No Azure storage account configuration found with the id '{}'. " +
+                       "Use 'az webapp config azure-storage-accounts add' to add a new " +
+                       "Azure storage account configuration.".format(id))
+
+    new_account_config = AzureStorageInfoValue(
+        storage_type or existing_account_config.type,
+        account_name or existing_account_config.account_name,
+        share_name or existing_account_config.share_name,
+        access_key or existing_account_config.access_key,
+        mount_path or existing_account_config.mount_path
+    )
+
+    azure_storage_accounts.properties[id] = new_account_config
+
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
@@ -430,6 +499,19 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     return result
 
 
+def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                     'list_azure_storage_accounts', slot, client)
+
+    slot_azure_storage_config_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                                                     .azure_storage_config_names or []
+
+    return [{'name': p,
+             'value': result.properties[p],
+             'slotSetting': p in slot_azure_storage_config_names} for p in result.properties]
+
+
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
@@ -549,6 +631,30 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
                                          app_settings.properties, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+
+
+def delete_azure_storage_accounts(cmd, resource_group_name, name, ids, slot=None):
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+    client = web_client_factory(cmd.cli_ctx)
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+    is_slot_settings = False
+
+    for id in ids:
+        azure_storage_accounts.properties.pop(id, None)
+        if slot_cfg_names.azure_storage_config_names and id in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.remove(id)
+            is_slot_settings = True
+
+    if is_slot_settings:
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    return result.properties
 
 
 def _ssl_context():

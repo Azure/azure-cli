@@ -10,7 +10,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
-from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
 
@@ -226,6 +226,14 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+
+    with self.argument_context('webapp config azure-storage-accounts') as c:
+        c.argument('id', options_list=['--id', '-i'], help='custom identifier')
+        c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type', arg_type=get_enum_type(AzureStorageType))
+        c.argument('account_name', options_list=['--acount-name', '-a'], help='storage account name')
+        c.argument('share_name', options_list=['--share-name', '-sn'], help='share name (Azure Files) or container name (Azure Blob Storage)')
+        c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
+        c.argument('mount_path', options_list=['--mount-path', '-m'], help='path to mount storage volume within web app')
 
     with self.argument_context('webapp config container') as c:
         c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'], help='the container registry server url')

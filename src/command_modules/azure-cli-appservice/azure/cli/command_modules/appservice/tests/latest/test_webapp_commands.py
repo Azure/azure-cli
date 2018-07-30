@@ -320,6 +320,35 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
+        # site azure storage account configurations tests
+        # add
+        self.cmd('webapp config azure-storage-accounts add -g {} -n {} --id Id --type AzureFiles --account-name name '
+                 '--share-name sharename --access-key key --mount-path /path/to/mount'.format(resource_group, webapp_name))
+        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+                     JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+                     JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+                     JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+                     JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+        # update
+        self.cmd('webapp config azure-storage-accounts update -g {} -n {} --id Id --mount-path /different/path'
+                 .format(resource_group, webapp_name))
+        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck("length(@)", 1),
+                     JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+                     JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+                     JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+                     JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+                     JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
+        # list
+        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck("length(@)", 1),
+                     JMESPathCheck("[0].name=='Id'")])
+        # delete
+        self.cmd('webapp config azure-storage-accounts delete -g {} -n {} --ids Id'.format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck("length(@)", 0)])
+
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
                  '--slot-settings c3=conn3'.format(resource_group, webapp_name))
