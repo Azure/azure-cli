@@ -27,7 +27,10 @@ def get_help_files(cli_ctx):
     cli_ctx.invocation.commands_loader.load_command_table([])
     cmd_table = cli_ctx.invocation.commands_loader.command_table
     for command in cmd_table:
-        cli_ctx.invocation.commands_loader.load_arguments(command)
+        try:
+            cli_ctx.invocation.commands_loader.load_arguments(command)        
+        except Exception as ex:
+            print("Skipped '{}' due to '{}'".format(command, ex))
     cli_ctx.invocation.parser.load_command_table(cli_ctx.invocation.commands_loader)
 
     parser_keys = []
