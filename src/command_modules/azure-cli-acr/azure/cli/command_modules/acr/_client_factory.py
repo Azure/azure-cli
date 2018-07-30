@@ -28,10 +28,6 @@ def cf_acr_registries(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).registries
 
 
-def cf_acr_registries_stable(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, '2017-10-01').registries
-
-
 def cf_acr_replications(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).replications
 

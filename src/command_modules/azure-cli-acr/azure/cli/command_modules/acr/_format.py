@@ -18,6 +18,10 @@ def usage_output_format(result):
     return _output_format(result, _usage_format_group)
 
 
+def policy_output_format(result):
+    return _output_format(result, _policy_format_group)
+
+
 def credential_output_format(result):
     return _output_format(result, _credential_format_group)
 
@@ -79,6 +83,13 @@ def _usage_format_group(item):
         ('LIMIT', _get_value(item, 'limit')),
         ('CURRENT VALUE', _get_value(item, 'currentValue')),
         ('UNIT', _get_value(item, 'unit'))
+    ])
+
+
+def _policy_format_group(item):
+    return OrderedDict([
+        ('STATUS', _get_value(item, 'status')),
+        ('TYPE', _get_value(item, 'type'))
     ])
 
 

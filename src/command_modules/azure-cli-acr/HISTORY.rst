@@ -4,7 +4,7 @@ Release History
 ===============
 
 2.1.3
-++++++
++++++
 * Add content-trust policy commands.
 * Minor fixes
 
