@@ -138,7 +138,7 @@ helps['acr config content-trust show'] = """
     examples:
         - name: Show the configured content-trust policy for a container registry
           text: >
-            az acr content-trust show -n MyRegistry
+            az acr config content-trust show -n MyRegistry
 """
 
 helps['acr config content-trust update'] = """
@@ -147,7 +147,7 @@ helps['acr config content-trust update'] = """
     examples:
         - name: Update content-trust policy for a container registry
           text: >
-            az acr content-trust update -n MyRegistry --status Enabled
+            az acr config content-trust update -n MyRegistry --status Enabled
 """
 
 helps['acr credential show'] = """

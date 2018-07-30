@@ -87,7 +87,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
-    with self.argument_context('acr config content-trsut') as c:
+    with self.argument_context('acr config content-trust') as c:
         c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(POLICY_STATUS))
 
     with self.argument_context('acr repository') as c:
