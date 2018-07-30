@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.0
++++++
+* `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+
 2.2.2
 +++++
 * Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
