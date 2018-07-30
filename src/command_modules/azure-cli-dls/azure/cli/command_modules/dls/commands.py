@@ -15,6 +15,7 @@ from ._validators import (
     validate_subnet
 )
 
+
 def load_command_table(self, _):
 
     adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'

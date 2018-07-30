@@ -39,6 +39,7 @@ def validate_resource_group_name(cmd, ns):
         group_name = _get_resource_group_from_account_name(client, account_name)
         ns.resource_group_name = group_name
 
+
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
