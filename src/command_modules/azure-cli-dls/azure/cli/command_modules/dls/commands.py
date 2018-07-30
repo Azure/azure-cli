@@ -11,6 +11,9 @@ from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account_virtual_network,
     cf_dls_account_trusted_provider)
 
+from ._validators import (
+    validate_subnet
+)
 
 def load_command_table(self, _):
 
@@ -56,11 +59,11 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
     # account virtual network rule operations
-    with self.command_group('dls account virtual-network', dls_virtual_network_sdk, client_factory=cf_dls_account_virtual_network) as g:
-        g.custom_command('create', 'add_adls_virtual_network_rule')
-        g.command('update', 'update')
+    with self.command_group('dls account network-rule', dls_virtual_network_sdk, client_factory=cf_dls_account_virtual_network) as g:
+        g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
+        g.generic_update_command('update')
         g.command('list', 'list_by_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account trusted id provider operations

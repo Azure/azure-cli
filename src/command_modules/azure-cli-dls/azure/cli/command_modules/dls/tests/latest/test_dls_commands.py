@@ -375,24 +375,24 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             'subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/default',
             'updated_subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/updatedSubnetId'
         })
-        self.cmd('dls account virtual-network create -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet-id {subnet_id}')
-        self.cmd('dls account virtual-network show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
+        self.cmd('dls account network-rule create -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet {subnet_id}')
+        self.cmd('dls account network-rule show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
             self.check('name', '{vnet}'),
             self.check('subnetId', '{subnet_id}'),
         ])
 
-        self.cmd('dls account virtual-network update -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet-id {updated_subnet_id}')
-        self.cmd('dls account virtual-network show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
+        self.cmd('dls account network-rule update -g {rg} -n {dls} --virtual-network-rule-name {vnet} --subnet {updated_subnet_id}')
+        self.cmd('dls account network-rule show -g {rg} -n {dls} --virtual-network-rule-name {vnet}', checks=[
             self.check('name', '{vnet}'),
             self.check('subnetId', '{subnet_id}'),
         ])
 
-        self.cmd('dls account virtual-network list -g {rg} -n {dls}', checks=[
+        self.cmd('dls account network-rule list -g {rg} -n {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
         ])
-        self.cmd('dls account virtual-network delete -g {rg} -n {dls} --virtual-network-rule-name {vnet}')
-        self.cmd('dls account virtual-network list -g {rg} -n {dls}', checks=[
+        self.cmd('dls account network-rule delete -g {rg} -n {dls} --virtual-network-rule-name {vnet}')
+        self.cmd('dls account network-rule list -g {rg} -n {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 0),
         ])

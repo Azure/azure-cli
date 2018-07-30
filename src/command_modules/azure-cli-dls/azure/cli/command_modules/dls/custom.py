@@ -52,7 +52,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
                         key_version=None, disable_encryption=False, tier=None):
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    create_params = DataLakeStoreAccount(location=location,
+    create_params = DataLakeStoreAccount(location,
                                          tags=tags,
                                          default_group=default_group,
                                          new_tier=tier)
@@ -118,9 +118,9 @@ def add_adls_firewall_rule(client,
 def add_adls_virtual_network_rule(client,
                            account_name,
                            virtual_network_rule_name,
-                           subnet_id,
+                           subnet,
                            resource_group_name):
-    create_params = VirtualNetworkRule(subnet_id)
+    create_params = VirtualNetworkRule(subnet)
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    virtual_network_rule_name,
