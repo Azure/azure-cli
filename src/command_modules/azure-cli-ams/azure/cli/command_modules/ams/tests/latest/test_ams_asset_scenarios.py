@@ -3,20 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer    
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
-class AmsTests(ScenarioTest):
+class AmsAssetTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @StorageAccountPreparer(parameter_name='storage_account_for_asset')
-    def test_ams_asset(self, resource_group, storage_account_for_create, storage_account_for_asset):
+    def test_ams_asset(self, storage_account_for_create, storage_account_for_asset):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
+            'storageAccountForAsset': storage_account_for_asset,
             'location': 'westus2'
         })
 
@@ -44,7 +45,8 @@ class AmsTests(ScenarioTest):
             self.check('name', '{assetName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('alternateId', '{alternateId}'),
-            self.check('description', '{description}')
+            self.check('description', '{description}'),
+            self.check('storageAccountName', '{storageAccountForAsset}')
         ])
 
         self.cmd('az ams asset update -a {amsname} -n {assetName} -g {rg} --set description=mydesc alternateId=myaid', checks=[
@@ -68,7 +70,7 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_asset_get_sas_urls(self, resource_group, storage_account_for_create):
+    def test_ams_asset_get_sas_urls(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
