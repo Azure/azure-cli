@@ -116,10 +116,10 @@ def add_adls_firewall_rule(client,
 
 # region virtual network
 def add_adls_virtual_network_rule(client,
-                           account_name,
-                           virtual_network_rule_name,
-                           subnet,
-                           resource_group_name):
+                                  account_name,
+                                  virtual_network_rule_name,
+                                  subnet,
+                                  resource_group_name):
     create_params = VirtualNetworkRule(subnet)
     return client.create_or_update(resource_group_name,
                                    account_name,
