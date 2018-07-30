@@ -11,7 +11,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list, get_presets_definition_name_completion_list
 
-from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol)
+from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType)
 
 from ._validators import validate_storage_account_id, datetime_format
 
@@ -175,3 +175,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams live event create') as c:
         c.argument('streaming_protocol', arg_type=get_enum_type(LiveEventInputProtocol),
                    help='The streaming protocol for the live event.')
+        c.argument('auto_start', action='store_true', help='The flag indicates if auto start the live event.')
+        c.argument('encoding_type', arg_type=get_enum_type(LiveEventEncodingType),
+                   help='The encoding type for Live Event.')
+        c.argument('preset_name', help='The encoding preset name.')
+        c.argument('tags', arg_type=tags_type)
