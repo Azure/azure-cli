@@ -275,31 +275,21 @@ def acr_build(cmd,
             raise CLIError("Source location should be a local directory path or remote URL.")
 
         _check_local_docker_file(source_location, docker_file_path)
-        size = 0
 
         try:
             source_location = _upload_source_code(
                 client_registries, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path)
-            size = os.path.getsize(tar_file_path)
         except Exception as err:
             raise CLIError(err)
         finally:
             try:
-                logger.debug("Starting to delete the archived source code from '%s'.", tar_file_path)
+                logger.debug("Deleting the archived source code from '%s'.", tar_file_path)
                 os.remove(tar_file_path)
             except OSError:
                 pass
-
-        unit = 'GiB'
-        for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
-            if size < 1024:
-                unit = S
-                break
-            size = size / 1024.0
-        logger.warning("Sending build context ({0:.3f} {1}) to ACR.".format(size, unit))
     else:
         source_location = _check_remote_source_code(source_location)
-        logger.warning("Sending build context to ACR.")
+        logger.warning("Sending build context to ACR...")
 
     if no_push:
         is_push_enabled = False
@@ -363,9 +353,10 @@ def _check_remote_source_code(source_location):
 
 
 def _upload_source_code(client, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path):
-    logger.debug("Starting to acquire the access token to upload the source code.")
     ignore_list = _load_dockerignore_file(source_location)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
+
+    logger.warning("Packing source code into tar file to upload...")
 
     def _filter_file(tarinfo):
         # ignore common vcs dir or file
@@ -395,7 +386,16 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         # otherwise the child item name will have a prefix (eg, ../) which can block unpacking.
         tar.add(source_location, arcname="", filter=_filter_file)
 
-    logger.debug("Starting to upload the archived source code from '%s'.", tar_file_path)
+    size = os.path.getsize(tar_file_path)
+    unit = 'GiB'
+    for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
+        if size < 1024:
+            unit = S
+            break
+        size = size / 1024.0
+
+    logger.debug("Uploading archived source code from '%s'.", tar_file_path)
+    logger.warning("Sending build context ({0:.3f} {1}) to ACR...".format(size, unit))
 
     upload_url = None
     relative_path = None
