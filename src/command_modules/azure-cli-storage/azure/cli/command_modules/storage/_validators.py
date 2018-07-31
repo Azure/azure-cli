@@ -50,7 +50,7 @@ def _query_account_rg(cli_ctx, account_name):
 
 def process_resource_group(cmd, namespace):
     """Processes the resource group parameter from the account name"""
-    if namespace.account_name:
+    if namespace.account_name and not namespace.resource_group_name:
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
