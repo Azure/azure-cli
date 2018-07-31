@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName, PolicyStatus
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName
 
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 
@@ -16,5 +16,3 @@ BUILD_STEP_RESOURCE_TYPE = BUILD_TASK_RESOURCE_TYPE + '/steps'
 
 CLASSIC_REGISTRY_SKU = [SkuName.classic.value]
 MANAGED_REGISTRY_SKU = [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]
-
-POLICY_STATUS = [PolicyStatus.enabled, PolicyStatus.disabled]
