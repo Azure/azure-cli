@@ -298,15 +298,18 @@ def _validate_managed_disk_sku(sku):
 
 def _validate_location(cmd, namespace, zone_info, size_info):
     from ._vm_utils import list_sku_info
+    from azure.cli.core.profiles import supported_api_version, ResourceType
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
             temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
-            if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
-                               "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
-                               "used to find such locations".format(namespace.resource_group_name))
+            if supported_api_version(cmd.cli_ctx, ResourceType.MGMT_COMPUTE, min_api='2017-09-01'):
+                if not temp or not [x for x in (temp.location_info or []) if x.zones]:
+                    raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity "
+                                   "zone is not yet supported. Please use '--location' to specify a capable one. "
+                                   "'az vm list-skus' can be used to find such locations"
+                                   .format(namespace.resource_group_name))
 
 
 # pylint: disable=too-many-branches, too-many-statements
