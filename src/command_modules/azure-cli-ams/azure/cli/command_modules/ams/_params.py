@@ -180,3 +180,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The encoding type for Live Event.')
         c.argument('preset_name', help='The encoding preset name.')
         c.argument('tags', arg_type=tags_type)
+        c.argument('key_frame_interval_duration', help='ISO 8601 timespan duration of the key frame interval duration.')
+        c.argument('access_token', help='The access token.')
+        c.argument('description', help='The live event description.')
