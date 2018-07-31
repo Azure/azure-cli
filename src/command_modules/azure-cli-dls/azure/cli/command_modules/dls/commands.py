@@ -64,7 +64,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
         g.generic_update_command('update')
         g.command('list', 'list_by_account')
-        g.show_command('show', 'get')
+        g.generic_show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account trusted id provider operations

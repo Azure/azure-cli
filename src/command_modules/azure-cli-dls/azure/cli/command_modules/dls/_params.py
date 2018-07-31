@@ -14,6 +14,9 @@ from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_
     TrustedIdProviderState,
     TierType,
     FirewallAllowAzureIpsState)
+from ._validators import (
+    validate_subnet
+)
 
 from azure.mgmt.datalake.store.models import EncryptionConfigType
 
@@ -55,6 +58,25 @@ def load_arguments(self, _):
 
     with self.argument_context('dls account list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)
+
+    # ADLS network-rule
+    # with self.argument_context('dls account network-rule') as c:
+    #     # c.argument('name', options_list=['--name', '-n'])
+    #
+    #     c.argument('virtual_network_subnet_id',
+    #                options_list=['--subnet'],
+    #                help='Name or ID of the subnet that allows access to ADLS. '
+    #                'If subnet name is provided, --vnet-name must be provided.')
+    #
+    #     c.argument('ignore_missing_vnet_service_endpoint',
+    #                options_list=['--ignore-missing-endpoint', '-i'],
+    #                help='Create firewall rule before the virtual network has vnet service endpoint enabled')
+
+    with self.argument_context('dls account network-rule create') as c:
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name',
+                validator=validate_subnet)
 
     # filesystem
     with self.argument_context('dls fs') as c:
