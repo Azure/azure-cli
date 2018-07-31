@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.43"
+__version__ = "2.0.44"
 
 import os
 import sys
@@ -498,6 +498,7 @@ def get_default_cli():
     from azure.cli.core.parser import AzCliCommandParser
     from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
     from azure.cli.core._help import AzCliHelp
+    from azure.cli.core._output import AzOutputProducer
 
     return AzCli(cli_name='az',
                  config_dir=GLOBAL_CONFIG_DIR,
@@ -506,4 +507,5 @@ def get_default_cli():
                  invocation_cls=AzCliCommandInvoker,
                  parser_cls=AzCliCommandParser,
                  logging_cls=AzCliLogging,
+                 output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
