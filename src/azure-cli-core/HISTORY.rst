@@ -5,7 +5,7 @@ Release History
 
 2.0.44
 ++++++
-* Minor fixes
+* Introduce YAML output format
 
 2.0.43
 ++++++
