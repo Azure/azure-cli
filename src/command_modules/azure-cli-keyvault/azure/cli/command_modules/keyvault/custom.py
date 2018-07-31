@@ -396,19 +396,19 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
         instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
 
     if enable_soft_delete is not None:
-        instance.properties.properties.enable_soft_delete = enable_soft_delete
+        instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
-        instance.properties.properties.enable_purge_protection = enable_purge_protection
+        instance.properties.enable_purge_protection = enable_purge_protection
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
-        if instance.properties.properties.network_acls is None:
-            instance.properties.properties.network_acls = _create_network_rule_set(cmd, bypass, default_action)
+        if instance.properties.network_acls is None:
+            instance.properties.network_acls = _create_network_rule_set(cmd, bypass, default_action)
         else:
             if bypass:
-                instance.properties.properties.network_acls.bypass = bypass
+                instance.properties.network_acls.bypass = bypass
             if default_action:
-                instance.properties.properties.network_acls.default_action = default_action
+                instance.properties.network_acls.default_action = default_action
     return instance
 
 
@@ -562,8 +562,9 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(cmd, client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
-               disabled=False, expires=None, not_before=None, tags=None):
+def create_key(cmd, client, vault_base_url, key_name, protection=None,  # pylint: disable=unused-argument
+               key_size=None, key_ops=None, disabled=False, expires=None,
+               not_before=None, tags=None, kty=None, curve=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     return client.create_key(vault_base_url=vault_base_url,
@@ -588,7 +589,7 @@ def restore_key(client, vault_base_url, file_path):
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
 
-def import_key(client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
+def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium key vaults. """

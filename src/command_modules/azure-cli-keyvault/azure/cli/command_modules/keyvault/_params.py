@@ -23,8 +23,7 @@ from ._validators import (
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
-    validate_vault_id, validate_storage_disabled_attribute, validate_storage_account_id,
-    validate_sas_definition_id)
+    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 # CUSTOM CHOICE LISTS
