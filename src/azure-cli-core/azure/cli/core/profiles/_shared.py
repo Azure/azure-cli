@@ -94,7 +94,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE: '2017-07-29',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_KEYVAULT: '2018-02-14',
-        ResourceType.DATA_KEYVAULT: '7-0'
+        ResourceType.DATA_KEYVAULT: '7.0'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -282,6 +282,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
+    #api_version = api_version.replace('.', '-')
     return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 
