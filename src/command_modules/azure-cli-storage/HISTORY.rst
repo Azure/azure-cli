@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.2
++++++
+* Make '--resource-group' parameter optional for 'storage account' commands.
+
 2.1.1
 +++++
 * Allows download of large files using a single connection.
