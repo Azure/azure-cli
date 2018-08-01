@@ -21,8 +21,8 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.keyvault import KeyVaultAuthentication
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
+from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -1144,6 +1144,8 @@ def _create_certificate(cmd,
 
             policy = _get_default_policy(cli_ctx, certificate_subject_name)
             logger.info("Creating self-signed certificate")
+            #_create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
+            _create_self_signed_key_vault_certificate.__doc__ = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient').__doc__
             result = _create_self_signed_key_vault_certificate(
                 cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
             kv_result = result[0]
@@ -1580,16 +1582,13 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
     return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
 
 
-#_create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
-
-
 def _get_keyVault_not_arm_client(cli_ctx):
     from azure.cli.core._profile import Profile
-    KeyVaultClient = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient')
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
-    client = KeyVaultClient(KeyVaultAuthentication(get_token))
+    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
     return client
 
 

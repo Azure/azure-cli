@@ -247,7 +247,7 @@ def validate_subnet(cmd, namespace):
 def validate_vault_id(entity_type):
 
     def _validate(ns):
-        from azure.keyvault.custom.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
         name = getattr(ns, entity_type.replace('deleted', '') + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)

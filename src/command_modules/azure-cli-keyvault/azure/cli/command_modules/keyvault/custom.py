@@ -358,8 +358,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_soft_delete=enable_soft_delete,
-                                 enable_purge_protection=enable_purge_protection)#,
-                                 #network_acls=network_acls)
+                                 enable_purge_protection=enable_purge_protection)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
