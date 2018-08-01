@@ -3,8 +3,9 @@
 Release History
 ===============
 
-2.1.2
+2.2.0
 +++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
 * Make '--resource-group' parameter optional for 'storage account' commands.
 
 2.1.1
