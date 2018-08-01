@@ -135,17 +135,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     return params
 
 
-def list_network_rules(client, resource_group_name, storage_account_name):
-    sa = client.get_properties(resource_group_name, storage_account_name)
+def list_network_rules(client, resource_group_name, account_name):
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     delattr(rules, 'bypass')
     delattr(rules, 'default_action')
     return rules
 
 
-def add_network_rule(cmd, client, resource_group_name, storage_account_name, action='Allow', subnet=None,
+def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
                      vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, storage_account_name)
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
         from msrestazure.tools import is_valid_resource_id
@@ -164,12 +164,12 @@ def add_network_rule(cmd, client, resource_group_name, storage_account_name, act
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, storage_account_name, params)
+    return client.update(resource_group_name, account_name, params)
 
 
-def remove_network_rule(cmd, client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
+def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, storage_account_name)
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
@@ -179,4 +179,4 @@ def remove_network_rule(cmd, client, resource_group_name, storage_account_name, 
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, storage_account_name, params)
+    return client.update(resource_group_name, account_name, params)

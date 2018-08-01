@@ -53,7 +53,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
         g.command('keys renew', 'regenerate_key', transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys', transform=lambda x: getattr(x, 'keys', x))
-        g.storage_command('generate-sas', 'generate_shared_access_signature', command_type=cloud_data_plane_sdk)
+
+    with self.command_group('storage account', cloud_data_plane_sdk) as g:
+        g.storage_command('generate-sas', 'generate_shared_access_signature')
 
     with self.command_group('storage account network-rule', storage_account_sdk,
                             custom_command_type=storage_account_custom_type,

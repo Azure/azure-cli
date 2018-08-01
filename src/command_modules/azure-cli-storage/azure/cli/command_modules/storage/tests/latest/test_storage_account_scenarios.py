@@ -108,6 +108,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('kind', 'Storage')
         ])
 
+        self.cmd('az storage account show -n {}'.format(name), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('location', location),
+            JMESPathCheck('sku.name', 'Standard_LRS'),
+            JMESPathCheck('kind', 'Storage')
+        ])
+
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
             JMESPathCheck("contains(connectionString, 'https')", False),
