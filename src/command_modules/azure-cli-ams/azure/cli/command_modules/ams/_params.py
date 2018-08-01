@@ -183,6 +183,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_frame_interval_duration', help='ISO 8601 timespan duration of the key frame interval duration.')
         c.argument('access_token', help='The access token.')
         c.argument('description', help='The live event description.')
+        c.argument('ips', nargs='+', help='The IP allow list.')
+        c.argument('preview_locator', help='The preview locator Guid.')
+        c.argument('streaming_policy_name', help='The name of streaming policy used for live event preview.')
+        c.argument('alternative_media_id', help='An alternative media identifier associated with the preview url. This identifier can be used to distinguish the preview of different live events for authorization purposes in the custom license acquisition url template or the custom key acquisition url template of the streaming policy specified in the streaming policy name field.')
 
     with self.argument_context('ams live event stop') as c:
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
