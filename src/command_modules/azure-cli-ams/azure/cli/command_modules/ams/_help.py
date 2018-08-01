@@ -291,3 +291,18 @@ helps['ams live event show'] = """
     type: command
     short-summary: Show the details of a live event.
 """
+
+helps['ams live event list'] = """
+    type: command
+    short-summary: List all the live events of an Azure Media Services account.
+"""
+
+helps['ams live event delete'] = """
+    type: command
+    short-summary: Delete a live event.
+"""
+
+helps['ams live event stop'] = """
+    type: command
+    short-summary: Stop a live event.
+"""
