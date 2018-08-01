@@ -28,6 +28,7 @@ def _environment_variables_type(value):
         raise CLIError(message)
     return {'name': env_name, 'value': env_value}
 
+
 def _secure_environment_variables_type(value):
     """Space-separated values in 'key=value' format."""
     try:
@@ -37,6 +38,7 @@ def _secure_environment_variables_type(value):
                    "Argument values should be in the format a=b c=d")
         raise CLIError(message)
     return {'name': env_name, 'secureValue': env_secure_value}
+
 
 secrets_type = CLIArgumentType(
     validator=validate_secrets,
