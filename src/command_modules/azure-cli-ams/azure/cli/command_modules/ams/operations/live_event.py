@@ -16,8 +16,9 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
     from azure.mgmt.media.models import LiveEventEncoding
 
     protocol = LiveEventInputProtocol(streaming_protocol)
-    live_event_input = LiveEventInput(streaming_protocol=protocol,
-                                    key_frame_interval_duration=key_frame_interval_duration, access_token=access_token)
+    live_event_input = LiveEventInput(streaming_protocol=protocol, access_token=access_token,
+                                      key_frame_interval_duration=key_frame_interval_duration)
+
     live_event_encoding = LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name)
 
     live_event = LiveEvent(input=live_event_input, location=location, encoding=live_event_encoding)
