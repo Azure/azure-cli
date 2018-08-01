@@ -101,7 +101,11 @@ helps['ams transform show'] = """
 helps['ams transform create'] = """
     type: command
     short-summary: Create a transform.
-"""
+    examples:
+        - name: Create a transform with a built-in preset and a custom preset from a local JSON file.
+          text: >
+            az ams transform create -a {myAmsAccount} -n {transformName} -g {myResourceGroup} --presets {builtInPreset} {localPathToCustomPresetJsonFile}
+    """
 
 helps['ams transform delete'] = """
     type: command

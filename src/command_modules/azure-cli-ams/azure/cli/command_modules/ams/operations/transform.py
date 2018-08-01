@@ -13,53 +13,35 @@ from azure.cli.command_modules.ams._sdk_utils import (map_format_type, map_codec
                                                       get_sdk_model_class, get_stand_alone_presets)
 from azure.cli.command_modules.ams._utils import (parse_iso_duration, camel_to_snake)
 
-from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput, BuiltInStandardEncoderPreset)
+from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput,
+                                     BuiltInStandardEncoderPreset, EncoderNamedPreset)
 
 # pylint: disable=line-too-long
 
 
 def create_transform(client, account_name, resource_group_name,
-                     transform_name, preset_names=None, description=None,
-                     custom_preset_path=None):
+                     transform_name, presets, description=None):
     outputs = []
 
-    if custom_preset_path is None and preset_names is None:
-        raise CLIError("Missing required arguments.\nEither --preset-names "
-                       "or --custom-preset must be specified.")
-
-    if preset_names:
-        for preset in preset_names:
-            outputs.append(get_transform_output(preset))
-
-    if custom_preset_path:
-        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
-        outputs.append(TransformOutput(preset=standard_encoder_preset))
+    for preset in presets:
+        outputs.append(get_transform_output(preset))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, outputs, description)
 
 
-def add_transform_output(client, account_name, resource_group_name, transform_name, preset_names=None,
-                         custom_preset_path=None):
+def add_transform_output(client, account_name, resource_group_name, transform_name, presets):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    if not transform.outputs and (preset_names or custom_preset_path):
-        transform.outputs = []
-
-    if preset_names:
-        for preset in preset_names:
-            transform.outputs.append(get_transform_output(preset))
-
-    if custom_preset_path:
-        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
-        transform.outputs.append(TransformOutput(preset=standard_encoder_preset))
+    for preset in presets:
+        transform.outputs.append(get_transform_output(preset))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
 
 
-def remove_transform_output(client, account_name, resource_group_name, transform_name, preset_names):
+def remove_transform_output(client, account_name, resource_group_name, transform_name, presets):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    transform_output_list = list(filter(lambda x: not hasattr(x.preset, 'preset_name') or x.preset.preset_name.value not in preset_names,
+    transform_output_list = list(filter(lambda x: not hasattr(x.preset, 'preset_name') or x.preset.preset_name.value not in presets,
                                         transform.outputs))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform_output_list)
@@ -72,23 +54,17 @@ def transform_update_setter(client, resource_group_name,
                                    parameters.outputs, parameters.description)
 
 
-def update_transform(instance, description=None, preset_names=None, custom_preset_path=None):
+def update_transform(instance, presets, description=None):
     if not instance:
         raise CLIError('The transform resource was not found.')
 
     if description:
         instance.description = description
 
-    if preset_names or custom_preset_path:
+    if presets:
         instance.outputs = []
-
-    if preset_names:
-        for preset in preset_names:
+        for preset in presets:
             instance.outputs.append(get_transform_output(preset))
-
-    if custom_preset_path:
-        standard_encoder_preset = parse_standard_encoder_preset(custom_preset_path)
-        instance.outputs.append(TransformOutput(preset=standard_encoder_preset))
 
     return instance
 
@@ -103,10 +79,11 @@ def get_transform_output(preset):
             if preset in get_stand_alone_presets():
                 transform_preset = get_sdk_model_class("{}Preset".format(preset))()
             else:
+                if preset not in [e.value for e in EncoderNamedPreset]:
+                    raise CLIError("Couldn't create a preset from '{}'".format(preset))
                 transform_preset = BuiltInStandardEncoderPreset(preset_name=preset)
-
     except:
-        raise CLIError("Couldn't create a preset from '{}'.".format(preset))
+        raise CLIError("Couldn't create a preset from '{}'".format(preset))
 
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output
