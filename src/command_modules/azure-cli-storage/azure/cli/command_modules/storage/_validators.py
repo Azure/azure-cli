@@ -24,16 +24,13 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 def _query_account_key(cli_ctx, account_name):
     """Query the storage account key. This is used when the customer doesn't offer account key but name."""
     rg, scf = _query_account_rg(cli_ctx, account_name)
-    t_storage_account_keys, t_storage_account_list_keys_results = get_sdk(
-        cli_ctx,
-        ResourceType.MGMT_STORAGE,
-        'models.storage_account_keys#StorageAccountKeys',
-        'models.storage_account_list_keys_result#StorageAccountListKeysResult')
+    t_storage_account_keys = get_sdk(
+        cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
-    elif t_storage_account_list_keys_results:
-        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
+    return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):
