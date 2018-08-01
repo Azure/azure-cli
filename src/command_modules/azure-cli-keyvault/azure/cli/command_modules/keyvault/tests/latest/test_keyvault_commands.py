@@ -93,8 +93,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
-                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment '
-                 '--bypass AzureServices --default-action Deny',
+                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment ',
+                 #'--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),

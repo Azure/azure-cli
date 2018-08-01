@@ -282,7 +282,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-    #api_version = api_version.replace('.', '-')
+    api_version = api_version.replace('.', '-')
     return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 
