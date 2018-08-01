@@ -334,6 +334,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
                                       location, service_principal, client_secret, chart_url, os_type,
                                       image_tag, aci_resource_group):
     from subprocess import PIPE, Popen
+    instance = client.get(resource_group_name, name)
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     url_chart = chart_url
     if image_tag is None:
@@ -365,26 +366,26 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     if os_type.lower() in ['linux', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Linux')
+                                               norm_location, 'Linux', instance.enable_rbac)
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Windows')
+                                               norm_location, 'Windows', instance.enable_rbac)
 
 
 def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                            client_secret, subscription_id, tenant_id, aci_resource_group,
-                                           norm_location, os_type):
+                                           norm_location, os_type, use_rbac):
+    rbac_install = "true" if use_rbac else "false"
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + '-' + os_type.lower() + '-' + norm_location
     node_name = 'virtual-kubelet-' + helm_release_name
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={}'.format(
-            node_name, node_taint, os_type, image_tag)
-
+        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},rbac.install={}'.format(
+            node_name, node_taint, os_type, image_tag, rbac_install)
         if service_principal:
             values += ",env.azureClientId=" + service_principal
         if client_secret:
