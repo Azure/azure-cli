@@ -8,10 +8,12 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+
 try:
     from azure_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
+
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
@@ -26,6 +28,7 @@ except OSError:
 else:
     import re
     import sys
+
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/core/__init__.py')
@@ -50,8 +53,8 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'applicationinsights>=0.11.1',
     'argcomplete>=1.8.0',
+    'azure-cli-telemetry',
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
@@ -63,7 +66,7 @@ DEPENDENCIES = [
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml>=3.13',
+    'pyyaml~=3.13',
     'requests',
     'six',
     'tabulate>=0.7.7,<=0.8.2',

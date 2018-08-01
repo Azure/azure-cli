@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""The programming interfaces which 3rd party application can depend on."""
+from datetime import timedelta
 
-# pylint: disable=unused-import
+MANDATORY_WAIT_PERIOD = timedelta(minutes=10)
 
-from ._environment import get_config_dir
-from ._profile import load_subscriptions
-
-from ._completers import get_subscription_id_list
-from .decorators import suppress_all_exceptions
+TELEMETRY_CACHE_DIR = 'telemetry'
+TELEMETRY_NOTE_NAME = 'telemetry.txt'
+TELEMETRY_LOG_NAME = 'telemetry.log'
+TELEMETRY_LOG_DIR = 'logs'

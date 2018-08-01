@@ -6,6 +6,7 @@ Release History
 ++++++
 * use knack/0.4.2 with fix towards numeric value display in table output
 * Introduce YAML output format
+* Overhaul telemetry upload mechanism
 
 2.0.43
 ++++++
