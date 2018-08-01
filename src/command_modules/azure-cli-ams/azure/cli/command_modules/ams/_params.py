@@ -62,13 +62,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', account_name_arg_type)
         c.argument('transform_name', name_arg_type, id_part='child_name_1',
                    help='The name of the transform.')
-        c.argument('preset_names',
-                   arg_type=get_enum_type(get_presets_definition_name_completion_list()),
+        c.argument('presets',
                    nargs='+',
-                   help='Space-separated list of built-in preset names.')
+                   help='Space-separated list of preset names. Allowed values: {}. In addition to the allowed values, you can also pass the local full path to a custom preset JSON file.'
+                   .format(", ".join(get_presets_definition_name_completion_list())))
         c.argument('description', help='The description of the transform.')
-        c.argument('custom_preset_path', options_list=['--custom-preset'],
-                   help='The local full path to the custom presest JSON definition file.')
 
     with self.argument_context('ams transform list') as c:
         c.argument('account_name', id_part=None)
