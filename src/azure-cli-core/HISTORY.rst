@@ -5,9 +5,6 @@ Release History
 2.0.44
 ++++++
 * use knack/0.4.2 with fix towards numeric value display in table output
-
-2.0.44
-++++++
 * Introduce YAML output format
 
 2.0.43
