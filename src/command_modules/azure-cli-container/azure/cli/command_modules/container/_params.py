@@ -47,7 +47,7 @@ secrets_type = CLIArgumentType(
 )
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('container') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
