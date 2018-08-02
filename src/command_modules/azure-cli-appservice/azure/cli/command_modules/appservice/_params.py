@@ -36,7 +36,7 @@ def load_arguments(self, _):
                                    arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                                           help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+                                           help="name of the webapp. You can configure the default using 'az configure --defaults web=<name>'")
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -47,7 +47,7 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', configured_default='web', arg_type=name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                   help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+                   help="name of the webapp. You can configure the default using 'az configure --defaults web=<name>'")
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
