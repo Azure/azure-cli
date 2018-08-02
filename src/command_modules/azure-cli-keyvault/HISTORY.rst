@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.0
+++++++
+* support KV mgmt multi-api version
+* support KV data plane multi-api version
 
 2.0.24
 ++++++
