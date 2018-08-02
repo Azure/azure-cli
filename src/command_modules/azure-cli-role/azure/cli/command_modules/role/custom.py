@@ -63,7 +63,7 @@ def _get_role_property(obj, property_name):
     return getattr(obj, property_name)
 
 
-def _set_role_definition_property(obj, property_name, property_value):
+def _set_role_property(obj, property_name, property_value):
     if isinstance(obj, dict):
         if 'properties' in obj:
             obj['properties'][property_name] = property_value
@@ -246,8 +246,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     for i in results:
         if not i.get('roleDefinitionName'):
             if role_dics.get(_get_role_property(i, 'roleDefinitionId')):
-                _set_role_definition_property(i, 'roleDefinitionName',
-                                              role_dics[_get_role_property(i, 'roleDefinitionId')])
+                _set_role_property(i, 'roleDefinitionName', role_dics[_get_role_property(i, 'roleDefinitionId')])
             else:
                 i['roleDefinitionName'] = None  # the role definition might have been deleted
 
@@ -262,11 +261,14 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
             for i in [r for r in results if not r.get('principalName')]:
                 i['principalName'] = ''
                 if principal_dics.get(_get_role_property(i, 'principalId')):
-                    _set_role_definition_property(i, 'principalName', _get_role_property(i, 'principalId'))
+                    _set_role_property(i, 'principalName', principal_dics[_get_role_property(i, 'principalId')])
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
+    for r in results:
+        if not r.get('additionalProperties'):  # remove the useless "additionalProperties"
+            r.pop('additionalProperties', None)
     return results
 
 
