@@ -19,7 +19,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 import azure.cli.core.telemetry as telemetry
 
-from ._validators import secret_text_encoding_values
+from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)

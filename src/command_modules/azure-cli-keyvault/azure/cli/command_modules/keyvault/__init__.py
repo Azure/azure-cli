@@ -33,12 +33,12 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
                                                     recommend_remove=True))
 
     def load_command_table(self, args):
-        from .commands import load_command_table
+        from azure.cli.command_modules.keyvault.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from ._params import load_arguments
+        from azure.cli.command_modules.keyvault._params import load_arguments
         load_arguments(self, command)
 
 

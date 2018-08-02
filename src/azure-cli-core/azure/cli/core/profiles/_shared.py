@@ -91,7 +91,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-07-29',
+        ResourceType.DATA_STORAGE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_KEYVAULT: '2018-02-14',
         ResourceType.DATA_KEYVAULT: '7.0'

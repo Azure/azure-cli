@@ -1100,6 +1100,9 @@ def _create_certificate(cmd,
     secret_url = None
     certificate_thumbprint = None
 
+    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
+    _create_keyvault.__doc__ = VaultProperties.__doc__
+
     if secret_identifier is not None:
         vault = _get_vault_from_secret_identifier(cli_ctx, secret_identifier)
         vault_id = vault.id
@@ -1111,6 +1114,7 @@ def _create_certificate(cmd,
         if certificate_file is not None:
             vault_name = _get_vault_name(resource_group_name, vault_name)
             logger.info("Creating key vault")
+            
             vault = _create_keyvault(
                 cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
@@ -1683,10 +1687,6 @@ def _create_keyvault(cmd,
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=parameters)
-
-
-#_create_keyvault.__doc__ = VaultProperties.__doc__
-
 
 # pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
