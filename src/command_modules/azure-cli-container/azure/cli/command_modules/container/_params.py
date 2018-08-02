@@ -22,11 +22,22 @@ def _environment_variables_type(value):
     """Space-separated values in 'key=value' format."""
     try:
         env_name, env_value = value.split('=', 1)
+        return {'name': env_name, 'value': env_value}
     except ValueError:
         message = ("Incorrectly formatted environment settings. "
                    "Argument values should be in the format a=b c=d")
         raise CLIError(message)
-    return {'name': env_name, 'value': env_value}
+
+
+def _secure_environment_variables_type(value):
+    """Space-separated values in 'key=value' format."""
+    try:
+        env_name, env_secure_value = value.split('=', 1)
+        return {'name': env_name, 'secureValue': env_secure_value}
+    except ValueError:
+        message = ("Incorrectly formatted secure environment settings. "
+                   "Argument values should be in the format a=b c=d")
+        raise CLIError(message)
 
 
 secrets_type = CLIArgumentType(
@@ -36,6 +47,7 @@ secrets_type = CLIArgumentType(
 )
 
 
+# pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('container') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -55,6 +67,7 @@ def load_arguments(self, _):
         c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')
         c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
+        c.argument('secure_environment_variables', nargs='+', type=_secure_environment_variables_type, help='A list of secure environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secrets', secrets_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")

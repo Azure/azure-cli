@@ -79,6 +79,7 @@ def create_container(cmd,
                      dns_name_label=None,
                      command_line=None,
                      environment_variables=None,
+                     secure_environment_variables=None,
                      registry_login_server=None,
                      registry_username=None,
                      registry_password=None,
@@ -165,6 +166,12 @@ def create_container(cmd,
         mounts.append(gitrepo_volume_mount)
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
+
+    # Concatenate secure and standard environment variables
+    if environment_variables and secure_environment_variables:
+        environment_variables = environment_variables + secure_environment_variables
+    else:
+        environment_variables = environment_variables or secure_environment_variables
 
     container = Container(name=name,
                           image=image,
