@@ -11,6 +11,7 @@ from datetime import datetime
 from io import BytesIO
 import tempfile
 import tarfile
+from builtins import open as bltn_open
 import requests
 import colorama
 from knack.log import get_logger
@@ -31,7 +32,6 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
 from ._utils import validate_managed_registry
 from ._client_factory import cf_acr_registries
 from ._build_polling import get_build_with_polling
-from builtins import open as bltn_open
 
 
 logger = get_logger(__name__)
