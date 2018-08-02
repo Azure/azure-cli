@@ -262,7 +262,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
             for i in [r for r in results if not r.get('principalName')]:
                 i['principalName'] = ''
                 if principal_dics.get(_get_role_property(i, 'principalId')):
-                    _set_role_definition_property(i, 'principalName', _get_role_property(i, 'principalId'))
+                    _set_role_definition_property(i, 'principalName', principal_dics[_get_role_property(i, 'principalId')])
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
