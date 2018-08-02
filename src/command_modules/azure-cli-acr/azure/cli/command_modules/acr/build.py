@@ -438,8 +438,11 @@ class IgnoreRule(object):  # pylint: disable=too-few-public-methods
             if token == "**":
                 tokens[index] = ".*"
             else:
+                # * matches any sequence of non-seperator characters
+                # ? matches any single non-seperator character
+                # . matches dot character
                 tokens[index] = token.replace(
-                    "*", "[^/]*").replace("?", "[^/]")
+                    "*", "[^/]*").replace("?", "[^/]").replace(".", "\\.")
 
         self.pattern = "^{}$".format("/".join(tokens))
 
