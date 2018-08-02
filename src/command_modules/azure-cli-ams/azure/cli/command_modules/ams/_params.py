@@ -189,7 +189,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alternative_media_id', help='An alternative media identifier associated with the preview URL. This identifier can be used to distinguish the preview of different live events for authorization purposes in the custom license acquisition URL template or the custom key acquisition URL template of the streaming policy specified in the streaming policy name field.')
         c.argument('vanity_url', action='store_true', help='The live event vanity URL flag.')
         c.argument('client_access_policy', help='The content of clientaccesspolicy.xml used by Silverlight.')
-        c.argument('cross_domain_policy', help='The content of clientaccesspolicy.xml used by Silverlight.')
+        c.argument('cross_domain_policy', help='The content of crossdomain.xml used bySilverlight.')
         c.argument('stream_options', nargs='+', help='The stream options.')
 
     with self.argument_context('ams live event stop') as c:
