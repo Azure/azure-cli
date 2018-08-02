@@ -34,7 +34,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'six',
-    'azure-mgmt-eventhub==1.2.0',
+    'azure-mgmt-eventhub==2.1.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
