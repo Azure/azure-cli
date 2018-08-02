@@ -46,7 +46,7 @@ class TestTelemetryClient(unittest.TestCase):
                 for line in fq.readlines():
                     self.sample_records.append(line[20:])
 
-        _TestSender.instances.clear()
+        del _TestSender.instances[:]
 
     def test_telemetry_client_without_flush(self):
         client = CliTelemetryClient(sender=_TestSender)
@@ -76,7 +76,7 @@ class TestTelemetryClient(unittest.TestCase):
         self.assertEqual(1, len(sender.data))
 
         # default batch size is 100, ensure data is sent after accumulation
-        sender.data.clear()
+        del sender.data[:]
         count = 0
         for r in self.sample_records:
             client.add(r, flush=True)
@@ -84,7 +84,7 @@ class TestTelemetryClient(unittest.TestCase):
             count += 1
             if not count % 100:
                 self.assertEqual(1, len(sender.data))
-                sender.data.clear()
+                del sender.data[:]
             else:
                 self.assertEqual(0, len(sender.data))
 
@@ -92,7 +92,7 @@ class TestTelemetryClient(unittest.TestCase):
 class TestNoRetrySender(unittest.TestCase):
     def setUp(self):
         # build some data in the form of envelops
-        _TestSender.instances.clear()
+        del _TestSender.instances[:]
         client = CliTelemetryClient(sender=_TestSender)
         with open(os.path.join(TEST_RESOURCE_FOLDER, 'cache'), mode='r') as fq:
             for line in fq.readlines()[:5]:

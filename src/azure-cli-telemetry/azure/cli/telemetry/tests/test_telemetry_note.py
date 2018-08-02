@@ -9,6 +9,7 @@ import tempfile
 import shutil
 import stat
 import datetime
+import time
 
 import portalocker
 
@@ -53,7 +54,7 @@ class TestTelemetryNote(unittest.TestCase):
                     self.assertFalse(True)
 
     def test_open_telemetry_note_file(self):
-        with open(TelemetryNote.get_file_path(self.workDir), mode='x') as fq:
+        with open(TelemetryNote.get_file_path(self.workDir), mode='w') as fq:
             fq.write(self.SAMPLE_TIME_1.strftime('%Y-%m-%dT%H:%M:%S'))
 
         with TelemetryNote(self.workDir) as note:
@@ -75,10 +76,13 @@ class TestTelemetryNote(unittest.TestCase):
     def set_modify_time(self, file_path, new_time=None):
         if not new_time:
             new_time = (datetime.datetime.now() - datetime.timedelta(minutes=5))
-        os.utime(file_path, (new_time.timestamp(), new_time.timestamp()))
+
+        expected_timestamp = time.mktime(new_time.timetuple()) + new_time.microsecond / 1E6
+        os.utime(file_path, (expected_timestamp, expected_timestamp))
 
         modify_time = datetime.datetime.fromtimestamp(os.stat(file_path).st_mtime)
-        self.assertEqual(new_time, modify_time)
+        actual_timestamp = time.mktime(modify_time.timetuple()) + modify_time.microsecond / 1E6
+        self.assertAlmostEqual(expected_timestamp, actual_timestamp, delta=1E-6)
 
 
 if __name__ == '__main__':
