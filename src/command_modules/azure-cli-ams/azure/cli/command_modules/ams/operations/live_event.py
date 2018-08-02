@@ -49,3 +49,14 @@ def stop(cmd, client, resource_group_name, account_name, live_event_name,
                                                   remove_outputs_on_stop))
 
     return client.get(resource_group_name, account_name, live_event_name)
+
+
+def reset(cmd, client, resource_group_name, account_name, live_event_name,
+          no_wait=False):
+
+    if no_wait:
+        return sdk_no_wait(no_wait, client.reset, resource_group_name, account_name, live_event_name)
+
+    LongRunningOperation(cmd.cli_ctx)(client.reset(resource_group_name, account_name, live_event_name))
+
+    return client.get(resource_group_name, account_name, live_event_name)
