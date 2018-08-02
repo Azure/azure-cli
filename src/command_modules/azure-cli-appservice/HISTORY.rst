@@ -2,14 +2,10 @@
 
 Release History
 ===============
-0.2.3
+0.2.2
 +++++
 * fix a bug that prevent from creating a function-app using storage accounts in external resource groups
 * fix a crash on zip deployment
-
-0.2.2
-+++++
-* Minor fixes.
 
 0.2.1
 +++++
