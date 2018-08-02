@@ -583,16 +583,33 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name)
                  ])
 
-        # copy database to other server (max parameters)
+        # copy database to same server (min parameters, plus service_objective)
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --service-objective {}'
+                 .format(rg, server1, database_name, database_copy_name, service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                 ])
+
+        # copy database to elastic pool in other server (max parameters, other than
+        # service_objective)
+        pool_name = 'pool1'
+        pool_edition = 'Standard'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}'
+                 .format(resource_group_2, server2, pool_name, pool_edition))
+
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '--service-objective {}'
+                 '--elastic-pool {}'
                  .format(rg, server1, database_name, database_copy_name,
-                         resource_group_2, server2, service_objective),
+                         resource_group_2, server2, pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('name', database_copy_name),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)
+                     JMESPathCheck('elasticPoolName', pool_name)
                  ])
 
 
@@ -1178,16 +1195,34 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
-        # create replica in third server with max params
-        # --elastic-pool is untested
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 ' --partner-resource-group {} --service-objective {}'
+        # Delete replica in second server and recreate with explicit service objective
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'
+                 .format(s2.group, s2.name, database_name))
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {}'
                  .format(s1.group, s1.name, database_name,
-                         s3.name, s3.group, service_objective),
+                         s2.name, service_objective),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'pool1'
+        pool_edition = 'Standard'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}'
+                 .format(s3.group, s3.name, pool_name, pool_edition))
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, pool_name),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s3.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+                     JMESPathCheck('elasticPoolName', pool_name)])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'

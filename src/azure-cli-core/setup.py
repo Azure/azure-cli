@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.41"
+VERSION = "2.0.42"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -63,7 +63,7 @@ DEPENDENCIES = [
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=3.12',
+    'pyyaml~=4.2b4',
     'requests',
     'six',
     'tabulate>=0.7.7,<=0.8.2',

@@ -101,6 +101,13 @@ Usage of /:  39.6% of 1.94GB   Swap usage:   0%   Users logged in: 0
 jasonsha@MyVM:~$
 ```
 
+#### Exit Codes
+For scripting purposes, we output certain exit codes for differing scenarios.
+`0`: Command ran successfully.
+`1`: Generic error; server returned bad status code, CLI validation failed, etc.
+`2`: Parser error; check input to command line.
+`3`: Missing ARM resource; used for existence check from `show` commands.
+
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
 

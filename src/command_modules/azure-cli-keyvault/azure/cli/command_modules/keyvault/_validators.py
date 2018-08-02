@@ -30,10 +30,10 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
@@ -247,7 +247,7 @@ def validate_subnet(cmd, namespace):
 def validate_vault_id(entity_type):
 
     def _validate(ns):
-        from azure.keyvault.custom.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
         name = getattr(ns, entity_type.replace('deleted', '') + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)

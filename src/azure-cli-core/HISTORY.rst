@@ -3,9 +3,14 @@
 Release History
 ===============
 
-2.0.41
+2.0.42
 ++++++
 * login: support browser based login in WSL bash window
+
+2.0.41
+++++++
+* Minor fixes
+* Update PyYAML dependency to 4.2b4
 
 2.0.40
 ++++++
@@ -29,7 +34,7 @@ Release History
 
 2.0.35
 ++++++
-* Minor fixes
+* Added method of registering `show` commands to fail with exit code of 3.
 
 2.0.34
 ++++++

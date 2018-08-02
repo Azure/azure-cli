@@ -79,10 +79,10 @@ def execute(args):
         args.tests = test_paths
 
     success, failed_tests = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
-    if args.dest_file:
-        with open(args.dest_file, 'w') as f:
-            for failed_test in failed_tests:
-                f.write(failed_test + '\n')
+    # if args.dest_file:
+    #     with open(args.dest_file, 'w') as f:
+    #         for failed_test in failed_tests:
+    #             f.write(failed_test + '\n')
     sys.exit(0 if success else 1)
 
 

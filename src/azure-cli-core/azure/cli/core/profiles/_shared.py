@@ -35,6 +35,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
+    MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
@@ -43,6 +44,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
+    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -89,8 +91,10 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-07-29',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_KEYVAULT: '2018-02-14',
+        ResourceType.DATA_KEYVAULT: '7.0'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -102,7 +106,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_KEYVAULT: '2016-10-01'
     }
 }
 
@@ -276,6 +282,9 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
+    # For api versions that have dot instead of hyphen (for instance KV dataplan) 
+    # We first replace dot with hyphen and then the next line replaces it with underscore 
+    api_version = api_version.replace('.', '-')
     return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 

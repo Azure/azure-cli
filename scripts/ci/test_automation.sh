@@ -39,6 +39,4 @@ if [ "$target_profile" != "latest" ]; then
 fi
 
 title 'Running tests'
-coverage run -m automation test --ci --profile $target_profile
-coverage combine
-codecov
+python -m automation test --ci --profile $target_profile

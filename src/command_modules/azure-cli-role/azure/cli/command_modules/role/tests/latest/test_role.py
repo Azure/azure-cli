@@ -90,7 +90,7 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-        from azure.keyvault.models import KeyVaultErrorException
+        KeyVaultErrorException = self.cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({

@@ -506,6 +506,38 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     return result
 
 
+def _validate_elastic_pool_id(
+        cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name):
+    '''
+    Validates elastic_pool_id is either None or a valid resource id.
+
+    If elastic_pool_id has a value but it is not a valid resource id,
+    then assume that user specified elastic pool name which we need to
+    convert to elastic pool id using the provided server & resource group
+    name.
+
+    Returns the elastic_pool_id, which may have been updated and may be None.
+    '''
+
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
+        return resource_id(
+            subscription=get_subscription_id(cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Sql',
+            type='servers',
+            name=server_name,
+            child_type_1='elasticPools',
+            child_name_1=elastic_pool_id)
+
+    return elastic_pool_id
+
+
 def _db_dw_create(
         cli_ctx,
         client,
@@ -532,6 +564,13 @@ def _db_dw_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, kwargs['location'], sku)
+
+    # Validate elastic pool id
+    kwargs['elastic_pool_id'] = _validate_elastic_pool_id(
+        cli_ctx,
+        kwargs['elastic_pool_id'],
+        dest_db.server_name,
+        dest_db.resource_group_name)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,

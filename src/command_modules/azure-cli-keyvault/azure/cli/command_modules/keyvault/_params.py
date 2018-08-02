@@ -24,21 +24,31 @@ from ._validators import (
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
-
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 # CUSTOM CHOICE LISTS
 
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
 certificate_format_values = ['PEM', 'DER']
 
-
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    from azure.keyvault.models import JsonWebKeyOperation
-    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType, SasDefinitionAttributes
-    from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
-        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
-
+    JsonWebKeyOperation = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyOperation')
+    KeyAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_attributes#KeyAttributes')
+    JsonWebKeyType = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyType')
+    JsonWebKeyCurveName = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#JsonWebKeyCurveName')
+    SasTokenType = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#SasTokenType')
+    SasDefinitionAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.sas_definition_attributes#SasDefinitionAttributes')
+    SecretAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_attributes#SecretAttributes')
+    CertificateAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    StorageAccountAttributes = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.storage_account_attributes#StorageAccountAttributes')
+    SkuName = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SkuName')
+    KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
+    SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
+    CertificatePermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#CertificatePermissions')
+    StoragePermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#StoragePermissions')
+    NetworkRuleBypassOptions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
+    NetworkRuleAction = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleAction')
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
         help='Name of the key vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
@@ -58,7 +68,7 @@ def load_arguments(self, _):
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
-    with self.argument_context('keyvault', arg_group='Network Rule') as c:
+    with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction), help='Default action to apply when no rule matches.')
 
@@ -81,7 +91,7 @@ def load_arguments(self, _):
         c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
         c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
 
-    with self.argument_context('keyvault network-rule') as c:
+    with self.argument_context('keyvault network-rule', min_api='2018-02-14') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)

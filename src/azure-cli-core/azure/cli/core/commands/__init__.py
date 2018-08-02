@@ -875,7 +875,7 @@ class AzCommandGroup(CommandGroup):
             **merged_kwargs)
 
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
-        from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
+        from azure.cli.core.commands.arm import _cli_generic_wait_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
         # don't inherit deprecation info from command group
@@ -885,6 +885,19 @@ class AzCommandGroup(CommandGroup):
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         _cli_generic_wait_command(
+            self.command_loader,
+            '{} {}'.format(self.group_name, name),
+            getter_op=getter_op,
+            **merged_kwargs)
+
+    def generic_show_command(self, name, getter_name='get', getter_type=None, **kwargs):
+        from azure.cli.core.commands.arm import _cli_generic_show_command
+        self._check_stale()
+        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
+        if getter_type:
+            merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
+        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        _cli_generic_show_command(
             self.command_loader,
             '{} {}'.format(self.group_name, name),
             getter_op=getter_op,
