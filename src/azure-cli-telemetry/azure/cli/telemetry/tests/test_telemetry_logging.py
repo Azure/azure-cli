@@ -28,7 +28,7 @@ class TestTelemetryUploadLogging(unittest.TestCase):
     def setUp(self):
         self._original_handlers = logging.root.handlers
         self._original_level = logging.root.level
-        logging.root.handlers.clear()
+        del logging.root.handlers[:]
 
     def tearDown(self):
         for handler in logging.root.handlers:
@@ -36,7 +36,7 @@ class TestTelemetryUploadLogging(unittest.TestCase):
                 if handler.stream:
                     handler.stream.close()
 
-        logging.root.handlers.clear()
+        del logging.root.handlers[:]
         logging.root.setLevel(self._original_level)
         for handler in self._original_handlers:
             logging.root.addHandler(handler)
@@ -55,7 +55,8 @@ class TestTelemetryUploadLogging(unittest.TestCase):
 
         with open(log_file, mode='r') as fq:
             content = fq.read().strip('\n')
-            self.assertTrue(content.endswith(random_name))
+            self.assertTrue(content.endswith(random_name),
+                            'Log content {} does not contain {}'.format(content, random_name))
 
     def test_config_logging_for_upload_process_nonexist(self):
         temp_dir = tempfile.mktemp()
@@ -73,7 +74,8 @@ class TestTelemetryUploadLogging(unittest.TestCase):
 
         with open(log_file, mode='r') as fq:
             content = fq.read().strip('\n')
-            self.assertTrue(content.endswith(random_name))
+            self.assertTrue(content.endswith(random_name),
+                            'Log content {} does not contain {}'.format(content, random_name))
 
 
 if __name__ == '__main__':

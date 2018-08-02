@@ -11,7 +11,7 @@ addons:
       - libssl-dev
       - libffi-dev
       - python-dev
-install: echo 'skip'
+install: pip install tox
 cache: pip
 jobs:
   include:
@@ -31,6 +31,14 @@ jobs:
       env: PURPOSE='Lint Command Table and Help'
       script: ./scripts/ci/verify_linter.sh
       python: 3.6
+    - stage: unittest
+      python: 3.6
+      env: TOXENV=py36
+      script: ./scripts/ci/unittest.sh
+    - stage: unittest
+      python: 2.7
+      env: TOXENV=py27
+      script: ./scripts/ci/unittest.sh
     - stage: verify
       env: PURPOSE='Automation'
       script: ./scripts/ci/test_automation.sh
@@ -73,3 +81,8 @@ jobs:
       python: 3.6
       env: PURPOSE='Automation Docker'
       if: repo = Azure/azure-cli and type = push
+stages:
+  - precheck
+  - unittest
+  - verify
+  - publish

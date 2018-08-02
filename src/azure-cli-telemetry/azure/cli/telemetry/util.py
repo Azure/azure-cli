@@ -60,7 +60,8 @@ def save_payload(config_dir, payload):
 def _create_rotate_file_logger(log_dir):
     cache_name = os.path.join(log_dir, 'telemetry', 'cache')
     try:
-        os.makedirs(os.path.dirname(cache_name), exist_ok=True)
+        if not os.path.exists(os.path.dirname(cache_name)):
+            os.makedirs(os.path.dirname(cache_name))
 
         handler = logging.handlers.RotatingFileHandler(cache_name, maxBytes=128 * 1024, backupCount=100)
         handler.setLevel(logging.INFO)
