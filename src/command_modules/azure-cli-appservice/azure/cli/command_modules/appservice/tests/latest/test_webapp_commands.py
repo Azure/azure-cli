@@ -621,20 +621,22 @@ class WebappSSLCertTest(ScenarioTest):
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_functionapp_e2e(self, resource_group):
-        functionapp_name = self.create_random_name('func-e2e', 24)
+    @ResourceGroupPreparer(parameter_name='resource_group2')
+    def test_functionapp_e2e(self, resource_group, resource_group2):
+        functionapp_name, functionapp_name2 = self.create_random_name('func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
-        storage = 'functionappplanstorage'
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
+        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage2, resource_group2)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
-
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2, functionapp_name2, plan_id, storage_account_id2))
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
