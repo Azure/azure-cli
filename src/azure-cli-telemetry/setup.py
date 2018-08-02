@@ -58,7 +58,5 @@ setup(
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
     ],
-    cmdclass=cmdclass,
-    setup_requires=["pytest-runner"],
-    tests_require=["pytest", "mock"]
+    cmdclass=cmdclass
 )

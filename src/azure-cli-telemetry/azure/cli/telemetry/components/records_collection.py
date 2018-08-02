@@ -80,7 +80,7 @@ class RecordsCollection(object):
     def _add_record(self, content_line):
         """ Parse a line in the recording file. """
         try:
-            time, content = content_line.split(',', maxsplit=1)
+            time, content = content_line.split(',', 1)
             time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
             if time > self._last_sent:
                 self._next_send = max(self._next_send, time)

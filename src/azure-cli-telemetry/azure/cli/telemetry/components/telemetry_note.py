@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import time
 import datetime
 
 import portalocker.utils
@@ -17,7 +18,7 @@ class TelemetryNote(portalocker.utils.Lock):
         self._logger = get_logger('note')
 
         if not os.path.exists(self._path):
-            super(TelemetryNote, self).__init__(self._path, mode='x', timeout=0.1, fail_when_locked=True)
+            super(TelemetryNote, self).__init__(self._path, mode='w', timeout=0.1, fail_when_locked=True)
         else:
             super(TelemetryNote, self).__init__(self._path, mode='r+', timeout=1, fail_when_locked=True)
 
@@ -36,19 +37,14 @@ class TelemetryNote(portalocker.utils.Lock):
         fallback = datetime.datetime.min
 
         try:
-            if not self.fh.readable():
-                self._logger.debug('The file is not readable. Fallback to datetime.min.')
-                return fallback
-
             raw = self.fh.read().strip()
             last_send = datetime.datetime.strptime(raw, '%Y-%m-%dT%H:%M:%S')
             self._logger.info("Read timestamp from the note. The last send was %s.", last_send)
-        except (ValueError, IOError) as err:
-            last_send = datetime.datetime.min
+            return last_send
+        except (AttributeError, ValueError, IOError) as err:
             self._logger.warning("Fail to parse or read the timestamp '%s' in the note file. Set the last send time "
                                  "to minimal. Reason: %s", raw, err)
-
-        return last_send
+            return fallback
 
     def update_telemetry_note(self, next_send):
         # note update retry
@@ -69,7 +65,7 @@ class TelemetryNote(portalocker.utils.Lock):
 
     def touch(self):
         st_atime = os.stat(self.path).st_atime
-        st_mtime = datetime.datetime.now().timestamp()
+        st_mtime = time.time()
         os.utime(self.path, (st_atime, st_mtime))
         self._logger.info('Update the note mtime to %s', datetime.datetime.fromtimestamp(st_mtime))
 
