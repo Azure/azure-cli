@@ -5,7 +5,7 @@ Release History
 
 0.2.2
 +++++
-* added readonly property 'pendingReplicationOperationsCount' to georecovery
+* added readonly property 'pendingReplicationOperationsCount' to georecovery-alias
 
 0.2.1
 +++++
