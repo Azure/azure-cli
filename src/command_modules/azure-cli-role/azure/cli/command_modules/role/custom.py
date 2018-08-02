@@ -267,6 +267,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
+    for r in results:
+        if not r.get('additionalProperties'):  # remove the useless "additionalProperties"
+            r.pop('additionalProperties', None)
     return results
 
 
