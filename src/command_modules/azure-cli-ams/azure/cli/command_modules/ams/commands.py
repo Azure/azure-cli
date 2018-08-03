@@ -61,8 +61,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('delete', 'delete')
         g.custom_command('create', 'create_transform',
                          custom_command_type=get_custom_sdk('transform', get_transforms_client))
-        g.custom_command('update', 'update_transform',
-                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
         g.generic_update_command('update',
                                  setter_name='transform_update_setter',
                                  setter_type=get_custom_sdk('transform', get_mediaservices_client),
@@ -132,7 +130,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('list', 'list')
+        g.generic_update_command('update',
+                                 custom_func_name='update_live_event',
+                                 custom_func_type=get_custom_sdk('live_event', get_mediaservices_client))
 
     with self.command_group('ams live output', get_sdk('LiveOutputs', get_live_outputs_client)) as g:
         g.custom_command('create', 'create_live_output',
                          custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
+

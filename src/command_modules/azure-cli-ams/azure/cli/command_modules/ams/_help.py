@@ -312,6 +312,11 @@ helps['ams live event reset'] = """
     short-summary: Reset a live event.
 """
 
+helps['ams live event update'] = """
+    type: command
+    short-summary: Update the details of a live event.
+"""
+
 helps['ams live output'] = """
     type: group
     short-summary: Manage live outputs for an Azure Media Service account.
@@ -321,3 +326,4 @@ helps['ams live output create'] = """
     type: command
     short-summary: Create a live output.
 """
+
