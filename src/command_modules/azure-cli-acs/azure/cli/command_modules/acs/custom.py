@@ -501,7 +501,7 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal
 
 
-def _add_role_assignment(cli_ctx, role, service_principal, delay=2):
+def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
@@ -510,7 +510,10 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2):
         hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
-            create_role_assignment(cli_ctx, role, service_principal)
+            if not scope:
+                create_role_assignment(cli_ctx, role, service_principal)
+            else:
+                create_role_assignment(cli_ctx, role, service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1286,6 +1289,16 @@ def _update_dict(dict1, dict2):
     cp.update(dict2)
     return cp
 
+def role_assignment_exist(cli_ctx, scope):
+    exsit = False
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    for i in list(assignments_client.list_for_scope(scope=scope, filter='atScope()')):
+        if i.scope == scope:
+            exsit = True
+            break
+    return exsit
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if in_cloud_console():
@@ -1336,6 +1349,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_ssh_key=False,
                disable_rbac=None,
                enable_rbac=None,
+               skip_role_assignment=False,
                network_plugin=None,
                pod_cidr=None,
                service_cidr=None,
@@ -1372,7 +1386,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
-        dns_prefix=dns_name_prefix,
         os_type="Linux",
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
@@ -1396,6 +1409,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
+
+
+    #if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
+    if vnet_subnet_id and not skip_role_assignment:
+        scope = vnet_subnet_id
+        if not _add_role_assignment(cmd.cli_ctx, 'Contributor', service_principal, scope=scope):
+            logger.warning('Could not create a role assignment. '
+                           'Are you an Owner on this project?')
+
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
@@ -2072,8 +2094,8 @@ def _remove_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags']
-    ap_attrs = ['dns_prefix', 'fqdn', 'os_disk_size_gb', 'ports', 'vnet_subnet_id']
-    sp_attrs = ['key_vault_secret_ref', 'secret']
+    ap_attrs = ['os_disk_size_gb', 'vnet_subnet_id']
+    sp_attrs = ['secret']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:

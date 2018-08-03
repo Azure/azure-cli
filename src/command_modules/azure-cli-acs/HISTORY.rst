@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.3
++++++
+* Add new option "skip role assignment" for customVnet when creating
+* Skip role assignment when it exists instead of return error
+
 2.2.2
 +++++
 * Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
