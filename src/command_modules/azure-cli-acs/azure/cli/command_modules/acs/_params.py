@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long,too-many-statements
 
+import sys
 import os.path
 import platform
 
@@ -231,7 +232,11 @@ def load_arguments(self, _):
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':
-        program_files = os.environ.get('ProgramFiles')
+         # CLI/Windows uses Python 32bits, extra logics are needed to find the x64 ProgramFiles folder
+        if 'PROGRAMFILES(X86)' in os.environ and sys.maxsize < 2**32:
+            program_files = os.environ.get('ProgramW6432')
+        else:
+            program_files = os.environ.get('ProgramFiles')
         if not program_files:
             return None
         install_location = '{}\\{}.exe'.format(program_files, exe_name)
