@@ -232,7 +232,7 @@ def load_arguments(self, _):
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':
-         # CLI/Windows uses Python 32bits, extra logics are needed to find the x64 ProgramFiles folder
+        # CLI/Windows uses Python 32bits, extra logics are needed to find the x64 ProgramFiles folder
         if 'PROGRAMFILES(X86)' in os.environ and sys.maxsize < 2**32:
             program_files = os.environ.get('ProgramW6432')
         else:
