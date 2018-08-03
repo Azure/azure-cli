@@ -25,7 +25,6 @@ from azure.cli.command_modules.vm._validators import (
 # pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
     from azure.mgmt.compute.models import CachingTypes, UpgradeMode
-    from azure.mgmt.storage.models import SkuName
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -41,7 +40,10 @@ def load_arguments(self, _):
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
-    disk_sku = CLIArgumentType(help='Underlying storage SKU.', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+    if self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
+    else:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
@@ -69,7 +71,7 @@ def load_arguments(self, _):
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
-        c.argument('sku', arg_type=disk_sku)
+        c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
     # endregion
 
     # region Identity
@@ -89,7 +91,7 @@ def load_arguments(self, _):
         if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
             c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
         else:
-            c.argument('sku', arg_type=disk_sku)
+            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
     # endregion
 
     # region Images
@@ -180,7 +182,7 @@ def load_arguments(self, _):
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
         c.argument('disk', validator=validate_vm_disk, help='disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('new', action='store_true', help='create a new disk')
-        c.argument('sku', arg_type=disk_sku)
+        c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
@@ -216,7 +218,7 @@ def load_arguments(self, _):
         c.argument('plan', help='image billing plan')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('version', help="image sku's version")
-        c.argument('urn', help="URN, in format of 'publisher:offer:sku:versin'. If specified, other argument values can be omitted")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
@@ -293,12 +295,13 @@ def load_arguments(self, _):
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
         c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
         c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
-        c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_D1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+        c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                    help="(PREVIEW) the eviction policy for virtual machines in a low priority scale set.")
+        c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -397,7 +400,7 @@ def load_arguments(self, _):
             c.argument('os_disk_name', help='The name of the new VM OS disk.')
             c.argument('os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(['windows', 'linux']))
             c.argument('storage_account', help="Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.")
-            c.argument('storage_sku', help='The SKU of the storage account with which to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. With `--use-unmanaged-disk`, all are available.', arg_type=get_enum_type(SkuName))
+            c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to persist VM')
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')

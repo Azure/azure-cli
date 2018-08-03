@@ -3,6 +3,20 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Do not require '--log-analytics-workspace-key' for name or ID when in set subscription
+
+0.3.1
++++++
+* Update PyYAML dependency to 3.13
+
+0.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Remove the requirement for username and password for non dockerhub registries
+* Fix error when creating container groups from yaml file
+
 0.2.1
 +++++
 * Update PyYAML dependency to 4.2b4

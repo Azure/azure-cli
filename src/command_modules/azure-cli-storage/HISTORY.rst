@@ -3,9 +3,20 @@
 Release History
 ===============
 
-2.0.37
-++++++
-* Minor fixes
+2.2.0
++++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
+* Make '--resource-group' parameter optional for 'storage account' commands.
+
+2.1.1
++++++
+* Allows download of large files using a single connection.
+* Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Added `pageRanges` property to `storage blob show` output that will be populated for page blobs.
 
 2.0.36
 ++++++

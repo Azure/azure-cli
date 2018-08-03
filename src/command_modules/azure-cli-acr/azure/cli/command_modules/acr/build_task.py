@@ -119,6 +119,7 @@ def acr_build_task_show(cmd,
                         client,
                         build_task_name,
                         registry_name,
+                        with_secure_properties=False,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -138,6 +139,31 @@ def acr_build_task_show(cmd,
             raise
         logger.warning("Could not get build task details. Build task basic information is printed.")
 
+    if not with_secure_properties:
+        return build_task
+
+    try:
+        source_repository = client.list_source_repository_properties(resource_group_name,
+                                                                     registry_name,
+                                                                     build_task_name)
+        setattr(getattr(build_task, 'source_repository'),
+                'source_control_auth_properties',
+                getattr(source_repository, 'source_control_auth_properties'))
+    except CloudError as e:
+        if e.status_code != 403:
+            raise
+        logger.warning("No permission to get source repository secure properties.")
+
+    try:
+        build_arguments = client_build_steps.list_build_arguments(resource_group_name=resource_group_name,
+                                                                  registry_name=registry_name,
+                                                                  build_task_name=build_task_name,
+                                                                  step_name=_get_build_step_name(build_task_name))
+        setattr(getattr(build_task, 'properties'), 'buildArguments', list(build_arguments))
+    except CloudError as e:
+        if e.status_code != 403:
+            raise
+        logger.warning("No permission to get secure build arguments.")
     return build_task
 
 
@@ -252,6 +278,23 @@ def acr_build_task_update(cmd,  # pylint: disable=too-many-locals
     return build_task
 
 
+def acr_build_task_update_build(cmd,
+                                client,
+                                build_id,
+                                registry_name,
+                                no_archive=None,
+                                resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+
+    is_archive_enabled = not no_archive if no_archive is not None else None
+
+    return client.update(resource_group_name=resource_group_name,
+                         registry_name=registry_name,
+                         build_id=build_id,
+                         is_archive_enabled=is_archive_enabled)
+
+
 def _get_build_step_name(build_task_name):
     return '{}StepName'.format(build_task_name)
 
@@ -299,22 +342,38 @@ def acr_build_task_list_builds(cmd,
                                top=15,
                                build_task_name=None,
                                build_status=None,
+                               image=None,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
     filter_str = None
-    filter_str = _add_build_filter(filter_str, 'BuildTaskName', build_task_name)
-    filter_str = _add_build_filter(filter_str, 'Status', build_status)
+    filter_str = _add_build_filter(filter_str, 'BuildTaskName', build_task_name, 'eq')
+    filter_str = _add_build_filter(filter_str, 'Status', build_status, 'eq')
+
+    if image:
+        from .repository import get_image_digest
+        try:
+            repository, _, manifest = get_image_digest(cmd.cli_ctx, registry_name, resource_group_name, image)
+            filter_str = _add_build_filter(
+                filter_str, 'OutputImageManifests', '{}@{}'.format(repository, manifest), 'contains')
+        except CLIError as e:
+            raise CLIError("Could not find image '{}'. {}".format(image, e))
 
     return client.list(resource_group_name, registry_name, filter=filter_str, top=top)
 
 
-def _add_build_filter(orig_filter, name, value):
+def _add_build_filter(orig_filter, name, value, operator):
     if not value:
         return orig_filter
 
-    new_filter_str = "{} eq '{}'".format(name, value)
+    if operator == 'contains':
+        new_filter_str = "contains({}, '{}')".format(name, value)
+    elif operator == 'eq':
+        new_filter_str = "{} eq '{}'".format(name, value)
+    else:
+        raise ValueError("Allowed filter operator: {}".format(['contains', 'eq']))
+
     return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 
 
@@ -323,19 +382,36 @@ def acr_build_task_logs(cmd,
                         registry_name,
                         build_id=None,
                         build_task_name=None,
+                        image=None,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
     if not build_id:
         # show logs for the last build
-        paged_builds = acr_build_task_list_builds(cmd, client, registry_name,
-                                                  top=None, build_task_name=build_task_name)
+        paged_builds = acr_build_task_list_builds(cmd,
+                                                  client,
+                                                  registry_name,
+                                                  top=1,
+                                                  build_task_name=build_task_name,
+                                                  image=image)
         try:
             build_id = paged_builds.get(0)[0].build_id
-            logger.warning("Showing logs for the last created build")
+            logger.warning(_get_list_builds_message(base_message="Showing logs of the last created build",
+                                                    build_task_name=build_task_name,
+                                                    image=image))
             logger.warning("Build ID: %s", build_id)
         except (AttributeError, KeyError, TypeError, IndexError):
-            raise CLIError('Could not get the last created build.')
+            raise CLIError(_get_list_builds_message(base_message="Could not find the last created build",
+                                                    build_task_name=build_task_name,
+                                                    image=image))
 
     return acr_build_show_logs(client, build_id, registry_name, resource_group_name)
+
+
+def _get_list_builds_message(base_message, build_task_name=None, image=None):
+    if build_task_name:
+        base_message = "{} for build task '{}'".format(base_message, build_task_name)
+    if image:
+        base_message = "{} for image '{}'".format(base_message, image)
+    return "{}.".format(base_message)

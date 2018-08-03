@@ -419,32 +419,42 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
 
         # assert we handled such error
-        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+        self.assertTrue(
+            'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
-    def test_update_addons(self):
+    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
+    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
         # http_application_routing enabled
-        instance = mock.Mock()
+        instance = mock.MagicMock()
         instance.addon_profiles = None
-        instance = _update_addons(instance, 'http_application_routing', enable=True)
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'http_application_routing', enable=True)
         self.assertIn('httpApplicationRouting', instance.addon_profiles)
         addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertTrue(addon_profile.enabled)
 
         # http_application_routing enabled
-        instance = _update_addons(instance, 'http_application_routing', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'http_application_routing', enable=False)
         addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
-        instance = _update_addons(instance, 'monitoring', enable=True)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=True)
         monitoring_addon_profile = instance.addon_profiles['omsagent']
         self.assertTrue(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
-        instance = _update_addons(instance, 'monitoring', enable=False)
-        instance = _update_addons(instance, 'http_application_routing', enable=True)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
+                                  'http_application_routing', enable=True)
         monitoring_addon_profile = instance.addon_profiles['omsagent']
         self.assertFalse(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
@@ -454,13 +464,15 @@ class AcsCustomCommandTest(unittest.TestCase):
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
         instance.addon_profiles = None
-        instance = _update_addons(instance, 'monitoring', enable=True)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=True)
         with self.assertRaises(CLIError):
-            instance = _update_addons(instance, 'monitoring', enable=True)
+            instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                      'clitest000001', 'monitoring', enable=True)
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location')
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
-    def test_ensure_container_insights_for_monitoring(self, invoke_def, rg_def):
+    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
         cmd = mock.Mock()
         addon = mock.Mock()
         wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"

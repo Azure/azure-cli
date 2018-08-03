@@ -28,19 +28,19 @@ def load_command_table(self, _):
 
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:
         g.custom_command('create', 'create_vault')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
         g.command('backup-properties show', 'get', command_type=backup_storage_config_sdk)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
 
     with self.command_group('backup container', backup_custom, client_factory=backup_protection_containers_cf) as g:
-        g.command('show', 'show_container')
+        g.show_command('show', 'show_container')
         g.command('list', 'list_containers', table_transformer=transform_container_list)
 
     with self.command_group('backup policy', backup_custom, client_factory=protection_policies_cf) as g:
         g.command('get-default-for-vm', 'get_default_policy_for_vm')
-        g.command('show', 'show_policy')
+        g.show_command('show', 'show_policy')
         g.command('list', 'list_policies', client_factory=backup_policies_cf, table_transformer=transform_policy_list)
         g.command('list-associated-items', 'list_associated_items_for_policy', client_factory=backup_protected_items_cf, table_transformer=transform_item_list)
         g.command('set', 'set_policy')
@@ -53,18 +53,18 @@ def load_command_table(self, _):
         g.command('disable', 'disable_protection', confirmation=True)
 
     with self.command_group('backup item', backup_custom, client_factory=backup_protected_items_cf) as g:
-        g.command('show', 'show_item')
+        g.show_command('show', 'show_item')
         g.command('list', 'list_items', table_transformer=transform_item_list)
         g.command('set-policy', 'update_policy_for_item', client_factory=protected_items_cf)
 
     with self.command_group('backup job', backup_custom, client_factory=job_details_cf) as g:
         g.command('list', 'list_jobs', client_factory=backup_jobs_cf, table_transformer=transform_job_list)
-        g.command('show', 'show_job')
+        g.show_command('show', 'show_job')
         g.command('stop', 'stop_job', client_factory=job_cancellations_cf)
         g.command('wait', 'wait_for_job')
 
     with self.command_group('backup recoverypoint', backup_custom, client_factory=recovery_points_cf) as g:
-        g.command('show', 'show_recovery_point')
+        g.show_command('show', 'show_recovery_point')
         g.command('list', 'list_recovery_points', table_transformer=transform_recovery_point_list)
 
     with self.command_group('backup restore', backup_custom, client_factory=restores_cf) as g:

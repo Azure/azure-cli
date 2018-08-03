@@ -27,8 +27,19 @@ logger = get_logger(__name__)
 
 UNTAG_NOT_SUPPORTED = 'Untag is only supported for managed registries.'
 DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
+SHOW_MANIFESTS_NOT_SUPPORTED = 'Show manifests is only supported for managed registries.'
+DETAIL_NOT_SUPPORTED = 'Detail is only supported for managed registries.'
+ATTRIBUTES_NOT_SUPPORTED = 'Attributes are only supported for managed registries.'
+METADATA_NOT_SUPPORTED = 'Metadata is only supported for managed registries.'
 
+ALLOWED_HTTP_METHOD = ['get', 'patch', 'delete']
+ORDERBY_PARAMS = {
+    'time_asc': 'timeasc',
+    'time_desc': 'timedesc'
+}
+MANIFEST_V2_HEADER = {
+    'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
+}
 DEFAULT_PAGINATION = 20
 
 
@@ -40,10 +51,6 @@ def _get_basic_auth_str(username, password):
 
 def _get_bearer_auth_str(token):
     return 'Bearer ' + token
-
-
-def _get_manifest_v2_header():
-    return {'Accept': 'application/vnd.docker.distribution.manifest.v2+json'}
 
 
 def _get_authorization_header(username, password):
@@ -73,25 +80,60 @@ def _parse_error_message(error_message, response):
         return error_message
 
 
-def _delete_data_from_registry(login_server, path, username, password, retry_times=3, retry_interval=5):
+def _request_data_from_registry(http_method,
+                                login_server,
+                                path,
+                                username,
+                                password,
+                                result_index=None,
+                                json_payload=None,
+                                params=None,
+                                retry_times=3,
+                                retry_interval=5):
+    if http_method not in ALLOWED_HTTP_METHOD:
+        raise ValueError("Allowed http method: {}".format(ALLOWED_HTTP_METHOD))
+
+    if http_method in ['get', 'delete'] and json_payload:
+        raise ValueError("Empty json payload is required for http method: {}".format(http_method))
+
+    if http_method in ['patch'] and not json_payload:
+        raise ValueError("Non-empty json payload is required for http method: {}".format(http_method))
+
+    url = 'https://{}{}'.format(login_server, path)
+    headers = _get_authorization_header(username, password)
+
     for i in range(0, retry_times):
         errorMessage = None
         try:
-            response = requests.delete(
-                'https://{}{}'.format(login_server, path),
-                headers=_get_authorization_header(username, password),
+            response = requests.request(
+                method=http_method,
+                url=url,
+                headers=headers,
+                params=params,
+                json=json_payload,
                 verify=(not should_disable_connection_verify())
             )
             log_registry_response(response)
 
-            if response.status_code == 200 or response.status_code == 202:
-                return
+            if response.status_code == 200:
+                result = response.json()[result_index] if result_index else response.json()
+                next_link = response.headers['link'] if 'link' in response.headers else None
+                return result, next_link
+            elif response.status_code == 202:
+                result = None
+                try:
+                    result = response.json()[result_index] if result_index else response.json()
+                except ValueError:
+                    logger.debug('Response is empty or is not a valid json.')
+                return result, None
+            elif response.status_code == 204:
+                return None, None
             elif response.status_code == 401:
                 raise CLIError(_parse_error_message('Authentication required.', response))
             elif response.status_code == 404:
                 raise CLIError(_parse_error_message('The requested data does not exist.', response))
             else:
-                raise Exception(_parse_error_message('Could not delete the requested data.', response))
+                raise Exception(_parse_error_message('Could not {} the requested data.'.format(http_method), response))
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -102,14 +144,16 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
     raise CLIError(errorMessage)
 
 
-def _get_manifest_digest(login_server, path, username, password, retry_times=3, retry_interval=5):
+def _get_manifest_digest(login_server, repository, tag, username, password, retry_times=3, retry_interval=5):
+    url = 'https://{}/v2/{}/manifests/{}'.format(login_server, repository, tag)
+    headers = _get_authorization_header(username, password)
+    headers.update(MANIFEST_V2_HEADER)
+
     for i in range(0, retry_times):
         errorMessage = None
         try:
-            headers = _get_authorization_header(username, password)
-            headers.update(_get_manifest_v2_header())
             response = requests.get(
-                'https://{}{}'.format(login_server, path),
+                url=url,
                 headers=headers,
                 verify=(not should_disable_connection_verify())
             )
@@ -138,78 +182,63 @@ def _obtain_data_from_registry(login_server,
                                username,
                                password,
                                result_index,
-                               retry_times=3,
-                               retry_interval=5,
                                top=None,
                                orderby=None):
-    resultList = []
-    executeNextHttpCall = True
+    result_list = []
+    execute_next_http_call = True
 
-    url = 'https://{}{}'.format(login_server, path)
-    headers = _get_authorization_header(username, password)
     params = {
         'n': DEFAULT_PAGINATION,
-        'orderby': orderby
+        'orderby': ORDERBY_PARAMS[orderby] if orderby else None
     }
 
-    while executeNextHttpCall:
-        executeNextHttpCall = False
-        for i in range(0, retry_times):
-            errorMessage = None
-            try:
-                # Override the default page size if top is provided
-                if top is not None:
-                    params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
-                    top -= params['n']
+    while execute_next_http_call:
+        execute_next_http_call = False
 
-                response = requests.get(
-                    url=url,
-                    headers=headers,
-                    params=params,
-                    verify=(not should_disable_connection_verify())
-                )
-                log_registry_response(response)
+        # Override the default page size if top is provided
+        if top is not None:
+            params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
+            top -= params['n']
 
-                if response.status_code == 200:
-                    result = response.json()[result_index]
-                    if result:
-                        resultList += result
-                    if top is not None and top <= 0:
-                        break
-                    if 'link' in response.headers and response.headers['link']:
-                        linkHeader = response.headers['link']
-                        # The registry is telling us there's more items in the list,
-                        # and another call is needed. The link header looks something
-                        # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
-                        # we should follow the next path indicated in the link header
-                        path = linkHeader[(linkHeader.index('<') + 1):linkHeader.index('>')]
-                        tokens = path.split('?', 2)
-                        params = {y[0]: unquote(y[1]) for y in (x.split('=', 2) for x in tokens[1].split('&'))}
-                        executeNextHttpCall = True
-                    break
-                elif response.status_code == 401:
-                    raise CLIError(_parse_error_message('Authentication required.', response))
-                elif response.status_code == 404:
-                    raise CLIError(_parse_error_message('The requested data does not exist.', response))
-                else:
-                    raise Exception(_parse_error_message('Could not get the requested data.', response))
-            except CLIError:
-                raise
-            except Exception as e:  # pylint: disable=broad-except
-                errorMessage = str(e)
-                logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
-                time.sleep(retry_interval)
-        if errorMessage:
-            raise CLIError(errorMessage)
+        result, next_link = _request_data_from_registry(
+            http_method='get',
+            login_server=login_server,
+            path=path,
+            username=username,
+            password=password,
+            result_index=result_index,
+            params=params)
 
-    return resultList
+        result_list += result
+
+        if top is not None and top <= 0:
+            break
+
+        if next_link:
+            # The registry is telling us there's more items in the list,
+            # and another call is needed. The link header looks something
+            # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
+            # we should follow the next path indicated in the link header
+            next_link_path = next_link[(next_link.index('<') + 1):next_link.index('>')]
+            tokens = next_link_path.split('?', 2)
+            params = {y[0]: unquote(y[1]) for y in (x.split('=', 2) for x in tokens[1].split('&'))}
+            execute_next_http_call = True
+
+    return result_list
 
 
 def acr_repository_list(cmd,
                         registry_name,
+                        top=None,
                         resource_group_name=None,
                         username=None,
                         password=None):
+    is_managed_registry = True
+    try:
+        _, resource_group_name = validate_managed_registry(cmd.cli_ctx, registry_name, resource_group_name)
+    except CLIError:
+        is_managed_registry = False
+
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
@@ -219,18 +248,31 @@ def acr_repository_list(cmd,
 
     return _obtain_data_from_registry(
         login_server=login_server,
-        path='/v2/_catalog',
+        path='/acr/v1/_catalog' if is_managed_registry else '/v2/_catalog',
         username=username,
         password=password,
-        result_index='repositories')
+        result_index='repositories',
+        top=top)
 
 
 def acr_repository_show_tags(cmd,
                              registry_name,
                              repository,
+                             top=None,
+                             orderby=None,
                              resource_group_name=None,
                              username=None,
-                             password=None):
+                             password=None,
+                             detail=False):
+    if detail:
+        _, resource_group_name = validate_managed_registry(
+            cmd.cli_ctx, registry_name, resource_group_name, DETAIL_NOT_SUPPORTED)
+    else:
+        if top is not None:
+            logger.warning("The specified --top is ignored as it is only supported with --detail.")
+        if orderby:
+            logger.warning("The specified --orderby is ignored as it is only supported with --detail.")
+
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
@@ -242,10 +284,12 @@ def acr_repository_show_tags(cmd,
 
     return _obtain_data_from_registry(
         login_server=login_server,
-        path='/v2/{}/tags/list'.format(repository),
+        path='/acr/v1/{}/_tags'.format(repository) if detail else '/v2/{}/tags/list'.format(repository),
         username=username,
         password=password,
-        result_index='tags')
+        result_index='tags',
+        top=top,
+        orderby=orderby)
 
 
 def acr_repository_show_manifests(cmd,
@@ -255,7 +299,11 @@ def acr_repository_show_manifests(cmd,
                                   orderby=None,
                                   resource_group_name=None,
                                   username=None,
-                                  password=None):
+                                  password=None,
+                                  detail=False):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, SHOW_MANIFESTS_NOT_SUPPORTED)
+
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
@@ -267,12 +315,135 @@ def acr_repository_show_manifests(cmd,
 
     return _obtain_data_from_registry(
         login_server=login_server,
-        path='/v2/_acr/{}/manifests/list'.format(repository),
+        path='/acr/v1/{}/_manifests'.format(repository) if detail else '/v2/_acr/{}/manifests/list'.format(repository),
         username=username,
         password=password,
         result_index='manifests',
         top=top,
         orderby=orderby)
+
+
+def acr_repository_show(cmd,
+                        registry_name,
+                        repository=None,
+                        image=None,
+                        resource_group_name=None,
+                        username=None,
+                        password=None):
+    return _acr_repository_attributes_helper(
+        cli_ctx=cmd.cli_ctx,
+        registry_name=registry_name,
+        http_method='get',
+        json_payload=None,
+        permission='pull',
+        repository=repository,
+        image=image,
+        resource_group_name=resource_group_name,
+        username=username,
+        password=password)
+
+
+def acr_repository_update(cmd,
+                          registry_name,
+                          repository=None,
+                          image=None,
+                          resource_group_name=None,
+                          username=None,
+                          password=None,
+                          delete_enabled=None,
+                          list_enabled=None,
+                          read_enabled=None,
+                          write_enabled=None):
+    json_payload = {}
+
+    if delete_enabled is not None:
+        json_payload.update({
+            'deleteEnabled': delete_enabled
+        })
+    if list_enabled is not None:
+        json_payload.update({
+            'listEnabled': list_enabled
+        })
+    if read_enabled is not None:
+        json_payload.update({
+            'readEnabled': read_enabled
+        })
+    if write_enabled is not None:
+        json_payload.update({
+            'writeEnabled': write_enabled
+        })
+
+    return _acr_repository_attributes_helper(
+        cli_ctx=cmd.cli_ctx,
+        registry_name=registry_name,
+        http_method='patch' if json_payload else 'get',
+        json_payload=json_payload,
+        permission='*',
+        repository=repository,
+        image=image,
+        resource_group_name=resource_group_name,
+        username=username,
+        password=password)
+
+
+def _acr_repository_attributes_helper(cli_ctx,
+                                      registry_name,
+                                      http_method,
+                                      json_payload,
+                                      permission,
+                                      repository=None,
+                                      image=None,
+                                      resource_group_name=None,
+                                      username=None,
+                                      password=None):
+    _validate_parameters(repository, image)
+    _, resource_group_name = validate_managed_registry(
+        cli_ctx, registry_name, resource_group_name, ATTRIBUTES_NOT_SUPPORTED)
+
+    if image:
+        # If --image is specified, repository must be empty.
+        repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+    else:
+        # This is a request on repository
+        tag, manifest = None, None
+
+    login_server, username, password = get_access_credentials(
+        cli_ctx=cli_ctx,
+        registry_name=registry_name,
+        resource_group_name=resource_group_name,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=permission)
+
+    if tag:
+        path = '/acr/v1/{}/_tags/{}'.format(repository, tag)
+        result_index = 'tag'
+    elif manifest:
+        path = '/acr/v1/{}/_manifests/{}'.format(repository, manifest)
+        result_index = 'manifest'
+    else:
+        path = '/acr/v1/{}'.format(repository)
+        result_index = None
+
+    # Non-GET request doesn't return the entity so there is always a GET reqeust
+    if http_method != 'get':
+        _request_data_from_registry(
+            http_method=http_method,
+            login_server=login_server,
+            path=path,
+            username=username,
+            password=password,
+            result_index=result_index,
+            json_payload=json_payload)
+
+    return _request_data_from_registry(
+        http_method='get',
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password,
+        result_index=result_index)[0]
 
 
 def acr_repository_untag(cmd,
@@ -295,11 +466,12 @@ def acr_repository_untag(cmd,
         repository=repository,
         permission='*')
 
-    return _delete_data_from_registry(
+    return _request_data_from_registry(
+        http_method='delete',
         login_server=login_server,
         path='/v2/_acr/{}/tags/{}'.format(repository, tag),
         username=username,
-        password=password)
+        password=password)[0]
 
 
 def acr_repository_delete(cmd,
@@ -312,8 +484,7 @@ def acr_repository_delete(cmd,
                           username=None,
                           password=None,
                           yes=False):
-    if bool(repository) == bool(image):
-        raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
+    _validate_parameters(repository, image)
 
     # Check if this is a legacy command. --manifest can be used as a flag so None is checked.
     if repository and (tag or manifest is not None):
@@ -366,11 +537,17 @@ def acr_repository_delete(cmd,
                            "and all images under it?".format(repository), yes)
         path = '/v2/_acr/{}/repository'.format(repository)
 
-    return _delete_data_from_registry(
+    return _request_data_from_registry(
+        http_method='delete',
         login_server=login_server,
         path=path,
         username=username,
-        password=password)
+        password=password)[0]
+
+
+def _validate_parameters(repository, image):
+    if bool(repository) == bool(image):
+        raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
 
 
 def _parse_image_name(image, allow_digest=False):
@@ -469,11 +646,12 @@ def _legacy_delete(cmd,
             yes=yes)
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
 
-    return _delete_data_from_registry(
+    return _request_data_from_registry(
+        http_method='delete',
         login_server=login_server,
         path=path,
         username=username,
-        password=password)
+        password=password)[0]
 
 
 def _delete_manifest_confirmation(login_server,
@@ -486,7 +664,8 @@ def _delete_manifest_confirmation(login_server,
     # Always query manifest if it is empty
     manifest = manifest or _get_manifest_digest(
         login_server=login_server,
-        path='/v2/{}/manifests/{}'.format(repository, tag),
+        repository=repository,
+        tag=tag,
         username=username,
         password=password)
 
@@ -519,3 +698,27 @@ def _user_confirmation(message, yes=False):
             raise CLIError('Operation cancelled.')
     except NoTTYException:
         raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def get_image_digest(cli_ctx, registry_name, resource_group_name, image):
+    repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+
+    if manifest:
+        return repository, tag, manifest
+
+    # If we don't have manifest yet, try to get it from tag.
+    login_server, username, password = get_access_credentials(
+        cli_ctx=cli_ctx,
+        registry_name=registry_name,
+        resource_group_name=resource_group_name,
+        repository=repository,
+        permission='pull')
+
+    manifest = _get_manifest_digest(
+        login_server=login_server,
+        repository=repository,
+        tag=tag,
+        username=username,
+        password=password)
+
+    return repository, tag, manifest

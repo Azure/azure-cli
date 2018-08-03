@@ -278,8 +278,8 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': '934939417e99892b59660637cd4b4abeefccff04',
-            'context': 'https://github.com/djyou/BuildTest',
+            'git_access_token': 'b67dce55c2d8a654a4c823751a58aac1e59d9641',
+            'context': 'https://github.com/xiadu94/BuildTest',
             'image1': 'repo1:tag1',
             'image2': 'repo2:tag2',
             'build_arg': 'key1=value1',
@@ -356,18 +356,53 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('[1].name', '{build_task_name2}')])
 
         # trigger a build from the build task
-        self.cmd('acr build-task run -n {build_task_name1} -r {registry_name} --no-logs',
-                 checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
-                         self.check('status', 'Succeeded')])
+        response = self.cmd('acr build-task run -n {build_task_name1} -r {registry_name} --no-logs',
+                            checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
+                                    self.check('status', 'Succeeded')]).get_output_in_json()
+
+        self.kwargs.update({
+            'build_id': response['buildId']
+        })
 
         # list all builds from the build task
         self.cmd('acr build-task list-builds -n {build_task_name1} -r {registry_name}',
-                 checks=[self.check('[0].type', 'Microsoft.ContainerRegistry/registries/builds')])
+                 checks=[self.check('[0].type', 'Microsoft.ContainerRegistry/registries/builds'),
+                         self.check('[0].buildId', '{build_id}'),
+                         self.check('[0].isArchiveEnabled', False)])
 
         self.cmd('acr build-task show -n {build_task_name1} -r {registry_name}',
                  checks=[self.check('name', '{build_task_name1}')])
         self.cmd('acr build-task show -n {build_task_name2} -r {registry_name}',
                  checks=[self.check('name', '{build_task_name2}')])
+
+        self.cmd('acr build-task show -n {build_task_name2} -r {registry_name} --with-secure-properties',
+                 checks=[self.check('name', '{build_task_name2}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('alias', '{build_task_name2}'),
+                         self.check('platform.osType', '{non_default_os_type}'),
+                         self.check('platform.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', '{non_default_status}'),
+                         self.check('timeout', '{non_default_timeout}'),
+                         self.check('sourceRepository.repositoryUrl', '{context}'),
+                         self.check('sourceRepository.sourceControlType', 'GitHub'),
+                         self.check('sourceRepository.isCommitTriggerEnabled', False),
+                         self.check('sourceRepository.sourceControlAuthProperties.token', '{git_access_token}'),
+                         self.check('sourceRepository.sourceControlAuthProperties.tokenType', 'PAT'),
+                         self.check('sourceRepository.sourceControlAuthProperties.scope', 'repo'),
+                         self.check('properties.baseImageTrigger', '{non_default_base_image_trigger}'),
+                         self.check('properties.branch', '{non_default_branch}'),
+                         self.check('properties.dockerFilePath', '{non_default_docker_file_path}'),
+                         self.check('properties.imageNames', ['repo1:tag1', 'repo2:tag2']),
+                         self.check('properties.buildArguments[0].name', 'key1'),
+                         self.check('properties.buildArguments[0].value', 'value1'),
+                         self.check('properties.buildArguments[0].isSecret', False),
+                         self.check('properties.buildArguments[1].name', 'key2'),
+                         self.check('properties.buildArguments[1].value', 'value2'),
+                         self.check('properties.buildArguments[1].isSecret', True),
+                         self.check('properties.isPushEnabled', False),
+                         self.check('properties.noCache', True),
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # update the first build task using non-default parameter values
         self.cmd('acr build-task update -n {build_task_name1} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image1}'
@@ -394,6 +429,13 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('properties.isPushEnabled', False),
                          self.check('properties.noCache', True),
                          self.check('properties.provisioningState', 'Succeeded')])
+
+        # update a build of the first task
+        self.cmd('acr build-task update-build -r {registry_name} --build-id {build_id} --no-archive false',
+                 checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
+                         self.check('buildId', '{build_id}'),
+                         self.check('isArchiveEnabled', True),
+                         self.check('provisioningState', 'Succeeded')])
 
         # test build task delete
         self.cmd('acr build-task delete -n {build_task_name1} -r {registry_name}')

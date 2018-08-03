@@ -35,10 +35,10 @@ class FeedbackTest(unittest.TestCase):
     """ tests the frequncy heuristic """
     def __init__(self, *args, **kwargs):
         super(FeedbackTest, self).__init__(*args, **kwargs)
-        from azure.cli.testsdk import TestCli
+        from azure.cli.core.mock import DummyCli
         from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
         self.norm_update = fh.update_frequency
-        self.shell_ctx = AzInteractiveShell(TestCli(), None)
+        self.shell_ctx = AzInteractiveShell(DummyCli(), None)
 
     def test_heuristic(self):
         # test the correct logging of time for frequency

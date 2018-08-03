@@ -83,7 +83,7 @@ def load_command_table(self, _):
     # Virtual Machine Operations Commands
     with self.command_group('lab vm', virtual_machine_operations,
                             client_factory=get_devtestlabs_virtual_machine_operation) as g:
-        g.command('show', 'get', table_transformer=transform_vm)
+        g.show_command('show', 'get', table_transformer=transform_vm)
         g.command('delete', 'delete')
         g.command('start', 'start')
         g.command('stop', 'stop')
@@ -100,7 +100,7 @@ def load_command_table(self, _):
 
     # Custom Image Operations Commands
     with self.command_group('lab custom-image', custom_image_operations) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.custom_command('create', 'create_custom_image', client_factory=get_devtestlabs_custom_image_operation)
@@ -116,7 +116,7 @@ def load_command_table(self, _):
     # Artifact Source Operations Commands
     with self.command_group('lab artifact-source', artifact_source_operations) as g:
         g.command('list', 'list', table_transformer=transform_artifact_source_list)
-        g.command('show', 'get', table_transformer=transform_artifact_source)
+        g.show_command('show', 'get', table_transformer=transform_artifact_source)
 
     # Virtual Network Operations Commands
     with self.command_group('lab vnet', virtual_network_operations) as g:
@@ -125,7 +125,7 @@ def load_command_table(self, _):
 
     # Formula Operations Commands
     with self.command_group('lab formula', formula_operations) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.command('export-artifacts', 'get', transform=export_artifacts)
@@ -133,13 +133,13 @@ def load_command_table(self, _):
     # Secret Operations Commands
     with self.command_group('lab secret', secret_operations) as g:
         g.command('set', 'create_or_update')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
 
     # Environment Operations Commands
     with self.command_group('lab environment', environment_operations) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.command('create', 'create_or_update')
@@ -148,5 +148,5 @@ def load_command_table(self, _):
     # ARM Templates Operations Commands
     with self.command_group('lab arm-template', arm_template_operations) as g:
         g.command('list', 'list', table_transformer=transform_arm_template_list)
-        g.custom_command('show', 'show_arm_template', table_transformer=transform_arm_template,
-                         client_factory=get_devtestlabs_arm_template_operation)
+        g.custom_show_command('show', 'show_arm_template', table_transformer=transform_arm_template,
+                              client_factory=get_devtestlabs_arm_template_operation)

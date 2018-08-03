@@ -71,8 +71,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage entity delete -t {} --row-key 001 --partition-key 001',
                          account_info, table_name)
-        self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
-                         account_info, table_name).assert_with_checks(NoneCheck())
+        self.storage_cmd_negative('storage entity show -t {} --row-key 001 --partition-key 001',
+                                  account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
                          account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',

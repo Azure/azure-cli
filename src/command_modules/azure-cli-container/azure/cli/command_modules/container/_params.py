@@ -71,7 +71,7 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help="The path within the container where the azure file volume should be mounted. Must not contain colon ':'.")
 
     with self.argument_context('container create', arg_group='Log Analytics') as c:
-        c.argument('log_analytics_workspace', help='The Log Analytics workspace name or id. If a name is specified, use the current subscription or use --subscription flag to set the desired subscription.')
+        c.argument('log_analytics_workspace', help='The Log Analytics workspace name or id. Use the current subscription or use --subscription flag to set the desired subscription.')
         c.argument('log_analytics_workspace_key', help='The Log Analytics workspace key.')
 
     with self.argument_context('container create', arg_group='Git Repo Volume') as c:

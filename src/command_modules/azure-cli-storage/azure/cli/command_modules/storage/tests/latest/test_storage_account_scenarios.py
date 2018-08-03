@@ -108,6 +108,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('kind', 'Storage')
         ])
 
+        self.cmd('az storage account show -n {}'.format(name), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('location', location),
+            JMESPathCheck('sku.name', 'Standard_LRS'),
+            JMESPathCheck('kind', 'Storage')
+        ])
+
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
             JMESPathCheck("contains(connectionString, 'https')", False),
@@ -151,7 +158,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd(create_cmd, checks=[JMESPathCheck('sku.name', 'Standard_RAGRS')])
 
     def test_show_usage(self):
-        self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
+        self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -311,7 +318,7 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
                  checks=JMESPathCheck('nameAvailable', True))
 
     def test_show_usage_stack(self):
-        self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
+        self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local',
                            dev_setting_location='local')

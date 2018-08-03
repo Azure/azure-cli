@@ -12,6 +12,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
 
+    from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
@@ -21,9 +22,9 @@ def load_arguments(self, _):
 
     from azure.cli.command_modules.resource._completers import (
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
-        get_resource_types_completion_list, get_providers_completion_list, get_subscription_id_list)
+        get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -136,6 +137,7 @@ def load_arguments(self, _):
         c.argument('template_uri', help='a uri to a remote template file')
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=('--name', '-n'), required=False,

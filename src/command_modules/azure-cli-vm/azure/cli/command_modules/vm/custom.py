@@ -71,7 +71,7 @@ def _construct_identity_info(identity_scope, identity_role, implicit_identity, e
     if identity_scope:
         info['scope'] = identity_scope
         info['role'] = str(identity_role)  # could be DefaultStr, so convert to string
-    info['userAssignedIdentities'] = external_identities or []
+    info['userAssignedIdentities'] = external_identities or {}
     info['systemAssignedIdentity'] = implicit_identity or ''
     return info
 
@@ -421,6 +421,8 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
                                                                                         'ResourceIdentityType',
                                                                                         'VirtualMachineUpdate')
+    VirtualMachineIdentityUserAssignedIdentitiesValue = cmd.get_models(
+        'VirtualMachineIdentityUserAssignedIdentitiesValue')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -429,12 +431,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         return client.virtual_machines.get(resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        vm_patch = None
-        if VirtualMachineUpdate:
-            vm_patch = VirtualMachineUpdate()
-        if vm.identity and vm.identity.identity_ids:
-            for i in vm.identity.identity_ids:
-                external_identities.append(i)
         if vm.identity and vm.identity.type == ResourceIdentityType.system_assigned_user_assigned:
             identity_types = ResourceIdentityType.system_assigned_user_assigned
         elif vm.identity and vm.identity.type == ResourceIdentityType.system_assigned and external_identities:
@@ -450,18 +446,18 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
-            # do in-place update, so the outer method can display the same data
-            external_identities[::] = set(external_identities)
-            vm.identity.identity_ids = external_identities
+            vm.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                vm.identity.user_assigned_identities[identity] = VirtualMachineIdentityUserAssignedIdentitiesValue()
 
-        if vm_patch:
-            vm_patch.identity = vm.identity
-            return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
-        return set_vm(cmd, vm)
+        vm_patch = VirtualMachineUpdate()
+        vm_patch.identity = vm.identity
+        return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
 
-    vm = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
-                                identity_scope=identity_scope)
-    return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id, external_identities)
+    assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
+    vm = client.virtual_machines.get(resource_group_name, vm_name)
+    return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
+                                    vm.identity.user_assigned_identities)
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
@@ -482,7 +478,8 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                                                 overwrite_vhds=overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
+    output = getattr(result, 'output', None) or result.resources[0]
+    print(json.dumps(output, indent=2))  # pylint: disable=no-member
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
@@ -629,9 +626,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             'promotionCode': plan_promotion_code
         }
 
-    enable_local_identity, external_identities = None, None
+    enable_local_identity = None
     if assign_identity is not None:
-        vm_resource['identity'], _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+        vm_resource['identity'], _, _, enable_local_identity = _build_identities_info(assign_identity)
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
@@ -668,8 +665,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role,
-                                                         vm.identity.principal_id, external_identities))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
+                                                         vm.identity.user_assigned_identities))
     return vm
 
 
@@ -986,6 +983,13 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def list_av_sets(cmd, resource_group_name=None):
+    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
+    if resource_group_name:
+        return op_group.list(resource_group_name)
+    return op_group.list_by_subscription()
 # endregion
 
 
@@ -1224,23 +1228,30 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         remove_system_assigned_identity = True
         identities.remove('[system]')
     resource = getter(cmd, resource_group_name, name)
-    existing = set([x.lower() for x in (resource.identity.identity_ids or [])])
-    to_remove = set([x.lower() for x in identities])
-    non_existing = to_remove.difference(existing)
-    if non_existing:
-        raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
-    resource.identity.identity_ids = list(existing - to_remove)
-    if not resource.identity.identity_ids:
-        resource.identity.identity_ids = None
-        if resource.identity.type == ResourceIdentityType.user_assigned:
-            resource.identity.type = ResourceIdentityType.none
-        elif resource.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-            resource.identity.type = ResourceIdentityType.system_assigned
+    emsis_to_remove = []
+    if identities:
+        existing_emsis = set([x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())])
+        emsis_to_remove = set([x.lower() for x in identities])
+        non_existing = emsis_to_remove.difference(existing_emsis)
+        if non_existing:
+            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+        if not list(existing_emsis - emsis_to_remove):  # if all emsis are gone, we need to update the type
+            if resource.identity.type == ResourceIdentityType.user_assigned:
+                resource.identity.type = ResourceIdentityType.none
+            elif resource.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+                resource.identity.type = ResourceIdentityType.system_assigned
 
-    if remove_system_assigned_identity and resource.identity.type != ResourceIdentityType.none:
+    resource.identity.user_assigned_identities = None
+    if remove_system_assigned_identity:
         resource.identity.type = (ResourceIdentityType.none
                                   if resource.identity.type == ResourceIdentityType.system_assigned
                                   else ResourceIdentityType.user_assigned)
+
+    if emsis_to_remove:
+        if resource.identity.type not in [ResourceIdentityType.none, ResourceIdentityType.system_assigned]:
+            resource.identity.user_assigned_identities = {}
+            for identity in emsis_to_remove:
+                resource.identity.user_assigned_identities[identity] = None
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
     return result.identity
@@ -1250,10 +1261,8 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
     def setter(resource_group_name, vm_name, vm):
         client = _compute_client_factory(cmd.cli_ctx)
         VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
-        if VirtualMachineUpdate:
-            vm_update = VirtualMachineUpdate(identity=vm.identity)
-            return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
-        return client.virtual_machines.create_or_update(resource_group_name, vm_name, vm)
+        vm_update = VirtualMachineUpdate(identity=vm.identity)
+        return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
@@ -1714,6 +1723,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                          identity_role_id=None, identity_scope=None):
     VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
         'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
+    IdentityUserAssignedIdentitiesValue = cmd.get_models('VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -1722,12 +1732,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
     def setter(vmss, external_identities=external_identities):
-        vmss_patch = None
-        if VirtualMachineScaleSetUpdate:
-            vmss_patch = VirtualMachineScaleSetUpdate()
-        if vmss.identity and vmss.identity.identity_ids:
-            for i in vmss.identity.identity_ids:
-                external_identities.append(i)
+
         if vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned_user_assigned:
             identity_types = ResourceIdentityType.system_assigned_user_assigned
         elif vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned and external_identities:
@@ -1742,24 +1747,22 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
             identity_types = ResourceIdentityType.system_assigned
         vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
         if external_identities:
-            # do in-place update, so the outer method can display the same data
-            external_identities[::] = set(external_identities)
-            vmss.identity.identity_ids = external_identities
-        if vmss_patch:
-            vmss_patch.identity = vmss.identity
-            poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
-        else:
-            poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+            vmss.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                vmss.identity.user_assigned_identities[identity] = IdentityUserAssignedIdentitiesValue()
+        vmss_patch = VirtualMachineScaleSetUpdate()
+        vmss_patch.identity = vmss.identity
+        poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
-    vmss = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
-                                  identity_scope=identity_scope)
-
+    assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _construct_identity_info(identity_scope, identity_role,
-                                    vmss.identity.principal_id, external_identities)
+
+    return _construct_identity_info(identity_scope, identity_role, vmss.identity.principal_id,
+                                    vmss.identity.user_assigned_identities)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -1788,7 +1791,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
-                identity_role_id=None, zones=None, priority=None, eviction_policy=None):
+                identity_role_id=None, zones=None, priority=None, eviction_policy=None,
+                application_security_groups=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1987,7 +1991,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy)
+        eviction_policy=eviction_policy, application_security_groups=application_security_groups)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -1998,9 +2002,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             'promotionCode': plan_promotion_code
         }
 
-    enable_local_identity, external_identities = None, None
+    enable_local_identity = None
     if assign_identity is not None:
-        vmss_resource['identity'], _, external_identities, enable_local_identity = _build_identities_info(
+        vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
             assign_identity)
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
@@ -2038,7 +2042,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                                          vmss_info.identity.principal_id,
-                                                                         external_identities)
+                                                                         vmss_info.identity.user_assigned_identities)
     return deployment_result
 
 
@@ -2054,7 +2058,7 @@ def _build_identities_info(identities):
     identity_types = ','.join(identity_types)
     info = {'type': identity_types}
     if external_identities:
-        info['identityIds'] = external_identities
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
@@ -2407,12 +2411,8 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
     def _set_vmss(resource_group_name, name, vmss_instance):
         VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
                                                       operation_group='virtual_machine_scale_sets')
-        if VirtualMachineScaleSetUpdate:
-            vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
-            return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
-
-        return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
-                                                                  vmss_name, vmss_instance)
+        vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
+        return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID

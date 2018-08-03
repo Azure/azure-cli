@@ -15,7 +15,8 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskStatus,
     OsType,
     BaseImageTriggerType,
-    BuildStatus
+    BuildStatus,
+    PolicyStatus
 )
 
 from azure.cli.core.commands.parameters import (
@@ -38,7 +39,7 @@ from ._constants import (
     BUILD_TASK_RESOURCE_TYPE,
     BUILD_STEP_RESOURCE_TYPE,
     CLASSIC_REGISTRY_SKU,
-    MANAGED_REGISTRY_SKU
+    MANAGED_REGISTRY_SKU,
 )
 from ._validators import (
     validate_registry_name,
@@ -86,12 +87,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
+    with self.argument_context('acr config content-trust') as c:
+        c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+
     with self.argument_context('acr repository') as c:
         c.argument('repository', help="The name of the repository.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('top', type=int, help='Limit the number of items in the results.')
         c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
+        c.argument('detail', help='Show detailed information.', action='store_true')
+        c.argument('delete_enabled', help='Indicates whether delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
+        c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
 
     with self.argument_context('acr repository delete') as c:
         c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
@@ -142,6 +151,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('git_access_token', help="The access token used to access the source control provider.")
+        c.argument('with_secure_properties', help="Indicates whether the secure properties of a build task should be returned.", action='store_true')
         # build step parameters
         c.argument('step_name', help='The name of the build step.', completer=get_resource_name_completion_list(BUILD_STEP_RESOURCE_TYPE))
         c.argument('branch', help="The source control branch name.")
@@ -152,6 +162,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')
         c.argument('build_status', help='The current status of build.', arg_type=get_enum_type(BuildStatus))
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
+        c.argument('no_archive', help='Indicates whether the build should be archived.', arg_type=get_three_state_flag())
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)

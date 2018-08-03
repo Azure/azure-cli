@@ -48,8 +48,8 @@ Commands to create an Azure container group
         --registry-username           : The username to log in container image registry server.
 
     Log Analytics Arguments
-        --log-analytics-workspace       : The Log Analytics workspace name or id. If a name is
-                                        specified, use the --subscription flag to set the subscription if not current.
+        --log-analytics-workspace       : The Log Analytics workspace name or id. Use the --subscription
+                                          flag to set the subscription if not current.
         --log-analytics-workspace-key   : The Log Analytics workspace key.
 
     Global Arguments

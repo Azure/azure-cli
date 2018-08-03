@@ -140,15 +140,15 @@ def cf_tm_geographic(cli_ctx, _):
 
 
 def cf_dns_mgmt_zones(cli_ctx, _):
-    from azure.mgmt.dns import DnsManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, DnsManagementClient).zones
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).zones
 
 
 def cf_dns_mgmt_record_sets(cli_ctx, _):
-    from azure.mgmt.dns import DnsManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, DnsManagementClient).record_sets
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
 
 
 def cf_route_filters(cli_ctx, _):

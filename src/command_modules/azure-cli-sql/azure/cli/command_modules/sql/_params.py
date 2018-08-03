@@ -104,9 +104,15 @@ sku_arg_group = 'Performance Level'
 
 sku_component_arg_group = 'Performance Level (components)'
 
+server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
+
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
-    help='Name of the Azure SQL server.')
+    configured_default='sql-server',
+    help='Name of the Azure SQL server. ' + server_configure_help,
+    completer=get_resource_name_completion_list('Microsoft.SQL/servers'),
+    # Allow --ids command line argument. id_part=name is 1st name in uri
+    id_part='name')
 
 available_param_type = CLIArgumentType(
     options_list=['--available', '-a'],
@@ -286,9 +292,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -541,7 +545,7 @@ def load_arguments(self, _):
 
         c.argument('server_name',
                    help='Name of the server containing the secondary replica that will become'
-                   ' the new primary.')
+                   ' the new primary. ' + server_configure_help)
 
         c.argument('resource_group_name',
                    help='Name of the resource group containing the secondary replica that'
@@ -656,9 +660,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql dw') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -695,9 +697,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql elastic-pool') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('elastic_pool_name',
                    options_list=['--name', '-n'],
@@ -833,10 +833,8 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql server') as c:
         c.argument('server_name',
-                   help='The server name',
-                   options_list=['--name', '-n'],
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type,
+                   options_list=['--name', '-n'])
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'])
@@ -877,9 +875,10 @@ def load_arguments(self, _):
     #           sql server ad-admin
     ######
     with self.argument_context('sql server ad-admin') as c:
+        # The options list should be ['--server', '-s'], but in the originally released version it was
+        # ['--server-name'] which we must keep for backward compatibility - but we should deprecate it.
         c.argument('server_name',
-                   options_list=['--server-name', '-s'],
-                   help='The name of the SQL Server')
+                   options_list=['--server-name', '--server', '-s'])
 
         c.argument('login',
                    options_list=['--display-name', '-u'],
@@ -937,9 +936,7 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server firewall-rule update' is a custom
         # command.
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('firewall_rule_name',
                    options_list=['--name', '-n'],
@@ -999,8 +996,7 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server vnet-rule create' is a custom
         # command.
         c.argument('server_name',
-                   options_list=['--server', '-s'],
-                   completer=get_resource_name_completion_list('Microsoft.SQL/servers'))
+                   arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
                    options_list=['--name', '-n'])

@@ -67,6 +67,14 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 
 
+def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
+    profile = Profile(cli_ctx=cli_ctx)
+    if refresh:
+        profile.refresh_accounts()
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
+    return subscriptions
+
+
 def _get_authority_url(cli_ctx, tenant):
     import re
     authority_url = cli_ctx.cloud.endpoints.active_directory
@@ -726,7 +734,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all subscriptions you have access to...")
+        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
