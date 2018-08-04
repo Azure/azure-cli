@@ -221,7 +221,8 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
             logger.warning('  - %s/%s', f[0], f[1])
         return []
 
-    return [delete_action(f) for f in source_files]
+    for f in source_files:
+        delete_action(f)
 
 
 def _create_file_and_directory_from_blob(file_service, blob_service, share, container, sas, blob_name,
