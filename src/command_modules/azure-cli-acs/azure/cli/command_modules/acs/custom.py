@@ -1289,6 +1289,7 @@ def _update_dict(dict1, dict2):
     cp.update(dict2)
     return cp
 
+
 def role_assignment_exist(cli_ctx, scope):
     exsit = False
     factory = get_auth_management_client(cli_ctx, scope)
@@ -1299,6 +1300,7 @@ def role_assignment_exist(cli_ctx, scope):
             exsit = True
             break
     return exsit
+
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if in_cloud_console():
@@ -1410,14 +1412,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
-
-    #if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
+    # if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
     if vnet_subnet_id and not skip_role_assignment:
         scope = vnet_subnet_id
         if not _add_role_assignment(cmd.cli_ctx, 'Contributor', service_principal, scope=scope):
             logger.warning('Could not create a role assignment. '
                            'Are you an Owner on this project?')
-
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
