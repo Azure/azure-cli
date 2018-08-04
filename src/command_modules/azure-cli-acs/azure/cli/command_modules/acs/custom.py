@@ -1412,8 +1412,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
-    # if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
-    if vnet_subnet_id and not skip_role_assignment:
+    if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
         scope = vnet_subnet_id
         if not _add_role_assignment(cmd.cli_ctx, 'Contributor', service_principal, scope=scope):
             logger.warning('Could not create a role assignment. '
