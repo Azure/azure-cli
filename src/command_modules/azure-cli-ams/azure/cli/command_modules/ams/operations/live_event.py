@@ -7,7 +7,7 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 
 
-def create(client, resource_group_name, account_name, live_event_name, streaming_protocol, location,
+def create(client, resource_group_name, account_name, live_event_name, streaming_protocol, location,  # pylint: disable=too-many-locals
            auto_start=False, encoding_type=None, preset_name=None, tags=None, description=None,
            key_frame_interval_duration=None, access_token=None, no_wait=False, ips=None,
            preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
@@ -24,16 +24,17 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
     live_event_preview = createLiveEventPreview(preview_locator, streaming_policy_name, alternative_media_id,
                                                 ips, live_event_name)
 
-    live_event = LiveEvent(input=live_event_input, location=location, preview=live_event_preview,
-                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name))
-
     policies = createCrossSiteAccessPolicies(client_access_policy, cross_domain_policy)
+
+    live_event = LiveEvent(input=live_event_input, location=location, preview=live_event_preview,
+                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name),
+                           tags=tags, vanity_url=vanity_url, stream_options=stream_options,
+                           cross_site_access_policies=policies)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
                        live_event_name=live_event_name, parameters=live_event, auto_start=auto_start,
-                       description=description, tags=tags, key_frame_interval_duration=key_frame_interval_duration,
-                       access_token=access_token, vanity_url=vanity_url, cross_site_access_policies=policies,
-                       stream_options=stream_options)
+                       description=description, key_frame_interval_duration=key_frame_interval_duration,
+                       access_token=access_token)
 
 
 def createLiveEventPreview(preview_locator, streaming_policy_name, alternative_media_id, ips, live_event_name):
@@ -57,7 +58,13 @@ def createLiveEventPreview(preview_locator, streaming_policy_name, alternative_m
 def createCrossSiteAccessPolicies(client_access_policy, cross_domain_policy):
     from azure.mgmt.media.models import CrossSiteAccessPolicies
 
-    return CrossSiteAccessPolicies(client_access_policy=client_access_policy, cross_domain_policy=cross_domain_policy)
+    with open(client_access_policy, 'r') as file:
+        client_policy = file.read()
+
+    with open(cross_domain_policy, 'r') as file:
+        domain_policy = file.read()
+
+    return CrossSiteAccessPolicies(client_access_policy=client_policy, cross_domain_policy=domain_policy)
 
 
 def start(cmd, client, resource_group_name, account_name, live_event_name, no_wait=False):
