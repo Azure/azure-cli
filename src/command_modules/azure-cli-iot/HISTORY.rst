@@ -3,11 +3,10 @@
 Release History
 ===============
 
-Unreleased
+0.2.1
 +++++
 * Removed deprecated commands which have moved to the iot extension
 * Updated elements to not assume azure-devices.net domain
-
 
 0.2.0
 +++++
