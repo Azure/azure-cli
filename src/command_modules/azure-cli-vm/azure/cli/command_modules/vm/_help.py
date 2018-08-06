@@ -1125,8 +1125,6 @@ helps['vm list-skus'] = """
           text: az vm list-skus -l eastus2 --zone --size standard_ds1
         - name: List availability set related sku information in The West US region.
           text: az vm list-skus -l westus --resource-type availabilitySets
-
-
 """
 
 helps['vm open-port'] = """
