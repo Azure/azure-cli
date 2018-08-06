@@ -21,23 +21,21 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
                                       access_token=access_token,
                                       key_frame_interval_duration=key_frame_interval_duration)
 
-    live_event_preview = createLiveEventPreview(preview_locator, streaming_policy_name, alternative_media_id,
+    live_event_preview = create_live_event_preview(preview_locator, streaming_policy_name, alternative_media_id,
                                                 ips, live_event_name)
 
-    policies = createCrossSiteAccessPolicies(client_access_policy, cross_domain_policy)
+    policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
     live_event = LiveEvent(input=live_event_input, location=location, preview=live_event_preview,
                            encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name),
                            tags=tags, vanity_url=vanity_url, stream_options=stream_options,
-                           cross_site_access_policies=policies)
+                           cross_site_access_policies=policies, description=description)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
-                       live_event_name=live_event_name, parameters=live_event, auto_start=auto_start,
-                       description=description, key_frame_interval_duration=key_frame_interval_duration,
-                       access_token=access_token)
+                       live_event_name=live_event_name, parameters=live_event, auto_start=auto_start)
 
 
-def createLiveEventPreview(preview_locator, streaming_policy_name, alternative_media_id, ips, live_event_name):
+def create_live_event_preview(preview_locator, streaming_policy_name, alternative_media_id, ips, live_event_name):
     from azure.mgmt.media.models import LiveEventPreview
     from azure.mgmt.media.models import LiveEventPreviewAccessControl
     from azure.mgmt.media.models import IPAccessControl
@@ -55,7 +53,7 @@ def createLiveEventPreview(preview_locator, streaming_policy_name, alternative_m
                             access_control=live_event_preview_access_control)
 
 
-def createCrossSiteAccessPolicies(client_access_policy, cross_domain_policy):
+def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
     from azure.mgmt.media.models import CrossSiteAccessPolicies
 
     with open(client_access_policy, 'r') as file:
