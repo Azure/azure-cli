@@ -183,13 +183,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_frame_interval_duration', help='ISO 8601 timespan duration of the key frame interval duration.')
         c.argument('access_token', help='The access token.')
         c.argument('description', help='The live event description.')
-        c.argument('ips', nargs='+', help='The IP allow list.')
+        c.argument('ips', nargs='+', help='Space-separated list of IPs for the IP allow list.')
         c.argument('preview_locator', help='The preview locator Guid.')
         c.argument('streaming_policy_name', help='The name of streaming policy used for live event preview.')
         c.argument('alternative_media_id', help='An alternative media identifier associated with the preview URL. This identifier can be used to distinguish the preview of different live events for authorization purposes in the custom license acquisition URL template or the custom key acquisition URL template of the streaming policy specified in the streaming policy name field.')
         c.argument('vanity_url', action='store_true', help='The live event vanity URL flag.')
-        c.argument('client_access_policy', help='The content of clientaccesspolicy.xml used by Silverlight.')
-        c.argument('cross_domain_policy', help='The content of crossdomain.xml used bySilverlight.')
+        c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
+        c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used bySilverlight.')
         c.argument('stream_options', nargs='+', help='The stream options.')
 
     with self.argument_context('ams live event stop') as c:
