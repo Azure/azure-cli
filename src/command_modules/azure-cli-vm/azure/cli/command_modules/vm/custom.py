@@ -721,8 +721,8 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
     if not show_all:
-        result = [x for x in result if x.resource_type != 'virtualMachines' or x.resource_type == 'virtualMachines' and
-                  not [y for y in x.restrictions if y.reason_code == 'NotAvailableForSubscription']]
+        result = [x for x in result if not [y for y in (x.restrictions or [])
+                                            if y.reason_code == 'NotAvailableForSubscription']]
     if resource_type:
         result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
     if size:
