@@ -104,7 +104,7 @@ helps['ams transform create'] = """
     examples:
         - name: Create a transform with AdaptiveStreaming and VideoAnalyzer built-in presets and a custom preset from a local JSON file.
           text: >
-            az ams transform create -a myAmsAccount -n transformName -g myResourceGroup --presets AdaptiveStreaming VideoAnalyzer \"C:\MyPresets\CustomPreset.json\"
+            az ams transform create -a myAmsAccount -n transformName -g myResourceGroup --presets AdaptiveStreaming VideoAnalyzer \"C:\\MyPresets\\CustomPreset.json\"
     """
 
 helps['ams transform delete'] = """
