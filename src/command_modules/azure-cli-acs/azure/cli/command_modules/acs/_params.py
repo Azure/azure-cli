@@ -231,19 +231,13 @@ def load_arguments(self, _):
 
 def _get_default_install_location(exe_name):
     system = platform.system()
+    install_location = None
     if system == 'Windows':
-        # CLI/Windows uses Python 32bits, extra logics are needed to find the x64 ProgramFiles folder
-        if 'PROGRAMFILES(X86)' in os.environ and sys.maxsize < 2**32:
-            program_files = os.environ.get('ProgramW6432')
-        else:
-            program_files = os.environ.get('ProgramFiles')
-        if not program_files:
-            return None
-        install_location = '{}\\{}.exe'.format(program_files, exe_name)
+        user_profile = os.environ.get('USERPROFILE')
+        if user_profile:
+            install_location = os.path.join(user_profile, r'AppData\Local\Microsoft\WindowsApps', exe_name + '.exe')
     elif system == 'Linux' or system == 'Darwin':
         install_location = '/usr/local/bin/{}'.format(exe_name)
-    else:
-        install_location = None
     return install_location
 
 

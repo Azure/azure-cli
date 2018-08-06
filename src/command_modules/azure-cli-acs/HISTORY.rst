@@ -2,10 +2,10 @@
 
 Release History
 ===============
-
 2.3.0
 +++++
 * `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+* `az acs install-cli`: ensure kubectl gets installed to under "Program Files" instead of "Program Files(x86)"
 
 2.2.2
 +++++
