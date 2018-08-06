@@ -13,7 +13,6 @@ from azure.cli.command_modules.relay._help import helps
 class RelayCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         relay_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.relay.custom#{}')
         super(RelayCommandsLoader, self).__init__(
