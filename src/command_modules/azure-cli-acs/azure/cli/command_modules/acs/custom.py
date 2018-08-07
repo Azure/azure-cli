@@ -317,11 +317,10 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
         env_paths = os.environ['PATH'].split(';')
         install_dir, exe = install_location.rsplit('\\', 1)
         found = next((x for x in env_paths if x.lower().rstrip('\\')== install_dir.lower()), None)
-
         if not found:
             logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-            '    1. Run "set PATH=%PATH%;{0}". Good for the current command session.\n' 
-            '    2. Update system PATH environment variable(once for all) by following '
+            '    1. Run "set PATH=%PATH%;{0}" or "$env:path += {}" for PowerShell. It is good for the current command session.\n'
+            '    2. Update system PATH environment variable (once for all) by following '
             '"Control Panel->System->Advanced->Environment Variables", and re-open the command window.'.format(install_dir, exe))
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
