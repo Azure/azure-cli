@@ -319,21 +319,6 @@ def load_command_table(self, _):
         g.custom_command('set-primary', 'failover_group_failover')
 
     ###############################################
-    #             sql failover-group              #
-    ###############################################
-
-    failover_groups_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.failover_groups_operations#FailoverGroupsOperations.{}',
-        client_factory=get_sql_failover_groups_operations)
-    with self.command_group('sql failover-group', failover_groups_operations, client_factory=get_sql_failover_groups_operations) as g:
-        g.command('show', 'get')
-        g.command('list', 'list_by_server')
-        g.custom_command('create', 'failover_group_create')
-        g.generic_update_command('update', custom_func_name='failover_group_update')
-        g.command('delete', 'delete')
-        g.custom_command('set-primary', 'failover_group_failover')
-
-    ###############################################
     #                sql server                   #
     ###############################################
 

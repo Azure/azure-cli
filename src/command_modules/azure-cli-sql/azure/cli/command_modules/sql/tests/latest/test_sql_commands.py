@@ -2795,7 +2795,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest1069"
+        failover_group_name = "fgclitest1070"
 
         database_name = "db1"
 
@@ -2879,11 +2879,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s2.group, s2.name, failover_group_name))
 
-        # If you are running tests in record mode uncomment the line below
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
-        # And we have to wait for this to complete
-        time.sleep(30)
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(30)
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql failover-group show -g {} -s {} -n {}'
@@ -2899,16 +2899,33 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server
+        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # The failover operation is completed when new primary is promoted to primary role
+        # But there is a async part to make old primary a new secondary
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(30)
+
+        # Check the roles of failover groups to confirm failover happened
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+        # Do no-op failover to the same server
         self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s1.group, s1.name, failover_group_name))
 
-        # If you are running tests in record mode uncomment the line below
-        # The failover operation is completed when new primary is promoted to primary role
-        # But there is a async part to make old primary a new secondary
-        # And we have to wait for this to complete
-        time.sleep(30)
-
-        # Check the roles of failover groups to confirm failover happened
+        # Check the roles of failover groups to confirm failover didn't happen
         self.cmd('sql failover-group show -g {} -s {} -n {}'
                  .format(s2.group, s2.name, failover_group_name),
                  checks=[

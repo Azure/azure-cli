@@ -2120,9 +2120,6 @@ def managed_db_restore(
 ###############################################
 
 
-DATABASE_ID_TEMPLATE = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}"
-
-
 # pylint: disable=too-few-public-methods
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
@@ -2162,7 +2159,7 @@ def failover_group_create(
         add_db = []
 
     databases = _get_list_of_databases_for_fg(
-        get_subscription_id(cmd.cli_ctx),
+        cmd,
         resource_group_name,
         server_name,
         [],
@@ -2196,8 +2193,6 @@ def failover_group_update(
     Updates the failover group.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     if failover_policy is not None:
         instance.read_write_endpoint.failover_policy = failover_policy
 
@@ -2215,7 +2210,7 @@ def failover_group_update(
         remove_db = []
 
     databases = _get_list_of_databases_for_fg(
-        get_subscription_id(cmd.cli_ctx),
+        cmd,
         resource_group_name,
         server_name,
         instance.databases,
@@ -2258,7 +2253,7 @@ def failover_group_failover(
 
 
 def _get_list_of_databases_for_fg(
-        subscription_id,
+        cmd,
         resource_group_name,
         server_name,
         databases_in_fg,
@@ -2271,19 +2266,9 @@ def _get_list_of_databases_for_fg(
     that are already part of the failover group.
     '''
 
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    add_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in add_db]
 
-    add_db_ids = [DATABASE_ID_TEMPLATE.format(
-        quote(subscription_id),
-        quote(resource_group_name),
-        quote(server_name),
-        quote(d)) for d in add_db]
-
-    remove_db_ids = [DATABASE_ID_TEMPLATE.format(
-        quote(subscription_id),
-        quote(resource_group_name),
-        quote(server_name),
-        quote(d)) for d in remove_db]
+    remove_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in remove_db]
 
     databases = list(({x.lower() for x in databases_in_fg} |
                       {x.lower() for x in add_db_ids}) - {x.lower() for x in remove_db_ids})
