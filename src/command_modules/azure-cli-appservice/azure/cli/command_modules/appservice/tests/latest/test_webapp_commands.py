@@ -167,7 +167,9 @@ class WebappQuickCreateTest(ScenarioTest):
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        self.assertTrue('Hello world' in str(r.content))
+        if 'Hello world' not in str(r.content):
+            # dump out more info for diagnose
+            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -784,8 +786,7 @@ class WebappImplictIdentityTest(ScenarioTest):
         webapp_name = self.create_random_name('web-msi', 20)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46668')]
-        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             result = self.cmd('webapp identity assign -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
             self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
                 self.check('principalId', result['principalId'])
@@ -794,6 +795,10 @@ class WebappImplictIdentityTest(ScenarioTest):
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].roleDefinitionName', role)
         ])
+
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.check('principalId', result['principalId']))
+        self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.is_empty())
 
 
 class WebappListLocationsFreeSKUTest(ScenarioTest):
