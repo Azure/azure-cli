@@ -186,3 +186,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams live event stop') as c:
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
+
+    with self.argument_context('ams live output') as c:
+        c.argument('account_name', account_name_arg_type)
+        c.argument('live_event_name', help='The name of the live event.')
+        c.argument('live_output_name', name_arg_type, help='The name of the live output.')
+
+    with self.argument_context('ams live output create') as c:
+        c.argument('asset_name', help='The name of the asset.')
+        c.argument('manifest_name', help='The manifest file name.')
+        c.argument('archive_window_length', help='ISO 8601 timespan duration of the archive window length. This is the duration that customer want to retain the recorded content.')
