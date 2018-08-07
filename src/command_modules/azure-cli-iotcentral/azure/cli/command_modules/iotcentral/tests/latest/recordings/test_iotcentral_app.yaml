@@ -1,0 +1,283 @@
+interactions:
+- request:
+    body: !!python/unicode '{"location": "westus", "tags": {"date": "2018-07-26T01:11:58Z",
+      "product": "azurecli", "cause": "automation"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 resourcemanagementclient/2.0.0rc2
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"date":"2018-07-26T01:11:58Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:02 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: !!python/unicode '{"name": "iotcentral-app-for-cli-test"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app create]
+      Connection: [keep-alive]
+      Content-Length: ['39']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/checkNameAvailability?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode '{"nameAvailable":true}'}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:03 GMT']
+      etag: [W/"16-4/x+wI91pK3bZiWtoOg+Zr/n2HE"]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodeastus01]
+      x-iot-version: ['20180725.5']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-msedge-ref: ['Ref A: D16BDD1AC125400A9982B135646EC2E9 Ref B: DM2EDGE0207 Ref
+          C: 2018-07-26T01:12:04Z']
+      x-powered-by: [Express]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 resourcemanagementclient/2.0.0rc2
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"date":"2018-07-26T01:11:58Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:04 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"sku": {"name": "S1"}, "properties": {"subdomain": "iotcentral-app-for-cli-test",
+      "displayName": "iotcentral-app-for-cli-test"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app create]
+      Connection: [keep-alive]
+      Content-Length: ['151']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test","name":"iotcentral-app-for-cli-test","type":"Microsoft.IoTCentral/IoTApps","location":"westus","properties":{"applicationId":"ade9cdb4-e30b-4ac3-b7cd-5c0b3ef451b4","state":"created","displayName":"iotcentral-app-for-cli-test","subdomain":"iotcentral-app-for-cli-test","createdDate":"2018-07-26T01:12:06.736Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"7b00e21a-0000-0000-0000-5b591fe60000\""}'}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['630']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:06 GMT']
+      etag: ['"7b00e21a-0000-0000-0000-5b591fe60000"']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodeastus01]
+      x-iot-version: ['20180725.5']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-msedge-ref: ['Ref A: 9A4140DB8ECF4ED2AFDDA3DB10A6EA66 Ref B: DM2EDGE0109 Ref
+          C: 2018-07-26T01:12:07Z']
+      x-powered-by: [Express]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app create]
+      Connection: [keep-alive]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test","name":"iotcentral-app-for-cli-test","type":"Microsoft.IoTCentral/IoTApps","location":"westus","properties":{"applicationId":"ade9cdb4-e30b-4ac3-b7cd-5c0b3ef451b4","state":"created","displayName":"iotcentral-app-for-cli-test","subdomain":"iotcentral-app-for-cli-test","createdDate":"2018-07-26T01:12:06.736Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"7b00e21a-0000-0000-0000-5b591fe60000\""}'}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['630']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:37 GMT']
+      etag: [W/"7b00e21a-0000-0000-0000-5b591fe60000"]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodeastus01]
+      x-iot-version: ['20180725.5']
+      x-msedge-ref: ['Ref A: DD732DA601804B0981D43C5C74E3122F Ref B: DM2EDGE0417 Ref
+          C: 2018-07-26T01:12:38Z']
+      x-powered-by: [Express]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test","name":"iotcentral-app-for-cli-test","type":"Microsoft.IoTCentral/IoTApps","location":"westus","properties":{"applicationId":"ade9cdb4-e30b-4ac3-b7cd-5c0b3ef451b4","state":"created","displayName":"iotcentral-app-for-cli-test","subdomain":"iotcentral-app-for-cli-test","createdDate":"2018-07-26T01:12:06.736Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"7b00e21a-0000-0000-0000-5b591fe60000\""}'}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['630']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:38 GMT']
+      etag: [W/"7b00e21a-0000-0000-0000-5b591fe60000"]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodeastus01]
+      x-iot-version: ['20180725.5']
+      x-msedge-ref: ['Ref A: 57BDB214AB8C4E19A3A585F01160B4EB Ref B: DM2EDGE0115 Ref
+          C: 2018-07-26T01:12:39Z']
+      x-powered-by: [Express]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test","name":"iotcentral-app-for-cli-test","type":"Microsoft.IoTCentral/IoTApps","location":"westus","properties":{"applicationId":"ade9cdb4-e30b-4ac3-b7cd-5c0b3ef451b4","state":"created","displayName":"iotcentral-app-for-cli-test","subdomain":"iotcentral-app-for-cli-test","createdDate":"2018-07-26T01:12:06.736Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"7b00e21a-0000-0000-0000-5b591fe60000\""}],"nextLink":null}'}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['658']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 26 Jul 2018 01:12:39 GMT']
+      etag: [W/"292-2NvmG/+Tl+/9zt+nqxXb2aalhX0"]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodeastus01]
+      x-iot-version: ['20180725.5']
+      x-msedge-ref: ['Ref A: 345C329CB0A848C2AE8BD0EAB10D6D86 Ref B: DM2EDGE0812 Ref
+          C: 2018-07-26T01:12:40Z']
+      x-powered-by: [Express]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iotcentral app delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 azure-mgmt-iotcentral/2017-07-01-privatepreview
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotcentral-app-for-cli-test?api-version=2017-07-01-privatepreview
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      cache-control: ['no-store, must-revalidate, no-cache, max-stale=0, private,
+          post-check=0, pre-check=0']
+      content-length: ['0']
+      date: ['Thu, 26 Jul 2018 01:12:46 GMT']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-iot-cluster: [iotcprodwestus01]
+      x-iot-version: ['20180725.5']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-msedge-ref: ['Ref A: 7ADF29E9087741AD8206CC458B13DA5B Ref B: CO1EDGE0409 Ref
+          C: 2018-07-26T01:12:43Z']
+      x-powered-by: [Express]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Linux-4.4.0-17134-Microsoft-x86_64-with-Ubuntu-16.04-xenial)
+          requests/2.19.1 msrest/0.5.1 msrest_azure/0.4.33 resourcemanagementclient/2.0.0rc2
+          Azure-SDK-For-Python AZURECLI/2.0.43]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 26 Jul 2018 01:12:47 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdVQ0gzMkxLSzdTV0lYTkFXVktNRU5KVTdQQTJNUzJXSEtQTXw4RDYyNjcxOEY3NjY4QjMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+version: 1
