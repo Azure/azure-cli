@@ -491,19 +491,16 @@ class AcsCustomCommandTest(unittest.TestCase):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'kubectl.exe')
-            k8s_install_cli(None, client_version='1.2.3', install_location = test_location)
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 2 warnings, 1st for download result; 2nd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
 
             if platform.system() == 'Windows':
-                # 2 warnings, 1st for download result; 2nd for updating PATH
-                self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
-
                 # try again with install location in PATH, we should only get one more warning
                 os.environ['PATH'] += ';' + temp_dir
-                k8s_install_cli(None, client_version='1.2.3', install_location = test_location)
+                k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
                 self.assertEqual(logger_mock.warning.call_count, 3)
-            else:
-                self.assertEqual(logger_mock.warning.call_count, 1)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -511,5 +508,5 @@ class AcsCustomCommandTest(unittest.TestCase):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
-            k8s_install_cli(None, client_version='1.2.3', install_location = test_location)
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
             self.assertTrue(os.path.exists(test_location))
