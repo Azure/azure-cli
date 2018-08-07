@@ -173,6 +173,7 @@ def load_arguments(self, _):
         c.argument('service_cidr')
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
+        c.argument('skip_subnet_role_assignment', action='store_true')
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
