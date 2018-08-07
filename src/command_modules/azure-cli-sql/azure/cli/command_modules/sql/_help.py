@@ -322,6 +322,22 @@ helps['sql elastic-pool op cancel'] = """
         - name: Cancel an operation.
           text: az sql elastic-pool op cancel -g mygroup -s myserver -ep myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
     """
+helps['sql failover-group'] = """
+    type: group
+    short-summary: Manage SQL Failover Groups.
+    """
+helps['sql failover-group create'] = """
+    type: command
+    short-summary: Creates a failover group.
+    """
+helps['sql failover-group update'] = """
+    type: command
+    short-summary: Updates the failover group.
+    """
+helps['sql failover-group set-primary'] = """
+    type: command
+    short-summary: Set the primary of the failover group by failing over all databases from the current primary server.
+    """
 helps['sql server'] = """
     type: group
     short-summary: Manage SQL servers.
