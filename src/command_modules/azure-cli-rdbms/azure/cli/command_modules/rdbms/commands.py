@@ -90,31 +90,31 @@ def load_command_table(self, _):
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
-        g.generic_wait_command('wait', getter_name='_server_mysql_get', getter_type=rdbms_custom)
+        g.custom_wait_command('wait', '_server_mysql_get')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
-        g.generic_wait_command('wait', getter_name='_server_postgresql_get', getter_type=rdbms_custom)
+        g.custom_wait_command('wait', '_server_postgresql_get')
 
     with self.command_group('mysql server firewall-rule', mysql_firewall_rule_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update',
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
@@ -124,7 +124,7 @@ def load_command_table(self, _):
     with self.command_group('postgres server firewall-rule', postgres_firewall_rule_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update',
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
@@ -134,25 +134,25 @@ def load_command_table(self, _):
     with self.command_group('mysql server vnet-rule', mysql_vnet_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update')
 
     with self.command_group('postgres server vnet-rule', postgres_vnet_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update')
 
     with self.command_group('mysql server configuration', mysql_config_sdk) as g:
         g.command('set', 'create_or_update')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('postgres server configuration', postgres_config_sdk) as g:
         g.command('set', 'create_or_update')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('mysql server-logs', mysql_log_sdk, client_factory=cf_mysql_log) as g:
@@ -166,11 +166,11 @@ def load_command_table(self, _):
     with self.command_group('mysql db', mysql_db_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('postgres db', postgres_db_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')

@@ -6,7 +6,6 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
-from azure.cli.command_modules.profile._completers import get_subscription_id_list
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
 
@@ -29,7 +28,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.command_group('account', profile_custom) as g:
             g.command('list', 'list_subscriptions', table_transformer=transform_account_list)
             g.command('set', 'set_active_subscription')
-            g.command('show', 'show_subscription')
+            g.show_command('show', 'show_subscription')
             g.command('clear', 'account_clear')
             g.command('list-locations', 'list_locations')
             g.command('get-access-token', 'get_access_token')
@@ -38,6 +37,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
     # pylint: disable=line-too-long
     def load_arguments(self, command):
+        from azure.cli.core.api import get_subscription_id_list
 
         with self.argument_context('login') as c:
             c.argument('password', options_list=['--password', '-p'], help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")

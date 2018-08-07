@@ -51,7 +51,8 @@ from .custom import (
     ClientAuthenticationType,
     ClientType,
     DatabaseCapabilitiesAdditionalDetails,
-    ElasticPoolCapabilitiesAdditionalDetails
+    ElasticPoolCapabilitiesAdditionalDetails,
+    FailoverPolicyType
 )
 
 from ._validators import (
@@ -66,7 +67,7 @@ from ._validators import (
 #####
 
 
-class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
+class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
@@ -104,9 +105,15 @@ sku_arg_group = 'Performance Level'
 
 sku_component_arg_group = 'Performance Level (components)'
 
+server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
+
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
-    help='Name of the Azure SQL server.')
+    configured_default='sql-server',
+    help='Name of the Azure SQL server. ' + server_configure_help,
+    completer=get_resource_name_completion_list('Microsoft.SQL/servers'),
+    # Allow --ids command line argument. id_part=name is 1st name in uri
+    id_part='name')
 
 available_param_type = CLIArgumentType(
     options_list=['--available', '-a'],
@@ -286,9 +293,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -541,7 +546,7 @@ def load_arguments(self, _):
 
         c.argument('server_name',
                    help='Name of the server containing the secondary replica that will become'
-                   ' the new primary.')
+                   ' the new primary. ' + server_configure_help)
 
         c.argument('resource_group_name',
                    help='Name of the resource group containing the secondary replica that'
@@ -656,9 +661,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql dw') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
@@ -695,9 +698,7 @@ def load_arguments(self, _):
     ###############################################
     with self.argument_context('sql elastic-pool') as c:
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('elastic_pool_name',
                    options_list=['--name', '-n'],
@@ -829,14 +830,38 @@ def load_arguments(self, _):
                    help='The unique name of the operation to cancel.')
 
     ###############################################
+    #             sql failover-group              #
+    ###############################################
+
+    with self.argument_context('sql failover-group') as c:
+        c.argument('failover_group_name', options_list=['--name', '-n'], help="The name of the Failover Group")
+        c.argument('server_name', arg_type=server_param_type)
+        c.argument('partner_server', help="The name of the partner server of a Failover Group")
+        c.argument('partner_resource_group', help="The name of the resource group of the partner server")
+        c.argument('failover_policy', help="The failover policy of the Failover Group",
+                   arg_type=get_enum_type(FailoverPolicyType))
+        c.argument('grace_period',
+                   help='Interval in hours before automatic failover is initiated '
+                        'if an outage occurs on the primary server. '
+                        'This indicates that Azure SQL Database will not initiate '
+                        'automatic failover before the grace period expires. '
+                        'Please note that failover operation with AllowDataLoss option '
+                        'might cause data loss due to the nature of asynchronous synchronization.')
+        c.argument('add_db', nargs='+',
+                   help='List of databases to add to Failover Group')
+        c.argument('remove_db', nargs='+',
+                   help='List of databases to remove from Failover Group')
+        c.argument('allow-data-loss',
+                   help='Complete the failover even if doing so may result in data loss. '
+                        'This will allow the failover to proceed even if a primary database is unavailable.')
+
+    ###############################################
     #                sql server                   #
     ###############################################
     with self.argument_context('sql server') as c:
         c.argument('server_name',
-                   help='The server name',
-                   options_list=['--name', '-n'],
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type,
+                   options_list=['--name', '-n'])
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'])
@@ -877,9 +902,10 @@ def load_arguments(self, _):
     #           sql server ad-admin
     ######
     with self.argument_context('sql server ad-admin') as c:
+        # The options list should be ['--server', '-s'], but in the originally released version it was
+        # ['--server-name'] which we must keep for backward compatibility - but we should deprecate it.
         c.argument('server_name',
-                   options_list=['--server-name', '-s'],
-                   help='The name of the SQL Server')
+                   options_list=['--server-name', '--server', '-s'])
 
         c.argument('login',
                    options_list=['--display-name', '-u'],
@@ -937,9 +963,7 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server firewall-rule update' is a custom
         # command.
         c.argument('server_name',
-                   arg_type=server_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
-                   id_part='name')
+                   arg_type=server_param_type)
 
         c.argument('firewall_rule_name',
                    options_list=['--name', '-n'],
@@ -999,8 +1023,7 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server vnet-rule create' is a custom
         # command.
         c.argument('server_name',
-                   options_list=['--server', '-s'],
-                   completer=get_resource_name_completion_list('Microsoft.SQL/servers'))
+                   arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
                    options_list=['--name', '-n'])

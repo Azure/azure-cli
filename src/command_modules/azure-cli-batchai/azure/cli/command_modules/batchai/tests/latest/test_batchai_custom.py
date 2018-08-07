@@ -23,7 +23,7 @@ from azure.cli.command_modules.batchai.custom import (
     _add_setup_task,
     _get_effective_resource_parameters)
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 from azure.mgmt.batchai.models import (
     Cluster, ClusterCreateParameters, UserAccountSettings, MountVolumes, NodeSetup, FileServer,
     FileServerCreateParameters, AzureFileShareReference, AzureBlobFileSystemReference, AzureStorageCredentialsInfo,
@@ -211,10 +211,10 @@ class TestBatchAICustom(unittest.TestCase):
                               admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_patch_mount_volumes_no_volumes(self):
-        self.assertIsNone(_patch_mount_volumes(TestCli(), None))
+        self.assertIsNone(_patch_mount_volumes(DummyCli(), None))
 
     def test_batchai_patch_mount_volumes_empty_volumes(self):
-        self.assertEqual(MountVolumes(), _patch_mount_volumes(TestCli(), MountVolumes()))
+        self.assertEqual(MountVolumes(), _patch_mount_volumes(DummyCli(), MountVolumes()))
 
     def test_batchai_patch_mount_volumes_with_templates_via_command_line_args(self):
         # noinspection PyTypeChecker
@@ -248,7 +248,7 @@ class TestBatchAICustom(unittest.TestCase):
                 ),
             ]
         )
-        actual = _patch_mount_volumes(TestCli(), mount_volumes, 'account', 'key')
+        actual = _patch_mount_volumes(DummyCli(), mount_volumes, 'account', 'key')
         expected = MountVolumes(
             azure_file_shares=[
                 AzureFileShareReference(
@@ -315,7 +315,7 @@ class TestBatchAICustom(unittest.TestCase):
         )
         with _given_env_variable('AZURE_BATCHAI_STORAGE_ACCOUNT', 'account'):
             with _given_env_variable('AZURE_BATCHAI_STORAGE_KEY', 'key'):
-                actual = _patch_mount_volumes(TestCli(), mount_volumes)
+                actual = _patch_mount_volumes(DummyCli(), mount_volumes)
         expected = MountVolumes(
             azure_file_shares=[
                 AzureFileShareReference(
@@ -371,7 +371,7 @@ class TestBatchAICustom(unittest.TestCase):
         )
         get_storage_client.return_value = \
             _get_mock_storage_accounts_and_keys({'account1': 'key1', 'account2': 'key2'})
-        actual = _patch_mount_volumes(TestCli(), mount_volumes)
+        actual = _patch_mount_volumes(DummyCli(), mount_volumes)
         expected = MountVolumes(
             azure_file_shares=[
                 AzureFileShareReference(
@@ -407,7 +407,7 @@ class TestBatchAICustom(unittest.TestCase):
             ]
         )
         with self.assertRaisesRegexp(CLIError, 'Cannot find "account1" storage account'):
-            _patch_mount_volumes(TestCli(), mount_volumes)
+            _patch_mount_volumes(DummyCli(), mount_volumes)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_patch_mount_volumes_with_credentials_no_account_given(
@@ -426,7 +426,7 @@ class TestBatchAICustom(unittest.TestCase):
             ]
         )
         with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
-            _patch_mount_volumes(TestCli(), mount_volumes)
+            _patch_mount_volumes(DummyCli(), mount_volumes)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_patch_mount_volumes_when_no_patching_required(
@@ -444,7 +444,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        actual = _patch_mount_volumes(TestCli(), mount_volumes)
+        actual = _patch_mount_volumes(DummyCli(), mount_volumes)
         self.assertEquals(mount_volumes, actual)
 
     def test_batchai_patch_mount_volumes_no_azure_file_url(self):
@@ -460,7 +460,7 @@ class TestBatchAICustom(unittest.TestCase):
             ]
         )
         with self.assertRaisesRegexp(CLIError, 'Azure File URL cannot absent or be empty'):
-            _patch_mount_volumes(TestCli(), mount_volumes)
+            _patch_mount_volumes(DummyCli(), mount_volumes)
 
     def test_batchai_patch_mount_volumes_ill_formed_azure_file_url(self):
         # noinspection PyTypeChecker
@@ -475,7 +475,7 @@ class TestBatchAICustom(unittest.TestCase):
             ]
         )
         with self.assertRaisesRegexp(CLIError, 'Ill-formed Azure File URL'):
-            _patch_mount_volumes(TestCli(), mount_volumes)
+            _patch_mount_volumes(DummyCli(), mount_volumes)
 
     def test_batchai_add_nfs_to_mount_volumes_no_relative_mount_path(self):
         with self.assertRaisesRegexp(CLIError, 'File server relative mount path cannot be empty'):
@@ -503,11 +503,11 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_add_azure_file_share_to_mount_volumes_no_account_info(self):
         with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
-            _add_azure_file_share_to_mount_volumes(TestCli(), MountVolumes(), 'share', 'relative_path')
+            _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', 'relative_path')
 
     def test_batchai_add_azure_file_share_to_mount_volumes_no_relative_mount_path(self):
         with self.assertRaisesRegexp(CLIError, 'Azure File share relative mount path cannot be empty'):
-            _add_azure_file_share_to_mount_volumes(TestCli(), MountVolumes(), 'share', '')
+            _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', '')
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_add_azure_file_share_to_mount_volumes_account_and_key_via_env_variables(
@@ -515,7 +515,7 @@ class TestBatchAICustom(unittest.TestCase):
         get_storage_client.return_value = _get_mock_storage_accounts_and_keys({'account': 'key'})
         with _given_env_variable('AZURE_BATCHAI_STORAGE_ACCOUNT', 'account'):
             with _given_env_variable('AZURE_BATCHAI_STORAGE_KEY', 'key'):
-                actual = _add_azure_file_share_to_mount_volumes(TestCli(), MountVolumes(), 'share', 'relative_path')
+                actual = _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', 'relative_path')
         expected = MountVolumes(azure_file_shares=[
             AzureFileShareReference(
                 account_name='account',
@@ -533,7 +533,7 @@ class TestBatchAICustom(unittest.TestCase):
             self, get_storage_client):
         get_storage_client.return_value = \
             _get_mock_storage_accounts_and_keys({'account': 'key'})
-        actual = _add_azure_file_share_to_mount_volumes(TestCli(), MountVolumes(), 'share', 'relative_path',
+        actual = _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', 'relative_path',
                                                         'account', 'key')
         expected = MountVolumes(azure_file_shares=[
             AzureFileShareReference(
@@ -550,7 +550,7 @@ class TestBatchAICustom(unittest.TestCase):
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_add_azure_file_share_to_mount_volumes_account_via_command_line_args(self, get_storage_client):
         get_storage_client.return_value = _get_mock_storage_accounts_and_keys({'account': 'key'})
-        actual = _add_azure_file_share_to_mount_volumes(TestCli(), MountVolumes(), 'share', 'relative_path', 'account')
+        actual = _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', 'relative_path', 'account')
         expected = MountVolumes(azure_file_shares=[
             AzureFileShareReference(
                 account_name='account',
@@ -566,7 +566,7 @@ class TestBatchAICustom(unittest.TestCase):
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_add_azure_file_share_to_absent_mount_volumes(self, get_storage_client):
         get_storage_client.return_value = _get_mock_storage_accounts_and_keys({'account': 'key'})
-        actual = _add_azure_file_share_to_mount_volumes(TestCli(), None, 'share', 'relative_path', 'account')
+        actual = _add_azure_file_share_to_mount_volumes(DummyCli(), None, 'share', 'relative_path', 'account')
         expected = MountVolumes(azure_file_shares=[
             AzureFileShareReference(
                 account_name='account',
@@ -581,16 +581,16 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_add_azure_container_mount_volumes_no_account(self):
         with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
-            _add_azure_container_to_mount_volumes(TestCli(), MountVolumes(), 'container', 'relative_path')
+            _add_azure_container_to_mount_volumes(DummyCli(), MountVolumes(), 'container', 'relative_path')
 
     def test_batchai_add_azure_container_mount_volumes_no_relative_path(self):
         with self.assertRaisesRegexp(CLIError, 'Azure Storage Container relative mount path cannot be empty'):
-            _add_azure_container_to_mount_volumes(TestCli(), MountVolumes(), 'container', '')
+            _add_azure_container_to_mount_volumes(DummyCli(), MountVolumes(), 'container', '')
 
     def test_batchai_add_azure_container_to_absent_mount_volumes(self):
         with _given_env_variable('AZURE_BATCHAI_STORAGE_ACCOUNT', 'account'):
             with _given_env_variable('AZURE_BATCHAI_STORAGE_KEY', 'key'):
-                actual = _add_azure_container_to_mount_volumes(TestCli(), None, 'container', 'relative_path')
+                actual = _add_azure_container_to_mount_volumes(DummyCli(), None, 'container', 'relative_path')
         expected = MountVolumes(azure_blob_file_systems=[
             AzureBlobFileSystemReference(
                 account_name='account',
@@ -602,7 +602,7 @@ class TestBatchAICustom(unittest.TestCase):
     def test_batchai_add_azure_container_mount_volumes_account_and_key_via_env_variables(self):
         with _given_env_variable('AZURE_BATCHAI_STORAGE_ACCOUNT', 'account'):
             with _given_env_variable('AZURE_BATCHAI_STORAGE_KEY', 'key'):
-                actual = _add_azure_container_to_mount_volumes(TestCli(), MountVolumes(), 'container', 'relative_path')
+                actual = _add_azure_container_to_mount_volumes(DummyCli(), MountVolumes(), 'container', 'relative_path')
         expected = MountVolumes(azure_blob_file_systems=[
             AzureBlobFileSystemReference(
                 account_name='account',
@@ -613,7 +613,7 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_add_azure_container_mount_volumes_account_and_key_via_cmd_line_args(self):
         actual = _add_azure_container_to_mount_volumes(
-            TestCli(), MountVolumes(), 'container', 'relative_path', 'account', 'key')
+            DummyCli(), MountVolumes(), 'container', 'relative_path', 'account', 'key')
         expected = MountVolumes(azure_blob_file_systems=[
             AzureBlobFileSystemReference(
                 account_name='account',
@@ -626,7 +626,7 @@ class TestBatchAICustom(unittest.TestCase):
     def test_batchai_add_azure_container_mount_volumes_account_via_cmd_line_args(self, get_storage_client):
         get_storage_client.return_value = _get_mock_storage_accounts_and_keys({'account': 'key'})
         actual = _add_azure_container_to_mount_volumes(
-            TestCli(), MountVolumes(), 'container', 'relative_path', 'account')
+            DummyCli(), MountVolumes(), 'container', 'relative_path', 'account')
         expected = MountVolumes(azure_blob_file_systems=[
             AzureBlobFileSystemReference(
                 account_name='account',
@@ -844,7 +844,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertFalse(_is_on_mount_point('afs', 'af'))
 
     def test_list_setup_task_files_for_cluster_when_no_node_setup(self):
-        self.assertEqual(_list_node_setup_files_for_cluster(TestCli(), Cluster(), '.', 60), [])
+        self.assertEqual(_list_node_setup_files_for_cluster(DummyCli(), Cluster(), '.', 60), [])
 
     def test_list_setup_task_files_for_cluster_when_output_not_on_mounts_root(self):
         with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
@@ -853,7 +853,7 @@ class TestBatchAICustom(unittest.TestCase):
                     setup_task=SetupTask(
                         command_line='true',
                         std_out_err_path_prefix='/somewhere')))
-            _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
+            _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_cluster_doesnt_support_suffix(self):
         with self.assertRaisesRegexp(CLIError, 'List files is not supported for this cluster'):
@@ -862,7 +862,7 @@ class TestBatchAICustom(unittest.TestCase):
                     setup_task=SetupTask(
                         command_line='true',
                         std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/nfs')))
-            _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
+            _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_cluster_has_not_mount_volumes(self):
         with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
@@ -872,7 +872,7 @@ class TestBatchAICustom(unittest.TestCase):
                         command_line='true',
                         std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/nfs')))
             cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
-            _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
+            _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_output_not_on_afs_or_bfs(self):
         with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
@@ -893,7 +893,7 @@ class TestBatchAICustom(unittest.TestCase):
                         )]
                 ))
             cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
-            _list_node_setup_files_for_cluster(TestCli(), cluster, '.', 60)
+            _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     @patch('azure.cli.command_modules.batchai.custom._get_files_from_afs')
     def test_list_setup_task_files_for_cluster_when_output_on_afs(self, get_files_from_afs):
@@ -910,7 +910,7 @@ class TestBatchAICustom(unittest.TestCase):
                     account_name='some',
                     azure_file_url='some url',
                     credentials=None)])
-        cli_ctx = TestCli()
+        cli_ctx = DummyCli()
         _list_node_setup_files_for_cluster(cli_ctx, cluster, '.', 60)
         get_files_from_afs.assert_called_once_with(
             cli_ctx,
@@ -936,7 +936,7 @@ class TestBatchAICustom(unittest.TestCase):
                     account_name='some',
                     container_name='container',
                     credentials=None)])
-        cli_ctx = TestCli()
+        cli_ctx = DummyCli()
         _list_node_setup_files_for_cluster(cli_ctx, cluster, '.', 60)
         get_files_from_bfs.assert_called_once_with(
             cli_ctx,

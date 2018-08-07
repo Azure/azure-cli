@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 
@@ -14,7 +13,7 @@ def load_command_table(self, _):
         client_factory=cf_accounts)
 
     with self.command_group('maps account', mgmt_type) as g:
-        g.command('show', 'get', exception_handler=empty_on_404)
+        g.show_command('show', 'get')
         g.custom_command('list', 'list_accounts')
         g.custom_command('create', 'create_account')
         g.command('delete', 'delete')

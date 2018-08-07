@@ -113,6 +113,13 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 else:
                     return _encode_hex(result)
             except Exception as ex:  # pylint: disable=broad-except
+                if name == 'show':
+                    # show_exception_handler needs to be called before the keyvault_exception_handler
+                    from azure.cli.core.commands.arm import show_exception_handler
+                    try:
+                        show_exception_handler(ex)
+                    except Exception:  # pylint: disable=broad-except
+                        pass
                 return keyvault_exception_handler(ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access

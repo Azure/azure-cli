@@ -70,7 +70,7 @@ def load_command_table(self, _):
     with self.command_group('cdn endpoint', cdn_endpoints_sdk) as g:
         for name in ['start', 'stop', 'delete']:
             g.command(name, name)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
         g.command('load', 'load_content')
         g.command('purge', 'purge_content')
@@ -82,7 +82,7 @@ def load_command_table(self, _):
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters')
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('usage', 'list_resource_usage')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_profiles', client_factory=cf_cdn)
@@ -91,7 +91,7 @@ def load_command_table(self, _):
                                  doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
 
     with self.command_group('cdn custom-domain', cdn_domain_sdk, client_factory=cf_cdn) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('list', 'list_by_endpoint')
         g.custom_command('create', 'create_custom_domain')
@@ -99,7 +99,7 @@ def load_command_table(self, _):
         g.command('disable-https', 'disable_custom_https')
 
     with self.command_group('cdn origin', cdn_origin_sdk) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_endpoint')
 
     with self.command_group('cdn edge-node', cdn_edge_sdk) as g:

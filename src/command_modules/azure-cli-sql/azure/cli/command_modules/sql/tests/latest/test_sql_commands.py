@@ -9,6 +9,7 @@ import os
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
@@ -19,8 +20,8 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    TestCli,
-    LiveScenarioTest)
+    LiveScenarioTest,
+    record_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -52,13 +53,13 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(TestCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(DummyCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute(TestCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(DummyCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -2322,11 +2323,11 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
     def test_sql_subscription_usages(self):
         self.cmd('sql list-usages -l westus',
-                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+                 checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+        self.cmd('sql show-usage -l westus -u ServerQuota',
                  checks=[
-                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheck('name', 'ServerQuota'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
 
@@ -2546,6 +2547,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_instance_mgmt(self):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
@@ -2664,6 +2667,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_managed_db_mgmt(self):
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
@@ -2761,3 +2766,208 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
+
+
+class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
+    # create 2 servers in the same resource group, and 1 server in a different resource group
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1")
+    @ResourceGroupPreparer(parameter_name="resource_group_2",
+                           parameter_name_for_location="resource_group_location_2")
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westus')
+    @SqlServerPreparer(parameter_name="server_name_2",
+                       resource_group_parameter_name="resource_group_2", location='eastus')
+    def test_sql_failover_group_mgmt(self,
+                                     resource_group_1, resource_group_location_1,
+                                     resource_group_2, resource_group_location_2,
+                                     server_name_1, server_name_2):
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo(object):  # pylint disable=too-few-public-methods
+            def __init__(self, name, group, location):
+                self.name = name
+                self.group = group
+                self.location = location
+
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
+
+        failover_group_name = "fgclitest1070"
+
+        database_name = "db1"
+
+        server2_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+            get_subscription_id(self.cli_ctx),
+            resource_group_2,
+            server_name_2)
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Create Failover Group
+        self.cmd('sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2'
+                 .format(failover_group_name, s1.group, s1.name, s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('partnerServers[0].id', server2_id),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # List of all failover groups on the primary server
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', failover_group_name),
+                     JMESPathCheck('[0].replicationRole', 'Primary')
+                 ])
+
+        # Get Failover Group on a partner server and check if role is secondary
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
+        # Failover Failover Group
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name))
+
+        # The failover operation is completed when new primary is promoted to primary role
+        # But there is a async part to make old primary a new secondary
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(30)
+
+        # Check the roles of failover groups to confirm failover happened
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        # Fail back to original server
+        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # The failover operation is completed when new primary is promoted to primary role
+        # But there is a async part to make old primary a new secondary
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(30)
+
+        # Check the roles of failover groups to confirm failover happened
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+        # Do no-op failover to the same server
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # Check the roles of failover groups to confirm failover didn't happen
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Check if database got removed
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, database_name),
+                 checks=[
+                     JMESPathCheck('[0].failoverGroupId', 'None')
+                 ])
+
+        # Drop failover group
+        self.cmd('sql failover-group delete -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # Check if failover group  really got dropped
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])

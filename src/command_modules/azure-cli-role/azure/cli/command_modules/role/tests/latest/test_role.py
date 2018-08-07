@@ -219,7 +219,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + '@msazurestack.onmicrosoft.com',
                 'nsg': 'nsg1'
             })
 
@@ -235,8 +235,10 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}',
-                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
+                    self.check("length([])", 1),
+                    self.check("[0].principalName", self.kwargs["upn"])
+                ])
 
                 # test couple of more general filters
                 result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()

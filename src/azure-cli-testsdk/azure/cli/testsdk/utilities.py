@@ -18,17 +18,14 @@ def find_recording_dir(test_file):
     return os.path.join(os.path.dirname(test_file), 'recordings')
 
 
-def get_active_api_profile(cli_ctx):
-    from azure.cli.core.cloud import get_active_cloud
-    return get_active_cloud(cli_ctx).profile
-
-
 @contextmanager
 def force_progress_logging():
     from six import StringIO
     import logging
     from knack.log import get_logger
-    from azure.cli.core.commands import logger as cmd_logger
+    from .reverse_dependency import get_commands_loggers
+
+    cmd_logger = get_commands_loggers()
 
     # register a progress logger handler to get the content to verify
     test_io = StringIO()

@@ -3,9 +3,17 @@
 Release History
 ===============
 
-0.1.5
+0.2.2
 +++++
-* Minor fixes
+* added readonly property 'pendingReplicationOperationsCount' to georecovery-alias
+
+0.2.1
++++++
+* updated help for the parameter --partition-count of eventhub
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 
 0.1.4
 ++++++

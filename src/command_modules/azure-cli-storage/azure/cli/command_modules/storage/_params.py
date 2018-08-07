@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key, add_progress_callback,
+                          validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
 
@@ -84,9 +84,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule']:
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+            c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
@@ -137,7 +138,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Default action to apply when no rule matches.')
 
     with self.argument_context('storage account show-connection-string') as c:
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
         c.argument('key_name', options_list=['--key'], help='The key to use.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
@@ -154,7 +154,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account network-rule') as c:
         from ._validators import validate_subnet
-        c.argument('storage_account_name', acct_name_type, id_part=None)
+        c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
@@ -167,7 +167,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=('--account-name',))
+        c.argument('account_name', acct_name_type, options_list=['--account-name'])
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),

@@ -21,17 +21,11 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
                                 " Run 'az login' only if you need to use a different account")
 
 
-def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
-    profile = Profile(cli_ctx=cli_ctx)
-    if refresh:
-        subscriptions = profile.refresh_accounts()
-    subscriptions = profile.load_cached_subscriptions(all_clouds)
-    return subscriptions
-
-
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = _load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
+    from azure.cli.core.api import load_subscriptions
+
+    subscriptions = load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:

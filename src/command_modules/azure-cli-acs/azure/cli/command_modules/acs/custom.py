@@ -45,7 +45,6 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -61,6 +60,7 @@ from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
+from ._client_factory import cf_resources
 
 logger = get_logger(__name__)
 
@@ -334,6 +334,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
                                       location, service_principal, client_secret, chart_url, os_type,
                                       image_tag, aci_resource_group):
     from subprocess import PIPE, Popen
+    instance = client.get(resource_group_name, name)
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     url_chart = chart_url
     if image_tag is None:
@@ -365,26 +366,26 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     if os_type.lower() in ['linux', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Linux')
+                                               norm_location, 'Linux', instance.enable_rbac)
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Windows')
+                                               norm_location, 'Windows', instance.enable_rbac)
 
 
 def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                            client_secret, subscription_id, tenant_id, aci_resource_group,
-                                           norm_location, os_type):
+                                           norm_location, os_type, use_rbac):
+    rbac_install = "true" if use_rbac else "false"
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + '-' + os_type.lower() + '-' + norm_location
     node_name = 'virtual-kubelet-' + helm_release_name
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={}'.format(
-            node_name, node_taint, os_type, image_tag)
-
+        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},rbac.install={}'.format(
+            node_name, node_taint, os_type, image_tag, rbac_install)
         if service_principal:
             values += ",env.azureClientId=" + service_principal
         if client_secret:
@@ -1207,6 +1208,7 @@ def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, sc
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -1215,6 +1217,9 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
@@ -1312,8 +1317,12 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(proxy_url)
-    subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                     "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
+    try:
+        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                         "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
+    except KeyboardInterrupt:
+        # Let command processing finish gracefully after the user presses [Ctrl+C]
+        return
 
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
@@ -1399,7 +1408,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address
         )
 
-    addon_profiles = _handle_addons_args(enable_addons, {}, workspace_resource_id)
+    addon_profiles = _handle_addons_args(
+        cmd,
+        enable_addons,
+        subscription_id,
+        resource_group_name,
+        {},
+        workspace_resource_id
+    )
     if 'omsagent' in addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
@@ -1446,8 +1462,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(instance, addons, enable=False, no_wait=no_wait)
+    instance = _update_addons(
+        cmd,
+        instance,
+        subscription_id,
+        resource_group_name,
+        addons,
+        enable=False,
+        no_wait=no_wait
+    )
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
@@ -1455,8 +1480,9 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
 
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
     instance = client.get(resource_group_name, name)
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(instance, addons, enable=True,
+    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
@@ -1576,7 +1602,8 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
-def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait=False):
+def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
+                   no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
@@ -1592,10 +1619,19 @@ def _update_addons(instance, addons, enable, workspace_resource_id=None, no_wait
             if addon == 'omsagent':
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
-                                   'To change monitoring configuration, run "az aks disable-addons -monitoring"'
+                                   'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
                                    'before enabling it again.')
-                elif workspace_resource_id:
-                    addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+                if not workspace_resource_id:
+                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                        cmd,
+                        subscription_id,
+                        resource_group_name)
+                workspace_resource_id = workspace_resource_id.strip()
+                if not workspace_resource_id.startswith('/'):
+                    workspace_resource_id = '/' + workspace_resource_id
+                if workspace_resource_id.endswith('/'):
+                    workspace_resource_id = workspace_resource_id.rstrip('/')
+                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -1626,7 +1662,8 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=None):
+def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
+                        workspace_resource_id=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -1636,7 +1673,15 @@ def _handle_addons_args(addons_str, addon_profiles=None, workspace_resource_id=N
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
         if not workspace_resource_id:
-            raise CLIError('"--enable-addons monitoring" requires "--workspace-resource-id".')
+            # use default workspace if exists else create default workspace
+            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                cmd, subscription_id, resource_group_name)
+
+        workspace_resource_id = workspace_resource_id.strip()
+        if not workspace_resource_id.startswith('/'):
+            workspace_resource_id = '/' + workspace_resource_id
+        if workspace_resource_id.endswith('/'):
+            workspace_resource_id = workspace_resource_id.rstrip('/')
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
             enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
         addons.remove('monitoring')
@@ -1694,10 +1739,112 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
     return True
 
 
+def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
+    # log analytics workspaces cannot be created in WCUS region due to capacity limits
+    # so mapped to EUS per discussion with log analytics team
+    AzureLocationToOmsRegionCodeMap = {
+        "eastus": "EUS",
+        "westeurope": "WEU",
+        "southeastasia": "SEA",
+        "australiasoutheast": "ASE",
+        "usgovvirginia": "USGV",
+        "westcentralus": "EUS",
+        "japaneast": "EJP",
+        "uksouth": "SUK",
+        "canadacentral": "CCA",
+        "centralindia": "CIN",
+        "eastus2euap": "EAP"
+    }
+    AzureRegionToOmsRegionMap = {
+        "australiaeast": "australiasoutheast",
+        "australiasoutheast": "australiasoutheast",
+        "brazilsouth": "eastus",
+        "canadacentral": "canadacentral",
+        "canadaeast": "canadacentral",
+        "centralus": "eastus",
+        "eastasia": "southeastasia",
+        "eastus": "eastus",
+        "eastus2": "eastus",
+        "japaneast": "japaneast",
+        "japanwest": "japaneast",
+        "northcentralus": "eastus",
+        "northeurope": "westeurope",
+        "southcentralus": "eastus",
+        "southeastasia": "southeastasia",
+        "uksouth": "uksouth",
+        "ukwest": "uksouth",
+        "westcentralus": "eastus",
+        "westeurope": "westeurope",
+        "westus": "eastus",
+        "westus2": "eastus",
+        "centralindia": "centralindia",
+        "southindia": "centralindia",
+        "westindia": "centralindia",
+        "koreacentral": "southeastasia",
+        "koreasouth": "southeastasia",
+        "francecentral": "westeurope",
+        "francesouth": "westeurope"
+    }
+
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    default_region_name = "eastus"
+    default_region_code = "EUS"
+
+    workspace_region = AzureRegionToOmsRegionMap[
+        rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
+    workspace_region_code = AzureLocationToOmsRegionCodeMap[
+        workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+
+    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
+    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
+
+    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
+        '/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
+    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
+
+    # check if default RG exists
+    if resource_groups.check_existence(default_workspace_resource_group):
+        try:
+            resource = resources.get_by_id(default_workspace_resource_id, '2015-11-01-preview')
+            return resource.id
+        except CloudError as ex:
+            if ex.status_code != 404:
+                raise ex
+    else:
+        resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
+
+    default_workspace_params = {
+        'location': workspace_region,
+        'properties': {
+            'sku': {
+                'name': 'standalone'
+            }
+        }
+    }
+    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
+                                                    default_workspace_params)
+
+    ws_resource_id = ''
+    while True:
+        result = async_poller.result(15)
+        if async_poller.done():
+            ws_resource_id = result.id
+            break
+
+    return ws_resource_id
+
+
 def _ensure_container_insights_for_monitoring(cmd, addon):
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+
+    workspace_resource_id = workspace_resource_id.strip()
+
     if not workspace_resource_id.startswith('/'):
         workspace_resource_id = '/' + workspace_resource_id
+
+    if workspace_resource_id.endswith('/'):
+        workspace_resource_id = workspace_resource_id.rstrip('/')
 
     # extract subscription ID and resource group from workspace_resource_id URL
     try:
@@ -1706,8 +1853,18 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     except IndexError:
         raise CLIError('Could not locate resource group in workspace-resource-id URL.')
 
-    # find the location from the resource group
-    location = _get_rg_location(cmd.cli_ctx, resource_group, subscription_id)
+    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    try:
+        resource = resources.get_by_id(workspace_resource_id, '2015-11-01-preview')
+        location = resource.location
+    except CloudError as ex:
+        raise ex
+
+    unix_time_in_millis = int(
+        (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
+
+    solution_deployment_name = 'ContainerInsights-{}'.format(unix_time_in_millis)
 
     # pylint: disable=line-too-long
     template = {
@@ -1725,12 +1882,18 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                 "metadata": {
                     "description": "Azure Monitor Log Analytics workspace region"
                 }
+            },
+            "solutionDeploymentName": {
+                "type": "string",
+                "metadata": {
+                    "description": "Name of the solution deployment"
+                }
             }
         },
         "resources": [
             {
                 "type": "Microsoft.Resources/deployments",
-                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                "name": "[parameters('solutionDeploymentName')]",
                 "apiVersion": "2017-05-10",
                 "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
                 "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
@@ -1771,12 +1934,13 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         },
         "workspaceRegion": {
             "value": location
+        },
+        "solutionDeploymentName": {
+            "value": solution_deployment_name
         }
     }
 
-    # TODO: does this name need to be randomized or input by the user?
-    deployment_name = 'aks-monitoring'
-
+    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)

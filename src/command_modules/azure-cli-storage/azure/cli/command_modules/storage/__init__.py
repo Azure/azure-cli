@@ -140,21 +140,6 @@ class StorageCommandGroup(AzCommandGroup):
         command_name = self.custom_command(name, method_name, **kwargs)
         self._register_data_plane_account_arguments(command_name)
 
-    def get_handler_suppress_404(self):
-
-        # pylint: disable=inconsistent-return-statements
-        def handler(ex):
-            from azure.cli.core.profiles import get_sdk
-
-            t_error = get_sdk(self.command_loader.cli_ctx,
-                              ResourceType.DATA_STORAGE,
-                              'common._error#AzureMissingResourceHttpError')
-            if isinstance(ex, t_error):
-                return None
-            raise ex
-
-        return handler
-
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.core.commands.parameters import get_resource_name_completion_list

@@ -3,8 +3,9 @@
 Release History
 ===============
 
-0.3.3
+0.4.0
 +++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * Fixed `az batchai job exec` command
 
 0.3.2

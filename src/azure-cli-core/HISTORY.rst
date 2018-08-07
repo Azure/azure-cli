@@ -2,10 +2,21 @@
 
 Release History
 ===============
+2.0.44
+++++++
+* use knack/0.4.2 with fix towards numeric value display in table output
+* Introduce YAML output format
+* Overhaul telemetry upload mechanism
+
+2.0.43
+++++++
+* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Minor fixes
 
 2.0.42
 ++++++
 * login: support browser based login in WSL bash window
+* Adds `--force-string` flag to all generic update commands.
 
 2.0.41
 ++++++
@@ -28,8 +39,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36
-++++++
+2.0.36	
+++++++	
 * Minor fixes
 
 2.0.35

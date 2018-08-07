@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+# pylint: disable=line-too-long
 
 from __future__ import print_function
 from collections import OrderedDict
@@ -58,6 +59,10 @@ def _process_parameters(template_param_defs, parameter_lists):
         return None
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
+        # support situation where empty JSON "{}" is provided
+        if value == '{}' and not parameters:
+            return True
+
         try:
             key, value = value.split('=', 1)
         except ValueError:
@@ -89,7 +94,7 @@ def _process_parameters(template_param_defs, parameter_lists):
     for params in parameter_lists or []:
         for item in params:
             param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
-            if param_obj:
+            if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
@@ -218,19 +223,27 @@ def _urlretrieve(url):
 
 def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode=None, validate_only=False,
+                              parameters=None, mode=None, rollback_on_error=None, validate_only=False,
                               no_wait=False):
-    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
     template = None
     template_link = None
     template_obj = None
+    on_error_deployment = None
+
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
+
+    if rollback_on_error == '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
@@ -241,7 +254,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template, template_link=template_link,
-                                      parameters=parameters, mode=mode)
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
@@ -488,6 +501,14 @@ def create_resource_group(cmd, rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
+def update_resource_group(instance, tags=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+
 def export_group_as_template(
         cmd, resource_group_name, include_comments=False, include_parameter_default_value=False):
     """Captures a resource group as a template.
@@ -660,9 +681,9 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, no_wait=False):
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode, no_wait=no_wait)
+                                     deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
@@ -674,16 +695,18 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None):
+                          parameters=None, mode=None, rollback_on_error=None):
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     'deployment_dry_run', parameters, mode, validate_only=True)
+                                     'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
                                                 parameters=None):
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
-                                                   parameters, 'Incremental', validate_only=True)
+                                                   parameters,
+                                                   'Incremental',
+                                                   validate_only=True)
 
 
 def export_subscription_deployment_template(cmd, deployment_name):

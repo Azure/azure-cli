@@ -9,7 +9,7 @@ import logging
 import unittest
 
 from azure.cli.core._help import ArgumentGroupRegistry, CliCommandHelpFile
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.help import HelpObject, GroupHelpFile, HelpAuthoringException
 
@@ -28,9 +28,9 @@ class HelpTest(unittest.TestCase):
         from azure.cli.core.commands.arm import add_id_parameters
         import knack.events as events
 
-        cli = TestCli()
+        cli = DummyCli()
         parser_dict = {}
-        cli = TestCli()
+        cli = DummyCli()
         help_ctx = cli.help_cls(cli)
         try:
             cli.invoke(['-h'])

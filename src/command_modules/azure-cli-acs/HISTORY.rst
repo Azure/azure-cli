@@ -3,8 +3,22 @@
 Release History
 ===============
 
-2.1.4
+2.3.0
 +++++
+* `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+
+2.2.2
++++++
+* Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
+* changes for consuming multi api azure.mgmt.authorization package
+
+2.2.1
++++++
+* Depdendency update: paramiko >= 2.0.8
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * `az aks create` will error out if `--max-pods` is less than 5
 
 2.1.3

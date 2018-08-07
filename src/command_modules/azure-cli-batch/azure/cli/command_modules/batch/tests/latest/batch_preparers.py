@@ -14,8 +14,8 @@ class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_BATCH_ACCT_NAME'):
         super(BatchAccountPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name

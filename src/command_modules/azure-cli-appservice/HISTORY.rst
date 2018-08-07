@@ -2,14 +2,19 @@
 
 Release History
 ===============
+0.2.2
++++++
+* fix a bug that prevent from creating a function-app using storage accounts in external resource groups
+* fix a crash on zip deployment
 
-0.1.38
-++++++
+0.2.1
++++++
+* Minor fixes.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
 * appservice: allow PremiumV2 skus
-
-0.1.37
-++++++
-* Minor fixes
 
 0.1.36
 ++++++

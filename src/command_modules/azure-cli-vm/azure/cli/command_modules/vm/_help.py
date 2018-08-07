@@ -135,7 +135,7 @@ helps['vmss create'] = """
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
-            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
             az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
@@ -546,7 +546,7 @@ helps['vm diagnostics set'] = """
                 | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
-                --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
+                --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
             protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
@@ -606,7 +606,7 @@ helps['vm unmanaged-disk attach'] = """
 
 helps['vm unmanaged-disk detach'] = """
     type: command
-    short-summary: Detatch an unmanaged disk from a VM.
+    short-summary: Detach an unmanaged disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
@@ -615,11 +615,11 @@ helps['vm unmanaged-disk detach'] = """
 
 helps['vm unmanaged-disk list'] = """
     type: command
-    short-summary: List unamanaged disks of a VM.
+    short-summary: List unmanaged disks of a VM.
     examples:
         - name: List the unmanaged disks attached to a VM.
           text: az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm
-        - name: List unamanaged disks with IDs containing the string "data_disk".
+        - name: List unmanaged disks with IDs containing the string "data_disk".
           text: >
             az vm unmanaged-disk list --ids \\
                 $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
@@ -627,7 +627,7 @@ helps['vm unmanaged-disk list'] = """
 
 helps['vm disk detach'] = """
     type: command
-    short-summary: Detatch a managed disk from a VM.
+    short-summary: Detach a managed disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
@@ -1119,6 +1119,12 @@ helps['vm list-skus'] = """
     examples:
         - name: List all SKUs in the West US region.
           text: az vm list-skus -l westus
+        - name: List all available vm sizes in the East US2 region which support availability zone.
+          text: az vm list-skus -l eastus2 --zone
+        - name: List all available vm sizes in the East US2 region which support availability zone with name like "standard_ds1...".
+          text: az vm list-skus -l eastus2 --zone --size standard_ds1
+        - name: List availability set related sku information in The West US region.
+          text: az vm list-skus -l westus --resource-type availabilitySets
 """
 
 helps['vm open-port'] = """
@@ -1217,8 +1223,8 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VM with the 'Reader' role.
-          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader
+        - name: Enable system assigned identity on a VM with the 'Reader' role.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vm identity remove'] = """
@@ -1250,7 +1256,7 @@ helps['vm run-command invoke'] = """
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
         - name: invoke command with parameters
-          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
+          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
 """
 
 helps['vmss identity'] = """
@@ -1263,8 +1269,8 @@ helps['vmss identity assign'] = """
     short-summary: Enable managed service identity on a VMSS.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VMSS with the 'Owner' role.
-          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner
+        - name: Enable system assigned identity on a VMSS with the 'Owner' role.
+          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vmss identity remove'] = """

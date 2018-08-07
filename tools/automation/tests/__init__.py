@@ -196,7 +196,7 @@ def discover_tests(args):
     module_data = {}
     for mod in all_modules:
         mod_name = mod[1]
-        if mod_name == 'core':
+        if mod_name == 'core' or mod_name == 'telemetry':
             mod_data = {
                 'filepath': os.path.join(mod[0].path, mod_name, 'tests'),
                 'base_path': 'azure.cli.{}.tests'.format(mod_name),

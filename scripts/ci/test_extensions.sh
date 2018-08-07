@@ -27,7 +27,7 @@ for ext in $output; do
         exit_code=1
         echo "Failed to load:" $ext
     fi
-    azdev verify load_all
+    azdev verify load-all
     if [ $? != 0 ]
     then
         exit_code=1

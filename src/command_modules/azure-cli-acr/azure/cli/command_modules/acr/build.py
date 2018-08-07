@@ -11,6 +11,7 @@ from datetime import datetime
 from io import BytesIO
 import tempfile
 import tarfile
+from builtins import open as bltn_open
 import requests
 import colorama
 from knack.log import get_logger
@@ -275,31 +276,21 @@ def acr_build(cmd,
             raise CLIError("Source location should be a local directory path or remote URL.")
 
         _check_local_docker_file(source_location, docker_file_path)
-        size = 0
 
         try:
             source_location = _upload_source_code(
                 client_registries, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path)
-            size = os.path.getsize(tar_file_path)
         except Exception as err:
             raise CLIError(err)
         finally:
             try:
-                logger.debug("Starting to delete the archived source code from '%s'.", tar_file_path)
+                logger.debug("Deleting the archived source code from '%s'.", tar_file_path)
                 os.remove(tar_file_path)
             except OSError:
                 pass
-
-        unit = 'GiB'
-        for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
-            if size < 1024:
-                unit = S
-                break
-            size = size / 1024.0
-        logger.warning("Sending build context ({0:.3f} {1}) to ACR.".format(size, unit))
     else:
         source_location = _check_remote_source_code(source_location)
-        logger.warning("Sending build context to ACR.")
+        logger.warning("Sending build context to ACR...")
 
     if no_push:
         is_push_enabled = False
@@ -363,39 +354,18 @@ def _check_remote_source_code(source_location):
 
 
 def _upload_source_code(client, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path):
-    logger.debug("Starting to acquire the access token to upload the source code.")
-    ignore_list = _load_dockerignore_file(source_location)
-    common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
+    _pack_source_code(source_location, tar_file_path, docker_file_path)
 
-    def _filter_file(tarinfo):
-        # ignore common vcs dir or file
-        if tarinfo.name in common_vcs_ignore_list:
-            logger.debug(".dockerignore: ignore vcs file '%s'", tarinfo.name)
-            return None
+    size = os.path.getsize(tar_file_path)
+    unit = 'GiB'
+    for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
+        if size < 1024:
+            unit = S
+            break
+        size = size / 1024.0
 
-        if ignore_list is None:
-            return tarinfo
-
-        # always include docker file
-        # file path comparision is case-sensitive
-        if tarinfo.name == docker_file_path:
-            logger.debug(".dockerignore: skip checking '%s'", docker_file_path)
-            return tarinfo
-
-        for item in ignore_list:
-            if re.match(item.pattern, tarinfo.name):
-                logger.debug(".dockerignore: rule '%s' matches '%s'.", item.rule, tarinfo.name)
-                return None if item.ignore else tarinfo
-
-        logger.debug(".dockerignore: no rule for '%s'.", tarinfo.name)
-        return tarinfo
-
-    with tarfile.open(tar_file_path, "w:gz") as tar:
-        # NOTE: Need to set arcname to empty string;
-        # otherwise the child item name will have a prefix (eg, ../) which can block unpacking.
-        tar.add(source_location, arcname="", filter=_filter_file)
-
-    logger.debug("Starting to upload the archived source code from '%s'.", tar_file_path)
+    logger.debug("Uploading archived source code from '%s'.", tar_file_path)
+    logger.warning("Sending build context ({0:.3f} {1}) to ACR...".format(size, unit))
 
     upload_url = None
     relative_path = None
@@ -422,6 +392,73 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
     return relative_path
 
 
+def _pack_source_code(source_location, tar_file_path, docker_file_path):
+    logger.warning("Packing source code into tar file to upload...")
+
+    ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
+    common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
+
+    def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
+        # ignore common vcs dir or file
+        if tarinfo.name in common_vcs_ignore_list:
+            logger.debug(".dockerignore: ignore vcs file '%s'", tarinfo.name)
+            return True, parent_matching_rule_index
+
+        if ignore_list is None:
+            return False, parent_matching_rule_index
+
+        # always include docker file
+        # file path comparision is case-sensitive
+        if tarinfo.name == docker_file_path:
+            logger.debug(".dockerignore: skip checking '%s'", docker_file_path)
+            return False, parent_matching_rule_index
+
+        for index, item in enumerate(ignore_list):
+            # stop checking the remaining rules whose priorities are lower than the parent matching rule
+            # at this point, current item should just inherit from parent
+            if index >= parent_matching_rule_index:
+                break
+            if re.match(item.pattern, tarinfo.name):
+                logger.debug(".dockerignore: rule '%s' matches '%s'.", item.rule, tarinfo.name)
+                return item.ignore, index
+
+        logger.debug(".dockerignore: no rule for '%s'. parent ignore '%s'", tarinfo.name, parent_ignored)
+        # inherit from parent
+        return parent_ignored, parent_matching_rule_index
+
+    with tarfile.open(tar_file_path, "w:gz") as tar:
+        # need to set arcname to empty string as the archive root path
+        _archive_file_recursively(tar, source_location, arcname="",
+                                  parent_ignored=False, parent_matching_rule_index=ignore_list_size,
+                                  ignore_check=_ignore_check)
+
+
+def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matching_rule_index, ignore_check):
+    # create a TarInfo object from the file
+    tarinfo = tar.gettarinfo(name, arcname)
+
+    if tarinfo is None:
+        raise CLIError("tarfile: unsupported type {}".format(name))
+
+    # check if the file/dir is ignored
+    ignored, matching_rule_index = ignore_check(tarinfo, parent_ignored, parent_matching_rule_index)
+
+    if not ignored:
+        # append the tar header and data to the archive
+        if tarinfo.isreg():
+            with bltn_open(name, "rb") as f:
+                tar.addfile(tarinfo, f)
+        else:
+            tar.addfile(tarinfo)
+
+    # even the dir is ignored, its child items can still be included, so continue to scan
+    if tarinfo.isdir():
+        for f in os.listdir(name):
+            _archive_file_recursively(tar, os.path.join(name, f), os.path.join(arcname, f),
+                                      parent_ignored=ignored, parent_matching_rule_index=matching_rule_index,
+                                      ignore_check=ignore_check)
+
+
 class IgnoreRule(object):  # pylint: disable=too-few-public-methods
     def __init__(self, rule):
 
@@ -438,8 +475,11 @@ class IgnoreRule(object):  # pylint: disable=too-few-public-methods
             if token == "**":
                 tokens[index] = ".*"
             else:
+                # * matches any sequence of non-seperator characters
+                # ? matches any single non-seperator character
+                # . matches dot character
                 tokens[index] = token.replace(
-                    "*", "[^/]*").replace("?", "[^/]")
+                    "*", "[^/]*").replace("?", "[^/]").replace(".", "\\.")
 
         self.pattern = "^{}$".format("/".join(tokens))
 
@@ -448,7 +488,7 @@ def _load_dockerignore_file(source_location):
     # reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
     docker_ignore_file = os.path.join(source_location, ".dockerignore")
     if not os.path.exists(docker_ignore_file):
-        return None
+        return None, 0
 
     ignore_list = []
 
@@ -463,4 +503,4 @@ def _load_dockerignore_file(source_location):
         # add ignore rule
         ignore_list.append(IgnoreRule(rule))
 
-    return ignore_list
+    return ignore_list, len(ignore_list)

@@ -619,6 +619,7 @@ def load_arguments(self, _):
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
+        c.argument('include_default', help='Include default security rules in the output.')
 
     with self.argument_context('network nsg rule create') as c:
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)

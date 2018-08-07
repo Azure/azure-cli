@@ -54,10 +54,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_service', supports_no_wait=True)
         g.custom_command('delete', 'delete_service', supports_no_wait=True, confirmation=True)
         g.custom_command('list', 'list_services')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('start', 'start_service', supports_no_wait=True)
         g.custom_command('stop', 'stop_service', supports_no_wait=True)
-        g.generic_wait_command('wait')
+        g.wait_command('wait')
 
     with self.command_group('dms', dms_skus_sdk, client_factory=dms_cf_skus) as g:
         g.command('list-skus', 'list_skus')
@@ -66,7 +66,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_or_update_project')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     with self.command_group('dms project', dms_sdk, client_factory=dms_cf_services) as g:
         g.custom_command('check-name', 'check_project_name_availability')
@@ -75,7 +75,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_task')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('cancel', 'cancel')
 
     with self.command_group('dms project task', dms_sdk, client_factory=dms_cf_services) as g:

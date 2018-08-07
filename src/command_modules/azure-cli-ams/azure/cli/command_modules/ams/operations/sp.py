@@ -108,7 +108,7 @@ def _get_displayable_name(graph_object):
 def list_role_assignments(cmd, assignee_object_id):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively). Supported only for a user principal.
+    member(transitively).
     '''
     graph_client = _graph_client_factory(cmd.cli_ctx)
     factory = _auth_client_factory(cmd.cli_ctx)
@@ -151,6 +151,7 @@ def list_role_assignments(cmd, assignee_object_id):
 
 
 def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -159,7 +160,9 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
 
     role_id = _resolve_role_id(role, scope, definitions_client)
 
-    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
 
     return assignments_client.create(scope=scope,
