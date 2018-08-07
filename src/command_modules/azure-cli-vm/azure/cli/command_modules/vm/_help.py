@@ -1119,6 +1119,12 @@ helps['vm list-skus'] = """
     examples:
         - name: List all SKUs in the West US region.
           text: az vm list-skus -l westus
+        - name: List all available vm sizes in the East US2 region which support availability zone.
+          text: az vm list-skus -l eastus2 --zone
+        - name: List all available vm sizes in the East US2 region which support availability zone with name like "standard_ds1...".
+          text: az vm list-skus -l eastus2 --zone --size standard_ds1
+        - name: List availability set related sku information in The West US region.
+          text: az vm list-skus -l westus --resource-type availabilitySets
 """
 
 helps['vm open-port'] = """

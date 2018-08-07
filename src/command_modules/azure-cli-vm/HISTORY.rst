@@ -4,7 +4,7 @@ Release History
 ===============
 2.2.1
 ++++++
-* Minor fixes
+* vm list-skus: add a few common filters to make the command easier to use 
 
 2.2.0
 ++++++
