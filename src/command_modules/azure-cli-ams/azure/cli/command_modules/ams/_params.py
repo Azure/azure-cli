@@ -192,6 +192,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
         c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The stream options.')
 
+    with self.argument_context('ams live event update') as c:
+        c.argument('description', help='The live event description.')
+        c.argument('ips', nargs='+', help='Space-separated list of allowed IPs addresses for access control. Use "" to clear existing list.')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
+        c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
+        c.argument('key_frame_interval_duration', help='ISO 8601 timespan duration of the key frame interval duration.')
+
     with self.argument_context('ams live event stop') as c:
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
 

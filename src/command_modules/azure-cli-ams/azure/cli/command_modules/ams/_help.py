@@ -326,4 +326,3 @@ helps['ams live output create'] = """
     type: command
     short-summary: Create a live output.
 """
-
