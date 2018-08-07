@@ -21,7 +21,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
-    cf_ddos_protection_plans, cf_public_ip_prefixes)
+    cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
+    cf_service_endpoint_policy_definitions)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -211,6 +212,16 @@ def load_command_table(self, _):
     network_watcher_pc_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.packet_captures_operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
+    )
+
+    network_sepd_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.service_endpoint_policy_definitions_operations#ServiceEndpointPolicyDefinitionsOperations.{}',
+        client_factory=cf_service_endpoint_policy_definitions
+    )
+
+    network_sepp_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.service_endpoint_policies_operations#ServiceEndpointPoliciesOperations.{}',
+        client_factory=cf_service_endpoint_policies
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -608,6 +619,23 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command('update', setter_arg_name='route_parameters', custom_func_name='update_route')
+
+    # endregion
+
+    # region ServiceEndpoint
+    with self.command_group('network service-endpoint policy', network_sepp_sdk) as g:
+        g.custom_command('create', 'create_service_endpoint_policy')
+        g.command('delete', 'delete')
+        g.command('list', 'list_by_resource_group')
+        g.show_command('show')
+        g.generic_update_command('update')
+
+    with self.command_group('network service-endpoint policy-definition', network_sepd_sdk) as g:
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete')
+        g.command('list', 'list_by_resource_group')
+        g.show_command('show')
+        g.generic_update_command('update')
 
     # endregion
 

@@ -2712,6 +2712,13 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
 # endregion
 
 
+# region ServiceEndpoints
+def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name, {})
+
+# endregion
+
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
