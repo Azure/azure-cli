@@ -120,6 +120,10 @@ def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
 
+def list_public_ip_prefixes(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
+
+
 def list_route_tables(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'route_tables', resource_group_name)
 
@@ -2614,6 +2618,17 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
         instance.ip_tags = ip_tags
     return instance
 
+
+def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length=None,
+                            ip_tags=None, location=None, tags=None, public_ip_addresses=None, resource_guid=None,
+                            zones=None):
+    PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
+    prefix = PublicIPPrefix(location=location, sku=PublicIPPrefixSku(name='Standard'), prefix_length=prefix_length)
+    return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
+
+
+def update_public_ip_prefix(instance):
+    pass
 
 # endregion
 
