@@ -11,20 +11,15 @@ from ._constants import certificate_help
 
 helps['iot'] = """
     type: group
-    short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
+    short-summary: Manage Internet of Things (IoT) assets.
     long-summary: Comprehensive IoT data-plane functionality is available
                   in the Azure IoT CLI Extension. For more info and install guide
                   go to https://github.com/Azure/azure-iot-cli-extension
 """
 
-helps['iot device'] = """
-    type: group
-    short-summary: (PREVIEW) Manage devices in your Azure IoT hub.
-"""
-
 helps['iot hub'] = """
     type: group
-    short-summary: (PREVIEW) Manage Azure IoT hubs.
+    short-summary: Manage Azure IoT hubs.
 """
 helps['iot dps'] = """
     type: group
@@ -426,7 +421,7 @@ helps['iot hub delete'] = """
 
 helps['iot hub consumer-group'] = """
     type: group
-    short-summary: (PREVIEW) Manage the event hub consumer groups of an IoT hub.
+    short-summary: Manage the event hub consumer groups of an IoT hub.
 """
 
 helps['iot hub consumer-group create'] = """
@@ -458,7 +453,7 @@ helps['iot hub consumer-group delete'] = """
 
 helps['iot hub policy'] = """
     type: group
-    short-summary: (PREVIEW) Manage shared access policies of an IoT hub.
+    short-summary: Manage shared access policies of an IoT hub.
 """
 
 helps['iot hub policy list'] = """
@@ -492,7 +487,7 @@ helps['iot hub list-skus'] = """
 
 helps['iot hub job'] = """
     type: group
-    short-summary: (PREVIEW) Manage jobs in an IoT hub.
+    short-summary: Manage jobs in an IoT hub.
 """
 
 helps['iot hub job list'] = """
@@ -518,137 +513,4 @@ helps['iot hub show-quota-metrics'] = """
 helps['iot hub show-stats'] = """
     type: command
     short-summary: Get the statistics for an IoT hub.
-"""
-
-helps['iot device create'] = """
-    type: command
-    short-summary: Register a device for an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity create' via the IoT Extension instead.
-    examples:
-        - name: Create a device authenticating with symmetric key.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice
-        - name: Create a device authenticating with an existing X.509 certificate.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --primary-thumbprint X.509_certificate_thumbprint
-        - name: Create a device authenticating with a self-signed X.509 certificate, which is put into to the current directory.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509
-        - name: Create a device authenticating with a self-signed X.509 certificate that is valid for 100 days.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --valid-days 100
-        - name: Create a device authenticating with a self-signed X.509 certificate, and write the certificate to /path/to/output.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --output-dir /path/to/output
-"""
-
-helps['iot device show'] = """
-    type: command
-    short-summary: Get the details for a device in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity show' via the IoT Extension instead.
-"""
-
-helps['iot device update'] = """
-    type: command
-    short-summary: Update the metadata of a device in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity update' via the IoT Extension instead.
-    examples:
-        - name: Disable a device.
-          text: >
-            az iot device update --hub-name MyIotHub --device-id MyDevice --set status=disabled
-"""
-
-helps['iot device list'] = """
-    type: command
-    short-summary: List devices in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity list' via the IoT Extension instead.
-"""
-
-helps['iot device delete'] = """
-    type: command
-    short-summary: Delete a device from an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity delete' via the IoT Extension instead.
-"""
-
-helps['iot device show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for devices in an IoT hub.
-    long-summary: This command is deprecating.
-                  Use 'az iot hub device-identity show-connection-string' via the IoT Extension instead.
-    examples:
-        - name: Show the connection string of a device in an IoT Hub using the primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice
-        - name: Show the connection string of a device in an IoT Hub using the secondary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice --key secondary
-        - name: Show the connection strings of the default devices in an IoT Hub using primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub
-        - name: Show the connection strings of the top 100 devices in an IoT Hub using primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --top 100
-"""
-
-helps['iot device message'] = """
-    type: group
-    short-summary: (PREVIEW) Manage IoT device messaging.
-"""
-
-helps['iot device message send'] = """
-    type: command
-    short-summary: Send a device-to-cloud message.
-    long-summary: This command is deprecating. Use 'az iot device send-d2c-message' via the IoT Extension instead.
-    examples:
-        - name: Send a device-to-cloud message to an IoT hub with a default message.
-          text: >
-            az iot device message send --hub-name MyIotHub --device-id MyDevice
-        - name: Send a device-to-cloud message to an IoT hub with a custom message.
-          text: >
-            az iot device message send --hub-name MyIotHub --device-id MyDevice --data "Custom Message"
-"""
-
-helps['iot device message receive'] = """
-    type: command
-    short-summary: Receive a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message receive' via the IoT Extension instead.
-    examples:
-        - name: Receive a cloud-to-device message from an IoT hub with a default timeout.
-          text: >
-            az iot device message receive --hub-name MyIotHub --device-id MyDevice
-        - name: Receive a cloud-to-device message from an IoT Hub with a timeout of 300 seconds.
-          text: >
-            az iot device message receive --hub-name MyIotHub --device-id MyDevice --lock-timeout 300
-"""
-
-helps['iot device message complete'] = """
-    type: command
-    short-summary: Complete a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message complete' via the IoT Extension instead.
-"""
-
-helps['iot device message reject'] = """
-    type: command
-    short-summary: Reject a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message reject' via the IoT Extension instead.
-"""
-
-helps['iot device message abandon'] = """
-    type: command
-    short-summary: Abandon a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message abandon' via the IoT Extension instead.
-"""
-
-helps['iot device export'] = """
-    type: command
-    short-summary: Export all the device identities in the IoT hub identity registry to an Azure Storage blob container.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity export' via the IoT Extension instead.
-                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
-"""
-
-helps['iot device import'] = """
-    type: command
-    short-summary: Import, update, or delete device identities in the IoT hub identity registry from a blob.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity import' via the IoT Extension instead.
-                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
 """
