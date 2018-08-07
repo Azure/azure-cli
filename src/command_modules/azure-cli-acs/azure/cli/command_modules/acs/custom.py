@@ -293,10 +293,13 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
     file_url = ''
     system = platform.system()
     base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
+
+    # ensure installation directory exists
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)    
+
     if system == 'Windows':
-        install_dir, exe = install_location.rsplit('\\', 1)
-        if not os.path.exists(install_dir):
-            os.makedirs(install_dir)
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
         # TODO: Support ARM CPU here
@@ -313,15 +316,15 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
-    if system == 'Windows':
+
+    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
-        install_dir, exe = install_location.rsplit('\\', 1)
         found = next((x for x in env_paths if x.lower().rstrip('\\')== install_dir.lower()), None)
         if not found:
             logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-            '    1. Run "set PATH=%PATH%;{0}" or "$env:path += {}" for PowerShell. It is good for the current command session.\n'
-            '    2. Update system PATH environment variable (once for all) by following '
-            '"Control Panel->System->Advanced->Environment Variables", and re-open the command window.'.format(install_dir, exe))
+            '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. This is good for the current command session.\n'
+            '    2. Update system PATH environment variable by following '
+            '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. You only need to do it once'.format(install_dir, cli))
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        os.path.dirname(install_location), os.path.basename(install_location))

@@ -5,6 +5,7 @@ Release History
 
 2.3.0
 +++++
+* `az acs/aks install-cli` will install to under %USERPROFILE%\.azure-kubectl on Windows
 * `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
 
 2.2.2
