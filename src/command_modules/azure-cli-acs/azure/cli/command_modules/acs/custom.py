@@ -1418,7 +1418,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
         scope = vnet_subnet_id
         if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor', service_principal, scope=scope):
-            logger.warning('Could not create a role assignment for custom vnet. '
+            logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
 
     network_profile = None

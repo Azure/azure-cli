@@ -154,7 +154,7 @@ helps['aks create'] = """
                          {sp_cache} to be used by subsequent `az aks` commands.
         - name: --skip-subnet-role-assignment
           type: bool
-          short-summary: Skip role assignment for custom vnet (advanced networking).
+          short-summary: Skip role assignment for subnet (advanced networking).
           long-summary:  If it is true, please make sure your service principal has the access to your subnet.
         - name: --client-secret
           type: string
