@@ -263,6 +263,12 @@ def load_arguments(self, _):
     with self.argument_context('vm user') as c:
         c.argument('username', options_list=['--username', '-u'], help='The user name')
         c.argument('password', options_list=['--password', '-p'], help='The user password')
+
+    with self.argument_context('vm list-skus') as c:
+        c.argument('size', options_list=['--size', '-s'], help="size name, partial name is accepted")
+        c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availabilityt zones")
+        c.argument('show_all', options_list=['--all'], help="show all information including vm sizes not available under the current subscription")
+        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
     # endregion
 
     # region VMSS
