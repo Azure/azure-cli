@@ -5,6 +5,7 @@
 
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from azure.mgmt.media.models import IPRange
 
 
 def create(client, resource_group_name, account_name, live_event_name, streaming_protocol, location,  # pylint: disable=too-many-locals
@@ -56,13 +57,17 @@ def create_live_event_preview(preview_locator, streaming_policy_name, alternativ
 def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
     from azure.mgmt.media.models import CrossSiteAccessPolicies
 
-    with open(client_access_policy, 'r') as file:
-        client_policy = file.read()
+    policies = CrossSiteAccessPolicies()
 
-    with open(cross_domain_policy, 'r') as file:
-        domain_policy = file.read()
+    if client_access_policy:
+        with open(client_access_policy, 'r') as file:
+            policies.client_access_policy = file.read()
 
-    return CrossSiteAccessPolicies(client_access_policy=client_policy, cross_domain_policy=domain_policy)
+    if cross_domain_policy:
+        with open(cross_domain_policy, 'r') as file:
+            policies.cross_domain_policy = file.read()
+
+    return policies
 
 
 def start(cmd, client, resource_group_name, account_name, live_event_name, no_wait=False):
@@ -96,3 +101,57 @@ def reset(cmd, client, resource_group_name, account_name, live_event_name,
     LongRunningOperation(cmd.cli_ctx)(client.reset(resource_group_name, account_name, live_event_name))
 
     return client.get(resource_group_name, account_name, live_event_name)
+
+    
+def update_live_event_setter(client, resource_group_name, account_name, live_event_name,
+                             parameters):
+    parameters.preview.access_control.ip.allow = list(map(lambda x: create_ip_range(live_event_name, x) if isinstance(x, str) else x,
+                                                          parameters.preview.access_control.ip.allow))
+    return client.update(resource_group_name, account_name, live_event_name, parameters)
+
+
+def update_live_event(instance, tags=None, description=None, key_frame_interval_duration=None, 
+                      ips=None, client_access_policy=None, cross_domain_policy=None):
+    if not instance:
+        raise CLIError('The live event resource was not found.')
+
+    if tags is not None:
+        instance.tags = tags
+
+    if description is not None:
+        instance.description = description
+
+    if key_frame_interval_duration is not None:
+        instance.input.key_frame_interval_duration = key_frame_interval_duration
+
+    if ips is not None:
+        if len(ips) == 1 and ips[0] == "":
+            instance.preview.access_control.ip.allow = []
+        else:
+            instance.preview.access_control.ip.allow = []
+
+            for ip in ips:
+                instance.preview.access_control.ip.allow.append(create_ip_range(instance.name, ip))
+
+    if client_access_policy is not None:
+        if not client_access_policy:
+            instance.cross_site_access_policies.client_access_policy = None
+        else:
+            instance.cross_site_access_policies.client_access_policy = read_xml_policy(client_access_policy)
+
+    if cross_domain_policy is not None:
+        if not cross_domain_policy:
+            instance.cross_site_access_policies.cross_domain_policy = None
+        else:
+            instance.cross_site_access_policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+
+    return instance
+
+
+def read_xml_policy(xml_policy_path):
+    with open(xml_policy_path, 'r') as file:
+        return file.read()
+
+
+def create_ip_range(live_event_name, ip):
+    return IPRange(name=("{}_{}".format(live_event_name, ip)), address=ip, subnet_prefix_length=0)

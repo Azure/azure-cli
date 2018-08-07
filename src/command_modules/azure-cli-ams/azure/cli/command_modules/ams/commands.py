@@ -131,8 +131,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.generic_update_command('update',
+                                 setter_name='update_live_event_setter',
+                                 setter_type=get_custom_sdk('live_event', get_live_events_client),
                                  custom_func_name='update_live_event',
-                                 custom_func_type=get_custom_sdk('live_event', get_mediaservices_client))
+                                 custom_func_type=get_custom_sdk('live_event', get_live_events_client))
 
     with self.command_group('ams live output', get_sdk('LiveOutputs', get_live_outputs_client)) as g:
         g.custom_command('create', 'create_live_output',
