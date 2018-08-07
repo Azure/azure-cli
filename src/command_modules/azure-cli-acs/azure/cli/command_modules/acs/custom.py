@@ -1290,16 +1290,18 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def role_assignment_exist(cli_ctx, scope):
-    exsit = False
+def subnet_role_assignment_exists(cli_ctx, scope):
+    exist = False
+    network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
+
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
 
     for i in list(assignments_client.list_for_scope(scope=scope, filter='atScope()')):
-        if i.scope == scope:
-            exsit = True
+        if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
+            exist = True
             break
-    return exsit
+    return exist
 
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
@@ -1351,7 +1353,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_ssh_key=False,
                disable_rbac=None,
                enable_rbac=None,
-               skip_role_assignment=False,
+               skip_subnet_role_assignment=False,
                network_plugin=None,
                pod_cidr=None,
                service_cidr=None,
@@ -1412,11 +1414,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
-    if vnet_subnet_id and not skip_role_assignment and not role_assignment_exist(cmd.cli_ctx, vnet_subnet_id):
+    if (vnet_subnet_id and not skip_subnet_role_assignment and
+            not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
         scope = vnet_subnet_id
-        if not _add_role_assignment(cmd.cli_ctx, 'Contributor', service_principal, scope=scope):
-            logger.warning('Could not create a role assignment. '
-                           'Are you an Owner on this project?')
+        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor', service_principal, scope=scope):
+            logger.warning('Could not create a role assignment for custom vnet. '
+                           'Are you an Owner on this subscription?')
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):

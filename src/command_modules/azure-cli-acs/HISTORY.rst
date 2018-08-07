@@ -5,7 +5,8 @@ Release History
 
 2.2.3
 +++++
-* Add new option "skip role assignment" for customVnet when creating
+* Create role assignment to the subnet when it's provided.
+* Add new option "skip role assignment" for customVnet when it's provided
 * Skip role assignment when it exists instead of return error
 
 2.2.2

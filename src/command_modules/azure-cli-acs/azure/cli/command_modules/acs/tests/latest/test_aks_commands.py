@@ -262,7 +262,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--node-count=1 --service-principal={service_principal} ' \
                      '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} ' \
-                     '--skip-role-assignment'
+                     '--skip-subnet-role-assignment'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
