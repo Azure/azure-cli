@@ -8,6 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from ._format import (
     registry_output_format,
     usage_output_format,
+    policy_output_format,
     credential_output_format,
     webhook_output_format,
     webhook_get_config_output_format,
@@ -37,6 +38,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     acr_import_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.import#{}',
+        client_factory=cf_acr_registries
+    )
+
+    acr_policy_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.policy#{}',
+        table_transformer=policy_output_format,
         client_factory=cf_acr_registries
     )
 
@@ -154,3 +161,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                   table_transformer=build_output_format)
         g.command('logs', 'acr_build_task_logs', client_factory=cf_acr_builds,
                   table_transformer=None)
+
+    with self.command_group('acr config content-trust', acr_policy_util) as g:
+        g.command('show', 'acr_config_content_trust_show')
+        g.command('update', 'acr_config_content_trust_update')

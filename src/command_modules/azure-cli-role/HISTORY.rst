@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.3
+++++++
+* role assignment: fix a recent regression that principalName is missing
 
 2.1.2
 ++++++

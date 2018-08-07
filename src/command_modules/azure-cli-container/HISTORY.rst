@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.3
++++++
+* Add '--secure-environment-variables' for passing secure environment variables to a container
+
 0.3.2
 +++++
 * Do not require '--log-analytics-workspace-key' for name or ID when in set subscription

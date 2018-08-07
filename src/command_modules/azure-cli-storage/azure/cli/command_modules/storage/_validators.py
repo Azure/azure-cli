@@ -23,27 +23,33 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # pylint: disable=inconsistent-return-statements
 def _query_account_key(cli_ctx, account_name):
     """Query the storage account key. This is used when the customer doesn't offer account key but name."""
+    rg, scf = _query_account_rg(cli_ctx, account_name)
+    t_storage_account_keys = get_sdk(
+        cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
+
+    if t_storage_account_keys:
+        return scf.storage_accounts.list_keys(rg, account_name).key1
+    # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
+    return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+
+
+def _query_account_rg(cli_ctx, account_name):
+    """Query the storage account's resource group, which the mgmt sdk requires."""
     scf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from msrestazure.tools import parse_resource_id
-        rg = parse_resource_id(acc.id)['resource_group']
-
-        t_storage_account_keys, t_storage_account_list_keys_results = get_sdk(
-            cli_ctx,
-            ResourceType.MGMT_STORAGE,
-            'models.storage_account_keys#StorageAccountKeys',
-            'models.storage_account_list_keys_result#StorageAccountListKeysResult')
-
-        if t_storage_account_keys:
-            return scf.storage_accounts.list_keys(rg, account_name).key1
-        elif t_storage_account_list_keys_results:
-            return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
-    else:
-        raise ValueError("Storage account '{}' not found.".format(account_name))
+        return parse_resource_id(acc.id)['resource_group'], scf
+    raise ValueError("Storage account '{}' not found.".format(account_name))
 
 
 # region PARAMETER VALIDATORS
+
+def process_resource_group(cmd, namespace):
+    """Processes the resource group parameter from the account name"""
+    if namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
 
 def validate_table_payload_format(cmd, namespace):
     t_table_payload = get_table_data_type(cmd.cli_ctx, 'table', 'TablePayloadFormat')

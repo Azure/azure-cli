@@ -2,6 +2,13 @@
 
 Release History
 ===============
+
+2.1.3
++++++
+* Add content-trust policy commands.
+* Fix a few issues to handle .dockerignore file properly in build command.
+* Minor fixes
+
 2.1.2
 +++++
 * Minor fixes
