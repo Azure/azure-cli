@@ -47,7 +47,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
-    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -117,7 +116,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01'
     }
