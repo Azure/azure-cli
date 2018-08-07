@@ -6,6 +6,9 @@ Release History
 2.3.0
 +++++
 * `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+* Create role assignment to the subnet when it's provided.
+* Add new option "skip role assignment" for subnet when it's provided
+* Skip role assignment to subnet when assignment already exists
 
 2.2.2
 +++++
