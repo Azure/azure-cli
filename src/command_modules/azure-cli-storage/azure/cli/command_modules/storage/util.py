@@ -223,8 +223,5 @@ def check_precondition_success(func):
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
             if ex.status_code not in [304, 412]:
                 raise
-            from knack.log import get_logger
-            logger = get_logger(__name__)
-            logger.warning('Failed precondition')
             return False, None
     return wrapper
