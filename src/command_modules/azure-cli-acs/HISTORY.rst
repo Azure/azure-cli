@@ -7,7 +7,7 @@ Release History
 +++++
 * Create role assignment to the subnet when it's provided.
 * Add new option "skip role assignment" for subnet when it's provided
-* Skip role assignment to subnet when assignment has already existed
+* Skip role assignment to subnet when assignment already exists
 
 2.2.2
 +++++

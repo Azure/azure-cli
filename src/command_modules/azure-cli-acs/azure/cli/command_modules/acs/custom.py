@@ -510,10 +510,7 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
         hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
-            if not scope:
-                create_role_assignment(cli_ctx, role, service_principal)
-            else:
-                create_role_assignment(cli_ctx, role, service_principal, scope=scope)
+            create_role_assignment(cli_ctx, role, service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1296,7 +1293,7 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
 
-    for i in list(assignments_client.list_for_scope(scope=scope, filter='atScope()')):
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
         if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
             return True
     return False
