@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.2.0
++++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
+* Make '--resource-group' parameter optional for 'storage account' commands.
+* Remove 'Failed precondition' warnings for individual failures in batch commands for single aggregated message.
+* blob/file delete-batch commands no longer output array of nulls.
+
 2.1.1
 +++++
 * Allows download of large files using a single connection.

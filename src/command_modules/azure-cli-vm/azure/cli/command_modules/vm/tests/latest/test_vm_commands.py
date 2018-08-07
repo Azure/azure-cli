@@ -794,7 +794,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
         ])
 
 
-class ComputeListSkusScenarioTest(ScenarioTest):
+class ComputeListSkusScenarioTest(LiveScenarioTest):
 
     @AllowLargeResponse(size_kb=3072)
     def test_list_compute_skus_table_output(self):
@@ -819,6 +819,13 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         self.assertTrue(ud_found)
         self.assertTrue(size_found)
         self.assertTrue(zone_found)
+
+    @AllowLargeResponse(size_kb=3072)
+    def test_list_compute_skus_fiter(self):
+        result = self.cmd('vm list-skus -l eastus2 --size Standard_DS1_V2 --zone').get_output_in_json()
+        self.assertTrue(result and len(result) == len([x for x in result if x['name'] == 'Standard_DS1_v2' and x['locationInfo'][0]['zones']]))
+        result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
+        self.assertTrue(result and len(result) == len([x for x in result if x['resourceType'] == 'disks']))
 
 
 class VMExtensionScenarioTest(ScenarioTest):

@@ -184,8 +184,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
     response = requests.get(deployment_status_url, headers=authorization)
-    if response.json()['status'] != 4:
-        logger.warning(response.json()['progress'])
+    response = response.json()
+    if response.get('status', 0) != 4:
+        logger.warning(response.get('progress', ''))
         response = _check_zip_deployment_status(deployment_status_url, authorization)
     return response
 
@@ -722,6 +723,8 @@ def _mask_creds_related_appsettings(settings):
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(webapp_name))
     binding = HostNameBinding(webapp.location, site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
@@ -749,17 +752,19 @@ def list_hostnames(cmd, resource_group_name, webapp_name, slot=None):
 def get_external_ip(cmd, resource_group_name, webapp_name):
     # logics here are ported from portal
     client = web_client_factory(cmd.cli_ctx)
-    webapp_name = client.web_apps.get(resource_group_name, webapp_name)
-    if webapp_name.hosting_environment_profile:
+    webapp = client.web_apps.get(resource_group_name, webapp_name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(webapp_name))
+    if webapp.hosting_environment_profile:
         address = client.app_service_environments.list_vips(
-            resource_group_name, webapp_name.hosting_environment_profile.name)
+            resource_group_name, webapp.hosting_environment_profile.name)
         if address.internal_ip_address:
             ip_address = address.internal_ip_address
         else:
-            vip = next((s for s in webapp_name.host_name_ssl_states if s.ssl_state == SslState.ip_based_enabled), None)
+            vip = next((s for s in webapp.host_name_ssl_states if s.ssl_state == SslState.ip_based_enabled), None)
             ip_address = vip.virtual_ip if vip else address.service_ip_address
     else:
-        ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
+        ip_address = _resolve_hostname_through_dns(webapp.default_host_name)
 
     return {'ip': ip_address}
 
@@ -772,6 +777,8 @@ def _resolve_hostname_through_dns(hostname):
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
+    if not site:
+        raise CLIError("'{}' app doesn't exist".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     clone_from_prod = None
@@ -1122,6 +1129,8 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
 
 def _get_location_from_webapp(client, resource_group_name, webapp):
     webapp = client.web_apps.get(resource_group_name, webapp)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(webapp))
     return webapp.location
 
 
@@ -1217,6 +1226,8 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
 
 def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not site:
+        raise CLIError("'{}' app doesn't exist".format(name))
     url = site.enabled_host_names[0]  # picks the custom domain URL incase a domain is assigned
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
@@ -1237,6 +1248,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
+    if not site:
+        raise CLIError("'{}' app doesn't exist".format(name))
     location = site.location
 
     application_logs = None
@@ -1333,6 +1346,8 @@ def delete_slot(cmd, resource_group_name, webapp, slot):
 def set_traffic_routing(cmd, resource_group_name, name, distribution):
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
+    if not site:
+        raise CLIError("'{}' app doesn't exist".format(name))
     configs = get_site_configs(cmd, resource_group_name, name)
     host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
     configs.experiments.ramp_up_rules = []
@@ -1482,6 +1497,9 @@ def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, locat
 def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(name))
+
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
     for webapp_cert in webapp_certs:
@@ -1736,7 +1754,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
     if error_message:
         raise CLIError(error_message)
 
-    obj = storage_client.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
+    obj = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account)  # pylint: disable=no-member
     try:
         keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
     except AttributeError:

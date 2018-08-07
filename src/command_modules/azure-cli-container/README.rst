@@ -30,17 +30,31 @@ Commands to create an Azure container group
                                         using `az configure --defaults group=<name>`.
         --command-line                : The command line to run when the container is started, e.g.
                                         '/bin/bash -c myscript.sh'.
-        --cpu                         : The required number of CPU cores of the containers.  Default: 1.
-        --environment-variables -e    : A list of environment variable for the container.
-                                        Space-separated values in 'key=value' format.
-        --ip-address                  : The IP address type of the container group.  Allowed values:
+        --cpu                            : The required number of CPU cores of the containers.  Default:
+                                        1.
+        --dns-name-label                 : The dns name label for container group with public IP.
+        --environment-variables -e       : A list of environment variable for the container. Space-
+                                        separated values in 'key=value' format.
+        --file -f                        : The path to the input file.
+        --image                          : The container image name.
+        --ip-address                     : The IP address type of the container group.  Allowed values:
                                         Public.
-        --location -l                 : Location. You can configure the default location using `az
+        --location -l                    : Location. You can configure the default location using `az
                                         configure --defaults location=<location>`.
-        --memory                      : The required memory of the containers in GB.  Default: 1.5.
-        --os-type                     : The OS type of the containers.  Allowed values: Linux, Windows.
-                                        Default: Linux.
-        --port                        : Default: 80.
+        --memory                         : The required memory of the containers in GB.  Default: 1.5.
+        --name -n                        : The name of the container group.
+        --no-wait                        : Do not wait for the long-running operation to finish.
+        --os-type                        : The OS type of the containers.  Allowed values: Linux,
+                                        Windows.  Default: Linux.
+        --ports                          : The ports to open.  Default: [80].
+        --protocol                       : The network protocol to use.  Allowed values: TCP, UDP.
+        --restart-policy                 : Restart policy for all containers within the container group.
+                                        Allowed values: Always, Never, OnFailure.  Default: Always.
+        --secrets                        : Space-separated secrets in 'key=value' format.
+        --secrets-mount-path             : The path within the container where the secrets volume should
+                                        be mounted. Must not contain colon ':'.
+        --secure-environment-variables   : A list of secure environment variable for the container.
+                                        Space-separated values in 'key=value' format.
 
     Image Registry Arguments
         --registry-login-server       : The container image registry login server.

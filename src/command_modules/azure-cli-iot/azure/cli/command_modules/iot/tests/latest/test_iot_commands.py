@@ -11,8 +11,6 @@ class IoTHubTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
-        device_id_1 = 'test-device-1'
-        device_id_2 = 'test-device-2'
         hub = 'iot-hub-for-test'
         rg = resource_group
         location = resource_group_location
@@ -135,92 +133,6 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub job cancel --hub-name {0} --job-id {1}'.format(hub, job_id),
                  expect_failure=True)
 
-        # Test 'az iot device create'
-        device_1 = device_id_1
-        self.cmd('iot device create --hub-name {0} -d {1}'.format(hub, device_1),
-                 checks=[self.check('deviceId', device_1),
-                         self.check('status', 'enabled'),
-                         self.check('statusReason', None),
-                         self.check('connectionState', 'Disconnected')])
-
-        device_2 = device_id_2
-        primary_thumbprint = 'A361EA6A7119A8B0B7BBFFA2EAFDAD1F9D5BED8C'
-        secondary_thumbprint = '14963E8F3BA5B3984110B3C1CA8E8B8988599087'
-        self.cmd('iot device create --hub-name {0} -d {1} --x509 --primary-thumbprint {2} --secondary-thumbprint {3}'
-                 .format(hub, device_2, primary_thumbprint, secondary_thumbprint),
-                 checks=[self.check('deviceId', device_2),
-                         self.check('status', 'enabled'),
-                         self.check('statusReason', None),
-                         self.check('connectionState', 'Disconnected'),
-                         self.check('authentication.symmetricKey.primaryKey', None),
-                         self.check('authentication.symmetricKey.secondaryKey', None),
-                         self.check('authentication.x509Thumbprint.primaryThumbprint', primary_thumbprint),
-                         self.check('authentication.x509Thumbprint.secondaryThumbprint', secondary_thumbprint)])
-
-        # Test 'az iot device show-connection-string'
-        conn_str_pattern = r'^HostName={0}\.azure-devices\.net;DeviceId={1};SharedAccessKey='.format(hub, device_1)
-        self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_1), checks=[
-            self.check_pattern('connectionString', conn_str_pattern)
-        ])
-
-        connection_string = 'HostName={0}.azure-devices.net;DeviceId={1};x509=true'.format(hub, device_2)
-        self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_2), checks=[
-            self.check('connectionString', connection_string)
-        ])
-
-        device_id_pattern = r'^test\-device\-\d$'
-        self.cmd('iot device show-connection-string --hub-name {0}'.format(hub), checks=[
-            self.check('length([*])', 2),
-            self.check_pattern('[0].deviceId', device_id_pattern),
-            self.check_pattern('[1].deviceId', device_id_pattern)
-        ])
-
-        # Test 'az iot device show'
-        self.cmd('iot device show --hub-name {0} -d {1}'.format(hub, device_1), checks=[
-            self.check('deviceId', device_1),
-            self.check('status', 'enabled'),
-            self.check('statusReason', None),
-            self.check('connectionState', 'Disconnected')
-        ])
-
-        # Test 'az iot device update'
-        status_reason = 'TestReason'
-        self.cmd('iot device update --hub-name {0} -d {1} --set statusReason={2}'.format(hub, device_2, status_reason),
-                 checks=[
-                     self.check('deviceId', device_2),
-                     self.check('status', 'enabled'),
-                     self.check('statusReason', status_reason),
-                     self.check('connectionState', 'Disconnected'),
-                     self.check('authentication.symmetricKey.primaryKey', None),
-                     self.check('authentication.symmetricKey.secondaryKey', None),
-                     self.check('authentication.x509Thumbprint.primaryThumbprint', primary_thumbprint),
-                     self.check('authentication.x509Thumbprint.secondaryThumbprint', secondary_thumbprint)])
-
-        # Test 'az iot device list'
-        self.cmd('iot device list --hub-name {0}'.format(hub),
-                 checks=[self.check('length([*])', 2),
-                         self.check_pattern('[0].deviceId', device_id_pattern),
-                         self.check_pattern('[1].deviceId', device_id_pattern)])
-
-        # Test 'az iot device message send'
-        self.cmd('iot device message send --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-
-        # Test 'az iot device message receive'
-        self.cmd('iot device message receive --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-
-        # Test 'az iot device message complete'
-        lock_token = '00000000-0000-0000-0000-000000000000'
-        self.cmd('iot device message complete --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
-        # Test 'az iot device message reject'
-        self.cmd('iot device message reject --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
-        # Test 'az iot device message abandon'
-        self.cmd('iot device message abandon --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
         # Test 'az iot hub show-quota-metrics'
         self.cmd('iot hub show-quota-metrics -n {0}'.format(hub), checks=[
             self.check('length([*])', 2),
@@ -237,10 +149,6 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('enabledDeviceCount', device_count_pattern),
             self.check_pattern('totalDeviceCount', device_count_pattern)
         ])
-
-        # Test 'az iot device delete'
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_2), checks=self.is_empty())
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())

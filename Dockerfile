@@ -46,7 +46,7 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git \
  && chmod +x /usr/local/bin/jp \
  && pip install --no-cache-dir --upgrade jmespath-terminal \
  && /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
-    for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
+    for d in src/azure-cli src/azure-cli-telemetry src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; echo $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
     done; \
     [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \

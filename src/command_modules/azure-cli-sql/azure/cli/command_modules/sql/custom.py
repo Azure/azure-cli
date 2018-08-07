@@ -20,7 +20,11 @@ from azure.mgmt.sql.models import (
     CreateMode,
     DatabaseEdition,
     EncryptionProtector,
+    FailoverGroup,
+    FailoverGroupReadOnlyEndpoint,
+    FailoverGroupReadWriteEndpoint,
     IdentityType,
+    PartnerInfo,
     PerformanceLevelUnit,
     ReplicationRole,
     ResourceIdentity,
@@ -119,7 +123,7 @@ def is_available(status):
     Returns True if the capability status is available (including default).
     '''
 
-    return status != CapabilityStatus.visible and status != CapabilityStatus.visible.value
+    return status not in (CapabilityStatus.visible, CapabilityStatus.visible.value)
 
 
 def _filter_available(capabilities):
@@ -436,7 +440,7 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
+class DatabaseIdentity():  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.
@@ -2110,3 +2114,163 @@ def managed_db_restore(
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
+
+###############################################
+#              sql failover-group             #
+###############################################
+
+
+# pylint: disable=too-few-public-methods
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
+
+
+def failover_group_create(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        partner_server,
+        partner_resource_group=None,
+        failover_policy=FailoverPolicyType.automatic.value,
+        grace_period=1,
+        add_db=None):
+    '''
+    Creates a failover group.
+    '''
+
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    # Build the partner server id
+    partner_server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+        quote(get_subscription_id(cmd.cli_ctx)),
+        quote(partner_resource_group or resource_group_name),
+        quote(partner_server))
+
+    partner_server = PartnerInfo(id=partner_server_id)
+
+    # Convert grace period from hours to minutes
+    grace_period = int(grace_period) * 60
+
+    if add_db is None:
+        add_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        [],
+        add_db,
+        [])
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name,
+        parameters=FailoverGroup(
+            partner_servers=[partner_server],
+            databases=databases,
+            read_write_endpoint=FailoverGroupReadWriteEndpoint(
+                failover_policy=failover_policy,
+                failover_with_data_loss_grace_period_minutes=grace_period),
+            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+                failover_policy="Disabled")))
+
+
+def failover_group_update(
+        cmd,
+        instance,
+        resource_group_name,
+        server_name,
+        failover_policy=None,
+        grace_period=None,
+        add_db=None,
+        remove_db=None):
+    '''
+    Updates the failover group.
+    '''
+
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
+
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if instance.read_write_endpoint.failover_policy == 'Manual':
+        grace_period = None
+
+    if add_db is None:
+        add_db = []
+
+    if remove_db is None:
+        remove_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        instance.databases,
+        add_db,
+        remove_db)
+
+    instance.databases = databases
+
+    return instance
+
+
+def failover_group_failover(
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        allow_data_loss=False):
+    '''
+    Failover a failover group.
+    '''
+
+    failover_group = client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+    if failover_group.replication_role == "Primary":
+        return
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.force_failover_allow_data_loss
+    else:
+        failover_func = client.failover
+
+    return failover_func(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+
+def _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        databases_in_fg,
+        add_db,
+        remove_db):
+    '''
+    Gets a list of databases that are supposed to be part of the failover group
+    after the operation finishes
+    It consolidates the list of dbs to add and remove with the list of databases
+    that are already part of the failover group.
+    '''
+
+    add_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in add_db]
+
+    remove_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in remove_db]
+
+    databases = list(({x.lower() for x in databases_in_fg} |
+                      {x.lower() for x in add_db_ids}) - {x.lower() for x in remove_db_ids})
+
+    return databases

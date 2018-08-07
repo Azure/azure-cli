@@ -21,6 +21,9 @@ echo "Virtual environemtn established at $VENV_DIR." >&2
 echo "   Python path `which python`" >&2
 echo "   `python --version`" >&2
 
+echo "Install Telemetry" >&2
+pip install -e src/azure-cli-telemetry -q --log pip.log
+
 echo "Install CORE" >&2
 pip install -e src/azure-cli-core -q --log pip.log
 
