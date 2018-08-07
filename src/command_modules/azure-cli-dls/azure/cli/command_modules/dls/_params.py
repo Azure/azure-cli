@@ -14,11 +14,11 @@ from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_
     TrustedIdProviderState,
     TierType,
     FirewallAllowAzureIpsState)
+
+from azure.mgmt.datalake.store.models import EncryptionConfigType
 from ._validators import (
     validate_subnet
 )
-
-from azure.mgmt.datalake.store.models import EncryptionConfigType
 
 
 # pylint: disable=line-too-long, too-many-statements
