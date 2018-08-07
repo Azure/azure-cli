@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long,too-many-statements
 
+import sys
 import os.path
 import platform
 
@@ -230,15 +231,13 @@ def load_arguments(self, _):
 
 def _get_default_install_location(exe_name):
     system = platform.system()
+    install_location = None
     if system == 'Windows':
-        program_files = os.environ.get('ProgramFiles')
-        if not program_files:
-            return None
-        install_location = '{}\\{}.exe'.format(program_files, exe_name)
+        user_profile = os.environ.get('USERPROFILE')
+        if user_profile:
+            install_location = os.path.join(user_profile, r'AppData\Local\Microsoft\WindowsApps', exe_name + '.exe')
     elif system == 'Linux' or system == 'Darwin':
         install_location = '/usr/local/bin/{}'.format(exe_name)
-    else:
-        install_location = None
     return install_location
 
 
