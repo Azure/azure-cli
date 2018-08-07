@@ -231,7 +231,8 @@ def validate_subnet(cmd, namespace):
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
         return
-    elif subnet and not subnet_is_id and vnet:
+
+    if subnet and not subnet_is_id and vnet:
         namespace.subnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,

@@ -9,6 +9,7 @@ def keyvault_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
 
+
 def keyvault_client_vaults_factory(cli_ctx, _):
     return keyvault_client_factory(cli_ctx).vaults
 
@@ -17,6 +18,7 @@ def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
+
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         from azure.cli.core._profile import Profile
@@ -31,4 +33,5 @@ def keyvault_data_plane_factory(cli_ctx, _):
                 raise CLIError(
                     "Credentials have expired due to inactivity. Please run 'az login'")
             raise CLIError(err)
+
     return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)

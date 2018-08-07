@@ -4,11 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 
-from azure.cli.core.commands import CliCommandType
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_data_plane_factory)
 
@@ -35,7 +33,7 @@ def load_command_table(self, _):
         client_factory=keyvault_client_vaults_factory,
         resource_type=ResourceType.MGMT_KEYVAULT
     )
-    
+
     kv_data_sdk = CliCommandType(
         operations_tmpl='azure.keyvault.key_vault_client#KeyVaultClient.{}',
         client_factory=keyvault_data_plane_factory,
@@ -45,7 +43,8 @@ def load_command_table(self, _):
 
     # Management Plane Commands
     with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
-        g.custom_command('create', 'create_keyvault', doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
+        g.custom_command('create', 'create_keyvault',
+                         doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
@@ -57,7 +56,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
                                  custom_func_name='update_keyvault')
 
-    with self.command_group('keyvault network-rule', kv_vaults_sdk, min_api='2018-02-14', client_factory=keyvault_client_vaults_factory) as g:
+    with self.command_group('keyvault network-rule',
+                            kv_vaults_sdk,
+                            min_api='2018-02-14',
+                            client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('add', 'add_network_rule')
         g.custom_command('remove', 'remove_network_rule')
         g.custom_command('list', 'list_network_rules')
@@ -92,9 +94,11 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret', doc_string_source=data_doc_string.format('backup_secret'))
         g.keyvault_custom('restore', 'restore_secret', doc_string_source=data_doc_string.format('restore_secret'))
-    
+
     with self.command_group('keyvault certificate', kv_data_sdk) as g:
-        g.keyvault_custom('create', 'create_certificate', doc_string_source=data_doc_string.format('create_certificate'))
+        g.keyvault_custom('create',
+                          'create_certificate',
+                          doc_string_source=data_doc_string.format('create_certificate'))
         g.keyvault_command('list', 'get_certificates')
         g.keyvault_command('list-versions', 'get_certificate_versions')
         g.keyvault_command('list-deleted', 'get_deleted_certificates')
@@ -137,7 +141,7 @@ def load_command_table(self, _):
         g.keyvault_command('update', 'update_storage_account')
         g.keyvault_command('remove', 'delete_storage_account')
         g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
-        if (data_api_version != '2016_10_01'):
+        if data_api_version != '2016_10_01':
             g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
             g.keyvault_command('show-deleted', 'get_deleted_storage_account')
             g.keyvault_command('purge', 'purge_deleted_storage_account')
@@ -150,12 +154,16 @@ def load_command_table(self, _):
                               doc_string_source=data_doc_string.format('restore_storage_account'))
 
     with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
-        g.keyvault_command('create', 'set_sas_definition', doc_string_source=data_doc_string.format('set_sas_definition'))
+        g.keyvault_command('create',
+                           'set_sas_definition',
+                           doc_string_source=data_doc_string.format('set_sas_definition'))
         g.keyvault_command('list', 'get_sas_definitions')
         g.keyvault_command('show', 'get_sas_definition')
-        g.keyvault_command('update', 'update_sas_definition', doc_string_source=data_doc_string.format('update_sas_definition'))
+        g.keyvault_command('update',
+                           'update_sas_definition',
+                           doc_string_source=data_doc_string.format('update_sas_definition'))
         g.keyvault_command('delete', 'delete_sas_definition')
-        if (data_api_version != '2016_10_01'):
+        if data_api_version != '2016_10_01':
             g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
             g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
             g.keyvault_command('recover', 'recover_deleted_sas_definition')

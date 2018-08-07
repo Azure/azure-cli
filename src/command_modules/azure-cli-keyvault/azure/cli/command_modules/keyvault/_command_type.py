@@ -16,7 +16,7 @@ def _encode_hex(item):
     encoded strings. """
     if isinstance(item, list):
         return [_encode_hex(x) for x in item]
-    elif hasattr(item, '__dict__'):
+    if hasattr(item, '__dict__'):
         for key, val in item.__dict__.items():
             if not key.startswith('_'):
                 try:
@@ -24,7 +24,7 @@ def _encode_hex(item):
                 except TypeError:
                     item.__dict__[key] = _encode_hex(val)
         return item
-    elif isinstance(item, (bytes, bytearray)):
+    if isinstance(item, (bytes, bytearray)):
         return base64.b64encode(item).decode('utf-8')
     return item
 
@@ -104,15 +104,14 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 if isinstance(result, poller_classes()):
                     return _encode_hex(
                         LongRunningOperation(self.command_loader.cli_ctx, 'Starting {}'.format(name))(result))
-                elif isinstance(result, Paged):
+                if isinstance(result, Paged):
                     try:
                         return _encode_hex(list(result))
                     except TypeError:
                         # TODO: Workaround for an issue in either KeyVault server-side or msrest
                         # See https://github.com/Azure/autorest/issues/1309
                         return []
-                else:
-                    return _encode_hex(result)
+                return _encode_hex(result)
             except Exception as ex:  # pylint: disable=broad-except
                 if name == 'show':
                     # show_exception_handler needs to be called before the keyvault_exception_handler
@@ -141,6 +140,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
         if command_type:
             kwargs[command_type_name] = command_type
         self._create_keyvault_command(name, method_name, command_type_name, **kwargs)
+
 
 class KeyVaultArgumentContext(AzArgumentContext):
 

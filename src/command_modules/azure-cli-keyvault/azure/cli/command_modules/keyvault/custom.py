@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 import codecs
 import json
 import os
@@ -17,10 +19,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.exceptions import UnsupportedAlgorithm
 
-import azure.cli.core.telemetry as telemetry
 
-from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
+from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType, get_sdk
+
+from ._validators import secret_text_encoding_values
 
 logger = get_logger(__name__)
 
@@ -98,7 +101,7 @@ def _scaffold_certificate_profile(cmd):
     X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
     SubjectAlternativeNames = cmd.get_models('SubjectAlternativeNames', resource_type=ResourceType.DATA_KEYVAULT)
     Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
-    
+
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
@@ -194,10 +197,9 @@ def _get_object_id_from_subscription(graph_client, subscription):
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        elif subscription['user']['type'] == 'servicePrincipal':
+        if subscription['user']['type'] == 'servicePrincipal':
             return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        else:
-            logger.warning("Unknown user type '%s'", subscription['user']['type'])
+        logger.warning("Unknown user type '%s'", subscription['user']['type'])
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')
@@ -212,13 +214,18 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 
-def _create_network_rule_set(cmd, bypass=None, default_action=None): 
+def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleSet = cmd.get_models('NetworkRuleSet', resource_type=ResourceType.MGMT_KEYVAULT)
-    NetworkRuleBypassOptions = get_sdk(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
-    NetworkRuleAction = get_sdk(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#NetworkRuleAction')
-    
+    NetworkRuleBypassOptions = get_sdk(cmd.cli_ctx,
+                                       ResourceType.MGMT_KEYVAULT,
+                                       'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
+    NetworkRuleAction = get_sdk(cmd.cli_ctx,
+                                ResourceType.MGMT_KEYVAULT,
+                                'models.key_vault_management_client_enums#NetworkRuleAction')
+
     return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
                           default_action=default_action or NetworkRuleAction.allow.value)
+
 
 # region KeyVault Vault
 def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-argument
@@ -235,7 +242,8 @@ def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-a
 def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
     from azure.cli.core._profile import Profile
 
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     SkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -269,7 +277,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
 
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
     KeyPermissions = cmd.get_models('KeyPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
     SecretPermissions = cmd.get_models('SecretPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -291,7 +300,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
 
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we make network_acls None
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'): 
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
         network_acls = _create_network_rule_set(cmd, bypass, default_action) if bypass or default_action else None
 
     if no_self_perms:
@@ -370,7 +379,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
 
 
 def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
@@ -432,8 +442,9 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None):
     """ Update security policy settings for a Key Vault. """
-    
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
     Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
@@ -474,7 +485,8 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
     rules = vault.properties.network_acls
@@ -498,7 +510,8 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
     """ Removes a network rule from the network ACLs for a Key Vault. """
 
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
     if not vault.properties.network_acls:
@@ -541,7 +554,8 @@ def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint:
 
 def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -587,6 +601,7 @@ def restore_key(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
+
 
 def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):

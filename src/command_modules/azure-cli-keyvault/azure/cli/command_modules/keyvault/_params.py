@@ -13,6 +13,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from ._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
@@ -24,12 +25,12 @@ from ._validators import (
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
-from azure.cli.core.profiles import ResourceType, get_sdk
 
 # CUSTOM CHOICE LISTS
 
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
 certificate_format_values = ['PEM', 'DER']
+
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
