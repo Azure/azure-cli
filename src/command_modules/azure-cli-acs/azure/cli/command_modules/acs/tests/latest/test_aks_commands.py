@@ -218,7 +218,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create cluster without skip_role_assignment
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--node-count=1 --service-principal={service_principal} ' \
-                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id}'
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
         self.cmd(create_cmd, checks=[
             self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
             self.check('provisioningState', 'Succeeded')
@@ -237,7 +238,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--node-count=1 --service-principal={service_principal} ' \
-                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id}'
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
         self.cmd(create_cmd, checks=[
             self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
             self.check('provisioningState', 'Succeeded')
@@ -260,7 +262,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--node-count=1 --service-principal={service_principal} ' \
                      '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} ' \
-                     '--skip-subnet-role-assignment'
+                     '--skip-subnet-role-assignment --no-ssh-key'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
