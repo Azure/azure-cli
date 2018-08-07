@@ -213,8 +213,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group),
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
         # create cluster without skip_role_assignment
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
@@ -255,8 +254,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group),
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
         # create cluster without skip_role_assignment
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \

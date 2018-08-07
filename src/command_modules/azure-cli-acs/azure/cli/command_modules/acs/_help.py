@@ -155,7 +155,7 @@ helps['aks create'] = """
         - name: --skip-subnet-role-assignment
           type: bool
           short-summary: Skip role assignment for subnet (advanced networking).
-          long-summary:  If it is true, please make sure your service principal has the access to your subnet.
+          long-summary:  If specified, please make sure your service principal has the access to your subnet.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
