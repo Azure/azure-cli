@@ -372,7 +372,6 @@ class TestActions(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):
-        
         # recognized distro
         np = mock.MagicMock()
         np.accelerated_networking = None
