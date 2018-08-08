@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 class AmsLiveOutputTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_live_event_create(self, storage_account_for_create):
+    def test_live_output_create(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         live_event_name = self.create_random_name(prefix='le', length=12)
 
