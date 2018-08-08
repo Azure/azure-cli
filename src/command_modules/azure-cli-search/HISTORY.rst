@@ -5,8 +5,7 @@ Release History
 
 0.1.1
 +++++
-* Minor fixes.
-
+* Minor fixes
 
 0.1.0
 +++++
