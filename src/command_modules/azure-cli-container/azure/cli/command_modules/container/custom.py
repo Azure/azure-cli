@@ -400,7 +400,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
-    resource_client = _resource_client_factory(cmd.cli_ctx)
+    resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
     resource = resource_client.resources.get(resource_group_name,
