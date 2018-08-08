@@ -33,3 +33,17 @@ def unrecognized_help_parameter_rule(linter, help_entry):
             violations.append(param_help_name)
     if violations:
         raise RuleError('The following parameter help names are invalid: {}'.format(' | '.join(violations)))
+
+@help_file_entry_rule
+def mismatched_help_parameter_rule(linter, help_entry):
+    if help_entry not in linter.commands:
+        return
+
+    help_names = linter.get_help_entry_example_names(help_entry)
+    help_texts = linter.get_help_entry_example_text(help_entry)
+    violations = []
+    for help_name, help_text in zip(help_names, help_texts):
+        if help_name not in help_text:
+            violations.append(help_name)
+    if violations:
+        raise RuleError('The following commands have mismatched names and text: {}'.format(' | '.join(violations)))

@@ -63,6 +63,14 @@ class Linter(object):
     def is_valid_parameter_help_name(self, entry_name, param_name):
         return param_name in [param.name for param in getattr(self._loaded_help.get(entry_name), 'parameters', [])]
 
+    def get_help_entry_example_names(self, entry_name):
+        return [param_help.get('name', None) for param_help in \
+            self._all_yaml_help.get(entry_name).get('examples', [])]
+
+    def get_help_entry_example_text(self, entry_name):
+        return [param_help.get('text', None) for param_help in \
+            self._all_yaml_help.get(entry_name).get('examples', [])]
+
     def get_command_help(self, command_name):
         return self._get_loaded_help_description(command_name)
 
