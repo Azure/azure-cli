@@ -95,7 +95,7 @@ def reset(cmd, client, resource_group_name, account_name, live_event_name,
 
     return client.get(resource_group_name, account_name, live_event_name)
 
-    
+
 def update_live_event_setter(client, resource_group_name, account_name, live_event_name,
                              parameters):
     ips = list(map(lambda x: create_ip_range(live_event_name, x) if isinstance(x, str) else x,
