@@ -33,7 +33,6 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-resource==2.0.0',
     'azure-mgmt-search==2.0.0',
 ]
 

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.3
++++++
+* Minor fixes
+
 2.2.2
 +++++
 * `dns`: Added dns support to 2017-03-09-profile for Azure Stack 
