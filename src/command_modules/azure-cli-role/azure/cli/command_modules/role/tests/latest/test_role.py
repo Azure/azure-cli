@@ -13,7 +13,7 @@ import mock
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 
@@ -90,7 +90,7 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-        KeyVaultErrorException = self.cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
+        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
