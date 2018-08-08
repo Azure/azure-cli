@@ -22,7 +22,7 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
                                       key_frame_interval_duration=key_frame_interval_duration)
 
     live_event_preview = create_live_event_preview(preview_locator, streaming_policy_name, alternative_media_id,
-                                                ips, live_event_name)
+                                                   ips, live_event_name)
 
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
