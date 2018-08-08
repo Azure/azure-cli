@@ -11,7 +11,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list, get_presets_definition_name_completion_list
 
-from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType)
+from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
 
 from ._validators import validate_storage_account_id, datetime_format
 
@@ -183,14 +183,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_frame_interval_duration', help='ISO 8601 timespan duration of the key frame interval duration.')
         c.argument('access_token', help='The access token.')
         c.argument('description', help='The live event description.')
-        c.argument('ips', nargs='+', help='Space-separated list of IPs for the IP allow list.')
+        c.argument('ips', nargs='+', help='Space-separated list of allowed IP addresses for access control.')
         c.argument('preview_locator', help='The preview locator Guid.')
         c.argument('streaming_policy_name', help='The name of streaming policy used for live event preview.')
         c.argument('alternative_media_id', help='An alternative media identifier associated with the preview URL. This identifier can be used to distinguish the preview of different live events for authorization purposes in the custom license acquisition URL template or the custom key acquisition URL template of the streaming policy specified in the streaming policy name field.')
         c.argument('vanity_url', action='store_true', help='The live event vanity URL flag.')
         c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
-        c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used bySilverlight.')
-        c.argument('stream_options', nargs='+', help='The stream options.')
+        c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
+        c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The stream options.')
 
     with self.argument_context('ams live event stop') as c:
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
