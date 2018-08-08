@@ -33,6 +33,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-containerinstance==1.0.0',
     'azure-mgmt-loganalytics==0.2.0',
+    'azure-mgmt-resource==2.0.0',
     'azure-cli-core',
     'pyyaml>=3.13',
     'colorama',

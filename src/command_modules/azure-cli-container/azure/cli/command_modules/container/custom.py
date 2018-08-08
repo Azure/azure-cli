@@ -33,10 +33,9 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
-from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -216,7 +215,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
 
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
-    resource_client = _resource_client_factory(cli_ctx)
+    resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
 
     cg_defintion = None
@@ -401,7 +400,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
-    resource_client = _resource_client_factory(cmd.cli_ctx)
+    resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
     resource = resource_client.resources.get(resource_group_name,
