@@ -676,7 +676,7 @@ def add_progress_callback(cmd, namespace):
     del namespace.no_progress
 
 
-def process_blob_download_batch_parameters(namespace, cmd):
+def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
     import os
 
@@ -685,24 +685,10 @@ def process_blob_download_batch_parameters(namespace, cmd):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
-    process_blob_batch_source_parameters(cmd, namespace)
+    _process_blob_batch_container_parameters(cmd, namespace)
 
-
-def process_blob_batch_source_parameters(cmd, namespace):
-    """Process the parameters for storage blob download command"""
-
-    # try to extract account name and container name from source string
-    from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.source)
-
-    if not identifier.is_url():
-        namespace.source_container_name = namespace.source
-    elif identifier.blob:
-        raise ValueError('incorrect usage: source should be either container URL or name')
-    else:
-        namespace.source_container_name = identifier.container
-        if namespace.account_name is None:
-            namespace.account_name = identifier.account_name
+    # 3. Call validators
+    add_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -710,40 +696,11 @@ def process_blob_upload_batch_parameters(cmd, namespace):
     import os
 
     # 1. quick check
-    if not os.path.exists(namespace.source):
-        raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
-
-    if not os.path.isdir(namespace.source):
-        raise ValueError('incorrect usage: source must be a directory')
+    if not os.path.exists(namespace.source) or not os.path.isdir(namespace.source):
+        raise ValueError('incorrect usage: source must be an existing directory')
 
     # 2. try to extract account name and container name from destination string
-    from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.destination)
-
-    if not identifier.is_url():
-        namespace.destination_container_name = namespace.destination
-    elif identifier.blob is not None:
-        raise ValueError('incorrect usage: destination cannot be a blob url')
-    else:
-        namespace.destination_container_name = identifier.container
-
-        if namespace.account_name:
-            if namespace.account_name != identifier.account_name:
-                raise ValueError(
-                    'The given storage account name is not consistent with the account name in the destination URI')
-        else:
-            namespace.account_name = identifier.account_name
-
-        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
-            validate_client_parameters(cmd, namespace)
-
-        # it is possible the account name be overwritten by the connection string
-        if namespace.account_name != identifier.account_name:
-            raise ValueError(
-                'The given storage account name is not consistent with the account name in the destination URI')
-
-        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
-            raise ValueError('Missing storage account credential information.')
+    _process_blob_batch_container_parameters(cmd, namespace, source=False)
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
@@ -765,10 +722,48 @@ def process_blob_upload_batch_parameters(cmd, namespace):
         else:
             namespace.blob_type = 'block'
 
+    # 5. call other validators
+    validate_metadata(namespace)
+    t_blob_content_settings = cmd.loader.get_sdk('blob.models#ContentSettings')
+    get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
+    add_progress_callback(cmd, namespace)
 
-def process_blob_copy_batch_namespace(namespace):
-    if namespace.prefix is None and not namespace.recursive:
-        raise ValueError('incorrect usage: --recursive | --pattern PATTERN')
+
+def process_blob_delete_batch_parameters(cmd, namespace):
+    _process_blob_batch_container_parameters(cmd, namespace)
+
+
+def _process_blob_batch_container_parameters(cmd, namespace, source=True):
+    """Process the container parameters for storage blob batch commands before populating args from environment."""
+    if source:
+        container_arg, container_name_arg = 'source', 'source_container_name'
+    else:
+        # destination
+        container_arg, container_name_arg = 'destination', 'destination_container_name'
+
+    # try to extract account name and container name from source string
+    from .storage_url_helpers import StorageResourceIdentifier
+    container_arg_val = getattr(namespace, container_arg)  # either a url or name
+    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, container_arg_val)
+
+    if not identifier.is_url():
+        setattr(namespace, container_name_arg, container_arg_val)
+    elif identifier.blob:
+        raise ValueError('incorrect usage: {} should be either a container URL or name'.format(container_arg))
+    else:
+        setattr(namespace, container_name_arg, identifier.container)
+        if namespace.account_name is None:
+            namespace.account_name = identifier.account_name
+        elif namespace.account_name != identifier.account_name:
+            raise ValueError('The given storage account name is not consistent with the '
+                             'account name in the destination URL')
+
+        # if no sas-token is given and the container url contains one, use it
+        if not namespace.sas_token and identifier.sas_token:
+            namespace.sas_token = identifier.sas_token
+
+    # Finally, grab missing storage connection parameters from environment variables
+    validate_client_parameters(cmd, namespace)
 
 
 def process_file_upload_batch_parameters(cmd, namespace):
