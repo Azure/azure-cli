@@ -242,3 +242,38 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertNotEquals('Stopping', live_event['resourceState'])
         self.assertNotEquals('Stopped', live_event['resourceState'])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_live_event_update(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        live_event_name = self.create_random_name(prefix='le', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingProtocol': 'FragmentedMP4',
+            'liveEventName': live_event_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --streaming-protocol {streaming_protocol}')
+
+        self.kwargs.update({
+            'tags': 'key=value',
+            'keyFrameIntervalDuration': 'PT2S',
+            'description': 'asd',
+            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+        })
+
+        live_event_updated = self.cmd('az ams live event update -a {amsname} -n {liveEventName} -g {rg} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --tags {tags}', checks=[
+            self.check('description', '{description}'),
+            self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
+            self.check('length(preview.accessControl.ip.allow)', 2),
+            self.check('tags.key', 'value')
+        ]).get_output_in_json()
+
+        self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
+        self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
