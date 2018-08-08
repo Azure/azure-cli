@@ -119,6 +119,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
         finally:
             self.cmd('ad app delete --id {sp}')
 
+
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
