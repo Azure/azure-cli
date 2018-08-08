@@ -71,6 +71,7 @@ DEPENDENCIES = [
     'six',
     'tabulate>=0.7.7,<=0.8.2',
     'wheel==0.30.0',
+    'azure-mgmt-resource==2.0.0'
 ]
 
 if sys.version_info < (3, 4):
