@@ -3,29 +3,44 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 import codecs
 import json
 import os
-import re
 import time
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 from OpenSSL import crypto
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.exceptions import UnsupportedAlgorithm
 
-import azure.cli.core.telemetry as telemetry
 
-from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
+from azure.cli.core import telemetry
+from azure.cli.core.profiles import ResourceType, get_sdk
+
+from ._validators import secret_text_encoding_values
 
 logger = get_logger(__name__)
 
 
-def _default_certificate_profile():
+def _default_certificate_profile(cmd):
 
-    from azure.keyvault.models import \
-        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
-         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, Trigger)
+    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
+    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -73,10 +88,19 @@ def _default_certificate_profile():
     return template
 
 
-def _scaffold_certificate_profile():
-    from azure.keyvault.models import \
-        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
-         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, SubjectAlternativeNames, Trigger)
+def _scaffold_certificate_profile(cmd):
+    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
+    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    SubjectAlternativeNames = cmd.get_models('SubjectAlternativeNames', resource_type=ResourceType.DATA_KEYVAULT)
+    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -173,10 +197,9 @@ def _get_object_id_from_subscription(graph_client, subscription):
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        elif subscription['user']['type'] == 'servicePrincipal':
+        if subscription['user']['type'] == 'servicePrincipal':
             return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        else:
-            logger.warning("Unknown user type '%s'", subscription['user']['type'])
+        logger.warning("Unknown user type '%s'", subscription['user']['type'])
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')
@@ -191,8 +214,21 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 
+def _create_network_rule_set(cmd, bypass=None, default_action=None):
+    NetworkRuleSet = cmd.get_models('NetworkRuleSet', resource_type=ResourceType.MGMT_KEYVAULT)
+    NetworkRuleBypassOptions = get_sdk(cmd.cli_ctx,
+                                       ResourceType.MGMT_KEYVAULT,
+                                       'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
+    NetworkRuleAction = get_sdk(cmd.cli_ctx,
+                                ResourceType.MGMT_KEYVAULT,
+                                'models.key_vault_management_client_enums#NetworkRuleAction')
+
+    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
+                          default_action=default_action or NetworkRuleAction.allow.value)
+
+
 # region KeyVault Vault
-def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argument
+def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
     :param client:
@@ -200,19 +236,22 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
+    return _scaffold_certificate_profile(cmd) if scaffold else _default_certificate_profile(cmd)
 
 
 def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
-    from azure.mgmt.keyvault.models import (
-        VaultCreateOrUpdateParameters, CreateMode, Sku, SkuName)
     from azure.cli.core._profile import Profile
 
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
+    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
+    Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
+    SkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    params = VaultCreateOrUpdateParameters(location,
+    params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
                                                        'sku': Sku(name=SkuName.standard.value),
                                                        'create_mode': CreateMode.recover.value})
@@ -228,14 +267,26 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
+                    enable_purge_protection=None,
+                    bypass=None,
+                    default_action=None,
                     no_self_perms=None,
                     tags=None):
-    from azure.mgmt.keyvault.models import (
-        VaultCreateOrUpdateParameters, Permissions, KeyPermissions, SecretPermissions,
-        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties)
+
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
+
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
+    Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    KeyPermissions = cmd.get_models('KeyPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    SecretPermissions = cmd.get_models('SecretPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    CertificatePermissions = cmd.get_models('CertificatePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    StoragePermissions = cmd.get_models('StoragePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
+    Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
@@ -246,6 +297,12 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
         tenant_id,
         base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
+
+    # if bypass or default_action was specified create a NetworkRuleSet
+    # if neither were specified we make network_acls None
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
+        network_acls = _create_network_rule_set(cmd, bypass, default_action) if bypass or default_action else None
+
     if no_self_perms:
         access_policies = []
     else:
@@ -309,7 +366,10 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
-                                 enable_soft_delete=enable_soft_delete)
+                                 enable_soft_delete=enable_soft_delete,
+                                 enable_purge_protection=enable_purge_protection)
+    if hasattr(properties, 'network_acls'):
+        properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
@@ -318,8 +378,9 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                    parameters=parameters)
 
 
-def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
@@ -327,8 +388,13 @@ def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
                                        properties=parameters.properties))
 
 
-def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encryption=None,
-                    enabled_for_template_deployment=None):
+def update_keyvault(cmd, instance, enabled_for_deployment=None,
+                    enabled_for_disk_encryption=None,
+                    enabled_for_template_deployment=None,
+                    enable_soft_delete=None,
+                    enable_purge_protection=None,
+                    bypass=None,
+                    default_action=None,):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -338,6 +404,20 @@ def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encr
     if enabled_for_template_deployment is not None:
         instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
 
+    if enable_soft_delete is not None:
+        instance.properties.enable_soft_delete = enable_soft_delete
+
+    if enable_purge_protection is not None:
+        instance.properties.enable_purge_protection = enable_purge_protection
+
+    if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
+        if instance.properties.network_acls is None:
+            instance.properties.network_acls = _create_network_rule_set(cmd, bypass, default_action)
+        else:
+            if bypass:
+                instance.properties.network_acls.bypass = bypass
+            if default_action:
+                instance.properties.network_acls.default_action = default_action
     return instance
 
 
@@ -360,10 +440,13 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
 
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
-               certificate_permissions=None):
+               certificate_permissions=None, storage_permissions=None):
     """ Update security policy settings for a Key Vault. """
-    from azure.mgmt.keyvault.models import (
-        VaultCreateOrUpdateParameters, AccessPolicyEntry, Permissions)
+
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
+    AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
+    Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -378,7 +461,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             object_id=object_id,
             permissions=Permissions(keys=key_permissions,
                                     secrets=secret_permissions,
-                                    certificates=certificate_permissions)))
+                                    certificates=certificate_permissions,
+                                    storage=storage_permissions)))
     else:
         # Modify existing policy.
         # If key_permissions is not set, use prev. value (similarly with secret_permissions).
@@ -386,7 +470,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
         certs = policy.permissions.certificates \
             if certificate_permissions is None else certificate_permissions
-        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs)
+        storage = policy.permissions.storage if storage_permissions is None else storage_permissions
+        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
@@ -395,9 +480,82 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                                        properties=vault.properties))
 
 
+def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
+    """ Add a network rule to the network ACLs for a Key Vault. """
+
+    VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
+    IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
+    rules = vault.properties.network_acls
+
+    if subnet:
+        rules.virtual_network_rules = rules.virtual_network_rules or []
+        rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+
+    if ip_address:
+        rules.ip_rules = rules.ip_rules or []
+        rules.ip_rules.append(IPRule(value=ip_address))
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=vault.location,
+                                       tags=vault.tags,
+                                       properties=vault.properties))
+
+
+def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
+    """ Removes a network rule from the network ACLs for a Key Vault. """
+
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    if not vault.properties.network_acls:
+        return vault
+
+    rules = vault.properties.network_acls
+
+    modified = False
+
+    if subnet and rules.virtual_network_rules:
+        new_rules = [x for x in rules.virtual_network_rules if x.id != subnet]
+        modified |= len(new_rules) != len(rules.virtual_network_rules)
+        if modified:
+            rules.virtual_network_rules = new_rules
+
+    if ip_address and rules.ip_rules:
+        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        modified |= len(new_rules) != len(rules.ip_rules)
+        if modified:
+            rules.ip_rules = new_rules
+
+    # if we didn't modify the network rules just return the vault as is
+    if not modified:
+        return vault
+
+    # otherwise update
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=vault.location,
+                                       tags=vault.tags,
+                                       properties=vault.properties))
+
+
+def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
+    """ Lists the network rules from the network ACLs for a Key Vault. """
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    return vault.properties.network_acls
+
+
 def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
+                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -417,15 +575,23 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
-               disabled=False, expires=None, not_before=None, tags=None):
-    from azure.keyvault.models import KeyAttributes
-    key_attrs = KeyAttributes(not disabled, not_before, expires)
-    return client.create_key(
-        vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
+def create_key(cmd, client, vault_base_url, key_name, protection=None,  # pylint: disable=unused-argument
+               key_size=None, key_ops=None, disabled=False, expires=None,
+               not_before=None, tags=None, kty=None, curve=None):
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    return client.create_key(vault_base_url=vault_base_url,
+                             key_name=key_name,
+                             kty=kty,
+                             key_size=key_size,
+                             key_ops=key_ops,
+                             key_attributes=key_attrs,
+                             tags=tags,
+                             curve=curve)
 
 
-def backup_key(client, vault_base_url, key_name, file_path):
+def backup_key(client, file_path, vault_base_url=None,
+               key_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -437,88 +603,85 @@ def restore_key(client, vault_base_url, file_path):
     return client.restore_key(vault_base_url, data)
 
 
-def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
-        Supports importing BYOK keys into HSM for premium KeyVaults. """
-    from azure.keyvault.models import KeyAttributes, JsonWebKey
+        Supports importing BYOK keys into HSM for premium key vaults. """
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
 
-    def _to_bytes(hex_string):
-        # zero pads and decodes a hex string
-        if len(hex_string) % 2:
-            hex_string = '0{}'.format(hex_string)
-        return codecs.decode(hex_string, 'hex_codec')
+    def _int_to_bytes(i):
+        h = hex(i)
+        if len(h) > 1 and h[0:2] == '0x':
+            h = h[2:]
+        # need to strip L in python 2.x
+        h = h.strip('L')
+        if len(h) % 2:
+            h = '0' + h
+        return codecs.decode(h, 'hex')
 
-    def _set_rsa_parameters(dest, src):
-        # map OpenSSL parameter names to JsonWebKey property names
-        conversion_dict = {
-            'modulus': 'n',
-            'publicExponent': 'e',
-            'privateExponent': 'd',
-            'prime1': 'p',
-            'prime2': 'q',
-            'exponent1': 'dp',
-            'exponent2': 'dq',
-            'coefficient': 'qi'
+    def _private_rsa_key_to_jwk(rsa_key, jwk):
+        jwk.n = _int_to_bytes(rsa_key.private_numbers().public_numbers.n)
+        jwk.e = _int_to_bytes(rsa_key.private_numbers().public_numbers.e)
+        jwk.q = _int_to_bytes(rsa_key.private_numbers().q)
+        jwk.p = _int_to_bytes(rsa_key.private_numbers().p)
+        jwk.d = _int_to_bytes(rsa_key.private_numbers().d)
+        jwk.dq = _int_to_bytes(rsa_key.private_numbers().dmql)
+        jwk.dp = _int_to_bytes(rsa_key.private_numbers().dmpl)
+        jwk.qi = _int_to_bytes(rsa_key.private_numbers().iqmp)
+
+    def _private_ec_key_to_jwk(ec_key, jwk):
+        supported_curves = {
+            'secp256r1': 'P-256',
+            'secp384r1': 'P-384',
+            'secp521r1': 'P-521',
+            'secp256k1': 'SECP256K1'
         }
-        # regex: looks for matches that fit the following patterns:
-        #   integerPattern: 65537 (0x10001)
-        #   hexPattern:
-        #      00:a0:91:4d:00:23:4a:c6:83:b2:1b:4c:15:d5:be:
-        #      d8:87:bd:c9:59:c2:e5:7a:f5:4a:e7:34:e8:f0:07:
-        # The desired match should always be the first component of the match
-        regex = re.compile(r'([^:\s]*(:[^\:)]+\))|([^:\s]*(:\s*[0-9A-Fa-f]{2})+))')
-        # regex2: extracts the hex string from a format like: 65537 (0x10001)
-        regex2 = re.compile(r'(?<=\(0x{1})([0-9A-Fa-f]*)(?=\))')
+        curve = ec_key.private_numbers().public_numbers.curve.name
 
-        key_params = crypto.dump_privatekey(crypto.FILETYPE_TEXT, src).decode('utf-8')
-        for match in regex.findall(key_params):
-            comps = match[0].split(':', 1)
-            name = conversion_dict.get(comps[0], None)
-            if name:
-                value = comps[1].replace(' ', '').replace('\n', '').replace(':', '')
-                try:
-                    value = _to_bytes(value)
-                except Exception:  # pylint:disable=broad-except
-                    # if decoding fails it is because of an integer pattern. Extract the hex
-                    # string and retry
-                    value = _to_bytes(regex2.findall(value)[0])
-                setattr(dest, name, value)
+        jwk.crv = supported_curves.get(curve, None)
+        if not jwk.crv:
+            raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
 
-    key_attrs = KeyAttributes(not disabled, not_before, expires)
+        jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
+        jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
+        jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
+
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
-        key_obj.kty = 'RSA'
         logger.info('Reading %s', pem_file)
-        with open(pem_file, 'r') as f:
+        with open(pem_file, 'rb') as f:
             pem_data = f.read()
-        # load private key and prompt for password if encrypted
-        try:
             pem_password = str(pem_password).encode() if pem_password else None
-            # despite documentation saying password should be a string, it needs to actually
-            # be UTF-8 encoded bytes
-            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_data, pem_password)
-        except crypto.Error:
-            raise CLIError(
-                'Import failed: Unable to decrypt private key. --pem-password may be incorrect.')
-        except TypeError:
-            raise CLIError('Invalid --pem-password.')
-        logger.info('setting RSA parameters from PEM data')
-        _set_rsa_parameters(key_obj, pkey)
+
+            try:
+                pkey = load_pem_private_key(pem_data, pem_password, default_backend())
+            except (ValueError, TypeError, UnsupportedAlgorithm) as e:
+                print(e)
+
+            # populate key into jwk
+            if isinstance(pkey, rsa.RSAPrivateKey):
+                key_obj.kty = 'RSA'
+                _private_rsa_key_to_jwk(pkey, key_obj)
+            elif isinstance(pkey, ec.EllipticCurvePrivateKey):
+                key_obj.kty = 'EC'
+                _private_ec_key_to_jwk(pkey, key_obj)
+            else:
+                raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
     elif byok_file:
         with open(byok_file, 'rb') as f:
             byok_data = f.read()
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
-    return client.import_key(
-        vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 # endregion
 
 
 # region KeyVault Secret
-def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
-                    secret_version=''):
+def download_secret(client, file_path, vault_base_url=None, secret_name=None, encoding=None,
+                    secret_version='', identifier=None):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -550,7 +713,8 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
         raise ex
 
 
-def backup_secret(client, vault_base_url, secret_name, file_path):
+def backup_secret(client, file_path, vault_base_url=None,
+                  secret_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_secret(vault_base_url, secret_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -565,10 +729,10 @@ def restore_secret(client, vault_base_url, file_path):
 
 # region KeyVault Certificate
 # pylint: disable=inconsistent-return-statements
-def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
+def create_certificate(cmd, client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
-    from azure.keyvault.models import CertificateAttributes
-    cert_attrs = CertificateAttributes(not disabled)
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
     if validity is not None:
@@ -615,11 +779,12 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def import_certificate(client, vault_base_url, certificate_name, certificate_data,
+def import_certificate(cmd, client, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
     import binascii
-    from azure.keyvault.models import CertificateAttributes, SecretProperties, CertificatePolicy
-
+    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
     x509 = None
     content_type = None
     try:
@@ -681,8 +846,8 @@ def import_certificate(client, vault_base_url, certificate_name, certificate_dat
     return result
 
 
-def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='PEM', certificate_version=''):
+def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
+                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -707,35 +872,38 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
         raise ex
 
 
-def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
+def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
-    from azure.keyvault.models import \
-        (Contact, Contacts, KeyVaultErrorException)
+    Contact = cmd.get_models('Contact', resource_type=ResourceType.DATA_KEYVAULT)
+    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
     try:
         contacts = client.get_certificate_contacts(vault_base_url)
     except KeyVaultErrorException:
-        contacts = Contacts([])
-    contact = Contact(contact_email, contact_name, contact_phone)
+        contacts = Contacts(contact_list=[])
+    contact = Contact(email_address=contact_email, name=contact_name, phone=contact_phone)
     if any((x for x in contacts.contact_list if x.email_address == contact_email)):
         raise CLIError("contact '{}' already exists".format(contact_email))
     contacts.contact_list.append(contact)
     return client.set_certificate_contacts(vault_base_url, contacts.contact_list)
 
 
-def delete_certificate_contact(client, vault_base_url, contact_email):
+def delete_certificate_contact(cmd, client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
-    from azure.keyvault.models import Contacts
-    contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining = Contacts([x for x in contacts if x.email_address != contact_email])
-    if len(contacts) == len(remaining.contact_list):
+    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
+    orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
+    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list
+                          if x.email_address != contact_email]
+    remaining = Contacts(contact_list=remaining_contacts)
+    if len(remaining_contacts) == len(orig_contacts):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
     return client.delete_certificate_contacts(vault_base_url)
 
 
-def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
+def create_certificate_issuer(cmd, client, vault_base_url, issuer_name, provider_name, account_id=None,
                               password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
@@ -745,10 +913,12 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import IssuerCredentials, OrganizationDetails, IssuerAttributes
-    credentials = IssuerCredentials(account_id, password)
-    issuer_attrs = IssuerAttributes(not disabled)
-    org_details = OrganizationDetails(organization_id, admin_details=[])
+    IssuerCredentials = cmd.get_models('IssuerCredentials', resource_type=ResourceType.DATA_KEYVAULT)
+    OrganizationDetails = cmd.get_models('OrganizationDetails', resource_type=ResourceType.DATA_KEYVAULT)
+    IssuerAttributes = cmd.get_models('IssuerAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    credentials = IssuerCredentials(account_id=account_id, password=password)
+    issuer_attrs = IssuerAttributes(enabled=not disabled)
+    org_details = OrganizationDetails(id=organization_id, admin_details=[])
     return client.set_certificate_issuer(
         vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
 
@@ -788,17 +958,16 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
         vault_base_url, issuer_name).organization_details.admin_details
 
 
-def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
+def add_certificate_issuer_admin(cmd, client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    from azure.keyvault.models import AdministratorDetails
-
+    AdministratorDetails = cmd.get_models('AdministratorDetails', resource_type=ResourceType.DATA_KEYVAULT)
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details
     admins = org_details.admin_details
     if any((x for x in admins if x.email_address == email)):
         raise CLIError("admin '{}' already exists".format(email))
-    new_admin = AdministratorDetails(first_name, last_name, email, phone)
+    new_admin = AdministratorDetails(first_name=first_name, last_name=last_name, email_address=email, phone=phone)
     admins.append(new_admin)
     org_details.admin_details = admins
     result = client.set_certificate_issuer(
@@ -821,4 +990,19 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
+# endregion
+
+
+# region storage_account
+def backup_storage_account(client, file_path, vault_base_url=None,
+                           storage_account_name=None, identifier=None):  # pylint: disable=unused-argument
+    backup = client.backup_storage_account(vault_base_url, storage_account_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+
+
+def restore_storage_account(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+        return client.restore_storage_account(vault_base_url, data)
 # endregion

@@ -4,8 +4,12 @@ Release History
 ===============
 
 2.2.2
-++++++
-* Minor fixes
++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* support KV mgmt multi-api version
+* support KV data plane multi-api version
 
 2.2.1
 +++++
@@ -26,6 +30,9 @@ Release History
 
 2.0.24
 ++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
 * Minor fixes
 
 2.0.23

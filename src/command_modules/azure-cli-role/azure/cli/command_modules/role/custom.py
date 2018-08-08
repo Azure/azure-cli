@@ -1075,12 +1075,14 @@ def create_service_principal_for_rbac(
 
 def _get_keyvault_client(cli_ctx):
     from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+    from azure.cli.core.profiles import get_api_version, ResourceType
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
-    return KeyVaultClient(KeyVaultAuthentication(_get_token))
+    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
