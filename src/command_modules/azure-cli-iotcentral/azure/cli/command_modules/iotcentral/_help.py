@@ -9,12 +9,12 @@ from knack.help_files import helps
 
 helps['iotcentral'] = """
     type: group
-    short-summary: (PREVIEW) Manage IoT Central assets.
+    short-summary: Manage IoT Central assets.
 """
 
 helps['iotcentral app'] = """
     type: group
-    short-summary: (PREVIEW) Manage IoT Central applications.
+    short-summary: Manage IoT Central applications.
 """
 
 helps['iotcentral app create'] = """
