@@ -766,11 +766,6 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
     validate_client_parameters(cmd, namespace)
 
 
-def process_blob_copy_batch_namespace(namespace):
-    if namespace.prefix is None and not namespace.recursive:
-        raise ValueError('incorrect usage: --recursive | --pattern PATTERN')
-
-
 def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
     import os
