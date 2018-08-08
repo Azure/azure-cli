@@ -2113,13 +2113,17 @@ def _validate_aci_location(norm_location):
     Validate the Azure Container Instance location
     """
     aci_locations = [
-        "westus",
+        "centralus",
         "eastus",
+        "eastus2",
+        "westus",
+        "westus2",
+        "northeurope",
         "westeurope",
         "southeastasia",
-        "westus2",
-        "northeurope"
+        "australiaeast"
     ]
+
     if norm_location not in aci_locations:
         raise CLIError('Azure Container Instance is not available at location "{}".'.format(norm_location) +
                        ' The available locations are "{}"'.format(','.join(aci_locations)))
