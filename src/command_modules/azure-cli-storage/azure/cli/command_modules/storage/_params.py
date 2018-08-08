@@ -330,8 +330,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_source_uri_arguments(validator=validate_source_uri)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
-        from azure.cli.command_modules.storage._validators import (get_source_file_or_blob_service_client,
-                                                                   process_blob_copy_batch_namespace)
+        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
