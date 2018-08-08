@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.2
+++++++
+* Minor fixes
+
 2.2.1
 +++++
 * Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
