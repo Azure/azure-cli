@@ -9,6 +9,7 @@ import os
 import platform
 import requests
 import tempfile
+import shutil
 import unittest
 import yaml
 
@@ -489,7 +490,8 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_cli_emit_warnings(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
-        with tempfile.TemporaryDirectory() as temp_dir:
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubectl.exe')
             k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
@@ -501,12 +503,17 @@ class AcsCustomCommandTest(unittest.TestCase):
                 os.environ['PATH'] += ';' + temp_dir
                 k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
                 self.assertEqual(logger_mock.warning.call_count, 3)
+        finally:
+            shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_cli_create_installation_dir(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
-        with tempfile.TemporaryDirectory() as temp_dir:
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
             k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
             self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)
