@@ -2029,5 +2029,42 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self._network_watcher_troubleshooting()
 
 
+class ServiceEndpointScenarioTest(ScenarioTest):
+
+    #@ResourceGroupPreparer(name_prefix='network_service_endpoint_scenario_test')
+    def test_network_service_endpoints(self):#, resource_group):
+
+        self.kwargs.update({
+            'policy': 'policy1',
+            'pd_name': 'storage-def',
+            'sub': self.get_subscription_id(),
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rg': 'tjp-vm'
+        })
+
+        self.cmd('network service-endpoint list -l westus')
+
+        # test policy CRUD
+        self.cmd('network service-endpoint policy create -g {rg} -n {policy} --tags test=best')
+        self.cmd('network service-endpoint policy update -g {rg} -n {policy} --tags test=nest')
+        self.cmd('network service-endpoint policy list -g {rg}')
+        self.cmd('network service-endpoint policy show -g {rg} -n {policy}')
+        self.cmd('network service-endpoint policy delete -g {rg} -n {policy}')
+
+        # test policy definition CRUD
+        self.cmd('network service-endpoint policy create -g {rg} -n {policy} --tags test=best')
+        self.cmd('network service-endpoint policy-definition create -g {rg} --policy-name {policy} -n {pd_name} --service Microsoft.Storage --description "Test Def" --service-resources /subscriptions/{sub}')
+        #self.cmd('network service-endpoint policy-definition update -g {rg} --policy-name {policy} -n {pd_name} --description "Better description"')
+        self.cmd('network service-endpoint policy-definition list -g {rg} --policy-name {policy}')
+        self.cmd('network service-endpoint policy-definition show -g {rg} --policy-name {policy} -n {pd_name}')
+        self.cmd('network service-endpoint policy-definition delete -g {rg} --policy-name {policy} -n {pd_name}')
+
+        # create a subnet with the policy
+        self.cmd('network service-endpoint policy-definition create -g {rg} --policy-name {policy} -n {pd_name} --service Microsoft.Storage --service-resources /subscriptions/{sub}')
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --endpoint-services Microsoft.Storage --service-endpoint-policy {policy}')
+
+
 if __name__ == '__main__':
     unittest.main()

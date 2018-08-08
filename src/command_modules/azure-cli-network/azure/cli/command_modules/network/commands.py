@@ -216,12 +216,14 @@ def load_command_table(self, _):
 
     network_sepd_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.service_endpoint_policy_definitions_operations#ServiceEndpointPolicyDefinitionsOperations.{}',
-        client_factory=cf_service_endpoint_policy_definitions
+        client_factory=cf_service_endpoint_policy_definitions,
+        min_api='2018-07-01'
     )
 
     network_sepp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.service_endpoint_policies_operations#ServiceEndpointPoliciesOperations.{}',
-        client_factory=cf_service_endpoint_policies
+        client_factory=cf_service_endpoint_policies,
+        min_api='2018-07-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -562,7 +564,6 @@ def load_command_table(self, _):
     # endregion
 
     # region PublicIPAddresses
-
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
@@ -623,15 +624,18 @@ def load_command_table(self, _):
     # endregion
 
     # region ServiceEndpoint
+    with self.command_group('network service-endpoint', network_endpoint_service_sdk) as g:
+        g.command('list', 'list')
+
     with self.command_group('network service-endpoint policy', network_sepp_sdk) as g:
         g.custom_command('create', 'create_service_endpoint_policy')
         g.command('delete', 'delete')
-        g.command('list', 'list_by_resource_group')
+        g.custom_command('list', 'list_service_endpoint_policies')
         g.show_command('show')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_service_endpoint_policy')
 
     with self.command_group('network service-endpoint policy-definition', network_sepd_sdk) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'create_service_endpoint_policy_definition')
         g.command('delete', 'delete')
         g.command('list', 'list_by_resource_group')
         g.show_command('show')
