@@ -704,6 +704,10 @@ def process_blob_batch_source_parameters(cmd, namespace):
         if namespace.account_name is None:
             namespace.account_name = identifier.account_name
 
+    # if no sas-token is given and the container url contains one, use it
+    if not namespace.sas_token and identifier.sas_token:
+        namespace.sas_token = identifier.sas_token
+
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
@@ -734,16 +738,14 @@ def process_blob_upload_batch_parameters(cmd, namespace):
         else:
             namespace.account_name = identifier.account_name
 
-        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
-            validate_client_parameters(cmd, namespace)
+        # if no sas-token is given and the container url contains one, use it
+        if not namespace.sas_token and identifier.sas_token:
+            namespace.sas_token = identifier.sas_token
 
         # it is possible the account name be overwritten by the connection string
         if namespace.account_name != identifier.account_name:
             raise ValueError(
                 'The given storage account name is not consistent with the account name in the destination URI')
-
-        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
-            raise ValueError('Missing storage account credential information.')
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
