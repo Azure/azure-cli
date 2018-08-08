@@ -33,7 +33,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-iotcentral==0.1.0'
+    'azure-mgmt-iotcentral==0.2.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
