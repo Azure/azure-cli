@@ -47,4 +47,4 @@ class AmsLiveOutputTests(ScenarioTest):
 
         resource_states = ['Creating', 'Created']
 
-        self.assertEquals(live_output['resourceState'], resource_states)
+        self.assertIn(live_output['resourceState'], resource_states)
