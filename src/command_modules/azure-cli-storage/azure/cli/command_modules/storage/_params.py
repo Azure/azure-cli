@@ -305,10 +305,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
 
     with self.argument_context('storage blob delete-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_batch_source_parameters
+        from azure.cli.command_modules.storage._validators import process_blob_delete_batch_parameters
 
         c.ignore('source_container_name')
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
+        c.argument('source', options_list=('--source', '-s'), validator=process_blob_delete_batch_parameters)
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
