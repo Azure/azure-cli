@@ -14,10 +14,7 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
            key_frame_interval_duration=None, access_token=None, no_wait=False, ips=None,
            preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
            vanity_url=False, client_access_policy=None, cross_domain_policy=None, stream_options=None):
-    from azure.mgmt.media.models import LiveEventInputProtocol
-    from azure.mgmt.media.models import LiveEventInput
-    from azure.mgmt.media.models import LiveEvent
-    from azure.mgmt.media.models import LiveEventEncoding
+    from azure.mgmt.media.models import (LiveEventInputProtocol, LiveEventInput, LiveEvent, LiveEventEncoding)
 
     live_event_input = LiveEventInput(streaming_protocol=LiveEventInputProtocol(streaming_protocol),
                                       access_token=access_token,
@@ -38,15 +35,12 @@ def create(client, resource_group_name, account_name, live_event_name, streaming
 
 
 def create_live_event_preview(preview_locator, streaming_policy_name, alternative_media_id, ips, live_event_name):
-    from azure.mgmt.media.models import LiveEventPreview
-    from azure.mgmt.media.models import LiveEventPreviewAccessControl
-    from azure.mgmt.media.models import IPAccessControl
-    from azure.mgmt.media.models import IPRange
+    from azure.mgmt.media.models import (IPAccessControl, LiveEventPreviewAccessControl, LiveEventPreview)
 
     allow_list = []
     if ips is not None:
-        for each in ips:
-            allow_list.append(IPRange(name=(live_event_name + each), address=each, subnet_prefix_length=0))
+        for ip in ips:
+            allow_list.append(create_ip_range(live_event_name, ip))
 
     live_event_preview_access_control = LiveEventPreviewAccessControl(ip=IPAccessControl(allow=allow_list))
 
@@ -61,12 +55,10 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
     policies = CrossSiteAccessPolicies()
 
     if client_access_policy:
-        with open(client_access_policy, 'r') as file:
-            policies.client_access_policy = file.read()
+        policies.client_access_policy = read_xml_policy(client_access_policy)
 
     if cross_domain_policy:
-        with open(cross_domain_policy, 'r') as file:
-            policies.cross_domain_policy = file.read()
+        policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
 
     return policies
 
