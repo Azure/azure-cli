@@ -439,8 +439,7 @@ class DeploymentNoWaitTest(ScenarioTest):
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
 
-# TODO: convert back to ScenarioTest when #5740 is fixed.
-class DeploymentThruUriTest(LiveScenarioTest):
+class DeploymentThruUriTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
