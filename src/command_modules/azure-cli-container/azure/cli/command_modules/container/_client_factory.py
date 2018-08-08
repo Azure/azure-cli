@@ -26,3 +26,9 @@ def _log_analytics_client_factory(cli_ctx, *_):
 
 def cf_log_analytics(cli_ctx, *_):
     return _log_analytics_client_factory(cli_ctx).workspaces
+
+
+def cf_resource(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
