@@ -86,7 +86,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(ScenarioTest):
+class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
@@ -119,6 +119,7 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         finally:
             self.cmd('ad app delete --id {sp}')
 
+class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
