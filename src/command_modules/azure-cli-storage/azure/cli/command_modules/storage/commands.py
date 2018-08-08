@@ -112,9 +112,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('set-tier', 'set_blob_tier')
         g.storage_custom_command('upload', 'upload_blob',
                                  doc_string_source='blob#BlockBlobService.create_blob_from_path')
-        g.storage_custom_command('upload-batch', 'storage_blob_upload_batch', validator=process_blob_upload_batch_parameters)
-        g.storage_custom_command('download-batch', 'storage_blob_download_batch', validator=process_blob_download_batch_parameters)
-        g.storage_custom_command('delete-batch', 'storage_blob_delete_batch', validator=process_blob_delete_batch_parameters)
+        g.storage_custom_command('upload-batch', 'storage_blob_upload_batch',
+                                 validator=process_blob_upload_batch_parameters)
+        g.storage_custom_command('download-batch', 'storage_blob_download_batch',
+                                 validator=process_blob_download_batch_parameters)
+        g.storage_custom_command('delete-batch', 'storage_blob_delete_batch',
+                                 validator=process_blob_delete_batch_parameters)
         g.storage_custom_command('show', 'show_blob', table_transformer=transform_blob_output,
                                  client_factory=page_blob_service_factory,
                                  doc_string_source='blob#PageBlobService.get_blob_properties',
