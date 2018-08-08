@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Minor changes
+
 0.2.1
 +++++
 * Consuming multi api azure.mgmt.authorization package
