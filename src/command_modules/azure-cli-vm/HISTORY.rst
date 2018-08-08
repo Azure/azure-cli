@@ -4,6 +4,7 @@ Release History
 ===============
 2.2.1
 ++++++
+* vm/vmss create: default on accelerated networking for all vm sizes
 * vm list-skus: add a few common filters to make the command easier to use 
 
 2.2.0
