@@ -687,17 +687,17 @@ def process_blob_download_batch_parameters(cmd, namespace):
     # 2. try to extract account name and container name from source string
     _process_blob_batch_container_parameters(cmd, namespace)
 
+    # 3. Call validators
+    add_progress_callback(cmd, namespace)
+
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
     import os
 
     # 1. quick check
-    if not os.path.exists(namespace.source):
-        raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
-
-    if not os.path.isdir(namespace.source):
-        raise ValueError('incorrect usage: source must be a directory')
+    if not os.path.exists(namespace.source) or not os.path.isdir(namespace.source):
+        raise ValueError('incorrect usage: source must be an existing directory')
 
     # 2. try to extract account name and container name from destination string
     _process_blob_batch_container_parameters(cmd, namespace, source=False)
@@ -722,13 +722,19 @@ def process_blob_upload_batch_parameters(cmd, namespace):
         else:
             namespace.blob_type = 'block'
 
+    # 5. call other validators
+    validate_metadata(namespace)
+    t_blob_content_settings = cmd.loader.get_sdk('blob.models#ContentSettings')
+    get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
+    add_progress_callback(cmd, namespace)
+
 
 def process_blob_delete_batch_parameters(cmd, namespace):
     _process_blob_batch_container_parameters(cmd, namespace)
 
 
 def _process_blob_batch_container_parameters(cmd, namespace, source=True):
-    """Process the container parameters for storage blob batch command"""
+    """Process the container parameters for storage blob batch commands before populating args from environment."""
     if source:
         container_arg, container_name_arg = 'source', 'source_container_name'
     else:
@@ -755,6 +761,9 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
         # if no sas-token is given and the container url contains one, use it
         if not namespace.sas_token and identifier.sas_token:
             namespace.sas_token = identifier.sas_token
+
+    # Finally, grab missing storage connection parameters from environment variables
+    validate_client_parameters(cmd, namespace)
 
 
 def process_blob_copy_batch_namespace(namespace):
