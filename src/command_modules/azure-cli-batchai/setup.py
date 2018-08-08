@@ -31,9 +31,12 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-storage==2.0.0rc4',
     'azure-mgmt-batchai==2.0.0',
+    'azure-storage-blob==1.1.0',
     'azure-cli-core',
-    'mock>=2.0.0'
+    'mock>=2.0.0',
+    'sshtunnel'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
