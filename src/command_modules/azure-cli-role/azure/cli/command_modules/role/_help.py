@@ -175,6 +175,10 @@ helps['ad app owner remove'] = """
     type: command
     short-summary: remove an application owner.
 """
+helps['ad app permission'] = """
+    type: group
+    short-summary: manage an application's OAuth2 permissions.
+"""
 helps['ad app permission grant'] = """
     type: command
     short-summary: Grant an app OAuth2 permissions from another app
