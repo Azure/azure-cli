@@ -212,3 +212,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('asset_name', help='The name of the asset.')
         c.argument('manifest_name', help='The manifest file name.')
         c.argument('archive_window_length', help='ISO 8601 timespan duration of the archive window length. This is the duration that customer want to retain the recorded content.')
+        c.argument('description', help='The live output description.')
+        c.argument('fragments_per_ts_segment', help='The amount of fragments per HLS segment.')
+        c.argument('output_snap_time', help='The output snapshot time.')
