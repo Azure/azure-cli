@@ -32,17 +32,23 @@ class AmsLiveOutputTests(ScenarioTest):
             'assetName': assetName,
             'liveOutputName': live_output_name,
             'archiveWindowLength': 'PT2S',
-            'manifestName': manifest_name
+            'manifestName': manifest_name,
+            'description': 'testDescription',
+            'fragments': 5,
+            'outputSnapTime': 0
         })
 
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
 
-        live_output = self.cmd('az ams live output create -a {amsname} -n {liveOutputName} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName}', checks=[
+        live_output = self.cmd('az ams live output create -a {amsname} -n {liveOutputName} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName} --description {description} --fragments-per-ts-segment {fragments} --output-snap-time {outputSnapTime}', checks=[
             self.check('archiveWindowLength', '0:00:02'),
             self.check('assetName', '{assetName}'),
             self.check('manifestName', '{manifestName}'),
             self.check('name', '{liveOutputName}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('description', '{description}'),
+            self.check('hls.fragmentsPerTsSegment', '{fragments}'),
+            self.check('outputSnapTime', '{outputSnapTime}')
         ]).get_output_in_json()
 
         resource_states = ['Creating', 'Created']
