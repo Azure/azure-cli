@@ -209,7 +209,8 @@ def _obtain_data_from_registry(login_server,
             result_index=result_index,
             params=params)
 
-        result_list += result
+        if result:
+            result_list += result
 
         if top is not None and top <= 0:
             break

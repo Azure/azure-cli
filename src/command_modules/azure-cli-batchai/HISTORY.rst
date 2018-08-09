@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.1
++++++
+* Logger output for auto-storage account creation now specifies "resource *group*".
+
 0.4.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

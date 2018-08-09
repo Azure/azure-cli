@@ -202,7 +202,77 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         with self.assertRaises(CLIError) as err:
             self.cmd(create_cmd)
         self.assertIn('--max-pods', str(err.exception))
+    
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_without_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
 
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.check('[0].scope', '{vnet_subnet_id}')
+        ])
+
+        # create cluster with same role assignment
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} ' \
+                     '--skip-subnet-role-assignment --no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.is_empty()
+        ])
+
+    
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -295,7 +365,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
+        
     @classmethod
     def generate_ssh_keys(cls):
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
@@ -303,3 +373,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         with open(pathname, 'w') as key_file:
             key_file.write(TEST_SSH_KEY_PUB)
         return pathname
+    
+    def generate_vnet_subnet_id(self, resource_group):
+        vnet_name = self.create_random_name('clivnet', 16)
+        subnet_name = self.create_random_name('clisubnet', 16)
+        address_prefix = "192.168.0.0/16"
+        subnet_prefix = "192.168.0.0/24"
+        vnet_subnet =self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+                               .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
+        return vnet_subnet.get("newVNet").get("subnets")[0].get("id")

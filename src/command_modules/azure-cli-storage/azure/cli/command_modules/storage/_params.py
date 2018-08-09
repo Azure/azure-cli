@@ -264,13 +264,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
-        from ._validators import process_blob_upload_batch_parameters
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group='Content Control')
         c.ignore('source_files', 'destination_container_name')
 
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_upload_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', type=int,
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
@@ -290,11 +289,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
-
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
         c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int,
@@ -305,10 +302,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
 
     with self.argument_context('storage blob delete-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_batch_source_parameters
-
         c.ignore('source_container_name')
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
@@ -335,8 +330,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_source_uri_arguments(validator=validate_source_uri)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
-        from azure.cli.command_modules.storage._validators import (get_source_file_or_blob_service_client,
-                                                                   process_blob_copy_batch_namespace)
+        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
@@ -346,7 +340,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-        c.argument('prefix', validator=process_blob_copy_batch_namespace)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri

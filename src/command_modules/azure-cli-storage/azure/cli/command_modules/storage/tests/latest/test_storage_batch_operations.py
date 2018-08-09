@@ -421,6 +421,42 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage file delete-batch -s {} --pattern nonexists/*', storage_account_info,
                          src_share).assert_with_checks(JMESPathCheck('length(@)', 0))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_blob_batch_sas_scenarios(self, test_dir, storage_account_info):
+        from datetime import datetime, timedelta
+
+        container_name = self.create_container(storage_account_info)
+        temp_dir = self.create_temp_dir()
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions dwrl '
+                                     '--expiry {}', storage_account_info, container_name, expiry).get_output_in_json()
+
+        storage_account = self.cmd('storage account show -n {}'.format(storage_account_info[0])).get_output_in_json()
+
+        # create container url with sas token
+        container_url = storage_account.get('primaryEndpoints').get('blob') + container_name
+        container_url += '?' + sas_token
+
+        self.kwargs.update({
+            'test_dir': test_dir,
+            'container_url': container_url,
+            'temp_dir': temp_dir
+        })
+
+        self.cmd('storage blob upload-batch -s "{test_dir}" -d {container_url}')
+        self.cmd('storage blob download-batch -s {container_url} -d "{temp_dir}"')
+
+        self.storage_cmd('storage blob list -c {}', storage_account_info, container_name).assert_with_checks(
+            JMESPathCheck('length(@)', sum(len(files) for _, __, files in os.walk(test_dir))),
+            JMESPathCheck('length(@)', sum(len(files) for _, __, files in os.walk(temp_dir))))
+
+        self.cmd('storage blob delete-batch -s {container_url}')
+        self.storage_cmd('storage blob list -c {}', storage_account_info, container_name).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
+
 
 if __name__ == '__main__':
     import unittest
