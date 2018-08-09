@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.2
++++++
+* Minor changes
+
 2.1.1
 +++++
 * `group deployment create`: Add `--rollback-on-error` to execute a known-good deployment on error.

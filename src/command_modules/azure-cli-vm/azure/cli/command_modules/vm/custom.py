@@ -717,9 +717,20 @@ def get_vm_details(cmd, resource_group_name, vm_name):
     return result
 
 
-def list_skus(cmd, location=None):
+def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
     from ._vm_utils import list_sku_info
-    return list_sku_info(cmd.cli_ctx, location)
+    result = list_sku_info(cmd.cli_ctx, location)
+    if not show_all:
+        result = [x for x in result if not [y for y in (x.restrictions or [])
+                                            if y.reason_code == 'NotAvailableForSubscription']]
+    if resource_type:
+        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+    if size:
+        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+    if zone:
+        result = [x for x in result if x.resource_type == 'virtualMachines' and
+                  x.location_info and x.location_info[0].zones]
+    return result
 
 
 def list_vm(cmd, resource_group_name=None, show_details=False):
@@ -1468,10 +1479,9 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, resource_group_name=None):
-    from azure.mgmt.keyvault import KeyVaultManagementClient
     from azure.keyvault import KeyVaultId
     import re
-    client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     grouped_secrets = {}
 
     merged_secrets = []

@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key, add_progress_callback,
+                          validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
 
@@ -84,9 +84,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule']:
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+            c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
@@ -137,7 +138,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Default action to apply when no rule matches.')
 
     with self.argument_context('storage account show-connection-string') as c:
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
         c.argument('key_name', options_list=['--key'], help='The key to use.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
@@ -154,7 +154,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account network-rule') as c:
         from ._validators import validate_subnet
-        c.argument('storage_account_name', acct_name_type, id_part=None)
+        c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
@@ -167,7 +167,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=('--account-name',))
+        c.argument('account_name', acct_name_type, options_list=['--account-name'])
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -264,13 +264,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
-        from ._validators import process_blob_upload_batch_parameters
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group='Content Control')
         c.ignore('source_files', 'destination_container_name')
 
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_upload_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', type=int,
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
@@ -290,11 +289,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
-
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
         c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int,
@@ -305,10 +302,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
 
     with self.argument_context('storage blob delete-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_batch_source_parameters
-
         c.ignore('source_container_name')
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
@@ -335,8 +330,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_source_uri_arguments(validator=validate_source_uri)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
-        from azure.cli.command_modules.storage._validators import (get_source_file_or_blob_service_client,
-                                                                   process_blob_copy_batch_namespace)
+        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
@@ -346,7 +340,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-        c.argument('prefix', validator=process_blob_copy_batch_namespace)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri

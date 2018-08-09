@@ -173,6 +173,7 @@ def load_arguments(self, _):
         c.argument('service_cidr')
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
+        c.argument('skip_subnet_role_assignment', action='store_true')
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -231,10 +232,10 @@ def load_arguments(self, _):
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':
-        program_files = os.environ.get('ProgramFiles')
-        if not program_files:
+        home_dir = os.environ.get('USERPROFILE')
+        if not home_dir:
             return None
-        install_location = '{}\\{}.exe'.format(program_files, exe_name)
+        install_location = os.path.join(home_dir, r'.azure-{0}\{0}.exe'.format(exe_name))
     elif system == 'Linux' or system == 'Darwin':
         install_location = '/usr/local/bin/{}'.format(exe_name)
     else:

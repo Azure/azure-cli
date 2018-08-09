@@ -152,6 +152,10 @@ helps['aks create'] = """
           short-summary: Service principal used for authentication to Azure APIs.
           long-summary:  If not specified, a new service principal is created and cached at
                          {sp_cache} to be used by subsequent `az aks` commands.
+        - name: --skip-subnet-role-assignment
+          type: bool
+          short-summary: Skip role assignment for subnet (advanced networking).
+          long-summary:  If specified, please make sure your service principal has the access to your subnet.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if

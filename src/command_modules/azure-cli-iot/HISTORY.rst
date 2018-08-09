@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.3.0
++++++
+* BREAKING CHANGE: Removed deprecated commands which have moved to the iot extension
+* Updated elements to not assume azure-devices.net domain
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

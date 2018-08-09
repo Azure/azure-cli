@@ -293,6 +293,12 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
     file_url = ''
     system = platform.system()
     base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
+
+    # ensure installation directory exists
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
+
     if system == 'Windows':
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
@@ -303,15 +309,28 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.warning('Downloading client to %s from %s', install_location, file_url)
+    logger.warning('Downloading client to "%s" from "%s"', install_location, file_url)
     try:
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
-    logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
-                   os.path.dirname(install_location), os.path.basename(install_location))
+
+    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
+        env_paths = os.environ['PATH'].split(';')
+        found = next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
+        if not found:
+            # pylint: disable=logging-format-interpolation
+            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           'This is good for the current command session.\n'
+                           '    2. Update system PATH environment variable by following '
+                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
+                           'You only need to do it once'.format(install_dir, cli))
+    else:
+        logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                       install_dir, cli)
 
 
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name='aci-connector',
@@ -334,6 +353,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
                                       location, service_principal, client_secret, chart_url, os_type,
                                       image_tag, aci_resource_group):
     from subprocess import PIPE, Popen
+    instance = client.get(resource_group_name, name)
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     url_chart = chart_url
     if image_tag is None:
@@ -365,26 +385,26 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     if os_type.lower() in ['linux', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Linux')
+                                               norm_location, 'Linux', instance.enable_rbac)
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Windows')
+                                               norm_location, 'Windows', instance.enable_rbac)
 
 
 def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
                                            client_secret, subscription_id, tenant_id, aci_resource_group,
-                                           norm_location, os_type):
+                                           norm_location, os_type, use_rbac):
+    rbac_install = "true" if use_rbac else "false"
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + '-' + os_type.lower() + '-' + norm_location
     node_name = 'virtual-kubelet-' + helm_release_name
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={}'.format(
-            node_name, node_taint, os_type, image_tag)
-
+        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},rbac.install={}'.format(
+            node_name, node_taint, os_type, image_tag, rbac_install)
         if service_principal:
             values += ",env.azureClientId=" + service_principal
         if client_secret:
@@ -501,7 +521,7 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal
 
 
-def _add_role_assignment(cli_ctx, role, service_principal, delay=2):
+def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
@@ -510,7 +530,7 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2):
         hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
-            create_role_assignment(cli_ctx, role, service_principal)
+            create_role_assignment(cli_ctx, role, service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1287,6 +1307,18 @@ def _update_dict(dict1, dict2):
     return cp
 
 
+def subnet_role_assignment_exists(cli_ctx, scope):
+    network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
+
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+        if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
+            return True
+    return False
+
+
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if in_cloud_console():
         raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
@@ -1336,6 +1368,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_ssh_key=False,
                disable_rbac=None,
                enable_rbac=None,
+               skip_subnet_role_assignment=False,
                network_plugin=None,
                pod_cidr=None,
                service_cidr=None,
@@ -1372,7 +1405,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
-        dns_prefix=dns_name_prefix,
         os_type="Linux",
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
@@ -1396,6 +1428,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
+
+    if (vnet_subnet_id and not skip_subnet_role_assignment and
+            not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
+        scope = vnet_subnet_id
+        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor', service_principal, scope=scope):
+            logger.warning('Could not create a role assignment for subnet. '
+                           'Are you an Owner on this subscription?')
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
@@ -2072,8 +2111,8 @@ def _remove_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags']
-    ap_attrs = ['dns_prefix', 'fqdn', 'os_disk_size_gb', 'ports', 'vnet_subnet_id']
-    sp_attrs = ['key_vault_secret_ref', 'secret']
+    ap_attrs = ['os_disk_size_gb', 'vnet_subnet_id']
+    sp_attrs = ['secret']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
@@ -2093,13 +2132,17 @@ def _validate_aci_location(norm_location):
     Validate the Azure Container Instance location
     """
     aci_locations = [
-        "westus",
+        "centralus",
         "eastus",
+        "eastus2",
+        "westus",
+        "westus2",
+        "northeurope",
         "westeurope",
         "southeastasia",
-        "westus2",
-        "northeurope"
+        "australiaeast"
     ]
+
     if norm_location not in aci_locations:
         raise CLIError('Azure Container Instance is not available at location "{}".'.format(norm_location) +
                        ' The available locations are "{}"'.format(','.join(aci_locations)))
