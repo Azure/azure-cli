@@ -33,10 +33,9 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
-from azure.cli.command_modules.resource._client_factory import _resource_client_factory
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -79,6 +78,7 @@ def create_container(cmd,
                      dns_name_label=None,
                      command_line=None,
                      environment_variables=None,
+                     secure_environment_variables=None,
                      registry_login_server=None,
                      registry_username=None,
                      registry_password=None,
@@ -166,6 +166,12 @@ def create_container(cmd,
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
 
+    # Concatenate secure and standard environment variables
+    if environment_variables and secure_environment_variables:
+        environment_variables = environment_variables + secure_environment_variables
+    else:
+        environment_variables = environment_variables or secure_environment_variables
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -209,7 +215,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
 
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
-    resource_client = _resource_client_factory(cli_ctx)
+    resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
 
     cg_defintion = None
@@ -394,7 +400,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
-    resource_client = _resource_client_factory(cmd.cli_ctx)
+    resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
     resource = resource_client.resources.get(resource_group_name,

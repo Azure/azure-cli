@@ -6,8 +6,10 @@
 # pylint: skip-file
 import mock
 import os
+import platform
 import requests
 import tempfile
+import shutil
 import unittest
 import yaml
 
@@ -18,7 +20,7 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
                                                   create_application, _update_addons,
-                                                  _ensure_container_insights_for_monitoring)
+                                                  _ensure_container_insights_for_monitoring, k8s_install_cli)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -54,7 +56,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
     def test_add_role_assignment_exists(self):
@@ -72,7 +74,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
     def test_add_role_assignment_fails(self):
@@ -90,7 +92,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
@@ -483,3 +485,35 @@ class AcsCustomCommandTest(unittest.TestCase):
         args, kwargs = invoke_def.call_args
         self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
         self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_cli_emit_warnings(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'kubectl.exe')
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 2 warnings, 1st for download result; 2nd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+
+            if platform.system() == 'Windows':
+                # try again with install location in PATH, we should only get one more warning
+                os.environ['PATH'] += ';' + temp_dir
+                k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+                self.assertEqual(logger_mock.warning.call_count, 3)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_cli_create_installation_dir(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)

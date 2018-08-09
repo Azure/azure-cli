@@ -167,7 +167,9 @@ class WebappQuickCreateTest(ScenarioTest):
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        self.assertTrue('Hello world' in str(r.content))
+        if 'Hello world' not in str(r.content):
+            # dump out more info for diagnose
+            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -266,7 +268,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('pythonVersion', ''),
             JMESPathCheck('use32BitWorkerProcess', True),
             JMESPathCheck('webSocketsEnabled', False),
-            JMESPathCheck('minTlsVersion', '1.0')])
+            JMESPathCheck('minTlsVersion', '1.2')])
 
         # update and verify
         checks = [
@@ -277,12 +279,12 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
             JMESPathCheck('webSocketsEnabled', True),
-            JMESPathCheck('minTlsVersion', '1.2'),
+            JMESPathCheck('minTlsVersion', '1.0'),
             JMESPathCheck('http20Enabled', True)
         ]
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true --http20-enabled true  --min-tls-version 1.2 '.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true  --min-tls-version 1.0'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
@@ -621,20 +623,22 @@ class WebappSSLCertTest(ScenarioTest):
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_functionapp_e2e(self, resource_group):
-        functionapp_name = self.create_random_name('func-e2e', 24)
+    @ResourceGroupPreparer(parameter_name='resource_group2')
+    def test_functionapp_e2e(self, resource_group, resource_group2):
+        functionapp_name, functionapp_name2 = self.create_random_name('func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
-        storage = 'functionappplanstorage'
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
+        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage2, resource_group2)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
-
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2, functionapp_name2, plan_id, storage_account_id2))
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -782,8 +786,7 @@ class WebappImplictIdentityTest(ScenarioTest):
         webapp_name = self.create_random_name('web-msi', 20)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46668')]
-        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             result = self.cmd('webapp identity assign -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
             self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
                 self.check('principalId', result['principalId'])
@@ -792,6 +795,10 @@ class WebappImplictIdentityTest(ScenarioTest):
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].roleDefinitionName', role)
         ])
+
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.check('principalId', result['principalId']))
+        self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.is_empty())
 
 
 class WebappListLocationsFreeSKUTest(ScenarioTest):

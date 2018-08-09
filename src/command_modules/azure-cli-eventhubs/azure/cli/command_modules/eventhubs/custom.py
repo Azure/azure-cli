@@ -17,7 +17,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
         parameters=EHNamespace(
             location=location,
             tags=tags,
-            sku=Sku(sku, sku, capacity),
+            sku=Sku(name=sku, tier=sku, capacity=capacity),
             is_auto_inflate_enabled=is_auto_inflate_enabled,
             maximum_throughput_units=maximum_throughput_units))
 

@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.43"
+VERSION = "2.0.44"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -91,7 +91,8 @@ DEPENDENCIES = [
     'azure-cli-vm',
     'azure-cli-servicefabric',
     'azure-cli-servicebus',
-    'azure-cli-eventhubs'
+    'azure-cli-eventhubs',
+    'azure-cli-search'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

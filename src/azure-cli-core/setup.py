@@ -8,14 +8,16 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+
 try:
     from azure_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
+
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.43"
+VERSION = "2.0.44"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -26,6 +28,7 @@ except OSError:
 else:
     import re
     import sys
+
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/core/__init__.py')
@@ -50,12 +53,12 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'applicationinsights>=0.11.1',
     'argcomplete>=1.8.0',
+    'azure-cli-telemetry',
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack==0.4.1',
+    'knack==0.4.2',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko>=2.0.8',
@@ -63,11 +66,12 @@ DEPENDENCIES = [
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml>=3.13',
+    'pyyaml~=3.13',
     'requests',
     'six',
     'tabulate>=0.7.7,<=0.8.2',
     'wheel==0.30.0',
+    'azure-mgmt-resource==2.0.0'
 ]
 
 if sys.version_info < (3, 4):

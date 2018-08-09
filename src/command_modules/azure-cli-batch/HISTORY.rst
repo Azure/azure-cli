@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.3.2
++++++
+* Update Key Vault SDK dependency
+
 3.3.1
 +++++
 * Fix bug when show AAD token in cloudshell

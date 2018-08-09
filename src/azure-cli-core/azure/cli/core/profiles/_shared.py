@@ -79,7 +79,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2017-10-01',
+        ResourceType.MGMT_STORAGE: '2018-03-01-preview',
         ResourceType.MGMT_NETWORK: '2018-02-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2018-06-01', {
             'resource_skus': '2017-09-01',
@@ -97,7 +97,9 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_STORAGE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_NETWORK_DNS: '2018-03-01-preview'
+        ResourceType.MGMT_NETWORK_DNS: '2018-03-01-preview',
+        ResourceType.MGMT_KEYVAULT: '2018-02-14',
+        ResourceType.DATA_KEYVAULT: '7.0'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -114,7 +116,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_KEYVAULT: '2016-10-01'
     }
 }
 

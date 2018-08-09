@@ -13,7 +13,7 @@ import mock
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 
@@ -86,11 +86,11 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(ScenarioTest):
+class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-        from azure.keyvault.models import KeyVaultErrorException
+        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -119,6 +119,8 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         finally:
             self.cmd('ad app delete --id {sp}')
 
+
+class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
@@ -235,8 +237,10 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}',
-                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
+                    self.check("length([])", 1),
+                    self.check("[0].principalName", self.kwargs["upn"])
+                ])
 
                 # test couple of more general filters
                 result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()

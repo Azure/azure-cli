@@ -17,6 +17,16 @@ helps['acr credential'] = """
     short-summary: Manage login credentials for Azure Container Registries.
     """
 
+helps['acr config'] = """
+    type: group
+    short-summary: Configure various policies for Azure Container Registries.
+    """
+
+helps['acr config content-trust'] = """
+    type: group
+    short-summary: Manage content-trust policy for Azure Container Registries.
+    """
+
 helps['acr repository'] = """
     type: group
     short-summary: Manage repositories (image names) for Azure Container Registries.
@@ -120,6 +130,24 @@ helps['acr show-usage'] = """
         - name: Get the quota usages for a container registry.
           text: >
             az acr show-usage -n MyRegistry
+"""
+
+helps['acr config content-trust show'] = """
+    type: command
+    short-summary: Show the configured content-trust policy for a container registry.
+    examples:
+        - name: Show the configured content-trust policy for a container registry
+          text: >
+            az acr config content-trust show -n MyRegistry
+"""
+
+helps['acr config content-trust update'] = """
+    type: command
+    short-summary: Update content-trust policy for a container registry.
+    examples:
+        - name: Update content-trust policy for a container registry
+          text: >
+            az acr config content-trust update -n MyRegistry --status Enabled
 """
 
 helps['acr credential show'] = """
