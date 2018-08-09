@@ -142,7 +142,8 @@ def load_command_table(self, _):
 
     network_public_ip_prefix_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.public_ip_prefixes_operations#PublicIPPrefixesOperations.{}',
-        client_factory=cf_public_ip_prefixes
+        client_factory=cf_public_ip_prefixes,
+        min_api='2018-07-01'
     )
 
     network_rf_sdk = CliCommandType(

@@ -127,6 +127,33 @@ class NetworkPublicIpWithSku(ScenarioTest):
         ])
 
 
+class NetworkPublicIpPrefix(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
+    def test_network_public_ip_prefix(self, resource_group):
+
+        self.kwargs.update({
+            'prefix': 'prefix1',
+            'pip': 'pip1'
+        })
+
+        # Test prefix CRUD
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
+                 checks=self.check('prefixLength', 30))
+        self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.is_empty())
+
+
+        # Test public IP create with prefix
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
+                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+
+
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_multi_id')
