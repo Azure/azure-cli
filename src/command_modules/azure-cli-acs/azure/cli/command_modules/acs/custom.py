@@ -1526,12 +1526,11 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
     else:
-        if (not credentialResults.kubeconfigs or not credentialResults.kubeconfigs[0] or
-                not credentialResults.kubeconfigs[0].value):
-            raise CLIError("No kubeconfigs for credential found.")
-        else:
+        try:
             kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
             _print_or_merge_credentials(path, kubeconfig)
+        except (IndexError, ValueError):
+            raise CLIError("Fail to find kubeconfig file.")
 
 
 ADDONS = {
