@@ -9,6 +9,7 @@ Release History
 * Create role assignment to the subnet when it's provided.
 * Add new option "skip role assignment" for subnet when it's provided
 * Skip role assignment to subnet when assignment already exists
+* `az aks get-credentials` will now call new apis to get cluster credential.
 
 2.2.2
 +++++
