@@ -42,6 +42,13 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
+    with self.argument_context('ad app permission grant') as c:
+        c.argument('app_id', help='clientId of an existing app from which you want to grant permissions to your app')
+        c.argument('expires', help='Expiry date for the permissions in years, options include 1, 2 or never.')
+
+    with self.argument_context('ad app permission list') as c:
+        c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
+
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 

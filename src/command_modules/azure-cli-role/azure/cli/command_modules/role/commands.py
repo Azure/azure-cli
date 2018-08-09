@@ -84,6 +84,8 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
         g.custom_show_command('show', 'show_application')
+        g.custom_command('permission grant', 'grant_application')
+        g.custom_command('permission list', 'list_granted_application')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
