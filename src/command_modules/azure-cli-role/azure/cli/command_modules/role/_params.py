@@ -46,6 +46,13 @@ def load_arguments(self, _):
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
+    with self.argument_context('ad app permission grant') as c:
+        c.argument('app_id', help='clientId of an existing app from which you want to grant permissions to your app')
+        c.argument('expires', help='Expiry date for the permissions in years, options include 1, 2 or never.')
+
+    with self.argument_context('ad app permission list') as c:
+        c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
+
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 

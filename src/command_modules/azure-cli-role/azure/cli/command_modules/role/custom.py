@@ -669,6 +669,53 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
+def list_granted_application(cmd, identifier):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    # Get the Service Principal ObjectId for the client app
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=identifier)
+
+    # Get the OAuth2 permissions client app
+    permissions = graph_client.oauth2.get(
+        filter="clientId eq '{}'".format(client_sp_object_id))
+
+    return permissions.additional_properties['value']
+
+
+def grant_application(cmd, identifier, app_id, expires='1'):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    # Get the Service Principal ObjectId for the client app
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=identifier)
+
+    # Get the Service Principal ObjectId for associated app
+    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=app_id)
+
+    # Build payload
+    start_date = datetime.datetime.utcnow()
+    end_date = start_date + relativedelta(years=1)
+
+    if expires == '2':
+        end_date = start_date + relativedelta(years=2)
+    elif expires.lower() == 'never':
+        end_date = start_date + relativedelta(years=1000)
+
+    payload = {
+        "odata.type": "Microsoft.DirectoryServices.OAuth2PermissionGrant",
+        "clientId": client_sp_object_id,
+        "consentType": "AllPrincipals",
+        "resourceId": associated_sp_object_id,
+        "scope": "user_impersonation",
+        "startTime": start_date.isoformat(),
+        "expiryTime": end_date.isoformat()
+    }
+
+    # Grant OAuth2 permissions
+    response = graph_client.oauth2.post(payload)
+
+    return response
+
+
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
@@ -892,9 +939,13 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         key_id, identifier))
 
 
-def _resolve_service_principal(client, identifier):
+def _resolve_service_principal(client, identifier=None, appid=None):
     # todo: confirm with graph team that a service principal name must be unique
-    result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
+    if identifier:
+        result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
+    elif appid:
+        result = list(client.list(filter="appId eq '{}'".format(appid)))
+
     if result:
         return result[0].object_id
     if _is_guid(identifier):

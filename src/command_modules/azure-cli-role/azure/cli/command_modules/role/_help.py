@@ -175,6 +175,20 @@ helps['ad app owner remove'] = """
     type: command
     short-summary: remove an application owner.
 """
+helps['ad app permission grant'] = """
+    type: command
+    short-summary: Grant an app OAuth2 permissions from another app
+    examples:
+        - name: Grant a native application with OAuth2 permissions from an existing AAD app with TTL of 2 years
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+"""
+helps['ad app permission list'] = """
+    type: command
+    short-summary: List the app OAuth2 permissions
+    examples:
+        - name: List the OAuth2 permissions for an existing AAD app
+          text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
