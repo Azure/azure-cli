@@ -336,3 +336,8 @@ helps['ams live output list'] = """
     type: command
     short-summary: List all the live outputs in a live event.
 """
+
+helps['ams live output delete'] = """
+    type: command
+    short-summary: Delete a live output.
+"""
