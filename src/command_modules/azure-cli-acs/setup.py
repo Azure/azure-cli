@@ -32,7 +32,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-authorization==0.50.0',
     'azure-mgmt-compute==4.0.0',
-    'azure-mgmt-containerservice==4.2.2', # this is a pending release number. This PR cannot be merged before release.
+    'azure-mgmt-containerservice==4.2.2',
     'azure-graphrbac==0.40.0',
     'azure-cli-core',
     'paramiko>=2.0.8',
