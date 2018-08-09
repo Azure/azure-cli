@@ -671,11 +671,11 @@ def list_granted_application(cmd, identifier):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # Get the Service Principal ObjectId for the client app
-    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=identifier)
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
 
     # Get the OAuth2 permissions client app
     permissions = graph_client.oauth2.get(
-        filter="clientId eq '{}'".format(client_sp_object_id))
+        filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
 
     return permissions.additional_properties['value']
 
@@ -684,10 +684,10 @@ def grant_application(cmd, identifier, app_id, expires='1'):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # Get the Service Principal ObjectId for the client app
-    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=identifier)
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
 
     # Get the Service Principal ObjectId for associated app
-    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, appid=app_id)
+    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, app_id)
 
     # Build payload
     start_date = datetime.datetime.utcnow()
@@ -709,7 +709,7 @@ def grant_application(cmd, identifier, app_id, expires='1'):
     }
 
     # Grant OAuth2 permissions
-    response = graph_client.oauth2.post(payload)
+    response = graph_client.oauth2.post(payload)  # pylint: disable=no-member
 
     return response
 
@@ -931,13 +931,9 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         key_id, identifier))
 
 
-def _resolve_service_principal(client, identifier=None, appid=None):
+def _resolve_service_principal(client, identifier):
     # todo: confirm with graph team that a service principal name must be unique
-    if identifier:
-        result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
-    elif appid:
-        result = list(client.list(filter="appId eq '{}'".format(appid)))
-
+    result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
     if result:
         return result[0].object_id
     if _is_guid(identifier):
