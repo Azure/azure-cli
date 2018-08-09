@@ -120,7 +120,6 @@ class AmsLiveOutputTests(ScenarioTest):
 
         assetName = self.create_random_name(prefix='asset', length=12)
         live_output_name = self.create_random_name(prefix='lo', length=12)
-        manifest_name = self.create_random_name(prefix='man', length=12)
 
         self.kwargs.update({
             'assetName': assetName,
@@ -147,3 +146,52 @@ class AmsLiveOutputTests(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ])
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_live_output_delete(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        live_event_name = self.create_random_name(prefix='le', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streaming_protocol': 'FragmentedMP4',
+            'liveEventName': live_event_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --streaming-protocol {streaming_protocol}')
+
+        assetName = self.create_random_name(prefix='asset', length=12)
+        live_output_name1 = self.create_random_name(prefix='lo', length=12)
+        live_output_name2 = self.create_random_name(prefix='lo', length=12)
+        manifest_name = self.create_random_name(prefix='man', length=12)
+
+        self.kwargs.update({
+            'assetName': assetName,
+            'liveOutputName1': live_output_name1,
+            'liveOutputName2': live_output_name2,
+            'archiveWindowLength': 'PT2S',
+            'manifestName': manifest_name
+        })
+
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
+
+        self.cmd('az ams live output create -a {amsname} -n {liveOutputName2} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName}', checks=[
+            self.check('archiveWindowLength', '0:00:02'),
+            self.check('assetName', '{assetName}'),
+            self.check('manifestName', '{manifestName}'),
+            self.check('name', '{liveOutputName2}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('az ams live output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
+            self.check('length(@)', 2)
+        ])
+
+        self.cmd('az ams live event delete -a {amsname} -g {rg} -n {liveOutputName2} --live-event-name {liveEventName}', checks=[])
+
+        self.cmd('az ams live output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
+            self.check('length(@)', 1)
+        ])
