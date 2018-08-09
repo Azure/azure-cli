@@ -796,7 +796,6 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
 
 class ComputeListSkusScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse(size_kb=3072)
     def test_list_compute_skus_table_output(self):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
@@ -820,7 +819,6 @@ class ComputeListSkusScenarioTest(LiveScenarioTest):
         self.assertTrue(size_found)
         self.assertTrue(zone_found)
 
-    @AllowLargeResponse(size_kb=3072)
     def test_list_compute_skus_fiter(self):
         result = self.cmd('vm list-skus -l eastus2 --size Standard_DS1_V2 --zone').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['name'] == 'Standard_DS1_v2' and x['locationInfo'][0]['zones']]))
