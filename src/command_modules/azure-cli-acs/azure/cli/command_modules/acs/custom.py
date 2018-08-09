@@ -1519,17 +1519,19 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
     credentialResults = None
     if admin:
-        credentialResults = client.list_cluster_admin_credentials(
-            resource_group_name, name)
+        credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
     else:
-        credentialResults = client.list_cluster_user_credentials(
-            resource_group_name, name)
+        credentialResults = client.list_cluster_user_credentials(resource_group_name, name)
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
     else:
-        kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
-        _print_or_merge_credentials(path, kubeconfig)
+        if (not credentialResults.kubeconfigs or not credentialResults.kubeconfigs[0]
+                or not credentialResults.kubeconfigs[0].value):
+            raise CLIError("No kubeconfigs for credential found.")
+        else:
+            kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
+            _print_or_merge_credentials(path, kubeconfig)
 
 
 ADDONS = {
