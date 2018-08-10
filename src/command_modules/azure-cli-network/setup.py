@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-network==2.0.0rc3',
+    'azure-mgmt-network==2.0.1',
     'azure-mgmt-trafficmanager==0.40.0',
     'azure-mgmt-dns==2.0.0rc2',
     'azure-cli-core',
