@@ -141,3 +141,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
         g.show_command('show', 'get')
         g.command('list', 'list')
+        g.command('delete', 'delete')
