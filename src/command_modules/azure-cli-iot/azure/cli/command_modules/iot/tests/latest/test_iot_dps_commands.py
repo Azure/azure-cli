@@ -131,7 +131,7 @@ class IoTDpsTest(ScenarioTest):
         _create_verification_cert(cert_file, key_file, verification_file, verification_code, 3, random.randint(0, max_int))
 
         # Verify certificate
-        etag = self.cmd('iot dps certificate verify --dps-name {} -g {} -n {} -p {} --etag {}'.format(dps_name, group_name, cert_name, verification_file, etag),
+        etag = self.cmd('az iot dps certificate verify --dps-name {} -g {} -n {} -p {} --etag {}'.format(dps_name, group_name, cert_name, verification_file, etag),
                         checks=[
                             self.check('name', cert_name),
                             self.check('properties.isVerified', True)
@@ -151,8 +151,7 @@ class IoTDpsTest(ScenarioTest):
 
         self.cmd('az iot hub policy create --hub-name {} -n {} --permissions {}'.format(hub_name, key_name, permission))
 
-        primary_key = self._get_hub_policy_primary_key(hub_name, key_name)
-        connection_string = 'HostName={};SharedAccessKeyName={};SharedAccessKey={}'.format(hub_host_name, key_name, primary_key)
+        connection_string = self._show_hub_connection_string(hub_name, group_name)
 
         self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {} -l {}'
                  .format(dps_name, group_name, connection_string, group_location))
@@ -188,3 +187,7 @@ class IoTDpsTest(ScenarioTest):
     def _get_hub_policy_primary_key(self, hub_name, key_name):
         output = self.cmd('az iot hub policy show --hub-name {} -n {}'.format(hub_name, key_name))
         return output.get_output_in_json()['primaryKey']
+
+    def _show_hub_connection_string(self, hub_name, group_name):
+        output = self.cmd('az iot hub show-connection-string --name {} -g {}'.format(hub_name, group_name))
+        return output.get_output_in_json()['connectionString']
