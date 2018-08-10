@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.3.3
++++++
+* Update Batch Management SDK dependency
+
 3.3.2
 +++++
 * Update Key Vault SDK dependency
