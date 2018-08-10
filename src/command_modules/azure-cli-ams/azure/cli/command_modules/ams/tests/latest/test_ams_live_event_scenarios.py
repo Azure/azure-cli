@@ -277,3 +277,58 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_live_event_show(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        live_event_name = self.create_random_name(prefix='le', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingProtocol': 'RTMP',
+            'liveEventName': live_event_name,
+            'encodingType': 'Basic',
+            'tags': 'key=value',
+            'previewLocator': _gen_guid(),
+            'keyFrameIntervalDuration': 'PT2S',
+            'description': 'asd',
+            'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
+            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url', checks=[
+            self.check('name', '{liveEventName}'),
+            self.check('location', 'West US 2'),
+            self.check('input.streamingProtocol', '{streamingProtocol}'),
+            self.check('encoding.encodingType', '{encodingType}'),
+            self.check('length(preview.accessControl.ip.allow)', 2),
+            self.check('preview.previewLocator', '{previewLocator}'),
+            self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
+            self.check('length(streamOptions)', 2),
+            self.check('description', '{description}'),
+            self.check('input.accessToken', '{accessToken}'),
+            self.check('vanityUrl', True)
+        ])
+
+        self.cmd('az ams live event show -a {amsname} -n {liveEventName} -g {rg}', checks=[
+            self.check('name', '{liveEventName}'),
+            self.check('location', 'West US 2'),
+            self.check('input.streamingProtocol', '{streamingProtocol}'),
+            self.check('encoding.encodingType', '{encodingType}'),
+            self.check('length(preview.accessControl.ip.allow)', 2),
+            self.check('preview.previewLocator', '{previewLocator}'),
+            self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
+            self.check('length(streamOptions)', 2),
+            self.check('description', '{description}'),
+            self.check('input.accessToken', '{accessToken}'),
+            self.check('vanityUrl', True)
+        ])
