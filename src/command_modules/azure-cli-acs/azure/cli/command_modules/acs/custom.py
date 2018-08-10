@@ -1361,7 +1361,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                location=None,
                admin_username="azureuser",
                kubernetes_version='',
-               node_vm_size="Standard_DS1_v2",
+               node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,
