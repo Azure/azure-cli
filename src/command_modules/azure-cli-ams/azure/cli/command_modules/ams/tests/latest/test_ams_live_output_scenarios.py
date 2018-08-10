@@ -190,7 +190,7 @@ class AmsLiveOutputTests(ScenarioTest):
             self.check('length(@)', 2)
         ])
 
-        self.cmd('az ams live event delete -a {amsname} -g {rg} -n {liveOutputName2} --live-event-name {liveEventName}', checks=[])
+        self.cmd('az ams live event delete -a {amsname} -g {rg} -n {liveOutputName2} --live-event-name {liveEventName}')
 
         self.cmd('az ams live output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
             self.check('length(@)', 1)
