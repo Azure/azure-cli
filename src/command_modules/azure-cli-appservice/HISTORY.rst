@@ -4,6 +4,7 @@ Release History
 ===============
 0.2.2
 +++++
+* arm tag support on create commands
 * fix a bug that prevent from creating a function-app using storage accounts in external resource groups
 * fix a crash on zip deployment
 

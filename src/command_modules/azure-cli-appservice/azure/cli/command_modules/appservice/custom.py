@@ -53,7 +53,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None):
+                  deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
+                  tags=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     client = web_client_factory(cmd.cli_ctx)
@@ -68,7 +69,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = "6.9.1"
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
+    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
     if is_linux:
@@ -948,7 +949,7 @@ def _linux_sku_check(sku):
 
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
-                            location=None):
+                            location=None, tags=None):
     client = web_client_factory(cmd.cli_ctx)
     sku = _normalize_sku(sku)
     if location is None:
@@ -958,7 +959,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, sku='B1', 
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
-                              sku=sku_def, reserved=(is_linux or None))
+                              sku=sku_def, reserved=(is_linux or None), tags=tags)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -1644,7 +1645,7 @@ class _StackRuntimeHelper(object):
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
-                    deployment_container_image_name=None):
+                    deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1652,7 +1653,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
     site_config = SiteConfig(app_settings=[])
-    functionapp_def = Site(location=None, site_config=site_config)
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
 
     if consumption_plan_location:
