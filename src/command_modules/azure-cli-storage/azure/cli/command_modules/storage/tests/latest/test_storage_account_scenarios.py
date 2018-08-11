@@ -236,7 +236,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az account list-locations',
                  checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
 
-    @live_only()
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_customer_managed_key(self, resource_group, storage_account):
