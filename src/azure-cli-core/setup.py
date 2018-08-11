@@ -53,6 +53,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
+    'adal>=1.0.0',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
