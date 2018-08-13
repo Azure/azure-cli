@@ -159,14 +159,14 @@ class AmsLiveOutputTests(ScenarioTest):
             'liveOutputName1': live_output_name1,
             'liveOutputName2': live_output_name2,
             'archiveWindowLength': 'PT2S',
-            'manifest_name1': manifest_name1,
-            'manifest_name2': manifest_name2
+            'manifestName1': manifest_name1,
+            'manifestName2': manifest_name2
         })
 
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
 
-        self.cmd('az ams live output create -a {amsname} -n {liveOutputName1} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifest_name1}')
-        self.cmd('az ams live output create -a {amsname} -n {liveOutputName2} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifest_name2}')
+        self.cmd('az ams live output create -a {amsname} -n {liveOutputName1} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName1}')
+        self.cmd('az ams live output create -a {amsname} -n {liveOutputName2} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName2}')
 
         self.cmd('az ams live output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
             self.check('length(@)', 2)
