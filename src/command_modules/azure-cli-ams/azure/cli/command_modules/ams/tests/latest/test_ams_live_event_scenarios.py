@@ -281,6 +281,7 @@ class AmsLiveEventTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_show(self, storage_account_for_create):
+        print('test')
         amsname = self.create_random_name(prefix='ams', length=12)
         live_event_name = self.create_random_name(prefix='le', length=12)
 
@@ -305,19 +306,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
-        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url', checks=[
-            self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
-            self.check('input.streamingProtocol', '{streamingProtocol}'),
-            self.check('encoding.encodingType', '{encodingType}'),
-            self.check('length(preview.accessControl.ip.allow)', 2),
-            self.check('preview.previewLocator', '{previewLocator}'),
-            self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
-            self.check('length(streamOptions)', 2),
-            self.check('description', '{description}'),
-            self.check('input.accessToken', '{accessToken}'),
-            self.check('vanityUrl', True)
-        ])
+        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url')
 
         self.cmd('az ams live event show -a {amsname} -n {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
