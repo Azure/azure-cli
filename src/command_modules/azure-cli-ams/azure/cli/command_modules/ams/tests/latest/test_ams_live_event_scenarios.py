@@ -7,8 +7,6 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure.cli.command_modules.ams._utils import _gen_guid
-
 
 class AmsLiveEventTests(ScenarioTest):
     def _get_test_data_file(self, filename):
@@ -30,7 +28,7 @@ class AmsLiveEventTests(ScenarioTest):
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
             'tags': 'key=value',
-            'previewLocator': _gen_guid(),
+            'previewLocator': '34cba94c-fff2-4a8c-aacc-7492a1dc412b',
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
@@ -62,6 +60,10 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertNotEquals('Stopping', live_event['resourceState'])
         self.assertNotEquals('Stopped', live_event['resourceState'])
+
+        self.cmd('az ams live event stop -a {amsname} -n {liveEventName} -g {rg}')
+
+        self.cmd('az ams live event delete -a {amsname} -n {liveEventName} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -292,7 +294,7 @@ class AmsLiveEventTests(ScenarioTest):
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
             'tags': 'key=value',
-            'previewLocator': _gen_guid(),
+            'previewLocator': '34cba94c-fff2-4a8c-aacc-7492a1dc412b',
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
@@ -305,7 +307,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
-        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url')
+        self.cmd('az ams live event create -a {amsname} -l {location} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url')
 
         self.cmd('az ams live event show -a {amsname} -n {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
@@ -320,3 +322,5 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.accessToken', '{accessToken}'),
             self.check('vanityUrl', True)
         ])
+
+        self.cmd('az ams live event delete -a {amsname} -n {liveEventName} -g {rg}')
