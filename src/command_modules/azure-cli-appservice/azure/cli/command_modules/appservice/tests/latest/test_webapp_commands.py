@@ -605,11 +605,14 @@ class WebappSSLCertTest(ScenarioTest):
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan, resource_group_location))
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), self.check('tags.plan', 'plan1'))
+        self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(resource_group, webapp_name, plan, resource_group_location))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)
