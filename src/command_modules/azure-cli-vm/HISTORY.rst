@@ -2,9 +2,14 @@
 
 Release History
 ===============
+
+2.2.2
++++++
+* test in progress
+
 2.2.1
 ++++++
-* vm list-skus: add a few common filters to make the command easier to use 
+* vm list-skus: add a few common filters to make the command easier to use
 
 2.2.0
 ++++++
@@ -51,11 +56,11 @@ Release History
 2.0.31
 ++++++
 * vm: fix an invalid detection logic on unmanaged blob uri
-* vm: support disk encryption w/o user provided service principals 
+* vm: support disk encryption w/o user provided service principals
 * BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
 * vmss: support eviction policy
 * BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
-                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list`
 * vm: support write accelerator
 * vmss: expose `az vmss perform-maintenance`
 * `vm diagnostics set`: detect VM's OS type reliably
@@ -83,7 +88,7 @@ Release History
 
 2.0.28
 ++++++
-* vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
+* vm/vmss create: support to attach unmanaged data disks and configure their caching modes
 * vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
 * vmss create: default priority to None
 * Support Autorest 3.0 based SDKs
