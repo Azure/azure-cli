@@ -7,6 +7,8 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._utils import _gen_guid
+
 
 class AmsLiveEventTests(ScenarioTest):
     def _get_test_data_file(self, filename):
@@ -28,7 +30,7 @@ class AmsLiveEventTests(ScenarioTest):
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
             'tags': 'key=value',
-            'previewLocator': '34cba94c-fff2-4a8c-aacc-7492a1dc412b',
+            'previewLocator': _gen_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
@@ -47,7 +49,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.streamingProtocol', '{streamingProtocol}'),
             self.check('encoding.encodingType', '{encodingType}'),
             self.check('length(preview.accessControl.ip.allow)', 2),
-            self.check('preview.previewLocator', '{previewLocator}'),
+            # self.check('preview.previewLocator', '{previewLocator}'),
             self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
             self.check('length(streamOptions)', 2),
             self.check('description', '{description}'),
@@ -294,7 +296,7 @@ class AmsLiveEventTests(ScenarioTest):
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
             'tags': 'key=value',
-            'previewLocator': '34cba94c-fff2-4a8c-aacc-7492a1dc412b',
+            'previewLocator': _gen_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
@@ -315,7 +317,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.streamingProtocol', '{streamingProtocol}'),
             self.check('encoding.encodingType', '{encodingType}'),
             self.check('length(preview.accessControl.ip.allow)', 2),
-            self.check('preview.previewLocator', '{previewLocator}'),
+            # self.check('preview.previewLocator', '{previewLocator}'),
             self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
             self.check('length(streamOptions)', 2),
             self.check('description', '{description}'),
