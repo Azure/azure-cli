@@ -5,10 +5,11 @@
 
 
 def ams_exception_handler(ex):
+    from azure.mgmt.media.models.api_error_py3 import ApiErrorException as ApiErrorExceptionPy3
     from azure.mgmt.media.models.api_error import ApiErrorException
     from knack.util import CLIError
 
-    if isinstance(ex, ApiErrorException) \
-            and ex.response is not None:
+    if isinstance(ex, (ApiErrorException, ApiErrorExceptionPy3)) \
+            and ex.message is not None:
         raise CLIError(ex.message)
     raise ex
