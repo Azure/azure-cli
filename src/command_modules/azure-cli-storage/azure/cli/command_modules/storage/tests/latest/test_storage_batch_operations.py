@@ -386,7 +386,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         src_container = create_and_populate_container()
         self.storage_cmd('storage blob delete-batch -s {} --pattern nonexists/*', storage_account_info, src_container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 37))
+            JMESPathCheck('length(@)', 41))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

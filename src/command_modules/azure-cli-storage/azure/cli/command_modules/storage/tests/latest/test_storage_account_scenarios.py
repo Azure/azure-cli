@@ -117,8 +117,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
-            JMESPathCheck("contains(connectionString, 'https')", False),
-            JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
+                JMESPathCheck("contains(connectionString, 'https')", False),
+                JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
         self.cmd('storage account update -g {} -n {} --tags foo=bar cat'
                  .format(resource_group, name),
