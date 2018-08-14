@@ -188,8 +188,6 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_list(self, storage_account_for_create):
