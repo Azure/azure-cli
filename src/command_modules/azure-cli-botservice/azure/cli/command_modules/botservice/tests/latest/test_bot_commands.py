@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import uuid
 import os
@@ -7,7 +12,6 @@ class BotTests(ScenarioTest):
     
     @ResourceGroupPreparer(random_name_length=20)
     def test_registration_bot(self, resource_group):
-        
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
@@ -32,7 +36,8 @@ class BotTests(ScenarioTest):
         ])
 
         self.cmd('az bot delete -g {rg} -n {botname}')
-    
+
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_webapp_bot(self, resource_group):
         self.kwargs.update({
@@ -66,5 +71,3 @@ class BotTests(ScenarioTest):
         ])
         # clean up the folder
         shutil.rmtree(dir_path)
-        
-

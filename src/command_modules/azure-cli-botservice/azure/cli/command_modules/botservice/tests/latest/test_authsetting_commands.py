@@ -1,5 +1,11 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import uuid
+
 
 class AuthSettingTests(ScenarioTest):
 
@@ -15,9 +21,9 @@ class AuthSettingTests(ScenarioTest):
         })
 
         self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id}', checks=[
-        self.check('name', '{botname}'),
-        self.check('resourceGroup', '{rg}'),
-        self.check('location', 'global')
+            self.check('name', '{botname}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('location', 'global')
         ])
 
         self.cmd('az bot authsetting create -g {rg} -n {botname} --client-id {clientid} --client-secret {secret} --scopes scope --service google -c myconnname', checks=[
@@ -40,7 +46,7 @@ class AuthSettingTests(ScenarioTest):
         self.kwargs.update({
             'service_provider': 'google'
         })
-        
+
         self.cmd('az bot authsetting list-providers', checks=[
             self.greater_than('length(@)', 0)
         ])

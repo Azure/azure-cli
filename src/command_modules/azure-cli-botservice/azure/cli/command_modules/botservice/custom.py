@@ -90,7 +90,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         msa_app_id, password = provisionConvergedApp(resource_name)
         logger.warning('obtained msa app id and password. Provisioning bot now.')
 
-
     if kind == 'registration':
         kind = 'bot'
         if not endpoint or not msa_app_id:
@@ -438,7 +437,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     zip_ref.close()
     os.remove(download_path)
     if not os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')
-                          and os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
+                            and os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))
     return {'downloadPath': folder_path}

@@ -63,7 +63,7 @@ def load_command_table(self, _):
     for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack']:
         with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType) as g:
             g.command('create', '{}_create'.format(channel))
-        
+
         with self.command_group('bot {}'.format(channel), channelOperations_commandType) as g:
             g.command('show', '{}_get'.format(channel))
             g.command('delete', '{}_delete'.format(channel))

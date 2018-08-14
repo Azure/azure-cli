@@ -1,5 +1,11 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import uuid
+
 
 class ChannelTests(ScenarioTest):
 
@@ -33,7 +39,7 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.sites[0].isEnabled', True),
         ])
 
-    
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_skype_channel(self, resource_group):
         self.create_bot(resource_group)
@@ -54,7 +60,7 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.enableMediaCards', True),
             self.check('properties.properties.enableVideo', True)
         ])
-        
+
         self.cmd('az bot skype delete -g {rg} -n {botname}')
 
 
@@ -70,12 +76,12 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.enableCalling', True),
             self.check('properties.properties.isEnabled', True)
         ])
-        
+
         self.cmd('az bot msteams show -g {rg} -n {botname} --with-secrets', checks=[
             self.check('properties.properties.enableCalling', True),
             self.check('properties.properties.isEnabled', True)
         ])
-        
+
         self.cmd('az bot msteams delete -g {rg} -n {botname}')
 
 
@@ -92,10 +98,10 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.sites[0].isEnabled', True),
             self.check('properties.properties.sites[0].key', '')
         ])
-        
+
         self.cmd('az bot directline show -g {rg} -n {botname} --with-secrets', checks=[
             self.check('properties.properties.sites[0].siteName', 'Default Site'),
             self.check('properties.properties.sites[0].isEnabled', True)
         ])
-        
+
         self.cmd('az bot directline delete -g {rg} -n {botname}')

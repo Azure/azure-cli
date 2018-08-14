@@ -5,6 +5,7 @@
 
 from azure.mgmt.botservice.models import BotChannel
 
+
 def create_channel(client, channel, channel_name, resource_group_name, resource_name):
     botChannel = BotChannel(
         location='global',

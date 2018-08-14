@@ -8,6 +8,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from knack.util import CLIError
 
+
 def _process_parameters(parameter_lists):
     def _try_parse_json_object(value):
         try:
