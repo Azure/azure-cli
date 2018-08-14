@@ -107,11 +107,11 @@ def add_adls_firewall_rule(client,
                            start_ip_address,
                            end_ip_address,
                            resource_group_name):
-    create_params = FirewallRule(start_ip_address=start_ip_address, end_ip_address=end_ip_address)
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    firewall_rule_name,
-                                   create_params)
+                                   start_ip_address,
+                                   end_ip_address)
 # endregion
 
 
@@ -121,11 +121,10 @@ def add_adls_virtual_network_rule(client,
                                   virtual_network_rule_name,
                                   subnet,
                                   resource_group_name):
-    create_params = VirtualNetworkRule(subnet_id=subnet)
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    virtual_network_rule_name,
-                                   create_params)
+                                   subnet)
 # endregion
 
 

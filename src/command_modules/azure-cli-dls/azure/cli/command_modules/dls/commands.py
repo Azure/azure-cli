@@ -11,14 +11,13 @@ from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account_virtual_network,
     cf_dls_account_trusted_provider)
 
-from ._validators import (
-    validate_subnet
-)
 
 
 # pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
-
+    from ._validators import (
+        validate_subnet
+    )
     adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')

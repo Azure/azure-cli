@@ -16,13 +16,13 @@ from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_
     FirewallAllowAzureIpsState)
 
 from azure.mgmt.datalake.store.models import EncryptionConfigType
-from ._validators import (
-    validate_subnet
-)
 
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
+    from ._validators import (
+        validate_subnet
+    )
     # ARGUMENT DEFINITIONS
     datalake_store_name_type = CLIArgumentType(help='Name of the Data Lake Store account.', options_list=['--account_name'], completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
 
