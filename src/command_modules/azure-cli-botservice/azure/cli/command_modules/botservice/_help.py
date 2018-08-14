@@ -165,7 +165,7 @@ for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'webchat', 'dire
         type: command
         short-summary: Delete {0} Channel on a Bot
     """.format(channelTitle)
-    helps['bot {0} get'.format(channel)] = """
+    helps['bot {0} show'.format(channel)] = """
         type: command
         short-summary: Get details of {0} Channel on a Bot
     """.format(channelTitle)

@@ -120,7 +120,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
 def update(client, parameters, resource_group_name):
     try:
-        return client.bots.update(
+        return client.update(
             resource_group_name=resource_group_name,
             resource_name=parameters.name,
             **(parameters.__dict__)

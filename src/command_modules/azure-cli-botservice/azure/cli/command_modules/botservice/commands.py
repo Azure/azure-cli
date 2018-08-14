@@ -6,7 +6,8 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.botservice._client_factory import (
     get_botservice_management_client,
-    get_botChannels_client)
+    get_botChannels_client,
+    get_botOperations_client)
 from azure.cli.command_modules.botservice._exception_handler import bot_exception_handler
 
 
@@ -14,6 +15,12 @@ def load_command_table(self, _):
     botOperations_commandType = CliCommandType(
         operations_tmpl='azure.mgmt.botservice.operations.bots_operations#BotsOperations.{}',  # pylint: disable=line-too-long
         client_factory=get_botservice_management_client,
+        exception_handler=bot_exception_handler
+    )
+
+    botServices_commandType = CliCommandType(
+        operations_tmpl='azure.mgmt.botservice.operations.bots_operations#BotsOperations.{}',  # pylint: disable=line-too-long
+        client_factory=get_botOperations_client,
         exception_handler=bot_exception_handler
     )
 
@@ -42,6 +49,8 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_bot')
         g.custom_command('delete', 'delete_bot')
         g.custom_command('prepare-publish', 'prepare_publish')
+
+    with self.command_group('bot', botServices_commandType) as g:
         g.generic_update_command('update', setter_name='update', setter_type=updateBotService_commandType)
 
     with self.command_group('bot authsetting', botOperations_commandType) as g:
