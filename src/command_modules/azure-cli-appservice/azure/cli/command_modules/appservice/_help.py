@@ -388,6 +388,26 @@ helps['webapp traffic-routing clear'] = """
     short-summary: Clear the routing rules and send all traffic to production.
 """
 
+helps['webapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['webapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+"""
+
+helps['webapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+"""
+
+helps['webapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
+"""
+
 helps['appservice plan'] = """
     type: group
     short-summary: Manage app service plans.
@@ -781,4 +801,24 @@ helps['functionapp deployment source config-zip'] = """
              az functionapp deployment source config-zip \\
                  -g <myRG> -n <myAppName> \\
                  --src <zip file path location>
+"""
+
+helps['functionapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['functionapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+"""
+
+helps['functionapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+"""
+
+helps['functionapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
 """

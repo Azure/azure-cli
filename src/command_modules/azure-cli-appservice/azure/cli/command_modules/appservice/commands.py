@@ -88,6 +88,11 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_traffic_routing')
         g.custom_command('clear', 'clear_traffic_routing')
 
+    with self.command_group('webapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')
+
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
         g.custom_show_command('show', 'get_site_configs')
@@ -220,3 +225,8 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+
+    with self.command_group('functionapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')

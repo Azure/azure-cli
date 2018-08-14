@@ -565,6 +565,37 @@ class WebappSlotTrafficRouting(ScenarioTest):
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
 
 
+class AppServiceCors(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_cors(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'web': self.create_random_name(prefix='slot-traffic-web', length=24),
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('webapp create -g {rg} -n {web} --plan {plan}')
+        self.cmd('webapp cors add -g {rg} -n {web} --allowed-origins https://msdn.com https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}',
+                 checks=self.check('allowedOrigins', ['https://msdn.com', 'https://msn.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --allowed-origins https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}', checks=self.check('allowedOrigins', ['https://msdn.com']))
+
+    @ResourceGroupPreparer()
+    def test_functionapp_cors(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'function': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'storage': 'functioncorsstorage'
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
+        self.cmd('functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+        self.cmd('functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
+        result = self.cmd('functionapp cors show -g {rg} -n {function}').get_output_in_json()['allowedOrigins']
+        # functionapp has pre-defined cors. We verify the ones we added are in the list
+        self.assertTrue(set(['https://msdn.com', 'https://msn.com']).issubset(set(result)))
+
+
 class WebappSlotSwapScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_slot_swap(self, resource_group):

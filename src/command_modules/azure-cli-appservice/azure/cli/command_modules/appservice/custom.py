@@ -1371,6 +1371,29 @@ def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
 
 
+def add_cors(cmd, resource_group_name, name, allowed_origins):
+    from azure.mgmt.web.models import CorsSettings
+    configs = get_site_configs(cmd, resource_group_name, name)
+    if not configs.cors:
+        configs.cors = CorsSettings()
+    configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
+    return result.cors
+
+
+def remove_cors(cmd, resource_group_name, name, allowed_origins):
+    configs = get_site_configs(cmd, resource_group_name, name)
+    if configs.cors:
+        configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
+        configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
+    return configs.cors
+
+
+def show_cors(cmd, resource_group_name, name):
+    configs = get_site_configs(cmd, resource_group_name, name)
+    return configs.cors
+
+
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
