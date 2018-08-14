@@ -9,7 +9,7 @@ from azure.cli.core.commands.parameters import get_resource_name_completion_list
 import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
 from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
 
-from azure.mgmt.redis.models.redis_management_client_enums import RebootType, RedisKeyType, SkuName
+from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName
 
 from azure.cli.core.commands.parameters import get_enum_type  # TODO: Move this into Knack
 

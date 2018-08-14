@@ -20,10 +20,7 @@ from azure.mgmt.sql.models import (
     ManagedInstance,
     Server,
     ServerAzureADAdministrator,
-    Sku
-)
-
-from azure.mgmt.sql.models.sql_management_client_enums import (
+    Sku,
     AuthenticationType,
     BlobAuditingPolicyState,
     CatalogCollationType,
