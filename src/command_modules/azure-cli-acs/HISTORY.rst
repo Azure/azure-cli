@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.2
++++++
+* `az aks create` now defaults to Standard_DS2_v2 VMs.
+
 2.3.1
 +++++
 * `az aks get-credentials` will now call new apis to get cluster credential.
