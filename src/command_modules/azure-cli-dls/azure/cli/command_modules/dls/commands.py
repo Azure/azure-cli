@@ -16,6 +16,7 @@ from ._validators import (
 )
 
 
+# pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
 
     adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
