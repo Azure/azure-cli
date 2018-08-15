@@ -409,6 +409,9 @@ helps['webapp cors remove'] = """
          - name: remove an allowed origin
            text: >
              az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins:
+           text: >
+             az webapp cors add -g <myRG> -n <myAppName> --allowed-origins
 """
 
 helps['webapp cors show'] = """
@@ -832,6 +835,9 @@ helps['functionapp cors remove'] = """
          - name: remove an allowed origin
            text: >
              az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins:
+           text: >
+             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins
 """
 
 helps['functionapp cors show'] = """

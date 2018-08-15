@@ -1384,7 +1384,10 @@ def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
 def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if configs.cors:
-        configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
+        if allowed_origins:
+            configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
+        else:
+            configs.cors.allowed_origins = []
         configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return configs.cors
 
