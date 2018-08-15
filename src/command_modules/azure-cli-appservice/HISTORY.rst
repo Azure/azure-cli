@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.4
++++++
+* `webapp/functionapp identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+
 0.2.3
 +++++
 * arm tag support on create commands
