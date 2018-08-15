@@ -588,7 +588,6 @@ class AppServiceCors(ScenarioTest):
         self.cmd('webapp cors remove -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
         self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}', checks=self.check('allowedOrigins', []))
 
-
     @ResourceGroupPreparer()
     def test_functionapp_cors(self, resource_group):
         self.kwargs.update({
