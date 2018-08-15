@@ -1371,26 +1371,26 @@ def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
 
 
-def add_cors(cmd, resource_group_name, name, allowed_origins):
+def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     from azure.mgmt.web.models import CorsSettings
-    configs = get_site_configs(cmd, resource_group_name, name)
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.cors
 
 
-def remove_cors(cmd, resource_group_name, name, allowed_origins):
-    configs = get_site_configs(cmd, resource_group_name, name)
+def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
     if configs.cors:
         configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
-        configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
+        configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return configs.cors
 
 
-def show_cors(cmd, resource_group_name, name):
-    configs = get_site_configs(cmd, resource_group_name, name)
+def show_cors(cmd, resource_group_name, name, slot=None):
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
     return configs.cors
 
 

@@ -396,11 +396,19 @@ helps['webapp cors'] = """
 helps['webapp cors add'] = """
     type: command
     short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az webapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
 """
 
 helps['webapp cors remove'] = """
     type: command
     short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
 """
 
 helps['webapp cors show'] = """
@@ -811,11 +819,19 @@ helps['functionapp cors'] = """
 helps['functionapp cors add'] = """
     type: command
     short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
 """
 
 helps['functionapp cors remove'] = """
     type: command
     short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
 """
 
 helps['functionapp cors show'] = """

@@ -571,6 +571,7 @@ class AppServiceCors(ScenarioTest):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'web': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'slot': 'slot1'
         })
         self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
         self.cmd('webapp create -g {rg} -n {web} --plan {plan}')
@@ -579,6 +580,14 @@ class AppServiceCors(ScenarioTest):
                  checks=self.check('allowedOrigins', ['https://msdn.com', 'https://msn.com']))
         self.cmd('webapp cors remove -g {rg} -n {web} --allowed-origins https://msn.com')
         self.cmd('webapp cors show -g {rg} -n {web}', checks=self.check('allowedOrigins', ['https://msdn.com']))
+
+        self.cmd('webapp deployment slot create -g {rg} -n {web} --slot {slot}')
+        self.cmd('webapp cors add -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
+                 checks=self.check('allowedOrigins', ['https://foo.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}', checks=self.check('allowedOrigins', []))
+
 
     @ResourceGroupPreparer()
     def test_functionapp_cors(self, resource_group):
