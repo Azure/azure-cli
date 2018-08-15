@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.45
+++++++
+* Fix issue of loading empty configuration file.
+
 2.0.44
 ++++++
 * use knack/0.4.2 with fix towards numeric value display in table output
