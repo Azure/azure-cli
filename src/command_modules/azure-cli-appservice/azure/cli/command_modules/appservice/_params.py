@@ -163,6 +163,9 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
 
+        with self.argument_context(scope + ' cors') as c:
+            c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
