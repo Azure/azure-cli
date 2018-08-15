@@ -41,7 +41,6 @@ class AuthSettingTests(ScenarioTest):
 
         self.cmd('az bot authsetting delete -g {rg} -n {botname} -c myconnname')
 
-
     def test_service_providers(self):
         self.kwargs.update({
             'service_provider': 'google'

@@ -24,7 +24,6 @@ class ChannelTests(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'global')
         ])
-    
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_webchat_channel(self, resource_group):
@@ -33,12 +32,11 @@ class ChannelTests(ScenarioTest):
         self.cmd('az bot webchat show -g {rg} -n {botname}', checks=[
             self.check('properties.properties.sites.length(@)', 0),
         ])
-        
+
         self.cmd('az bot webchat show -g {rg} -n {botname} --with-secrets', checks=[
             self.check('properties.properties.sites.length(@)', 1),
             self.check('properties.properties.sites[0].isEnabled', True),
         ])
-
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_skype_channel(self, resource_group):
@@ -63,7 +61,6 @@ class ChannelTests(ScenarioTest):
 
         self.cmd('az bot skype delete -g {rg} -n {botname}')
 
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_msteams_channel(self, resource_group):
         self.create_bot(resource_group)
@@ -83,7 +80,6 @@ class ChannelTests(ScenarioTest):
         ])
 
         self.cmd('az bot msteams delete -g {rg} -n {botname}')
-
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_directline_channel(self, resource_group):

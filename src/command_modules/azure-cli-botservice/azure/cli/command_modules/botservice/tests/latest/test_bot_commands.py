@@ -8,8 +8,9 @@ import uuid
 import os
 import shutil
 
+
 class BotTests(ScenarioTest):
-    
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_registration_bot(self, resource_group):
         self.kwargs.update({
@@ -36,7 +37,6 @@ class BotTests(ScenarioTest):
         ])
 
         self.cmd('az bot delete -g {rg} -n {botname}')
-
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_webapp_bot(self, resource_group):
