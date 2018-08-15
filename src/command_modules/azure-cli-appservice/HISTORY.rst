@@ -8,6 +8,7 @@ Release History
 
 0.2.3
 +++++
+* support CORS on functionapp & webapp
 * arm tag support on create commands
 
 0.2.2
