@@ -8,8 +8,6 @@ from knack.util import CLIError
 
 from azure.mgmt.datalake.store.models import (
     UpdateDataLakeStoreAccountParameters,
-    FirewallRule,
-    VirtualNetworkRule,
     CreateDataLakeStoreAccountParameters,
     EncryptionConfigType,
     EncryptionIdentity,
