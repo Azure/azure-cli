@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 2.0.45
 ++++++
-* Minor fixes
+* Fix issue of loading empty configuration file.
 
 2.0.44
 ++++++
