@@ -212,7 +212,7 @@ def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resourc
 
 
 def _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
-    from azure.mgmt.monitor.models.error_response import ErrorResponseException
+    from azure.mgmt.monitor.models import ErrorResponseException
 
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)

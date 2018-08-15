@@ -22,7 +22,7 @@ from azure.cli.command_modules.monitor.validators import (
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -93,7 +93,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics list') as c:
         from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
                                  process_metric_dimension, validate_metric_names)
-        from azure.mgmt.monitor.models.monitor_management_client_enums import AggregationType
+        from azure.mgmt.monitor.models import AggregationType
         c.resource_parameter('resource_uri', arg_group='Target Resource')
         c.extra('start_time', options_list=['--start-time'], validator=process_metric_timespan, arg_group='Time')
         c.extra('end_time', options_list=['--end-time'], arg_group='Time')
