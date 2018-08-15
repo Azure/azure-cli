@@ -12,7 +12,6 @@ from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account_trusted_provider)
 
 
-
 # pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
     from ._validators import (
