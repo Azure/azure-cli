@@ -488,11 +488,10 @@ def load_arguments(self, _):
 
     # endregion
 
+
 def _get_default_admin_username():
     import getpass
     try:
         return getpass.getuser()
     except KeyError:
         return None
-
-
