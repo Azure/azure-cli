@@ -6,21 +6,29 @@
 import json
 import os
 import time
+
 try:
     import collections.abc as collections
 except ImportError:
     import collections
 
-
 from codecs import open as codecs_open
+
+from knack.log import get_logger
+
+try:
+    t_JSONDecodeError = json.JSONDecodeError
+except AttributeError:  # in Python 2.7
+    t_JSONDecodeError = ValueError
 
 
 class Session(collections.MutableMapping):
-    '''A simple dict-like class that is backed by a JSON file.
+    """
+    A simple dict-like class that is backed by a JSON file.
 
     All direct modifications will save the file. Indirect modifications should
     be followed by a call to `save_with_retry` or `save`.
-    '''
+    """
 
     def __init__(self, encoding=None):
         super(Session, self).__init__()
@@ -38,7 +46,9 @@ class Session(collections.MutableMapping):
                     self.save()
             with codecs_open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
-        except (OSError, IOError):
+        except (OSError, IOError, t_JSONDecodeError):
+            get_logger(__name__).warning("Fail to load or parse file %s. It is overridden by default settings.",
+                                         self.filename)
             self.save()
 
     def save(self):
