@@ -19,7 +19,7 @@ helps['bot show'] = """
 """
 helps['bot prepare-publish'] = """
     type: command
-    short-summary: Add azure specific scripts to your local source code directory to 
+    short-summary: Add azure specific scripts to your local source code directory to
                    be able to publish back using az bot publish.
 """
 helps['bot delete'] = """
