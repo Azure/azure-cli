@@ -11,10 +11,10 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
                                                 get_three_state_flag)
-from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
-from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (IotDpsSku,
-                                                                               AllocationPolicy,
-                                                                               AccessRightsDescription)
+from azure.mgmt.iothub.models import IotHubSku
+from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
+                                                          AllocationPolicy,
+                                                          AccessRightsDescription)
 
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions

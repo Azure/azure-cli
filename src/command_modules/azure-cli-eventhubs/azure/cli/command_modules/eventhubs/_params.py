@@ -12,7 +12,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 # pylint: disable=line-too-long
 def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.eventhub.models.event_hub_management_client_enums import KeyType, AccessRights, SkuName
+    from azure.mgmt.eventhub.models import KeyType, AccessRights, SkuName
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
 
