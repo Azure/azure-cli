@@ -199,6 +199,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'description': 'test streaming description',
             'maxCacheAge': 11,
             'scaleUnits': 4,
+            'scaleUnits2': 10,
             'tags': 'foo=bar',
             'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
             'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
@@ -207,13 +208,13 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
         self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
-            self.check('scaleUnits', 4)
+            self.check('scaleUnits', '{scaleUnits}')
         ])
 
-        self.cmd('az ams streaming endpoint scale -g {rg} -a {amsname} -n {streamingEndpointName} --scale-unit 10')
+        self.cmd('az ams streaming endpoint scale -g {rg} -a {amsname} -n {streamingEndpointName} --scale-unit {scaleUnits2}')
 
         self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
-            self.check('scaleUnits', 10)
+            self.check('scaleUnits', '{scaleUnits2}')
         ])
 
         self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
