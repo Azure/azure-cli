@@ -8,7 +8,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type
 
-from azure.mgmt.reservations.models.azure_reservation_api_enums import (
+from azure.mgmt.reservations.models import (
     ReservedResourceType,
     InstanceFlexibility,
     AppliedScopeType

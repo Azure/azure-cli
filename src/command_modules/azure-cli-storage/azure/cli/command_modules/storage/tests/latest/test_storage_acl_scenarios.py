@@ -52,7 +52,7 @@ class StorageAccessControlListTests(StorageScenarioMixin, ScenarioTest):
                          container_id_parameter).assert_with_checks(JMESPathCheck('start', '2016-01-01T00:00:00+00:00'))
         self.storage_cmd('storage {} policy show {} -n test3', account_info, service_type,
                          container_id_parameter).assert_with_checks(
-            JMESPathCheck('expiry', '2018-01-01T00:00:00+00:00'))
+                             JMESPathCheck('expiry', '2018-01-01T00:00:00+00:00'))
         self.storage_cmd('storage {} policy show {} -n test4', account_info, service_type,
                          container_id_parameter).assert_with_checks(JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
                                                                     JMESPathCheck('expiry',

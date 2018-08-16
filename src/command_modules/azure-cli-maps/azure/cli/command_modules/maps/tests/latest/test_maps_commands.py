@@ -6,7 +6,7 @@
 import re
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-from azure.mgmt.maps.models.maps_management_client_enums import KeyType
+from azure.mgmt.maps.models import KeyType
 
 
 class MapsScenarioTests(ScenarioTest):

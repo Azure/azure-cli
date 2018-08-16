@@ -56,6 +56,9 @@ class Linter(object):
     def get_help_entry_type(self, entry_name):
         return self._all_yaml_help.get(entry_name).get('type')
 
+    def get_help_entry_examples(self, entry_name):
+        return self._all_yaml_help.get(entry_name).get('examples', [])
+
     def get_help_entry_parameter_names(self, entry_name):
         return [param_help.get('name', None) for param_help in \
             self._all_yaml_help.get(entry_name).get('parameters', [])]

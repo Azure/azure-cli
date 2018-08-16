@@ -33,3 +33,14 @@ def unrecognized_help_parameter_rule(linter, help_entry):
             violations.append(param_help_name)
     if violations:
         raise RuleError('The following parameter help names are invalid: {}'.format(' | '.join(violations)))
+
+@help_file_entry_rule
+def faulty_help_example_rule(linter, help_entry):
+    violations = []
+    for index, example in enumerate(linter.get_help_entry_examples(help_entry)):
+        if 'az '+ help_entry not in example.get('text', ''):
+            violations.append(str(index))
+
+    if violations:
+        raise RuleError('The following example entry indices do not include the command: {}'.format(
+            ' | '.join(violations)))

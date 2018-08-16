@@ -223,7 +223,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command('policy create', 'create_acl_policy')
         g.storage_custom_command('policy delete', 'delete_acl_policy')
-        g.storage_custom_command('policy show', 'get_acl_policy')
+        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
         g.storage_custom_command('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
 

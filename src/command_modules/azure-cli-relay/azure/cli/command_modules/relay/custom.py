@@ -18,7 +18,6 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
         parameters=RelayNamespace(
             location,
             tags)
-
     )
 
 
