@@ -48,6 +48,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
                    validator=validate_storage_account_id)
 
+    with self.argument_context('ams account storage sync-storage-keys') as c:
+        c.argument('id', required=True)
+
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('sp_name', name_arg_type,
