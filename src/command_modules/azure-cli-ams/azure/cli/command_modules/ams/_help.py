@@ -51,7 +51,7 @@ helps['ams account check-name'] = """
 
 helps['ams account storage'] = """
     type: group
-    short-summary: Manage secondary storage for an Azure Media Services account.
+    short-summary: Manage storage for an Azure Media Services account.
 """
 
 helps['ams account storage add'] = """
@@ -83,7 +83,7 @@ helps['ams account sp reset-credentials'] = """
     short-summary: Generate a new client secret for a service principal configured for an Azure Media Services account.
 """
 
-helps['ams account sync-storage-keys'] = """
+helps['ams account storage sync-storage-keys'] = """
     type: command
     short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
 """
