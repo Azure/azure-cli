@@ -7,9 +7,9 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.mgmt.datalake.store.models import (
-    DataLakeStoreAccountUpdateParameters,
+    UpdateDataLakeStoreAccountParameters,
+    CreateDataLakeStoreAccountParameters,
     FirewallRule,
-    DataLakeStoreAccount,
     EncryptionConfigType,
     EncryptionIdentity,
     EncryptionConfig,
@@ -24,18 +24,17 @@ from azure.cli.command_modules.dls._client_factory import (cf_dls_filesystem)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
-
 logger = get_logger(__name__)
 
 
 def get_update_progress(cli_ctx):
-
     def _update_progress(current, total):
         hook = cli_ctx.get_progress_controller(det=True)
         if total:
             hook.add(message='Alive', value=current, total_val=total)
             if total == current:
                 hook.end()
+
     return _update_progress
 
 
@@ -49,12 +48,11 @@ def list_adls_account(client, resource_group_name=None):
 def create_adls_account(cmd, client, resource_group_name, account_name, location=None, default_group=None, tags=None,
                         encryption_type=EncryptionConfigType.service_managed.value, key_vault_id=None, key_name=None,
                         key_version=None, disable_encryption=False, tier=None):
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    create_params = DataLakeStoreAccount(location,
-                                         tags=tags,
-                                         default_group=default_group,
-                                         new_tier=tier)
+    create_params = CreateDataLakeStoreAccountParameters(location=location,
+                                                         tags=tags,
+                                                         default_group=default_group,
+                                                         new_tier=tier)
 
     if not disable_encryption:
         identity = EncryptionIdentity()
@@ -62,12 +60,14 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
         if encryption_type == EncryptionConfigType.user_managed:
             if not key_name or not key_vault_id or not key_version:
                 # pylint: disable=line-too-long
-                raise CLIError('For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
+                raise CLIError(
+                    'For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
             config.key_vault_meta_info = KeyVaultMetaInfo(key_vault_id, key_name, key_version)
         else:
             if key_name or key_vault_id or key_version:
                 # pylint: disable=line-too-long
-                logger.warning('User supplied Key Vault information. For service managed encryption user supplied Key Vault information is ignored.')
+                logger.warning(
+                    'User supplied Key Vault information. For service managed encryption user supplied Key Vault information is ignored.')
 
         create_params.encryption_config = config
         create_params.identity = identity
@@ -81,7 +81,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
 
 def update_adls_account(client, account_name, resource_group_name, tags=None, default_group=None, firewall_state=None,
                         allow_azure_ips=None, trusted_id_provider_state=None, tier=None, key_version=None):
-    update_params = DataLakeStoreAccountUpdateParameters(
+    update_params = UpdateDataLakeStoreAccountParameters(
         tags=tags,
         default_group=default_group,
         firewall_state=firewall_state,
@@ -95,6 +95,8 @@ def update_adls_account(client, account_name, resource_group_name, tags=None, de
             UpdateKeyVaultMetaInfo(key_version))
 
     return client.update(resource_group_name, account_name, update_params).result()
+
+
 # endregion
 
 
@@ -105,11 +107,13 @@ def add_adls_firewall_rule(client,
                            start_ip_address,
                            end_ip_address,
                            resource_group_name):
-    create_params = FirewallRule(start_ip_address, end_ip_address)
+    create_params = FirewallRule(start_ip_address=start_ip_address, end_ip_address=end_ip_address)
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    firewall_rule_name,
                                    create_params)
+
+
 # endregion
 
 
@@ -132,7 +136,8 @@ def create_adls_item(cmd, account_name, path, content=None, folder=False, force=
             client.rm(path, recursive=folder)
         else:
             # pylint: disable=line-too-long
-            raise CLIError('An item at path: \'{}\' already exists. To overwrite the existing item, specify --force'.format(path))
+            raise CLIError(
+                'An item at path: \'{}\' already exists. To overwrite the existing item, specify --force'.format(path))
 
     if folder:
         return client.mkdir(path)
@@ -151,7 +156,8 @@ def append_adls_item(cmd, account_name, path, content):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     if not client.exists(path):
         # pylint: disable=line-too-long
-        raise CLIError('File at path: \'{}\' does not exist. Create the file before attempting to append to it.'.format(path))
+        raise CLIError(
+            'File at path: \'{}\' does not exist. Create the file before attempting to append to it.'.format(path))
 
     with client.open(path, mode='ab') as f:
         if isinstance(content, str):
@@ -215,7 +221,9 @@ def preview_adls_item(cmd, account_name, path, length=None, offset=0, force=Fals
         length = client.info(path)['length'] - offset
         if length > 1 * 1024 * 1024 and not force:
             # pylint: disable=line-too-long
-            raise CLIError('The remaining data to preview is greater than {} bytes. Please specify a length or use the --force parameter to preview the entire file. The length of the file that would have been previewed: {}'.format(str(1 * 1024 * 1024), str(length)))
+            raise CLIError(
+                'The remaining data to preview is greater than {} bytes. Please specify a length or use the --force parameter to preview the entire file. The length of the file that would have been previewed: {}'.format(
+                    str(1 * 1024 * 1024), str(length)))
 
     return client.read_block(path, offset, length)
 
@@ -239,7 +247,9 @@ def set_adls_item_expiry(cmd, account_name, path, expiration_time):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     if client.info(path)['type'] != 'FILE':
         # pylint: disable=line-too-long
-        raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
+        raise CLIError(
+            'The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(
+                path))
 
     expiration_time = float(expiration_time)
     try:
@@ -253,9 +263,13 @@ def remove_adls_item_expiry(cmd, account_name, path):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     if client.info(path)['type'] != 'FILE':
         # pylint: disable=line-too-long
-        raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
+        raise CLIError(
+            'The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(
+                path))
 
     client.set_expiry(path, ExpiryOptionType.never_expire.value)
+
+
 # endregion
 
 
@@ -294,6 +308,8 @@ def set_adls_item_owner(cmd, account_name, path, owner=None, group=None):
 
 def set_adls_item_permissions(cmd, account_name, path, permission):
     cf_dls_filesystem(cmd.cli_ctx, account_name).chmod(path, permission)
+
+
 # endregion
 
 
