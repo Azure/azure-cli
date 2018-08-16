@@ -307,6 +307,11 @@ helps['ams streaming endpoint scale'] = """
     short-summary: Set the scale of a streaming endpoint.
 """
 
+helps['ams streaming endpoint update'] = """
+    type: command
+    short-summary: Update the details of a streaming endpoint.
+"""
+
 helps['ams live'] = """
     type: group
     short-summary: Manage live streaming operations for an Azure Media Service account.
