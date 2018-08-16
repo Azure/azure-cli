@@ -165,8 +165,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams streaming policy list') as c:
         c.argument('account_name', id_part=None)
 
-    with self.argument_context('ams streaming endpoint list') as c:
-        c.argument('account_name', id_part=None)
+    with self.argument_context('ams streaming endpoint') as c:
+        c.argument('streaming_endpoint_name', name_arg_type, help='The name of the streaming endpoint.')
+        c.argument('account_name', account_name_arg_type)
+
+    with self.argument_context('ams streaming endpoint create') as c:
+        c.argument('tags', arg_type=tags_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('description', help='The streaming endpoint description.')
+        c.argument('scale_units', help='The number of scale units.')
+        c.argument('description', help='The streaming endpoint description.')
+        c.argument('availability_set_name', help='AvailabilitySet name.')
+        c.argument('max_cache_age', help='Max cache age.')
+        c.argument('custom_host_names', nargs='+', help='The custom host names of the streaming endpoint.')
+        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name.')
+        c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
+        c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
+        c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
+        c.argument('auto_start', action='store_true', help='Start the streaming endpoint automatically after creating it.')
+        c.argument('ips', nargs='+', arg_group='Access Control Support', help='Space-separated list of allowed IP addresses for access control. Use "" to clear existing list.')
+
+    with self.argument_context('ams streaming endpoint akamai add') as c:
+        c.argument('identifier', help='Identifier of the key.')
+        c.argument('base64_key', help='Authentication key.')
+        c.argument('expiration', help='The exact time the authentication key.')
+
+    with self.argument_context('ams streaming endpoint akamai remove') as c:
+        c.argument('identifier', help='Identifier of the key.')
 
     with self.argument_context('ams live event') as c:
         c.argument('account_name', account_name_arg_type)
