@@ -34,6 +34,8 @@ The document provides instructions and guidelines on how to author individual co
 
 [15. Preventing particular extensions from being loading](#extension-suppression)
 
+[16. Deprecating Commands and Arguments](#deprecating-commands-and-arguments)
+
 Authoring Commands
 =============================
 
@@ -754,3 +756,51 @@ class MyCommandsLoader(AzCommandsLoader):
                                                                                        reason='These commands are now in the CLI.',
                                                                                        recommend_remove=True))
 ```
+
+## Deprecating Commands and Arguments
+
+The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arugments are supported when deprecating an item:
+
+- `target`: The thing being deprecated. This is often not needed as in most cases the CLI can figure out what is being deprecated.
+- `redirect`: This is the alternative that should be used in lieu of the deprecated thing. If not provided, the item is expected to be removed in the future with no replacement.
+- `hide`: Hide the deprecated item from the help system, reducing discoverability, but still allow it to be used. Accepts either the boolean `True` to immediately hide the item or a core CLI version. If a version is supplied, the item will appear until the core CLI rolls to the specified value, after which it will be hidden.
+- `expiration`: Accepts a core CLI version at which the deprecated item will no longer function. This version will be communicated in all warning messages. 
+
+Deprecation of different command elements are usually accomplished using the `deprecate_info` kwarg in conjunction with a `deprecate` helper method.
+
+***Deprecate Command Group***
+```Python
+with self.command_group('test', test_sdk, deprecate_info=self.deprecate(redirect='new-test', hide=True)) as g:
+  g.show_command('show', 'get')
+  g.command('list', 'list')
+```
+
+This will deprecate the entire command group `test`. Note that call to `self.deprecate`, calling the deprecate helper method off of the command loader. The warning message for this would read: ```This command group has been deprecated and will be removed in a future release. Use `new-test` instead.```
+
+Additionally, since the command group is deprecated then, by extension, all of the commands within it are deprecated as well. They will not be marked as such, but will display a warning:
+
+```This command has been implicitly deprecated because command group `test` is deprecated and will be removed in a future release. Use `new-test` instead.```
+
+***Deprecate Command***
+```Python
+with self.command_group('test', test_sdk) as g:
+  g.command('show-parameters', 'get_params', deprecate_info=g.deprecate(redirect='test show', expiration='2.1.0'))
+```
+
+This will deprecate the command `test show-parameters`. Note that call to `g.deprecate`, calling the deprecate helper method off of the command group. The warning message for this would read: ```This command has been deprecated and will be removed in version 2.1.0. Use `test show` instead.```
+
+***Deprecate Argument***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('junk_flag', help='Something we no longer want to support.' deprecate_info=c.deprecate(expiration='2.1.0'))
+```
+
+This will deprecate the argument `--junk-flag` on `test show-parameters`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Argument `--junk-flag` has been deprecated and will be removed in version 2.1.0.```
+
+***Deprecate Argument Option***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('resource', options_list=['--resource', c.deprecate(target='--resource-id', redirect='--target')])
+```
+
+This will deprecate the argument `--resource-id` option on `test show-parameters` in favor of `--resource`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Option `--resource-id` has been deprecated and will be removed in a future release. Use `--resource` instead.``` Here you must specify `target` in order to identify the deprecated option. When an option value is deprecated, it appears in help as two separate arguments, with the deprecation warning on the deprecated option. 
