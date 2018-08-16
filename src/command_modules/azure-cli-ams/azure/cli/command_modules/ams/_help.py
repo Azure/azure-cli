@@ -172,6 +172,11 @@ helps['ams asset get-sas-urls'] = """
     short-summary: Lists the asset SAS URLs used for uploading and downloading asset content.
 """
 
+helps['ams asset get-encryption-key'] = """
+    type: command
+    short-summary: Gets the Asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
+"""
+
 helps['ams job'] = """
     type: group
     short-summary: Manage jobs for a transform.
