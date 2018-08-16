@@ -83,6 +83,11 @@ helps['ams account sp reset-credentials'] = """
     short-summary: Generate a new client secret for a service principal configured for an Azure Media Services account.
 """
 
+helps['ams account sync-storage-keys'] = """
+    type: command
+    short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
+"""
+
 helps['ams transform'] = """
     type: group
     short-summary: Manage transforms for an Azure Media Services account.
