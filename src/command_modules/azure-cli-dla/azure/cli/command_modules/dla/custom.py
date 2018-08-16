@@ -9,7 +9,6 @@ from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
-# pylint: disable=line-too-long
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 logger = get_logger(__name__)
@@ -66,18 +65,18 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
 
 def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
-    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccount, DataLakeStoreAccountInfo
-    adls_list = list()
-    adls_list.append(DataLakeStoreAccountInfo(default_data_lake_store))
+    from azure.mgmt.datalake.analytics.account.models import (CreateDataLakeAnalyticsAccountParameters,
+                                                              AddDataLakeStoreWithAccountParameters)
+    adls_list = [AddDataLakeStoreWithAccountParameters(name=default_data_lake_store)]
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    create_params = DataLakeAnalyticsAccount(location,
-                                             default_data_lake_store,
-                                             adls_list,
-                                             tags=tags,
-                                             max_degree_of_parallelism=max_degree_of_parallelism,
-                                             max_job_count=max_job_count,
-                                             query_store_retention=query_store_retention,
-                                             new_tier=tier)
+    create_params = CreateDataLakeAnalyticsAccountParameters(location=location,
+                                                             default_data_lake_store_account=default_data_lake_store,
+                                                             data_lake_store_accounts=adls_list,
+                                                             tags=tags,
+                                                             max_degree_of_parallelism=max_degree_of_parallelism,
+                                                             max_job_count=max_job_count,
+                                                             query_store_retention=query_store_retention,
+                                                             new_tier=tier)
 
     return client.create(resource_group_name, account_name, create_params).result()
 
@@ -85,8 +84,8 @@ def create_adla_account(cmd, client, resource_group_name, account_name, default_
 def update_adla_account(client, account_name, resource_group_name, tags=None, max_degree_of_parallelism=None,
                         max_job_count=None, query_store_retention=None, tier=None, firewall_state=None,
                         allow_azure_ips=None):
-    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccountUpdateParameters
-    update_params = DataLakeAnalyticsAccountUpdateParameters(
+    from azure.mgmt.datalake.analytics.account.models import UpdateDataLakeAnalyticsAccountParameters
+    update_params = UpdateDataLakeAnalyticsAccountParameters(
         tags=tags,
         max_degree_of_parallelism=max_degree_of_parallelism,
         max_job_count=max_job_count,
@@ -96,6 +95,8 @@ def update_adla_account(client, account_name, resource_group_name, tags=None, ma
         firewall_allow_azure_ips=allow_azure_ips)
 
     return client.update(resource_group_name, account_name, update_params).result()
+
+
 # endregion
 
 
@@ -114,6 +115,8 @@ def update_adla_blob_storage(client, account_name, storage_account_name, access_
                          storage_account_name,
                          access_key,
                          suffix)
+
+
 # endregion
 
 
@@ -126,17 +129,19 @@ def add_adla_firewall_rule(client, account_name, firewall_rule_name, start_ip_ad
                                    account_name,
                                    firewall_rule_name,
                                    create_params)
+
+
 # endregion
 
 
 # region compute policy
 def create_adla_compute_policy(client, account_name, compute_policy_name, object_id, object_type,
                                resource_group_name, max_dop_per_job=None, min_priority_per_job=None):
-    from azure.mgmt.datalake.analytics.account.models import ComputePolicyCreateOrUpdateParameters
+    from azure.mgmt.datalake.analytics.account.models import CreateOrUpdateComputePolicyParameters
     if not max_dop_per_job and not min_priority_per_job:
         raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
 
-    create_params = ComputePolicyCreateOrUpdateParameters(object_id=object_id,
+    create_params = CreateOrUpdateComputePolicyParameters(object_id=object_id,
                                                           object_type=object_type)
 
     if max_dop_per_job:
@@ -167,6 +172,8 @@ def update_adla_compute_policy(client, account_name, compute_policy_name, resour
                          compute_policy_name,
                          max_dop_per_job,
                          min_priority_per_job)
+
+
 # endregion
 
 
@@ -209,6 +216,8 @@ def update_adla_catalog_credential(client, account_name, database_name, credenti
                                                                        uri,
                                                                        credential_user_name)
     client.update_credential(account_name, database_name, credential_name, update_params)
+
+
 # endregion
 
 
@@ -236,7 +245,8 @@ def list_catalog_tvfs(client, account_name, database_name, schema_name=None):
 
 def list_catalog_table_statistics(client, account_name, database_name, schema_name=None, table_name=None):
     if not schema_name and table_name:
-        logger.warning('--table-name must be specified with --schema-name to be used. Defaulting to list all statistics in the database: %s', database_name)
+        logger.warning('--table-name must be specified with --schema-name to be used. Defaulting to list all '
+                       'statistics in the database: %s', database_name)
 
     if not schema_name:
         return client.list_table_statistics_by_database(account_name, database_name)
@@ -245,6 +255,8 @@ def list_catalog_table_statistics(client, account_name, database_name, schema_na
         return client.list_table_statistics_by_database_and_schema(account_name, database_name, schema_name)
 
     return client.list_table_statistics(account_name, database_name, schema_name, table_name)
+
+
 # endregion
 
 
@@ -255,9 +267,9 @@ def submit_adla_job(client, account_name, job_name, script, runtime_version=None
     from azure.mgmt.datalake.analytics.job.models import (
         JobType, CreateJobParameters, BuildJobParameters, CreateUSqlJobProperties, JobRelationshipProperties)
 
-    if not script or len(script) < 1:
-        # pylint: disable=line-too-long
-        raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
+    if not script:
+        raise CLIError('Could not read script content from the supplied --script param. It is either empty or an '
+                       'invalid file')
 
     job_properties = CreateUSqlJobProperties(script)
     if runtime_version:
@@ -300,14 +312,16 @@ def wait_adla_job(client, account_name, job_id, wait_interval_sec=5, max_wait_ti
     job = client.get(account_name, job_id)
     time_waited_sec = 0
     while job.state != JobState.ended:
-        if max_wait_time_sec > 0 and time_waited_sec >= max_wait_time_sec:
-            # pylint: disable=line-too-long
-            raise CLIError('Data Lake Analytics Job with ID: {0} has not completed in {1} seconds. Check job runtime or increase the value of --max-wait-time-sec'.format(job_id, time_waited_sec))
+        if 0 < max_wait_time_sec <= time_waited_sec:
+            raise CLIError('Data Lake Analytics Job with ID: {0} has not completed in {1} seconds. Check job runtime '
+                           'or increase the value of --max-wait-time-sec'.format(job_id, time_waited_sec))
         logger.info('Job is not yet done. Current job state: \'%s\'', job.state)
         time.sleep(wait_interval_sec)
         job = client.get(account_name, job_id)
 
     return job
+
+
 # endregion
 
 

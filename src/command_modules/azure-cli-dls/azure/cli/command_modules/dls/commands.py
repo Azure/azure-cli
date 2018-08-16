@@ -18,7 +18,7 @@ def load_command_table(self, _):
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
 
     dls_account_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('account_operations', 'AccountOperations'),
+        operations_tmpl=adls_format_path.format('accounts_operations', 'AccountsOperations'),
         client_factory=cf_dls_account
     )
 

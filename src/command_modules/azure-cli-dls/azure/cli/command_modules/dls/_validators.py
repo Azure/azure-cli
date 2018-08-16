@@ -35,6 +35,6 @@ def validate_resource_group_name(cmd, ns):
             account_name = ns.name
         except AttributeError:
             account_name = ns.account_name
-        client = get_mgmt_service_client(cmd.cli_ctx, DataLakeStoreAccountManagementClient).account
+        client = get_mgmt_service_client(cmd.cli_ctx, DataLakeStoreAccountManagementClient).accounts
         group_name = _get_resource_group_from_account_name(client, account_name)
         ns.resource_group_name = group_name

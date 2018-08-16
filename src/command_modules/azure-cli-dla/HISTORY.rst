@@ -5,7 +5,8 @@ Release History
 
 0.2.2
 +++++
-* Minor fixes
+* Update azure-mgmt-datalake-store dependency to 0.5.0
+* Update azure-mgmt-datalake-analytics dependency to 0.5.0
 
 0.2.1
 +++++
