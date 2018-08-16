@@ -411,7 +411,7 @@ helps['webapp cors remove'] = """
              az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
          - name: remove all allowed origins
            text: >
-             az webapp cors add -g <myRG> -n <myAppName> --allowed-origins
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
 """
 
 helps['webapp cors show'] = """
@@ -757,7 +757,7 @@ helps['functionapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az functionapp source-control config-local-git \\
+            az functionapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
@@ -834,10 +834,10 @@ helps['functionapp cors remove'] = """
     examples:
          - name: remove an allowed origin
            text: >
-             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
          - name: remove all allowed origins
            text: >
-             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
 """
 
 helps['functionapp cors show'] = """
