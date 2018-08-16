@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-import json
 from knack.arguments import CLIArgumentType
 from knack.log import get_logger
 
@@ -12,23 +11,42 @@ from azure.cli.core.commands.parameters import (
     tags_type,
     resource_group_name_type,
     get_resource_name_completion_list)
+from azure.cli.core.util import (shell_safe_json_parse, CLIError)
 
-from azure.cli.core.commands.validators import validate_key_value_pairs
+from azure.cli.core.commands.validators import validate_tag
 
 logger = get_logger(__name__)
 name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
 
-def validate_api_properties(string):
-    """ Extracts JSON format or 'a=b;c=d' format as api properties """
-    try:
-        return json.loads(string)
-    except ValueError:
-        result = validate_key_value_pairs(string)
-        if _is_suspected_json(string):
-            logger.warning('Api properties looks like a JSON format but not valid, interpreted as key=value pairs: %s',
-                           str(result))
-        return result
+def extract_key_values_pairs(api_properties):
+    api_properties_dict = {}
+    for item in api_properties:
+        api_properties_dict.update(validate_tag(item))
+    return api_properties_dict
+
+
+def validate_api_properties(ns):
+    """ Extracts JSON format or 'a=b c=d' format as api properties """
+    api_properties = ns.api_properties
+
+    if api_properties is None:
+        return
+
+    if len(api_properties) > 1:
+        ns.api_properties = extract_key_values_pairs(api_properties)
+    else:
+        string = api_properties[0]
+        try:
+            ns.api_properties = shell_safe_json_parse(string)
+            return
+        except CLIError:
+            result = extract_key_values_pairs([string])
+            if _is_suspected_json(string):
+                logger.warning('Api properties looks like a JSON format but not valid, interpreted as key=value pairs:'
+                               ' %s', str(result))
+            ns.api_properties = result
+            return
 
 
 def _is_suspected_json(string):
@@ -44,9 +62,10 @@ def _is_suspected_json(string):
 
 
 api_properties_type = CLIArgumentType(
-    type=validate_api_properties,
-    help="Api properties in JSON format or a=b;c=d format. Some cognitive services (i.e. QnA Maker) "
-         "require extra api properties to create the account."
+    validator=validate_api_properties,
+    help="Api properties in JSON format or a=b c=d format. Some cognitive services (i.e. QnA Maker) "
+         "require extra api properties to create the account.",
+    nargs='*'
 )
 
 
