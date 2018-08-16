@@ -2736,20 +2736,12 @@ def update_service_endpoint_policy(instance, tags=None):
 def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
                                               service_endpoint_policy_definition_name, service, service_resources,
                                               description=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    policy = client.get(resource_group_name, service_endpoint_policy_name)
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
     ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
     policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
                                                  service_resources=service_resources)
-    policy.service_endpoint_policy_definitions.append({
-        'name': service_endpoint_policy_definition_name,
-        'properties': {
-            'description': description,
-            'service': service,
-            'serviceResources': service_resources
-        }
-    })
-    return client.create_or_update(resource_group_name, service_endpoint_policy_name, policy)
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name,
+                                   service_endpoint_policy_definition_name, policy_def)
 # endregion
 
 # region TrafficManagers
