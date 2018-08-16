@@ -5,7 +5,6 @@
 
 # pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
-import getpass
 import json
 import os
 
@@ -485,7 +484,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None,
-              admin_username=getpass.getuser(), ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
+              admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
@@ -1779,7 +1778,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 def create_vmss(cmd, vmss_name, resource_group_name, image,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
-                admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
+                admin_username=None, admin_password=None, authentication_type=None,
                 vm_sku=None, no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, load_balancer_sku=None, application_gateway=None,
