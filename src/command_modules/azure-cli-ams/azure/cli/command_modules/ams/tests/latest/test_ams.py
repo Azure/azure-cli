@@ -94,18 +94,13 @@ class AmsTests(ScenarioTest):
             'location': 'westus2'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-
-        account = self.cmd('az ams account show -n {amsname} -g {rg}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
+        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
 
         self.kwargs.update({
             'storageId': account['storageAccounts'][0]['id']
         })
 
-        self.cmd('az ams account storage -g {rg} -a {amsname} --id "{storageId}"')
+        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --id "{storageId}"')
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
 
