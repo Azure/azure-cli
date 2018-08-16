@@ -85,6 +85,32 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_sync_storage_keys(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        account = self.cmd('az ams account show -n {amsname} -g {rg}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'storageId': account['storageAccounts'][0]['id']
+        })
+
+        self.cmd('az ams account storage -g {rg} -a {amsname} --id "{storageId}"')
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
     def test_ams_storage_add_remove(self, resource_group, storage_account_for_create, storage_account_for_update):
         amsname = self.create_random_name(prefix='ams', length=12)
