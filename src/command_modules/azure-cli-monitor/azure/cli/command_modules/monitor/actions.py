@@ -5,6 +5,8 @@
 
 import argparse
 
+import antlr4
+
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_operator_map,
     get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
@@ -72,6 +74,41 @@ def period_type(value):
     hours = _get_substring(match.regs[7])
     seconds = _get_substring(match.regs[8])
     return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
+
+
+# pylint: disable=protected-access, too-few-public-methods
+class MetricAlertConditionAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        from azure.cli.command_modules.monitor.grammar import (
+            MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
+
+        string_val = ' '.join(values)
+
+        lexer = MetricAlertConditionLexer(antlr4.InputStream(string_val))
+        stream = antlr4.CommonTokenStream(lexer)
+        parser = MetricAlertConditionParser(stream)
+        tree = parser.expression()
+
+        validator = MetricAlertConditionValidator()
+        walker = antlr4.ParseTreeWalker()
+        walker.walk(validator, tree)
+        metric_condition = validator.result()
+        super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
+
+
+# pylint: disable=protected-access, too-few-public-methods
+class MetricAlertAddAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        from azure.mgmt.monitor.models import MetricAlertAction
+        action = MetricAlertAction(
+            action_group_id=values[0],
+            webhook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+        )
+        action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
+                           'DataContracts.Resources.ScheduledQueryRules.Action'
+        super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
 
 
 # pylint: disable=too-few-public-methods
@@ -266,15 +303,26 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
+        from knack.util import CLIError
+
         if type_name == 'email':
-            return EmailReceiver(name=type_properties[0], email_address=type_properties[1])
+            try:
+                return EmailReceiver(name=type_properties[0], email_address=type_properties[1])
+            except IndexError:
+                raise CLIError('usage error: --action email NAME EMAIL_ADDRESS')
         elif type_name == 'sms':
-            return SmsReceiver(
-                name=type_properties[0],
-                country_code=type_properties[1],
-                phone_number=type_properties[2]
-            )
+            try:
+                return SmsReceiver(
+                    name=type_properties[0],
+                    country_code=type_properties[1],
+                    phone_number=type_properties[2]
+                )
+            except IndexError:
+                raise CLIError('usage error: --action sms NAME COUNTRY_CODE PHONE_NUMBER')
         elif type_name == 'webhook':
-            return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1])
+            try:
+                return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1])
+            except IndexError:
+                raise CLIError('usage error: --action webhook NAME URI')
         else:
             raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))

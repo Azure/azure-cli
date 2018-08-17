@@ -29,7 +29,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-monitor==0.5.0'
+    'azure-mgmt-monitor==0.5.2'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -52,7 +52,8 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.monitor',
-        'azure.cli.command_modules.monitor.operations'
+        'azure.cli.command_modules.monitor.operations',
+        'azure.cli.command_modules.monitor.grammar'
     ],
     package_data={'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json']},
     install_requires=DEPENDENCIES,
