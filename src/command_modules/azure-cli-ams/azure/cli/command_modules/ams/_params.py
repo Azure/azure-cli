@@ -9,7 +9,7 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
-from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list, get_presets_definition_name_completion_list
+from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list, get_presets_definition_name_completion_list, get_cdn_provider_completion_list
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
 
@@ -68,7 +68,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('presets',
                    nargs='+',
                    help='Space-separated list of preset names. Allowed values: {}. In addition to the allowed values, you can also pass the local full path to a custom preset JSON file.'
-                   .format(", ".join(get_presets_definition_name_completion_list())))
+                   .format(", ".join(get_cdn_provider_completion_list())))
         c.argument('description', help='The description of the transform.')
 
     with self.argument_context('ams transform list') as c:
@@ -181,7 +181,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('availability_set_name', help='AvailabilitySet name.')
         c.argument('max_cache_age', help='Max cache age.')
         c.argument('custom_host_names', nargs='+', help='The custom host names of the streaming endpoint.')
-        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name.')
+        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}'.format(", ".join(get_cdn_provider_completion_list())))
         c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
         c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
         c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
