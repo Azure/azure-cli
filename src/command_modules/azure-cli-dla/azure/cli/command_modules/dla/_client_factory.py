@@ -7,7 +7,7 @@
 def cf_dla_account(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
-    return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).account
+    return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).accounts
 
 
 def cf_dla_account_firewall(cli_ctx, _):

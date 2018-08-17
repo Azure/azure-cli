@@ -66,18 +66,17 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
 
 def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
-    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccount, DataLakeStoreAccountInfo
-    adls_list = list()
-    adls_list.append(DataLakeStoreAccountInfo(default_data_lake_store))
-    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    create_params = DataLakeAnalyticsAccount(location,
-                                             default_data_lake_store,
-                                             adls_list,
-                                             tags=tags,
-                                             max_degree_of_parallelism=max_degree_of_parallelism,
-                                             max_job_count=max_job_count,
-                                             query_store_retention=query_store_retention,
-                                             new_tier=tier)
+    from azure.mgmt.datalake.analytics.account.models import (CreateDataLakeAnalyticsAccountParameters,
+                                                              AddDataLakeStoreWithAccountParameters)
+    adls_list = [AddDataLakeStoreWithAccountParameters(name=default_data_lake_store)]
+    create_params = CreateDataLakeAnalyticsAccountParameters(location=location,
+                                                             default_data_lake_store_account=default_data_lake_store,
+                                                             data_lake_store_accounts=adls_list,
+                                                             tags=tags,
+                                                             max_degree_of_parallelism=max_degree_of_parallelism,
+                                                             max_job_count=max_job_count,
+                                                             query_store_retention=query_store_retention,
+                                                             new_tier=tier)
 
     return client.create(resource_group_name, account_name, create_params).result()
 
@@ -85,8 +84,8 @@ def create_adla_account(cmd, client, resource_group_name, account_name, default_
 def update_adla_account(client, account_name, resource_group_name, tags=None, max_degree_of_parallelism=None,
                         max_job_count=None, query_store_retention=None, tier=None, firewall_state=None,
                         allow_azure_ips=None):
-    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccountUpdateParameters
-    update_params = DataLakeAnalyticsAccountUpdateParameters(
+    from azure.mgmt.datalake.analytics.account.models import UpdateDataLakeAnalyticsAccountParameters
+    update_params = UpdateDataLakeAnalyticsAccountParameters(
         tags=tags,
         max_degree_of_parallelism=max_degree_of_parallelism,
         max_job_count=max_job_count,
@@ -132,11 +131,11 @@ def add_adla_firewall_rule(client, account_name, firewall_rule_name, start_ip_ad
 # region compute policy
 def create_adla_compute_policy(client, account_name, compute_policy_name, object_id, object_type,
                                resource_group_name, max_dop_per_job=None, min_priority_per_job=None):
-    from azure.mgmt.datalake.analytics.account.models import ComputePolicyCreateOrUpdateParameters
+    from azure.mgmt.datalake.analytics.account.models import CreateOrUpdateComputePolicyParameters
     if not max_dop_per_job and not min_priority_per_job:
         raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
 
-    create_params = ComputePolicyCreateOrUpdateParameters(object_id=object_id,
+    create_params = CreateOrUpdateComputePolicyParameters(object_id=object_id,
                                                           object_type=object_type)
 
     if max_dop_per_job:
