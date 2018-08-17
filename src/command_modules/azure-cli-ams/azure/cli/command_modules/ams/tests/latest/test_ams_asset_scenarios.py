@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
@@ -104,3 +105,36 @@ class AmsAssetTests(ScenarioTest):
         self.cmd('az ams asset get-sas-urls -a {amsname} -n {assetName} -g {rg}', checks=[
             self.check('length(@)', 2)
         ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_asset_get_encryption_key(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        assetName = self.create_random_name(prefix='asset', length=12)
+        alternateId = self.create_random_name(prefix='aid', length=12)
+        description = self.create_random_name(prefix='desc', length=12)
+
+        self.kwargs.update({
+            'assetName': assetName,
+            'alternateId': alternateId,
+            'description': description
+        })
+
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description {description} --alternate-id {alternateId}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('alternateId', '{alternateId}'),
+            self.check('description', '{description}')
+        ])
+
+        with self.assertRaises(CLIError):
+            self.cmd('az ams asset get-encryption-key -a {amsname} -n {assetName} -g {rg}')
