@@ -159,7 +159,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
                      self.check('id', '{app}'),
                      self.check('storageUrl != null', True),
                      self.check('version', '{app_p}'),
-                     self.check('state', 'active')])
+                     self.check('state', 'Active')])
 
         self.cmd('batch application package activate -g {rg} -n {acc} --application-id {app}'
                  ' --version {app_p} --format zip')
@@ -169,7 +169,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
                      self.check('id', '{app}'),
                      self.check('format', 'zip'),
                      self.check('version', '{app_p}'),
-                     self.check('state', 'active')])
+                     self.check('state', 'Active')])
 
         self.cmd('batch application set -g {rg} -n {acc} --application-id {app} '
                  '--default-version {app_p}')
@@ -178,7 +178,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
             self.check('id', '{app}'),
             self.check('defaultVersion', '{app_p}'),
             self.check('packages[0].format', 'zip'),
-            self.check('packages[0].state', 'active')])
+            self.check('packages[0].state', 'Active')])
 
         # test batch applcation delete
         self.cmd('batch application package delete -g {rg} -n {acc} --application-id {app} '
