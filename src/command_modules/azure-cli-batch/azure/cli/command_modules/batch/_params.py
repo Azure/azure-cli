@@ -7,8 +7,7 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.batch.models.batch_management_client_enums import \
-    (AccountKeyType)
+from azure.mgmt.batch.models import AccountKeyType
 from azure.batch.models.batch_service_client_enums import \
     (ComputeNodeDeallocationOption)
 

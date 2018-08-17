@@ -40,7 +40,9 @@ jobs:
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
     - stage: verify
-      env: PURPOSE='Automation'
+      env:
+      - PURPOSE='Automation'
+      - REDUCE_SDK='True'
       script: ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify

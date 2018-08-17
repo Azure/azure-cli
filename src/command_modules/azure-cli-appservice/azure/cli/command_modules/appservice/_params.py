@@ -9,7 +9,7 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
-                                                get_three_state_flag, get_enum_type)
+                                                get_three_state_flag, get_enum_type, tags_type)
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
 
 from ._completers import get_hostname_completion_list
@@ -68,6 +68,8 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host webapp on Linux worker')
+        c.argument('tags', arg_type=tags_type)
+
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
         c.ignore('allow_pending_state')
@@ -113,6 +115,8 @@ def load_arguments(self, _):
             c.argument('deployment_zip', options_list=['--deployment-zip', '-z'], help='perform deployment using zip file')
             c.argument('deployment_source_url', options_list=['--deployment-source-url', '-u'], help='Git repository URL to link with manual integration')
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'], help='the branch to deploy')
+            c.argument('tags', arg_type=tags_type)
+
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
         with self.argument_context(scope + ' config ssl upload') as c:
@@ -158,6 +162,9 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
+
+        with self.argument_context(scope + ' cors') as c:
+            c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

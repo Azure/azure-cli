@@ -79,7 +79,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
-        g.custom_command('identity show', 'show_identity')
+        g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
@@ -87,6 +87,11 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_traffic_routing')
         g.custom_show_command('show', 'show_traffic_routing')
         g.custom_command('clear', 'clear_traffic_routing')
+
+    with self.command_group('webapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -183,7 +188,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
         g.custom_command('identity assign', 'assign_identity')
-        g.custom_command('identity show', 'show_identity')
+        g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
@@ -220,3 +225,8 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+
+    with self.command_group('functionapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')

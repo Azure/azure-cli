@@ -1361,7 +1361,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                location=None,
                admin_username="azureuser",
                kubernetes_version='',
-               node_vm_size="Standard_DS1_v2",
+               node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,
@@ -1536,14 +1536,20 @@ def aks_get_versions(cmd, client, location):
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    access_profile = client.get_access_profile(
-        resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
-
-    if not access_profile:
-        raise CLIError("No Kubernetes access profile found.")
+    credentialResults = None
+    if admin:
+        credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
     else:
-        kubeconfig = access_profile.kube_config.decode(encoding='UTF-8')
-        _print_or_merge_credentials(path, kubeconfig)
+        credentialResults = client.list_cluster_user_credentials(resource_group_name, name)
+
+    if not credentialResults:
+        raise CLIError("No Kubernetes credentials found.")
+    else:
+        try:
+            kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
+            _print_or_merge_credentials(path, kubeconfig)
+        except (IndexError, ValueError):
+            raise CLIError("Fail to find kubeconfig file.")
 
 
 ADDONS = {

@@ -2,6 +2,13 @@
 
 Release History
 ===============
+
+0.2.3
++++++
+* support CORS on functionapp & webapp
+* arm tag support on create commands
+* `webapp/functionapp identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+
 0.2.2
 +++++
 * fix a bug that prevent from creating a function-app using storage accounts in external resource groups
