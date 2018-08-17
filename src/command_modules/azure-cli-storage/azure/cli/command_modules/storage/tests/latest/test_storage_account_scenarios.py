@@ -162,7 +162,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
     def test_show_usage_no_location(self):
-        with self.assertRaises(SystemExit) as err:
+        with self.assertRaises(SystemExit):
             self.cmd('storage account show-usage')
 
     @ResourceGroupPreparer()
