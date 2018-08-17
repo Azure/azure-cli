@@ -24,7 +24,7 @@ def load_command_table(self, _):
         client_factory=get_botOperations_client,
         exception_handler=bot_exception_handler
     )
-    
+
     botConnections_commandType = CliCommandType(
         operations_tmpl='azure.mgmt.botservice.operations.bot_connection_operations#BotConnectionOperations.{}',  # pylint: disable=line-too-long
         client_factory=get_botConnections_client,
