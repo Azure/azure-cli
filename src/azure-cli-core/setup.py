@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.44"
+VERSION = "2.0.45"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,6 +53,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
+    'adal>=1.0.2',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',

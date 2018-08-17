@@ -357,30 +357,36 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # delete recursively without pattern
         src_container = create_and_populate_container()
         cmd = 'storage blob delete-batch -s {}'.format(src_container)
-        self.storage_cmd(cmd, storage_account_info).assert_with_checks(JMESPathCheck('length(@)', 41))
+        self.storage_cmd(cmd, storage_account_info)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
 
         # delete recursively with wild card *, and use URL as source
         src_container = create_and_populate_container()
         src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
         src_url = src_url[:src_url.rfind('/')]
 
-        self.storage_cmd('storage blob delete-batch -s {} --pattern *', storage_account_info,
-                         src_url).assert_with_checks(JMESPathCheck('length(@)', 41))
+        self.storage_cmd('storage blob delete-batch -s {} --pattern *', storage_account_info, src_url)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
 
         # delete recursively with wild card after dir
         src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern apple/*', storage_account_info,
-                         src_container).assert_with_checks(JMESPathCheck('length(@)', 10))
+        self.storage_cmd('storage blob delete-batch -s {} --pattern apple/*', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 31))
 
         # delete recursively with wild card before name
         src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern */file_0', storage_account_info,
-                         src_container).assert_with_checks(JMESPathCheck('length(@)', 4))
+        self.storage_cmd('storage blob delete-batch -s {} --pattern */file_0', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 37))
 
         # delete recursively with non-existing pattern
         src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern nonexists/*', storage_account_info,
-                         src_container).assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.storage_cmd('storage blob delete-batch -s {} --pattern nonexists/*', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 41))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -396,30 +402,44 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # delete recursively without pattern
         src_share = create_and_populate_share()
         cmd = 'storage file delete-batch -s {}'.format(src_share)
-        self.storage_cmd(cmd, storage_account_info).assert_with_checks(JMESPathCheck('length(@)', 41))
+        self.storage_cmd(cmd, storage_account_info)
+        self.storage_cmd('storage file list -s {} --exclude-dir', storage_account_info,
+                         src_share).assert_with_checks(JMESPathCheck('length(@)', 0))
+        for path in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
+            self.storage_cmd('storage file list -s {} -p {} --exclude-dir', storage_account_info,
+                             src_share, path).assert_with_checks(JMESPathCheck('length(@)', 0))
 
         # delete recursively with wild card *, and use URL as source
         src_share = create_and_populate_share()
         src_url = self.storage_cmd('storage file url -s {} -p readme -otsv', storage_account_info, src_share).output
         src_url = src_url[:src_url.rfind('/')]
 
-        self.storage_cmd('storage file delete-batch -s {} --pattern *', storage_account_info,
-                         src_url).assert_with_checks(JMESPathCheck('length(@)', 41))
+        self.storage_cmd('storage file delete-batch -s {} --pattern *', storage_account_info, src_url)
+        self.storage_cmd('storage file list -s {} --exclude-dir', storage_account_info,
+                         src_share).assert_with_checks(JMESPathCheck('length(@)', 0))
+        for path in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
+            self.storage_cmd('storage file list -s {} -p {} --exclude-dir', storage_account_info,
+                             src_share, path).assert_with_checks(JMESPathCheck('length(@)', 0))
 
         # delete recursively with wild card after dir
         src_share = create_and_populate_share()
-        self.storage_cmd('storage file delete-batch -s {} --pattern apple/*', storage_account_info,
-                         src_share).assert_with_checks(JMESPathCheck('length(@)', 10))
+        self.storage_cmd('storage file delete-batch -s {} --pattern apple/*', storage_account_info, src_share)
+        self.storage_cmd('storage file list -s {} -p apple --exclude-dir', storage_account_info,
+                         src_share).assert_with_checks(JMESPathCheck('length(@)', 0))
 
         # delete recursively with wild card before name
         src_share = create_and_populate_share()
-        self.storage_cmd('storage file delete-batch -s {} --pattern */file_0', storage_account_info,
-                         src_share).assert_with_checks(JMESPathCheck('length(@)', 4))
+        self.storage_cmd('storage file delete-batch -s {} --pattern */file_0', storage_account_info, src_share)
+        for path in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
+            self.storage_cmd('storage file list -s {} -p {} --exclude-dir', storage_account_info,
+                             src_share, path).assert_with_checks(JMESPathCheck('length(@)', 9))
 
         # delete recursively with non-existing pattern
         src_share = create_and_populate_share()
-        self.storage_cmd('storage file delete-batch -s {} --pattern nonexists/*', storage_account_info,
-                         src_share).assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.storage_cmd('storage file delete-batch -s {} --pattern nonexists/*', storage_account_info, src_share)
+        for path in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
+            self.storage_cmd('storage file list -s {} -p {} --exclude-dir', storage_account_info,
+                             src_share, path).assert_with_checks(JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

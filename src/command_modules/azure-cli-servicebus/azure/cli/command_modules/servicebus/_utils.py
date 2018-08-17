@@ -5,7 +5,7 @@
 
 
 def accessrights_converter(accessrights):
-    from azure.mgmt.servicebus.models.service_bus_management_client_enums import AccessRights
+    from azure.mgmt.servicebus.models import AccessRights
     accessrights_new = []
     if 'Send' in accessrights:
         accessrights_new.append(AccessRights.send)

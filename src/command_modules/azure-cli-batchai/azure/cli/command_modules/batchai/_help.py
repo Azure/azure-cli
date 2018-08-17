@@ -110,7 +110,7 @@ helps['batchai cluster auto-scale'] = """
     examples:
         - name: Make a cluster to auto scale between 0 and 10 nodes depending on number of queued and running jobs.
           text:
-            az batchai auto-scale -g MyResourceGroup -w MyWorkspace -n MyCluster --min 0 --max 10
+            az batchai cluster auto-scale -g MyResourceGroup -w MyWorkspace -n MyCluster --min 0 --max 10
 """
 
 helps['batchai cluster delete'] = """
@@ -199,18 +199,18 @@ helps['batchai cluster file list'] = """
     examples:
         - name: List names and sizes of files and directories inside of $AZ_BATCHAI_STDOUTERR_DIR.
           text: |
-            az batchai cluster list-files -g MyResourceGroup -w MyWorkspace -c MyCluster -o table
+            az batchai cluster file list -g MyResourceGroup -w MyWorkspace -c MyCluster -o table
         - name: List names, sizes and download URLs for files and directories inside of $AZ_BATCHAI_STDOUTERR_DIR.
           text: |
-            az batchai cluster list-files -g MyResourceGroup -w MyWorkspace -c MyCluster
+            az batchai cluster file list -g MyResourceGroup -w MyWorkspace -c MyCluster
         - name: List names, sizes and download URLs for files and directories inside of $AZ_BATCHAI_STDOUTERR_DIR/folder/subfolder.
           text: |
-            az batchai cluster list-files -g MyResourceGroup -w MyWorkspace -c MyCluster \\
+            az batchai cluster file list -g MyResourceGroup -w MyWorkspace -c MyCluster \\
                 -p folder/subfolder
         - name: List names, sizes and download URLs for files and directories inside of $AZ_BATCHAI_STDOUTERR_DIR making
                 download URLs to remain valid for one hour.
           text: |
-            az batchai cluster list-files -g MyResourceGroup -w MyWorkspace -c MyCluster \\
+            az batchai cluster file list -g MyResourceGroup -w MyWorkspace -c MyCluster \\
                 --expiry 60
 """
 
@@ -249,7 +249,7 @@ helps['batchai experiment list'] = """
     examples:
         - name: List experiments.
           text:
-            az batchai workspace list -g MyResourceGroup -w MyWorkspace -o table
+            az batchai experiment list -g MyResourceGroup -w MyWorkspace -o table
 """
 
 helps['batchai experiment show'] = """
@@ -258,7 +258,7 @@ helps['batchai experiment show'] = """
     examples:
         - name: Show information about an experiment.
           text:
-            az batchai workspace show -g MyResourceGroup -w MyWorkspace -n MyExperiment -o table
+            az batchai experiment show -g MyResourceGroup -w MyWorkspace -n MyExperiment -o table
 """
 
 helps['batchai job'] = """
@@ -445,7 +445,7 @@ helps['batchai file-server create'] = """
             az batchai file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS -c nfs.json
         - name: Create a NFS manually providing parameters.
           text: |
-            az file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS \\
+            az batchai file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS \\
                 -s Standard_D14 --disk-count 4 --disk-size 512 \\
                 --storage-sku Premium_LRS --caching-type readonly \\
                 -u $USER -k ~/.ssh/id_rsa.pub

@@ -231,7 +231,7 @@ def process_metric_aggregation(namespace):
 
 
 def process_metric_result_type(namespace):
-    from azure.mgmt.monitor.models.monitor_management_client_enums import ResultType
+    from azure.mgmt.monitor.models import ResultType
 
     ns = vars(namespace)
     metadata_only = ns.pop('metadata', False)

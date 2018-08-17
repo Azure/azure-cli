@@ -149,7 +149,7 @@ helps['eventhubs namespace authorization-rule keys list'] = """
     short-summary: Shows the connection strings for namespace
     examples:
         - name: Shows the connection strings of Authorizationrule for the namespace.
-          text: az eventhubs namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az eventhubs namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['eventhubs namespace authorization-rule keys renew'] = """
