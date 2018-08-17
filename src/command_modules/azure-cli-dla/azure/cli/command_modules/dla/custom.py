@@ -64,7 +64,7 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
     return to_return
 
 
-def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
+def create_adla_account(client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
     from azure.mgmt.datalake.analytics.account.models import (CreateDataLakeAnalyticsAccountParameters,
                                                               AddDataLakeStoreWithAccountParameters)
