@@ -19,7 +19,7 @@ def list_resources(client, resource_group_name=None):
 
 
 def create(
-        client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
+        client, resource_group_name, account_name, sku_name, kind, location, tags=None, api_properties=None, yes=None):
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
         ' or the Translator Speech API to improve Microsoft products and services.'\
@@ -43,7 +43,11 @@ def create(
         if not option:
             raise CLIError('Operation cancelled.')
     sku = Sku(sku_name)
-    properties = {}
+
+    if api_properties is None:
+        properties = {}
+    else:
+        properties = {"apiProperties": api_properties}
     params = CognitiveServicesAccountCreateParameters(sku, kind, location, properties, tags)
     return client.create(resource_group_name, account_name, params)
 
