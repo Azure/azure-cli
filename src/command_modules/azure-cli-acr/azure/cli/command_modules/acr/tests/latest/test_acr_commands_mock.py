@@ -20,12 +20,12 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show,
     acr_repository_delete,
     acr_repository_untag,
-    _get_authorization_header,
     MANIFEST_V2_HEADER
 )
 from azure.cli.command_modules.acr._docker_utils import (
     get_login_credentials,
-    get_access_credentials
+    get_access_credentials,
+    get_authorization_header
 )
 from azure.cli.core.mock import DummyCli
 
@@ -53,7 +53,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/_catalog',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params={
                 'n': 20,
                 'orderby': None
@@ -68,7 +68,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/_catalog',
-            headers=_get_authorization_header(None, 'password'),
+            headers=get_authorization_header(None, 'password'),
             params={
                 'n': 10,
                 'orderby': None
@@ -107,7 +107,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/tags/list',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params={
                 'n': 20,
                 'orderby': None
@@ -125,7 +125,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags',
-            headers=_get_authorization_header(None, 'password'),
+            headers=get_authorization_header(None, 'password'),
             params={
                 'n': 10,
                 'orderby': 'timedesc'
@@ -163,7 +163,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/_acr/testrepository/manifests/list',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params={
                 'n': 20,
                 'orderby': None
@@ -179,7 +179,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests',
-            headers=_get_authorization_header(None, 'password'),
+            headers=get_authorization_header(None, 'password'),
             params={
                 'n': 10,
                 'orderby': 'timedesc'
@@ -214,7 +214,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -226,7 +226,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -238,7 +238,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -274,7 +274,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/_acr/testrepository/repository',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -284,7 +284,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                               registry_name='testregistry',
                               image='testrepository:testtag',
                               yes=True)
-        expected_get_headers = _get_authorization_header('username', 'password')
+        expected_get_headers = get_authorization_header('username', 'password')
         expected_get_headers.update(MANIFEST_V2_HEADER)
         mock_requests_get.assert_called_with(
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
@@ -293,7 +293,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -306,7 +306,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -318,7 +318,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -328,14 +328,14 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
 
         # Delete manifest with tag (deprecating)
         acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', manifest='', yes=True)
-        expected_get_headers = _get_authorization_header('username', 'password')
+        expected_get_headers = get_authorization_header('username', 'password')
         expected_get_headers.update(MANIFEST_V2_HEADER)
         mock_requests_get.assert_called_with(
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
@@ -344,7 +344,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
@@ -354,7 +354,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'),
+            headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
             verify=mock.ANY)
