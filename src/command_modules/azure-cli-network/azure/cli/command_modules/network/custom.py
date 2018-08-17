@@ -1815,6 +1815,21 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     return _get_property(poller.result().backend_address_pools, item_name)
 
 
+def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
+                            backend_address_pool, outbound_ports=None, frontend_ip_configurations=None,
+                            protocol=None, enable_tcp_reset=None, idle_timeout=None):
+    OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    lb = client.get(resource_group_name, load_balancer_name)
+    rule = OutboundRule(
+        protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
+        backend_address_pool=SubResource(id=backend_address_pool), frontend_ip_configurations=frontend_ip_configurations,
+        allocated_outbound_ports=outbound_ports, name=item_name)
+    _upsert(lb, 'outbound_rules', rule, 'name')
+    poller = client.create_or_update(resource_group_name, load_balancer_name, lb)
+    return _get_property(poller.result().outbound_rules, item_name)
+
+
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
     Probe = cmd.get_models('Probe')

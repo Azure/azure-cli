@@ -462,6 +462,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='probes',
                                  custom_func_name='set_lb_probe')
 
+    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
+        g.custom_command('create', 'create_lb_outbound_rule')
+
     # endregion
 
     # region LocalGateways
