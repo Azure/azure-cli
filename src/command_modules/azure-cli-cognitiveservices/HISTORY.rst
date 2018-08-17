@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Add new parameter --api-properties, which is required for creating some of the services.
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
