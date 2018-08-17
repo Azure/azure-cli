@@ -56,7 +56,7 @@ def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_conf
 
     # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
     # the resource retrieved to a create_parameters object
-    update_params = RedisUpdateParameters(
+    update_params = RedisUpdateParameters(  # pylint: disable=too-many-function-args
         existing.redis_configuration,
         existing.enable_non_ssl_port,
         existing.tenant_settings,
@@ -79,7 +79,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
-    update_params = RedisUpdateParameters(
+    update_params = RedisUpdateParameters(  # pylint: disable=too-many-function-args
         instance.redis_configuration,
         instance.enable_non_ssl_port,
         instance.tenant_settings,
@@ -113,15 +113,15 @@ def cli_redis_create(cmd, client,
     """
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
     params = RedisCreateParameters(
-        location,
-        Sku(sku, vm_size[0], vm_size[1:]),
-        tags,
-        redis_configuration,
-        enable_non_ssl_port,
-        tenant_settings,
-        shard_count,
-        subnet_id,
-        static_ip)
+        location=location,
+        sku=Sku(sku, vm_size[0], vm_size[1:]),
+        tags=tags,
+        redis_configuration=redis_configuration,
+        enable_non_ssl_port=enable_non_ssl_port,
+        tenant_settings=tenant_settings,
+        shard_count=shard_count,
+        subnet_id=subnet_id,
+        static_ip=static_ip)
     return client.create(resource_group_name, name, params)
 
 # endregion
