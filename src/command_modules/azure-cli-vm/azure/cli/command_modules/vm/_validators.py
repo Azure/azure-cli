@@ -303,6 +303,9 @@ def _validate_location(cmd, namespace, zone_info, size_info):
         if zone_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
             temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
+            # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
+            if not hasattr(temp, 'location_info'):
+                return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
                 raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
