@@ -937,7 +937,7 @@ def list_provider_operations(cmd):
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
-    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_assignments')
+    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
     if version == '2015-07-01':
         return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
