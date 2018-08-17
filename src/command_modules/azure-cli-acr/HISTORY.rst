@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.4
++++++
+* Provide a workaround for runtime operations without ARM requests.
+
 2.1.3
 +++++
 * Add content-trust policy commands.
