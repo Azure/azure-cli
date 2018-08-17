@@ -20,11 +20,12 @@ class BotTests(ScenarioTest):
             'app_id': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}', checks=[
+        self.cmd('az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1', checks=[
             self.check('name', '{botname}'),
             self.check('properties.description', '{description}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'global')
+            self.check('location', 'global'),
+            self.check('tags.key1', 'value1')
         ])
 
         self.cmd('az bot show -g {rg} -n {botname}', checks=[

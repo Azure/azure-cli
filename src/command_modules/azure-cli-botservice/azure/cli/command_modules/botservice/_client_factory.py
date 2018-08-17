@@ -24,3 +24,7 @@ def get_botChannels_client(cli_ctx, *_):
 
 def get_operations_client(cli_ctx, *_):
     return get_botservice_management_client(cli_ctx).operations
+
+
+def get_botConnections_client(cli_ctx, *_):
+    return get_botservice_management_client(cli_ctx).bot_connection

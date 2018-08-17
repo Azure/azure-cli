@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader
+from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
 from azure.cli.command_modules.botservice._help import helps  # pylint: disable=unused-import
 from azure.cli.command_modules.botservice._client_factory import get_botservice_management_client
 
@@ -17,7 +17,10 @@ class BotServiceCommandsLoader(AzCommandsLoader):
             client_factory=get_botservice_management_client)
         super(BotServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=custom_type,
-                                                       min_profile='2017-03-10-profile')
+                                                       min_profile='2017-03-10-profile',
+                                                       suppress_extension=ModExtensionSuppress(__name__, 'botservice', '0.3.0',
+                                                       reason='These commands are now in the CLI',
+                                                       recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.botservice.commands import load_command_table

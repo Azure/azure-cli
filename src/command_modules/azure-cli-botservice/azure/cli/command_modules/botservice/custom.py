@@ -73,9 +73,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
            language='Csharp', version='v3'):
-    if tags:
-        raise CLIError('Tags not supported yet')
-
     display_name = display_name or resource_name
     kind = kind.lower()
 
@@ -98,6 +95,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             location='global',
             sku=sku.Sku(name=sku_name),
             kind=kind,
+            tags=tags,
             properties=BotProperties(
                 display_name=display_name,
                 description=description,
@@ -126,13 +124,6 @@ def update(client, parameters, resource_group_name):
         )
     except AttributeError:
         return None
-
-
-def delete_bot(client, resource_group_name, resource_name):
-    return client.bots.delete(
-        resource_group_name=resource_group_name,
-        resource_name=resource_name
-    )
 
 
 def create_bot_json(cmd, client, resource_group_name, resource_name, app_password=None, raw_bot_properties=None):
@@ -175,14 +166,6 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
     return raw_bot_properties
 
 
-def get_connections(client, resource_group_name, resource_name):
-    return client.bot_connection.list_by_bot_service(resource_group_name, resource_name)
-
-
-def get_connection(client, resource_group_name, resource_name, connection_name):
-    return client.bot_connection.get(resource_group_name, resource_name, connection_name)
-
-
 def create_connection(client, resource_group_name, resource_name, connection_name, client_id,
                       client_secret, scopes, service_provider_name, parameters=None):
     from azure.mgmt.botservice.models import ConnectionSetting, ConnectionSettingProperties, ConnectionSettingParameter
@@ -207,10 +190,6 @@ def create_connection(client, resource_group_name, resource_name, connection_nam
         )
     )
     return client.bot_connection.create(resource_group_name, resource_name, connection_name, setting)
-
-
-def delete_connection(client, resource_group_name, resource_name, connection_name):
-    return client.bot_connection.delete(resource_group_name, resource_name, connection_name)
 
 
 def get_service_providers(client, name=None):
