@@ -5,11 +5,10 @@
 
 from azure.cli.core.commands import CliCommandType
 
-from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules
-from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
-
 
 def load_command_table(self, _):
+    from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules
+    from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
 
     redis_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations.redis_operations#RedisOperations.{}',
