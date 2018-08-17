@@ -169,7 +169,7 @@ helps['ams asset get-sas-urls'] = """
 
 helps['ams asset get-encryption-key'] = """
     type: command
-    short-summary: Gets the Asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
+    short-summary: Get the asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
 """
 
 helps['ams job'] = """
