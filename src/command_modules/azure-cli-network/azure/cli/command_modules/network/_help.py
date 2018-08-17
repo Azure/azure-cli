@@ -2783,6 +2783,36 @@ helps['network public-ip update'] = """
         - name: Update a public IP resource with a DNS name label and static allocation.
           text: az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
 """
+
+helps['network public-ip prefix'] = """
+    type: group
+    short-summary: Manage public IP prefix resources.
+"""
+
+helps['network public-ip prefix create'] = """
+    type: command
+    short-summary: Create a public IP prefix resource.
+"""
+
+helps['network public-ip prefix delete'] = """
+    type: command
+    short-summary: Delete a public IP prefix resource.
+"""
+
+helps['network public-ip prefix list'] = """
+    type: command
+    short-summary: List public IP prefix resources.
+"""
+
+helps['network public-ip prefix show'] = """
+    type: command
+    short-summary: Get the details of a public IP prefix resource.
+"""
+
+helps['network public-ip prefix update'] = """
+    type: command
+    short-summary: Update a public IP prefix resource.
+"""
 # endregion
 
 # region Route Table

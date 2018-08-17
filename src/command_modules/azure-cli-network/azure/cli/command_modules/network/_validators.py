@@ -263,6 +263,17 @@ def validate_peering_type(namespace):
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
 
 
+def validate_public_ip_prefix(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.public_ip_prefix and not is_valid_resource_id(namespace.public_ip_prefix):
+        namespace.public_ip_prefix = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            name=namespace.public_ip_prefix,
+            namespace='Microsoft.Network',
+            type='publicIPPrefixes')
+
+
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
@@ -617,6 +628,7 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_public_ip_prefix(cmd, namespace)
     validate_tags(namespace)
 
 
