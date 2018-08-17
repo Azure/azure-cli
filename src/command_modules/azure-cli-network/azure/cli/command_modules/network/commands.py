@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
-    cf_ddos_protection_plans)
+    cf_ddos_protection_plans, cf_public_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -138,6 +138,12 @@ def load_command_table(self, _):
     network_public_ip_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.{}',
         client_factory=cf_public_ip_addresses
+    )
+
+    network_public_ip_prefix_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.public_ip_prefixes_operations#PublicIPPrefixesOperations.{}',
+        client_factory=cf_public_ip_prefixes,
+        min_api='2018-07-01'
     )
 
     network_rf_sdk = CliCommandType(
@@ -555,6 +561,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
         g.generic_update_command('update', custom_func_name='update_public_ip')
+
+    with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
+        g.custom_command('create', 'create_public_ip_prefix')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_public_ip_prefixes')
+        g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_public_ip_prefix')
 
     # endregion
 
