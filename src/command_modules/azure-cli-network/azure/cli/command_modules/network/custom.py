@@ -120,6 +120,10 @@ def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
 
+def list_public_ip_prefixes(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
+
+
 def list_route_tables(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'route_tables', resource_group_name)
 
@@ -2556,9 +2560,10 @@ def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, r
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings')
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
+                     public_ip_prefix=None):
+    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
+        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
     if not allocation_method:
         allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
@@ -2577,6 +2582,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -2589,7 +2596,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
 
 def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None):
+                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
+                     public_ip_prefix=None):
     if dns_name is not None or reverse_fqdn is not None:
         if instance.dns_settings:
             if dns_name is not None:
@@ -2612,9 +2620,28 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
         instance.sku.name = sku
     if ip_tags:
         instance.ip_tags = ip_tags
+    if public_ip_prefix:
+        SubResource = cmd.get_models('SubResource')
+        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
     return instance
 
 
+def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
+                            location=None, tags=None):
+    PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
+    prefix = PublicIPPrefix(
+        location=location,
+        prefix_length=prefix_length,
+        sku=PublicIPPrefixSku(name='Standard'),
+        tags=tags,
+    )
+    return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
+
+
+def update_public_ip_prefix(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
 # endregion
 
 
