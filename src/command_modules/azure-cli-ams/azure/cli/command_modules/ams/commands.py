@@ -113,10 +113,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams streaming endpoint', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
         g.command('list', 'list')
-        g.command('start', 'start')
-        g.command('stop', 'stop')
+        g.custom_command('start', 'start',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
+        g.custom_command('stop', 'stop',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
         g.custom_command('create', 'create_streaming_endpoint',
-                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('scale', 'scale')
