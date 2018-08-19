@@ -73,7 +73,7 @@ helps['bot msteams create'] = """
     examples:
         - name: Create a Microsoft Teams Channel for a Bot with calling enabled
           text: |-
-            az bot msteams -n botName -g MyResourceGroup --enable-calling
+            az bot msteams create -n botName -g MyResourceGroup --enable-calling
             --calling-web-hook https://www.myapp.com/
 """
 helps['bot skype create'] = """
@@ -82,7 +82,7 @@ helps['bot skype create'] = """
     examples:
         - name: Create a Skype Channel for a Bot with messaging and screen sharing enabled
           text: |-
-            az bot skype -n botName -g MyResourceGroup --enable-messaging
+            az bot skype create -n botName -g MyResourceGroup --enable-messaging
             --enable-screen-sharing
 """
 helps['bot kik create'] = """
@@ -196,8 +196,6 @@ helps['bot msteams'] = """
     type: group
     short-summary: Manage the Microsoft Teams Channel on a Bot.
 """
-
-
 helps['bot webchat show'] = """
     type: command
     short-summary: Get details of the Webchat Channel on a Bot
