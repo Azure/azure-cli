@@ -80,4 +80,4 @@ def load_command_table(self, _):
             g.command('delete', '{}_delete'.format(channel))
 
     with self.command_group('bot webchat', channelOperations_commandType) as g:
-            g.command('show', 'webchat_get')
+        g.command('show', 'webchat_get')

@@ -17,7 +17,7 @@ from azure.cli.command_modules.botservice._webutils import (
     get_app_settings,
     _get_site_credential,
     _get_scm_url)
-from azure.mgmt.botservice.models import Bot, BotProperties, sku
+from azure.mgmt.botservice.models import Bot, BotProperties, Sku
 
 logger = get_logger(__name__)
 
@@ -93,7 +93,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             raise CLIError('Endpoint and msa app id are required for creating a registration bot')
         parameters = Bot(
             location='global',
-            sku=sku.Sku(name=sku_name),
+            sku=Sku(name=sku_name),
             kind=kind,
             tags=tags,
             properties=BotProperties(
@@ -108,7 +108,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             resource_name=resource_name,
             parameters=parameters
         )
-    elif kind == 'webapp' or kind == 'function':
+    if kind in ('webapp', 'function'):
         return create_app(cmd, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
                           storageAccountName, location, sku_name, appInsightsLocation, language, version)
     else:

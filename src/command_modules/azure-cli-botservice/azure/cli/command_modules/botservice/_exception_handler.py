@@ -7,7 +7,6 @@ from knack.util import CLIError
 
 
 def bot_exception_handler(ex):
-    raise ex
     from azure.mgmt.botservice.models import ErrorException
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import ClientRequestError  # pylint: disable=import-error

@@ -57,7 +57,7 @@ def load_arguments(self, _):
         c.argument('access_token', options_list=['--token'], help='The facebook application access token.')
 
     with self.argument_context('bot email create') as c:
-        c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag())
+        c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state')
         c.argument('email_address', options_list=['--email-address', '-a'], help='The email address for the bot.')
         c.argument('password', options_list=['--password', '-p'], help='The email password for the bot.')
 

@@ -168,7 +168,7 @@ helps['bot authsetting list-providers'] = """
 """
 
 
-for channel in ['Facebook', 'email', 'Skype', 'Kik', 'WebChat', 'Directline', 'Telegram', 'SMS', 'Slack']:
+for channel in ['Facebook', 'email', 'Skype', 'Kik', 'Directline', 'Telegram', 'SMS', 'Slack']:
     channel_name = channel.lower()
     helps['bot {0} delete'.format(channel_name)] = """
         type: command
@@ -195,4 +195,14 @@ helps['bot msteams show'] = """
 helps['bot msteams'] = """
     type: group
     short-summary: Manage the Microsoft Teams Channel on a Bot.
+"""
+
+
+helps['bot webchat show'] = """
+    type: command
+    short-summary: Get details of the Webchat Channel on a Bot
+"""
+helps['bot webchat'] = """
+    type: group
+    short-summary: Manage the Webchat Channel on a Bot.
 """

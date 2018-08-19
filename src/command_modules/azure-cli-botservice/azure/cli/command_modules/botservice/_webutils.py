@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from knack.util import CLIError
 
 
 def _process_parameters(parameter_lists):
