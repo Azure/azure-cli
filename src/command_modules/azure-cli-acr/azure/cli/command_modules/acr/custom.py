@@ -183,9 +183,11 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
                        "--password", password,
                        login_server])
             p.wait()
-        elif b'--password-stdin' in stderr:
-            pass
         else:
+            if b'--password-stdin' in stderr:
+                errors = [err for err in stderr.decode().split('\n') if '--password-stdin' not in err]
+                stderr = '\n'.join(errors).encode()
+
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)
             output.write(stderr)
