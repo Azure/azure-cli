@@ -13,6 +13,14 @@ for test_folder in `find src/command_modules -name tests`; do
         cp -r $t/recordings/2017-03-09-profile/* $test_folder/profile_2017_03_09/recordings/
     fi
 
+    if [ -d $t/recordings/2018-03-01-hybrid ]; then
+        mkdir -p $test_folder/hybrid_2018_03_01
+        cp -r $t/* $test_folder/hybrid_2018_03_01
+        rm -r $test_folder/hybrid_2018_03_01/recordings
+        mkdir -p $test_folder/hybrid_2018_03_01/recordings
+        cp -r $t/recordings/2018-03-01-hybrid/* $test_folder/hybrid_2018_03_01/recordings/
+    fi
+
     mkdir -p $test_folder/latest
     cp -r $t/* $test_folder/latest/
     
