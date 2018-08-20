@@ -1246,7 +1246,8 @@ helps['vm identity show'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: Manage run commands on a Virtual Machine. For more information on run commands see Azure VM docs.
+    short-summary: Manage run commands on a Virtual Machine.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
