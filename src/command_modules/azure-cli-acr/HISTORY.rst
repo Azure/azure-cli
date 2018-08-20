@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.4
++++++
+* Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
+
 2.1.3
 +++++
 * Add content-trust policy commands.

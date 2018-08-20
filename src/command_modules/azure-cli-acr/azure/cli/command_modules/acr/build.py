@@ -401,11 +401,13 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path):
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
         # ignore common vcs dir or file
         if tarinfo.name in common_vcs_ignore_list:
-            logger.debug(".dockerignore: ignore vcs file '%s'", tarinfo.name)
+            logger.warning("Excluding '%s' based on default ignore rules", tarinfo.name)
             return True, parent_matching_rule_index
 
         if ignore_list is None:
-            return False, parent_matching_rule_index
+            # if .dockerignore doesn't exists, inherit from parent
+            # eg, it will ignore the files under .git folder.
+            return parent_ignored, parent_matching_rule_index
 
         # always include docker file
         # file path comparision is case-sensitive
