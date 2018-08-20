@@ -1246,12 +1246,13 @@ helps['vm identity show'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
     type: command
-    short-summary: run command on a vm
+    short-summary: Execute a specific run command on a vm.
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
