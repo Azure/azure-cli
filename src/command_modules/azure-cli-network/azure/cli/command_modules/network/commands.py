@@ -46,7 +46,8 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
-    process_vpn_connection_create_namespace, process_route_table_create_namespace)
+    process_vpn_connection_create_namespace, process_route_table_create_namespace,
+    process_lb_outbound_rule_namespace)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -463,7 +464,9 @@ def load_command_table(self, _):
                                  custom_func_name='set_lb_probe')
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
-        g.custom_command('create', 'create_lb_outbound_rule')
+        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
+                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
 
     # endregion
 
