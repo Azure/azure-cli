@@ -18,22 +18,22 @@ name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id
 def load_arguments(self, _):
     with self.argument_context('bot') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('resource_name', options_list=['--name', '-n'], help='The resource name of the Bot.', arg_type=name_arg_type)
+        c.argument('resource_name', options_list=['--name', '-n'], help='The resource name of the bot.', arg_type=name_arg_type)
 
     with self.argument_context('bot create') as c:
-        c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(['F0', 'S1']), help='The Sku of the Bot', arg_group='Registration Bot Specific')
-        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'function', 'webapp']), help='The kind of the Bot.')
-        c.argument('display_name', help='the Display Name of the bot.If not specified, defaults to the name of the bot.', arg_group='Registration Bot Specific')
-        c.argument('description', options_list=['--description', '-d'], help='The Description of the Bot.', arg_group='Registration Bot Specific')
-        c.argument('endpoint', options_list=['-e', '--endpoint'], help='The Messaging Endpoint of the Bot.', arg_group='Registration Bot Specific')
-        c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account id (MSA ID) to be used with the Bot.')
-        c.argument('password', options_list=['-p', '--password'], help='the Microsoft account (MSA) password for the Bot.')
-        c.argument('storageAccountName', options_list=['-s', '--storage'], help='Storage account name to be used with the bot.If not provided, a new account will be created.', arg_group='Web/Function Bot Specific')
+        c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(['F0', 'S1']), help='The Sku of the bot', arg_group='Registration bot Specific')
+        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'function', 'webapp']), help='The kind of the bot.')
+        c.argument('display_name', help='the Display Name of the bot.If not specified, defaults to the name of the bot.', arg_group='Registration bot Specific')
+        c.argument('description', options_list=['--description', '-d'], help='The Description of the bot.', arg_group='Registration bot Specific')
+        c.argument('endpoint', options_list=['-e', '--endpoint'], help='The Messaging Endpoint of the bot.', arg_group='Registration bot Specific')
+        c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account id (MSA ID) to be used with the bot.')
+        c.argument('password', options_list=['-p', '--password'], help='the Microsoft account (MSA) password for the bot.')
+        c.argument('storageAccountName', options_list=['-s', '--storage'], help='Storage account name to be used with the bot.If not provided, a new account will be created.', arg_group='Web/Function bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(['Csharp', 'Node']), arg_group='Web/Function Bot Specific')
-        c.argument('appInsightsLocation', help='The location for the app insights to be used with the bot.', options_list=['--insights-location'], arg_group='Web/Function Bot Specific',
+        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(['Csharp', 'Node']), arg_group='Web/Function bot Specific')
+        c.argument('appInsightsLocation', help='The location for the app insights to be used with the bot.', options_list=['--insights-location'], arg_group='Web/Function bot Specific',
                    arg_type=get_enum_type(['South Central US', 'East US', 'West US 2', 'North Europe', 'West Europe', 'Southeast Asia']))
-        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder sdk version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function Bot Specific')
+        c.argument('version', options_list=['-v', '--version'], help='The Microsoft bot Builder sdk version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')
 
     with self.argument_context('bot publish') as c:
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to upload bot code from.')
@@ -80,7 +80,7 @@ def load_arguments(self, _):
     with self.argument_context('bot kik create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state.')
         c.argument('user_name', options_list=['--user-name', '-u'], help='kik user name.')
-        c.argument('is_validated', help='Whether or not the Kik account has been validated for use with the Bot.', arg_type=get_three_state_flag())
+        c.argument('is_validated', help='Whether or not the Kik account has been validated for use with the bot.', arg_type=get_three_state_flag())
         c.argument('api_key', options_list=['--key'], help='the api key for the kik account.')
 
     with self.argument_context('bot webchat create') as c:
@@ -97,13 +97,13 @@ def load_arguments(self, _):
     with self.argument_context('bot telegram create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state.')
         c.argument('access_token', help='The access token for the telegram account.')
-        c.argument('is_validated', help='Whether or not the Telegram account has been validated for use with the Bot.', arg_type=get_three_state_flag())
+        c.argument('is_validated', help='Whether or not the Telegram account has been validated for use with the bot.', arg_type=get_three_state_flag())
 
     with self.argument_context('bot sms create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state.')
         c.argument('account_sid', help='The account SID for the Twilio account.')
         c.argument('auth_token', help='The token token for the Twilio account.')
-        c.argument('is_validated', help='Whether or not the Twilio account has been validated for use with the Bot.', arg_type=get_three_state_flag())
+        c.argument('is_validated', help='Whether or not the Twilio account has been validated for use with the bot.', arg_type=get_three_state_flag())
         c.argument('phone', help='The phone number for the Twilio account.')
 
     with self.argument_context('bot slack create') as c:
