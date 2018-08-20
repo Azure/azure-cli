@@ -7,7 +7,6 @@ import re
 import time
 import os
 from random import uniform
-from datetime import datetime
 from io import BytesIO
 import tempfile
 import tarfile
