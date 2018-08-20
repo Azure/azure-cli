@@ -5,6 +5,7 @@ Release History
 
 2.1.4
 +++++
+* Provide a workaround for runtime operations without ARM requests.
 * Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
 
 2.1.3
