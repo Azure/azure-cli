@@ -864,15 +864,28 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace):
+
+    # check if id_rsa is present but id_rsa.pub is missing
+    def _public_key_is_missing():
+        private_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')
+        public_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        return (os.path.exists(private_key_path) and not os.path.exists(public_key_path))
+
+
+
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
-        logger.info('Use existing SSH public key file: %s', string_or_file)
+        logger.info('Reusing existing SSH public key from %s', string_or_file)
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not keys.is_valid_ssh_rsa_public_key(content):
         if namespace.generate_ssh_keys:
+
+            if _public_key_is_missing():
+                raise CLIError('SSH private key id_rsa exists but public key is missing. Please export the public key.')
+
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
             public_key_filepath = string_or_file
