@@ -3,13 +3,10 @@
 Release History
 ===============
 
-2.1.5
-+++++
-* Minor fixes
-
 2.1.4
 +++++
 * Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
+* Minor fixes
 
 2.1.3
 +++++
