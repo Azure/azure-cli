@@ -23,8 +23,11 @@ logger = get_logger(__name__)
 
 
 def get_bot_site_name(endpoint):
-    import urllib.parse
-    split_parts = urllib.parse.urlsplit(endpoint)
+    try:
+        from urllib.parse import urlsplit
+    except ImportError:
+        from urlparse import urlsplit  # pylint: disable=import-error
+    split_parts = urlsplit(endpoint)
     return split_parts.netloc.split('.', 1)[0]
 
 

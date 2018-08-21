@@ -60,7 +60,9 @@ class BotTests(ScenarioTest):
         ])
 
         # download the bot
-        self.cmd('az bot download -g {rg} -n {botname}')
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
 
         # publish it back
