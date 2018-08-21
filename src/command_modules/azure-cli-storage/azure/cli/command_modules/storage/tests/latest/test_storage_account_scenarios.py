@@ -6,6 +6,7 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPrepare
                                StorageAccountPreparer, api_version_constraint, live_only)
 from azure.cli.core.profiles import ResourceType
 from .storage_test_util import StorageScenarioMixin
+from knack.util import CLIError
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -160,6 +161,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
+    def test_show_usage_no_location(self):
+        with self.assertRaises(SystemExit):
+            self.cmd('storage account show-usage')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_logging_operations(self, resource_group, storage_account):
@@ -236,7 +241,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az account list-locations',
                  checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
 
-    @live_only()
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_customer_managed_key(self, resource_group, storage_account):

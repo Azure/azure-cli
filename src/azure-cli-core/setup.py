@@ -83,6 +83,11 @@ if sys.version_info < (2, 7, 9):
     DEPENDENCIES.append('ndg-httpsclient')
     DEPENDENCIES.append('pyasn1')
 
+if sys.version_info < (3, 0):
+    DEPENDENCIES.append('antlr4-python2-runtime')
+else:
+    DEPENDENCIES.append('antlr4-python3-runtime')
+
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
