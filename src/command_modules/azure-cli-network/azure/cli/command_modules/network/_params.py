@@ -25,12 +25,13 @@ from azure.cli.command_modules.network._validators import (
     validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_from_location,
-    get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id)
+    get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
+    validate_service_endpoint_policy)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer)
 from azure.cli.core.util import get_json_object
 
 
@@ -807,6 +808,27 @@ def load_arguments(self, _):
 
     # endregion
 
+    # region ServiceEndpoint
+    service_endpoint_policy_name = CLIArgumentType(options_list='--policy-name', id_part='name', help='Name of the service endpoint policy.', completer=get_resource_name_completion_list('Microsoft.Network/serviceEndpointPolicies'))
+
+    with self.argument_context('network service-endpoint policy') as c:
+        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, options_list=['--name', '-n'])
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network service-endpoint policy show') as c:
+        c.ignore('expand')
+
+    with self.argument_context('network service-endpoint policy-definition') as c:
+        c.argument('service_endpoint_policy_name', service_endpoint_policy_name)
+        c.argument('service_endpoint_policy_definition_name', name_arg_type, help='Name of the service endpoint policy definition', id_part='child_name_1')
+        c.argument('description', help='Description of the policy definition.')
+        c.argument('service', help='Service name the policy definition applies to.', completer=service_endpoint_completer)
+        c.argument('service_resources', help='Space-separated list of service resources the definition applies to.', nargs='+')
+
+    with self.argument_context('network service-endpoint policy-definition list') as c:
+        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, id_part=None)
+    # endregion
+
     # region TrafficManagers
     monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
@@ -886,6 +908,7 @@ def load_arguments(self, _):
         c.argument('network_security_group', validator=get_nsg_validator())
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+        c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
