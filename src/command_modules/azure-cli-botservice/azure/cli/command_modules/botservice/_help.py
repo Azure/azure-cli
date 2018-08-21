@@ -7,15 +7,15 @@ from knack.help_files import helps
 
 helps['bot'] = """
     type: group
-    short-summary: Manage Bot Services.
+    short-summary: Manage Microsoft Bot Services.
 """
 helps['bot create'] = """
     type: command
-    short-summary: Create a new Bot Service.
+    short-summary: Create a new Microsoft Bot Service.
 """
 helps['bot show'] = """
     type: command
-    short-summary: Get an existing Bot Service.
+    short-summary: Get an existing Microsoft Bot Service.
 """
 helps['bot prepare-publish'] = """
     type: command
@@ -28,7 +28,7 @@ helps['bot delete'] = """
 """
 helps['bot update'] = """
     type: command
-    short-summary: Update an existing Bot Service.
+    short-summary: Update an existing Microsoft Bot Service.
     examples:
         - name: Update description on a bot
           text: |-
@@ -36,7 +36,7 @@ helps['bot update'] = """
 """
 helps['bot publish'] = """
     type: command
-    short-summary: Publish to an existing Bot Service.
+    short-summary: Publish to an existing Microsoft Bot Service.
     long-summary: Publish your source code to your Azure Web App.
     examples:
         - name: Publish source code to your Azure App, from within the bot code folder
@@ -45,99 +45,99 @@ helps['bot publish'] = """
 """
 helps['bot download'] = """
     type: command
-    short-summary: Download an existing Bot Service.
+    short-summary: Download an existing Microsoft Bot Service.
     long-summary: The source code is downloaded from the web app associated with the Bot.
                   You can then make changes to it and publish it back to your app.
 """
 helps['bot facebook create'] = """
     type: command
-    short-summary: Create a Facebook Channel on a Bot.
+    short-summary: Create a Facebook Channel on a bot.
     examples:
-        - name: Create a Facebook Channel for a Bot
+        - name: Create a Facebook Channel for a bot
           text: |-
             az bot facebook create -n botName -g MyResourceGroup -appid myAppId
             --page-d myPageId --secret mySecret --token myToken
 """
 helps['bot email create'] = """
     type: command
-    short-summary: Create an Email Channel on a Bot.
+    short-summary: Create an Email Channel on a bot.
     examples:
-        - name: Create a Email Channel for a Bot
+        - name: Create a Email Channel for a bot
           text: |-
             az bot email create -n botName -g MyResourceGroup -a abc@outlook.com
             -p password
 """
 helps['bot msteams create'] = """
     type: command
-    short-summary: Create a Microsoft Teams Channel on a Bot.
+    short-summary: Create a Microsoft Teams Channel on a bot.
     examples:
-        - name: Create a Microsoft Teams Channel for a Bot with calling enabled
+        - name: Create a Microsoft Teams Channel for a bot with calling enabled
           text: |-
             az bot msteams create -n botName -g MyResourceGroup --enable-calling
             --calling-web-hook https://www.myapp.com/
 """
 helps['bot skype create'] = """
     type: command
-    short-summary: Create a Skype Channel on a Bot.
+    short-summary: Create a Skype Channel on a bot.
     examples:
-        - name: Create a Skype Channel for a Bot with messaging and screen sharing enabled
+        - name: Create a Skype Channel for a bot with messaging and screen sharing enabled
           text: |-
             az bot skype create -n botName -g MyResourceGroup --enable-messaging
             --enable-screen-sharing
 """
 helps['bot kik create'] = """
     type: command
-    short-summary: Create a Kik Channel on a Bot.
+    short-summary: Create a Kik Channel on a bot.
     examples:
-        - name: Create a Kik Channel for a Bot.
+        - name: Create a Kik Channel for a bot.
           text: |-
             az bot kik create -n botName -g MyResourceGroup -u mykikname
             -p password --key key --is-validated
 """
 helps['bot directline create'] = """
     type: command
-    short-summary: Create a DirectLine Channel on a Bot with only v3 protocol enabled.
+    short-summary: Create a DirectLine Channel on a bot with only v3 protocol enabled.
     examples:
-        - name: Create a DirectLine Channel for a Bot.
+        - name: Create a DirectLine Channel for a bot.
           text: |-
             az bot directline create -n botName -g MyResourceGroup --disablev1
 """
 helps['bot telegram create'] = """
     type: command
-    short-summary: Create a Telegram Channel on a Bot.
+    short-summary: Create a Telegram Channel on a bot.
     examples:
-        - name: Create a Telegram Channel for a Bot.
+        - name: Create a Telegram Channel for a bot.
           text: |-
             az bot telegram create -n botName -g MyResourceGroup --access-token token
             --is-validated
 """
 helps['bot sms create'] = """
     type: command
-    short-summary: Create an SMS Channel on a Bot.
+    short-summary: Create an SMS Channel on a bot.
     examples:
-        - name: Create an SMS Channel for a Bot.
+        - name: Create an SMS Channel for a bot.
           text: |-
-            a bot sms create -n botName -g MyResourceGroup --account-sid sid
+            az bot sms create -n botName -g MyResourceGroup --account-sid sid
             --auth-token token --is-validated
 """
 helps['bot slack create'] = """
     type: command
-    short-summary: Create a Slack Channel on a Bot.
+    short-summary: Create a Slack Channel on a bot.
     examples:
-        - name: Create a Slack Channel for a Bot.
+        - name: Create a Slack Channel for a bot.
           text: |-
             az bot slack create -n botName -g MyResourceGroup --client-id clientid
             --client-secret secret --verification-token token
 """
 helps['bot authsetting'] = """
     type: group
-    short-summary: Manage OAuth Connection Settings on a Bot.
+    short-summary: Manage OAuth Connection Settings on a bot.
 """
 helps['bot authsetting create'] = """
     type: command
-    short-summary: Create an OAuth Connection Setting on a Bot.
+    short-summary: Create an OAuth Connection Setting on a bot.
     examples:
-        - name: Create a new OAuth Connection Setting on a Bot.
+        - name: Create a new OAuth Connection Setting on a bot.
           text: |-
             az bot authsetting create -g MyResourceGroup -n botName -c myConnectionName
             --client-id clientId --client-secret secret --scopes "scope1 scope2" --service google
@@ -145,15 +145,15 @@ helps['bot authsetting create'] = """
 """
 helps['bot authsetting show'] = """
     type: command
-    short-summary: Show details of an OAuth Connection Setting on a Bot.
+    short-summary: Show details of an OAuth Connection Setting on a bot.
 """
 helps['bot authsetting list'] = """
     type: command
-    short-summary: Show all OAuth Connection Settings on a Bot.
+    short-summary: Show all OAuth Connection Settings on a bot.
 """
 helps['bot authsetting delete'] = """
     type: command
-    short-summary: Delete an OAuth Connection Setting on a Bot.
+    short-summary: Delete an OAuth Connection Setting on a bot.
 """
 helps['bot authsetting list-providers'] = """
     type: command
@@ -172,35 +172,35 @@ for channel in ['Facebook', 'email', 'Skype', 'Kik', 'Directline', 'Telegram', '
     channel_name = channel.lower()
     helps['bot {0} delete'.format(channel_name)] = """
         type: command
-        short-summary: Delete the {0} Channel on a Bot
+        short-summary: Delete the {0} Channel on a bot
     """.format(channel)
     helps['bot {0} show'.format(channel_name)] = """
         type: command
-        short-summary: Get details of the {0} Channel on a Bot
+        short-summary: Get details of the {0} Channel on a bot
     """.format(channel)
     helps['bot {0}'.format(channel_name)] = """
         type: group
-        short-summary: Manage the {0} Channel on a Bot.
+        short-summary: Manage the {0} Channel on a bot.
     """.format(channel)
 
 
 helps['bot msteams delete'] = """
     type: command
-    short-summary: Delete the Microsoft Teams Channel on a Bot
+    short-summary: Delete the Microsoft Teams Channel on a bot
 """
 helps['bot msteams show'] = """
     type: command
-    short-summary: Get details of the Microsoft Teams Channel on a Bot
+    short-summary: Get details of the Microsoft Teams Channel on a bot
 """
 helps['bot msteams'] = """
     type: group
-    short-summary: Manage the Microsoft Teams Channel on a Bot.
+    short-summary: Manage the Microsoft Teams Channel on a bot.
 """
 helps['bot webchat show'] = """
     type: command
-    short-summary: Get details of the Webchat Channel on a Bot
+    short-summary: Get details of the Webchat Channel on a bot
 """
 helps['bot webchat'] = """
     type: group
-    short-summary: Manage the Webchat Channel on a Bot.
+    short-summary: Manage the Webchat Channel on a bot.
 """
