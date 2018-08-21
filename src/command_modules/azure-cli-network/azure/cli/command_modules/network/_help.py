@@ -3024,6 +3024,78 @@ helps['network route-filter rule update'] = """
 """
 # endregion
 
+# region Service Endpoint
+helps['network service-endpoint'] = """
+    type: group
+    short-summary: Manage policies related to service endpoints.
+"""
+
+helps['network service-endpoint policy'] = """
+    type: group
+    short-summary: Manage service endpoint policies.
+"""
+
+helps['network service-endpoint policy create'] = """
+    type: command
+    short-summary: Create a service endpoint policy.
+"""
+
+helps['network service-endpoint policy delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy.
+"""
+
+helps['network service-endpoint policy list'] = """
+    type: command
+    short-summary: List service endpoint policies.
+"""
+
+helps['network service-endpoint policy show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy.
+"""
+
+helps['network service-endpoint policy update'] = """
+    type: command
+    short-summary: Update a service endpoint policy.
+"""
+
+helps['network service-endpoint policy-definition'] = """
+    type: group
+    short-summary: Manage service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition create'] = """
+    type: command
+    short-summary: Create a service endpoint policy definition.
+    parameters:
+        - name: --service
+          populator-commands:
+          - az network service-endpoint list
+"""
+
+helps['network service-endpoint policy-definition delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition list'] = """
+    type: command
+    short-summary: List service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition update'] = """
+    type: command
+    short-summary: Update a service endpoint policy definition.
+"""
+
+# endregion
+
 # region Traffic Manager
 helps['network traffic-manager'] = """
     type: group
@@ -3261,7 +3333,7 @@ helps['network vnet subnet list'] = """
     short-summary: List the subnets in a virtual network.
     examples:
         - name: List the subnets in a virtual network.
-          text: az network vnet subnet list -g MyResourceGroup -n MyVNet
+          text: az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
 """
 
 helps['network vnet subnet show'] = """

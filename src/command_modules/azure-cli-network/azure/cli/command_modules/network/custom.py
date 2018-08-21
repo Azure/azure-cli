@@ -2712,6 +2712,50 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
 # endregion
 
 
+# region ServiceEndpoints
+def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
+    ServiceEndpointPolicy = cmd.get_models('ServiceEndpointPolicy')
+    policy = ServiceEndpointPolicy(tags=tags, location=location)
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name, policy)
+
+
+def list_service_endpoint_policies(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def update_service_endpoint_policy(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
+                                              service_endpoint_policy_definition_name, service, service_resources,
+                                              description=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
+    ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
+    policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
+                                                 service_resources=service_resources)
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name,
+                                   service_endpoint_policy_definition_name, policy_def)
+
+def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
+    if service is not None:
+        instance.service = service
+
+    if service_resources is not None:
+        instance.service_resources = service_resources
+
+    if description is not None:
+        instance.description = description
+
+    return instance
+# endregion
+
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
@@ -2891,14 +2935,14 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
-                  route_table=None, service_endpoints=None):
+                  route_table=None, service_endpoints=None, service_endpoint_policy=None):
     '''Create a virtual network (VNet) subnet.
     :param str address_prefix: address prefix in CIDR format.
     :param str network_security_group: Name or ID of network security
         group to associate with the subnet.
     '''
-    NetworkSecurityGroup, ServiceEndpoint, Subnet = cmd.get_models(
-        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet')
+    NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
+        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
@@ -2909,6 +2953,10 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
         subnet.service_endpoints = []
         for service in service_endpoints:
             subnet.service_endpoints.append(ServiceEndpoint(service=service))
+    if service_endpoint_policy:
+        subnet.service_endpoint_policies = []
+        for policy in service_endpoint_policy:
+            subnet.service_endpoint_policies.append(SubResource(id=policy))
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
