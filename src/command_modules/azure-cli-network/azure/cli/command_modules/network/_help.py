@@ -3338,7 +3338,7 @@ helps['network vnet subnet list'] = """
     short-summary: List the subnets in a virtual network.
     examples:
         - name: List the subnets in a virtual network.
-          text: az network vnet subnet list -g MyResourceGroup -n MyVNet
+          text: az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
 """
 
 helps['network vnet subnet show'] = """

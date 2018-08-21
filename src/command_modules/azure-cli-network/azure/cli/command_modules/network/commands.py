@@ -639,7 +639,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.command('list', 'list_by_resource_group')
         g.show_command('show')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_service_endpoint_policy_definition',
+                                 setter_arg_name='service_endpoint_policy_definitions')
 
     # endregion
 

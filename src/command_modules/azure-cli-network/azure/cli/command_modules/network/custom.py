@@ -2742,6 +2742,18 @@ def create_service_endpoint_policy_definition(cmd, resource_group_name, service_
                                                  service_resources=service_resources)
     return client.create_or_update(resource_group_name, service_endpoint_policy_name,
                                    service_endpoint_policy_definition_name, policy_def)
+
+def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
+    if service is not None:
+        instance.service = service
+
+    if service_resources is not None:
+        instance.service_resources = service_resources
+
+    if description is not None:
+        instance.description = description
+
+    return instance
 # endregion
 
 # region TrafficManagers
