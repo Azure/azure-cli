@@ -391,6 +391,22 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
     return complex_validator_with_type if has_type_field else simple_validator
 
 
+def validate_service_endpoint_policy(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.service_endpoint_policy:
+        policy_ids = []
+        for policy in namespace.service_endpoint_policy:
+            if not is_valid_resource_id(policy):
+                policy = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    name=policy,
+                    namespace='Microsoft.Network',
+                    type='serviceEndpointPolicies')
+            policy_ids.append(policy)
+        namespace.service_endpoint_policy = policy_ids
+
+
 def get_servers_validator(camel_case=False):
     def validate_servers(namespace):
         servers = []

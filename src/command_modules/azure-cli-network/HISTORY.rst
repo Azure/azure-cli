@@ -2,9 +2,11 @@
 
 Release History
 ===============
+
 2.2.5
 +++++
-* Minor fixes
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
 
 2.2.4
 +++++
