@@ -258,7 +258,7 @@ def submit_adla_job(client, account_name, job_name, script, runtime_version=None
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
 
-    job_properties = CreateUSqlJobProperties(script)
+    job_properties = CreateUSqlJobProperties(script=script)
     if runtime_version:
         job_properties.runtime_version = runtime_version
 
@@ -272,18 +272,18 @@ def submit_adla_job(client, account_name, job_name, script, runtime_version=None
 
         return client.build(account_name, build_params)
 
-    create_params = CreateJobParameters(JobType.usql,
-                                        job_properties,
-                                        job_name,
-                                        degree_of_parallelism,
-                                        priority)
+    create_params = CreateJobParameters(type=JobType.usql,
+                                        properties=job_properties,
+                                        name=job_name,
+                                        degree_of_parallelism=degree_of_parallelism,
+                                        priority=priority)
     if recurrence_id:
-        create_params.related = JobRelationshipProperties(recurrence_id,
-                                                          pipeline_id,
-                                                          pipeline_name,
-                                                          pipeline_uri,
-                                                          run_id,
-                                                          recurrence_name)
+        create_params.related = JobRelationshipProperties(recurrence_id=recurrence_id,
+                                                          pipeline_id=pipeline_id,
+                                                          pipeline_name=pipeline_name,
+                                                          pipeline_uri=pipeline_uri,
+                                                          run_id=run_id,
+                                                          recurrence_name=recurrence_name)
 
     job_id = _get_uuid_str()
 
