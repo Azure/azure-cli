@@ -87,6 +87,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('description', help='The asset description.')
         c.argument('asset_name', name_arg_type, help='The name of the asset.')
         c.argument('storage_account', help='The name of the storage account.')
+        c.argument('container', help='The name of the asset blob container.')
 
     with self.argument_context('ams asset update') as c:
         c.argument('alternate_id', help='The alternate id of the asset.')
