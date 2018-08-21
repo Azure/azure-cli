@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.2.5
++++++
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
+
 2.2.4
 +++++
 * `network application-gateway ssl-policy predefined show`: exception handling to exit with code 3 upon a missing resource for consistency
