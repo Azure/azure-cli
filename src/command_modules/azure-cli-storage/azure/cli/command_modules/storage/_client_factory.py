@@ -91,7 +91,8 @@ def queue_data_service_factory(cli_ctx, kwargs):
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+        sas_token=kwargs.pop('sas_token', None),
+        token_credential=kwargs.pop('token_credential', None))
 
 
 def cloud_storage_account_service_factory(cli_ctx, kwargs):
