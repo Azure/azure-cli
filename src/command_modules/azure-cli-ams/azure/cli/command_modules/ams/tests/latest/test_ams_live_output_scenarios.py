@@ -35,7 +35,7 @@ class AmsLiveOutputTests(ScenarioTest):
             'manifestName': manifest_name,
             'description': 'testDescription',
             'fragments': 5,
-            'outputSnapTime': 0
+            'outputSnapTime': 3
         })
 
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
