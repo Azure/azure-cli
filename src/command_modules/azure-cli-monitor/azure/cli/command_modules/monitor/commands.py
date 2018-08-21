@@ -11,7 +11,8 @@ def load_command_table(self, _):
 
     from ._client_factory import (
         cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
-        cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories)
+        cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
+        cf_metric_alerts)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -96,6 +97,11 @@ def load_command_table(self, _):
         client_factory=cf_alert_rules,
         exception_handler=monitor_exception_handler)
 
+    metric_alert_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations.metric_alerts_operations#MetricAlertsOperations.{}',
+        client_factory=cf_metric_alerts,
+        exception_handler=monitor_exception_handler)
+
     metric_definitions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations.metric_definitions_operations#MetricDefinitionsOperations.{}',
         client_factory=cf_metric_def,
@@ -125,7 +131,7 @@ def load_command_table(self, _):
         g.custom_command('scope add', 'add_scope')
         g.custom_command('scope remove', 'remove_scope')
 
-    with self.command_group('monitor alert', alert_sdk, custom_command_type=alert_custom) as g:
+    with self.command_group('monitor alert', alert_sdk, custom_command_type=alert_custom, deprecate_info=self.deprecate(redirect='monitor metrics alert', hide='2.0.44')) as g:
         g.custom_command('create', 'create_metric_rule')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
@@ -187,3 +193,10 @@ def load_command_table(self, _):
         from .transformers import metrics_table, metrics_definitions_table
         g.command('list', 'list', command_type=metric_operations_sdk, table_transformer=metrics_table)
         g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
+
+    with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom, client_factory=cf_metric_alerts) as g:
+        g.custom_command('create', 'create_metric_alert', custom_command_type=alert_custom)
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
+        g.command('show', 'get')
+        g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)

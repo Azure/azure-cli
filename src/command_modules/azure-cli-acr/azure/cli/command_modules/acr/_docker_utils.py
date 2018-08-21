@@ -10,7 +10,9 @@ except ImportError:
     from urlparse import urlparse, urlunparse
 
 from json import loads
+from base64 import b64encode
 import requests
+from requests.utils import to_native_string
 from msrest.http_logger import log_request, log_response
 
 from knack.util import CLIError
@@ -18,6 +20,7 @@ from knack.prompting import prompt, prompt_pass, NoTTYException
 from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.cloud import CloudSuffixNotSetException
 
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
@@ -118,11 +121,18 @@ def _get_credentials(cli_ctx,
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
-    login_server = registry.login_server
-
     # 1. if username was specified, verify that password was also specified
     if username:
+        # Try to use the pre-defined login server suffix to construct login server from registry name.
+        # This is to avoid a management server request if username/password are already provided.
+        # In all other cases, including the suffix not defined, login server will be obtained from server.
+        login_server_suffix = get_login_server_suffix(cli_ctx)
+        if login_server_suffix:
+            login_server = '{}{}'.format(registry_name, login_server_suffix)
+        else:
+            registry, _ = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
+            login_server = registry.login_server
+
         if not password:
             try:
                 password = prompt_pass(msg='Password: ')
@@ -130,6 +140,9 @@ def _get_credentials(cli_ctx,
                 raise CLIError('Please specify both username and password in non-interactive mode.')
 
         return login_server, username, password
+
+    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
+    login_server = registry.login_server
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
     if not password and registry.sku.name in MANAGED_REGISTRY_SKU:
@@ -222,4 +235,30 @@ def log_registry_response(response):
 
 def get_login_server_suffix(cli_ctx):
     """Get the Azure Container Registry login server suffix in the current cloud."""
-    return cli_ctx.cloud.suffixes.acr_login_server_endpoint
+    try:
+        return cli_ctx.cloud.suffixes.acr_login_server_endpoint
+    except CloudSuffixNotSetException:
+        # Ignore the error if the suffix is not set, the caller should then try to get login server from server.
+        return None
+
+
+def _get_basic_auth_str(username, password):
+    return 'Basic ' + to_native_string(
+        b64encode(('%s:%s' % (username, password)).encode('latin1')).strip()
+    )
+
+
+def _get_bearer_auth_str(token):
+    return 'Bearer ' + token
+
+
+def get_authorization_header(username, password):
+    """Get the authorization header as Basic auth if username is provided, or Bearer auth otherwise
+    :param str username: The username used to log into the container registry
+    :param str password: The password used to log into the container registry
+    """
+    if username:
+        auth = _get_basic_auth_str(username, password)
+    else:
+        auth = _get_bearer_auth_str(password)
+    return {'Authorization': auth}

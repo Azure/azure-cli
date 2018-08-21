@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from base64 import b64encode
 import requests
-from requests.utils import to_native_string
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -19,7 +17,7 @@ from knack.log import get_logger
 from azure.cli.core.util import should_disable_connection_verify
 
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials, log_registry_response
+from ._docker_utils import get_access_credentials, get_authorization_header, log_registry_response
 
 
 logger = get_logger(__name__)
@@ -41,25 +39,6 @@ MANIFEST_V2_HEADER = {
     'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
 }
 DEFAULT_PAGINATION = 20
-
-
-def _get_basic_auth_str(username, password):
-    return 'Basic ' + to_native_string(
-        b64encode(('%s:%s' % (username, password)).encode('latin1')).strip()
-    )
-
-
-def _get_bearer_auth_str(token):
-    return 'Bearer ' + token
-
-
-def _get_authorization_header(username, password):
-    if username is None:
-        auth = _get_bearer_auth_str(password)
-    else:
-        auth = _get_basic_auth_str(username, password)
-
-    return {'Authorization': auth}
 
 
 def _parse_error_message(error_message, response):
@@ -100,7 +79,7 @@ def _request_data_from_registry(http_method,
         raise ValueError("Non-empty json payload is required for http method: {}".format(http_method))
 
     url = 'https://{}{}'.format(login_server, path)
-    headers = _get_authorization_header(username, password)
+    headers = get_authorization_header(username, password)
 
     for i in range(0, retry_times):
         errorMessage = None
@@ -146,7 +125,7 @@ def _request_data_from_registry(http_method,
 
 def _get_manifest_digest(login_server, repository, tag, username, password, retry_times=3, retry_interval=5):
     url = 'https://{}/v2/{}/manifests/{}'.format(login_server, repository, tag)
-    headers = _get_authorization_header(username, password)
+    headers = get_authorization_header(username, password)
     headers.update(MANIFEST_V2_HEADER)
 
     for i in range(0, retry_times):

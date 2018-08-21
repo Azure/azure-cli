@@ -5,7 +5,7 @@ Release History
 
 3.3.3
 +++++
-* Minor fixes
+* Update Batch Management SDK dependency
 
 3.3.2
 +++++
