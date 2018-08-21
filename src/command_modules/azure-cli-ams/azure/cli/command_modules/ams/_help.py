@@ -272,6 +272,11 @@ helps['ams streaming endpoint create'] = """
     short-summary: Create a streaming endpoint.
 """
 
+helps['ams streaming endpoint akamai'] = """
+    type: group
+    short-summary: Manage AkamaiAccessControl objects to be used on streaming endpoints.
+"""
+
 helps['ams streaming endpoint akamai add'] = """
     type: command
     short-summary: Add an AkamaiAccessControl to an existing streaming endpoint.
