@@ -64,18 +64,23 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
     return client.update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
 
 
-def update_streaming_endpoint(client, resource_group_name, account_name, streaming_endpoint_name,  # pylint: disable=too-many-locals
-                              tags=None, cross_domain_policy=None, ips=None, client_access_policy=None,
-                              description=None, max_cache_age=None,
+def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
+                             parameters):
+    return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
+
+
+def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, client_access_policy=None,
+                              description=None, max_cache_age=None, ips=None,
                               cdn_provider=None, cdn_profile=None, custom_host_names=None):
     from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl)
 
-    streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
+    if not instance:
+        raise CLIError('The streaming endpoint resource was not found.')
 
     allow_list = []
     if ips is not None:
         for ip in ips:
-            allow_list.append(create_ip_range(streaming_endpoint_name, ip))
+            allow_list.append(create_ip_range(instance.name, ip))
 
     streaming_endpoint_access_control = None
     if ips is not None:
@@ -85,18 +90,26 @@ def update_streaming_endpoint(client, resource_group_name, account_name, streami
 
     cdn_enabled = cdn_profile is not None or cdn_provider is not None
 
-    streaming_endpoint.max_cache_age = max_cache_age
-    streaming_endpoint.tags = tags
-    streaming_endpoint.description = description
-    streaming_endpoint.custom_host_names = custom_host_names
-    streaming_endpoint.cdn_profile = cdn_profile
-    streaming_endpoint.cdn_enabled = cdn_enabled
-    streaming_endpoint.cdn_provider = cdn_provider
-    streaming_endpoint.cross_site_access_policies = policies
-    streaming_endpoint.access_control = streaming_endpoint_access_control
+    if max_cache_age is not None:
+        instance.max_cache_age = max_cache_age
+    if tags is not None:
+        instance.tags = tags
+    if description is not None:
+        instance.description = description
+    if custom_host_names is not None:
+        instance.custom_host_names = custom_host_names
+    if cdn_profile is not None:
+        instance.cdn_profile = cdn_profile
+    if cdn_enabled is not None:
+        instance.cdn_enabled = cdn_enabled
+    if cdn_provider is not None:
+        instance.cdn_provider = cdn_provider
+    if max_cache_age is not None:
+        instance.cross_site_access_policies = policies
+    if streaming_endpoint_access_control is not None:
+        instance.access_control = streaming_endpoint_access_control
 
-    return client.update(resource_group_name=resource_group_name, account_name=account_name,
-                         streaming_endpoint_name=streaming_endpoint_name, parameters=streaming_endpoint)
+    return instance
 
 
 def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
