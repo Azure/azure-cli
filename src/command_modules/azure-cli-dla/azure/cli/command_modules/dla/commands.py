@@ -24,7 +24,7 @@ def load_command_table(self, _):
     adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{{}}'
 
     dla_account_sdk = CliCommandType(
-        operations_tmpl=adla_format_path.format('account', 'accounts_operations', 'AccountsOperations'),
+        operations_tmpl=adla_format_path.format('account', 'account_operations', 'AccountOperations'),
         client_factory=cf_dla_account)
 
     dla_firewall_sdk = CliCommandType(
