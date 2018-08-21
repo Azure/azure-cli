@@ -191,7 +191,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams streaming endpoint akamai add') as c:
         c.argument('identifier', help='Identifier of the key.')
         c.argument('base64_key', help='Authentication key.')
-        c.argument('expiration', help='The exact time the authentication key.')
+        c.argument('expiration', help='The exact time for the authentication key to expire.')
 
     with self.argument_context('ams streaming endpoint akamai remove') as c:
         c.argument('identifier', help='Identifier of the key.')
