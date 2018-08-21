@@ -26,7 +26,7 @@ class AuthSettingTests(ScenarioTest):
             self.check('location', 'global')
         ])
 
-        self.cmd('az bot authsetting create -g {rg} -n {botname} --client-id {clientid} --client-secret {secret} --scopes scope --service google -c myconnname', checks=[
+        self.cmd('az bot authsetting create -g {rg} -n {botname} --client-id {clientid} --client-secret {secret} --scopes scope1 scope2 --scopes-separator " " --service google -c myconnname', checks=[
             self.check('properties.clientId', '{clientid}')
         ])
 

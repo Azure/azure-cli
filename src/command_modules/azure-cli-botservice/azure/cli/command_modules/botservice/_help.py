@@ -140,8 +140,8 @@ helps['bot authsetting create'] = """
         - name: Create a new OAuth Connection Setting on a Bot.
           text: |-
             az bot authsetting create -g MyResourceGroup -n botName -c myConnectionName
-            --client-id clientId --client-secret secret --scopes "scope1 scope2" --service google
-            --parameters id=myid
+            --client-id clientId --client-secret secret --scopes scope1 scope2 --service google
+            --parameters id=myid --scopes-separator :
 """
 helps['bot authsetting show'] = """
     type: command
