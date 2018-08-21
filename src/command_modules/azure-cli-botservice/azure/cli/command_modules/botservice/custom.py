@@ -167,7 +167,7 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
 
 
 def create_connection(client, resource_group_name, resource_name, connection_name, client_id,
-                      client_secret, scopes, scopes_separator, service_provider_name, parameters=None):
+                      client_secret, scopes, service_provider_name, parameters=None):
     from azure.mgmt.botservice.models import ConnectionSetting, ConnectionSettingProperties, ConnectionSettingParameter
     service_provider = get_service_providers(client, name=service_provider_name)
     if not service_provider:
@@ -184,7 +184,7 @@ def create_connection(client, resource_group_name, resource_name, connection_nam
         properties=ConnectionSettingProperties(
             client_id=client_id,
             client_secret=client_secret,
-            scopes=scopes_separator.join(scopes),
+            scopes=scopes,
             service_provider_id=service_provider.properties.id,
             parameters=connection_parameters
         )

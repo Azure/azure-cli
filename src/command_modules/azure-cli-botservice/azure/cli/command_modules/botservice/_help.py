@@ -117,7 +117,7 @@ helps['bot sms create'] = """
     examples:
         - name: Create an SMS Channel for a Bot.
           text: |-
-            az bot sms create -n botName -g MyResourceGroup --account-sid sid
+            a bot sms create -n botName -g MyResourceGroup --account-sid sid
             --auth-token token --is-validated
 """
 helps['bot slack create'] = """
@@ -140,8 +140,8 @@ helps['bot authsetting create'] = """
         - name: Create a new OAuth Connection Setting on a Bot.
           text: |-
             az bot authsetting create -g MyResourceGroup -n botName -c myConnectionName
-            --client-id clientId --client-secret secret --scopes scope1 scope2 --service google
-            --parameters id=myid --scopes-separator :
+            --client-id clientId --client-secret secret --scopes "scope1 scope2" --service google
+            --parameters id=myid
 """
 helps['bot authsetting show'] = """
     type: command

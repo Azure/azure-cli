@@ -119,8 +119,7 @@ def load_arguments(self, _):
     with self.argument_context('bot authsetting create') as c:
         c.argument('client_id', help='Client id associated with the service provider setting.')
         c.argument('client_secret', help='Client secret associated with the service provider setting.')
-        c.argument('scopes', help='List of Scopes associated with the service provider setting.The format depends on the service provider.', nargs='*')
-        c.argument('scopes_separator', options_list=['--scopes-separator'], help='Separator used to concatenate the scope list with.The separator used depends on the service provider.')
+        c.argument('scopes', options_list=['--provider-scope-string'], help='The scope string associated with the service provider setting.The string should be delimited as needed for the service provider.')
         c.argument('service_provider_name', options_list=['--service'], help='Name of the service provider. For a list of all service providers, use `az bot connection listserviceproviders`.')
         c.argument('parameters', help='Parameter values for service provider parameters. Usage: --parameters key=value key1=value1.', nargs='+')
 
