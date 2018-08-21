@@ -121,9 +121,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          supports_no_wait=True)
         g.custom_command('create', 'create_streaming_endpoint',
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
-        g.custom_command('update', 'update_streaming_endpoint',
-                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
-                         supports_no_wait=True)
+        g.generic_update_command('update',
+                                 setter_name='update_streaming_endpoint_setter',
+                                 setter_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                                 custom_func_name='update_streaming_endpoint',
+                                 custom_func_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                                 supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('scale', 'scale')
