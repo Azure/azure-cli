@@ -1817,7 +1817,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
-                            backend_address_pool, outbound_ports=None, frontend_ip_configurations=None,
+                            backend_address_pool, frontend_ip_configurations, outbound_ports=None,
                             protocol=None, enable_tcp_reset=None, idle_timeout=None):
     OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).load_balancers

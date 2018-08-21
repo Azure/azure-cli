@@ -770,6 +770,10 @@ def load_arguments(self, _):
             c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default=PublicIPAddressSkuName.basic.value if PublicIPAddressSkuName is not None and item == 'create' else None, arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
 
+    for scope in ['public-ip', 'lb frontend-ip']:
+        with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
+            c.argument('public_ip_prefix', help='Name or ID of a public IP prefix.')
+
     with self.argument_context('network public-ip prefix') as c:
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
