@@ -7,18 +7,18 @@ from knack.util import CLIError
 
 
 def create_job(client, resource_group_name, account_name, transform_name, job_name,
-               output_asset_names, input_asset_name=None,
+               output_asset_names, input_asset_name=None, label=None,
                description=None, priority=None, files=None, base_uri=None):
     from azure.mgmt.media.models import (Job, JobInputAsset, JobInputHttp, JobOutputAsset)
 
     if input_asset_name:
-        job_input = JobInputAsset(asset_name=input_asset_name, files=files)
+        job_input = JobInputAsset(asset_name=input_asset_name, files=files, label=label)
     else:
         if base_uri is None and files is None:
             raise CLIError("Missing required arguments.\nEither --input-asset-name, "
                            "or both --files or --base-uri must be specified.")
         else:
-            job_input = JobInputHttp(files=files, base_uri=base_uri)
+            job_input = JobInputHttp(files=files, base_uri=base_uri, label=label)
 
     job_outputs = list(map(lambda x: JobOutputAsset(asset_name=x), output_asset_names))
 

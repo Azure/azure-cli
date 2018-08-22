@@ -123,6 +123,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('files',
                    nargs='+',
                    help='Space-separated list of files. It can be used to tell the service to only use the files specified from the input asset.')
+        c.argument('label', help='A label that is assigned to a JobInput, that is used to satisfy a reference used in the Transform.')
 
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', action='store_true', help='Delete the job being cancelled.')
