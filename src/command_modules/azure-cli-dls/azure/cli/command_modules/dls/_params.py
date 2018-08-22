@@ -59,11 +59,38 @@ def load_arguments(self, _):
     with self.argument_context('dls account list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)
 
-    with self.argument_context('dls account network-rule create') as c:
-        c.extra('vnet_name',
-                options_list=['--vnet-name'],
-                help='The virtual network name',
-                validator=validate_subnet)
+    #####
+    # virtual network rule
+    #####
+    with self.argument_context('dls account network-rule') as c:
+        c.argument('account_name', datalake_store_name_type, options_list=['--account-name'])
+
+        c.argument('virtual_network_rule_name',
+                   options_list=['--name', '-n'],
+                   help='The virtual network rule name',
+                   id_part='name')
+
+        c.argument('subnet',
+                   options_list=['--subnet'],
+                   help='Name or ID of the subnet that allows access to DLS. '
+                   'If subnet name is provided, --vnet-name must be provided.',
+                   validator=validate_subnet)
+
+    # with self.argument_context('dls account network-rule create') as c:
+    #     c.extra('vnet_name',
+    #             options_list = ['--vnet-name'],
+    #             help='The virtual network name',
+    #             validator=validate_subnet)
+
+    with self.argument_context('dls account network-rule update') as c:
+        c.argument('subnet',
+                   options_list=['--subnet'],
+                   help='Name or ID of the subnet that allows access to DLS. '
+                   'If subnet name is provided, --vnet-name must be provided.',
+                   validator=validate_subnet)
+
+    with self.argument_context('dls account network-rule list') as c:
+        c.argument('virtual_network_rule_name', id_part=None)
 
     # filesystem
     with self.argument_context('dls fs') as c:
