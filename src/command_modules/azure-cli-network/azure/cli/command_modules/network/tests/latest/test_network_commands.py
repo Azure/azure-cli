@@ -949,6 +949,53 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
                  checks=self.check("subnet.contains(id, 'subnet2')", True))
 
 
+class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_outbound_rules', location='eastus2')
+    def test_network_load_balancer_outbound_rules(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'lb': 'lb1',
+            'prefix': 'prefix1',
+            'frontend1': 'LoadBalancerFrontEnd',
+            'frontend2': 'prefixFrontEnd',
+            'backend': 'lb1bepool',
+            'rule1': 'rule1',
+            'rule2': 'rule2'
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {frontend2} --public-ip-prefix {prefix}')
+        self.cmd('network lb outbound-rule create -g {rg} --lb-name {lb} -n {rule1} --address-pool {backend} --enable-tcp-reset --frontend-ip-configs {frontend1} --outbound-ports 512 --protocol Tcp', checks=[
+            self.check('enableTcpReset', True),
+            self.check('protocol', 'Tcp'),
+            self.check('allocatedOutboundPorts', 512),
+            self.check("contains(backendAddressPool.id, '{backend}')", True),
+            self.check("contains(frontendIpConfigurations[0].id, '{frontend1}')", True)
+        ])
+        self.cmd('network lb outbound-rule create -g {rg} --lb-name {lb} -n {rule2} --address-pool {backend} --frontend-ip-configs {frontend2} --idle-timeout 20', checks=[
+            self.check('idleTimeoutInMinutes', 20),
+            self.check("contains(backendAddressPool.id, '{backend}')", True),
+            self.check("contains(frontendIpConfigurations[0].id, '{frontend2}')", True)
+        ])
+        self.cmd('network lb outbound-rule update -g {rg} --lb-name {lb} -n {rule2} --idle-timeout 25',
+                 checks=self.check('idleTimeoutInMinutes', 25))
+        self.cmd('network lb outbound-rule list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network lb outbound-rule show -g {rg} --lb-name {lb} -n {rule1}', checks=[
+            self.check('enableTcpReset', True),
+            self.check('protocol', 'Tcp'),
+            self.check('allocatedOutboundPorts', 512),
+            self.check("contains(backendAddressPool.id, '{backend}')", True),
+            self.check("contains(frontendIpConfigurations[0].id, '{frontend1}')", True)
+        ])
+        self.cmd('network lb outbound-rule delete -g {rg} --lb-name {lb} -n {rule1}')
+        self.cmd('network lb outbound-rule list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 1))
+
+
 class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules')

@@ -46,7 +46,8 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
-    process_vpn_connection_create_namespace, process_route_table_create_namespace)
+    process_vpn_connection_create_namespace, process_route_table_create_namespace,
+    process_lb_outbound_rule_namespace)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -425,7 +426,7 @@ def load_command_table(self, _):
         'inbound_nat_pools': 'inbound-nat-pool',
         'backend_address_pools': 'address-pool',
         'load_balancing_rules': 'rule',
-        'probes': 'probe'
+        'probes': 'probe',
     }
     for subresource, alias in property_map.items():
         with self.command_group('network lb {}'.format(alias), network_util) as g:
@@ -462,6 +463,15 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='probes',
                                  custom_func_name='set_lb_probe')
 
+    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
+        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
+                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+
+    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
+        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
+        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
+        g.command('delete', delete_network_resource_property_entry('load_balancers', 'outbound_rules'))
     # endregion
 
     # region LocalGateways
