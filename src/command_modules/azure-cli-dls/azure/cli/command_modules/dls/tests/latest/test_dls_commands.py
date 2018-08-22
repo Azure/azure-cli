@@ -377,12 +377,12 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             'updated_subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/updatedSubnetId',
             'updated_subnet': 'updatedSubnetId'
         })
-        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {vnet} --subnet {subnet}')
+        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {vnet} --subnet {subnet_id}')
         self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {vnet}', checks=[
             self.check('name', '{vnet}'),
         ])
 
-        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {vnet} --subnet {updated_subnet}')
+        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {vnet} --subnet {updated_subnet_id}')
         self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {vnet}', checks=[
             self.check('name', '{vnet}'),
         ])

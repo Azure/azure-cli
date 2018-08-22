@@ -47,7 +47,7 @@ def validate_subnet(cmd, namespace):
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
-    vnet = namespace.virtual_network_rule_name
+    vnet = namespace.vnet_name
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
         pass
@@ -62,4 +62,4 @@ def validate_subnet(cmd, namespace):
             child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
-    delattr(namespace, 'virtual_network_rule_name')
+    delattr(namespace, 'vnet_name')
