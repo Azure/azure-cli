@@ -1759,17 +1759,18 @@ def set_lb_inbound_nat_pool(
 
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        subnet=None, virtual_network_name=None, private_ip_address=None,
+        public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
         private_ip_address_allocation='dynamic', zone=None):
-    FrontendIPConfiguration, PublicIPAddress, Subnet = cmd.get_models(
-        'FrontendIPConfiguration', 'PublicIPAddress', 'Subnet')
+    FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
+        'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_address_allocation,
-        public_ip_address=PublicIPAddress(id=public_ip_address) if public_ip_address else None,
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
         subnet=Subnet(id=subnet) if subnet else None)
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
@@ -1813,6 +1814,39 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     _upsert(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
+
+
+def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
+                            backend_address_pool, frontend_ip_configurations, outbound_ports=None,
+                            protocol=None, enable_tcp_reset=None, idle_timeout=None):
+    OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    lb = client.get(resource_group_name, load_balancer_name)
+    rule = OutboundRule(
+        protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
+        backend_address_pool=SubResource(id=backend_address_pool),
+        frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations] \
+            if frontend_ip_configurations else None,
+        allocated_outbound_ports=outbound_ports, name=item_name)
+    _upsert(lb, 'outbound_rules', rule, 'name')
+    poller = client.create_or_update(resource_group_name, load_balancer_name, lb)
+    return _get_property(poller.result().outbound_rules, item_name)
+
+
+def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbound_ports=None,
+                         idle_timeout=None, frontend_ip_configurations=None, enable_tcp_reset=None,
+                         backend_address_pool=None):
+    SubResource = cmd.get_models('SubResource')
+    _set_param(instance, 'protocol', protocol)
+    _set_param(instance, 'allocated_outbound_ports', outbound_ports)
+    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
+    _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
+    _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool) \
+        if backend_address_pool else None)
+    _set_param(instance, 'frontend_ip_configurations', \
+        [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
+
+    return parent
 
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
