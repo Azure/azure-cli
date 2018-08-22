@@ -83,6 +83,7 @@ def load_arguments(self, _):
         c.argument('network_security_group_name', nsg_name_type, id_part='name')
         c.argument('private_ip_address', private_ip_address_type)
         c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
+        c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.', min_api='2018-07-01')
     # endregion
 
     # region ApplicationGateways
@@ -528,7 +529,6 @@ def load_arguments(self, _):
     with self.argument_context('network lb outbound-rule') as c:
         c.argument('backend_address_pool', options_list='--address-pool', help='Name or ID of the backend address pool.')
         c.argument('frontend_ip_configurations', options_list='--frontend-ip-configs', help='Space-separated list of frontend IP configuration names or IDs.', nargs='+')
-        c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.')
         c.argument('protocol', arg_type=get_enum_type(TransportProtocol), help='Network transport protocol.')
         c.argument('outbound_ports', type=int, help='The number of outbound ports to be used for NAT.')
 
