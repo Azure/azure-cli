@@ -11,10 +11,11 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
                                                 get_three_state_flag)
-from azure.mgmt.iothub.models import IotHubSku
-from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
-                                                          AllocationPolicy,
-                                                          AccessRightsDescription)
+from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
+from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (IotDpsSku,
+                                                                               AllocationPolicy,
+                                                                               AccessRightsDescription)
+from azure.cli.command_modules.iot.shared import (EndpointType)
 
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
@@ -98,9 +99,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
 
-    for subgroup in ['consumer-group', 'policy', 'job', 'certificate']:
+    for subgroup in ['consumer-group', 'policy', 'job', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:
             c.argument('hub_name', options_list=['--hub-name'])
+
+    with self.argument_context('iot hub routing-endpoint') as c:
+        c.argument('endpoint_name', options_list=['--endpoint-name', '-en'], help='Name of the Routing Endpoint.')
+        c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '-erg'],
+                   help='Resource group of the Endpoint resoure.')
+        c.argument('endpoint_subscription_id', options_list=['--endpoint-subscription-id', '-es'],
+                   help='SubscriptionId of the Endpoint resource.')
+        c.argument('connection_string', options_list=['--connection-string', '-cs'],
+                   help='Connection string of the Routing Endpoint.')
+        c.argument('container_name', options_list=['--container-name', '-cn'], help='Name of the storage container.')
+        c.argument('endpoint_type', arg_type=get_enum_type(EndpointType), options_list=['--endpoint-type', '-et'],
+                   help='Type of the Routing Endpoint.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,

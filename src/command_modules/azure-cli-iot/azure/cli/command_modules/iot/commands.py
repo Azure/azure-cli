@@ -109,3 +109,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('list', 'iot_hub_job_list')
         g.custom_command('show', 'iot_hub_job_get')
         g.custom_command('cancel', 'iot_hub_job_cancel')
+
+    # iot hub routing endpoint commands
+    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
+        g.custom_command('create', 'iot_hub_routing_endpoint_create')
+        g.custom_command('show', 'iot_hub_routing_endpoint_show')
+        g.custom_command('list', 'iot_hub_routing_endpoint_list')
+        g.custom_command('delete', 'iot_hub_routing_endpoint_delete')
