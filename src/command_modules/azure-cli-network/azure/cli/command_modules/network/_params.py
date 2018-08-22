@@ -465,6 +465,7 @@ def load_arguments(self, _):
         {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
         {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+        {'name': 'outbound-rule', 'display': 'outbound rule', 'ref': 'outbound_rules'},
     ]
     for item in lb_subresources:
         with self.argument_context('network lb {}'.format(item['name'])) as c:
@@ -523,6 +524,13 @@ def load_arguments(self, _):
         c.argument('port', help='The port to interrogate.')
         c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
         c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+
+    with self.argument_context('network lb outbound-rule') as c:
+        c.argument('backend_address_pool', options_list='--address-pool', help='Name or ID of the backend address pool.')
+        c.argument('frontend_ip_configurations', options_list='--frontend-ip-configs', help='Space-separated list of frontend IP configuration names or IDs.', nargs='+')
+        c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.')
+        c.argument('protocol', arg_type=get_enum_type(TransportProtocol), help='Network transport protocol.')
+        c.argument('outbound_ports', type=int, help='The number of outbound ports to be used for NAT.')
 
     with self.argument_context('network lb rule') as c:
         c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
@@ -761,6 +769,10 @@ def load_arguments(self, _):
             c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
             c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default=PublicIPAddressSkuName.basic.value if PublicIPAddressSkuName is not None and item == 'create' else None, arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+
+    for scope in ['public-ip', 'lb frontend-ip']:
+        with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
+            c.argument('public_ip_prefix', help='Name or ID of a public IP prefix.')
 
     with self.argument_context('network public-ip prefix') as c:
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
