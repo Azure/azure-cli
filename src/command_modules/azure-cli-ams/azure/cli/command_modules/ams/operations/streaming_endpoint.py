@@ -19,9 +19,10 @@ def create_streaming_endpoint(client, resource_group_name, account_name, streami
         for ip in ips:
             allow_list.append(create_ip_range(streaming_endpoint_name, ip))
 
-    streaming_endpoint_access_control = None
+    streaming_endpoint_access_control = StreamingEndpointAccessControl()
+
     if ips is not None:
-        streaming_endpoint_access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=allow_list))
+        streaming_endpoint_access_control.ip = IPAccessControl(allow=allow_list)
 
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
@@ -41,19 +42,22 @@ def create_streaming_endpoint(client, resource_group_name, account_name, streami
 
 def add_akamai_access_control(client, account_name, resource_group_name, streaming_endpoint_name,
                               identifier=None, base64_key=None, expiration=None):
-    from azure.mgmt.media.models import (AkamaiAccessControl, AkamaiSignatureHeaderAuthenticationKey)
+    from azure.mgmt.media.models import (AkamaiAccessControl, AkamaiSignatureHeaderAuthenticationKey,
+                                         StreamingEndpointAccessControl)
 
     streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
 
     auth_key = AkamaiSignatureHeaderAuthenticationKey(identifier=identifier,
                                                       base64_key=base64_key, expiration=expiration)
 
-    if streaming_endpoint.access_control is not None:
-        if streaming_endpoint.access_control.akamai is None:
-            akamai_control = AkamaiAccessControl(akamai_signature_header_authentication_key_list=[])
-            streaming_endpoint.access_control.akamai = akamai_control
+    if streaming_endpoint.access_control is None:
+        streaming_endpoint.access_control = StreamingEndpointAccessControl()
 
-        streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list.append(auth_key)
+    if streaming_endpoint.access_control.akamai is None:
+        streaming_endpoint.access_control.akamai = AkamaiAccessControl(
+            akamai_signature_header_authentication_key_list=[])
+
+    streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list.append(auth_key)
 
     return client.update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
 
