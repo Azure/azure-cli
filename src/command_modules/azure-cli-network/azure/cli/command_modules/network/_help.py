@@ -2206,6 +2206,38 @@ helps['network lb inbound-nat-rule update'] = """
 """
 # endregion
 
+# region Load Balancer outbound rule
+helps['network lb outbound-rule'] = """
+    type: group
+    short-summary: Manage outbound rules of a load balancer.
+"""
+
+helps['network lb outbound-rule create'] = """
+    type: command
+    short-summary: Create an outbound-rule.
+"""
+
+helps['network lb outbound-rule delete'] = """
+    type: command
+    short-summary: Delete an outbound-rule.
+"""
+
+helps['network lb outbound-rule list'] = """
+    type: command
+    short-summary: List outbound rules.
+"""
+
+helps['network lb outbound-rule show'] = """
+    type: command
+    short-summary: Get the details of an outbound rule.
+"""
+
+helps['network lb outbound-rule update'] = """
+    type: command
+    short-summary: Update an outbound-rule.
+"""
+# endregion
+
 # region Load Balancer probe
 helps['network lb probe'] = """
     type: group
