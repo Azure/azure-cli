@@ -5,6 +5,7 @@ Release History
 2.2.2
 ++++++
 * `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
 
 2.2.1
 ++++++
