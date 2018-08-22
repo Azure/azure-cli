@@ -9,6 +9,7 @@ Release History
 * Add `network service-endpoint` commands to support service endpoint policy features.
 * Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
 * Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
+* Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
 
 2.2.4
 +++++
