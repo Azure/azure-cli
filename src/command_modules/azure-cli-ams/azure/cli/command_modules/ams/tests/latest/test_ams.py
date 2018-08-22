@@ -166,7 +166,8 @@ class AmsTests(ScenarioTest):
 
         self.kwargs.update({
             'transformName': transformName,
-            'presetName': 'AACGoodQualityAudio'
+            'presetName': 'AACGoodQualityAudio',
+            'label': 'someLabel'
         })
 
         self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --presets {presetName}', checks=[
@@ -181,9 +182,10 @@ class AmsTests(ScenarioTest):
             'priority': 'High'
         })
 
-        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-names {assetName} --priority {priority}', checks=[
+        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-names {assetName} --priority {priority} --label {label}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('input.label', '{label}'),
             self.check('priority', '{priority}')
         ])
 
