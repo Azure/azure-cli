@@ -7,6 +7,8 @@ Release History
 +++++
 * Add `network public-ip prefix` commands to support public IP prefixes features.
 * Add `network service-endpoint` commands to support service endpoint policy features.
+* Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
+* Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
 
 2.2.4
 +++++
