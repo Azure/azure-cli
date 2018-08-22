@@ -236,10 +236,54 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
 
-        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName}')
+        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('resourceState', 'Running')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
+    def test_ams_streaming_endpoint_start_async(self, storage_account_for_scale):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_scale,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
+
+        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait')
 
         self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
-            self.check('resourceState', 'Running')
+            self.check('resourceState', 'Starting')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
+    def test_ams_streaming_endpoint_stop_async(self, storage_account_for_scale):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_scale,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --auto-start')
+
+        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait')
+
+        self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('resourceState', 'Stopping')
         ])
 
     @ResourceGroupPreparer()
@@ -261,9 +305,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('resourceState', 'Running')
         ])
 
-        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName}')
-
-        self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('resourceState', 'Stopped')
         ])
 
