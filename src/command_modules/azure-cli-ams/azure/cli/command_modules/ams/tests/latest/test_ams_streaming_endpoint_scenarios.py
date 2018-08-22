@@ -220,14 +220,14 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    def test_ams_streaming_endpoint_start(self, storage_account_for_scale):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_start(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_scale,
+            'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'streamingEndpointName': streaming_endpoint_name
         })
@@ -241,14 +241,14 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    def test_ams_streaming_endpoint_start_async(self, storage_account_for_scale):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_start_async(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_scale,
+            'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'streamingEndpointName': streaming_endpoint_name
         })
@@ -264,14 +264,14 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    def test_ams_streaming_endpoint_stop_async(self, storage_account_for_scale):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_stop_async(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_scale,
+            'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'streamingEndpointName': streaming_endpoint_name
         })
@@ -287,14 +287,14 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    def test_ams_streaming_endpoint_stop(self, storage_account_for_scale):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_stop(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_scale,
+            'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'streamingEndpointName': streaming_endpoint_name
         })
@@ -310,14 +310,14 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    def test_ams_streaming_endpoint_list(self, storage_account_for_scale):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_list(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_scale,
+            'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'streamingEndpointName': streaming_endpoint_name
         })
