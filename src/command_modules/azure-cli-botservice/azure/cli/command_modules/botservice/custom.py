@@ -28,7 +28,7 @@ def get_bot_site_name(endpoint):
     except ImportError:
         from urlparse import urlsplit  # pylint: disable=import-error
     split_parts = urlsplit(endpoint)
-    return split_parts.netloc.split('.', 1)[0]
+    return str(split_parts.netloc.split('.', 1)[0])
 
 
 def provisionConvergedApp(bot_name):
@@ -64,7 +64,7 @@ def provisionConvergedApp(bot_name):
         headers=headers
     )
     if response.status_code not in [201]:
-        raise CLIError('Unable to provision appid and password for supplied credentials')
+        raise CLIError('Unable to provision MSA id automatically. Please pass them in as parameters and try again.')
     response_content = json.loads(response.content.decode('utf-8'))
     msa_app_id = response_content['AppId']
     password = response_content['Password']
@@ -418,7 +418,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     zip_ref.extractall(folder_path)
     zip_ref.close()
     os.remove(download_path)
-    if not os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template') and
+    if not (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
                           os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))

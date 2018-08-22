@@ -20,7 +20,7 @@ helps['bot show'] = """
 helps['bot prepare-publish'] = """
     type: command
     short-summary: Add scripts to your local source code directory to
-                   be able to publish back using az bot publish.
+                   be able to publish back using `az bot publish`.
 """
 helps['bot delete'] = """
     type: command
