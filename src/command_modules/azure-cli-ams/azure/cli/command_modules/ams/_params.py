@@ -13,7 +13,7 @@ from azure.cli.command_modules.ams._completers import get_role_definition_name_c
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
 
-from ._validators import validate_storage_account_id, datetime_format
+from ._validators import validate_storage_account_id, datetime_format, validate_correlation_data
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -24,6 +24,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
     default_policy_name_arg_type = CLIArgumentType(options_list=['--content-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
+    correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Customer provided correlation data that will be returned in Job completed events. This data is in key=value format separated by spaces.", nargs='*', metavar='CORRELATION_DATA')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
@@ -124,6 +125,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    nargs='+',
                    help='Space-separated list of files. It can be used to tell the service to only use the files specified from the input asset.')
         c.argument('label', help='A label that is assigned to a JobInput, that is used to satisfy a reference used in the Transform.')
+        c.argument('correlation_data', arg_type=correlation_data_type)
 
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', action='store_true', help='Delete the job being cancelled.')

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.validators import validate_tag 
 
 def validate_storage_account_id(cmd, namespace):
     """Validate storage account name"""
@@ -30,3 +31,11 @@ def datetime_format(value):
         message = "Argument {} is not a valid ISO-8601 datetime format"
         raise ValueError(message.format(value))
     return datetime_obj
+
+def validate_correlation_data(ns):
+    """ Extracts multiple space-separated correlation data in key[=value] format """
+    if isinstance(ns.correlation_data, list):
+        correlation_data_dict = {}
+        for item in ns.correlation_data:
+            correlation_data_dict.update(validate_tag(item))
+        ns.correlation_data = correlation_data_dict
