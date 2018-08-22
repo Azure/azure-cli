@@ -250,6 +250,19 @@ def validate_ip_tags(cmd, namespace):
         namespace.ip_tags = ip_tags
 
 
+def validate_frontend_ip_configs(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if namespace.frontend_ip_configurations:
+        config_ids = []
+        for item in namespace.frontend_ip_configurations:
+            if not is_valid_resource_id(item):
+                config_ids.append(_generate_lb_subproperty_id(
+                    cmd.cli_ctx, namespace, 'frontendIpConfigurations', item))
+            else:
+                config_ids.append(item)
+        namespace.frontend_ip_configurations = config_ids
+
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -606,10 +619,20 @@ def process_lb_create_namespace(cmd, namespace):
 
 
 def process_lb_frontend_ip_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
             '--subnet ID | --public-ip NAME_OR_ID')
+
+    if namespace.public_ip_prefix:
+        if not is_valid_resource_id(namespace.public_ip_prefix):
+            namespace.public_ip_prefix = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIpPrefixes',
+                name=namespace.public_ip_prefix)
 
     if namespace.subnet:
         get_subnet_validator()(cmd, namespace)
@@ -1095,3 +1118,14 @@ def process_nw_troubleshooting_show_namespace(cmd, namespace):
             raise resource_usage
 
     get_network_watcher_from_resource(cmd, namespace)
+
+
+def process_lb_outbound_rule_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
+
+    validate_frontend_ip_configs(cmd, namespace)
+
+    if namespace.backend_address_pool:
+        if not is_valid_resource_id(namespace.backend_address_pool):
+            namespace.backend_address_pool = _generate_lb_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
