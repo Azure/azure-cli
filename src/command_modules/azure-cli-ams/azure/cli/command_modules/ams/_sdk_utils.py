@@ -25,5 +25,6 @@ def get_sdk_model_class(class_name):
 def get_stand_alone_presets():
     return ['AudioAnalyzer', 'VideoAnalyzer']
 
+
 def get_cdn_providers():
     return ['StandardVerizon', 'PremiumVerizon', 'StandardAkamai']
