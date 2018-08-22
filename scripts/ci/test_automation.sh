@@ -46,7 +46,7 @@ fi
 target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
 if [ "$target_profile" != "latest" ]; then
     # example: 2017-03-09-profile
-    target_profile=$target_profile-profile
+    # target_profile=$target_profile-profile
 fi
 
 title 'Running tests'
