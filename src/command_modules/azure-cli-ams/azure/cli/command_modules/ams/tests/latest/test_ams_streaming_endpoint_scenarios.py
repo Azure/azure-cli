@@ -257,11 +257,13 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
 
-        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait')
+        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait', checks=[self.is_empty()])
 
-        self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
-            self.check('resourceState', 'Starting')
-        ])
+        str_endpoint = self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}').get_output_in_json()
+
+        resource_states = ['Starting', 'Running']
+
+        self.assertIn(str_endpoint['resourceState'], resource_states)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -280,11 +282,13 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --auto-start')
 
-        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait')
+        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait', checks=[self.is_empty()])
 
-        self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
-            self.check('resourceState', 'Stopping')
-        ])
+        str_endpoint = self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}').get_output_in_json()
+
+        resource_states = ['Stopping', 'Stopped']
+
+        self.assertIn(str_endpoint['resourceState'], resource_states)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
