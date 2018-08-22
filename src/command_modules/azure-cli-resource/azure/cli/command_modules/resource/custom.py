@@ -33,7 +33,7 @@ from azure.mgmt.resource.links.models import ResourceLinkProperties
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
@@ -937,7 +937,10 @@ def list_provider_operations(cmd):
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
+    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
+    if version == '2015-07-01':
+        return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 

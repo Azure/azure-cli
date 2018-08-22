@@ -374,7 +374,7 @@ helps['policy set-definition create'] = """
             examples:
                 - name: Create a policy set definition.
                   text: |
-                    az policy setdefinition create -n readOnlyStorage --definitions '[
+                    az policy set-definition create -n readOnlyStorage --definitions '[
                             {
                                 "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
                             }
@@ -459,7 +459,7 @@ helps['resource show'] = """
     examples:
         - name: Show a virtual machine resource named 'MyVm'.
           text: >
-            az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Show a web app using a resource identifier.
           text: >
             az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
@@ -480,7 +480,7 @@ helps['resource delete'] = """
     examples:
         - name: Delete a virtual machine named 'MyVm'.
           text: >
-            az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Delete a web app using a resource identifier.
           text: >
             az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp

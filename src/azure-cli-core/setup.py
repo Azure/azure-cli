@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.44"
+VERSION = "2.0.45"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,6 +53,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
+    'adal>=1.0.2',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
@@ -81,6 +82,11 @@ if sys.version_info < (2, 7, 9):
     DEPENDENCIES.append('pyopenssl')
     DEPENDENCIES.append('ndg-httpsclient')
     DEPENDENCIES.append('pyasn1')
+
+if sys.version_info < (3, 0):
+    DEPENDENCIES.append('antlr4-python2-runtime')
+else:
+    DEPENDENCIES.append('antlr4-python3-runtime')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()

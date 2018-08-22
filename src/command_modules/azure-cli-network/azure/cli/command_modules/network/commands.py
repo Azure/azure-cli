@@ -285,7 +285,7 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
         g.command('list-options', 'list_available_ssl_options')
         g.command('predefined list', 'list_available_ssl_predefined_policies')
-        g.command('predefined show', 'get_ssl_predefined_policy')
+        g.show_command('predefined show', 'get_ssl_predefined_policy')
 
     with self.command_group('network application-gateway url-path-map rule') as g:
         g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)

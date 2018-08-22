@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.2.4
++++++
+* `network application-gateway ssl-policy predefined show`: exception handling to exit with code 3 upon a missing resource for consistency
 
 2.2.3
 +++++
