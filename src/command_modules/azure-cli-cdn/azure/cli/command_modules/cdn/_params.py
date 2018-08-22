@@ -28,7 +28,7 @@ class OriginType(argparse._AppendAction):
             msg = '%s takes 1, 2 or 3 values, %d given'
             raise argparse.ArgumentError(self, msg % (option_string, len(values)))
 
-        deep_created_origin = DeepCreatedOrigin('origin', values[0], http_port=80, https_port=443)
+        deep_created_origin = DeepCreatedOrigin(name='origin', host_name=values[0], http_port=80, https_port=443)
         if len(values) > 1:
             deep_created_origin.http_port = int(values[1])
         if len(values) > 2:

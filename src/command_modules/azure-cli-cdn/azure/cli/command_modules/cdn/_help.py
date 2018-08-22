@@ -43,7 +43,7 @@ helps['cdn profile delete'] = """
     examples:
         - name: Delete a CDN profile.
           text: >
-            az cdn profile create -g group -n profile
+            az cdn profile delete -g group -n profile
 """
 
 helps['cdn profile list'] = """

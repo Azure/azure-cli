@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.reservations.models.patch import Patch
+from azure.mgmt.reservations.models import Patch
 
 
 def cli_reservation_update_reservation(client, reservation_order_id, reservation_id,

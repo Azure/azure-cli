@@ -80,8 +80,8 @@ def create_endpoint(cmd, client, resource_group_name, profile_name, name, origin
     is_compression_enabled = False if is_compression_enabled is None else is_compression_enabled
     is_http_allowed = True if is_http_allowed is None else is_http_allowed
     is_https_allowed = True if is_https_allowed is None else is_https_allowed
-    endpoint = Endpoint(location,
-                        origins,
+    endpoint = Endpoint(location=location,
+                        origins=origins,
                         origin_host_header=origin_host_header,
                         origin_path=origin_path,
                         content_types_to_compress=content_types_to_compress,
@@ -118,7 +118,7 @@ def create_profile(cmd, client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
     from azure.mgmt.cdn.models import (Profile, Sku)
-    profile = Profile(location, Sku(name=sku), tags=tags)
+    profile = Profile(location=location, sku=Sku(name=sku), tags=tags)
     return client.profiles.create(resource_group_name, name, profile)
 
 # endregion

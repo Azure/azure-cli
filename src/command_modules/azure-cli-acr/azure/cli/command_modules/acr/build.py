@@ -7,7 +7,6 @@ import re
 import time
 import os
 from random import uniform
-from datetime import datetime
 from io import BytesIO
 import tempfile
 import tarfile
@@ -16,7 +15,6 @@ import requests
 import colorama
 from knack.log import get_logger
 from knack.util import CLIError
-from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.common import AzureHttpError
 from azure.cli.core.commands import LongRunningOperation
@@ -86,11 +84,11 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
     start = 0
     end = byte_size - 1
     available = 0
-    last_modified = None
     sleep_time = 1
     max_sleep_time = 15
     num_fails = 0
     num_fails_for_backoff = 3
+    consecutive_sleep_in_sec = 0
 
     # Try to get the initial properties so there's no waiting.
     # If the storage call fails, we'll just sleep and try again after.
@@ -99,16 +97,15 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
             container_name=container_name, blob_name=blob_name)
         metadata = props.metadata
         available = props.properties.content_length
-        last_modified = props.properties.last_modified
     except (AttributeError, AzureHttpError):
         pass
 
     while (_blob_is_not_complete(metadata) or start < available):
-
         while start < available:
             # Success! Reset our polling backoff.
             sleep_time = 1
             num_fails = 0
+            consecutive_sleep_in_sec = 0
 
             try:
                 old_byte_size = len(stream.getvalue())
@@ -134,7 +131,6 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
                         stream.write(curr_bytes[i + 1:])
                         print(flush.decode('utf-8', errors='ignore'))
                         break
-
             except AzureHttpError as ae:
                 if ae.status_code != 404:
                     raise CLIError(ae)
@@ -149,8 +145,6 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
                 container_name=container_name, blob_name=blob_name)
             metadata = props.metadata
             available = props.properties.content_length
-            last_modified = props.properties.last_modified
-
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)
@@ -161,38 +155,33 @@ def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-stateme
         except Exception as err:
             raise CLIError(err)
 
-        # If we're still expecting data and we have a record for the last
-        # modified date and the last modified date has timed out, exit
-        if ((last_modified is not None and _blob_is_not_complete(metadata)) or start < available):
+        if consecutive_sleep_in_sec > timeout_in_seconds:
+            # Flush anything remaining in the buffer - this would be the case
+            # if the file has expired and we weren't able to detect any \r\n
+            curr_bytes = stream.getvalue()
+            if curr_bytes:
+                print(curr_bytes.decode('utf-8', errors='ignore'))
 
-            delta = datetime.utcnow().replace(tzinfo=TZ_UTC) - last_modified
-
-            if delta.seconds > timeout_in_seconds:
-                # Flush anything remaining in the buffer - this would be the case
-                # if the file has expired and we weren't able to detect any \r\n
-                curr_bytes = stream.getvalue()
-
-                if curr_bytes:
-                    print(curr_bytes.decode('utf-8', errors='ignore'))
-
-                logger.warning("No additional logs found. Timing out...")
-                return
+            logger.warning("Failed to find any new logs in %d seconds. Client will stop polling for additional logs.",
+                           consecutive_sleep_in_sec)
+            return
 
         # If no new data available but not complete, sleep before trying to process additional data.
         if (_blob_is_not_complete(metadata) and start >= available):
             num_fails += 1
 
-            logger.debug("Failed to find new content '%s' times in a row", num_fails)
+            logger.debug("Failed to find new content %d times in a row", num_fails)
             if num_fails >= num_fails_for_backoff:
                 num_fails = 0
                 sleep_time = min(sleep_time * 2, max_sleep_time)
-                logger.debug("Resetting failure count to '%s'", num_fails)
+                logger.debug("Resetting failure count to %d", num_fails)
 
             # 1.0 <= x < 2.0
             rnd = uniform(1, 2)
             total_sleep_time = sleep_time + rnd
-            logger.debug("Base sleep time: '%s' random delay: '%s' total: '%s' seconds",
-                         sleep_time, rnd, total_sleep_time)
+            consecutive_sleep_in_sec += total_sleep_time
+            logger.debug("Base sleep time: %d, random delay: %d, total: %d, consecutive: %d",
+                         sleep_time, rnd, total_sleep_time, consecutive_sleep_in_sec)
             time.sleep(total_sleep_time)
 
     # One final check to see if there's anything in the buffer to flush
@@ -401,11 +390,13 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path):
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
         # ignore common vcs dir or file
         if tarinfo.name in common_vcs_ignore_list:
-            logger.debug(".dockerignore: ignore vcs file '%s'", tarinfo.name)
+            logger.warning("Excluding '%s' based on default ignore rules", tarinfo.name)
             return True, parent_matching_rule_index
 
         if ignore_list is None:
-            return False, parent_matching_rule_index
+            # if .dockerignore doesn't exists, inherit from parent
+            # eg, it will ignore the files under .git folder.
+            return parent_ignored, parent_matching_rule_index
 
         # always include docker file
         # file path comparision is case-sensitive

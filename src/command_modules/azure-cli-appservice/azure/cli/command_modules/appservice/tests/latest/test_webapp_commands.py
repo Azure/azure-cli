@@ -565,6 +565,45 @@ class WebappSlotTrafficRouting(ScenarioTest):
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
 
 
+class AppServiceCors(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_cors(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'web': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'slot': 'slot1'
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('webapp create -g {rg} -n {web} --plan {plan}')
+        self.cmd('webapp cors add -g {rg} -n {web} --allowed-origins https://msdn.com https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}',
+                 checks=self.check('allowedOrigins', ['https://msdn.com', 'https://msn.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --allowed-origins https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}', checks=self.check('allowedOrigins', ['https://msdn.com']))
+
+        self.cmd('webapp deployment slot create -g {rg} -n {web} --slot {slot}')
+        self.cmd('webapp cors add -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
+                 checks=self.check('allowedOrigins', ['https://foo.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}', checks=self.check('allowedOrigins', []))
+
+    @ResourceGroupPreparer()
+    def test_functionapp_cors(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'function': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'storage': 'functioncorsstorage'
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
+        self.cmd('functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+        self.cmd('functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
+        result = self.cmd('functionapp cors show -g {rg} -n {function}').get_output_in_json()['allowedOrigins']
+        # functionapp has pre-defined cors. We verify the ones we added are in the list
+        self.assertTrue(set(['https://msdn.com', 'https://msn.com']).issubset(set(result)))
+
+
 class WebappSlotSwapScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_slot_swap(self, resource_group):
@@ -605,11 +644,14 @@ class WebappSSLCertTest(ScenarioTest):
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan, resource_group_location))
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), self.check('tags.plan', 'plan1'))
+        self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(resource_group, webapp_name, plan, resource_group_location))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)

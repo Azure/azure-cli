@@ -40,11 +40,26 @@ jobs:
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
     - stage: verify
-      env: PURPOSE='Automation'
+      env:
+      - PURPOSE='Automation'
+      - REDUCE_SDK='True'
       script: ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
+      script: ./scripts/ci/test_automation.sh
+      python: 2.7
+    - stage: verify
+      env:
+      - PURPOSE='Automation'
+      - REDUCE_SDK='True'
+      - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
+      script: ./scripts/ci/test_automation.sh
+      python: 3.6
+    - stage: verify
+      env:
+      - PURPOSE='Automation'
+      - AZURE_CLI_TEST_TARGET_PROFILE='2018-03-01'
       script: ./scripts/ci/test_automation.sh
       python: 2.7
     - stage: verify

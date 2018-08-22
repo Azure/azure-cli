@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 from knack.arguments import CLIArgumentType
-from azure.mgmt.iotcentral.models.iot_central_client_enums import AppSku
+from azure.mgmt.iotcentral.models import AppSku
 
 from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_resource_name_completion_list,

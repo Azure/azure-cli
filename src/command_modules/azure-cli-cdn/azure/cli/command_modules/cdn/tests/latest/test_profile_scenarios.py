@@ -29,7 +29,6 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
 
 
 class CdnCustomDomainScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
@@ -50,12 +49,15 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
 
         # These will all fail because we don't really have the ability to create the custom endpoint in test.
         # but they should still fail if there was a CLI-level regression.
-        with self.assertRaises(CloudError):
-            self.cmd('cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
+        with self.assertRaises(ErrorResponseException):
+            self.cmd(
+                'cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
         with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(ErrorResponseException):
-            self.cmd('cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(ErrorResponseException):
-            self.cmd('cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
+        with self.assertRaises(CLIError):
+            self.cmd(
+                'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
+        with self.assertRaises(CLIError):
+            self.cmd(
+                'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
