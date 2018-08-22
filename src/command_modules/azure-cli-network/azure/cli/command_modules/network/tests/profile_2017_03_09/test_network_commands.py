@@ -1004,7 +1004,7 @@ class NetworkDnsScenarioTest(ScenarioTest):
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -1047,8 +1047,7 @@ class NetworkDnsScenarioTest(ScenarioTest):
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
-        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
-                 checks=self.is_empty())
+        self.cmd('network dns zone delete -g {rg} -n {zone} -y')
 
 
 class NetworkZoneImportExportTest(ScenarioTest):
