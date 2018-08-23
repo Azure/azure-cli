@@ -178,12 +178,16 @@ class AmsTests(ScenarioTest):
         self.kwargs.update({
             'streamingLocatorName': streamingLocatorName,
             'startTime': '2018-03-29T10:00:00',
-            'endTime': '2018-03-29T12:00:00'
+            'endTime': '2018-03-29T12:00:00',
+            'streamingLocatorId': 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+            'alternativeMediaId': 'randomid'
         })
 
-        self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime}', checks=[
+        self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime} --streaming-locator-id {streamingLocatorId} --alternative-media-id {alternativeMediaId}', checks=[
             self.check('name', '{streamingLocatorName}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('streamingLocatorId', '{streamingLocatorId}'),
+            self.check('alternativeMediaId', '{alternativeMediaId}')
         ])
 
         self.cmd('az ams streaming locator show -a {amsname} -n {streamingLocatorName} -g {rg}', checks=[
