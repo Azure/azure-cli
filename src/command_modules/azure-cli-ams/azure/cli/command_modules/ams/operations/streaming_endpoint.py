@@ -68,16 +68,11 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
                              parameters):
-    if parameters.access_control is not None:
-        if parameters.access_control.ip is not None:
-            ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
-                           parameters.access_control.ip.allow))
-        else:
-            raise CLIError('The streaming endpoint resource does not have an IP allow list, you must initialize it.')
-    else:
-            raise CLIError('The streaming endpoint resource does not have an Akamai access control, set it before using -add parameter.')
+    if parameters.access_control is not None and parameters.access_control.ip is not None and parameters.access_control.ip.allow:
+        ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
+                       parameters.access_control.ip.allow))
+        parameters.access_control.ip.allow = ips
 
-    parameters.access_control.ip.allow = ips
     return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
 
 
@@ -89,17 +84,12 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
     if not instance:
         raise CLIError('The streaming endpoint resource was not found.')
 
-    if ips is not None and (cdn_provider is not None or cdn_profile is not None):
-        raise CLIError('Streaming endpoints do not support CDN and Akamai access control simultaneously, you must enter only one option.')
-
-    allow_list = []
     if ips is not None:
-        for ip in ips:
-            allow_list.append(create_ip_range(instance.name, ip))
-
-    streaming_endpoint_access_control = None
-    if ips is not None:
-        streaming_endpoint_access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=allow_list))
+        instance.access_control = None
+        if len(ips) > 1 or (len(ips) == 1 and ips[0] != ""):
+            instance.access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=[]))
+            for ip in ips:
+                instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
 
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
@@ -120,8 +110,6 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         instance.cdn_provider = cdn_provider
     if max_cache_age is not None:
         instance.cross_site_access_policies = policies
-    if streaming_endpoint_access_control is not None:
-        instance.access_control = streaming_endpoint_access_control
 
     return instance
 

@@ -5,6 +5,7 @@
 
 import os
 
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
@@ -62,6 +63,81 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('length(accessControl.akamai.akamaiSignatureHeaderAuthenticationKeyList)', 0)
+        ])
+
+        self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_update(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=11)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name,
+            'availabilitySetName': 'availaTest',
+            'cdnProvider': 'StandardVerizon',
+            'cdnProfile': 'testProfile',
+            'description': 'test streaming description',
+            'maxCacheAge': 11,
+            'scaleUnits': 4,
+            'tags': 'foo=bar',
+            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
+            'ip': '4.4.4.4'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('location', 'West US 2'),
+            self.check('availabilitySetName', '{availabilitySetName}'),
+            self.check('cdnProvider', '{cdnProvider}'),
+            self.check('cdnProfile', '{cdnProfile}'),
+            self.check('description', '{description}'),
+            self.check('maxCacheAge', '{maxCacheAge}'),
+            self.check('scaleUnits', '{scaleUnits}'),
+            self.check('length(tags)', 1)
+        ])
+
+        with self.assertRaises(CLIError):
+            self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --add access_control.ip.allow {ip}')
+
+        self.kwargs.update({
+            'streamingEndpointName': streaming_endpoint_name,
+            'availabilitySetName': 'availaTest2',
+            'cdnProvider': 'PremiumVerizon',
+            'cdnProfile': 'testProfile2',
+            'description': 'test streaming description2',
+            'maxCacheAge': 9,
+            'tags': 'foo2=bar2 foo3=bar3',
+            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
+            'ips': '1.1.1.1 2.2.2.2 3.3.3.3'
+        })
+        
+        self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --tags {tags} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('cdnProvider', '{cdnProvider}'),
+            self.check('cdnProfile', '{cdnProfile}'),
+            self.check('description', '{description}'),
+            self.check('maxCacheAge', '{maxCacheAge}'),
+            self.check('length(tags)', 2)
+        ])
+
+        self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --ips {ips}')
+
+        self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('cdnProvider', None),
+            self.check('cdnProfile', ''),
+            self.check('cdnEnabled', False),
+            self.check('length(accessControl.ip.allow)', 3)
         ])
 
         self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
