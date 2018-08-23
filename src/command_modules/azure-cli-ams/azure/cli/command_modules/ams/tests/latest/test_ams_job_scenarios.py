@@ -22,10 +22,7 @@ class AmsJobTests(ScenarioTest):
             'location': 'westus2'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
-        ])
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
         assetName = self.create_random_name(prefix='asset', length=12)
 
@@ -33,10 +30,7 @@ class AmsJobTests(ScenarioTest):
             'assetName': assetName
         })
 
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}', checks=[
-            self.check('name', '{assetName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
 
         transformName = self.create_random_name(prefix='tra', length=10)
 
@@ -46,10 +40,7 @@ class AmsJobTests(ScenarioTest):
             'label': 'someLabel'
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --presets {presetName}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --presets {presetName}')
 
         jobName = self.create_random_name(prefix='job', length=10)
 
