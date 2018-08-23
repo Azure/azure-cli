@@ -179,8 +179,8 @@ class AmsTests(ScenarioTest):
             'streamingLocatorName': streamingLocatorName,
             'startTime': '2018-03-29T10:00:00',
             'endTime': '2018-03-29T12:00:00',
-            'streamingLocatorId': 'dddddddd-dddd-dddd-dddd-dddddddddddd',
-            'alternativeMediaId': 'randomid'
+            'streamingLocatorId': '1b4ba7ed-c100-40aa-8722-a86839c9f887',
+            'alternativeMediaId': '8f6c2c3b-1650-4771-af9f-79312e6b2ded'
         })
 
         self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime} --streaming-locator-id {streamingLocatorId} --alternative-media-id {alternativeMediaId}', checks=[
