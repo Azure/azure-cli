@@ -145,6 +145,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="Start time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('end_time', type=datetime_format,
                    help="End time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
+        c.argument('streaming_locator_id', help='The identifier of the streaming locator.')
+        c.argument('alternative_media_id', help='An alternative media identifier associated with the streaming locator.')
 
     with self.argument_context('ams streaming locator list') as c:
         c.argument('account_name', id_part=None)
