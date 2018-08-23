@@ -68,8 +68,15 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
                              parameters):
-    ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
-                   parameters.access_control.ip.allow))
+    if parameters.access_control is not None:
+        if parameters.access_control.ip is not None:
+            ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
+                           parameters.access_control.ip.allow))
+        else:
+            raise CLIError('The streaming endpoint resource does not have an IP allow list, you must initialize it.')
+    else:
+            raise CLIError('The streaming endpoint resource does not have an Akamai access control, set it before using -add parameter.')
+
     parameters.access_control.ip.allow = ips
     return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
 
@@ -82,6 +89,9 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
     if not instance:
         raise CLIError('The streaming endpoint resource was not found.')
 
+    if ips is not None and (cdn_provider is not None or cdn_profile is not None):
+        raise CLIError('Streaming endpoints do not support CDN and Akamai access control simultaneously, you must enter only one option.')
+
     allow_list = []
     if ips is not None:
         for ip in ips:
@@ -93,8 +103,6 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
 
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
-    cdn_enabled = cdn_profile is not None or cdn_provider is not None
-
     if max_cache_age is not None:
         instance.max_cache_age = max_cache_age
     if tags is not None:
@@ -105,8 +113,9 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         instance.custom_host_names = custom_host_names
     if cdn_profile is not None:
         instance.cdn_profile = cdn_profile
-    if cdn_enabled is not None:
-        instance.cdn_enabled = cdn_enabled
+
+    instance.cdn_enabled = cdn_profile is not None or cdn_provider is not None
+
     if cdn_provider is not None:
         instance.cdn_provider = cdn_provider
     if max_cache_age is not None:
