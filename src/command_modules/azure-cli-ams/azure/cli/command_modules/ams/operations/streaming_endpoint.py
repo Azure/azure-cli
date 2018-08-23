@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.util import CLIError
+
 
 def create_streaming_endpoint(client, resource_group_name, account_name, streaming_endpoint_name, location,  # pylint: disable=too-many-locals
                               auto_start=None, tags=None, cross_domain_policy=None, ips=None,
@@ -66,6 +68,9 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
                              parameters):
+    ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
+                   parameters.access_control.ip.allow))
+    parameters.access_control.ip.allow = ips
     return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
 
 
