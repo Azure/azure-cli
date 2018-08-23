@@ -117,7 +117,7 @@ helps['dls account network-rule create'] = """
         - name: --subnet
           type: string
           short-summary: 'The subnet name or id for the virtual network rule.'
-        - name: --name
+        - name: --vnet-name
           type: string
           short-summary: 'The name of the virtual network rule.'
 """
@@ -129,7 +129,7 @@ helps['dls account network-rule update'] = """
         - name: --subnet
           type: string
           short-summary: 'The subnet name or id for the virtual network rule.'
-        - name: --name
+        - name: --vnet-name
           type: string
           short-summary: 'The name of the virtual network rule.'
 """
