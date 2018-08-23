@@ -47,6 +47,12 @@ helps['acr build-task'] = """
     short-summary: Manage build definitions, which can be triggered by git commits or base image updates.
     """
 
+# TODO: Update help for all task commands
+helps['acr task'] = """
+    type: group
+    short-summary: Manage tasks, which can be triggered by git commits or base image updates. 
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if a container registry name is valid and available for use.
@@ -395,6 +401,135 @@ helps['acr replication update'] = """
             az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
 """
 
+helps['acr task create'] = """
+    type: command
+    short-summary: Creates a new task which can be triggered by git commits or base image updates.
+    examples:
+        - name: Create a task which updates on git commits and base image updates.
+          text: >
+            az acr task create -t helloworld:{{.Run.ID}} -n helloworld -r myRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node --git-access-token 0000000000000000000000000000000000000000
+"""
+
+helps['acr task show'] = """
+    type: command
+    short-summary: Get the properties of a specified task.
+    examples:
+        - name: Get the details of a task, displaying the results in a table.
+          text: >
+            az acr task show -n MyTask -r MyRegistry -o table
+
+        - name: Get the details of a task including secure properties.
+          text: >
+            az acr task show -n MyTask -r MyRegistry --with-secure-properties
+"""
+
+helps['acr task list'] = """
+    type: command
+    short-summary: List the tasks for a container registry.
+    examples:
+        - name: List tasks and show the results in a table.
+          text: >
+            az acr task list -r MyRegistry -o table
+"""
+
+helps['acr task delete'] = """
+    type: command
+    short-summary: Delete a task from a container registry.
+    examples:
+        - name: Delete a task from a container registry.
+          text: >
+            az acr task delete -n MyTask -r MyRegistry
+"""
+
+helps['acr task update'] = """
+    type: command
+    short-summary: Update a task for a container registry.
+    examples:
+        - name: Update the git access token for a task in a container registry.
+          text: >
+            az acr task update -n MyTask -r MyRegistry --git-access-token 0000000000000000000000000000000000000000
+"""
+
+helps['acr task list-runs'] = """
+    type: command
+    short-summary: List all of the executed runs for a registry, with the ability to filter by a specific task.
+    examples:
+        - name: List runs for a task and show the results in a table.
+          text: >
+            az acr task list-runs -n MyTask -r MyRegistry -o table
+        - name: List all of the runs for a registry and show the results in a table.
+          text: >
+            az acr task list-runs -r MyRegistry -o table
+        - name: List the last 10 successful runs for a registry and show the results in a table.
+          text: >
+            az acr task list-runs -r MyRegistry --run-status Succeeded --top 10 -o table
+        - name: List all of the runs that built the image 'hello-world:latest' for a registry and show the results in a table.
+          text: >
+            az acr task list-runs -r MyRegistry --image hello-world:latest -o table
+"""
+
+helps['acr task show-run'] = """
+    type: command
+    short-summary: Get the properties of a specified run.
+    examples:
+        - name:  Get the details of a run, displaying the results in a table.
+          text: >
+            az acr task show-run -n MyTask -r MyRegistry --run-id runId -o table
+"""
+
+helps['acr task run'] = """
+    type: command
+    short-summary: Trigger a task that might otherwise be waiting for git commits or base image update triggers.
+    examples:
+        - name: Trigger a task.
+          text: >
+            az acr task run -n MyTask -r MyRegistry
+"""
+
+helps['acr task update-run'] = """
+    type: command
+    short-summary: Patch the run properties.
+    examples:
+        - name: Update an existing run to be archived.
+          text: >
+            az acr task update-run -r MyRegistry --run-id runId --no-archive false
+"""
+
+helps['acr task logs'] = """
+    type: command
+    short-summary: Show logs for a particular run. If no run-id is supplied, it shows logs for the last created run.
+    examples:
+        - name: Show logs for the last created run in the registry.
+          text: >
+            az acr task logs -r MyRegistry
+        - name: Show logs for the last created run in the registry, filtered by task.
+          text: >
+            az acr task logs -r MyRegistry -n MyTask
+        - name: Show logs for a particular run.
+          text: >
+            az acr task logs -r MyRegistry --run-id runId
+        - name: Show logs for the last created run in the registry that built the image 'hello-world:latest'.
+          text: >
+            az acr task logs -r MyRegistry --image hello-world:latest
+"""
+
+helps['acr build'] = """
+    type: command
+    short-summary: Queues a quick docker build providing interactive feedback.
+    examples:
+        - name: Queue a local context, pushed to ACR with streaming logs.
+          text: >
+            az acr build -t sample/helloworld:{{.Run.ID}} -r MyRegistry .
+    examples:
+        - name: Queue a local context, pushed to ACR without streaming logs.
+          text: >
+            az acr build -t sample/helloworld:{{.Run.ID}} -r MyRegistry --no-logs .
+    examples:
+        - name: Queue a local context, validating the build is successful, without pushing to the registry.
+          text: >
+            az acr build -r MyRegistry .
+"""
+
 helps['acr build-task create'] = """
     type: command
     short-summary: Creates a new build definition which can be triggered by git commits or base image updates.
@@ -505,23 +640,6 @@ helps['acr build-task logs'] = """
         - name: Show logs for the last created build in the registry that built the image 'hello-world:latest'.
           text: >
             az acr build-task logs -r MyRegistry --image hello-world:latest
-"""
-
-helps['acr build'] = """
-    type: command
-    short-summary: Queues a quick docker build providing interactive feedback.
-    examples:
-        - name: Queue a local context, pushed to ACR with streaming logs.
-          text: >
-            az acr build -t sample/helloworld:{{.Build.ID}} -r MyRegistry .
-    examples:
-        - name: Queue a local context, pushed to ACR without streaming logs.
-          text: >
-            az acr build -t sample/helloworld:{{.Build.ID}} -r MyRegistry --no-logs .
-    examples:
-        - name: Queue a local context, validating the build is successful, without pushing to the registry.
-          text: >
-            az acr build -r MyRegistry .
 """
 
 helps['acr import'] = """
