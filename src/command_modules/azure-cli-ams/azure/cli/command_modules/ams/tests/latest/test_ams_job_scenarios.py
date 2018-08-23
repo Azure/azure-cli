@@ -46,10 +46,11 @@ class AmsJobTests(ScenarioTest):
 
         self.kwargs.update({
             'jobName': jobName,
-            'priority': 'High'
+            'priority': 'High',
+            'correlationData': 'foo=bar baz=fuzz'
         })
 
-        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-names {assetName} --priority {priority} --label {label}', checks=[
+        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-names {assetName} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('input.label', '{label}'),
@@ -59,7 +60,8 @@ class AmsJobTests(ScenarioTest):
         self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('priority', '{priority}')
+            self.check('priority', '{priority}'),
+            self.check('length(correlationData)', 2)
         ])
 
         list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
