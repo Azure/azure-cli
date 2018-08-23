@@ -31,6 +31,10 @@ from azure.cli.core.commands.parameters import (
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
+from .sdk.models import (
+    RunStatus,
+    TaskStatus
+)
 from ._constants import (
     STORAGE_RESOURCE_TYPE,
     REGISTRY_RESOURCE_TYPE,
@@ -38,6 +42,7 @@ from ._constants import (
     REPLICATION_RESOURCE_TYPE,
     BUILD_TASK_RESOURCE_TYPE,
     BUILD_STEP_RESOURCE_TYPE,
+    TASK_RESOURCE_TYPE,
     CLASSIC_REGISTRY_SKU,
     MANAGED_REGISTRY_SKU,
 )
@@ -45,7 +50,9 @@ from ._validators import (
     validate_registry_name,
     validate_headers,
     validate_build_arg,
-    validate_secret_build_arg
+    validate_secret_build_arg,
+    validate_arg,
+    validate_secret_arg
 )
 
 
@@ -75,8 +82,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('image_names', arg_type=image_by_tag_type, action='append')
         c.argument('timeout', type=int, help='The build timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
-        c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_build_arg)
-        c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
 
@@ -140,6 +145,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
+        c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
+        c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
 
     with self.argument_context('acr build-task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -164,6 +171,47 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('build_status', help='The current status of build.', arg_type=get_enum_type(BuildStatus))
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_archive', help='Indicates whether the build should be archived.', arg_type=get_three_state_flag())
+        c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_build_arg)
+        c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_build_arg)
+
+    with self.argument_context('acr task') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('task_name', options_list=['--name', '-n'], help='The name of the task.', completer=get_resource_name_completion_list(TASK_RESOURCE_TYPE))
+        c.argument('status', help='The current status of task.', arg_type=get_enum_type(TaskStatus))
+        c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
+
+        # BuildTaskStep parameters
+        c.argument('definition_file', options_list=['--definition-file'], help="The task template/definition file path relative to the source context.")
+        c.argument('values_file', options_list=['--values-file'], help="The task values/parameters file path relative to the source context.")
+
+        # DockerBuildStep parameters
+        c.argument('docker_file', options_list=['--dockerfile'], help="The relative path of the the docker file to the source code root folder.")
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
+        c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
+        c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
+
+        # common to DockerBuildStep, BuildTaskStep and RunTaskStep
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code respository.")
+        c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
+        c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
+
+        # Source Trigger parameters
+        c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('git_access_token', help="The access token used to access the source control provider.")
+        c.argument('branch', help="The source control branch name.")
+        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
+
+        # Run related parameters
+        c.argument('top', help='Limit the number of latest runs in the results.')
+        c.argument('run_id', help='The unique run identifier.')
+        c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
+        c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
+
+        # Run agent parameters
+        c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
+
+    with self.argument_context('acr task create') as c:
+        c.argument('task_name', completer=None)
