@@ -24,13 +24,13 @@ from azure.storage.blob import (
     BlockBlobService,
     AppendBlobService,
 )
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
-    QuickBuildRequest,
-    PlatformProperties
+from .sdk.models import (
+    DockerBuildRequest,
+    PlatformProperties,
+    Architecture
 )
 
 from ._utils import validate_managed_registry
-from ._client_factory import cf_acr_registries
 from ._build_polling import get_build_with_polling
 
 
@@ -48,10 +48,10 @@ def acr_build_show_logs(client,
     log_file_sas = None
     error_message = "Could not get build logs for build ID: {}.".format(build_id)
     try:
-        build_log_result = client.get_log_link(
+        build_log_result = client.get_log_sas_url(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            build_id=build_id)
+            run_id=build_id)
         log_file_sas = build_log_result.log_link
     except (AttributeError, CloudError) as e:
         logger.debug("%s Exception: %s", error_message, e)
@@ -267,7 +267,8 @@ def acr_build(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_build
+    client_registries = cf_acr_registries_build(cmd.cli_ctx)
 
     tar_file_path = os.path.join(tempfile.gettempdir(), 'source_archive_{}.tar.gz'.format(hash(os.times())))
 
@@ -301,19 +302,19 @@ def acr_build(cmd,
             is_push_enabled = False
             logger.warning("'--image -t' is not provided. Skipping image push after build.")
 
-    build_request = QuickBuildRequest(
-        source_location=source_location,
-        platform=PlatformProperties(os_type=os_type),
-        docker_file_path=docker_file_path,
+    docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
+        source_location=source_location,
+        platform=PlatformProperties(os=os_type, architecture=Architecture.amd64.value),
+        docker_file_path=docker_file_path,
         timeout=timeout,
-        build_arguments=(build_arg if build_arg else []) + (secret_build_arg if secret_build_arg else []))
+        arguments=(build_arg if build_arg else []) + (secret_build_arg if secret_build_arg else []))
 
-    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.queue_build(
+    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
-        build_request=build_request))
+        run_request=docker_build_request))
 
     build_id = queued_build.build_id
     logger.warning("Queued a build with build ID: %s", build_id)

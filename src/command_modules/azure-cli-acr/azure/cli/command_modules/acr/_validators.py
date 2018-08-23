@@ -60,3 +60,29 @@ def validate_build_argument(string, is_secret):
             return {'type': 'DockerBuildArgument', 'name': comps[0], 'value': comps[1], 'isSecret': is_secret}
         return {'type': 'DockerBuildArgument', 'name': comps[0], 'value': '', 'isSecret': is_secret}
     return None
+
+
+def validate_arg(namespace):
+    if isinstance(namespace.arg, list):
+        arguments_list = []
+        for item in namespace.arg:
+            arguments_list.append(validate_task_argument(item, False))
+        namespace.arg = arguments_list
+
+
+def validate_secret_arg(namespace):
+    if isinstance(namespace.secret_arg, list):
+        secret_arguments_list = []
+        for item in namespace.secret_arg:
+            secret_arguments_list.append(validate_task_argument(item, True))
+        namespace.secret_arg = secret_arguments_list
+
+
+def validate_task_argument(string, is_secret):
+    """Extracts a single argument in key[=value] format. """
+    if string:
+        comps = string.split('=', 1)
+        if len(comps) > 1:
+            return {'type': 'Argument', 'name': comps[0], 'value': comps[1], 'isSecret': is_secret}
+        return {'type': 'Argument', 'name': comps[0], 'value': '', 'isSecret': is_secret}
+    return None
