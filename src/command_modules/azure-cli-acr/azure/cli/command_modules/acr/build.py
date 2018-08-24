@@ -247,8 +247,8 @@ def acr_build(cmd,
               image_names=None,
               resource_group_name=None,
               timeout=None,
-              build_arg=None,
-              secret_build_arg=None,
+              arg=None,
+              secret_arg=None,
               docker_file_path='Dockerfile',
               no_push=False,
               no_logs=False,
@@ -298,14 +298,14 @@ def acr_build(cmd,
         platform=PlatformProperties(os=os_type, architecture=Architecture.amd64.value),
         docker_file_path=docker_file_path,
         timeout=timeout,
-        arguments=(build_arg if build_arg else []) + (secret_build_arg if secret_build_arg else []))
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=docker_build_request))
 
-    build_id = queued_build.build_id
+    build_id = queued_build.run_id
     logger.warning("Queued a build with build ID: %s", build_id)
     logger.warning("Waiting for build agent...")
 

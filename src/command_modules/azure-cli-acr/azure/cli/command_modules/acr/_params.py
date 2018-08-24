@@ -145,8 +145,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
-        c.argument('build_arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
-        c.argument('secret_build_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
+        c.argument('arg', options_list=['--build-arg'], help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
+        c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
 
     with self.argument_context('acr build-task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])

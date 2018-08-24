@@ -11,15 +11,15 @@ from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from .sdk.models import (
     Task,
-    SourceRepositoryProperties,
+    SourceProperties,
     AgentProperties,
     TriggerProperties,
     SourceTrigger,
     TriggerStatus,
     BaseImageTrigger,
-    SourceControlAuthInfo,
     PlatformProperties,
     SourceTriggerEvent,
+    AuthInfo,
     Architecture,
     Variant,
     DockerBuildStep,
@@ -83,7 +83,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=docker_file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            base_image_dependencies=[], #TODO: take user input
             context_path=context_path
         )
     if definition_file is not None:
@@ -91,8 +90,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
-            arguments=(arg if arg else []) + (secret_arg if secret_arg else []), #TODO: use new object model [values vs args] 
-            base_image_dependencies=[], #TODO: take user input
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -117,11 +114,11 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         trigger=None if context_path is None else TriggerProperties(
             source_triggers=[
                 SourceTrigger(
-                    source_repository=SourceRepositoryProperties(
+                    source_repository=SourceProperties(
                         source_control_type=source_control_type,
                         repository_url=context_path,
                         branch=branch,
-                        source_control_auth_properties=SourceControlAuthInfo(
+                        source_control_auth_properties=AuthInfo(
                             token=git_access_token,
                             token_type=DEFAULT_TOKEN_TYPE,
                             refresh_token='',
@@ -235,7 +232,6 @@ def acr_task_update_custom(instance,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=docker_file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            base_image_dependencies=[], #TODO
             context_path=context_path
         )
     if definition_file is not None:
@@ -243,8 +239,6 @@ def acr_task_update_custom(instance,  # pylint: disable=too-many-locals
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
-            arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            base_image_dependencies=[], #TODO
         )
 
     instance.platform = PlatformProperties(
@@ -260,11 +254,11 @@ def acr_task_update_custom(instance,  # pylint: disable=too-many-locals
     instance.trigger = TriggerProperties(
         source_triggers=[
             SourceTrigger(
-                source_repository=SourceRepositoryProperties(
+                source_repository=SourceProperties(
                     source_control_type=None,
                     repository_url=context_path,
                     branch=branch,
-                    source_control_auth_properties=SourceControlAuthInfo(
+                    source_control_auth_properties=AuthInfo(
                         token=git_access_token,
                         token_type=DEFAULT_TOKEN_TYPE,
                         refresh_token='',
