@@ -14,9 +14,20 @@ from enum import Enum
 # pylint: disable=too-few-public-methods
 class EndpointType(Enum):
     """
-    Type of the Routing Endpoint.
+    Type of the routing endpoint.
     """
     EventHub = 'eventhub'
     ServiceBusQueue = 'servicebusqueue'
     ServiceBusTopic = 'servicebustopic'
     AzureStorageContainer = 'azurestoragecontainer'
+
+# pylint: disable=too-few-public-methods
+class RouteSourceType(Enum):
+    """
+    Type of the route source.
+    """
+    Invalid = 'invalid'
+    DeviceMessages = 'devicemessages'
+    TwinChangeEvents = 'twinchangeevents'
+    DeviceLifecycleEvents = 'devicelifecycleevents'
+    DeviceJobLifecycleEvents = 'devicejoblifecycleevents'

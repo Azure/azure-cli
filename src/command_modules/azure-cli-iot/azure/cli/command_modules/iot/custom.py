@@ -19,7 +19,8 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       RoutingEventHubProperties,
                                       RoutingServiceBusQueueEndpointProperties,
                                       RoutingServiceBusTopicEndpointProperties,
-                                      RoutingStorageContainerProperties)
+                                      RoutingStorageContainerProperties,
+                                      RouteProperties)
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
@@ -599,6 +600,79 @@ def iot_hub_routing_endpoint_delete(client, hub_name, endpoint_name=None, endpoi
     hub = iot_hub_get(client, hub_name, resource_group_name)
     hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_create(client, hub_name, route_name, source_type, endpoint_name, enabled=None, condition=None,
+                         resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    hub.properties.routing.routes.append(
+        RouteProperties(
+            source=source_type,
+            name=route_name,
+            endpoint_names=endpoint_name.split(),
+            condition=('true' if condition is None else condition),
+            is_enabled=(True if enabled is None else enabled)
+        )
+    )
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_list(client, hub_name, source_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if not source_type:
+        return hub.properties.routing.routes
+    else:
+        return [route for route in hub.properties.routing.routes if route.source.lower() == source_type.lower()]
+
+
+def iot_hub_route_show(client, hub_name, route_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    for route in hub.properties.routing.routes:
+        if route.name.lower() == route_name.lower():
+            return route
+    raise CLIError("No route found.")
+
+
+def iot_hub_route_delete(client, hub_name, route_name=None, source_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if not route_name and not source_type:
+        hub.properties.routing.routes = []
+    if route_name:
+        hub.properties.routing.routes = [route for route in hub.properties.routing.routes
+                                         if route.name.lower() != (route.name.lower()
+                                                                   if route_name is None else route_name.lower())]
+    if source_type:
+        hub.properties.routing.routes = [route for route in hub.properties.routing.routes
+                                         if route.source.lower() != (route.source.lower()
+                                                                     if source_type is None else source_type.lower())]
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None, condition=None,
+                         resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    updated_route = next((route for route in hub.properties.routing.routes if route.name.lower() == route_name.lower()), None)
+    if updated_route:
+        updated_route.source = updated_route.source if source_type is None else source_type
+        updated_route.endpoint_names = updated_route.endpoint_names if endpoint_name is None else endpoint_name.split()
+        updated_route.condition = updated_route.condition if condition is None else condition
+        updated_route.is_enabled = updated_route.is_enabled if enabled is None else enabled
+    else:
+        raise CLIError("No route found.")
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+# def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, resource_group_name=None):
+#     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+#     hub = iot_hub_get(client, hub_name, resource_group_name)
+#     hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
+#     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)

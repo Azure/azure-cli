@@ -15,7 +15,9 @@ from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (IotDpsSku,
                                                                                AllocationPolicy,
                                                                                AccessRightsDescription)
-from azure.cli.command_modules.iot.shared import (EndpointType)
+from azure.cli.command_modules.iot.shared import (EndpointType,
+                                                  RouteSourceType)
+
 
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
@@ -102,6 +104,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     for subgroup in ['consumer-group', 'policy', 'job', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:
             c.argument('hub_name', options_list=['--hub-name'])
+
+    with self.argument_context('iot hub route') as c:
+        c.argument('route_name', options_list=['--route-name', '-rn'], help='Name of the Route.')
+        c.argument('endpoint_name', options_list=['--endpoint-name', '-en'],
+                   help='Name of the routing endpoint.')
+        c.argument('condition', options_list=['--condition', '-c'],
+                   help='Condition that is evaluated to apply the routing rule.')
+        c.argument('enabled', options_list=['--enabled', '-e'], arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether to enable route to the Iot hub.')
+        c.argument('source_type', arg_type=get_enum_type(RouteSourceType), options_list=['--source-type', '-st'],
+                   help='Source of the route.')
 
     with self.argument_context('iot hub routing-endpoint') as c:
         c.argument('endpoint_name', options_list=['--endpoint-name', '-en'], help='Name of the Routing Endpoint.')
