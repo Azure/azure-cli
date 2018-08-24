@@ -9,10 +9,11 @@ from azure.mgmt.media.models import AssetContainerPermission
 
 
 def create_asset(client, account_name, resource_group_name, asset_name, alternate_id=None, description=None,
-                 storage_account=None):
+                 storage_account=None, container=None):
     from azure.mgmt.media.models import Asset
 
-    asset = Asset(alternate_id=alternate_id, description=description, storage_account_name=storage_account)
+    asset = Asset(alternate_id=alternate_id, description=description, storage_account_name=storage_account,
+                  container=container)
 
     return client.create_or_update(resource_group_name, account_name, asset_name, asset)
 

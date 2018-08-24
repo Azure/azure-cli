@@ -17,6 +17,44 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_create_with_akamai_without_ips(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name,
+            'identifier': 'id1',
+            'expiration': '2030-12-31T16:00:00-08:00',
+            'base64Key': 'dGVzdGlkMQ=='
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('location', 'West US 2'),
+        ])
+
+        self.cmd('az ams streaming endpoint akamai add -g {rg} -a {amsname} -n {streamingEndpointName} --identifier {identifier} --expiration {expiration} --base64-key {base64Key}', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(accessControl.akamai.akamaiSignatureHeaderAuthenticationKeyList)', 1)
+        ])
+
+        self.cmd('az ams streaming endpoint akamai remove -g {rg} -a {amsname} -n {streamingEndpointName} --identifier {identifier}', checks=[
+            self.check('name', '{streamingEndpointName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(accessControl.akamai.akamaiSignatureHeaderAuthenticationKeyList)', 0)
+        ])
+
+        self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_create_with_akamai(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
@@ -294,3 +332,122 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
         self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_start(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
+
+        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('resourceState', 'Running')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_start_async(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
+
+        self.cmd('az ams streaming endpoint start -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait', checks=[self.is_empty()])
+
+        str_endpoint = self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}').get_output_in_json()
+
+        resource_states = ['Starting', 'Running']
+
+        self.assertIn(str_endpoint['resourceState'], resource_states)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_stop_async(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --auto-start')
+
+        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName} --no-wait', checks=[self.is_empty()])
+
+        str_endpoint = self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}').get_output_in_json()
+
+        resource_states = ['Stopping', 'Stopped']
+
+        self.assertIn(str_endpoint['resourceState'], resource_states)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_stop(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location} --auto-start', checks=[
+            self.check('resourceState', 'Running')
+        ])
+
+        self.cmd('az ams streaming endpoint stop -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('resourceState', 'Stopped')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint_list(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'streamingEndpointName': streaming_endpoint_name
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams streaming endpoint list -g {rg} -a {amsname}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('az ams streaming endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} -l {location}')
+
+        self.cmd('az ams streaming endpoint list -g {rg} -a {amsname}', checks=[
+            self.check('length(@)', 2)
+        ])
