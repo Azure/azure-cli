@@ -130,7 +130,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('length(tags)', 2)
         ])
 
-        self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --ips {ips}')
+        self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --ips {ips} --disable-cdn')
 
         self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('name', '{streamingEndpointName}'),

@@ -197,6 +197,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
         c.argument('auto_start', action='store_true', help='Start the streaming endpoint automatically after creating it.')
         c.argument('ips', nargs='+', arg_group='Access Control Support', help='Space-separated list of allowed IP addresses for access control. Use "" to clear existing list.')
+        c.argument('disable_cdn', arg_group='CDN Support', action='store_true', help='Use this flag to disable CDN for the streaming endpoint.')
 
     with self.argument_context('ams streaming endpoint scale') as c:
         c.argument('scale_unit', options_list=['--scale-units'], help='The number of scale units.')

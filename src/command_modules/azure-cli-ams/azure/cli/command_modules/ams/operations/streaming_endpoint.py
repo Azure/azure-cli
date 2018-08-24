@@ -76,8 +76,9 @@ def update_streaming_endpoint_setter(client, resource_group_name, account_name, 
     return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, client_access_policy=None,
-                              description=None, max_cache_age=None, ips=None,
+                              description=None, max_cache_age=None, ips=None, disable_cdn=None,
                               cdn_provider=None, cdn_profile=None, custom_host_names=None):
     from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl, CrossSiteAccessPolicies)
 
@@ -85,12 +86,17 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         raise CLIError('The streaming endpoint resource was not found.')
 
     if ips is not None:
-        instance.access_control = None
-        if len(ips) > 1 or (len(ips) == 1 and ips[0] != ""):
-            instance.access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=[]))
+        is_ips_argument_empty = len(ips) == 1 and ips[0] == ""
+        if is_ips_argument_empty:
+            if instance.access_control is not None and instance.access_control.ip is not None:
+                instance.access_control.ip = None
+        else:
+            if instance.access_control is None:
+                instance.access_control = StreamingEndpointAccessControl()
+            if instance.access_control.ip is None:
+                instance.access_control.ip = IPAccessControl(allow=[])
             for ip in ips:
                 instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
-            instance.cdn_enabled = False
 
     if instance.cross_site_access_policies is None:
         instance.cross_site_access_policies = CrossSiteAccessPolicies()
@@ -115,14 +121,17 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         instance.description = description
     if custom_host_names is not None:
         instance.custom_host_names = custom_host_names
+    if cdn_provider is not None:
+        instance.cdn_provider = cdn_provider
+    if cdn_profile is not None:
+        instance.cdn_profile = cdn_profile
     if cdn_provider is not None or cdn_profile is not None:
         if ips is None and instance.access_control is not None:
             instance.access_control = None
-        if cdn_provider is not None:
-            instance.cdn_provider = cdn_provider
-        if cdn_profile is not None:
-            instance.cdn_profile = cdn_profile
         instance.cdn_enabled = True
+
+    if disable_cdn is not None:
+        instance.cdn_enabled = not disable_cdn
 
     return instance
 
