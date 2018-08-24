@@ -539,11 +539,10 @@ helps['iot hub routing-endpoint list'] = """
     examples:
         - name: Get all the endpoints from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint list --resource-group MyResourceGroup --hub-name MyIotHub
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
         - name: Get all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint list --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-type eventhub
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub -et eventhub
 """
 
 helps['iot hub routing-endpoint show'] = """
@@ -582,15 +581,13 @@ helps['iot hub route create'] = """
     examples:
         - name: Create a new route "R1".
           text: >
-            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group [Resource Group]
-            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
         - name: Create a new route "R1" with all parameters.
           text: >
-            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group [Resource Group]
-            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
-            --container-name [Container Name]
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
+            --condition true --enabled true
 """
 
 helps['iot hub route list'] = """
@@ -599,21 +596,19 @@ helps['iot hub route list'] = """
     examples:
         - name: Get all route from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint list --resource-group MyResourceGroup --hub-name MyIotHub
-        - name: Get all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub
+        - name: Get all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint list --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-type eventhub
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub -st DeviceMessages
 """
 
 helps['iot hub route show'] = """
     type: command
     short-summary: Get route information from "myiothub" IoT Hub.
     examples:
-        - name: Get an endpoint information from "MyIotHub" IoT Hub.
+        - name: Get an route information from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name [Endpoint Name]
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub -rn [Route Name]
 """
 
 helps['iot hub route delete'] = """
@@ -622,47 +617,33 @@ helps['iot hub route delete'] = """
     examples:
         - name: Delete route "R1" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name E2
-        - name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub -rn R1
+        - name: Delete all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-type eventhub
-        - name: Delete all the endpoints from "MyIotHub" IoT Hub.
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub -st DeviceMessages
+        - name: Delete all the routes from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub
 """
 
 helps['iot hub route test'] = """
     type: command
     short-summary: Test routes in IoT Hub.
     examples:
-        - name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
+        - name: Test the route "R1" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name E2
-        - name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub -rn R1
+        - name: Test all the route of source type "DeviceMessages" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-type eventhub
-        - name: Delete all the endpoints from "MyIotHub" IoT Hub.
-          text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub -st DeviceMessages
 """
 
 helps['iot hub route update'] = """
     type: command
     short-summary: Update a route in IoT Hub.
     examples:
-        - name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
+        - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name E2
-        - name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
-          text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-type eventhub
-        - name: Delete all the endpoints from "MyIotHub" IoT Hub.
-          text: >
-            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            az iot hub route update -g MyResourceGroup --hub-name MyIotHub
+            --source-type DeviceMessages --route-name R1
 """
