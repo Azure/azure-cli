@@ -99,7 +99,17 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
             for ip in ips:
                 instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
 
-    policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
+    if client_access_policy is not None:
+        if not client_access_policy:
+            instance.cross_site_access_policies.client_access_policy = None
+        else:
+            instance.cross_site_access_policies.client_access_policy = read_xml_policy(client_access_policy)
+
+    if cross_domain_policy is not None:
+        if not cross_domain_policy:
+            instance.cross_site_access_policies.cross_domain_policy = None
+        else:
+            instance.cross_site_access_policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
 
     if max_cache_age is not None:
         instance.max_cache_age = max_cache_age
@@ -120,20 +130,6 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         instance.cross_site_access_policies = policies
 
     return instance
-
-
-def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
-    from azure.mgmt.media.models import CrossSiteAccessPolicies
-
-    policies = CrossSiteAccessPolicies()
-
-    if client_access_policy:
-        policies.client_access_policy = read_xml_policy(client_access_policy)
-
-    if cross_domain_policy:
-        policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
-
-    return policies
 
 
 def read_xml_policy(xml_policy_path):
