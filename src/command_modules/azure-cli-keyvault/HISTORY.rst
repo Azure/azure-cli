@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.3
++++++
+* restricting keyvault storage commmands to the latest API profile
+
 2.2.2
 +++++
 * adding commands for managing storage accounts and sas-definitions
