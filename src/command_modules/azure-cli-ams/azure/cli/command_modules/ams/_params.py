@@ -9,7 +9,8 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
-from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list, get_cdn_provider_completion_list
+from azure.cli.command_modules.ams._completers import (get_role_definition_name_completion_list, get_cdn_provider_completion_list,
+                                                       get_default_streaming_policies_completion_list)
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
 
@@ -140,7 +141,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('asset_name',
                    help='The name of the asset used by the streaming locator.')
         c.argument('streaming_policy_name',
-                   help='The name of the streaming policy used by the streaming locator.')
+                   help='The name of the streaming policy used by the streaming locator. Default policies are: {}'.format(", ".join(get_default_streaming_policies_completion_list())))
         c.argument('start_time', type=datetime_format,
                    help="Start time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('end_time', type=datetime_format,
