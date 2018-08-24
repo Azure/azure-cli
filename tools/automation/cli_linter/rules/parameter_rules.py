@@ -28,8 +28,12 @@ def expired_option(linter, command_name, parameter_name):
 
 @parameter_rule
 def bad_short_option(linter, command_name, parameter_name):
+    from knack.deprecation import Deprecated
     bad_options = []
     for option in linter.get_parameter_options(command_name, parameter_name):
+        if isinstance(option, Deprecated):
+            # we don't care if deprecated options are "bad options" since this is the mechanism by which we get rid of them
+            continue
         if not option.startswith('--') and len(option) != 2:
             bad_options.append(option)
 
