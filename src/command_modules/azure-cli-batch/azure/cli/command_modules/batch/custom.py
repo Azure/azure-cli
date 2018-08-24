@@ -18,8 +18,8 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
-                                TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
-                                StartTask, AffinityInformation)
+                                TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
+                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -41,11 +41,27 @@ def transfer_doc(source_func, *additional_source_funcs):
 
 
 # Mgmt custom commands
-
 def list_accounts(client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(acct_list)
+
+
+def get_account(cmd, client, resource_group_name=None, account_name=None):
+    if resource_group_name and account_name:
+        return client.get(resource_group_name, account_name)
+    else:
+        account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint')
+        if not account_endpoint:
+            raise ValueError(
+                "Missing required arguments. Either specify --resource-group-name and "
+                "--account-name or must be logged into a batch account")
+        account_list = list_accounts(client)
+        for account in account_list:
+            if account.account_endpoint in account_endpoint:
+                return account
+    raise ValueError("Missing required arguments. Either specify --resource-group-name and "
+                     "--account-name or must be logged into a batch account")
 
 
 @transfer_doc(AutoStorageBaseProperties)
@@ -106,6 +122,8 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             profile = Profile(cli_ctx=cmd.cli_ctx)
             creds, subscription, tenant = profile.get_raw_token(resource=resource)
             return {
+                'account': account.name,
+                'endpoint': 'https://{}/'.format(account.account_endpoint),
                 'tokenType': creds[0],
                 'accessToken': creds[1],
                 'expiresOn': creds[2]['expiresOn'],
@@ -272,7 +290,6 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
                                                 expand=expand)
         return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
                                                   job_list_from_job_schedule_options=option1))
-
     option2 = JobListOptions(filter=filter,
                              select=select,
                              expand=expand)
@@ -291,13 +308,16 @@ def create_task(client,
         json_obj = get_file_json(json_file)
         try:
             task = TaskAddParameter.from_dict(json_obj)
-        except DeserializationError:
-            tasks = []
+        except (DeserializationError, TypeError):
             try:
-                for json_task in json_obj:
-                    tasks.append(TaskAddParameter.from_dict(json_task))
+                task_collection = TaskAddCollectionParameter.from_dict(json_obj)
+                tasks = task_collection.value
             except (DeserializationError, TypeError):
-                raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
+                try:
+                    for json_task in json_obj:
+                        tasks.append(TaskAddParameter.from_dict(json_task))
+                except (DeserializationError, TypeError):
+                    raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
