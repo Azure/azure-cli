@@ -5,7 +5,7 @@ Release History
 
 0.4.3
 +++++
-* Minor fixes
+* Fix auto storage account creation failure in `az batchai cluster create` command
 
 0.4.2
 +++++
