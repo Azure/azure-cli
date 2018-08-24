@@ -127,7 +127,11 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
     if description is not None:
         instance.description = description
     if custom_host_names is not None:
-        instance.custom_host_names = custom_host_names
+        is_custom_host_names_argument_empty = len(custom_host_names) == 1 and custom_host_names[0] == ""
+        if is_custom_host_names_argument_empty:
+            instance.custom_host_names = []
+        else:
+            instance.custom_host_names = custom_host_names
     if cdn_provider is not None:
         instance.cdn_provider = cdn_provider
     if cdn_profile is not None:
