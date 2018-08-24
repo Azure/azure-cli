@@ -1057,3 +1057,50 @@ def resolve_role_id(cli_ctx, role, scope):
 def _gen_guid():
     import uuid
     return uuid.uuid4()
+
+
+def get_arm_resource_by_id(cli_ctx, id):
+    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+
+    if not is_valid_resource_id(id):
+        raise CLIError("'{}' is not a valid ID.".format(id))
+
+    rcf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    parts = parse_resource_id(id)
+    namespace = parts.get('child_namespace_1', parts['namespace'])
+    if parts.get('child_type_2'):
+        parent = (parts['type'] + '/' + parts['name'] + '/' +
+                    parts['child_type_1'] + '/' + parts['child_name_1'])
+        resource_type = parts['child_type_2']
+    elif parts.get('child_type_1'):
+        # if the child resource has a provider namespace it is independent of the
+        # parent, so set the parent to empty
+        if parts.get('child_namespace_1') is not None:
+            parent = ''
+        else:
+            parent = parts['type'] + '/' + parts['name']
+        resource_type = parts['child_type_1']
+    else:
+        parent = None
+        resource_type = parts['type']
+
+    provider = rcf.providers.get(parts['namespace'])
+
+    # If available, we will use parent resource's api-version
+    resource_type_str = (parts['resource_parent'].split('/')[0] if parts['resource_parent'] else parts['type'])
+
+    api_version = None
+    rt = [t for t in provider.resource_types
+            if t.resource_type.lower() == resource_type_str.lower()]
+    if not rt:
+        raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
+    if len(rt) == 1 and rt[0].api_versions:
+        npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
+        api_version = npv[0] if npv else rt[0].api_versions[0]
+    else:
+        raise IncorrectUsageError(
+            'API version is required and could not be resolved for resource {}'
+            .format(parts['type']))
+
+    return rcf.resources.get_by_id(id, api_version)
