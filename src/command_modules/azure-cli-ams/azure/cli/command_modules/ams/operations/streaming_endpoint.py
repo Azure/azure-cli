@@ -98,6 +98,7 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
             instance.access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=[]))
             for ip in ips:
                 instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
+            instance.cdn_enabled = False
 
     if instance.cross_site_access_policies is None:
         instance.cross_site_access_policies = CrossSiteAccessPolicies()
@@ -122,13 +123,14 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         instance.description = description
     if custom_host_names is not None:
         instance.custom_host_names = custom_host_names
-    if cdn_profile is not None:
-        instance.cdn_profile = cdn_profile
-
-    instance.cdn_enabled = cdn_profile is not None or cdn_provider is not None
-
-    if cdn_provider is not None:
-        instance.cdn_provider = cdn_provider
+    if cdn_provider is not None or cdn_profile is not None:
+        if ips is None and instance.access_control is not None:
+            instance.access_control = None
+        if cdn_provider is not None:
+            instance.cdn_provider = cdn_provider
+        if cdn_profile is not None:
+            instance.cdn_profile = cdn_profile
+        instance.cdn_enabled = True
 
     return instance
 
