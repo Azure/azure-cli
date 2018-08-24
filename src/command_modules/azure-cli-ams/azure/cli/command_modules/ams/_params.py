@@ -13,7 +13,7 @@ from azure.cli.command_modules.ams._completers import get_role_definition_name_c
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
 
-from ._validators import validate_storage_account_id, datetime_format
+from ._validators import validate_storage_account_id, datetime_format, validate_correlation_data
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -24,6 +24,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
     default_policy_name_arg_type = CLIArgumentType(options_list=['--content-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
+    correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Customer provided correlation data that will be returned in Job completed events. This data is in key=value format separated by spaces.", nargs='*', metavar='CORRELATION_DATA')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
@@ -47,6 +48,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('storage_account', name_arg_type,
                    help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
                    validator=validate_storage_account_id)
+
+    with self.argument_context('ams account storage sync-storage-keys') as c:
+        c.argument('id', required=True)
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
@@ -84,6 +88,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('description', help='The asset description.')
         c.argument('asset_name', name_arg_type, help='The name of the asset.')
         c.argument('storage_account', help='The name of the storage account.')
+        c.argument('container', help='The name of the asset blob container.')
 
     with self.argument_context('ams asset update') as c:
         c.argument('alternate_id', help='The alternate id of the asset.')
@@ -119,6 +124,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('files',
                    nargs='+',
                    help='Space-separated list of files. It can be used to tell the service to only use the files specified from the input asset.')
+        c.argument('label', help='A label that is assigned to a JobInput, that is used to satisfy a reference used in the Transform.')
+        c.argument('correlation_data', arg_type=correlation_data_type)
 
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', action='store_true', help='Delete the job being cancelled.')
@@ -138,6 +145,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="Start time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('end_time', type=datetime_format,
                    help="End time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
+        c.argument('streaming_locator_id', help='The identifier of the streaming locator.')
+        c.argument('alternative_media_id', help='An alternative media identifier associated with the streaming locator.')
 
     with self.argument_context('ams streaming locator list') as c:
         c.argument('account_name', id_part=None)

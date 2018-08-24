@@ -48,6 +48,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('remove', 'remove_mediaservice_secondary_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.command('sync-storage-keys', 'sync_storage_keys')
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('create', 'create_assign_sp_to_mediaservice',
@@ -77,6 +78,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
+        g.command('get-encryption-key', 'get_encryption_key')
         g.generic_update_command('update',
                                  custom_func_name='update_asset',
                                  custom_func_type=get_custom_sdk('asset', get_mediaservices_client))
@@ -111,10 +113,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams streaming endpoint', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
         g.command('list', 'list')
-        g.command('start', 'start')
-        g.command('stop', 'stop')
+        g.custom_command('start', 'start',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
+        g.custom_command('stop', 'stop',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
         g.custom_command('create', 'create_streaming_endpoint',
-                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
+                         supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('scale', 'scale')

@@ -51,7 +51,7 @@ helps['ams account check-name'] = """
 
 helps['ams account storage'] = """
     type: group
-    short-summary: Manage secondary storage for an Azure Media Services account.
+    short-summary: Manage storage for an Azure Media Services account.
 """
 
 helps['ams account storage add'] = """
@@ -81,6 +81,11 @@ helps['ams account sp create'] = """
 helps['ams account sp reset-credentials'] = """
     type: command
     short-summary: Generate a new client secret for a service principal configured for an Azure Media Services account.
+"""
+
+helps['ams account storage sync-storage-keys'] = """
+    type: command
+    short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
 """
 
 helps['ams transform'] = """
@@ -165,6 +170,11 @@ helps['ams asset delete'] = """
 helps['ams asset get-sas-urls'] = """
     type: command
     short-summary: Lists the asset SAS URLs used for uploading and downloading asset content.
+"""
+
+helps['ams asset get-encryption-key'] = """
+    type: command
+    short-summary: Get the asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
 """
 
 helps['ams job'] = """

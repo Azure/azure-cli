@@ -85,6 +85,27 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_sync_storage_keys(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
+
+        self.kwargs.update({
+            'storageId': account['storageAccounts'][0]['id']
+        })
+
+        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --id "{storageId}"')
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
     def test_ams_storage_add_remove(self, resource_group, storage_account_for_create, storage_account_for_update):
         amsname = self.create_random_name(prefix='ams', length=12)
@@ -113,88 +134,6 @@ class AmsTests(ScenarioTest):
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_job(self, resource_group, storage_account_for_create):
-        amsname = self.create_random_name(prefix='ams', length=12)
-
-        self.kwargs.update({
-            'amsname': amsname,
-            'storageAccount': storage_account_for_create,
-            'location': 'westus2'
-        })
-
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
-        ])
-
-        assetName = self.create_random_name(prefix='asset', length=12)
-
-        self.kwargs.update({
-            'assetName': assetName
-        })
-
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}', checks=[
-            self.check('name', '{assetName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
-
-        transformName = self.create_random_name(prefix='tra', length=10)
-
-        self.kwargs.update({
-            'transformName': transformName,
-            'presetName': 'AACGoodQualityAudio'
-        })
-
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --presets {presetName}', checks=[
-            self.check('name', '{transformName}'),
-            self.check('resourceGroup', '{rg}')
-        ])
-
-        jobName = self.create_random_name(prefix='job', length=10)
-
-        self.kwargs.update({
-            'jobName': jobName,
-            'priority': 'High'
-        })
-
-        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-names {assetName} --priority {priority}', checks=[
-            self.check('name', '{jobName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('priority', '{priority}')
-        ])
-
-        self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
-            self.check('name', '{jobName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('priority', '{priority}')
-        ])
-
-        list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
-        assert len(list) > 0
-
-        self.cmd('az ams job cancel -n {jobName} -a {amsname} -g {rg} -t {transformName}')
-
-        job = self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
-            self.check('name', '{jobName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('priority', '{priority}')
-        ]).get_output_in_json()
-
-        assert job['state'] == 'Canceled' or job['state'] == 'Canceling'
-
-        _RETRY_TIMES = 5
-        for l in range(0, _RETRY_TIMES):
-            try:
-                self.cmd('az ams job delete -n {jobName} -a {amsname} -g {rg} -t {transformName}')
-                break
-            except Exception as ex:  # pylint: disable=broad-except
-                if l < _RETRY_TIMES:
-                    time.sleep(5)
-                else:
-                    raise
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -239,12 +178,16 @@ class AmsTests(ScenarioTest):
         self.kwargs.update({
             'streamingLocatorName': streamingLocatorName,
             'startTime': '2018-03-29T10:00:00',
-            'endTime': '2018-03-29T12:00:00'
+            'endTime': '2018-03-29T12:00:00',
+            'streamingLocatorId': '1b4ba7ed-c100-40aa-8722-a86839c9f887',
+            'alternativeMediaId': '8f6c2c3b-1650-4771-af9f-79312e6b2ded'
         })
 
-        self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime}', checks=[
+        self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime} --streaming-locator-id {streamingLocatorId} --alternative-media-id {alternativeMediaId}', checks=[
             self.check('name', '{streamingLocatorName}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('streamingLocatorId', '{streamingLocatorId}'),
+            self.check('alternativeMediaId', '{alternativeMediaId}')
         ])
 
         self.cmd('az ams streaming locator show -a {amsname} -n {streamingLocatorName} -g {rg}', checks=[
@@ -295,25 +238,6 @@ class AmsTests(ScenarioTest):
         assert len(list) > 0
 
         self.cmd('az ams streaming policy delete -n {streamingPolicyName} -a {amsname} -g {rg}')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_streaming_endpoint(self, resource_group, storage_account_for_create):
-        amsname = self.create_random_name(prefix='ams', length=12)
-
-        self.kwargs.update({
-            'amsname': amsname,
-            'storageAccount': storage_account_for_create,
-            'location': 'westus2'
-        })
-
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
-            self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
-        ])
-
-        list = self.cmd('az ams streaming endpoint list -a {amsname} -g {rg}').get_output_in_json()
-        assert len(list) > 0
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
