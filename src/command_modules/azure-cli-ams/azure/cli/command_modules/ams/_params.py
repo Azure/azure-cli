@@ -186,7 +186,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('availability_set_name', help='AvailabilitySet name.')
         c.argument('max_cache_age', help='Max cache age.')
         c.argument('custom_host_names', nargs='+', help='The custom host names of the streaming endpoint.')
-        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name.')
+        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}'.format(", ".join(get_cdn_provider_completion_list())))
         c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
         c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
         c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
