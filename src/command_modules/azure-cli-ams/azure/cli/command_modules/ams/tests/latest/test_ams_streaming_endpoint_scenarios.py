@@ -158,7 +158,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
             'ips': '1.1.1.1 2.2.2.2 3.3.3.3'
         })
-        
+
         self.cmd('az ams streaming endpoint update -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --tags {tags} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('cdnProvider', '{cdnProvider}'),
