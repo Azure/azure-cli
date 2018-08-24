@@ -125,13 +125,6 @@ helps['dls account network-rule create'] = """
 helps['dls account network-rule update'] = """
     type: command
     short-summary: Updates a virtual network rule in a Data Lake Store account.
-    parameters:
-        - name: --subnet
-          type: string
-          short-summary: 'The subnet name or id for the virtual network rule.'
-        - name: --vnet-name
-          type: string
-          short-summary: 'The name of the virtual network rule.'
 """
 
 helps['dls account network-rule show'] = """
