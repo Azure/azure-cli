@@ -67,8 +67,8 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
 
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
-                             parameters):
-    if parameters.access_control is not None and parameters.access_control.ip is not None and parameters.access_control.ip.allow:
+                                     parameters):
+    if parameters.access_control is not None and parameters.access_control.ip is not None and parameters.access_control.ip.allow:  # pylint: disable=line-too-long
         ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
                        parameters.access_control.ip.allow))
         parameters.access_control.ip.allow = ips
@@ -79,7 +79,7 @@ def update_streaming_endpoint_setter(client, resource_group_name, account_name, 
 def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, client_access_policy=None,
                               description=None, max_cache_age=None, ips=None,
                               cdn_provider=None, cdn_profile=None, custom_host_names=None):
-    from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl)
+    from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl, CrossSiteAccessPolicies)
 
     if not instance:
         raise CLIError('The streaming endpoint resource was not found.')
@@ -90,6 +90,9 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
             instance.access_control = StreamingEndpointAccessControl(ip=IPAccessControl(allow=[]))
             for ip in ips:
                 instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
+
+    if instance.cross_site_access_policies is None:
+        instance.cross_site_access_policies = CrossSiteAccessPolicies()
 
     if client_access_policy is not None:
         if not client_access_policy:
@@ -118,8 +121,6 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
 
     if cdn_provider is not None:
         instance.cdn_provider = cdn_provider
-    if max_cache_age is not None:
-        instance.cross_site_access_policies = policies
 
     return instance
 
