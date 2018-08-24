@@ -174,7 +174,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('description', help='The streaming endpoint description.')
         c.argument('scale_units', help='The number of scale units.')
-        c.argument('description', help='The streaming endpoint description.')
         c.argument('availability_set_name', help='AvailabilitySet name.')
         c.argument('max_cache_age', help='Max cache age.')
         c.argument('custom_host_names', nargs='+', help='The custom host names of the streaming endpoint.')
@@ -188,7 +187,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams streaming endpoint update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('description', help='The streaming endpoint description.')
         c.argument('description', help='The streaming endpoint description.')
         c.argument('availability_set_name', help='AvailabilitySet name.')
         c.argument('max_cache_age', help='Max cache age.')
