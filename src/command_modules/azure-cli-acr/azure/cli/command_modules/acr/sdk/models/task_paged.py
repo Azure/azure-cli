@@ -14,7 +14,7 @@ from msrest.paging import Paged
 
 class TaskPaged(Paged):
     """
-    A paging container for iterating over a list of :class:`Task <containerregistrybuild.models.Task>` object
+    A paging container for iterating over a list of :class:`Task <azure.mgmt.containerregistry.v2018_09_01.models.Task>` object
     """
 
     _attribute_map = {

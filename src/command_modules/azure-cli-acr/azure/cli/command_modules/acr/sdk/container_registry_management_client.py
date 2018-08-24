@@ -58,11 +58,11 @@ class ContainerRegistryManagementClient(object):
     :vartype config: ContainerRegistryManagementClientConfiguration
 
     :ivar registries: Registries operations
-    :vartype registries: containerregistrybuild.operations.RegistriesOperations
+    :vartype registries: azure.mgmt.containerregistry.v2018_09_01.operations.RegistriesOperations
     :ivar runs: Runs operations
-    :vartype runs: containerregistrybuild.operations.RunsOperations
+    :vartype runs: azure.mgmt.containerregistry.v2018_09_01.operations.RunsOperations
     :ivar tasks: Tasks operations
-    :vartype tasks: containerregistrybuild.operations.TasksOperations
+    :vartype tasks: azure.mgmt.containerregistry.v2018_09_01.operations.TasksOperations
 
     :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials

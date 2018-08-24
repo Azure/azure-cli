@@ -15,6 +15,12 @@ from .task_step_properties import TaskStepProperties
 class RunTaskStep(TaskStepProperties):
     """The properties of a generic task run step.
 
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar base_image_dependencies: List of base image dependencies for a step.
+    :vartype base_image_dependencies:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
     :param task_definition_content: Base64 encoded value of the
@@ -23,21 +29,29 @@ class RunTaskStep(TaskStepProperties):
     :param values_content: Base64 encoded value of the parameters/values file
      content.
     :type values_content: str
+    :param values: The collection of overridable values that can be passed
+     when running a task.
+    :type values:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.SetValue]
     """
 
     _validation = {
+        'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
         'task_definition_content': {'required': True},
     }
 
     _attribute_map = {
+        'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
         'task_definition_content': {'key': 'taskDefinitionContent', 'type': 'str'},
         'values_content': {'key': 'valuesContent', 'type': 'str'},
+        'values': {'key': 'values', 'type': '[SetValue]'},
     }
 
-    def __init__(self, task_definition_content, values_content=None):
+    def __init__(self, task_definition_content, values_content=None, values=None):
         super(RunTaskStep, self).__init__()
         self.task_definition_content = task_definition_content
         self.values_content = values_content
+        self.values = values
         self.type = 'RunTask'

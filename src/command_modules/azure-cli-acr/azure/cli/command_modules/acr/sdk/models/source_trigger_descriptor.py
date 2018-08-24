@@ -12,13 +12,17 @@
 from msrest.serialization import Model
 
 
-class GitCommitTrigger(Model):
-    """The git commit trigger that caused a build.
+class SourceTriggerDescriptor(Model):
+    """The source trigger that caused a run.
 
     :param id: The unique ID of the trigger.
     :type id: str
+    :param event_type: The event type of the trigger.
+    :type event_type: str
     :param commit_id: The unique ID that identifies a commit.
     :type commit_id: str
+    :param pull_request_id: The unique ID that identifies pull request.
+    :type pull_request_id: str
     :param repository_url: The repository URL.
     :type repository_url: str
     :param branch_name: The branch name in the repository.
@@ -29,16 +33,20 @@ class GitCommitTrigger(Model):
 
     _attribute_map = {
         'id': {'key': 'id', 'type': 'str'},
+        'event_type': {'key': 'eventType', 'type': 'str'},
         'commit_id': {'key': 'commitId', 'type': 'str'},
+        'pull_request_id': {'key': 'pullRequestId', 'type': 'str'},
         'repository_url': {'key': 'repositoryUrl', 'type': 'str'},
         'branch_name': {'key': 'branchName', 'type': 'str'},
         'provider_type': {'key': 'providerType', 'type': 'str'},
     }
 
-    def __init__(self, id=None, commit_id=None, repository_url=None, branch_name=None, provider_type=None):
-        super(GitCommitTrigger, self).__init__()
+    def __init__(self, id=None, event_type=None, commit_id=None, pull_request_id=None, repository_url=None, branch_name=None, provider_type=None):
+        super(SourceTriggerDescriptor, self).__init__()
         self.id = id
+        self.event_type = event_type
         self.commit_id = commit_id
+        self.pull_request_id = pull_request_id
         self.repository_url = repository_url
         self.branch_name = branch_name
         self.provider_type = provider_type

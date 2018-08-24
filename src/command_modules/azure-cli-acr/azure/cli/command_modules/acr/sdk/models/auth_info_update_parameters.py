@@ -12,12 +12,13 @@
 from msrest.serialization import Model
 
 
-class SourceControlAuthInfo(Model):
+class AuthInfoUpdateParameters(Model):
     """The authorization properties for accessing the source code repository.
 
     :param token_type: The type of Auth token. Possible values include: 'PAT',
      'OAuth'
-    :type token_type: str or ~containerregistrybuild.models.TokenType
+    :type token_type: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TokenType
     :param token: The access token used to access the source control provider.
     :type token: str
     :param refresh_token: The refresh token used to refresh the access token.
@@ -28,10 +29,6 @@ class SourceControlAuthInfo(Model):
     :type expires_in: int
     """
 
-    _validation = {
-        'token': {'required': True},
-    }
-
     _attribute_map = {
         'token_type': {'key': 'tokenType', 'type': 'str'},
         'token': {'key': 'token', 'type': 'str'},
@@ -40,8 +37,8 @@ class SourceControlAuthInfo(Model):
         'expires_in': {'key': 'expiresIn', 'type': 'int'},
     }
 
-    def __init__(self, token, token_type=None, refresh_token=None, scope=None, expires_in=None):
-        super(SourceControlAuthInfo, self).__init__()
+    def __init__(self, token_type=None, token=None, refresh_token=None, scope=None, expires_in=None):
+        super(AuthInfoUpdateParameters, self).__init__()
         self.token_type = token_type
         self.token = token
         self.refresh_token = refresh_token

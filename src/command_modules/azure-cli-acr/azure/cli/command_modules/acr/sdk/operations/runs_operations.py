@@ -40,7 +40,7 @@ class RunsOperations(object):
         self.config = config
 
     def list(
-            self, resource_group_name, registry_name, filter=None, top=None, skip_token=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, registry_name, filter=None, top=None, custom_headers=None, raw=False, **operation_config):
         """Gets all the runs for a registry.
 
         :param resource_group_name: The name of the resource group to which
@@ -48,14 +48,14 @@ class RunsOperations(object):
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param filter: The runs filter to apply on the operation.
+        :param filter: The runs filter to apply on the operation. Arithmetic
+         operators are not supported. The allowed string function is
+         'contains'. All logical operators except 'Not', 'Has', 'All' are
+         allowed.
         :type filter: str
         :param top: $top is supported for get list of runs, which limits the
          maximum number of runs to return.
         :type top: int
-        :param skip_token: $skipToken is supported on get list of runs, which
-         provides the next page in the list of runs.
-        :type skip_token: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -63,7 +63,7 @@ class RunsOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: An iterator like instance of Run
         :rtype:
-         ~containerregistrybuild.models.RunPaged[~containerregistrybuild.models.Run]
+         ~azure.mgmt.containerregistry.v2018_09_01.models.RunPaged[~azure.mgmt.containerregistry.v2018_09_01.models.Run]
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
         def internal_paging(next_link=None, raw=False):
@@ -85,8 +85,6 @@ class RunsOperations(object):
                     query_parameters['$filter'] = self._serialize.query("filter", filter, 'str')
                 if top is not None:
                     query_parameters['$top'] = self._serialize.query("top", top, 'int')
-                if skip_token is not None:
-                    query_parameters['$skipToken'] = self._serialize.query("skip_token", skip_token, 'str')
 
             else:
                 url = next_link
@@ -141,7 +139,7 @@ class RunsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Run or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.Run or
+        :rtype: ~azure.mgmt.containerregistry.v2018_09_01.models.Run or
          ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -264,7 +262,7 @@ class RunsOperations(object):
         :return: An instance of AzureOperationPoller that returns Run or
          ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.Run]
+         ~msrestazure.azure_operation.AzureOperationPoller[~azure.mgmt.containerregistry.v2018_09_01.models.Run]
          or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -333,12 +331,13 @@ class RunsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: RunGetLogResult or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.RunGetLogResult or
+        :rtype:
+         ~azure.mgmt.containerregistry.v2018_09_01.models.RunGetLogResult or
          ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/runs/{runId}/getLogSasUrl'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/runs/{runId}/listLogSasUrl'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),

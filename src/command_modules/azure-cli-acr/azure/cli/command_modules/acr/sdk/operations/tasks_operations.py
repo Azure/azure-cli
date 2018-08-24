@@ -55,7 +55,7 @@ class TasksOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: An iterator like instance of Task
         :rtype:
-         ~containerregistrybuild.models.TaskPaged[~containerregistrybuild.models.Task]
+         ~azure.mgmt.containerregistry.v2018_09_01.models.TaskPaged[~azure.mgmt.containerregistry.v2018_09_01.models.Task]
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
         def internal_paging(next_link=None, raw=False):
@@ -127,7 +127,7 @@ class TasksOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Task or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.Task or
+        :rtype: ~azure.mgmt.containerregistry.v2018_09_01.models.Task or
          ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -240,14 +240,15 @@ class TasksOperations(object):
         :param task_name: The name of the container registry task.
         :type task_name: str
         :param task_create_parameters: The parameters for creating a task.
-        :type task_create_parameters: ~containerregistrybuild.models.Task
+        :type task_create_parameters:
+         ~azure.mgmt.containerregistry.v2018_09_01.models.Task
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :return: An instance of AzureOperationPoller that returns Task or
          ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.Task]
+         ~msrestazure.azure_operation.AzureOperationPoller[~azure.mgmt.containerregistry.v2018_09_01.models.Task]
          or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -468,14 +469,14 @@ class TasksOperations(object):
         :type task_name: str
         :param task_update_parameters: The parameters for updating a task.
         :type task_update_parameters:
-         ~containerregistrybuild.models.TaskUpdateParameters
+         ~azure.mgmt.containerregistry.v2018_09_01.models.TaskUpdateParameters
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :return: An instance of AzureOperationPoller that returns Task or
          ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.Task]
+         ~msrestazure.azure_operation.AzureOperationPoller[~azure.mgmt.containerregistry.v2018_09_01.models.Task]
          or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -527,7 +528,7 @@ class TasksOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
 
-    def list_details(
+    def get_details(
             self, resource_group_name, registry_name, task_name, custom_headers=None, raw=False, **operation_config):
         """Returns a task with extended information that includes all secrets.
 
@@ -544,7 +545,7 @@ class TasksOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Task or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.Task or
+        :rtype: ~azure.mgmt.containerregistry.v2018_09_01.models.Task or
          ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """

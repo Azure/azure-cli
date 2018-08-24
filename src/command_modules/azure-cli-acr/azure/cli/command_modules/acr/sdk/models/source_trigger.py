@@ -18,14 +18,15 @@ class SourceTrigger(Model):
     :param source_repository: The properties that describes the source(code)
      for the task.
     :type source_repository:
-     ~containerregistrybuild.models.SourceRepositoryProperties
+     ~azure.mgmt.containerregistry.v2018_09_01.models.SourceProperties
     :param source_trigger_events: The source event corresponding to the
      trigger.
     :type source_trigger_events: list[str or
-     ~containerregistrybuild.models.SourceTriggerEvent]
+     ~azure.mgmt.containerregistry.v2018_09_01.models.SourceTriggerEvent]
     :param status: The current status of build trigger. Possible values
      include: 'Disabled', 'Enabled'
-    :type status: str or ~containerregistrybuild.models.TriggerStatus
+    :type status: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TriggerStatus
     :param name: The name of the trigger.
     :type name: str
     """
@@ -37,7 +38,7 @@ class SourceTrigger(Model):
     }
 
     _attribute_map = {
-        'source_repository': {'key': 'sourceRepository', 'type': 'SourceRepositoryProperties'},
+        'source_repository': {'key': 'sourceRepository', 'type': 'SourceProperties'},
         'source_trigger_events': {'key': 'sourceTriggerEvents', 'type': '[str]'},
         'status': {'key': 'status', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},

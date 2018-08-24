@@ -66,6 +66,12 @@ class TaskStatus(Enum):
     enabled = "Enabled"
 
 
+class BaseImageDependencyType(Enum):
+
+    build_time = "BuildTime"
+    run_time = "RunTime"
+
+
 class SourceControlType(Enum):
 
     github = "Github"
@@ -81,7 +87,6 @@ class TokenType(Enum):
 class SourceTriggerEvent(Enum):
 
     commit = "commit"
-    pullrequest = "pullrequest"
 
 
 class TriggerStatus(Enum):
@@ -94,9 +99,3 @@ class BaseImageTriggerType(Enum):
 
     all = "All"
     runtime = "Runtime"
-
-
-class BaseImageDependencyType(Enum):
-
-    build_time = "BuildTime"
-    run_time = "RunTime"

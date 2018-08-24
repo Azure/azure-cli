@@ -9,11 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .argument import Argument
 from .run_request import RunRequest
 from .image_descriptor import ImageDescriptor
 from .image_update_trigger import ImageUpdateTrigger
-from .git_commit_trigger import GitCommitTrigger
+from .source_trigger_descriptor import SourceTriggerDescriptor
 from .platform_properties import PlatformProperties
 from .agent_properties import AgentProperties
 from .run import Run
@@ -21,24 +20,36 @@ from .source_upload_definition import SourceUploadDefinition
 from .run_filter import RunFilter
 from .run_update_parameters import RunUpdateParameters
 from .run_get_log_result import RunGetLogResult
+from .base_image_dependency import BaseImageDependency
 from .task_step_properties import TaskStepProperties
-from .source_control_auth_info import SourceControlAuthInfo
-from .source_repository_properties import SourceRepositoryProperties
+from .auth_info import AuthInfo
+from .source_properties import SourceProperties
 from .source_trigger import SourceTrigger
 from .base_image_trigger import BaseImageTrigger
 from .trigger_properties import TriggerProperties
 from .task import Task
+from .platform_update_parameters import PlatformUpdateParameters
+from .task_step_update_parameters import TaskStepUpdateParameters
+from .auth_info_update_parameters import AuthInfoUpdateParameters
+from .source_update_parameters import SourceUpdateParameters
+from .source_trigger_update_parameters import SourceTriggerUpdateParameters
+from .base_image_trigger_update_parameters import BaseImageTriggerUpdateParameters
+from .trigger_update_parameters import TriggerUpdateParameters
 from .task_update_parameters import TaskUpdateParameters
 from .resource import Resource
 from .proxy_resource import ProxyResource
+from .argument import Argument
 from .docker_build_request import DockerBuildRequest
+from .set_value import SetValue
 from .build_task_request import BuildTaskRequest
 from .task_run_request import TaskRunRequest
 from .quick_task_run_request import QuickTaskRunRequest
-from .base_image_dependency import BaseImageDependency
 from .docker_build_step import DockerBuildStep
 from .build_task_step import BuildTaskStep
 from .run_task_step import RunTaskStep
+from .docker_build_step_update_parameters import DockerBuildStepUpdateParameters
+from .build_task_step_update_parameters import BuildTaskStepUpdateParameters
+from .run_task_step_update_parameters import RunTaskStepUpdateParameters
 from .run_paged import RunPaged
 from .task_paged import TaskPaged
 from .container_registry_management_client_enums import (
@@ -49,20 +60,19 @@ from .container_registry_management_client_enums import (
     Variant,
     ProvisioningState,
     TaskStatus,
+    BaseImageDependencyType,
     SourceControlType,
     TokenType,
     SourceTriggerEvent,
     TriggerStatus,
     BaseImageTriggerType,
-    BaseImageDependencyType,
 )
 
 __all__ = [
-    'Argument',
     'RunRequest',
     'ImageDescriptor',
     'ImageUpdateTrigger',
-    'GitCommitTrigger',
+    'SourceTriggerDescriptor',
     'PlatformProperties',
     'AgentProperties',
     'Run',
@@ -70,24 +80,36 @@ __all__ = [
     'RunFilter',
     'RunUpdateParameters',
     'RunGetLogResult',
+    'BaseImageDependency',
     'TaskStepProperties',
-    'SourceControlAuthInfo',
-    'SourceRepositoryProperties',
+    'AuthInfo',
+    'SourceProperties',
     'SourceTrigger',
     'BaseImageTrigger',
     'TriggerProperties',
     'Task',
+    'PlatformUpdateParameters',
+    'TaskStepUpdateParameters',
+    'AuthInfoUpdateParameters',
+    'SourceUpdateParameters',
+    'SourceTriggerUpdateParameters',
+    'BaseImageTriggerUpdateParameters',
+    'TriggerUpdateParameters',
     'TaskUpdateParameters',
     'Resource',
     'ProxyResource',
+    'Argument',
     'DockerBuildRequest',
+    'SetValue',
     'BuildTaskRequest',
     'TaskRunRequest',
     'QuickTaskRunRequest',
-    'BaseImageDependency',
     'DockerBuildStep',
     'BuildTaskStep',
     'RunTaskStep',
+    'DockerBuildStepUpdateParameters',
+    'BuildTaskStepUpdateParameters',
+    'RunTaskStepUpdateParameters',
     'RunPaged',
     'TaskPaged',
     'RunStatus',
@@ -97,10 +119,10 @@ __all__ = [
     'Variant',
     'ProvisioningState',
     'TaskStatus',
+    'BaseImageDependencyType',
     'SourceControlType',
     'TokenType',
     'SourceTriggerEvent',
     'TriggerStatus',
     'BaseImageTriggerType',
-    'BaseImageDependencyType',
 ]

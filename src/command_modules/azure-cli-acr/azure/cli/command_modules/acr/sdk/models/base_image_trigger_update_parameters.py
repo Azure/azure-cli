@@ -12,8 +12,8 @@
 from msrest.serialization import Model
 
 
-class BaseImageTrigger(Model):
-    """The trigger based on base image dependency.
+class BaseImageTriggerUpdateParameters(Model):
+    """The properties for updating base image dependency trigger.
 
     :param base_image_trigger_type: The type of the auto trigger for base
      image dependency updates. Possible values include: 'All', 'Runtime'
@@ -28,7 +28,6 @@ class BaseImageTrigger(Model):
     """
 
     _validation = {
-        'base_image_trigger_type': {'required': True},
         'name': {'required': True},
     }
 
@@ -38,8 +37,8 @@ class BaseImageTrigger(Model):
         'name': {'key': 'name', 'type': 'str'},
     }
 
-    def __init__(self, base_image_trigger_type, name, status=None):
-        super(BaseImageTrigger, self).__init__()
+    def __init__(self, name, base_image_trigger_type=None, status=None):
+        super(BaseImageTriggerUpdateParameters, self).__init__()
         self.base_image_trigger_type = base_image_trigger_type
         self.status = status
         self.name = name

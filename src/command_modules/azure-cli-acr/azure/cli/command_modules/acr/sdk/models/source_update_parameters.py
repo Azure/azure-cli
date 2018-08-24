@@ -12,13 +12,13 @@
 from msrest.serialization import Model
 
 
-class SourceRepositoryProperties(Model):
-    """The properties of the source code repository.
+class SourceUpdateParameters(Model):
+    """The properties for updating the source code repository.
 
     :param source_control_type: The type of source control service. Possible
      values include: 'Github', 'VisualStudioTeamService'
     :type source_control_type: str or
-     ~containerregistrybuild.models.SourceControlType
+     ~azure.mgmt.containerregistry.v2018_09_01.models.SourceControlType
     :param repository_url: The full URL to the source code respository
     :type repository_url: str
     :param branch: The branch name of the source code.
@@ -27,23 +27,18 @@ class SourceRepositoryProperties(Model):
      accessing the source code repository and to set up
      webhooks for notifications.
     :type source_control_auth_properties:
-     ~containerregistrybuild.models.SourceControlAuthInfo
+     ~azure.mgmt.containerregistry.v2018_09_01.models.AuthInfoUpdateParameters
     """
-
-    _validation = {
-        'source_control_type': {'required': True},
-        'repository_url': {'required': True},
-    }
 
     _attribute_map = {
         'source_control_type': {'key': 'sourceControlType', 'type': 'str'},
         'repository_url': {'key': 'repositoryUrl', 'type': 'str'},
         'branch': {'key': 'branch', 'type': 'str'},
-        'source_control_auth_properties': {'key': 'sourceControlAuthProperties', 'type': 'SourceControlAuthInfo'},
+        'source_control_auth_properties': {'key': 'sourceControlAuthProperties', 'type': 'AuthInfoUpdateParameters'},
     }
 
-    def __init__(self, source_control_type, repository_url, branch=None, source_control_auth_properties=None):
-        super(SourceRepositoryProperties, self).__init__()
+    def __init__(self, source_control_type=None, repository_url=None, branch=None, source_control_auth_properties=None):
+        super(SourceUpdateParameters, self).__init__()
         self.source_control_type = source_control_type
         self.repository_url = repository_url
         self.branch = branch

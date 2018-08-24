@@ -100,14 +100,15 @@ class RegistriesOperations(object):
         :param registry_name: The name of the container registry.
         :type registry_name: str
         :param run_request: The parameters of a run that needs to scheduled.
-        :type run_request: ~containerregistrybuild.models.RunRequest
+        :type run_request:
+         ~azure.mgmt.containerregistry.v2018_09_01.models.RunRequest
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :return: An instance of AzureOperationPoller that returns Run or
          ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.Run]
+         ~msrestazure.azure_operation.AzureOperationPoller[~azure.mgmt.containerregistry.v2018_09_01.models.Run]
          or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
@@ -173,12 +174,13 @@ class RegistriesOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: SourceUploadDefinition or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.SourceUploadDefinition or
-         ~msrest.pipeline.ClientRawResponse
+        :rtype:
+         ~azure.mgmt.containerregistry.v2018_09_01.models.SourceUploadDefinition
+         or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/getBuildSourceUploadUrl'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/listBuildSourceUploadUrl'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),

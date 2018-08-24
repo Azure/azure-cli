@@ -12,16 +12,13 @@
 from msrest.serialization import Model
 
 
-class RunRequest(Model):
-    """The request parameters for scheduling a run.
+class TaskStepUpdateParameters(Model):
+    """Base properties for updating any task step.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: DockerBuildRequest, BuildTaskRequest, TaskRunRequest,
-    QuickTaskRunRequest
+    sub-classes are: DockerBuildStepUpdateParameters,
+    BuildTaskStepUpdateParameters, RunTaskStepUpdateParameters
 
-    :param is_archive_enabled: The value that indicates whether archiving is
-     enabled for the run or not. Default value: False .
-    :type is_archive_enabled: bool
     :param type: Constant filled by server.
     :type type: str
     """
@@ -31,15 +28,13 @@ class RunRequest(Model):
     }
 
     _attribute_map = {
-        'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
         'type': {'key': 'type', 'type': 'str'},
     }
 
     _subtype_map = {
-        'type': {'DockerBuildRequest': 'DockerBuildRequest', 'BuildTaskRequest': 'BuildTaskRequest', 'TaskRunRequest': 'TaskRunRequest', 'QuickTaskRunRequest': 'QuickTaskRunRequest'}
+        'type': {'Docker': 'DockerBuildStepUpdateParameters', 'BuildTask': 'BuildTaskStepUpdateParameters', 'RunTask': 'RunTaskStepUpdateParameters'}
     }
 
-    def __init__(self, is_archive_enabled=False):
-        super(RunRequest, self).__init__()
-        self.is_archive_enabled = is_archive_enabled
+    def __init__(self):
+        super(TaskStepUpdateParameters, self).__init__()
         self.type = None

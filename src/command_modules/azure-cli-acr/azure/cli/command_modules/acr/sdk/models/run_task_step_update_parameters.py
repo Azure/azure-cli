@@ -9,19 +9,20 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .run_request import RunRequest
+from .task_step_update_parameters import TaskStepUpdateParameters
 
 
-class TaskRunRequest(RunRequest):
-    """The parameters for a task run request.
+class RunTaskStepUpdateParameters(TaskStepUpdateParameters):
+    """The properties for updating generic task run step.
 
-    :param is_archive_enabled: The value that indicates whether archiving is
-     enabled for the run or not. Default value: False .
-    :type is_archive_enabled: bool
     :param type: Constant filled by server.
     :type type: str
-    :param task_name: The name of task against which run has to be queued.
-    :type task_name: str
+    :param task_definition_content: Base64 encoded value of the
+     template/definition file content.
+    :type task_definition_content: str
+    :param values_content: Base64 encoded value of the parameters/values file
+     content.
+    :type values_content: str
     :param values: The collection of overridable values that can be passed
      when running a task.
     :type values:
@@ -30,18 +31,18 @@ class TaskRunRequest(RunRequest):
 
     _validation = {
         'type': {'required': True},
-        'task_name': {'required': True},
     }
 
     _attribute_map = {
-        'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
         'type': {'key': 'type', 'type': 'str'},
-        'task_name': {'key': 'taskName', 'type': 'str'},
+        'task_definition_content': {'key': 'taskDefinitionContent', 'type': 'str'},
+        'values_content': {'key': 'valuesContent', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
     }
 
-    def __init__(self, task_name, is_archive_enabled=False, values=None):
-        super(TaskRunRequest, self).__init__(is_archive_enabled=is_archive_enabled)
-        self.task_name = task_name
+    def __init__(self, task_definition_content=None, values_content=None, values=None):
+        super(RunTaskStepUpdateParameters, self).__init__()
+        self.task_definition_content = task_definition_content
+        self.values_content = values_content
         self.values = values
-        self.type = 'TaskRunRequest'
+        self.type = 'RunTask'

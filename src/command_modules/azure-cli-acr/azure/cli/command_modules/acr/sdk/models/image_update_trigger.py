@@ -20,7 +20,8 @@ class ImageUpdateTrigger(Model):
     :param timestamp: The timestamp when the image update happened.
     :type timestamp: datetime
     :param images: The list of image updates that caused the build.
-    :type images: list[~containerregistrybuild.models.ImageDescriptor]
+    :type images:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.ImageDescriptor]
     """
 
     _attribute_map = {

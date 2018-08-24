@@ -9,18 +9,12 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .task_step_properties import TaskStepProperties
+from .task_step_update_parameters import TaskStepUpdateParameters
 
 
-class BuildTaskStep(TaskStepProperties):
-    """The properties of a build task step.
+class BuildTaskStepUpdateParameters(TaskStepUpdateParameters):
+    """The properties of updating a build task step.
 
-    Variables are only populated by the server, and will be ignored when
-    sending a request.
-
-    :ivar base_image_dependencies: List of base image dependencies for a step.
-    :vartype base_image_dependencies:
-     list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
     :param definition_file_path: The build task template/definition file path
@@ -41,13 +35,10 @@ class BuildTaskStep(TaskStepProperties):
     """
 
     _validation = {
-        'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
-        'definition_file_path': {'required': True},
     }
 
     _attribute_map = {
-        'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
         'definition_file_path': {'key': 'definitionFilePath', 'type': 'str'},
         'values_file_path': {'key': 'valuesFilePath', 'type': 'str'},
@@ -55,8 +46,8 @@ class BuildTaskStep(TaskStepProperties):
         'context_path': {'key': 'contextPath', 'type': 'str'},
     }
 
-    def __init__(self, definition_file_path, values_file_path=None, values=None, context_path=None):
-        super(BuildTaskStep, self).__init__()
+    def __init__(self, definition_file_path=None, values_file_path=None, values=None, context_path=None):
+        super(BuildTaskStepUpdateParameters, self).__init__()
         self.definition_file_path = definition_file_path
         self.values_file_path = values_file_path
         self.values = values

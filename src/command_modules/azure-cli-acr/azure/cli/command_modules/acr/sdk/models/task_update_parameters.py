@@ -15,44 +15,41 @@ from msrest.serialization import Model
 class TaskUpdateParameters(Model):
     """The parameters for updating a task.
 
-    :param alias: The alternative updatable name for a task.
-    :type alias: str
     :param status: The current status of task. Possible values include:
      'Disabled', 'Enabled'
-    :type status: str or ~containerregistrybuild.models.TaskStatus
+    :type status: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TaskStatus
     :param platform: The platform properties against which the run has to
      happen.
-    :type platform: ~containerregistrybuild.models.PlatformProperties
+    :type platform:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.PlatformUpdateParameters
     :param agent_configuration: The machine configuration of the run agent.
-    :type agent_configuration: ~containerregistrybuild.models.AgentProperties
+    :type agent_configuration:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.AgentProperties
     :param timeout: Run timeout in seconds.
     :type timeout: int
     :param step: The properties for updating a task step.
-    :type step: ~containerregistrybuild.models.TaskStepProperties
-    :param trigger: The properties that describe all triggers for the task.
-    :type trigger: ~containerregistrybuild.models.TriggerProperties
+    :type step:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TaskStepUpdateParameters
+    :param trigger: The properties for updating trigger properties.
+    :type trigger:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TriggerUpdateParameters
     :param tags: The ARM resource tags.
     :type tags: dict[str, str]
     """
 
-    _validation = {
-        'timeout': {'maximum': 28800, 'minimum': 300},
-    }
-
     _attribute_map = {
-        'alias': {'key': 'properties.alias', 'type': 'str'},
         'status': {'key': 'properties.status', 'type': 'str'},
-        'platform': {'key': 'properties.platform', 'type': 'PlatformProperties'},
+        'platform': {'key': 'properties.platform', 'type': 'PlatformUpdateParameters'},
         'agent_configuration': {'key': 'properties.agentConfiguration', 'type': 'AgentProperties'},
         'timeout': {'key': 'properties.timeout', 'type': 'int'},
-        'step': {'key': 'properties.step', 'type': 'TaskStepProperties'},
-        'trigger': {'key': 'properties.trigger', 'type': 'TriggerProperties'},
+        'step': {'key': 'properties.step', 'type': 'TaskStepUpdateParameters'},
+        'trigger': {'key': 'properties.trigger', 'type': 'TriggerUpdateParameters'},
         'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, alias=None, status=None, platform=None, agent_configuration=None, timeout=None, step=None, trigger=None, tags=None):
+    def __init__(self, status=None, platform=None, agent_configuration=None, timeout=None, step=None, trigger=None, tags=None):
         super(TaskUpdateParameters, self).__init__()
-        self.alias = alias
         self.status = status
         self.platform = platform
         self.agent_configuration = agent_configuration

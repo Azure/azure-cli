@@ -15,9 +15,9 @@ from .run_request import RunRequest
 class DockerBuildRequest(RunRequest):
     """The parameters for a docker quick build.
 
-    :param arguments: The collection of override arguments to be used when
-     executing the run.
-    :type arguments: list[~containerregistrybuild.models.Argument]
+    :param is_archive_enabled: The value that indicates whether archiving is
+     enabled for the run or not. Default value: False .
+    :type is_archive_enabled: bool
     :param type: Constant filled by server.
     :type type: str
     :param image_names: The fully qualified image names including the
@@ -32,6 +32,10 @@ class DockerBuildRequest(RunRequest):
     :param docker_file_path: The Docker file path relative to the source
      location.
     :type docker_file_path: str
+    :param arguments: The collection of override arguments to be used when
+     executing the run.
+    :type arguments:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.Argument]
     :param source_location: The URL(absolute or relative) of the source that
      needs to be built. For Docker build, it can be an URL to a tar or github
      repoistory as supported by Docker.
@@ -42,9 +46,11 @@ class DockerBuildRequest(RunRequest):
     :type timeout: int
     :param platform: The platform properties against which the build will
      happen.
-    :type platform: ~containerregistrybuild.models.PlatformProperties
+    :type platform:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.PlatformProperties
     :param agent_configuration: The machine configuration of the build agent.
-    :type agent_configuration: ~containerregistrybuild.models.AgentProperties
+    :type agent_configuration:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.AgentProperties
     """
 
     _validation = {
@@ -56,24 +62,26 @@ class DockerBuildRequest(RunRequest):
     }
 
     _attribute_map = {
-        'arguments': {'key': 'arguments', 'type': '[Argument]'},
+        'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
         'type': {'key': 'type', 'type': 'str'},
         'image_names': {'key': 'imageNames', 'type': '[str]'},
         'is_push_enabled': {'key': 'isPushEnabled', 'type': 'bool'},
         'no_cache': {'key': 'noCache', 'type': 'bool'},
         'docker_file_path': {'key': 'dockerFilePath', 'type': 'str'},
+        'arguments': {'key': 'arguments', 'type': '[Argument]'},
         'source_location': {'key': 'sourceLocation', 'type': 'str'},
         'timeout': {'key': 'timeout', 'type': 'int'},
         'platform': {'key': 'platform', 'type': 'PlatformProperties'},
         'agent_configuration': {'key': 'agentConfiguration', 'type': 'AgentProperties'},
     }
 
-    def __init__(self, docker_file_path, source_location, platform, arguments=None, image_names=None, is_push_enabled=True, no_cache=False, timeout=3600, agent_configuration=None):
-        super(DockerBuildRequest, self).__init__(arguments=arguments)
+    def __init__(self, docker_file_path, source_location, platform, is_archive_enabled=False, image_names=None, is_push_enabled=True, no_cache=False, arguments=None, timeout=3600, agent_configuration=None):
+        super(DockerBuildRequest, self).__init__(is_archive_enabled=is_archive_enabled)
         self.image_names = image_names
         self.is_push_enabled = is_push_enabled
         self.no_cache = no_cache
         self.docker_file_path = docker_file_path
+        self.arguments = arguments
         self.source_location = source_location
         self.timeout = timeout
         self.platform = platform

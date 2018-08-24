@@ -18,15 +18,23 @@ class TaskStepProperties(Model):
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: DockerBuildStep, BuildTaskStep, RunTaskStep
 
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar base_image_dependencies: List of base image dependencies for a step.
+    :vartype base_image_dependencies:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
     """
 
     _validation = {
+        'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
     }
 
     _attribute_map = {
+        'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
     }
 
@@ -36,4 +44,5 @@ class TaskStepProperties(Model):
 
     def __init__(self):
         super(TaskStepProperties, self).__init__()
+        self.base_image_dependencies = None
         self.type = None

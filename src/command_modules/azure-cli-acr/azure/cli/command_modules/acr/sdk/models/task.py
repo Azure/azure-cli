@@ -34,23 +34,28 @@ class Task(Resource):
      values include: 'Creating', 'Updating', 'Deleting', 'Succeeded', 'Failed',
      'Canceled'
     :vartype provisioning_state: str or
-     ~containerregistrybuild.models.ProvisioningState
+     ~azure.mgmt.containerregistry.v2018_09_01.models.ProvisioningState
     :ivar creation_date: The creation date of task.
     :vartype creation_date: datetime
     :param status: The current status of task. Possible values include:
      'Disabled', 'Enabled'
-    :type status: str or ~containerregistrybuild.models.TaskStatus
+    :type status: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TaskStatus
     :param platform: The platform properties against which the run has to
      happen.
-    :type platform: ~containerregistrybuild.models.PlatformProperties
+    :type platform:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.PlatformProperties
     :param agent_configuration: The machine configuration of the run agent.
-    :type agent_configuration: ~containerregistrybuild.models.AgentProperties
+    :type agent_configuration:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.AgentProperties
     :param timeout: Run timeout in seconds. Default value: 3600 .
     :type timeout: int
     :param step: The properties of a task step.
-    :type step: ~containerregistrybuild.models.TaskStepProperties
+    :type step:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TaskStepProperties
     :param trigger: The properties that describe all triggers for the task.
-    :type trigger: ~containerregistrybuild.models.TriggerProperties
+    :type trigger:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.TriggerProperties
     """
 
     _validation = {

@@ -12,13 +12,17 @@
 from msrest.serialization import Model
 
 
-class BaseImageTrigger(Model):
-    """The trigger based on base image dependency.
+class SourceTriggerUpdateParameters(Model):
+    """The properties for updating a source based trigger.
 
-    :param base_image_trigger_type: The type of the auto trigger for base
-     image dependency updates. Possible values include: 'All', 'Runtime'
-    :type base_image_trigger_type: str or
-     ~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageTriggerType
+    :param source_repository: The properties that describes the source(code)
+     for the task.
+    :type source_repository:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.SourceUpdateParameters
+    :param source_trigger_events: The source event corresponding to the
+     trigger.
+    :type source_trigger_events: list[str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.SourceTriggerEvent]
     :param status: The current status of build trigger. Possible values
      include: 'Disabled', 'Enabled'
     :type status: str or
@@ -28,18 +32,19 @@ class BaseImageTrigger(Model):
     """
 
     _validation = {
-        'base_image_trigger_type': {'required': True},
         'name': {'required': True},
     }
 
     _attribute_map = {
-        'base_image_trigger_type': {'key': 'baseImageTriggerType', 'type': 'str'},
+        'source_repository': {'key': 'sourceRepository', 'type': 'SourceUpdateParameters'},
+        'source_trigger_events': {'key': 'sourceTriggerEvents', 'type': '[str]'},
         'status': {'key': 'status', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
     }
 
-    def __init__(self, base_image_trigger_type, name, status=None):
-        super(BaseImageTrigger, self).__init__()
-        self.base_image_trigger_type = base_image_trigger_type
+    def __init__(self, name, source_repository=None, source_trigger_events=None, status=None):
+        super(SourceTriggerUpdateParameters, self).__init__()
+        self.source_repository = source_repository
+        self.source_trigger_events = source_trigger_events
         self.status = status
         self.name = name

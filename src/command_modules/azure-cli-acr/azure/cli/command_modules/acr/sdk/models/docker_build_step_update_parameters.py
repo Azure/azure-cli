@@ -9,28 +9,22 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .task_step_properties import TaskStepProperties
+from .task_step_update_parameters import TaskStepUpdateParameters
 
 
-class DockerBuildStep(TaskStepProperties):
-    """The Docker build step.
+class DockerBuildStepUpdateParameters(TaskStepUpdateParameters):
+    """The properties for updating a docker build step.
 
-    Variables are only populated by the server, and will be ignored when
-    sending a request.
-
-    :ivar base_image_dependencies: List of base image dependencies for a step.
-    :vartype base_image_dependencies:
-     list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
     :param image_names: The fully qualified image names including the
      repository and tag.
     :type image_names: list[str]
     :param is_push_enabled: The value of this property indicates whether the
-     image built should be pushed to the registry or not. Default value: True .
+     image built should be pushed to the registry or not.
     :type is_push_enabled: bool
     :param no_cache: The value of this property indicates whether the image
-     cache is enabled or not. Default value: False .
+     cache is enabled or not.
     :type no_cache: bool
     :param docker_file_path: The Docker file path relative to the source
      context.
@@ -47,13 +41,10 @@ class DockerBuildStep(TaskStepProperties):
     """
 
     _validation = {
-        'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
-        'docker_file_path': {'required': True},
     }
 
     _attribute_map = {
-        'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
         'image_names': {'key': 'imageNames', 'type': '[str]'},
         'is_push_enabled': {'key': 'isPushEnabled', 'type': 'bool'},
@@ -63,8 +54,8 @@ class DockerBuildStep(TaskStepProperties):
         'context_path': {'key': 'contextPath', 'type': 'str'},
     }
 
-    def __init__(self, docker_file_path, image_names=None, is_push_enabled=True, no_cache=False, arguments=None, context_path=None):
-        super(DockerBuildStep, self).__init__()
+    def __init__(self, image_names=None, is_push_enabled=None, no_cache=None, docker_file_path=None, arguments=None, context_path=None):
+        super(DockerBuildStepUpdateParameters, self).__init__()
         self.image_names = image_names
         self.is_push_enabled = is_push_enabled
         self.no_cache = no_cache

@@ -12,8 +12,8 @@
 from msrest.serialization import Model
 
 
-class PlatformProperties(Model):
-    """The platform properties against which the run has to happen.
+class PlatformUpdateParameters(Model):
+    """The properties for updating the platform configuration.
 
     :param os: The operating system type required for the run. Possible values
      include: 'Windows', 'Linux'
@@ -28,19 +28,14 @@ class PlatformProperties(Model):
      ~azure.mgmt.containerregistry.v2018_09_01.models.Variant
     """
 
-    _validation = {
-        'os': {'required': True},
-        'architecture': {'required': True},
-    }
-
     _attribute_map = {
         'os': {'key': 'os', 'type': 'str'},
         'architecture': {'key': 'architecture', 'type': 'str'},
         'variant': {'key': 'variant', 'type': 'str'},
     }
 
-    def __init__(self, os, architecture, variant=None):
-        super(PlatformProperties, self).__init__()
+    def __init__(self, os=None, architecture=None, variant=None):
+        super(PlatformUpdateParameters, self).__init__()
         self.os = os
         self.architecture = architecture
         self.variant = variant

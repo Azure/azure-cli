@@ -15,9 +15,9 @@ from .run_request import RunRequest
 class QuickTaskRunRequest(RunRequest):
     """The parameters for a quick task run request.
 
-    :param arguments: The collection of override arguments to be used when
-     executing the run.
-    :type arguments: list[~containerregistrybuild.models.Argument]
+    :param is_archive_enabled: The value that indicates whether archiving is
+     enabled for the run or not. Default value: False .
+    :type is_archive_enabled: bool
     :param type: Constant filled by server.
     :type type: str
     :param task_definition_content: Base64 encoded value of the
@@ -26,13 +26,19 @@ class QuickTaskRunRequest(RunRequest):
     :param values_content: Base64 encoded value of the parameters/values file
      content.
     :type values_content: str
+    :param values: The collection of overridable values that can be passed
+     when running a task.
+    :type values:
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.SetValue]
     :param timeout: Build timeout in seconds. Default value: 3600 .
     :type timeout: int
     :param platform: The platform properties against which the build will
      happen.
-    :type platform: ~containerregistrybuild.models.PlatformProperties
+    :type platform:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.PlatformProperties
     :param agent_configuration: The machine configuration of the build agent.
-    :type agent_configuration: ~containerregistrybuild.models.AgentProperties
+    :type agent_configuration:
+     ~azure.mgmt.containerregistry.v2018_09_01.models.AgentProperties
     """
 
     _validation = {
@@ -43,19 +49,21 @@ class QuickTaskRunRequest(RunRequest):
     }
 
     _attribute_map = {
-        'arguments': {'key': 'arguments', 'type': '[Argument]'},
+        'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
         'type': {'key': 'type', 'type': 'str'},
         'task_definition_content': {'key': 'taskDefinitionContent', 'type': 'str'},
         'values_content': {'key': 'valuesContent', 'type': 'str'},
+        'values': {'key': 'values', 'type': '[SetValue]'},
         'timeout': {'key': 'timeout', 'type': 'int'},
         'platform': {'key': 'platform', 'type': 'PlatformProperties'},
         'agent_configuration': {'key': 'agentConfiguration', 'type': 'AgentProperties'},
     }
 
-    def __init__(self, task_definition_content, platform, arguments=None, values_content=None, timeout=3600, agent_configuration=None):
-        super(QuickTaskRunRequest, self).__init__(arguments=arguments)
+    def __init__(self, task_definition_content, platform, is_archive_enabled=False, values_content=None, values=None, timeout=3600, agent_configuration=None):
+        super(QuickTaskRunRequest, self).__init__(is_archive_enabled=is_archive_enabled)
         self.task_definition_content = task_definition_content
         self.values_content = values_content
+        self.values = values
         self.timeout = timeout
         self.platform = platform
         self.agent_configuration = agent_configuration

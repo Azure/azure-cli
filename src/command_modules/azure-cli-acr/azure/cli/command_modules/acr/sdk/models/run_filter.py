@@ -19,11 +19,13 @@ class RunFilter(Model):
     :type run_id: str
     :param run_type: The type of run. Possible values include: 'QuickBuild',
      'AutoBuild'
-    :type run_type: str or ~containerregistrybuild.models.RunType
+    :type run_type: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.RunType
     :param status: The current status of the run. Possible values include:
      'Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Canceled',
      'Error', 'Timeout'
-    :type status: str or ~containerregistrybuild.models.RunStatus
+    :type status: str or
+     ~azure.mgmt.containerregistry.v2018_09_01.models.RunStatus
     :param create_time: The create time for a run.
     :type create_time: datetime
     :param finish_time: The time the run finished.

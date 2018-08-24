@@ -12,24 +12,24 @@
 from msrest.serialization import Model
 
 
-class TriggerProperties(Model):
-    """The properties of a build trigger.
+class TriggerUpdateParameters(Model):
+    """The properties for updating build triggers.
 
     :param source_triggers: The collection of triggers based on source code
      repository.
     :type source_triggers:
-     list[~azure.mgmt.containerregistry.v2018_09_01.models.SourceTrigger]
+     list[~azure.mgmt.containerregistry.v2018_09_01.models.SourceTriggerUpdateParameters]
     :param base_image_trigger: The trigger based on base image dependencies.
     :type base_image_trigger:
-     ~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageTrigger
+     ~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageTriggerUpdateParameters
     """
 
     _attribute_map = {
-        'source_triggers': {'key': 'sourceTriggers', 'type': '[SourceTrigger]'},
-        'base_image_trigger': {'key': 'baseImageTrigger', 'type': 'BaseImageTrigger'},
+        'source_triggers': {'key': 'sourceTriggers', 'type': '[SourceTriggerUpdateParameters]'},
+        'base_image_trigger': {'key': 'baseImageTrigger', 'type': 'BaseImageTriggerUpdateParameters'},
     }
 
     def __init__(self, source_triggers=None, base_image_trigger=None):
-        super(TriggerProperties, self).__init__()
+        super(TriggerUpdateParameters, self).__init__()
         self.source_triggers = source_triggers
         self.base_image_trigger = base_image_trigger
