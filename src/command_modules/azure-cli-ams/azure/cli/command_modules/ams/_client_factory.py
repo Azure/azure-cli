@@ -73,3 +73,7 @@ def get_live_events_client(cli_ctx, *_):
 
 def get_live_outputs_client(cli_ctx, *_):
     return cf_media(cli_ctx).live_outputs
+
+
+def get_content_key_policies_client(cli_ctx, *_):
+    return cf_media(cli_ctx).content_key_policies
