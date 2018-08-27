@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import (sdk_no_wait, CLIError)
 from azure.cli.core.commands import LongRunningOperation
 
 
@@ -71,6 +71,80 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
             streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list = list(filter(lambda x: x.identifier != identifier, streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list))  # pylint: disable=line-too-long
 
     return client.update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
+
+
+def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
+                                     parameters):
+    if parameters.access_control is not None and parameters.access_control.ip is not None and parameters.access_control.ip.allow:  # pylint: disable=line-too-long
+        ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
+                       parameters.access_control.ip.allow))
+        parameters.access_control.ip.allow = ips
+
+    return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
+
+
+# pylint: disable=too-many-branches
+def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, client_access_policy=None,
+                              description=None, max_cache_age=None, ips=None, disable_cdn=None,
+                              cdn_provider=None, cdn_profile=None, custom_host_names=None):
+    from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl, CrossSiteAccessPolicies)
+
+    if not instance:
+        raise CLIError('The streaming endpoint resource was not found.')
+
+    if ips is not None:
+        is_ips_argument_empty = len(ips) == 1 and ips[0] == ""
+        if is_ips_argument_empty:
+            if instance.access_control is not None and instance.access_control.ip is not None:
+                instance.access_control.ip = None
+        else:
+            if instance.access_control is None:
+                instance.access_control = StreamingEndpointAccessControl()
+            if instance.access_control.ip is None:
+                instance.access_control.ip = IPAccessControl(allow=[])
+            for ip in ips:
+                instance.access_control.ip.allow.append(create_ip_range(instance.name, ip))
+
+    if instance.cross_site_access_policies is None:
+        instance.cross_site_access_policies = CrossSiteAccessPolicies()
+
+    if client_access_policy is not None:
+        if not client_access_policy:
+            instance.cross_site_access_policies.client_access_policy = None
+        else:
+            instance.cross_site_access_policies.client_access_policy = read_xml_policy(client_access_policy)
+
+    if cross_domain_policy is not None:
+        if not cross_domain_policy:
+            instance.cross_site_access_policies.cross_domain_policy = None
+        else:
+            instance.cross_site_access_policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+
+    if max_cache_age is not None:
+        instance.max_cache_age = max_cache_age
+    if tags is not None:
+        instance.tags = tags
+    if description is not None:
+        instance.description = description
+    if custom_host_names is not None:
+        is_custom_host_names_argument_empty = len(custom_host_names) == 1 and custom_host_names[0] == ""
+        if is_custom_host_names_argument_empty:
+            instance.custom_host_names = []
+        else:
+            instance.custom_host_names = custom_host_names
+    if cdn_provider is not None:
+        instance.cdn_provider = cdn_provider
+    if cdn_profile is not None:
+        instance.cdn_profile = cdn_profile
+    if cdn_provider is not None or cdn_profile is not None:
+        if ips is None and instance.access_control is not None:
+            instance.access_control = None
+        instance.cdn_enabled = True
+
+    if disable_cdn is not None:
+        instance.cdn_enabled = not disable_cdn
+
+    return instance
 
 
 def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
