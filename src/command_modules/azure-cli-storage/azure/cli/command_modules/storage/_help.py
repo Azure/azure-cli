@@ -838,7 +838,7 @@ helps['storage blob generate-sas'] = """
 helps['storage share generate-sas'] = """
     type: command
     examples:
-        - name: Generate a sas token for a blob with read-only permissions.
+        - name: Generate a sas token for a fileshare and use it to upload a file.
           text: |
             end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
             sas=`az storage share generate-sas -n MyShare --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
