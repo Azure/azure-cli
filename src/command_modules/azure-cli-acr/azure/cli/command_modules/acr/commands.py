@@ -177,13 +177,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_task_show')
         g.command('list', 'acr_task_list', table_transformer=task_output_format)
         g.command('delete', 'acr_task_delete')
-        g.generic_update_command('update',
-                                 getter_name='acr_task_update_get',
-                                 setter_name='acr_task_update_set',
-                                 custom_func_name='acr_task_update_custom',
-                                 custom_func_type=acr_task_util,
-                                 client_factory=cf_acr_tasks,
-                                 table_transformer=task_output_format)
+        g.command('update', 'acr_task_update')
         g.command('run', 'acr_task_run', client_factory=cf_acr_runs,
                   table_transformer=build_output_format)
         g.command('list-runs', 'acr_task_list_runs', client_factory=cf_acr_runs,

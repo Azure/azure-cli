@@ -21,12 +21,20 @@ from .sdk.models import (
     SourceTriggerEvent,
     AuthInfo,
     Architecture,
-    Variant,
     DockerBuildStep,
     RunTaskStep,
     BuildTaskStep,
     TaskRunRequest,
     TaskUpdateParameters,
+    PlatformUpdateParameters,
+    DockerBuildStepUpdateParameters,
+    BuildTaskStepUpdateParameters, 
+    RunTaskStepUpdateParameters,
+    TriggerUpdateParameters,
+    SourceUpdateParameters,
+    SourceTriggerUpdateParameters,
+    BaseImageTriggerUpdateParameters,
+    AuthInfoUpdateParameters,
     SourceControlType
 )
 from ._utils import validate_managed_registry
@@ -64,18 +72,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger='Runtime',
                     resource_group_name=None):
 
-    if docker_file is None and definition_file is None and image_names is None:
+    if docker_file is None and definition_file is None:
         raise CLIError("One of --dockerfile or --definition-file argument is required")
     if docker_file is not None and definition_file is not None:
         raise CLIError("Cannot use both --dockerfile and --definition-file arguments to create a task")
-    if docker_file is None and definition_file is None:
-        yml_data = {'steps':[{'cmd': ', '.join(image_names)}]} #TODO: multiple images supported?
-        acb_yml = yaml.dump(yml_data, default_flow_style=False, allow_unicode=True)
-        # print(acb_yml)
-        step = RunTaskStep(
-            task_definition_content=(base64.b64encode(acb_yml.encode())).decode('utf-8') #TODO: validate
-        )
-        # print(step.task_definition_content)
     if docker_file is not None:
         step = DockerBuildStep(
             image_names=image_names,
@@ -186,47 +186,37 @@ def acr_task_delete(cmd,
     return client.delete(resource_group_name, registry_name, task_name)
 
 
-def acr_task_update_get(client):  # pylint: disable=unused-argument
-    """Returns an empty TaskUpdateParameters object.
-    """
-    return TaskUpdateParameters()
-
-
-def acr_task_update_set(cmd,
-                        client,
-                        task_name,
-                        registry_name,
-                        resource_group_name=None,
-                        parameters=None):
+#TODO
+def acr_task_update(cmd,  # pylint: disable=too-many-locals
+                    client,
+                    task_name,
+                    registry_name,
+                    resource_group_name=None,
+                    # build task parameters
+                    status=None,
+                    os_type=None,
+                    cpu=None,
+                    timeout=None,
+                    context_path=None,
+                    commit_trigger_enabled=None,
+                    git_access_token=None,
+                    branch=None,
+                    image_names=None,
+                    no_push=None,
+                    no_cache=None,
+                    docker_file=None,
+                    definition_file=None,
+                    values_file=None,
+                    arg=None,
+                    secret_arg=None,
+                    base_image_trigger=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    return client.update(resource_group_name, registry_name, task_name, parameters)
 
-#TODO
-def acr_task_update_custom(instance,  # pylint: disable=too-many-locals
-                           status=None,
-                           os_type=None,
-                           cpu=None,
-                           timeout=None,
-                           context_path=None,
-                           commit_trigger_enabled=None,
-                           git_access_token=None,
-                           branch=None,
-                           image_names=None,
-                           no_push=None,
-                           no_cache=None,
-                           docker_file=None,
-                           definition_file=None,
-                           values_file=None,
-                           arg=None,
-                           secret_arg=None,
-                           base_image_trigger=None):
-    if docker_file is None and definition_file is None:
-        raise CLIError("One of --dockerfile or --definition-file argument is required")
-    if docker_file is not None and definition_file is not None:
-        raise CLIError("Cannot use both --dockerfile and --definition-file arguments to create a task")
-    if docker_file is not None:
-        instance.step = DockerBuildStep(
+    task = client.get(resource_group_name, registry_name, task_name)
+    step = task.step
+    if isinstance(step, DockerBuildStep):
+        step = DockerBuildStepUpdateParameters(
             image_names=image_names,
             is_push_enabled=not no_push,
             no_cache=no_cache,
@@ -234,51 +224,60 @@ def acr_task_update_custom(instance,  # pylint: disable=too-many-locals
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
             context_path=context_path
         )
-    if definition_file is not None:
-        instance.step = BuildTaskStep(
+    if isinstance(step, BuildTaskStep):
+        step = BuildTaskStepUpdateParameters(
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
         )
 
-    instance.platform = PlatformProperties(
-        os=os_type,
-        architecture=Architecture.amd64, #TODO
-        variant=Variant.v8 #TODO
-    )
-    instance.status = status
-    instance.timeout = timeout
-    instance.agent_configuration = AgentProperties(
-        cpu=cpu
-    )
-    instance.trigger = TriggerProperties(
-        source_triggers=[
-            SourceTrigger(
-                source_repository=SourceProperties(
-                    source_control_type=None,
-                    repository_url=context_path,
-                    branch=branch,
-                    source_control_auth_properties=AuthInfo(
-                        token=git_access_token,
-                        token_type=DEFAULT_TOKEN_TYPE,
-                        refresh_token='',
-                        scope='repo',
-                        expires_in=1313141
-                    )
-                ),
-                source_trigger_events=[SourceTriggerEvent.commit, SourceTriggerEvent.pullrequest], #TODO
-                status="Enabled" if commit_trigger_enabled else "Disabled", #TODO
-                name="" #TODO
+    source_control_type = None
+    if context_path is not None:
+        if 'GITHUB.COM' in context_path.upper(): # TODO: replace github.com check with something more generic?
+            source_control_type = SourceControlType.github.value
+        else:
+            source_control_type = SourceControlType.visual_studio_team_service.value
+
+    taskUpdateParameters = TaskUpdateParameters(
+        status=status,
+        platform=PlatformUpdateParameters(
+            os=os_type,
+            architecture=Architecture.amd64
+        ),
+        agent_configuration=AgentProperties(
+            cpu=cpu
+        ),
+        timeout=timeout,
+        step=step,
+        trigger=TriggerUpdateParameters(
+            source_triggers=[
+                SourceTriggerUpdateParameters(
+                    source_repository=SourceUpdateParameters(
+                        source_control_type=source_control_type,
+                        repository_url=context_path,
+                        branch=branch,
+                        source_control_auth_properties=AuthInfoUpdateParameters(
+                            token=git_access_token,
+                            token_type=DEFAULT_TOKEN_TYPE,
+                            refresh_token='',
+                            scope='repo',
+                            expires_in=1313141
+                        )
+                    ),
+                    source_trigger_events=[SourceTriggerEvent.commit], #TODO: pull request?
+                    status="Enabled" if commit_trigger_enabled else "Disabled",
+                    name="myTrigger" #TODO: take user input?
+                )
+            ],
+            base_image_trigger=BaseImageTriggerUpdateParameters(
+                base_image_trigger_type=base_image_trigger,
+                status="Enabled", #TODO: take user input?
+                name="mybaseTrigger" #TODO: take user input?
             )
-        ],
-        base_image_trigger=BaseImageTrigger(
-            base_image_trigger_type=base_image_trigger,
-            status="Enabled", #TODO
-            name="" #TODO
         )
     )
 
-    return instance
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 #TODO: validate new API
@@ -327,7 +326,7 @@ def acr_task_run(cmd,
     return acr_build_show_logs(client, run_id, registry_name, resource_group_name, True)
 
 
-#TODO: validate new API, table_transformer
+#TODO: table_transformer
 def acr_task_show_run(cmd,
                       client,  # cf_acr_runs
                       run_id,
@@ -338,7 +337,7 @@ def acr_task_show_run(cmd,
     return client.get(resource_group_name, registry_name, run_id)
 
 
-#TODO: validate new API, table_transformer
+#TODO: validate filters, table_transformer
 def acr_task_list_runs(cmd,
                        client,  # cf_acr_runs
                        registry_name,
@@ -366,7 +365,6 @@ def acr_task_list_runs(cmd,
     return client.list(resource_group_name, registry_name, filter=filter_str, top=top)
 
 
-#TODO: validate new API
 def _add_run_filter(orig_filter, name, value, operator):
     if not value:
         return orig_filter
@@ -381,7 +379,6 @@ def _add_run_filter(orig_filter, name, value, operator):
     return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 
 
-#TODO: validate new API
 def acr_task_logs(cmd,
                   client,  # cf_acr_runs
                   registry_name,

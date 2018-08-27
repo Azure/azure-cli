@@ -181,11 +181,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
         # BuildTaskStep parameters
-        c.argument('definition_file', options_list=['--definition-file'], help="The task template/definition file path relative to the source context.")
+        c.argument('definition_file', options_list=['--definition-file'], help="The task template/definition file path relative to the source context. Required if --dockerfile is not provided.")
         c.argument('values_file', options_list=['--values-file'], help="The task values/parameters file path relative to the source context.")
 
         # DockerBuildStep parameters
-        c.argument('docker_file', options_list=['--dockerfile'], help="The relative path of the the docker file to the source code root folder.")
+        c.argument('docker_file', options_list=['--dockerfile', '-f'], help="The relative path of the the docker file to the source code root folder. Required for a build task.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
