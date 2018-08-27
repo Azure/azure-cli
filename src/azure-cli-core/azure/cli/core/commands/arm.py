@@ -1059,48 +1059,57 @@ def _gen_guid():
     return uuid.uuid4()
 
 
-def get_arm_resource_by_id(cli_ctx, id):
+def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
 
-    if not is_valid_resource_id(id):
-        raise CLIError("'{}' is not a valid ID.".format(id))
+    if not is_valid_resource_id(arm_id):
+        raise CLIError("'{}' is not a valid ID.".format(arm_id))
 
-    rcf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
-    parts = parse_resource_id(id)
-    namespace = parts.get('child_namespace_1', parts['namespace'])
-    if parts.get('child_type_2'):
-        parent = (parts['type'] + '/' + parts['name'] + '/' +
-                    parts['child_type_1'] + '/' + parts['child_name_1'])
-        resource_type = parts['child_type_2']
-    elif parts.get('child_type_1'):
-        # if the child resource has a provider namespace it is independent of the
-        # parent, so set the parent to empty
-        if parts.get('child_namespace_1') is not None:
-            parent = ''
+    if not api_version:
+
+        parts = parse_resource_id(arm_id)
+
+        # to retrieve the provider, we need to know the namespace
+        namespaces = {k: v for k, v in parts.items() if 'namespace' in k}
+
+        # every ARM ID has at least one namespace, so start with that
+        namespace = namespaces.pop('namespace')
+        namespaces.pop('resource_namespace')
+        # find the most specific child namespace (if any) and use that value instead
+        highest_child = 0
+        for k, v in namespaces.items():
+            child_number = int(k.split('_')[2])
+            if child_number > highest_child:
+                namespace = v
+                highest_child = child_number
+
+        # retrieve provider info for the namespace
+        provider = client.providers.get(namespace)
+
+        # assemble the resource type key used by the provider list operation.  type1/type2/type3/...
+        resource_type_str = ''
+        if not highest_child:
+            resource_type_str = parts['resource_type']
         else:
-            parent = parts['type'] + '/' + parts['name']
-        resource_type = parts['child_type_1']
-    else:
-        parent = None
-        resource_type = parts['type']
+            types = {int(k.split('_')[2]): v for k, v in parts.items() if k.startswith('child_type')}
+            for k in sorted(types.keys()):
+                if k < highest_child:
+                    continue
+                resource_type_str = '{}{}/'.format(resource_type_str, parts['child_type_{}'.format(k)])
+            resource_type_str = resource_type_str.rstrip('/')
 
-    provider = rcf.providers.get(parts['namespace'])
+        api_version = None
+        rt = next((t for t in provider.resource_types if t.resource_type.lower() == resource_type_str.lower()), None)
+        if not rt:
+            raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
+        try:
+            # if the service specifies, use the default API version
+            api_version = rt.default_api_version
+        except AttributeError:
+            # if the service doesn't specify, use the most recent non-preview API version unless there is only a
+            # single API version. API versions are returned by the service in a sorted list
+            api_version = next((x for x in rt.api_versions if not x.endswith('preview')), rt.api_versions[0])
 
-    # If available, we will use parent resource's api-version
-    resource_type_str = (parts['resource_parent'].split('/')[0] if parts['resource_parent'] else parts['type'])
-
-    api_version = None
-    rt = [t for t in provider.resource_types
-            if t.resource_type.lower() == resource_type_str.lower()]
-    if not rt:
-        raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
-    if len(rt) == 1 and rt[0].api_versions:
-        npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
-        api_version = npv[0] if npv else rt[0].api_versions[0]
-    else:
-        raise IncorrectUsageError(
-            'API version is required and could not be resolved for resource {}'
-            .format(parts['type']))
-
-    return rcf.resources.get_by_id(id, api_version)
+    return client.resources.get_by_id(arm_id, api_version)
