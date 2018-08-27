@@ -748,6 +748,17 @@ def load_arguments(self, _):
     with self.argument_context('network watcher troubleshooting') as c:
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')
         c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['vnetGateway', 'vpnConnection']))
+
+    with self.argument_context('network watcher run-configuration-diagnostic') as c:
+        c.argument('target', help='ID of the target resource to diagnose. Valid resources are VM, NIC, VMSS/NIC and Application Gateway.')
+
+    with self.argument_context('network watcher run-configuration-diagnostic', arg_group='Query') as c:
+        c.argument('queries', help='JSON list of queries to use.', type=get_json_object)
+        c.argument('direction', arg_type=get_enum_type(Direction), help='Direction of the traffic.')
+        c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to be verified on.')
+        c.argument('destination', help="Traffic destination. Accepted values are '*', IP address/CIDR, or service tag.")
+        c.argument('source', help="Traffic source. Accepted values are '*', IP address/CIDR, or service tag.")
+        c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
     # region PublicIPAddresses

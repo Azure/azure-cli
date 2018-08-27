@@ -3879,6 +3879,34 @@ helps['network watcher test-ip-flow'] = """
             az network watcher test-ip-flow -g MyResourceGroup --direction Outbound \\
                 --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm MyVm
 """
+
+helps['network watcher run-configuration-diagnostic'] = """
+    type: command
+    short-summary: Run a configuration diagnostic on a target resource.
+    long-summary: >
+        Requires that Network Watcher is enabled for the region in which the target is located.
+    examples:
+        - name: Run configuration diagnostic on a VM with a single query.
+          text: |
+            az network watcher run-configuration-diagnostic --target {VM_ID}
+               --direction Inbound --protocol TCP --source 12.11.12.14 --destination 10.1.1.4 --port 12100
+        - name: Run configuration diagnostic on a VM with multiple queries.
+          text: |
+            az network watcher run-configuration-diagnostic --target {VM_ID}
+                --queries '[
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.0/32",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Outbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                }]'
+"""
 # endregion
 
 # region Network Watcher Connection Monitor

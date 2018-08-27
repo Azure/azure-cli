@@ -547,6 +547,7 @@ def load_command_table(self, _):
         g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
         g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
+        g.custom_command('run-configuration-diagnostic', 'show_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01')
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
         g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_create_namespace)

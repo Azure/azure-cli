@@ -2601,6 +2601,14 @@ def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, r
                                    resource_group_name=None):
     return client.get_troubleshooting_result(watcher_rg, watcher_name, resource)
 
+
+def show_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, target,
+                                          direction=None, protocol=None, source=None, destination=None,
+                                          destination_port=None, queries=None, resource_group_name=None):
+    TrafficQuery = cmd.get_models('TrafficQuery')
+    # TODO: Make query
+    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, target, queries)
+
 # endregion
 
 
