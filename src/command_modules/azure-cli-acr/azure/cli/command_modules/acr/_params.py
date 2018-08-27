@@ -140,9 +140,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
+        c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
 
     with self.argument_context('acr build-task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         # build task parameters
         c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task.', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
         c.argument('alias', help='The alternative name for build task. Default to the build task name.')
