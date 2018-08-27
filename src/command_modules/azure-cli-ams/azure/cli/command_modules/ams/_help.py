@@ -177,6 +177,17 @@ helps['ams asset get-encryption-key'] = """
     short-summary: Get the asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
 """
 
+helps['ams content-key-policy'] = """
+    type: group
+    short-summary: Manage content key policies for an Azure Media Services account.
+"""
+
+helps['ams content-key-policy create'] = """
+    type: command
+    short-summary: Create a new content key policy resource.
+"""
+
+
 helps['ams job'] = """
     type: group
     short-summary: Manage jobs for a transform.
