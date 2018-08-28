@@ -40,13 +40,13 @@ def load_arguments(self, _):
 
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, AuthenticationMethod, Direction,
-     ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
+     ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'AuthenticationMethod', 'Direction',
-         'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
+         'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
@@ -717,6 +717,12 @@ def load_arguments(self, _):
         c.argument('dest_resource', arg_group='Destination')
         c.argument('dest_address', arg_group='Destination')
         c.argument('dest_port', type=int, arg_group='Destination')
+        c.argument('protocol', arg_type=get_enum_type(Protocol))
+
+    with self.argument_context('network watcher test-connectivity', arg_group='HTTP Configuration') as c:
+        c.argument('method', arg_type=get_enum_type(HTTPMethod), help='HTTP method to use.')
+        c.argument('headers', nargs='+', help='Space-separated list of headers in `KEY=VALUE` format.')
+        c.argument('valid_status_codes', nargs='+', type=int, help='Space-separated list of HTTP status codes considered valid.')
 
     with self.argument_context('network watcher packet-capture') as c:
         c.argument('capture_name', name_arg_type, help='Name of the packet capture session.')
@@ -749,11 +755,14 @@ def load_arguments(self, _):
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')
         c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['vnetGateway', 'vpnConnection']))
 
-    with self.argument_context('network watcher run-configuration-diagnostic') as c:
-        c.argument('target', help='ID of the target resource to diagnose. Valid resources are VM, NIC, VMSS/NIC and Application Gateway.')
+    with self.argument_context('network watcher run-configuration-diagnostic', arg_group='Target') as c:
+        c.argument('resource', help='Name or ID of the target resource to diagnose. If an ID is given, other resource arguments should not be given.')
+        c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['virtualMachines', 'networkInterfaces', 'applicationGateways']))
+        c.argument('parent', help='The parent path. (ex: virtualMachineScaleSets/vmss1)')
+        c.argument('resource_group_name')
 
     with self.argument_context('network watcher run-configuration-diagnostic', arg_group='Query') as c:
-        c.argument('queries', help='JSON list of queries to use.', type=get_json_object)
+        c.argument('queries', help='JSON list of queries to use. Use `@{path}` to load from a file.', type=get_json_object)
         c.argument('direction', arg_type=get_enum_type(Direction), help='Direction of the traffic.')
         c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to be verified on.')
         c.argument('destination', help="Traffic destination. Accepted values are '*', IP address/CIDR, or service tag.")

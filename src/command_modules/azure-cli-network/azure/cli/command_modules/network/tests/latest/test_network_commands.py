@@ -1980,37 +1980,83 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-# convert to ScenarioTest and re-record when #6009 is fixed
-class NetworkWatcherScenarioTest(LiveScenarioTest):
-    import mock
+class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
-    def _mock_thread_count():
-        return 1
-
-    def _network_watcher_configure(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_nw', location='westcentralus')
+    def test_network_watcher_configure(self, resource_group):
         self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
-    def _network_watcher_vm(self):
-        self.kwargs['private-ip'] = '10.0.0.9'
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}')
+
+class NetworkWatcherScenarioTest(ScenarioTest):
+    import mock
+
+    def _mock_thread_count():
+        return 1
+
+    def _configure_network_watcher(self):
+        # ensure network watcher RG exists and is configured for our location
+        self.cmd('group create -g NetworkWatcherRg -l westcentralus')
+        self.cmd('network watcher configure -g NetworkWatcherRg --locations westcentralus --enabled')
+
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_vm(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': 'westcentralus',
+            'vm': 'vm1',
+            'nsg': 'nsg1',
+            'capture': 'capture1',
+            'private-ip':  '10.0.0.9'
+        })
+        self._configure_network_watcher()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}').get_output_in_json()
+        self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
+        self.cmd('network watcher test-connectivity -g {rg} --source-resource {vm} --dest-address www.microsoft.com --dest-port 80 --valid-status-codes 200 202')
+        self.cmd('network watcher run-configuration-diagnostic --resource {vm_id} --direction Inbound --protocol TCP --source 12.11.12.14 --destination 10.1.1.4 --port 12100')
         self.cmd('network watcher show-topology -g {rg}')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local {private-ip}:22 --protocol tcp --remote 100.1.2.3:*')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
-        self.cmd('network watcher test-connectivity -g {rg} --source-resource {vm} --dest-address www.microsoft.com --dest-port 80')
 
-    def _network_watcher_flow_log(self):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'nsg': 'nsg1',
+            'sa': storage_account
+        })
+
+        self._configure_network_watcher()
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
         self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}')
 
-    def _network_watcher_packet_capture(self):
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_packet_capture(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vm': 'vm1',
+            'capture': 'capture1'
+        })
+        self._configure_network_watcher()
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm}')
+        self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
         self.cmd('network watcher packet-capture show -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture stop -l {loc} -n {capture}')
@@ -2019,7 +2065,17 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('network watcher packet-capture delete -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture list -l {loc}')
 
-    def _network_watcher_troubleshooting(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_troubleshooting(self, resource_group, resource_group_location, storage_account):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'sa': storage_account
+        })
+        self._configure_network_watcher()
+
         # set up resource to troubleshoot
         self.cmd('storage container create -n troubleshooting --account-name {sa}')
         sa = self.cmd('storage account show -g {rg} -n {sa}').get_output_in_json()
@@ -2033,13 +2089,18 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 
-    def _network_watcher_connection_monitor(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_connection_monitor(self, resource_group, resource_group_location):
         import time
         self.kwargs.update({
+            'loc': resource_group_location,
             'vm2': 'vm2',
             'vm3': 'vm3',
             'cm': 'cm1'
         })
+        self._configure_network_watcher()
+
         self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
         self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
         self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
@@ -2055,25 +2116,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
             pass
         self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
         self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
-
-    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
-    @AllowLargeResponse()
-    def test_network_watcher(self, resource_group, storage_account):
-
-        self.kwargs.update({
-            'loc': 'westcentralus',
-            'vm': 'vm1',
-            'nsg': 'nsg1',
-            'capture': 'capture1'
-        })
-        self._network_watcher_configure()
-        self._network_watcher_connection_monitor()
-        self._network_watcher_vm()
-        self._network_watcher_flow_log()
-        self._network_watcher_packet_capture()
-        self._network_watcher_troubleshooting()
 
 
 class ServiceEndpointScenarioTest(ScenarioTest):
