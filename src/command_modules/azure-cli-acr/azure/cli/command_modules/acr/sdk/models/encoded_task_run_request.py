@@ -12,30 +12,24 @@
 from .run_request import RunRequest
 
 
-class BuildTaskRequest(RunRequest):
-    """The request parameters for a quick task build.
+class EncodedTaskRunRequest(RunRequest):
+    """The parameters for a quick task run request.
 
     :param is_archive_enabled: The value that indicates whether archiving is
      enabled for the run or not. Default value: False .
     :type is_archive_enabled: bool
     :param type: Constant filled by server.
     :type type: str
-    :param definition_file_path: The template/definition file path relative to
-     the source.
-    :type definition_file_path: str
-    :param values_file_path: The values/parameters file path relative to the
-     source.
-    :type values_file_path: str
+    :param encoded_task_content: Base64 encoded value of the
+     template/definition file content.
+    :type encoded_task_content: str
+    :param encoded_values_content: Base64 encoded value of the
+     parameters/values file content.
+    :type encoded_values_content: str
     :param values: The collection of overridable values that can be passed
      when running a task.
     :type values:
      list[~azure.mgmt.containerregistry.v2018_09_01.models.SetValue]
-    :param source_location: The URL(absolute or relative) of the source that
-     needs to be built. For Docker build, it can be an URL to a tar or github
-     repoistory as supported by Docker.
-     If it is relative URL, the relative path should be obtained from calling
-     getSourceUploadUrl API.
-    :type source_location: str
     :param timeout: Build timeout in seconds. Default value: 3600 .
     :type timeout: int
     :param platform: The platform properties against which the build will
@@ -49,8 +43,7 @@ class BuildTaskRequest(RunRequest):
 
     _validation = {
         'type': {'required': True},
-        'definition_file_path': {'required': True},
-        'source_location': {'required': True},
+        'encoded_task_content': {'required': True},
         'timeout': {'maximum': 28800, 'minimum': 300},
         'platform': {'required': True},
     }
@@ -58,22 +51,20 @@ class BuildTaskRequest(RunRequest):
     _attribute_map = {
         'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
         'type': {'key': 'type', 'type': 'str'},
-        'definition_file_path': {'key': 'definitionFilePath', 'type': 'str'},
-        'values_file_path': {'key': 'valuesFilePath', 'type': 'str'},
+        'encoded_task_content': {'key': 'encodedTaskContent', 'type': 'str'},
+        'encoded_values_content': {'key': 'encodedValuesContent', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
-        'source_location': {'key': 'sourceLocation', 'type': 'str'},
         'timeout': {'key': 'timeout', 'type': 'int'},
         'platform': {'key': 'platform', 'type': 'PlatformProperties'},
         'agent_configuration': {'key': 'agentConfiguration', 'type': 'AgentProperties'},
     }
 
-    def __init__(self, definition_file_path, source_location, platform, is_archive_enabled=False, values_file_path=None, values=None, timeout=3600, agent_configuration=None):
-        super(BuildTaskRequest, self).__init__(is_archive_enabled=is_archive_enabled)
-        self.definition_file_path = definition_file_path
-        self.values_file_path = values_file_path
+    def __init__(self, encoded_task_content, platform, is_archive_enabled=False, encoded_values_content=None, values=None, timeout=3600, agent_configuration=None):
+        super(EncodedTaskRunRequest, self).__init__(is_archive_enabled=is_archive_enabled)
+        self.encoded_task_content = encoded_task_content
+        self.encoded_values_content = encoded_values_content
         self.values = values
-        self.source_location = source_location
         self.timeout = timeout
         self.platform = platform
         self.agent_configuration = agent_configuration
-        self.type = 'BuildTaskRequest'
+        self.type = 'EncodedTaskRunRequest'

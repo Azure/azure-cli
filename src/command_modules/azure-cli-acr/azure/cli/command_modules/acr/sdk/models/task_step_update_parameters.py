@@ -17,7 +17,7 @@ class TaskStepUpdateParameters(Model):
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: DockerBuildStepUpdateParameters,
-    BuildTaskStepUpdateParameters, RunTaskStepUpdateParameters
+    FileTaskStepUpdateParameters, EncodedTaskStepUpdateParameters
 
     :param type: Constant filled by server.
     :type type: str
@@ -32,7 +32,7 @@ class TaskStepUpdateParameters(Model):
     }
 
     _subtype_map = {
-        'type': {'Docker': 'DockerBuildStepUpdateParameters', 'BuildTask': 'BuildTaskStepUpdateParameters', 'RunTask': 'RunTaskStepUpdateParameters'}
+        'type': {'Docker': 'DockerBuildStepUpdateParameters', 'FileTask': 'FileTaskStepUpdateParameters', 'EncodedTask': 'EncodedTaskStepUpdateParameters'}
     }
 
     def __init__(self):

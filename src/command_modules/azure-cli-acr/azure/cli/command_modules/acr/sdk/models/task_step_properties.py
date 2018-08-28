@@ -16,7 +16,7 @@ class TaskStepProperties(Model):
     """Base properties for any task step.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: DockerBuildStep, BuildTaskStep, RunTaskStep
+    sub-classes are: DockerBuildStep, FileTaskStep, EncodedTaskStep
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -39,7 +39,7 @@ class TaskStepProperties(Model):
     }
 
     _subtype_map = {
-        'type': {'Docker': 'DockerBuildStep', 'BuildTask': 'BuildTaskStep', 'RunTask': 'RunTaskStep'}
+        'type': {'Docker': 'DockerBuildStep', 'FileTask': 'FileTaskStep', 'EncodedTask': 'EncodedTaskStep'}
     }
 
     def __init__(self):

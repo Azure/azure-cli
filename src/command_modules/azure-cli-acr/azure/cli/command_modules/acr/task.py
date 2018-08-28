@@ -20,12 +20,12 @@ from .sdk.models import (
     AuthInfo,
     Architecture,
     DockerBuildStep,
-    BuildTaskStep,
+    FileTaskStep,
     TaskRunRequest,
     TaskUpdateParameters,
     PlatformUpdateParameters,
     DockerBuildStepUpdateParameters,
-    BuildTaskStepUpdateParameters,
+    FileTaskStepUpdateParameters,
     TriggerUpdateParameters,
     SourceUpdateParameters,
     SourceTriggerUpdateParameters,
@@ -57,7 +57,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     cpu=2,
                     timeout=3600,
                     docker_file=None,
-                    definition_file=None,
+                    task_file=None,
                     values_file=None,
                     commit_trigger_enabled=True,
                     branch='master',
@@ -68,10 +68,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger='Runtime',
                     resource_group_name=None):
 
-    if docker_file is None and definition_file is None:
-        raise CLIError("One of --dockerfile or --definition-file argument is required")
-    if docker_file is not None and definition_file is not None:
-        raise CLIError("Cannot use both --dockerfile and --definition-file arguments to create a task")
+    if docker_file is None and task_file is None:
+        raise CLIError("One of --dockerfile or --task-file argument is required")
+    if docker_file is not None and task_file is not None:
+        raise CLIError("Cannot use both --dockerfile and --task-file arguments to create a task")
     if docker_file is not None:
         step = DockerBuildStep(
             image_names=image_names,
@@ -81,9 +81,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
             context_path=context_path
         )
-    if definition_file is not None:
-        step = BuildTaskStep(
-            definition_file_path=definition_file,
+    if task_file is not None:
+        step = FileTaskStep(
+            task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
             values=None #TODO: override values
@@ -202,7 +202,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     no_push=None,
                     no_cache=None,
                     docker_file=None,
-                    definition_file=None,
+                    task_file=None,
                     values_file=None,
                     arg=None,
                     secret_arg=None,
@@ -225,9 +225,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             arguments=arguments,
             context_path=context_path
         )
-    if isinstance(step, BuildTaskStep):
-        step = BuildTaskStepUpdateParameters(
-            definition_file_path=definition_file,
+    if isinstance(step, FileTaskStep):
+        step = FileTaskStepUpdateParameters(
+            task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
             values=None #TODO: override values

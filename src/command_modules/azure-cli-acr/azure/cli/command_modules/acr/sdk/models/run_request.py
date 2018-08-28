@@ -16,8 +16,8 @@ class RunRequest(Model):
     """The request parameters for scheduling a run.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: DockerBuildRequest, BuildTaskRequest, TaskRunRequest,
-    QuickTaskRunRequest
+    sub-classes are: DockerBuildRequest, FileTaskRunRequest, TaskRunRequest,
+    EncodedTaskRunRequest
 
     :param is_archive_enabled: The value that indicates whether archiving is
      enabled for the run or not. Default value: False .
@@ -36,7 +36,7 @@ class RunRequest(Model):
     }
 
     _subtype_map = {
-        'type': {'DockerBuildRequest': 'DockerBuildRequest', 'BuildTaskRequest': 'BuildTaskRequest', 'TaskRunRequest': 'TaskRunRequest', 'QuickTaskRunRequest': 'QuickTaskRunRequest'}
+        'type': {'DockerBuildRequest': 'DockerBuildRequest', 'FileTaskRunRequest': 'FileTaskRunRequest', 'TaskRunRequest': 'TaskRunRequest', 'EncodedTaskRunRequest': 'EncodedTaskRunRequest'}
     }
 
     def __init__(self, is_archive_enabled=False):

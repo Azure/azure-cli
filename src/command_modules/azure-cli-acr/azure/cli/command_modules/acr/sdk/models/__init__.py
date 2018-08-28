@@ -41,15 +41,15 @@ from .proxy_resource import ProxyResource
 from .argument import Argument
 from .docker_build_request import DockerBuildRequest
 from .set_value import SetValue
-from .build_task_request import BuildTaskRequest
+from .file_task_run_request import FileTaskRunRequest
 from .task_run_request import TaskRunRequest
-from .quick_task_run_request import QuickTaskRunRequest
+from .encoded_task_run_request import EncodedTaskRunRequest
 from .docker_build_step import DockerBuildStep
-from .build_task_step import BuildTaskStep
-from .run_task_step import RunTaskStep
+from .file_task_step import FileTaskStep
+from .encoded_task_step import EncodedTaskStep
 from .docker_build_step_update_parameters import DockerBuildStepUpdateParameters
-from .build_task_step_update_parameters import BuildTaskStepUpdateParameters
-from .run_task_step_update_parameters import RunTaskStepUpdateParameters
+from .file_task_step_update_parameters import FileTaskStepUpdateParameters
+from .encoded_task_step_update_parameters import EncodedTaskStepUpdateParameters
 from .run_paged import RunPaged
 from .task_paged import TaskPaged
 from .container_registry_management_client_enums import (
@@ -101,15 +101,15 @@ __all__ = [
     'Argument',
     'DockerBuildRequest',
     'SetValue',
-    'BuildTaskRequest',
+    'FileTaskRunRequest',
     'TaskRunRequest',
-    'QuickTaskRunRequest',
+    'EncodedTaskRunRequest',
     'DockerBuildStep',
-    'BuildTaskStep',
-    'RunTaskStep',
+    'FileTaskStep',
+    'EncodedTaskStep',
     'DockerBuildStepUpdateParameters',
-    'BuildTaskStepUpdateParameters',
-    'RunTaskStepUpdateParameters',
+    'FileTaskStepUpdateParameters',
+    'EncodedTaskStepUpdateParameters',
     'RunPaged',
     'TaskPaged',
     'RunStatus',

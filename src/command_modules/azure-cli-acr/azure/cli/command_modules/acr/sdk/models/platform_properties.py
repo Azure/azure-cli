@@ -30,7 +30,6 @@ class PlatformProperties(Model):
 
     _validation = {
         'os': {'required': True},
-        'architecture': {'required': True},
     }
 
     _attribute_map = {
@@ -39,7 +38,7 @@ class PlatformProperties(Model):
         'variant': {'key': 'variant', 'type': 'str'},
     }
 
-    def __init__(self, os, architecture, variant=None):
+    def __init__(self, os, architecture=None, variant=None):
         super(PlatformProperties, self).__init__()
         self.os = os
         self.architecture = architecture
