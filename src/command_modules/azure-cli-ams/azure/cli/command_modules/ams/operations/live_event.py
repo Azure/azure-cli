@@ -120,7 +120,7 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
 
     if ips is not None:
         instance.preview.access_control.ip.allow = []
-        if len(ips) > 1 or (len(ips) == 1 and ips[0]):
+        if len(ips) > 1 or ips[0]:
             for ip in ips:
                 instance.preview.access_control.ip.allow.append(create_ip_range(instance.name, ip))
 
