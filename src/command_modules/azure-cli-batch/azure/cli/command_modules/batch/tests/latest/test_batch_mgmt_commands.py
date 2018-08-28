@@ -16,28 +16,16 @@ from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
-# TODO: Convert back to ScenarioTest and re-record when issue #5142 is fixed.
-class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
+class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
-
-        SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
-        KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
-        ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
-        ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
         self.kwargs.update({
             'rg': resource_group,
             'str_n': 'clibatchteststorage1',
             'loc': 'northeurope',
-            'acc': 'clibatchtest1',
-            'byos_n': 'clibatchtestuser1',
-            'byos_l': 'southindia',
-            'kv': 'clibatchtestkeyvault1',
-            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
-            'perm_k': ALL_KEY_PERMISSIONS,
-            'perm_s': ALL_SECRET_PERMISSIONS
+            'acc': 'clibatchtest1'
         })
 
         # test create storage account with default set
@@ -47,18 +35,6 @@ class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-inst
             self.check('resourceGroup', '{rg}')])
         storage_id = result.get_output_in_json()['id']
 
-        # test create keyvault for use with BYOS account
-        self.cmd('keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
-                 '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks([
-                     self.check('name', '{kv}'),
-                     self.check('location', '{byos_l}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('type(properties.accessPolicies)', 'array'),
-                     self.check('length(properties.accessPolicies)', 1),
-                     self.check('properties.sku.name', 'standard')])
-        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
-                 '--key-permissions {perm_k} --secret-permissions {perm_s}')
-
         # test create account with default set
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
             self.check('name', '{acc}'),
@@ -66,12 +42,6 @@ class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-inst
             self.check('resourceGroup', '{rg}')])
 
         time.sleep(100)
-
-        # test create account with BYOS
-        self.cmd('batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks([
-            self.check('name', '{byos_n}'),
-            self.check('location', '{byos_l}'),
-            self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
@@ -108,7 +78,6 @@ class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-inst
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
-        self.cmd('batch account delete -g {rg} -n {byos_n} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
@@ -186,3 +155,55 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
         self.cmd('batch application delete -g {rg} -n {acc} --application-id {app} --yes')
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
         self.cmd('storage account delete -g {rg} -n {str_n} --yes')
+
+
+# These tests have requirements which cannot be met by CLI team so reserved for live testing.
+class BatchMgmtLiveScenarioTests(LiveScenarioTest):
+    @ResourceGroupPreparer(location='northeurope')
+    def test_batch_byos_account_cmd(self, resource_group):
+        SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
+                                    'models.key_vault_management_client_enums#SecretPermissions')
+        KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
+                                 'models.key_vault_management_client_enums#KeyPermissions')
+        ALL_SECRET_PERMISSIONS = ' '.join(
+            [perm.value for perm in SecretPermissions])
+        ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': 'clibatchteststorage1',
+            'byos_n': 'clibatchtestuser1',
+            'byos_l': 'southindia',
+            'kv': 'clibatchtestkeyvault1',
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
+            'perm_k': ALL_KEY_PERMISSIONS,
+            'perm_s': ALL_SECRET_PERMISSIONS
+        })
+
+        # test create keyvault for use with BYOS account
+        self.cmd(
+            'keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
+            '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks(
+            [
+                self.check('name', '{kv}'),
+                self.check('location', '{byos_l}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('type(properties.accessPolicies)', 'array'),
+                self.check('length(properties.accessPolicies)', 1),
+                self.check('properties.sku.name', 'standard')])
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
+                 '--key-permissions {perm_k} --secret-permissions {perm_s}')
+
+        time.sleep(100)
+
+        # test create account with BYOS
+        self.cmd(
+            'batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks(
+            [
+                self.check('name', '{byos_n}'),
+                self.check('location', '{byos_l}'),
+                self.check('resourceGroup', '{rg}')])
+
+        # test batch account delete
+        self.cmd('batch account delete -g {rg} -n {byos_n} --yes')
+        self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())

@@ -47,6 +47,11 @@ helps['batch account login'] = """
     short-summary: Log in to a Batch account through Azure Active Directory or Shared Key authentication.
 """
 
+helps['batch account show'] = """
+    type: command
+    short-summary: Get a specified Batch account or the currently set account.
+"""
+
 helps['batch application'] = """
     type: group
     short-summary: Manage Batch applications.
@@ -72,6 +77,7 @@ helps['batch application package activate'] = """
     short-summary: Activates a Batch application package.
     long-summary: This step is unnecessary if the package has already been successfully activated by the `create` command.
 """
+
 
 helps['batch application summary'] = """
     type: group
