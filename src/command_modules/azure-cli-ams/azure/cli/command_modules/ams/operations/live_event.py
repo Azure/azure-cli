@@ -119,11 +119,8 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
         instance.input.key_frame_interval_duration = key_frame_interval_duration
 
     if ips is not None:
-        if len(ips) == 1 and ips[0] == "":
-            instance.preview.access_control.ip.allow = []
-        else:
-            instance.preview.access_control.ip.allow = []
-
+        instance.preview.access_control.ip.allow = []
+        if len(ips) > 1 or ips[0]:
             for ip in ips:
                 instance.preview.access_control.ip.allow.append(create_ip_range(instance.name, ip))
 
