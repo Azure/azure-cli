@@ -74,13 +74,15 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
 
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
-                                     parameters):
+                                     parameters, no_wait):
     if parameters.access_control is not None and parameters.access_control.ip is not None and parameters.access_control.ip.allow:  # pylint: disable=line-too-long
         ips = list(map(lambda x: create_ip_range(streaming_endpoint_name, x) if isinstance(x, str) else x,
                        parameters.access_control.ip.allow))
         parameters.access_control.ip.allow = ips
 
-    return client.update(resource_group_name, account_name, streaming_endpoint_name, parameters)
+    return sdk_no_wait(no_wait, client.update, resource_group_name=resource_group_name,
+                       account_name=account_name, streaming_endpoint_name=streaming_endpoint_name,
+                       parameters=parameters)
 
 
 # pylint: disable=too-many-branches
