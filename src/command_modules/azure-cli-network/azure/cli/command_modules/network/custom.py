@@ -2580,6 +2580,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     if retention is not None:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
         config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+    setattr(config, 'flow_analytics_configuration', None)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
