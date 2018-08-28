@@ -978,7 +978,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
     if admin_site_name is not None:
         instance.admin_site_name = admin_site_name
     return instance
-                                                    
+
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
     try:
