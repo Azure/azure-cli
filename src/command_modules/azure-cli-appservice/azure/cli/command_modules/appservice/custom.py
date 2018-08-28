@@ -1058,7 +1058,8 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     db_setting = _create_db_setting(db_name, db_type, db_connection_string)
 
     backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit.name,
-                                     keep_at_least_one_backup=keep_at_least_one_backup, retention_period_in_days=retention_period_in_days)
+                                     keep_at_least_one_backup=keep_at_least_one_backup,
+                                     retention_period_in_days=retention_period_in_days)
     backup_request = BackupRequest(backup_request_name=backup_name, backup_schedule=backup_schedule,
                                    enabled=True, storage_account_url=storage_account_url,
                                    databases=db_setting)
@@ -1271,7 +1272,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
         turned_on = server_logging_option != 'off'
         if server_logging_option in ['filesystem', 'off']:
             # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
-            filesystem_log_config = FileSystemHttpLogsConfig(retention_in_mb=100, retention_in_days=3, enabled=turned_on)
+            filesystem_log_config = FileSystemHttpLogsConfig(retention_in_mb=100, retention_in_days=3,
+                                                             enabled=turned_on)
         http_logs = HttpLogsConfig(file_system=filesystem_log_config, azure_blob_storage=None)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
@@ -1708,9 +1710,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
                                                               value=deployment_container_image_name))
                 site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
-                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE', value='false'))
+                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
+                                                              value='false'))
             else:
-                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE', value='true'))
+                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
+                                                              value='true'))
                 site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
         else:
             functionapp_def.kind = 'functionapp'
