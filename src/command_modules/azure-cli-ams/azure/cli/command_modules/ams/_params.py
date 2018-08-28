@@ -135,6 +135,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', account_name_arg_type)
         c.argument('content_key_policy_name', name_arg_type)
         c.argument('description', help='The content key policy description.')
+        c.argument('clear_key_configuration',
+                   action='store_true',
+                   arg_group='Simple Policy Options',
+                   help='Use clear key configuration.')
+        c.argument('open_restriction',
+                   action='store_true',
+                   arg_group='Simple Policy Options',
+                   help='Use open restriction.')
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
