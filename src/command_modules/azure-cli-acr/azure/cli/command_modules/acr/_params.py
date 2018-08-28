@@ -52,7 +52,8 @@ from ._validators import (
     validate_build_arg,
     validate_secret_build_arg,
     validate_arg,
-    validate_secret_arg
+    validate_secret_arg,
+    validate_set
 )
 
 
@@ -206,6 +207,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('run_id', help='The unique run identifier.')
         c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
         c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
+        c.argument('set_value', help="The collection of overridable values that can be passed when running a task in 'name[=value]' format.", action='append', validator=validate_set)
 
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')

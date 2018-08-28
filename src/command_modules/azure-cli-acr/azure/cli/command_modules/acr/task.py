@@ -86,7 +86,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=None #TODO: override values
+            values=(arg if arg else []) + (secret_arg if secret_arg else [])
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -226,11 +226,15 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             context_path=context_path
         )
     if isinstance(step, BuildTaskStep):
+        if arg is None and secret_arg is None:
+            arguments = None
+        else:
+            arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
         step = BuildTaskStepUpdateParameters(
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=None #TODO: override values
+            values=arguments
         )
 
     source_control_type = None
@@ -300,6 +304,7 @@ def acr_task_run(cmd,
                  client,  # cf_acr_runs
                  task_name,
                  registry_name,
+                 set_value=None,
                  no_logs=False,
                  resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -311,7 +316,9 @@ def acr_task_run(cmd,
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(resource_group_name,
                                        registry_name,
-                                       TaskRunRequest(task_name=task_name))) # TODO: override values
+                                       TaskRunRequest(
+                                           task_name=task_name,
+                                           values=(set_value if set_value else []))))
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
