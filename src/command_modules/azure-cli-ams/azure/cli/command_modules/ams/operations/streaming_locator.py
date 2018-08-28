@@ -22,5 +22,5 @@ def create_streaming_locator(client, resource_group_name, account_name,
 
 def list_content_keys(client, resource_group_name, account_name,
                       streaming_locator_name):
-    return client.list_content_keys(resource_group_name, account_name, 
+    return client.list_content_keys(resource_group_name, account_name,
                                     streaming_locator_name).content_keys
