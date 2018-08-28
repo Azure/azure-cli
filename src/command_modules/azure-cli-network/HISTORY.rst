@@ -10,6 +10,7 @@ Release History
 * Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
 * Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
 * Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
+* Allow `network watcher flow-log show/configure` to be used with classic NSGs.
 
 2.2.4
 +++++
