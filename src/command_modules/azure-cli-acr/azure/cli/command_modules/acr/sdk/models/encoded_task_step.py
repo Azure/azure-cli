@@ -12,8 +12,8 @@
 from .task_step_properties import TaskStepProperties
 
 
-class RunTaskStep(TaskStepProperties):
-    """The properties of a generic task run step.
+class EncodedTaskStep(TaskStepProperties):
+    """The properties of a encoded task step.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -23,12 +23,12 @@ class RunTaskStep(TaskStepProperties):
      list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
-    :param task_definition_content: Base64 encoded value of the
+    :param encoded_task_content: Base64 encoded value of the
      template/definition file content.
-    :type task_definition_content: str
-    :param values_content: Base64 encoded value of the parameters/values file
-     content.
-    :type values_content: str
+    :type encoded_task_content: str
+    :param encoded_values_content: Base64 encoded value of the
+     parameters/values file content.
+    :type encoded_values_content: str
     :param values: The collection of overridable values that can be passed
      when running a task.
     :type values:
@@ -38,20 +38,20 @@ class RunTaskStep(TaskStepProperties):
     _validation = {
         'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
-        'task_definition_content': {'required': True},
+        'encoded_task_content': {'required': True},
     }
 
     _attribute_map = {
         'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
-        'task_definition_content': {'key': 'taskDefinitionContent', 'type': 'str'},
-        'values_content': {'key': 'valuesContent', 'type': 'str'},
+        'encoded_task_content': {'key': 'encodedTaskContent', 'type': 'str'},
+        'encoded_values_content': {'key': 'encodedValuesContent', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
     }
 
-    def __init__(self, task_definition_content, values_content=None, values=None):
-        super(RunTaskStep, self).__init__()
-        self.task_definition_content = task_definition_content
-        self.values_content = values_content
+    def __init__(self, encoded_task_content, encoded_values_content=None, values=None):
+        super(EncodedTaskStep, self).__init__()
+        self.encoded_task_content = encoded_task_content
+        self.encoded_values_content = encoded_values_content
         self.values = values
-        self.type = 'RunTask'
+        self.type = 'EncodedTask'

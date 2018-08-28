@@ -12,16 +12,16 @@
 from .task_step_update_parameters import TaskStepUpdateParameters
 
 
-class BuildTaskStepUpdateParameters(TaskStepUpdateParameters):
-    """The properties of updating a build task step.
+class FileTaskStepUpdateParameters(TaskStepUpdateParameters):
+    """The properties of updating a task step.
 
     :param type: Constant filled by server.
     :type type: str
-    :param definition_file_path: The build task template/definition file path
-     relative to the source context.
-    :type definition_file_path: str
-    :param values_file_path: The task values/parameters file path relative to
+    :param task_file_path: The task template/definition file path relative to
      the source context.
+    :type task_file_path: str
+    :param values_file_path: The values/parameters file path relative to the
+     source context.
     :type values_file_path: str
     :param values: The collection of overridable values that can be passed
      when running a task.
@@ -40,16 +40,16 @@ class BuildTaskStepUpdateParameters(TaskStepUpdateParameters):
 
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
-        'definition_file_path': {'key': 'definitionFilePath', 'type': 'str'},
+        'task_file_path': {'key': 'taskFilePath', 'type': 'str'},
         'values_file_path': {'key': 'valuesFilePath', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
         'context_path': {'key': 'contextPath', 'type': 'str'},
     }
 
-    def __init__(self, definition_file_path=None, values_file_path=None, values=None, context_path=None):
-        super(BuildTaskStepUpdateParameters, self).__init__()
-        self.definition_file_path = definition_file_path
+    def __init__(self, task_file_path=None, values_file_path=None, values=None, context_path=None):
+        super(FileTaskStepUpdateParameters, self).__init__()
+        self.task_file_path = task_file_path
         self.values_file_path = values_file_path
         self.values = values
         self.context_path = context_path
-        self.type = 'BuildTask'
+        self.type = 'FileTask'

@@ -12,17 +12,17 @@
 from .task_step_update_parameters import TaskStepUpdateParameters
 
 
-class RunTaskStepUpdateParameters(TaskStepUpdateParameters):
-    """The properties for updating generic task run step.
+class EncodedTaskStepUpdateParameters(TaskStepUpdateParameters):
+    """The properties for updating encoded task step.
 
     :param type: Constant filled by server.
     :type type: str
-    :param task_definition_content: Base64 encoded value of the
+    :param encoded_task_content: Base64 encoded value of the
      template/definition file content.
-    :type task_definition_content: str
-    :param values_content: Base64 encoded value of the parameters/values file
-     content.
-    :type values_content: str
+    :type encoded_task_content: str
+    :param encoded_values_content: Base64 encoded value of the
+     parameters/values file content.
+    :type encoded_values_content: str
     :param values: The collection of overridable values that can be passed
      when running a task.
     :type values:
@@ -35,14 +35,14 @@ class RunTaskStepUpdateParameters(TaskStepUpdateParameters):
 
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
-        'task_definition_content': {'key': 'taskDefinitionContent', 'type': 'str'},
-        'values_content': {'key': 'valuesContent', 'type': 'str'},
+        'encoded_task_content': {'key': 'encodedTaskContent', 'type': 'str'},
+        'encoded_values_content': {'key': 'encodedValuesContent', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
     }
 
-    def __init__(self, task_definition_content=None, values_content=None, values=None):
-        super(RunTaskStepUpdateParameters, self).__init__()
-        self.task_definition_content = task_definition_content
-        self.values_content = values_content
+    def __init__(self, encoded_task_content=None, encoded_values_content=None, values=None):
+        super(EncodedTaskStepUpdateParameters, self).__init__()
+        self.encoded_task_content = encoded_task_content
+        self.encoded_values_content = encoded_values_content
         self.values = values
-        self.type = 'RunTask'
+        self.type = 'EncodedTask'

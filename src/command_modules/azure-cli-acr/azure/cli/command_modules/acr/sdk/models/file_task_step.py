@@ -12,8 +12,8 @@
 from .task_step_properties import TaskStepProperties
 
 
-class BuildTaskStep(TaskStepProperties):
-    """The properties of a build task step.
+class FileTaskStep(TaskStepProperties):
+    """The properties of a task step.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -23,9 +23,9 @@ class BuildTaskStep(TaskStepProperties):
      list[~azure.mgmt.containerregistry.v2018_09_01.models.BaseImageDependency]
     :param type: Constant filled by server.
     :type type: str
-    :param definition_file_path: The build task template/definition file path
-     relative to the source context.
-    :type definition_file_path: str
+    :param task_file_path: The task template/definition file path relative to
+     the source context.
+    :type task_file_path: str
     :param values_file_path: The task values/parameters file path relative to
      the source context.
     :type values_file_path: str
@@ -43,22 +43,22 @@ class BuildTaskStep(TaskStepProperties):
     _validation = {
         'base_image_dependencies': {'readonly': True},
         'type': {'required': True},
-        'definition_file_path': {'required': True},
+        'task_file_path': {'required': True},
     }
 
     _attribute_map = {
         'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
         'type': {'key': 'type', 'type': 'str'},
-        'definition_file_path': {'key': 'definitionFilePath', 'type': 'str'},
+        'task_file_path': {'key': 'taskFilePath', 'type': 'str'},
         'values_file_path': {'key': 'valuesFilePath', 'type': 'str'},
         'values': {'key': 'values', 'type': '[SetValue]'},
         'context_path': {'key': 'contextPath', 'type': 'str'},
     }
 
-    def __init__(self, definition_file_path, values_file_path=None, values=None, context_path=None):
-        super(BuildTaskStep, self).__init__()
-        self.definition_file_path = definition_file_path
+    def __init__(self, task_file_path, values_file_path=None, values=None, context_path=None):
+        super(FileTaskStep, self).__init__()
+        self.task_file_path = task_file_path
         self.values_file_path = values_file_path
         self.values = values
         self.context_path = context_path
-        self.type = 'BuildTask'
+        self.type = 'FileTask'
