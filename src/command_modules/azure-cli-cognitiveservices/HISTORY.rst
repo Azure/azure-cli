@@ -3,6 +3,13 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Add new command `az cognitiveservices account list-usage`
+* Add new command `az cognitiveservices account list-kinds`
+* Add new command `az cognitiveservices account list`
+* Deprecate `az cognitiveservices list`
+
 0.2.1
 +++++
 * Add new parameter --api-properties, which is required for creating some of the services.

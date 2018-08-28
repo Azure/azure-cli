@@ -7,7 +7,7 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.cognitiveservices._help  # pylint: disable=unused-import
 
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_cognitive_service_accounts
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts
 
 
 class CognitiveServicesCommandsLoader(AzCommandsLoader):
@@ -16,7 +16,7 @@ class CognitiveServicesCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         custom_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.cognitiveservices.custom#{}',
-            client_factory=cf_cognitive_service_accounts)
+            client_factory=cf_accounts)
         super(CognitiveServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                               custom_command_type=custom_type,
                                                               min_profile='2017-03-10-profile')
