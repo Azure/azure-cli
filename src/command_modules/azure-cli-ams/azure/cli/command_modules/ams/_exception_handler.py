@@ -13,5 +13,5 @@ def ams_exception_handler(ex):
     if isinstance(ex, (ApiErrorException, ApiErrorExceptionPy3)) and ex.message:
         raise CLIError(ex.message)
     if isinstance(ex, ValidationError):
-        raise CLIError(ex.args[0])
+        raise CLIError(ex)
     raise ex
