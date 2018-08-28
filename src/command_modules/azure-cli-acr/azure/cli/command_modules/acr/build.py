@@ -74,8 +74,8 @@ def acr_build_show_logs(client,
                  raise_error_on_failure=raise_error_on_failure)
 
 
-def _stream_logs(no_format,
-                 byte_size,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+                 byte_size,
                  timeout_in_seconds,
                  blob_service,
                  container_name,
