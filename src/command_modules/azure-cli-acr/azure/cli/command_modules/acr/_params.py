@@ -42,7 +42,6 @@ from ._constants import (
     MANAGED_REGISTRY_SKU,
 )
 from ._validators import (
-    validate_registry_name,
     validate_headers,
     validate_build_arg,
     validate_secret_build_arg
@@ -110,7 +109,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('image', arg_type=image_by_tag_type)
 
     with self.argument_context('acr create') as c:
-        c.argument('registry_name', completer=None, validator=validate_registry_name)
+        c.argument('registry_name', completer=None)
         c.argument('deployment_name', arg_type=deployment_name_type, validator=None)
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
