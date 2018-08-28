@@ -20,9 +20,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'contentKeyPolicyName': policy_name,
-            'description': 'ExampleDescription',
-            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration',
-            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
+            'description': 'ExampleDescription'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -34,5 +32,5 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        self.assertEquals('{configurationODataType}', content_key_policy[0]['configuration']['odatatype'])
-        self.assertEquals('{restrictionODataType}', content_key_policy[0]['restriction']['odatatype'])
+        self.assertEquals('#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration', content_key_policy['options'][0]['configuration']['odatatype'])
+        self.assertEquals('#Microsoft.Media.ContentKeyPolicyOpenRestriction', content_key_policy['options'][0]['restriction']['odatatype'])
