@@ -81,8 +81,15 @@ def validate_set(namespace):
     if isinstance(namespace.set, list):
         set_list = []
         for item in namespace.set:
-            set_list.append(validate_run_set(item, True))
+            set_list.append(validate_run_set(item, False))
         namespace.set = set_list
+
+def validate_secret_set(namespace):
+    if isinstance(namespace.set, list):
+        secret_set_list = []
+        for item in namespace.set:
+            secret_set_list.append(validate_run_set(item, True))
+        namespace.secret_set = secret_set_list
 
 def validate_run_set(string, is_secret):
     """Extracts a single SetValue in key[=value] format. """

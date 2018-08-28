@@ -65,6 +65,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     no_cache=False,
                     arg=None,
                     secret_arg=None,
+                    set_value=None,
+                    secret_set_value=None,
                     base_image_trigger='Runtime',
                     resource_group_name=None):
 
@@ -86,7 +88,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=(arg if arg else []) + (secret_arg if secret_arg else [])
+            values=(set_value if set_value else []) + (secret_set_value if secret_set_value else [])
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -206,6 +208,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     values_file=None,
                     arg=None,
                     secret_arg=None,
+                    set_value=None,
+                    secret_set_value=None,
                     base_image_trigger=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -226,15 +230,15 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             context_path=context_path
         )
     if isinstance(step, FileTaskStep):
-        if arg is None and secret_arg is None:
-            arguments = None
+        if set_value is None and secret_set_value is None:
+            values = None
         else:
-            arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
+            values = (set_value if set_value else []) + (secret_set_value if secret_set_value else [])
         step = FileTaskStepUpdateParameters(
             task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=arguments
+            values=values
         )
 
     source_control_type = None
