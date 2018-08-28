@@ -515,6 +515,7 @@ def get_file_path_validator(default_file_param=None):
         if default_file_param and '.' not in file_name:
             dir_name = path
             file_name = os.path.split(getattr(namespace, default_file_param))[1]
+        dir_name = None if dir_name in ('', '.') else dir_name
         namespace.directory_name = dir_name
         namespace.file_name = file_name
         del namespace.path
