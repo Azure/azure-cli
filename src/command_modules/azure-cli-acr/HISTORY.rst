@@ -5,7 +5,7 @@ Release History
 
 2.1.5
 +++++
-* Add a flag for displaying build logs
+* Add a no-format flag for displaying build logs
 
 2.1.4
 +++++
