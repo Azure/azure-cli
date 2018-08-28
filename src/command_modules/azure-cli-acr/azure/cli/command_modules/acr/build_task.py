@@ -408,7 +408,7 @@ def acr_build_task_logs(cmd,
                                                     build_task_name=build_task_name,
                                                     image=image))
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name,no_format)
+    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format)
 
 
 def _get_list_builds_message(base_message, build_task_name=None, image=None):
