@@ -14,7 +14,6 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     WebhookAction,
     BuildTaskStatus,
     OsType,
-    BaseImageTriggerType,
     BuildStatus,
     PolicyStatus
 )
@@ -33,7 +32,8 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 from .sdk.models import (
     RunStatus,
-    TaskStatus
+    TaskStatus,
+    BaseImageTriggerType
 )
 from ._constants import (
     STORAGE_RESOURCE_TYPE,

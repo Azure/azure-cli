@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import base64
-import yaml
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -22,14 +20,12 @@ from .sdk.models import (
     AuthInfo,
     Architecture,
     DockerBuildStep,
-    RunTaskStep,
     BuildTaskStep,
     TaskRunRequest,
     TaskUpdateParameters,
     PlatformUpdateParameters,
     DockerBuildStepUpdateParameters,
-    BuildTaskStepUpdateParameters, 
-    RunTaskStepUpdateParameters,
+    BuildTaskStepUpdateParameters,
     TriggerUpdateParameters,
     SourceUpdateParameters,
     SourceTriggerUpdateParameters,
@@ -53,9 +49,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     client,
                     task_name,
                     registry_name,
-                    context_path=None,
+                    context_path,
+                    git_access_token,
                     image_names=None,
-                    git_access_token=None,
                     status='Enabled',
                     os_type='Linux',
                     cpu=2,
@@ -90,6 +86,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
+            values=None #TODO: override values
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -111,7 +108,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         agent_configuration=AgentProperties(
             cpu=cpu
         ),
-        trigger=None if context_path is None else TriggerProperties(
+        trigger=TriggerProperties(
             source_triggers=[
                 SourceTrigger(
                     source_repository=SourceProperties(
@@ -150,7 +147,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     return task
 
 
-#TODO: validate table_transformer
+#TODO: fix table_transformer
 def acr_task_show(cmd,
                   client,
                   task_name,
@@ -166,7 +163,7 @@ def acr_task_show(cmd,
         return client.list_details(resource_group_name, registry_name, task_name)
 
 
-#TODO: validate table_transformer
+#TODO: fix table_transformer
 def acr_task_list(cmd,
                   client,
                   registry_name,
@@ -186,7 +183,7 @@ def acr_task_delete(cmd,
     return client.delete(resource_group_name, registry_name, task_name)
 
 
-#TODO
+#TODO: validate after RP changes
 def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     client,
                     task_name,
@@ -216,12 +213,16 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
     if isinstance(step, DockerBuildStep):
+        if arg is None and secret_arg is None:
+            arguments = None
+        else:
+            arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
         step = DockerBuildStepUpdateParameters(
             image_names=image_names,
             is_push_enabled=not no_push,
             no_cache=no_cache,
             docker_file_path=docker_file,
-            arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+            arguments=arguments,
             context_path=context_path
         )
     if isinstance(step, BuildTaskStep):
@@ -229,6 +230,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             definition_file_path=definition_file,
             values_file_path=values_file,
             context_path=context_path,
+            values=None #TODO: override values
         )
 
     source_control_type = None
@@ -241,8 +243,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=os_type,
-            architecture=Architecture.amd64
+            os=os_type
         ),
         agent_configuration=AgentProperties(
             cpu=cpu
@@ -258,10 +259,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                         branch=branch,
                         source_control_auth_properties=AuthInfoUpdateParameters(
                             token=git_access_token,
-                            token_type=DEFAULT_TOKEN_TYPE,
-                            refresh_token='',
-                            scope='repo',
-                            expires_in=1313141
+                            token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
                     source_trigger_events=[SourceTriggerEvent.commit], #TODO: pull request?
@@ -298,7 +296,6 @@ def acr_task_update_run(cmd,
                          is_archive_enabled=is_archive_enabled)
 
 
-#TODO: validate new API
 def acr_task_run(cmd,
                  client,  # cf_acr_runs
                  task_name,
@@ -314,7 +311,7 @@ def acr_task_run(cmd,
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(resource_group_name,
                                        registry_name,
-                                       TaskRunRequest(task_name=task_name)))
+                                       TaskRunRequest(task_name=task_name))) # TODO: override values
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
@@ -337,7 +334,7 @@ def acr_task_show_run(cmd,
     return client.get(resource_group_name, registry_name, run_id)
 
 
-#TODO: validate filters, table_transformer
+#TODO: table_transformer
 def acr_task_list_runs(cmd,
                        client,  # cf_acr_runs
                        registry_name,
