@@ -54,7 +54,7 @@ class Session(collections.MutableMapping):
             log_level = logger.INFO
             if isinstance(load_exception, t_JSONDecodeError):
                 log_level = logger.WARNING
-            
+
             get_logger(__name__).log(log_level, "Failed to load or parse file %s. It will be overridden by default settings.",
                                      self.filename)
             self.save()
