@@ -575,7 +575,7 @@ def _create_auto_storage_account(storage_client, resource_group, location):
         name = _generate_auto_storage_account_name()
         check = storage_client.storage_accounts.check_name_availability(name).name_available
     storage_client.storage_accounts.create(resource_group, name, {
-        'sku': Sku(SkuName.standard_lrs),
+        'sku': Sku(name=SkuName.standard_lrs),
         'kind': Kind.storage,
         'location': location}).result()
     return name

@@ -766,7 +766,8 @@ class AzureBatchDataPlaneCommand(object):
                 for flattened_arg in self.parser.compile_args():
                     args.append(flattened_arg)
                 param = 'json_file'
-                docstring = "A file containing the {} specification in JSON format. " \
+                docstring = "A file containing the {} specification in JSON " \
+                            "(formatted to match the respective REST API body). " \
                             "If this parameter is specified, all '{} Arguments'" \
                             " are ignored.".format(arg[0].replace('_', ' '), group_title(arg[0]))
                 args.append((param, CLICommandArgument(param,
