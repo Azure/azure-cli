@@ -58,7 +58,7 @@ class Session(collections.MutableMapping):
             get_logger(__name__).log(log_level, "Failed to load or parse file %s. It will be overridden by default settings.",
                                      self.filename)
             self.save()
-        
+
     def save(self):
         if self.filename:
             with codecs_open(self.filename, 'w', encoding=self._encoding) as f:
