@@ -42,6 +42,7 @@ def acr_build_show_logs(client,
                         build_id,
                         registry_name,
                         resource_group_name,
+                        no_format=False,
                         raise_error_on_failure=False):
     log_file_sas = None
     error_message = "Could not get build logs for build ID: {}.".format(build_id)
@@ -61,7 +62,8 @@ def acr_build_show_logs(client,
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(log_file_sas)
 
-    _stream_logs(byte_size=1024,  # 1 KiB
+    _stream_logs(no_format,
+                 byte_size=1024,  # 1 KiB
                  timeout_in_seconds=1800,  # 30 minutes
                  blob_service=AppendBlobService(
                      account_name=account_name,
@@ -72,13 +74,15 @@ def acr_build_show_logs(client,
                  raise_error_on_failure=raise_error_on_failure)
 
 
-def _stream_logs(byte_size,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+                 byte_size,
                  timeout_in_seconds,
                  blob_service,
                  container_name,
                  blob_name,
                  raise_error_on_failure):
-    colorama.init()
+    if not no_format:
+        colorama.init()
     stream = BytesIO()
     metadata = {}
     start = 0
@@ -250,6 +254,7 @@ def acr_build(cmd,
               build_arg=None,
               secret_build_arg=None,
               docker_file_path='Dockerfile',
+              no_format=False,
               no_push=False,
               no_logs=False,
               os_type='Linux'):
@@ -311,7 +316,7 @@ def acr_build(cmd,
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, True)
+    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def _check_local_docker_file(source_location, docker_file_path):
