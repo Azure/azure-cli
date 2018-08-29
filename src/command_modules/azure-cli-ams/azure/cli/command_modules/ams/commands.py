@@ -106,15 +106,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams streaming locator', get_sdk('StreamingLocators', get_streaming_locators_client)) as g:
         g.custom_command('create', 'create_streaming_locator',
-                         custom_command_type=get_custom_sdk('streaming', get_streaming_locators_client))
+                         custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('get-paths', 'list_paths')
+        g.custom_command('get-content-keys', 'list_content_keys',
+                         custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
 
     with self.command_group('ams streaming policy', get_sdk('StreamingPolicies', get_streaming_policies_client)) as g:
         g.custom_command('create', 'create_streaming_policy',
-                         custom_command_type=get_custom_sdk('streaming', get_streaming_policies_client))
+                         custom_command_type=get_custom_sdk('streaming_policy', get_streaming_policies_client))
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
