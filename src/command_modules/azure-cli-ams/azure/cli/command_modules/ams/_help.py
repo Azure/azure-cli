@@ -184,9 +184,13 @@ helps['ams content-key-policy'] = """
 
 helps['ams content-key-policy create'] = """
     type: command
-    short-summary: Create a new content key policy resource.
+    short-summary: Create a new content key policy.
 """
 
+helps['ams content-key-policy show'] = """
+    type: command
+    short-summary: Show an existing content key policy.
+"""
 helps['ams content-key-policy delete'] = """
     type: command
     short-summary: Delete a content key policy.
