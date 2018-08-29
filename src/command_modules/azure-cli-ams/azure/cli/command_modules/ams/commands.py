@@ -100,6 +100,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('ams content-key-policy', get_sdk('ContentKeyPolicies', get_content_key_policies_client)) as g:
         g.custom_command('create', 'create_content_key_policy',
                          custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
+        g.command('delete', 'delete')
 
     with self.command_group('ams streaming locator', get_sdk('StreamingLocators', get_streaming_locators_client)) as g:
         g.custom_command('create', 'create_streaming_locator',
