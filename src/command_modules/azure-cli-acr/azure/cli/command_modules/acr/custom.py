@@ -51,12 +51,16 @@ def acr_create(cmd,
                admin_enabled=False,
                deployment_name=None):
     if sku in MANAGED_REGISTRY_SKU and storage_account_name:
-        raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
+        raise CLIError("Please specify '--sku {}' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
                        "to create a Classic registry using storage account `{}`."
-                       .format(storage_account_name, storage_account_name))
+                       .format(sku, storage_account_name, storage_account_name))
 
     if sku in CLASSIC_REGISTRY_SKU:
+        result = client.check_name_availability(registry_name)
+        if not result.name_available:
+            raise CLIError(result.message)
+
         logger.warning(
             "Due to the planned deprecation of the Classic registry SKU, we recommend using "
             "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
