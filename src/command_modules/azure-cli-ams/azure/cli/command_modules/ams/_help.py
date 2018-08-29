@@ -192,6 +192,11 @@ helps['ams content-key-policy delete'] = """
     short-summary: Delete a content key policy.
 """
 
+helps['ams content-key-policy show'] = """
+    type: command
+    short-summary: Show an existing content key policy.
+"""
+
 helps['ams job'] = """
     type: group
     short-summary: Manage jobs for a transform.
