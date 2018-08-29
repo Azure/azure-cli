@@ -20,7 +20,8 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       RoutingServiceBusQueueEndpointProperties,
                                       RoutingServiceBusTopicEndpointProperties,
                                       RoutingStorageContainerProperties,
-                                      RouteProperties)
+                                      RouteProperties,
+                                      RoutingMessage)
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
@@ -667,11 +668,18 @@ def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoin
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
-# def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, resource_group_name=None):
-#     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-#     hub = iot_hub_get(client, hub_name, resource_group_name)
-#     hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
-#     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
+                       system_properties=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    route_message = RoutingMessage(
+        body=body,
+        app_properties=app_properties,
+        system_properties=system_properties
+    )
+    if route_name:
+        route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
+        return client.iot_hub_resource.test_route(hub_name, resource_group_name, route, route_message)
+    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, source_type, route_message)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):

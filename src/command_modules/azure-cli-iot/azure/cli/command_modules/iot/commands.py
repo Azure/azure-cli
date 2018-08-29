@@ -124,4 +124,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('list', 'iot_hub_route_list')
         g.custom_command('delete', 'iot_hub_route_delete')
         g.custom_command('update', 'iot_hub_route_update')
-        # g.custom_command('test', 'iot_hub_route_test')
+        g.custom_command('test', 'iot_hub_route_test')

@@ -116,6 +116,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('source_type', arg_type=get_enum_type(RouteSourceType), options_list=['--source-type', '-st'],
                    help='Source of the route.')
 
+    with self.argument_context('iot hub route test') as c:
+        c.argument('body', options_list=['--body', '-b'], help='Body of the route message.')
+        c.argument('app_properties', options_list=['--app-properties', '-ap'],
+                   help='App properties of the route message.')
+        c.argument('system_properties', options_list=['--system-properties', '-sp'],
+                   help='System properties of the route message.')
+
     with self.argument_context('iot hub routing-endpoint') as c:
         c.argument('endpoint_name', options_list=['--endpoint-name', '-en'], help='Name of the Routing Endpoint.')
         c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '-erg'],
