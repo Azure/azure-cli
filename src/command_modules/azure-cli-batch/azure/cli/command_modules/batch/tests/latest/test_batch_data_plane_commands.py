@@ -120,7 +120,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus2')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_job_list_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
