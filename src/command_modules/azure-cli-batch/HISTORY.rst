@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.4.0
++++++
+* Updated to Batch SDK 5.0.0.
+
 3.3.4
 +++++
 * Update adding tasks through --json-file to support AddTaskCollectionParameter syntax

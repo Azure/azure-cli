@@ -203,9 +203,12 @@ def create_certificate(client, certificate_file, thumbprint, password=None):
     with open(certificate_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')
-    cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
-                                   certificate_format=certificate_format,
-                                   password=password)
+    cert = CertificateAddParameter(
+        thumbprint=thumbprint,
+        thumbprint_algorithm=thumbprint_algorithm,
+        data=data,
+        certificate_format=certificate_format,
+        password=password)
     client.add(cert)
     return client.get(thumbprint_algorithm, thumbprint)
 
@@ -269,12 +272,13 @@ def update_pool(client,
             metadata = []
         if application_package_references is None:
             application_package_references = []
-        param = PoolUpdatePropertiesParameter(certificate_references,
-                                              application_package_references,
-                                              metadata)
+        param = PoolUpdatePropertiesParameter(
+            certificate_references=certificate_references,
+            application_package_references=application_package_references,
+            metadata=metadata)
 
         if start_task_command_line:
-            param.start_task = StartTask(start_task_command_line,
+            param.start_task = StartTask(command_line=start_task_command_line,
                                          environment_settings=start_task_environment_settings,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
@@ -322,11 +326,13 @@ def create_task(client,
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
                              "or both --task-id and --command-line must be specified.")
-        task = TaskAddParameter(task_id, command_line,
-                                resource_files=resource_files,
-                                environment_settings=environment_settings,
-                                affinity_info=AffinityInformation(affinity_id) if affinity_id else None,
-                                application_package_references=application_package_references)
+        task = TaskAddParameter(
+            id=task_id,
+            command_line=command_line,
+            resource_files=resource_files,
+            environment_settings=environment_settings,
+            affinity_info=AffinityInformation(affinity_id=affinity_id) if affinity_id else None,
+            application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:
             task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,
