@@ -52,12 +52,58 @@ class CognitiveServicesTests(ScenarioTest):
         self.assertNotEqual(oldkeys, newkeys)
 
         # test to list cognitive service accounts under current resource group
-        self.cmd('az cognitiveservices list -g {rg}', checks=[
+        self.cmd('az cognitiveservices account list -g {rg}', checks=[
             self.check('length(@)', 1)])
 
         # test to delete the cognitive services account
         exitcode = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}').exit_code
         self.assertEqual(exitcode, 0)
+
+    @ResourceGroupPreparer()
+    def test_cognitiveservices_account_list_kinds(self, resource_group):
+        # test to list cognitive services account kinds
+        results = self.cmd('az cognitiveservices account list-kinds').get_output_in_json()
+        self.assertTrue(len(results) > 0)
+        self.assertTrue('Face' in results)
+
+    @ResourceGroupPreparer()
+    def test_cognitiveservices_account_list_skus(self, resource_group):
+
+        self.kwargs.update({
+            'name': self.create_random_name(prefix='cs_cli_test_', length=16),
+            'kind': 'Face',
+            'sku': 'S0',
+            'location': 'westeurope'
+        })
+
+        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+                 checks=[self.check('name', '{name}'),
+                         self.check('location', '{location}'),
+                         self.check('sku.name', '{sku}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        results = self.cmd('az cognitiveservices account list-skus -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(isinstance(results['value'], list))
+        self.assertTrue(len(results['value']) > 0)
+
+    @ResourceGroupPreparer()
+    def test_cognitiveservices_account_list_usage(self, resource_group):
+
+        self.kwargs.update({
+            'name': self.create_random_name(prefix='cs_cli_test_', length=16),
+            'kind': 'TextAnalytics',
+            'sku': 'S0',
+            'location': 'westeurope'
+        })
+
+        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+                 checks=[self.check('name', '{name}'),
+                         self.check('location', '{location}'),
+                         self.check('sku.name', '{sku}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        results = self.cmd('az cognitiveservices account list-usage -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(isinstance(results, list))
 
 
 if __name__ == '__main__':

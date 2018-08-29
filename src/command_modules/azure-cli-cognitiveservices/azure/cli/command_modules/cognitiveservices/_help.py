@@ -20,6 +20,14 @@ helps['cognitiveservices list'] = """
           text: az cognitiveservices list -g MyResourceGroup
 """
 
+helps['cognitiveservices account list'] = """
+    type: command
+    short-summary: List available Azure Cognitive Services accounts.
+    examples:
+        - name: List all the Cognitive Services accounts in a resource group.
+          text: az cognitiveservices account list -g MyResourceGroup
+"""
+
 helps['cognitiveservices account'] = """
     type: group
     short-summary: Manage Azure Cognitive Services accounts.
@@ -36,6 +44,10 @@ helps['cognitiveservices account delete'] = """
 helps['cognitiveservices account create'] = """
     type: command
     short-summary: Create an Azure Cognitive Services account.
+    parameters:
+        - name: --kind
+          populator-commands:
+            - az cognitiveservices account list-kinds
     examples:
         - name: Create an S0 face API Cognitive Services account in West Europe without confirmation required.
           text: az cognitiveservices account create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
@@ -52,6 +64,10 @@ helps['cognitiveservices account show'] = """
 helps['cognitiveservices account update'] = """
     type: command
     short-summary: Update the properties of an Azure Cognitive Services account.
+    parameters:
+        - name: --sku
+          populator-commands:
+            - az cognitiveservices account list-skus
     examples:
         - name: Update sku and tags.
           text: az cognitiveservices account update --name myresource -g cognitive-services-resource-group --sku S0 --tags external-app=chatbot-HR azure-web-app-bot=HR-external azure-app-service=HR-external-app-service

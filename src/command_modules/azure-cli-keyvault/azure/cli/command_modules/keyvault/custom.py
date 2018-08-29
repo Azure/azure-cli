@@ -621,14 +621,15 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
         return codecs.decode(h, 'hex')
 
     def _private_rsa_key_to_jwk(rsa_key, jwk):
-        jwk.n = _int_to_bytes(rsa_key.private_numbers().public_numbers.n)
-        jwk.e = _int_to_bytes(rsa_key.private_numbers().public_numbers.e)
-        jwk.q = _int_to_bytes(rsa_key.private_numbers().q)
-        jwk.p = _int_to_bytes(rsa_key.private_numbers().p)
-        jwk.d = _int_to_bytes(rsa_key.private_numbers().d)
-        jwk.dq = _int_to_bytes(rsa_key.private_numbers().dmql)
-        jwk.dp = _int_to_bytes(rsa_key.private_numbers().dmpl)
-        jwk.qi = _int_to_bytes(rsa_key.private_numbers().iqmp)
+        priv = rsa_key.private_numbers()
+        jwk.n = _int_to_bytes(priv.public_numbers.n)
+        jwk.e = _int_to_bytes(priv.public_numbers.e)
+        jwk.q = _int_to_bytes(priv.q)
+        jwk.p = _int_to_bytes(priv.p)
+        jwk.d = _int_to_bytes(priv.d)
+        jwk.dq = _int_to_bytes(priv.dmq1)
+        jwk.dp = _int_to_bytes(priv.dmp1)
+        jwk.qi = _int_to_bytes(priv.iqmp)
 
     def _private_ec_key_to_jwk(ec_key, jwk):
         supported_curves = {
