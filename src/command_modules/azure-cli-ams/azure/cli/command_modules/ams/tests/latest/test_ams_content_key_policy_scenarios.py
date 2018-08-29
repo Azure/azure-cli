@@ -11,26 +11,30 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 class AmsContentKeyPolicyTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_content_key_policy_create_simple(self, storage_account_for_create):
+    def test_content_key_policy_create_basic(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
-        policy_name = self.create_random_name(prefix='le', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
 
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
             'location': 'westus2',
             'contentKeyPolicyName': policy_name,
-            'description': 'ExampleDescription'
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration',
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        content_key_policy = self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --open-restriction', checks=[
+        content_key_policy = self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --open-restriction --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
             self.check('length(options)', 1),
             self.check('description', '{description}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('options[0].name', '{policyOptionName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}')
         ]).get_output_in_json()
-
-        self.assertEquals('#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration', content_key_policy['options'][0]['configuration']['odatatype'])
-        self.assertEquals('#Microsoft.Media.ContentKeyPolicyOpenRestriction', content_key_policy['options'][0]['restriction']['odatatype'])
