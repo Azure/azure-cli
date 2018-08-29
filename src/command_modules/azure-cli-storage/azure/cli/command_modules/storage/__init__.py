@@ -211,12 +211,13 @@ If you want to use the old authentication method and allow querying for the righ
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type
 
-        # needed to account for failing api-constraints in older profiles
+        # The CLI's argument registration methods assume command table has finished loading and contain checks
+        # that reflect the state of the CLI at that point in time.
+        # The following code bypasses those checks, as these arguments are registered in tandem with commands.
         if command_name not in self.command_loader.command_table:
             return
-
-        # workaround to allow use of AzArgumentContext.extra()
         self.command_loader.command_name = command_name
+
         with self.command_loader.argument_context(command_name, min_api='2017-11-09') as c:
             c.extra('auth_mode', arg_type=get_enum_type(['login', 'key']),
                     help='The mode in which to run the command. "login" mode will directly use your login credentials '
