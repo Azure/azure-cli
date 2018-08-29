@@ -187,6 +187,10 @@ helps['ams content-key-policy create'] = """
     short-summary: Create a new content key policy.
 """
 
+helps['ams content-key-policy show'] = """
+    type: command
+    short-summary: Show an existing content key policy.
+"""
 
 helps['ams job'] = """
     type: group
