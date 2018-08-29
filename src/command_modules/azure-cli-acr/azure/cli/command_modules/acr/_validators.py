@@ -3,9 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from ._client_factory import cf_acr_registries
-
 
 def validate_headers(namespace):
     """Extracts multiple space-separated headers in key[=value] format. """
