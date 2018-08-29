@@ -54,7 +54,7 @@ from ._validators import (
     validate_arg,
     validate_secret_arg,
     validate_set,
-    validate_secret_set
+    validate_set_secret
 )
 
 
@@ -196,8 +196,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
-        c.argument('set_value', help="The collection of overridable values in 'name[=value]' format.", action='append', validator=validate_set)
-        c.argument('secret_set_value', help="The collection of secret overridable values in 'name[=value]' format.", action='append', validator=validate_secret_set)
+        c.argument('set_value', options_list=['--set'], help="The collection of overridable values in 'name[=value]' format.", action='append', validator=validate_set)
+        c.argument('set_secret', help="The collection of secret overridable values in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
@@ -210,7 +210,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('run_id', help='The unique run identifier.')
         c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
         c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
-        c.argument('set_value', help="The collection of overridable values that can be passed when running a task in 'name[=value]' format.", action='append', validator=validate_set)
 
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')

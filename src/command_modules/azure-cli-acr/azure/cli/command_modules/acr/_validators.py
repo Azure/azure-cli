@@ -78,20 +78,20 @@ def validate_secret_arg(namespace):
         namespace.secret_arg = secret_arguments_list
 
 def validate_set(namespace):
-    if isinstance(namespace.set, list):
+    if isinstance(namespace.set_value, list):
         set_list = []
-        for item in namespace.set:
-            set_list.append(validate_run_set(item, False))
-        namespace.set = set_list
+        for item in namespace.set_value:
+            set_list.append(validate_task_value(item, False))
+        namespace.set_value = set_list
 
-def validate_secret_set(namespace):
-    if isinstance(namespace.set, list):
-        secret_set_list = []
-        for item in namespace.set:
-            secret_set_list.append(validate_run_set(item, True))
-        namespace.secret_set = secret_set_list
+def validate_set_secret(namespace):
+    if isinstance(namespace.set_secret, list):
+        set_secret_list = []
+        for item in namespace.set_secret:
+            set_secret_list.append(validate_task_value(item, True))
+        namespace.set_secret = set_secret_list
 
-def validate_run_set(string, is_secret):
+def validate_task_value(string, is_secret):
     """Extracts a single SetValue in key[=value] format. """
     if string:
         comps = string.split('=', 1)

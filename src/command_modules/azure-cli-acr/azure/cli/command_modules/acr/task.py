@@ -66,7 +66,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     arg=None,
                     secret_arg=None,
                     set_value=None,
-                    secret_set_value=None,
+                    set_secret=None,
                     base_image_trigger='Runtime',
                     resource_group_name=None):
 
@@ -88,7 +88,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=(set_value if set_value else []) + (secret_set_value if secret_set_value else [])
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -209,7 +209,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     arg=None,
                     secret_arg=None,
                     set_value=None,
-                    secret_set_value=None,
+                    set_secret=None,
                     base_image_trigger=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -230,10 +230,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             context_path=context_path
         )
     if isinstance(step, FileTaskStep):
-        if set_value is None and secret_set_value is None:
+        if set_value is None and set_secret is None:
             values = None
         else:
-            values = (set_value if set_value else []) + (secret_set_value if secret_set_value else [])
+            values = (set_value if set_value else []) + (set_secret if set_secret else [])
         step = FileTaskStepUpdateParameters(
             task_file_path=task_file,
             values_file_path=values_file,
