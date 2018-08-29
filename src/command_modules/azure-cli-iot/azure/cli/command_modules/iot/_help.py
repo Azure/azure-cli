@@ -518,7 +518,7 @@ helps['iot hub show-stats'] = """
 helps['iot hub routing-endpoint create'] = """
     type: command
     short-summary: Add an endpoint to your IoT Hub.
-    long-summary: Add a new endpoint in your IoT Hub. To learn about the endpoints that are supported,
+    long-summary: Create a new custom endpoint in your IoT Hub.
     examples:
         - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
           text: >
@@ -536,6 +536,8 @@ helps['iot hub routing-endpoint create'] = """
 helps['iot hub routing-endpoint list'] = """
     type: command
     short-summary: Get information on all the endpoints for your IoT Hub.
+    long-summary: Get information on all endpoints in your IoT Hub. 
+                  You can also specify which endpoint type you want to get informaiton on.
     examples:
         - name: Get all the endpoints from "MyIotHub" IoT Hub.
           text: >
@@ -547,7 +549,8 @@ helps['iot hub routing-endpoint list'] = """
 
 helps['iot hub routing-endpoint show'] = """
     type: command
-    short-summary: Get information of the endpoint from your IoT Hub.
+    short-summary: Get information on mentioned endpoint for your IoT Hub.
+    long-summary: Get information on a specific endpoint in your IoT Hub
     examples:
         - name: Get an endpoint information from "MyIotHub" IoT Hub.
           text: >
@@ -557,8 +560,9 @@ helps['iot hub routing-endpoint show'] = """
 
 helps['iot hub routing-endpoint delete'] = """
     type: command
-    short-summary: Delete endpoints from your IoT Hub.
-    long-summary: Delete an endpoint. Remember to delete any routes that use this endpoint.
+    short-summary: Delete all or mentioned endpoint for your IoT Hub.
+    long-summary: Delete an endpoint for your IoT Hub. We recommend that you delete
+                  any routes to the endpoint, before deleting the endpoint.
     examples:
         - name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
           text: >
@@ -593,6 +597,7 @@ helps['iot hub route create'] = """
 helps['iot hub route list'] = """
     type: command
     short-summary: Get all the routes in IoT Hub.
+    long-summary: Get information on all routes from an IoT Hub.
     examples:
         - name: Get all route from "MyIotHub" IoT Hub.
           text: >
@@ -604,7 +609,8 @@ helps['iot hub route list'] = """
 
 helps['iot hub route show'] = """
     type: command
-    short-summary: Get route information from "myiothub" IoT Hub.
+    short-summary: Get information about the route in IoT Hub.
+    long-summary: Get information on a specific route in your IoT Hub.
     examples:
         - name: Get an route information from "MyIotHub" IoT Hub.
           text: >
@@ -613,7 +619,8 @@ helps['iot hub route show'] = """
 
 helps['iot hub route delete'] = """
     type: command
-    short-summary: Delete a route in IoT Hub.
+    short-summary: Delete all or mentioned route for your IoT Hub.
+    long-summary: Delete a route or all routes for your IoT Hub.
     examples:
         - name: Delete route "R1" from "MyIotHub" IoT Hub.
           text: >
@@ -628,7 +635,9 @@ helps['iot hub route delete'] = """
 
 helps['iot hub route test'] = """
     type: command
-    short-summary: Test routes in IoT Hub.
+    short-summary: Test all routes or mentioned route in IoT Hub.
+    long-summary: Test all existing routes or mentioned route in your IoT Hub.
+                  You can provide a sample message to test your routes.
     examples:
         - name: Test the route "R1" from "MyIotHub" IoT Hub.
           text: >
@@ -641,6 +650,7 @@ helps['iot hub route test'] = """
 helps['iot hub route update'] = """
     type: command
     short-summary: Update a route in IoT Hub.
+    long-summary: Updates a route in IoT Hub. You can change the source, enpoint or query on the route.
     examples:
         - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
           text: >
