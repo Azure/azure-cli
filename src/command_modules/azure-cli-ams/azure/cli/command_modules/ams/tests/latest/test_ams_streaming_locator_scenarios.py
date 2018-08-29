@@ -20,10 +20,10 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        assetName = self.create_random_name(prefix='asset', length=12)
+        asset_name = self.create_random_name(prefix='asset', length=12)
 
         self.kwargs.update({
-            'assetName': assetName
+            'assetName': asset_name
         })
 
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
@@ -36,10 +36,10 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams streaming policy create -a {amsname} -n {streamingPolicyName} -g {rg} --download')
 
-        streamingLocatorName = self.create_random_name(prefix='sln', length=10)
+        streaming_locator_name = self.create_random_name(prefix='sln', length=10)
 
         self.kwargs.update({
-            'streamingLocatorName': streamingLocatorName,
+            'streamingLocatorName': streaming_locator_name,
             'startTime': '2018-03-29T10:00:00',
             'endTime': '2018-03-29T12:00:00',
             'streamingLocatorId': self.create_guid(),
@@ -78,19 +78,19 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        assetName = self.create_random_name(prefix='asset', length=12)
+        asset_name = self.create_random_name(prefix='asset', length=12)
 
         self.kwargs.update({
-            'assetName': assetName
+            'assetName': asset_name
         })
 
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
 
-        streamingLocatorName = self.create_random_name(prefix='sln', length=10)
+        streaming_locator_name = self.create_random_name(prefix='sln', length=10)
         policy_name = self.create_random_name(prefix='pn', length=12)
 
         self.kwargs.update({
-            'streamingLocatorName': streamingLocatorName,
+            'streamingLocatorName': streaming_locator_name,
             'contentKeyPolicyName': policy_name,
             'streamingPolicyName': 'Predefined_ClearKey'
         })
