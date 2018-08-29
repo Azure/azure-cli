@@ -184,7 +184,7 @@ helps['ams content-key-policy'] = """
 
 helps['ams content-key-policy create'] = """
     type: command
-    short-summary: Create a new content key policy resource.
+    short-summary: Create a new content key policy.
 """
 
 
