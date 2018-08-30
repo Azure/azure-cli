@@ -354,21 +354,24 @@ class WebappScaleTest(ScenarioTest):
             JMESPathCheck('sku.capacity', 0)  # 0 means the default value: 1 instance
         ])
         # scale up
-        self.cmd('appservice plan update -g {} -n {} --sku S2'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --sku S2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S2'),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.size', 'S2'),
             JMESPathCheck('sku.family', 'S')
         ])
         # scale down
-        self.cmd('appservice plan update -g {} -n {} --sku B1'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --sku B1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'B1'),
             JMESPathCheck('sku.tier', 'Basic'),
             JMESPathCheck('sku.size', 'B1'),
             JMESPathCheck('sku.family', 'B')
         ])
         # scale out
-        self.cmd('appservice plan update -g {} -n {} --number-of-workers 2'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --number-of-workers 2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'B1'),
             JMESPathCheck('sku.tier', 'Basic'),
             JMESPathCheck('sku.size', 'B1'),
@@ -491,7 +494,7 @@ class WebappSlotScenarioTest(ScenarioTest):
         webapp = self.create_random_name(prefix='slot-test-web', length=24)
 
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         slot2 = 'dev'
@@ -549,7 +552,7 @@ class WebappSlotTrafficRouting(ScenarioTest):
         plan = self.create_random_name(prefix='slot-traffic-plan', length=24)
         webapp = self.create_random_name(prefix='slot-traffic-web', length=24)
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         # create an empty slot
@@ -610,7 +613,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         plan = self.create_random_name(prefix='slot-swap-plan', length=24)
         webapp = self.create_random_name(prefix='slot-swap-web', length=24)
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=prod'.format(resource_group, webapp))
@@ -785,7 +788,9 @@ class WebappUpdateTest(ScenarioTest):
     def test_webapp_update(self, resource_group):
         webapp_name = self.create_random_name('webapp-update-test', 40)
         plan_name = self.create_random_name('webapp-update-plan', 40)
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
         self.cmd('webapp create -g {} -n {} --plan {}'
                  .format(resource_group, webapp_name, plan_name)).assert_with_checks([
                      JMESPathCheck('clientAffinityEnabled', True)])

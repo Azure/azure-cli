@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.2.4
++++++
+* appservice plan, webapp & function app updated to use latest python websites SDK version
 
 0.2.3
 +++++
