@@ -135,7 +135,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams content-key-policy') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('content_key_policy_name', name_arg_type)
+        c.argument('content_key_policy_name', name_arg_type,
+            help='The content key policy name.')
         c.argument('description', help='The content key policy description.')
         c.argument('clear_key_configuration',
                    action='store_true',
@@ -149,6 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the policy option.')
 
     with self.argument_context('ams content-key-policy options add') as c:
+        c.argument('policy_option_name', help='The content key policy option name.')
         c.argument('issuer', arg_group='Token Restriction Parameters',
                    required='True', help='The token issuer.')
         c.argument('audience', arg_group='Token Restriction Parameters',
