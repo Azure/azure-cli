@@ -309,6 +309,7 @@ def acr_task_run(cmd,
                  task_name,
                  registry_name,
                  set_value=None,
+                 set_secret=None,
                  no_logs=False,
                  resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -322,7 +323,7 @@ def acr_task_run(cmd,
                                        registry_name,
                                        TaskRunRequest(
                                            task_name=task_name,
-                                           values=(set_value if set_value else []))))
+                                           values=(set_value if set_value else []) + (set_secret if set_secret else []))))
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
