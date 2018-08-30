@@ -17,6 +17,11 @@ from automation.utilities.path import filter_user_selected_modules_with_tests, g
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 TEST_INDEX_FORMAT = 'testIndex_{}.json'
+PROFILE_TO_NAMESPACE = {
+    '2017-03-09-profile': 'profile_2017_03_09',
+    '2018-03-01-hybrid': 'hybrid_2018_03_01',
+    'latest': 'latest'
+}
 
 
 def extract_module_name(path):
@@ -129,7 +134,6 @@ def get_current_profile(args):
 
 def get_test_index(args):
     test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
-    print(test_index_path)
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
@@ -177,7 +181,7 @@ def discover_tests(args):
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
 
-    profile = args.profile.replace('-', '_')
+    profile_namespace = PROFILE_TO_NAMESPACE[args.profile]
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')
@@ -204,14 +208,14 @@ def discover_tests(args):
             }
         elif mod_name.startswith('azext_'):
             mod_data = {
-                'filepath': os.path.join(mod[0].path, 'tests', profile),
-                'base_path': '{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, 'tests', profile_namespace),
+                'base_path': '{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         else:
             mod_data = {
-                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile),
-                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile_namespace),
+                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         # get the list of test files in each module
