@@ -1792,8 +1792,8 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None):
-    PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
+        virtual_network_name=None, public_ip_prefix=None):
+    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if private_ip_address == '':
         instance.private_ip_allocation_method = private_ip_address_allocation
         instance.private_ip_address = None
@@ -1810,6 +1810,9 @@ def set_lb_frontend_ip_configuration(
         instance.public_ip_address = None
     elif public_ip_address is not None:
         instance.public_ip_address = PublicIPAddress(id=public_ip_address)
+
+    if public_ip_prefix:
+        instance.public_ip_prefix=SubResource(id=public_ip_prefix)
 
     return parent
 
@@ -3060,6 +3063,13 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         instance.delegations = delegations
 
     return instance
+
+
+def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
+    client = network_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.available_resource_group_delegations.list(location, resource_group_name).value
+    return client.available_delegations.list(location).value
 
 
 def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,
