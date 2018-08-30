@@ -200,10 +200,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
+        c.argument('source_trigger_name', help="The name of the source trigger.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('git_access_token', help="The access token used to access the source control provider.")
         c.argument('branch', help="The source control branch name.")
-        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
+        c.argument('base_image_trigger_name', help="The name of the base image trigger.")
+        c.argument('base_image_trigger_enabled', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('base_image_trigger_type', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
 
         # Run related parameters
         c.argument('top', help='Limit the number of latest runs in the results.')

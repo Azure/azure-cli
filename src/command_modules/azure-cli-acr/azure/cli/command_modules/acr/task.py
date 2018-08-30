@@ -50,7 +50,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     context_path,
-                    git_access_token,
+                    git_access_token=None,
                     image_names=None,
                     status='Enabled',
                     os_type='Linux',
@@ -59,6 +59,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     docker_file=None,
                     task_file=None,
                     values_file=None,
+                    source_trigger_name=None,
                     commit_trigger_enabled=True,
                     branch='master',
                     no_push=False,
@@ -67,13 +68,17 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     secret_arg=None,
                     set_value=None,
                     set_secret=None,
-                    base_image_trigger='Runtime',
+                    base_image_trigger_name=None,
+                    base_image_trigger_enabled=None,
+                    base_image_trigger_type='Runtime',
                     resource_group_name=None):
-
     if docker_file is None and task_file is None:
         raise CLIError("One of --dockerfile or --task-file argument is required")
     if docker_file is not None and task_file is not None:
         raise CLIError("Cannot use both --dockerfile and --task-file arguments to create a task")
+    if commit_trigger_enabled and not git_access_token:
+        raise CLIError("Commit trigger needs to be disabled [--commit-trigger-enabled False] " \
+        "if no --git-access-token is provided.")
     if docker_file is not None:
         step = DockerBuildStep(
             image_names=image_names,
@@ -120,21 +125,19 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                         source_control_auth_properties=AuthInfo(
                             token=git_access_token,
                             token_type=DEFAULT_TOKEN_TYPE,
-                            refresh_token='',
-                            scope='repo',
-                            expires_in=1313141
+                            scope='repo'
                         )
                     ),
                     source_trigger_events=[SourceTriggerEvent.commit.value], #TODO: pull request?
                     status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
-                    name="myTrigger" #TODO: take user input?
+                    name=source_trigger_name if source_trigger_name else "defaultSourceTriggerName"
                 )
-            ],
+            ] if commit_trigger_enabled else None,
             base_image_trigger=BaseImageTrigger(
-                base_image_trigger_type=base_image_trigger,
-                status="Enabled", #TODO: take user input?
-                name="mybaseTrigger" #TODO: take user input?
-            )
+                base_image_trigger_type=base_image_trigger_type,
+                status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
+                name=base_image_trigger_name if base_image_trigger_name else "defaultBaseimageTriggerName"
+            ) if base_image_trigger_enabled else None
         )
     )
     try:
@@ -162,7 +165,7 @@ def acr_task_show(cmd,
     if not with_secure_properties:
         return client.get(resource_group_name, registry_name, task_name)
     else:
-        return client.list_details(resource_group_name, registry_name, task_name)
+        return client.get_details(resource_group_name, registry_name, task_name)
 
 
 #TODO: fix table_transformer
@@ -185,7 +188,6 @@ def acr_task_delete(cmd,
     return client.delete(resource_group_name, registry_name, task_name)
 
 
-#TODO: validate after RP changes
 def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     client,
                     task_name,
@@ -210,7 +212,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     secret_arg=None,
                     set_value=None,
                     set_secret=None,
-                    base_image_trigger=None):
+                    base_image_trigger_enabled=None,
+                    base_image_trigger_type=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -248,18 +251,17 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         else:
             source_control_type = SourceControlType.visual_studio_team_service.value
 
-    taskUpdateParameters = TaskUpdateParameters(
-        status=status,
-        platform=PlatformUpdateParameters(
-            os=os_type
-        ),
-        agent_configuration=AgentProperties(
-            cpu=cpu
-        ),
-        timeout=timeout,
-        step=step,
-        trigger=TriggerUpdateParameters(
-            source_triggers=[
+    # update trigger
+    source_trigger_update_params = None
+    base_image_trigger_update_params = None
+    if task.trigger:
+        source_triggers = task.trigger.source_triggers
+        base_image_trigger = task.trigger.base_image_trigger
+        if commit_trigger_enabled or source_triggers is not None:
+            status = None
+            if commit_trigger_enabled is not None:
+                status = TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value
+            source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
                         source_control_type=source_control_type,
@@ -271,22 +273,39 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                         )
                     ),
                     source_trigger_events=[SourceTriggerEvent.commit], #TODO: pull request?
-                    status="Enabled" if commit_trigger_enabled else "Disabled",
-                    name="myTrigger" #TODO: take user input?
+                    status=status,
+                    name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"""
                 )
-            ],
-            base_image_trigger=BaseImageTriggerUpdateParameters(
-                base_image_trigger_type=base_image_trigger,
-                status="Enabled", #TODO: take user input?
-                name="mybaseTrigger" #TODO: take user input?
+            ]
+        if base_image_trigger_enabled or base_image_trigger is not None:
+            status = None
+            if base_image_trigger_enabled is not None:
+                status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
+            base_image_trigger_update_params = BaseImageTriggerUpdateParameters(
+                base_image_trigger_type=base_image_trigger_type,
+                status=status,
+                name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
             )
+
+    taskUpdateParameters = TaskUpdateParameters(
+        status=status,
+        platform=PlatformUpdateParameters(
+            os=os_type
+        ),
+        agent_configuration=AgentProperties(
+            cpu=cpu
+        ),
+        timeout=timeout,
+        step=step,
+        trigger=TriggerUpdateParameters(
+            source_triggers=source_trigger_update_params,
+            base_image_trigger=base_image_trigger_update_params
         )
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
-#TODO: validate new API
 def acr_task_update_run(cmd,
                         client,
                         run_id,
@@ -319,11 +338,15 @@ def acr_task_run(cmd,
     client_registries = cf_acr_registries_build(cmd.cli_ctx)
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
-        client_registries.schedule_run(resource_group_name,
-                                       registry_name,
-                                       TaskRunRequest(
-                                           task_name=task_name,
-                                           values=(set_value if set_value else []) + (set_secret if set_secret else []))))
+        client_registries.schedule_run(
+            resource_group_name,
+            registry_name,
+            TaskRunRequest(
+                task_name=task_name,
+                values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                )
+            )
+        )
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
