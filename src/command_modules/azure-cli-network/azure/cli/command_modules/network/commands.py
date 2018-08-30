@@ -695,10 +695,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
+        g.custom_command('create', 'create_subnet')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('create', 'create_subnet')
         g.generic_update_command('update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
 

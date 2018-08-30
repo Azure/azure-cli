@@ -207,6 +207,15 @@ def validate_cert(namespace):
             pass
 
 
+def validate_delegations(cmd, namespace):
+    if namespace.delegations:
+        Delegation = cmd.get_models('Delegation')
+        delegations = []
+        for i, item in enumerate(namespace.delegations):
+            delegations.append(Delegation(name=str(i), service_name=item))
+        namespace.delegations = delegations
+
+
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
