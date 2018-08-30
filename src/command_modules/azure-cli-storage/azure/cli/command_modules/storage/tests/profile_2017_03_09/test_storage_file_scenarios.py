@@ -6,7 +6,7 @@
 import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck)
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):

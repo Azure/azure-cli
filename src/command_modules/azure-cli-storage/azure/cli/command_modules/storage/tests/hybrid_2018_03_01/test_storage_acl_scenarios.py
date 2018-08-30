@@ -6,7 +6,7 @@
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
                                api_version_constraint)
 from azure.cli.core.profiles import ResourceType
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageAccessControlListTests(StorageScenarioMixin, ScenarioTest):
