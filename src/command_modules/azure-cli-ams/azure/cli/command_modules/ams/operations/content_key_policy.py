@@ -24,3 +24,9 @@ def create_content_key_policy(client, resource_group_name, account_name, content
 
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, options, description)
+
+def add_content_key_policy_option(client):
+    print(' ok')
+
+def remove_content_key_policy_option(client):
+    print(' nook')
