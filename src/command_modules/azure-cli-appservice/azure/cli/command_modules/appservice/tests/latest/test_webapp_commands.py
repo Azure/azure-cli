@@ -322,32 +322,34 @@ class WebappConfigureTest(ScenarioTest):
 
         # site azure storage account configurations tests
         # add
-        self.cmd('webapp config azure-storage-accounts add -g {} -n {} --id Id --type AzureFiles --account-name name '
-                 '--share-name sharename --access-key key --mount-path /path/to/mount'.format(resource_group, webapp_name))
-        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-                     JMESPathCheck('length(@)', 1),
-                     JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-                     JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-                     JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
-                     JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
-                     JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+        byos_resource_group = 'yili-cus-stage-01'  # on the beta stamp msftintch1501
+        byos_app_name = 'patle-byos'
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
+                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(byos_resource_group, byos_app_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
-        self.cmd('webapp config azure-storage-accounts update -g {} -n {} --id Id --mount-path /different/path'
-                 .format(resource_group, webapp_name))
-        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-                     JMESPathCheck("length(@)", 1),
-                     JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-                     JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-                     JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
-                     JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
-                     JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
+        self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
+                 .format(byos_resource_group, byos_app_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
         # list
-        self.cmd('webapp config azure-storage-accounts list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-                     JMESPathCheck("length(@)", 1),
-                     JMESPathCheck("[0].name=='Id'")])
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck('[0].name', 'Id')])
         # delete
-        self.cmd('webapp config azure-storage-accounts delete -g {} -n {} --ids Id'.format(resource_group, webapp_name)).assert_with_checks([
-                     JMESPathCheck("length(@)", 0)])
+        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 0)])
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '

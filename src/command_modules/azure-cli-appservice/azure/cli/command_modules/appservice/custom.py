@@ -167,22 +167,23 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
-def add_azure_storage_account(cmd, resource_group_name, name, id, storage_type, account_name,
+def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
     from azure.mgmt.web.models import AzureStorageInfoValue
 
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
-    if id in azure_storage_accounts.properties:
-        raise CLIError("Site already configured with an Azure storage account with the id '{}'. " +
-                       "Use 'az webapp config azure-storage-accounts update' to update an existing " +
-                       "Azure storage account configuration.".format(id))
+    if custom_id in azure_storage_accounts.properties:
+        raise CLIError("Site already configured with an Azure storage account with the id '{}'. "
+                       "Use 'az webapp config storage-account update' to update an existing "
+                       "Azure storage account configuration.".format(custom_id))
 
-    azure_storage_accounts.properties[id] = AzureStorageInfoValue(storage_type, account_name,
-                                                                  share_name, access_key, mount_path)
-
+    azure_storage_accounts.properties[custom_id] = AzureStorageInfoValue(type=storage_type, account_name=account_name,
+                                                                         share_name=share_name, access_key=access_key,
+                                                                         mount_path=mount_path)
     client = web_client_factory(cmd.cli_ctx)
+
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_azure_storage_accounts', azure_storage_accounts.properties,
                                          slot, client)
@@ -190,36 +191,36 @@ def add_azure_storage_account(cmd, resource_group_name, name, id, storage_type, 
     if slot_setting:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
-        if id not in slot_cfg_names.azure_storage_config_names:
-            slot_cfg_names.azure_storage_config_names.append(id)
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return result.properties
 
 
-def update_azure_storage_account(cmd, resource_group_name, name, id, storage_type=None, account_name=None,
+def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
                                  share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False):
     from azure.mgmt.web.models import AzureStorageInfoValue
 
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
-    existing_account_config = azure_storage_accounts.properties.pop(id, None)
+    existing_account_config = azure_storage_accounts.properties.pop(custom_id, None)
 
     if not existing_account_config:
-        raise CLIError("No Azure storage account configuration found with the id '{}'. " +
-                       "Use 'az webapp config azure-storage-accounts add' to add a new " +
-                       "Azure storage account configuration.".format(id))
+        raise CLIError("No Azure storage account configuration found with the id '{}'. "
+                       "Use 'az webapp config storage-account add' to add a new "
+                       "Azure storage account configuration.".format(custom_id))
 
     new_account_config = AzureStorageInfoValue(
-        storage_type or existing_account_config.type,
-        account_name or existing_account_config.account_name,
-        share_name or existing_account_config.share_name,
-        access_key or existing_account_config.access_key,
-        mount_path or existing_account_config.mount_path
+        type=storage_type or existing_account_config.type,
+        account_name=account_name or existing_account_config.account_name,
+        share_name=share_name or existing_account_config.share_name,
+        access_key=access_key or existing_account_config.access_key,
+        mount_path=mount_path or existing_account_config.mount_path
     )
 
-    azure_storage_accounts.properties[id] = new_account_config
+    azure_storage_accounts.properties[custom_id] = new_account_config
 
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
@@ -229,8 +230,8 @@ def update_azure_storage_account(cmd, resource_group_name, name, id, storage_typ
     if slot_setting:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
-        if id not in slot_cfg_names.azure_storage_config_names:
-            slot_cfg_names.azure_storage_config_names.append(id)
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return result.properties
@@ -502,7 +503,7 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
 def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                     'list_azure_storage_accounts', slot, client)
+                                     'list_azure_storage_accounts', slot)
 
     slot_azure_storage_config_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
                                                      .azure_storage_config_names or []
@@ -633,7 +634,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
 
-def delete_azure_storage_accounts(cmd, resource_group_name, name, ids, slot=None):
+def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
     client = web_client_factory(cmd.cli_ctx)
@@ -641,11 +642,10 @@ def delete_azure_storage_accounts(cmd, resource_group_name, name, ids, slot=None
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
-    for id in ids:
-        azure_storage_accounts.properties.pop(id, None)
-        if slot_cfg_names.azure_storage_config_names and id in slot_cfg_names.azure_storage_config_names:
-            slot_cfg_names.azure_storage_config_names.remove(id)
-            is_slot_settings = True
+    azure_storage_accounts.properties.pop(custom_id, None)
+    if slot_cfg_names.azure_storage_config_names and custom_id in slot_cfg_names.azure_storage_config_names:
+        slot_cfg_names.azure_storage_config_names.remove(custom_id)
+        is_slot_settings = True
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
