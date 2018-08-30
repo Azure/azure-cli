@@ -53,7 +53,6 @@ def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-man
 def web_client_factory(cli_ctx, **_):
     from azure.mgmt.web import WebSiteManagementClient
     mgmt_client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
-    mgmt_client.web_apps.api_version = '2016-08-01'
     return mgmt_client
 
 
