@@ -2493,11 +2493,23 @@ def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name
 
 def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
                           dest_resource=None, dest_port=None, dest_address=None,
-                          resource_group_name=None):
-    ConnectivitySource, ConnectivityDestination = cmd.get_models('ConnectivitySource', 'ConnectivityDestination')
-    source = ConnectivitySource(resource_id=source_resource, port=source_port)
-    dest = ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port)
-    return client.check_connectivity(watcher_rg, watcher_name, source, dest)
+                          resource_group_name=None, protocol=None, method=None, headers=None, valid_status_codes=None):
+    ConnectivitySource, ConnectivityDestination, ConnectivityParameters, ProtocolConfiguration, HTTPConfiguration = \
+        cmd.get_models(
+            'ConnectivitySource', 'ConnectivityDestination', 'ConnectivityParameters', 'ProtocolConfiguration',
+            'HTTPConfiguration')
+    params = ConnectivityParameters(
+        source=ConnectivitySource(resource_id=source_resource, port=source_port),
+        destination=ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port),
+        protocol=protocol
+    )
+    if any([method, headers, valid_status_codes]):
+        params.protocol_configuration = ProtocolConfiguration(http_configuration=HTTPConfiguration(
+            method=method,
+            headers=headers,
+            valid_status_codes=valid_status_codes
+        ))
+    return client.check_connectivity(watcher_rg, watcher_name, params)
 
 
 def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
@@ -2600,6 +2612,22 @@ def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, st
 def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, resource_type=None,
                                    resource_group_name=None):
     return client.get_troubleshooting_result(watcher_rg, watcher_name, resource)
+
+
+def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, resource,
+                                          direction=None, protocol=None, source=None, destination=None,
+                                          destination_port=None, queries=None,
+                                          resource_group_name=None, resource_type=None, parent=None):
+    TrafficQuery = cmd.get_models('TrafficQuery')
+    if not queries:
+        queries = [TrafficQuery(
+            direction=direction,
+            protocol=protocol,
+            source=source,
+            destination=destination,
+            destination_port=destination_port
+        )]
+    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, resource, queries)
 
 # endregion
 
