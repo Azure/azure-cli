@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
