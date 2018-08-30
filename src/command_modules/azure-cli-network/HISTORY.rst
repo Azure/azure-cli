@@ -12,7 +12,9 @@ Release History
 * Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
 * Allow `network watcher flow-log show/configure` to be used with classic NSGs.
 * Add `network watcher run-configuration-diagnostic` command.
-* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.
+* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.\
+* `network vnet subnet create/update`: Add support for `--delegation`.
+* Added `network vnet subnet list-available-delegations` command.
 
 2.2.4
 +++++
