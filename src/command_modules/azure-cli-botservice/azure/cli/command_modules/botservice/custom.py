@@ -79,13 +79,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     display_name = display_name or resource_name
     kind = kind.lower()
 
-    check_name = client.bots.get_check_name_availability(
-        name=resource_name,
-        type='')
-    if not check_name.valid:
-        raise CLIError('The bot name {0} is not available or is already taken. Please choose a different name'
-                       .format(resource_name))
-
     if not msa_app_id:
         msa_app_id, password = provisionConvergedApp(resource_name)
         logger.warning('obtained msa app id and password. Provisioning bot now.')
