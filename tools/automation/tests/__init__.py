@@ -17,11 +17,6 @@ from automation.utilities.path import filter_user_selected_modules_with_tests, g
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 TEST_INDEX_FORMAT = 'testIndex_{}.json'
-PROFILE_TO_NAMESPACE = {
-    '2017-03-09-profile': 'profile_2017_03_09',
-    '2018-03-01-hybrid': 'hybrid_2018_03_01',
-    'latest': 'latest'
-}
 
 
 def extract_module_name(path):
@@ -35,7 +30,7 @@ def extract_module_name(path):
 
 
 def execute(args):
-    from .main import run_tests, collect_test
+    from .main import run_tests
 
     validate_usage(args)
     current_profile = get_current_profile(args)
@@ -152,7 +147,6 @@ def get_test_index(args):
 
 def get_extension_modules():
     from importlib import import_module
-    import os
     import pkgutil
     from azure.cli.core.extension import get_extensions, get_extension_path, get_extension_modname
     extension_whls = get_extensions()
@@ -176,12 +170,11 @@ def discover_tests(args):
         full path. 
     """
     from importlib import import_module
-    import os
     import pkgutil
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
-
-    profile_namespace = PROFILE_TO_NAMESPACE[args.profile]
+    profile_split = args.profile.split('-')
+    profile_namespace = '_'.join([profile_split[-1]] + profile_split[:-1])
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')
@@ -236,7 +229,6 @@ def discover_tests(args):
                 display('Unable to import {}. Reason: {}'.format(test_file_path, ex))
                 continue
             module_dict = module.__dict__
-            classes = {}
             possible_test_classes = {x: y for x, y in module_dict.items() if not x.startswith('_')}
             for class_name, class_def in possible_test_classes.items():
                 try:
