@@ -849,9 +849,8 @@ def get_network_watcher_from_vm(cmd, namespace):
 
 
 def get_network_watcher_from_resource(cmd, namespace):
-    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
-    resource = resource_client.get_by_id(namespace.resource,
-                                         cmd.get_api_version(ResourceType.MGMT_NETWORK))
+    from azure.cli.core.commands.arm import get_arm_resource_by_id
+    resource = get_arm_resource_by_id(cmd.cli_ctx, namespace.resource)
     namespace.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(cmd, namespace)
 
@@ -934,6 +933,16 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
             namespace='Microsoft.Compute',
             type='virtualMachines',
             name=namespace.dest_resource)
+
+    if namespace.headers:
+        HTTPHeader = cmd.get_models('HTTPHeader')
+        headers = []
+        for item in namespace.headers:
+            parts = item.split('=')
+            if len(parts) != 2:
+                raise CLIError("usage error '{}': --headers KEY=VALUE [KEY=VALUE ...]".format(item))
+            headers.append(HTTPHeader(name=parts[0], value=parts[1]))
+        namespace.headers = headers
 
 
 def process_nw_flow_log_set_namespace(cmd, namespace):
@@ -1095,7 +1104,7 @@ def process_nw_troubleshooting_start_namespace(cmd, namespace):
 def process_nw_troubleshooting_show_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
-                              '--resource-group-name NAME')
+                              '--resource-group NAME')
     id_params = [namespace.resource_type, namespace.resource_group_name]
     if not is_valid_resource_id(namespace.resource):
         if not all(id_params):
@@ -1115,6 +1124,54 @@ def process_nw_troubleshooting_show_namespace(cmd, namespace):
             raise resource_usage
 
     get_network_watcher_from_resource(cmd, namespace)
+
+
+def process_nw_config_diagnostic_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    # validate target resource
+    resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
+                              '--resource-group NAME [--parent PATH]')
+
+    # omit --parent since it is optional
+    id_params = [namespace.resource_type, namespace.resource_group_name]
+    if not is_valid_resource_id(namespace.resource):
+        if not all(id_params):
+            raise resource_usage
+        # infer resource namespace
+        NAMESPACES = {
+            'virtualMachines': 'Microsoft.Compute',
+            'applicationGateways': 'Microsoft.Network',
+            'networkInterfaces': 'Microsoft.Network'
+        }
+        resource_namespace = NAMESPACES[namespace.resource_type]
+        if namespace.parent:
+            # special case for virtualMachineScaleSets/NetworkInterfaces, since it is
+            # the only one to need `--parent`.
+            resource_namespace = 'Microsoft.Compute'
+        namespace.resource = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace=resource_namespace,
+            type=namespace.resource_type,
+            parent=namespace.parent,
+            name=namespace.resource)
+    elif any(id_params) or namespace.parent:
+            raise resource_usage
+
+    # validate query
+    query_usage = CLIError('usage error: --queries JSON | --destination DEST --source SRC --direction DIR '
+                           '--port PORT --protocol PROTOCOL')
+    query_params = [namespace.destination, namespace.source, namespace.direction, namespace.protocol,
+                    namespace.destination_port]
+    if namespace.queries:
+        if any(query_params):
+            raise query_usage
+    elif not all(query_params):
+        raise query_usage
+
+    get_network_watcher_from_resource(cmd, namespace)
+
 
 
 def process_lb_outbound_rule_namespace(cmd, namespace):
