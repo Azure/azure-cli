@@ -51,7 +51,9 @@ from ._validators import (
     validate_build_arg,
     validate_secret_build_arg,
     validate_arg,
-    validate_secret_arg
+    validate_secret_arg,
+    validate_set,
+    validate_set_secret
 )
 
 
@@ -180,7 +182,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('status', help='The current status of task.', arg_type=get_enum_type(TaskStatus))
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
-        # BuildTaskStep parameters
+        # FileTaskStep parameters
         c.argument('task_file', help="The task template/definition file path relative to the source context. Required if --dockerfile is not provided.")
         c.argument('values_file', help="The task values/parameters file path relative to the source context.")
 
@@ -190,10 +192,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
 
-        # common to DockerBuildStep, BuildTaskStep and RunTaskStep
+        # common to DockerBuildStep, FileTaskStep and RunTaskStep
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
+        c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())

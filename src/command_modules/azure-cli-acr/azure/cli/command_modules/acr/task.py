@@ -65,6 +65,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     no_cache=False,
                     arg=None,
                     secret_arg=None,
+                    set_value=None,
+                    set_secret=None,
                     base_image_trigger='Runtime',
                     resource_group_name=None):
 
@@ -86,7 +88,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=None #TODO: override values
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -206,6 +208,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     values_file=None,
                     arg=None,
                     secret_arg=None,
+                    set_value=None,
+                    set_secret=None,
                     base_image_trigger=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -226,11 +230,15 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             context_path=context_path
         )
     if isinstance(step, FileTaskStep):
+        if set_value is None and set_secret is None:
+            values = None
+        else:
+            values = (set_value if set_value else []) + (set_secret if set_secret else [])
         step = FileTaskStepUpdateParameters(
             task_file_path=task_file,
             values_file_path=values_file,
             context_path=context_path,
-            values=None #TODO: override values
+            values=values
         )
 
     source_control_type = None
@@ -300,6 +308,8 @@ def acr_task_run(cmd,
                  client,  # cf_acr_runs
                  task_name,
                  registry_name,
+                 set_value=None,
+                 set_secret=None,
                  no_logs=False,
                  resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -311,7 +321,9 @@ def acr_task_run(cmd,
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(resource_group_name,
                                        registry_name,
-                                       TaskRunRequest(task_name=task_name))) # TODO: override values
+                                       TaskRunRequest(
+                                           task_name=task_name,
+                                           values=(set_value if set_value else []) + (set_secret if set_secret else []))))
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
