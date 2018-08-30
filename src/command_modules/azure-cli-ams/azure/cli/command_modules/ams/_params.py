@@ -145,6 +145,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Use open restriction. License or key will be delivered on every request.')
         c.argument('policy_option_name',
                    help='The name of the policy option.')
+
+    with self.argument_context('ams content-key-policy') as c:
+        c.argument('with_secrets',
+            action='store_true',
+            help='Include secret values of the content key policy.')
+
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('default_content_key_policy_name', default_policy_name_arg_type)

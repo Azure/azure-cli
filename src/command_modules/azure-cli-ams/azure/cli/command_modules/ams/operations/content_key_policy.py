@@ -24,3 +24,13 @@ def create_content_key_policy(client, resource_group_name, account_name, content
 
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, options, description)
+
+def show_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
+                              with_secrets=False):
+
+    if with_secrets:
+        return client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
+                                                         content_key_policy_name=content_key_policy_name)
+    else:
+        return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                          content_key_policy_name=content_key_policy_name)
