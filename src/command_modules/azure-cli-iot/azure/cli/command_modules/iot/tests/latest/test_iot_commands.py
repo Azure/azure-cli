@@ -158,14 +158,14 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -en {2} -et {3} -erg {4} -es {5} -cs {6}'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString), checks=[
-                 self.check('length(properties.routing.endpoints.eventHubs[*])', 1),
-                 self.check('properties.routing.endpoints.eventHubs[0].resourceGroup', rg),
-                 self.check('properties.routing.endpoints.eventHubs[0].subscriptionId', subscription_id),
-                 self.check('properties.routing.endpoints.eventHubs[0].name', endpoint_name),
-                 self.check('length(properties.routing.endpoints.serviceBusQueues[*])', 0),
-                 self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
-                 self.check('length(properties.routing.endpoints.storageContainers[*])', 0)
-                 ])
+                         self.check('length(properties.routing.endpoints.eventHubs[*])', 1),
+                         self.check('properties.routing.endpoints.eventHubs[0].resourceGroup', rg),
+                         self.check('properties.routing.endpoints.eventHubs[0].subscriptionId', subscription_id),
+                         self.check('properties.routing.endpoints.eventHubs[0].name', endpoint_name),
+                         self.check('length(properties.routing.endpoints.serviceBusQueues[*])', 0),
+                         self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
+                         self.check('length(properties.routing.endpoints.storageContainers[*])', 0)
+                         ])
 
         # Test 'az iot hub routing-endpoint list'
         self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1}'
