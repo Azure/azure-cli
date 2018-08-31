@@ -1945,6 +1945,38 @@ helps['network express-route peering update'] = """
 """
 # endregion
 
+# region Interface Endpoint
+helps['network interface-endpoint'] = """
+    type: group
+    short-summary: Manage interface endpoints.
+"""
+
+helps['network interface-endpoint create'] = """
+    type: command
+    short-summary: Create an interface endpoint.
+"""
+
+helps['network interface-endpoint delete'] = """
+    type: command
+    short-summary: Delete an interface endpoint.
+"""
+
+helps['network interface-endpoint list'] = """
+    type: command
+    short-summary: List interface endpoints.
+"""
+
+helps['network interface-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an interface endpoint.
+"""
+
+helps['network interface-endpoint update'] = """
+    type: command
+    short-summary: Update an interface endpoint.
+"""
+# endregion
+
 # region Load Balancer
 helps['network lb'] = """
     type: group
