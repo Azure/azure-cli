@@ -125,7 +125,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('iot hub routing-endpoint') as c:
         c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-e'],
                    help='Name of the Routing Endpoint.')
-        c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '--resource-group', '-r'],
+        c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '--erg', '-r'],
                    help='Resource group of the Endpoint resoure.')
         c.argument('endpoint_subscription_id', options_list=['--endpoint-subscription-id', '--subscription', '-s'],
                    help='SubscriptionId of the Endpoint resource.')
