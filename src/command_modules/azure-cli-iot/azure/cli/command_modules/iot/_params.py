@@ -18,7 +18,6 @@ from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (I
 from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType)
 
-
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
 
