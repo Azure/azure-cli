@@ -19,7 +19,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get_properties')
         g.custom_command('update', 'update')
         g.custom_command('list', 'list_resources')
-        g.command('list-skus', 'list_skus')
+        g.custom_command('list-skus', 'list_skus')
         g.custom_command('list-usage', 'list_usages')
         g.custom_command('list-kinds', 'list_kinds', client_factory=cf_resource_skus)
 
