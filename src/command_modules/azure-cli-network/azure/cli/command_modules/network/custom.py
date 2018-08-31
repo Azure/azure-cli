@@ -1425,7 +1425,7 @@ def lists_match(l1, l2):
 # region ExpressRoutes
 def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
                          service_provider_name, location=None, tags=None, no_wait=False,
-                         sku_family=None, sku_tier=None):
+                         sku_family=None, sku_tier=None, allow_global_reach=None):
     ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = cmd.get_models(
         'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties')
     client = network_client_factory(cmd.cli_ctx).express_route_circuits
@@ -1436,13 +1436,15 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
             service_provider_name=service_provider_name,
             peering_location=peering_location,
             bandwidth_in_mbps=bandwidth_in_mbps),
-        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family)
+        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family),
+        allow_global_reach=allow_global_reach
     )
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, circuit_name, circuit)
 
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
-                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
+                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
+                         allow_global_reach=None):
     if bandwidth_in_mbps is not None:
         instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
 
@@ -1460,6 +1462,9 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
 
     if tags is not None:
         instance.tags = tags
+
+    if allow_global_reach is not None:
+        instance.allow_global_reach = allow_global_reach
 
     return instance
 

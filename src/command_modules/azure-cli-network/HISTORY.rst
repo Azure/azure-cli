@@ -13,6 +13,7 @@ Release History
 * Allow `network watcher flow-log show/configure` to be used with classic NSGs.
 * Add `network watcher run-configuration-diagnostic` command.
 * Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.
+* `network express-route create/update`: Add `--allow-global-reach` flag.
 
 2.2.4
 +++++
