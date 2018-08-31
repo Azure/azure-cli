@@ -21,6 +21,7 @@ class EndpointType(Enum):
     ServiceBusTopic = 'servicebustopic'
     AzureStorageContainer = 'azurestoragecontainer'
 
+
 # pylint: disable=too-few-public-methods
 class RouteSourceType(Enum):
     """
