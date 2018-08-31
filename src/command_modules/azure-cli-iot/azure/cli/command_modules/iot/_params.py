@@ -123,16 +123,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='System properties of the route message.')
 
     with self.argument_context('iot hub routing-endpoint') as c:
-        c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-e'], help='Name of the Routing Endpoint.')
+        c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-e'],
+                   help='Name of the Routing Endpoint.')
         c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '--resource-group', '-r'],
                    help='Resource group of the Endpoint resoure.')
         c.argument('endpoint_subscription_id', options_list=['--endpoint-subscription-id', '--subscription', '-s'],
                    help='SubscriptionId of the Endpoint resource.')
         c.argument('connection_string', options_list=['--connection-string', '-c'],
                    help='Connection string of the Routing Endpoint.')
-        c.argument('container_name', options_list=['--container-name', '--container'], help='Name of the storage container.')
-        c.argument('endpoint_type', arg_type=get_enum_type(EndpointType), options_list=['--endpoint-type', '--type', '-t'],
-                   help='Type of the Routing Endpoint.')
+        c.argument('container_name', options_list=['--container-name', '--container'],
+                   help='Name of the storage container.')
+        c.argument('endpoint_type', arg_type=get_enum_type(EndpointType),
+                   options_list=['--endpoint-type', '--type', '-t'], help='Type of the Routing Endpoint.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
