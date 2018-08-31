@@ -536,7 +536,7 @@ helps['iot hub routing-endpoint create'] = """
 helps['iot hub routing-endpoint list'] = """
     type: command
     short-summary: Get information on all the endpoints for your IoT Hub.
-    long-summary: Get information on all endpoints in your IoT Hub. 
+    long-summary: Get information on all endpoints in your IoT Hub.
                   You can also specify which endpoint type you want to get informaiton on.
     examples:
         - name: Get all the endpoints from "MyIotHub" IoT Hub.
@@ -581,7 +581,6 @@ helps['iot hub route create'] = """
     type: command
     short-summary: Create a route in IoT Hub.
     long-summary: Create a route to send specific data source and condition to a desired endpoint.
-                  To learn about query syntax see aka.ms/RoutingQuerySyntax
     examples:
         - name: Create a new route "R1".
           text: >
