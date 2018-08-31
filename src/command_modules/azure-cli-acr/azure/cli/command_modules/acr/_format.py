@@ -46,6 +46,14 @@ def replication_output_format(result):
     return _output_format(result, _replication_format_group)
 
 
+def build_task_output_format(result):
+    return _output_format(result, _build_task_format_group)
+
+
+def build_task_detail_output_format(result):
+    return _output_format(result, _build_task_detail_format_group)
+
+
 def task_output_format(result):
     return _output_format(result, _task_format_group)
 
@@ -56,6 +64,10 @@ def task_detail_output_format(result):
 
 def build_output_format(result):
     return _output_format(result, _build_format_group)
+
+
+def run_output_format(result):
+    return _output_format(result, _run_format_group)
 
 
 def _output_format(result, format_group):
@@ -148,7 +160,7 @@ def _replication_format_group(item):
     ])
 
 
-def _task_format_group(item):
+def _build_task_format_group(item):
     return OrderedDict([
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
@@ -158,7 +170,7 @@ def _task_format_group(item):
     ])
 
 
-def _task_detail_format_group(item):
+def _build_task_detail_format_group(item):
     return OrderedDict([
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
@@ -169,6 +181,30 @@ def _task_detail_format_group(item):
         ('BASE IMAGE TRIGGER', _get_value(item, 'properties', 'baseImageTrigger')),
         ('IMAGE NAMES', _get_value(item, 'properties', 'imageNames')),
         ('PUSH ENABLED', _get_value(item, 'properties', 'isPushEnabled'))
+    ])
+
+
+def _task_format_group(item):
+    return OrderedDict([
+        ('Name', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status')),
+        ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
+        ('SOURCE REPOSITORY', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'repositoryUrl'))
+    ])
+
+
+def _task_detail_format_group(item):
+    return OrderedDict([
+        ('Name', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status')),
+        ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
+        ('SOURCE REPOSITORY', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'repositoryUrl')),
+        ('BRANCH', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'branch')),
+        ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
+        ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
+        ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
     ])
 
 
@@ -184,10 +220,23 @@ def _build_format_group(item):
     ])
 
 
+def _run_format_group(item):
+    return OrderedDict([
+        ('RUN ID', _get_value(item, 'runId')),
+        ('TASK', _get_value(item, 'task')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status')),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger'))),
+        ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+    ])
+
+
 def _get_value(item, *args):
-    """Recursively get a nested value from a dict.
+    """Get a nested value from a dict.
     :param dict item: The dict object
     """
+
     try:
         for arg in args:
             item = item[arg]
@@ -195,6 +244,16 @@ def _get_value(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+def _get_value_arr(item, *args):
+    """Get a nested array from a dict.
+    :param dict item: The dict object
+    """
+    try:
+        for arg in args:
+            item = item[arg]
+        return item[0] if item else ' '
+    except (KeyError, TypeError, IndexError):
+        return ' '
 
 def _get_build_trigger(image_update_trigger, git_commit_trigger):
     if git_commit_trigger.strip():
