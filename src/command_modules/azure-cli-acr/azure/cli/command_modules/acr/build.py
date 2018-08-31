@@ -6,6 +6,8 @@
 import re
 import time
 import os
+import codecs
+import uuid
 from random import uniform
 from io import BytesIO
 import tempfile
@@ -272,17 +274,26 @@ def acr_build(cmd,
     from ._client_factory import cf_acr_registries_build
     client_registries = cf_acr_registries_build(cmd.cli_ctx)
 
-    tar_file_path = os.path.join(tempfile.gettempdir(), 'source_archive_{}.tar.gz'.format(hash(os.times())))
-
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):
             raise CLIError("Source location should be a local directory path or remote URL.")
 
         _check_local_docker_file(source_location, docker_file_path)
 
+        tar_file_path = os.path.join(tempfile.gettempdir(), 'source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
+
         try:
+            # NOTE: os.path.basename is unable to parse "\" in the file path
+            original_docker_file_name = os.path.basename(docker_file_path.replace("\\", "/"))
+            docker_file_in_tar = '{}_{}'.format(uuid.uuid4().hex, original_docker_file_name)
+
             source_location = _upload_source_code(
-                client_registries, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path)
+                client_registries, registry_name, resource_group_name,
+                source_location, tar_file_path,
+                docker_file_path, docker_file_in_tar)
+            # For local source, the docker file is added separately into tar as the new file name (docker_file_in_tar)
+            # So we need to update the docker_file_path
+            docker_file_path = docker_file_in_tar
         except Exception as err:
             raise CLIError(err)
         finally:
@@ -356,8 +367,10 @@ def _check_remote_source_code(source_location):
     raise CLIError("'{}' is not a valid remote URL for git or tarball.".format(source_location))
 
 
-def _upload_source_code(client, registry_name, resource_group_name, source_location, tar_file_path, docker_file_path):
-    _pack_source_code(source_location, tar_file_path, docker_file_path)
+def _upload_source_code(client, registry_name, resource_group_name,
+                        source_location, tar_file_path,
+                        docker_file_path, docker_file_in_tar):
+    _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar)
 
     size = os.path.getsize(tar_file_path)
     unit = 'GiB'
@@ -395,7 +408,7 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
     return relative_path
 
 
-def _pack_source_code(source_location, tar_file_path, docker_file_path):
+def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
     logger.warning("Packing source code into tar file to upload...")
 
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
@@ -411,12 +424,6 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path):
             # if .dockerignore doesn't exists, inherit from parent
             # eg, it will ignore the files under .git folder.
             return parent_ignored, parent_matching_rule_index
-
-        # always include docker file
-        # file path comparision is case-sensitive
-        if tarinfo.name == docker_file_path:
-            logger.debug(".dockerignore: skip checking '%s'", docker_file_path)
-            return False, parent_matching_rule_index
 
         for index, item in enumerate(ignore_list):
             # stop checking the remaining rules whose priorities are lower than the parent matching rule
@@ -436,6 +443,10 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path):
         _archive_file_recursively(tar, source_location, arcname="",
                                   parent_ignored=False, parent_matching_rule_index=ignore_list_size,
                                   ignore_check=_ignore_check)
+        # add docker_file
+        docker_file_tarinfo = tar.gettarinfo(docker_file_path, docker_file_in_tar)
+        with bltn_open(docker_file_path, "rb") as f:
+            tar.addfile(docker_file_tarinfo, f)
 
 
 def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matching_rule_index, ignore_check):
@@ -474,19 +485,22 @@ class IgnoreRule(object):  # pylint: disable=too-few-public-methods
             self.ignore = False
             rule = rule[1:]  # remove !
 
+        self.pattern = "^"
         tokens = rule.split('/')
-        for index, token in enumerate(tokens):
+        token_length = len(tokens)
+        for index, token in enumerate(tokens, 1):
             # ** matches any number of directories
             if token == "**":
-                tokens[index] = ".*"
+                self.pattern += ".*" # treat **/ as **
             else:
                 # * matches any sequence of non-seperator characters
                 # ? matches any single non-seperator character
                 # . matches dot character
-                tokens[index] = token.replace(
+                self.pattern += token.replace(
                     "*", "[^/]*").replace("?", "[^/]").replace(".", "\\.")
-
-        self.pattern = "^{}$".format("/".join(tokens))
+                if index < token_length:
+                    self.pattern += "/" # add back / if it's not the last
+        self.pattern += "$"
 
 
 def _load_dockerignore_file(source_location):
@@ -495,17 +509,21 @@ def _load_dockerignore_file(source_location):
     if not os.path.exists(docker_ignore_file):
         return None, 0
 
+    encoding = "utf-8"
+    header = open(docker_ignore_file, "rb").read(len(codecs.BOM_UTF8))
+    if header.startswith(codecs.BOM_UTF8):
+        encoding = "utf-8-sig"
+
     ignore_list = []
 
-    # The ignore rule at the end has higher priority
-    for line in reversed(open(docker_ignore_file).readlines()):
+    for line in open(docker_ignore_file, 'r', encoding=encoding).readlines():
         rule = line.rstrip()
 
         # skip empty line and comment
         if not rule or rule.startswith('#'):
             continue
 
-        # add ignore rule
-        ignore_list.append(IgnoreRule(rule))
+        # the ignore rule at the end has higher priority
+        ignore_list = [IgnoreRule(rule)] + ignore_list
 
     return ignore_list, len(ignore_list)
