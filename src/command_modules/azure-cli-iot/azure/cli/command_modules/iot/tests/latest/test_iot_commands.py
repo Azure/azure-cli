@@ -234,7 +234,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route test'
-        self.cmd('iot hub route test --hub-name {0} -g {1} -rn {2}'.format(hub, rg, route_name), 
+        self.cmd('iot hub route test --hub-name {0} -g {1} -rn {2}'.format(hub, rg, route_name),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'
@@ -268,7 +268,6 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(properties.routing.endpoints.serviceBusQueues[*])', 0),
                          self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
                          self.check('length(properties.routing.endpoints.storageContainers[*])', 0)])
-
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
