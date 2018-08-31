@@ -269,6 +269,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
                          self.check('length(properties.routing.endpoints.storageContainers[*])', 0)])
 
+
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
