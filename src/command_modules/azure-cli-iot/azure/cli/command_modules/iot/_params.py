@@ -105,7 +105,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('hub_name', options_list=['--hub-name'])
 
     with self.argument_context('iot hub route') as c:
-        c.argument('route_name', options_list=['--route-name', '--name', '-r'], help='Name of the Route.')
+        c.argument('route_name', options_list=['--route-name', '--name', '-n'], help='Name of the Route.')
         c.argument('endpoint_name', options_list=['--endpoint-name', '--endpoint', '-e'],
                    help='Name of the routing endpoint.')
         c.argument('condition', options_list=['--condition', '-c'],
@@ -123,7 +123,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='System properties of the route message.')
 
     with self.argument_context('iot hub routing-endpoint') as c:
-        c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-e'],
+        c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-n'],
                    help='Name of the Routing Endpoint.')
         c.argument('endpoint_resource_group', options_list=['--endpoint-resource-group', '--erg', '-r'],
                    help='Resource group of the Endpoint resoure.')
