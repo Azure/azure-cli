@@ -40,6 +40,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
     configuration = None
     restriction = None
 
+    policy = client.get(resource_group_name, account_name, content_key_policy_name)
+
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
                                                        restriction_token_type)
@@ -60,20 +62,20 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
             raise CLIError('You should use alternative (alt) token keys if you have more than one token key.')
 
         primary_verification_key = None
-        _symmetric_keys = alt_symmetric_token_keys.split()
-        _rsa_key_exponents = alt_rsa_token_key_exponents.split()
-        _rsa_key_modulus = alt_rsa_token_key_modulus.split()
-        _x509_keys = alt_x509_certificate_token_keys.split()
+        _symmetric_keys = _coalesce_str(alt_symmetric_token_keys).split()
+        _rsa_key_exponents = _coalesce_str(alt_rsa_token_key_exponents).split()
+        _rsa_key_modulus = _coalesce_str(alt_rsa_token_key_modulus).split()
+        _x509_keys = _coalesce_str(alt_x509_certificate_token_keys).split()
         alternative_keys = []
 
         if symmetric_token_key is not None:
-            primary_verification_key = _symmetric_token_key_factory(symmetric_token_key)
+            primary_verification_key = _symmetric_token_key_factory(bytearray(symmetric_token_key, 'utf-8'))
         elif rsa_token_key_exponent is not None and rsa_token_key_modulus is not None:
             primary_verification_key = _rsa_token_key_factory(
-                rsa_token_key_exponent, rsa_token_key_modulus)
+                bytearray(rsa_token_key_exponent, 'utf-8'), bytearray(rsa_token_key_modulus, 'utf-8'))
         elif x509_certificate_token_key is not None:
             primary_verification_key = _x509_token_key_factory(
-                x509_certificate_token_key)
+                bytearray(x509_certificate_token_key.replace('\\n', '\n'), 'utf-8'))
         else:
             raise CLIError('Invalid token key.') # This should not happen.. but just in case.
 
@@ -103,13 +105,18 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                            configuration=configuration,
                                            restriction=restriction)
 
-    return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, [policy_option])
+    policy.options.append(policy_option)
 
+    return client.create_or_update(resource_group_name, account_name,
+                                   content_key_policy_name, policy.options)
 
 
 def remove_content_key_policy_option(client):
     pass #TODO
+
+
+def _coalesce_str(value):
+    return value or ''
 
 def _symmetric_token_key_factory(symmetric_token_key):
     return ContentKeyPolicySymmetricTokenKey(key_value=symmetric_token_key)
