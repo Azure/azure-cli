@@ -85,6 +85,10 @@ def cf_public_ip_addresses(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_addresses
 
 
+def cf_public_ip_prefixes(cli_ctx, _):
+    return network_client_factory(cli_ctx).public_ip_prefixes
+
+
 def cf_route_tables(cli_ctx, _):
     return network_client_factory(cli_ctx).route_tables
 
@@ -95,6 +99,14 @@ def cf_routes(cli_ctx, _):
 
 def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
+
+
+def cf_service_endpoint_policies(cli_ctx, _):
+    return network_client_factory(cli_ctx).service_endpoint_policies
+
+
+def cf_service_endpoint_policy_definitions(cli_ctx, _):
+    return network_client_factory(cli_ctx).service_endpoint_policy_definitions
 
 
 def cf_subnets(cli_ctx, _):

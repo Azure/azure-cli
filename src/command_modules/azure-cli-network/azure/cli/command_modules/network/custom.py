@@ -120,6 +120,10 @@ def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
 
+def list_public_ip_prefixes(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
+
+
 def list_route_tables(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'route_tables', resource_group_name)
 
@@ -1677,7 +1681,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
+        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None, enable_tcp_reset=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1689,7 +1693,8 @@ def create_lb_inbound_nat_rule(
         frontend_port=frontend_port, backend_port=backend_port,
         frontend_ip_configuration=frontend_ip,
         enable_floating_ip=floating_ip == 'true',
-        idle_timeout_in_minutes=idle_timeout)
+        idle_timeout_in_minutes=idle_timeout,
+        enable_tcp_reset=enable_tcp_reset)
     _upsert(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_rules, item_name)
@@ -1697,13 +1702,16 @@ def create_lb_inbound_nat_rule(
 
 def set_lb_inbound_nat_rule(
         instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None):
+        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
             _get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
     if floating_ip is not None:
         instance.enable_floating_ip = floating_ip == 'true'
+
+    if enable_tcp_reset is not None:
+        instance.enable_tcp_reset = enable_tcp_reset
 
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port', frontend_port)
@@ -1715,7 +1723,7 @@ def set_lb_inbound_nat_rule(
 
 def create_lb_inbound_nat_pool(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
-        frontend_port_range_end, backend_port, frontend_ip_name=None):
+        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None):
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1729,7 +1737,8 @@ def create_lb_inbound_nat_pool(
         frontend_ip_configuration=frontend_ip,
         frontend_port_range_start=frontend_port_range_start,
         frontend_port_range_end=frontend_port_range_end,
-        backend_port=backend_port)
+        backend_port=backend_port,
+        enable_tcp_reset=enable_tcp_reset)
     _upsert(lb, 'inbound_nat_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
@@ -1738,11 +1747,14 @@ def create_lb_inbound_nat_pool(
 def set_lb_inbound_nat_pool(
         instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
-        frontend_ip_name=None):
+        frontend_ip_name=None, enable_tcp_reset=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port_range_start', frontend_port_range_start)
     _set_param(instance, 'frontend_port_range_end', frontend_port_range_end)
     _set_param(instance, 'backend_port', backend_port)
+
+    if enable_tcp_reset is not None:
+        instance.enable_tcp_reset = enable_tcp_reset
 
     if frontend_ip_name == '':
         instance.frontend_ip_configuration = None
@@ -1755,17 +1767,18 @@ def set_lb_inbound_nat_pool(
 
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        subnet=None, virtual_network_name=None, private_ip_address=None,
+        public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
         private_ip_address_allocation='dynamic', zone=None):
-    FrontendIPConfiguration, PublicIPAddress, Subnet = cmd.get_models(
-        'FrontendIPConfiguration', 'PublicIPAddress', 'Subnet')
+    FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
+        'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_address_allocation,
-        public_ip_address=PublicIPAddress(id=public_ip_address) if public_ip_address else None,
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
         subnet=Subnet(id=subnet) if subnet else None)
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
@@ -1779,8 +1792,8 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None):
-    PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
+        virtual_network_name=None, public_ip_prefix=None):
+    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if private_ip_address == '':
         instance.private_ip_allocation_method = private_ip_address_allocation
         instance.private_ip_address = None
@@ -1798,6 +1811,9 @@ def set_lb_frontend_ip_configuration(
     elif public_ip_address is not None:
         instance.public_ip_address = PublicIPAddress(id=public_ip_address)
 
+    if public_ip_prefix:
+        instance.public_ip_prefix=SubResource(id=public_ip_prefix)
+
     return parent
 
 
@@ -1809,6 +1825,39 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     _upsert(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
+
+
+def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
+                            backend_address_pool, frontend_ip_configurations, outbound_ports=None,
+                            protocol=None, enable_tcp_reset=None, idle_timeout=None):
+    OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    lb = client.get(resource_group_name, load_balancer_name)
+    rule = OutboundRule(
+        protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
+        backend_address_pool=SubResource(id=backend_address_pool),
+        frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations] \
+            if frontend_ip_configurations else None,
+        allocated_outbound_ports=outbound_ports, name=item_name)
+    _upsert(lb, 'outbound_rules', rule, 'name')
+    poller = client.create_or_update(resource_group_name, load_balancer_name, lb)
+    return _get_property(poller.result().outbound_rules, item_name)
+
+
+def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbound_ports=None,
+                         idle_timeout=None, frontend_ip_configurations=None, enable_tcp_reset=None,
+                         backend_address_pool=None):
+    SubResource = cmd.get_models('SubResource')
+    _set_param(instance, 'protocol', protocol)
+    _set_param(instance, 'allocated_outbound_ports', outbound_ports)
+    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
+    _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
+    _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool) \
+        if backend_address_pool else None)
+    _set_param(instance, 'frontend_ip_configurations', \
+        [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
+
+    return parent
 
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
@@ -1839,7 +1888,7 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip='false', idle_timeout=None):
+        floating_ip='false', idle_timeout=None, enable_tcp_reset=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1859,7 +1908,8 @@ def create_lb_rule(
         probe=_get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip == 'true',
-        idle_timeout_in_minutes=idle_timeout)
+        idle_timeout_in_minutes=idle_timeout,
+        enable_tcp_reset=enable_tcp_reset)
     _upsert(lb, 'load_balancing_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().load_balancing_rules, item_name)
@@ -1868,7 +1918,7 @@ def create_lb_rule(
 def set_lb_rule(
         instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution='default', floating_ip=None, idle_timeout=None):
+        load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port', frontend_port)
     _set_param(instance, 'backend_port', backend_port)
@@ -1885,6 +1935,9 @@ def set_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             _get_property(parent.backend_address_pools, backend_address_pool_name)
+
+    if enable_tcp_reset is not None:
+        instance.enable_tcp_reset = enable_tcp_reset
 
     if probe_name == '':
         instance.probe = None
@@ -2443,11 +2496,23 @@ def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name
 
 def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
                           dest_resource=None, dest_port=None, dest_address=None,
-                          resource_group_name=None):
-    ConnectivitySource, ConnectivityDestination = cmd.get_models('ConnectivitySource', 'ConnectivityDestination')
-    source = ConnectivitySource(resource_id=source_resource, port=source_port)
-    dest = ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port)
-    return client.check_connectivity(watcher_rg, watcher_name, source, dest)
+                          resource_group_name=None, protocol=None, method=None, headers=None, valid_status_codes=None):
+    ConnectivitySource, ConnectivityDestination, ConnectivityParameters, ProtocolConfiguration, HTTPConfiguration = \
+        cmd.get_models(
+            'ConnectivitySource', 'ConnectivityDestination', 'ConnectivityParameters', 'ProtocolConfiguration',
+            'HTTPConfiguration')
+    params = ConnectivityParameters(
+        source=ConnectivitySource(resource_id=source_resource, port=source_port),
+        destination=ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port),
+        protocol=protocol
+    )
+    if any([method, headers, valid_status_codes]):
+        params.protocol_configuration = ProtocolConfiguration(http_configuration=HTTPConfiguration(
+            method=method,
+            headers=headers,
+            valid_status_codes=valid_status_codes
+        ))
+    return client.check_connectivity(watcher_rg, watcher_name, params)
 
 
 def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
@@ -2530,6 +2595,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     if retention is not None:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
         config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+    setattr(config, 'flow_analytics_configuration', None)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
@@ -2550,15 +2616,32 @@ def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, r
                                    resource_group_name=None):
     return client.get_troubleshooting_result(watcher_rg, watcher_name, resource)
 
+
+def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, resource,
+                                          direction=None, protocol=None, source=None, destination=None,
+                                          destination_port=None, queries=None,
+                                          resource_group_name=None, resource_type=None, parent=None):
+    TrafficQuery = cmd.get_models('TrafficQuery')
+    if not queries:
+        queries = [TrafficQuery(
+            direction=direction,
+            protocol=protocol,
+            source=source,
+            destination=destination,
+            destination_port=destination_port
+        )]
+    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, resource, queries)
+
 # endregion
 
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings')
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
+                     public_ip_prefix=None):
+    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
+        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
     if not allocation_method:
         allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
@@ -2577,6 +2660,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -2589,7 +2674,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
 
 def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None):
+                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
+                     public_ip_prefix=None):
     if dns_name is not None or reverse_fqdn is not None:
         if instance.dns_settings:
             if dns_name is not None:
@@ -2612,9 +2698,28 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
         instance.sku.name = sku
     if ip_tags:
         instance.ip_tags = ip_tags
+    if public_ip_prefix:
+        SubResource = cmd.get_models('SubResource')
+        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
     return instance
 
 
+def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
+                            location=None, tags=None):
+    PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
+    prefix = PublicIPPrefix(
+        location=location,
+        prefix_length=prefix_length,
+        sku=PublicIPPrefixSku(name='Standard'),
+        tags=tags,
+    )
+    return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
+
+
+def update_public_ip_prefix(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
 # endregion
 
 
@@ -2684,6 +2789,50 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
     return instance
 # endregion
 
+
+# region ServiceEndpoints
+def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
+    ServiceEndpointPolicy = cmd.get_models('ServiceEndpointPolicy')
+    policy = ServiceEndpointPolicy(tags=tags, location=location)
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name, policy)
+
+
+def list_service_endpoint_policies(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def update_service_endpoint_policy(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
+                                              service_endpoint_policy_definition_name, service, service_resources,
+                                              description=None):
+    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
+    ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
+    policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
+                                                 service_resources=service_resources)
+    return client.create_or_update(resource_group_name, service_endpoint_policy_name,
+                                   service_endpoint_policy_definition_name, policy_def)
+
+def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
+    if service is not None:
+        instance.service = service
+
+    if service_resources is not None:
+        instance.service_resources = service_resources
+
+    if description is not None:
+        instance.description = description
+
+    return instance
+# endregion
 
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
@@ -2864,14 +3013,10 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
-                  route_table=None, service_endpoints=None):
-    '''Create a virtual network (VNet) subnet.
-    :param str address_prefix: address prefix in CIDR format.
-    :param str network_security_group: Name or ID of network security
-        group to associate with the subnet.
-    '''
-    NetworkSecurityGroup, ServiceEndpoint, Subnet = cmd.get_models(
-        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet')
+                  route_table=None, service_endpoints=None, service_endpoint_policy=None,
+                  delegations=None):
+    NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
+        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
@@ -2882,18 +3027,19 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
         subnet.service_endpoints = []
         for service in service_endpoints:
             subnet.service_endpoints.append(ServiceEndpoint(service=service))
+    if service_endpoint_policy:
+        subnet.service_endpoint_policies = []
+        for policy in service_endpoint_policy:
+            subnet.service_endpoint_policies.append(SubResource(id=policy))
+    if delegations:
+        subnet.delegations = delegations
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None):
-    '''update existing virtual sub network
-    :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
-    :param str network_security_group: attach with existing network security group,
-        both name or id are accepted. Use empty string "" to detach it.
-    '''
+                  route_table=None, service_endpoints=None, delegations=None):
     NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
 
     if address_prefix:
@@ -2913,7 +3059,17 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         for service in service_endpoints:
             instance.service_endpoints.append(ServiceEndpoint(service=service))
 
+    if delegations:
+        instance.delegations = delegations
+
     return instance
+
+
+def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
+    client = network_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.available_resource_group_delegations.list(location, resource_group_name).value
+    return client.available_delegations.list(location).value
 
 
 def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,

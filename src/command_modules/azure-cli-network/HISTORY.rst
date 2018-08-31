@@ -2,9 +2,19 @@
 
 Release History
 ===============
+
 2.2.5
 +++++
-* Minor fixes
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
+* Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
+* Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
+* Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
+* Allow `network watcher flow-log show/configure` to be used with classic NSGs.
+* Add `network watcher run-configuration-diagnostic` command.
+* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.\
+* `network vnet subnet create/update`: Add support for `--delegation`.
+* Added `network vnet subnet list-available-delegations` command.
 
 2.2.4
 +++++
