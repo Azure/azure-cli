@@ -12,9 +12,10 @@ from azure.cli.core.commands.parameters import (get_location_type, get_enum_type
 from azure.cli.command_modules.ams._completers import (get_role_definition_name_completion_list, get_cdn_provider_completion_list,
                                                        get_default_streaming_policies_completion_list)
 
-from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType, StreamOptionsFlag)
+from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType,
+                                     StreamOptionsFlag, ContentKeyPolicyRestrictionTokenType)
 
-from ._validators import validate_storage_account_id, datetime_format, validate_correlation_data
+from ._validators import validate_storage_account_id, datetime_format, validate_correlation_data, validate_token_claim
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -26,6 +27,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
     default_policy_name_arg_type = CLIArgumentType(options_list=['--content-key-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
     correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Customer provided correlation data that will be returned in Job completed events. This data is in key=value format separated by spaces.", nargs='*', metavar='CORRELATION_DATA')
+    token_claim_type = CLIArgumentType(validator=validate_token_claim, help='A list of required token claims in key=value format separated by spaces.')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
@@ -133,7 +135,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams content-key-policy') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('content_key_policy_name', name_arg_type)
+        c.argument('content_key_policy_name', name_arg_type,
+            help='The content key policy name.')
         c.argument('description', help='The content key policy description.')
         c.argument('clear_key_configuration',
                    action='store_true',
@@ -150,6 +153,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('with_secrets',
             action='store_true',
             help='Include secret values of the content key policy.')
+
+
+    with self.argument_context('ams content-key-policy options add') as c:
+        c.argument('policy_option_name', help='The content key policy option name.')
+        c.argument('issuer', arg_group='Token Restriction Parameters',
+                   required='True', help='The token issuer.')
+        c.argument('audience', arg_group='Token Restriction Parameters',
+                   required='True', help='The audience for the token.')
+        c.argument('symmetric_token_key', arg_group='Token Restriction Parameters', help='The key value of the key.')
+        c.argument('rsa_token_key_exponent', arg_group='Token Restriction Parameters', help='The RSA Parameter exponent.')
+        c.argument('rsa_token_key_modulus', arg_group='Token Restriction Parameters', help='The RSA Parameter modulus.')
+        c.argument('x509_certificate_token_key', arg_group='Token Restriction Parameters', help='The raw data field of a certificate in PKCS 12 format (X509Certificate2 in .NET) with \\n as newlines')
+        c.argument('alt_symmetric_token_keys', arg_group='Token Restriction Parameters', help='A list of alternative symmetric token keys separated by spaces.')
+        c.argument('alt_rsa_token_key_exponents', arg_group='Token Restriction Parameters', help='A list of alternative rsa token key exponents separated by spaces.')
+        c.argument('alt_rsa_token_key_modulus', arg_group='Token Restriction Parameters', help='A list of alternative rsa token key modulus separated by spaces.')
+        c.argument('alt_x509_certificate_token_keys', arg_group='Token Restriction Parameters', help='A list of x509 certificate token keys separated by spaces.')
+        c.argument('token_claims', arg_group='Token Restriction Parameters',
+                   arg_type=token_claim_type)
+        c.argument('restriction_token_type', arg_group='Token Restriction Parameters',
+                   arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), required='True', help='The type of token.')
+        c.argument('open_id_connect_discovery_document', arg_group='Token Restriction Parameters', help='The OpenID connect discovery document.')
+
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)

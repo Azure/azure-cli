@@ -41,3 +41,11 @@ def validate_correlation_data(ns):
         for item in ns.correlation_data:
             correlation_data_dict.update(validate_tag(item))
         ns.correlation_data = correlation_data_dict
+
+def validate_token_claim(ns): 
+    """ Extracts multiple space-separated token claims in key[=value] format """
+    if isinstance(ns.token_claims, list):
+        token_claims_dict = {}
+        for item in ns.token_claims:
+            token_claims_dict.update(validate_tag(item))
+        ns.token_claims = token_claims_dict
