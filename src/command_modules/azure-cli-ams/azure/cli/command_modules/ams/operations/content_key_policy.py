@@ -33,11 +33,14 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
                               with_secrets=False):
 
     if with_secrets:
-        return client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
+        content_key_policy = client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
                                                          content_key_policy_name=content_key_policy_name)
+        content_key_policy.options[0].restriction.primary_verification_key.key_value = bytes(content_key_policy.options[0].restriction.primary_verification_key.key_value).decode("utf-8")
+        return content_key_policy
     else:
         return client.get(resource_group_name=resource_group_name, account_name=account_name,
                           content_key_policy_name=content_key_policy_name)
+
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                   policy_option_name, clear_key_configuration=False, open_restriction=False,
                                   issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
@@ -49,7 +52,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
     configuration = None
     restriction = None
 
-    policy = client.get(resource_group_name, account_name, content_key_policy_name)
+    policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
