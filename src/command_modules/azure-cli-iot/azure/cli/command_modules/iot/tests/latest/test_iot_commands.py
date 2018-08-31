@@ -30,7 +30,7 @@ class IoTHubTest(ScenarioTest):
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
             hub)
         self.cmd('iot hub show-connection-string -n {0}'.format(hub), checks=[
-            self.check_pattern('cs', conn_str_pattern)
+            self.check_pattern('connectionString', conn_str_pattern)
         ])
 
         self.cmd('iot hub show-connection-string -n {0} -g {1}'.format(hub, rg), checks=[

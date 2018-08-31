@@ -623,10 +623,8 @@ def iot_hub_route_create(client, hub_name, route_name, source_type, endpoint_nam
 def iot_hub_route_list(client, hub_name, source_type=None, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
-    if not source_type:
-        return hub.properties.routing.routes
-    else:
-        return [route for route in hub.properties.routing.routes if route.source.lower() == source_type.lower()]
+    return [route for route in hub.properties.routing.routes if route.source.lower() == (source_type.lower()
+                                                                                         if source_type else route.source.lower())]
 
 
 def iot_hub_route_show(client, hub_name, route_name, resource_group_name=None):
