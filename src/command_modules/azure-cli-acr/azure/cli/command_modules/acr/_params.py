@@ -84,6 +84,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('timeout', type=int, help='The build timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
+        c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
 

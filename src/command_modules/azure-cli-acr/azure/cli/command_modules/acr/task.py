@@ -337,6 +337,7 @@ def acr_task_run(cmd,
                  set_value=None,
                  set_secret=None,
                  no_logs=False,
+                 no_wait=False,
                  resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -357,7 +358,11 @@ def acr_task_run(cmd,
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with ID: %s", run_id)
-    logger.warning("Waiting for agent...")
+
+    if no_wait:
+        return queued_run
+
+    logger.warning("Waiting for an agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)
