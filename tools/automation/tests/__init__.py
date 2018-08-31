@@ -30,7 +30,7 @@ def extract_module_name(path):
 
 
 def execute(args):
-    from .main import run_tests, collect_test
+    from .main import run_tests
 
     validate_usage(args)
     current_profile = get_current_profile(args)
@@ -129,7 +129,6 @@ def get_current_profile(args):
 
 def get_test_index(args):
     test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
-    print(test_index_path)
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
@@ -148,7 +147,6 @@ def get_test_index(args):
 
 def get_extension_modules():
     from importlib import import_module
-    import os
     import pkgutil
     from azure.cli.core.extension import get_extensions, get_extension_path, get_extension_modname
     extension_whls = get_extensions()
@@ -172,12 +170,11 @@ def discover_tests(args):
         full path. 
     """
     from importlib import import_module
-    import os
     import pkgutil
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
-
-    profile = args.profile.replace('-', '_')
+    profile_split = args.profile.split('-')
+    profile_namespace = '_'.join([profile_split[-1]] + profile_split[:-1])
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')
@@ -204,14 +201,14 @@ def discover_tests(args):
             }
         elif mod_name.startswith('azext_'):
             mod_data = {
-                'filepath': os.path.join(mod[0].path, 'tests', profile),
-                'base_path': '{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, 'tests', profile_namespace),
+                'base_path': '{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         else:
             mod_data = {
-                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile),
-                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile_namespace),
+                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         # get the list of test files in each module
@@ -232,7 +229,6 @@ def discover_tests(args):
                 display('Unable to import {}. Reason: {}'.format(test_file_path, ex))
                 continue
             module_dict = module.__dict__
-            classes = {}
             possible_test_classes = {x: y for x, y in module_dict.items() if not x.startswith('_')}
             for class_name, class_def in possible_test_classes.items():
                 try:
