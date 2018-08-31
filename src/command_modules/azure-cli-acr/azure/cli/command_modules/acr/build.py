@@ -22,6 +22,7 @@ from azure.storage.blob import (
     BlockBlobService,
     AppendBlobService,
 )
+from azure.mgmt.containerregistry.v2018_02_01_preview.operations import BuildsOperations
 from .sdk.models import (
     DockerBuildRequest,
     PlatformProperties,
@@ -47,10 +48,17 @@ def acr_build_show_logs(client,
     log_file_sas = None
     error_message = "Could not get build logs for build ID: {}.".format(build_id)
     try:
-        build_log_result = client.get_log_sas_url(
-            resource_group_name=resource_group_name,
-            registry_name=registry_name,
-            run_id=build_id)
+        if isinstance(client, BuildsOperations):
+            # backward compatibility for build-task
+            build_log_result = client.get_log_link(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                build_id=build_id)
+        else:
+            build_log_result = client.get_log_sas_url(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                run_id=build_id)
         log_file_sas = build_log_result.log_link
     except (AttributeError, CloudError) as e:
         logger.debug("%s Exception: %s", error_message, e)
