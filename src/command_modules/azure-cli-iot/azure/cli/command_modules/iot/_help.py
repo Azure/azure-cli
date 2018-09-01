@@ -516,7 +516,7 @@ helps['iot hub show-stats'] = """
 """
 
 helps['iot hub routing-endpoint'] = """
-    type: command
+    type: group
     short-summary: Manage custom endpoints of an IoT hub.
 """
 
@@ -584,7 +584,7 @@ helps['iot hub routing-endpoint delete'] = """
 """
 
 helps['iot hub route'] = """
-    type: command
+    type: group
     short-summary: Manage routes of an IoT hub.
 """
 
@@ -624,7 +624,7 @@ helps['iot hub route show'] = """
     examples:
         - name: Get an route information from "MyIotHub" IoT Hub.
           text: >
-            az iot hub route list -g MyResourceGroup --hub-name MyIotHub --route-name [Route Name]
+            az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name [Route Name]
 """
 
 helps['iot hub route delete'] = """
