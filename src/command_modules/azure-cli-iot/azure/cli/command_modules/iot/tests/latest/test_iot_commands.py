@@ -156,7 +156,7 @@ class IoTHubTest(ScenarioTest):
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
         # Test 'az iot hub routing-endpoint create'
-        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -en {2} -et {3} -erg {4} -es {5} -cs {6}'
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c {6}'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
                  checks=[self.check('length(properties.routing.endpoints.eventHubs[*])', 1),
                          self.check('properties.routing.endpoints.eventHubs[0].resourceGroup', rg),
@@ -174,7 +174,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('eventHubs[0].subscriptionId', subscription_id),
                          self.check('eventHubs[0].name', endpoint_name)])
 
-        self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1} -et {2}'
+        self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1} -t {2}'
                  .format(hub, rg, endpoint_type),
                  checks=[self.check('length([*])', 1),
                          self.check('[0].resourceGroup', rg),
@@ -182,7 +182,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('[0].name', endpoint_name)])
 
         # Test 'az iot hub routing-endpoint show'
-        self.cmd('iot hub routing-endpoint show --hub-name {0} -g {1} -en {2}'
+        self.cmd('iot hub routing-endpoint show --hub-name {0} -g {1} -n {2}'
                  .format(hub, rg, endpoint_name),
                  checks=[self.check('resourceGroup', rg),
                          self.check('subscriptionId', subscription_id),
@@ -194,7 +194,7 @@ class IoTHubTest(ScenarioTest):
         new_source_type = 'TwinChangeEvents'
         condition = 'true'
         enabled = True
-        self.cmd('iot hub route create --hub-name {0} -g {1} -rn {2} -st {3} -en {4} -c {5} -e {6}'
+        self.cmd('iot hub route create --hub-name {0} -g {1} -n {2} -s {3} --en {4} -c {5} -e {6}'
                  .format(hub, rg, route_name, source_type, endpoint_name, condition, enabled),
                  checks=[self.check('length(properties.routing.routes[*])', 1),
                          self.check('properties.routing.routes[0].name', route_name),
@@ -215,7 +215,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('[0].endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route list'
-        self.cmd('iot hub route list --hub-name {0} -g {1} -st {2}'.format(hub, rg, source_type),
+        self.cmd('iot hub route list --hub-name {0} -g {1} -s {2}'.format(hub, rg, source_type),
                  checks=[self.check('length([*])', 1),
                          self.check('[0].name', route_name),
                          self.check('[0].source', source_type),
@@ -225,7 +225,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('[0].endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route show'
-        self.cmd('iot hub route show --hub-name {0} -g {1} -rn {2}'.format(hub, rg, route_name),
+        self.cmd('iot hub route show --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
                  checks=[self.check('name', route_name),
                          self.check('source', source_type),
                          self.check('isEnabled', enabled),
@@ -234,11 +234,11 @@ class IoTHubTest(ScenarioTest):
                          self.check('endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route test'
-        self.cmd('iot hub route test --hub-name {0} -g {1} -rn {2}'.format(hub, rg, route_name),
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'
-        self.cmd('iot hub route test --hub-name {0} -g {1} -st {2}'.format(hub, rg, source_type),
+        self.cmd('iot hub route test --hub-name {0} -g {1} -s {2}'.format(hub, rg, source_type),
                  checks=[self.check('length(routes[*])', 1),
                          self.check('routes[0].properties.name', route_name),
                          self.check('routes[0].properties.source', source_type),
@@ -248,7 +248,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('routes[0].properties.endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route update'
-        self.cmd('iot hub route update --hub-name {0} -g {1} -rn {2} -st {3}'.format(hub, rg, route_name, new_source_type),
+        self.cmd('iot hub route update --hub-name {0} -g {1} -n {2} -s {3}'.format(hub, rg, route_name, new_source_type),
                  checks=[self.check('length(properties.routing.routes[*])', 1),
                          self.check('properties.routing.routes[0].name', route_name),
                          self.check('properties.routing.routes[0].source', new_source_type),
