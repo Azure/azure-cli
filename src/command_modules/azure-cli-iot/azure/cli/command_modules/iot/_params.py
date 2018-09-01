@@ -106,7 +106,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('iot hub route') as c:
         c.argument('route_name', options_list=['--route-name', '--name', '-n'], help='Name of the Route.')
-        c.argument('endpoint_name', options_list=['--endpoint-name', '--endpoint', '-e'],
+        c.argument('endpoint_name', options_list=['--endpoint-name', '--endpoint', '--en'],
                    help='Name of the routing endpoint.')
         c.argument('condition', options_list=['--condition', '-c'],
                    help='Condition that is evaluated to apply the routing rule.')

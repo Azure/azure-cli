@@ -35,7 +35,7 @@ class IoTHubTest(ScenarioTest):
 
         self.cmd('iot hub show-connection-string -n {0} -g {1}'.format(hub, rg), checks=[
             self.check('length(@)', 1),
-            self.check_pattern('cs', conn_str_pattern)
+            self.check_pattern('connectionString', conn_str_pattern)
         ])
 
         # Test 'az iot hub update'
