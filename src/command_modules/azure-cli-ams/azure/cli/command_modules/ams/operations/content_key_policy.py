@@ -3,14 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
+from knack.util import CLIError
+
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
                                      ContentKeyPolicyTokenRestriction)
-from knack.util import CLIError
+
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
-                              policy_option_name, description=None, 
+                              policy_option_name, description=None,
                               clear_key_configuration=False, open_restriction=False):
 
     default_configuration = None
@@ -29,6 +32,7 @@ def create_content_key_policy(client, resource_group_name, account_name, content
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, options, description)
 
+
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                   policy_option_name, clear_key_configuration=False, open_restriction=False,
                                   issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
@@ -46,9 +50,9 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                                        rsa_token_key_modulus, x509_certificate_token_key,
                                                        restriction_token_type)
 
-    #TODO: probably some refactor in the near future to avoid having multiple ANDs.
+    # TODO: probably some refactor in the near future to avoid having multiple ANDs.
     if open_restriction and valid_token_restriction:
-        raise CLIError('You should only use one restriction type.')    
+        raise CLIError('You should only use one restriction type.')
 
     if clear_key_configuration:
         configuration = ContentKeyPolicyClearKeyConfiguration()
@@ -77,7 +81,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
             primary_verification_key = _x509_token_key_factory(
                 bytearray(x509_certificate_token_key.replace('\\n', '\n'), 'utf-8'))
         else:
-            raise CLIError('Invalid token key.') # This should not happen.. but just in case.
+            raise CLIError('Invalid token key.')  # This should not happen.. but just in case.
 
         # Extra validation to make sure exponents and modulus have the same cardinality
         if len(_rsa_key_exponents) != len(_rsa_key_modulus):
@@ -94,7 +98,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
         restriction = ContentKeyPolicyTokenRestriction(
             issuer=issuer, audience=audience, primary_verification_key=primary_verification_key,
-            alternative_verification_keys=alternative_keys, required_claims=token_claims,
+            alternate_verification_keys=alternative_keys, required_claims=token_claims,
             restriction_token_type=restriction_token_type,
             open_id_connect_discovery_document=open_id_connect_discovery_document)
 
@@ -111,23 +115,38 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                    content_key_policy_name, policy.options)
 
 
-def remove_content_key_policy_option(client):
-    pass #TODO
+def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
+                                     policy_option_name):
+    policy = client.get(resource_group_name, account_name, content_key_policy_name)
 
+    if all(option.name != policy_option_name for option in policy.options):
+        raise CLIError('No policy option found with name "' + policy_option_name + '"')
+
+    policy.options = list(filter(lambda option: option.name != policy_option_name, policy.options))
+
+    return client.create_or_update(resource_group_name, account_name,
+                                   content_key_policy_name, policy.options)
+
+
+# Private methods used
 
 def _coalesce_str(value):
     return value or ''
 
+
 def _symmetric_token_key_factory(symmetric_token_key):
     return ContentKeyPolicySymmetricTokenKey(key_value=symmetric_token_key)
+
 
 def _rsa_token_key_factory(rsa_token_key_exponent, rsa_token_key_modulus):
     return ContentKeyPolicyRsaTokenKey(
         exponent=rsa_token_key_exponent, modulus=rsa_token_key_modulus)
 
+
 def _x509_token_key_factory(x509_certificate_token_key):
     return ContentKeyPolicyX509CertificateTokenKey(
         raw_body=x509_certificate_token_key)
+
 
 def _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
                                       x509_certificate_token_key):
@@ -144,8 +163,9 @@ def _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponen
 
     return available
 
+
 def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
                              x509_certificate_token_key, restriction_token_type):
-    available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent, 
+    available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
     return restriction_token_type and available_keys >= 1
