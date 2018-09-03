@@ -77,7 +77,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     restriction = None
 
     policy = client.get(resource_group_name, account_name, content_key_policy_name)
-    policy_options = policy.options or []
+    policy_options = policy and policy.options or []
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
