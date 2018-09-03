@@ -23,12 +23,13 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               open_id_connect_discovery_document=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                               policy_option_name, description, clear_key_configuration, open_restriction,
+                                               policy_option_name, clear_key_configuration, open_restriction,
                                                issuer, audience, symmetric_token_key, rsa_token_key_exponent,
                                                rsa_token_key_modulus, x509_certificate_token_key,
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
-                                               token_claims, restriction_token_type, open_id_connect_discovery_document)
+                                               token_claims, restriction_token_type, open_id_connect_discovery_document,
+                                               description)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -41,7 +42,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   open_id_connect_discovery_document=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                               policy_option_name, None, clear_key_configuration, open_restriction,
+                                               policy_option_name, clear_key_configuration, open_restriction,
                                                issuer, audience, symmetric_token_key, rsa_token_key_exponent,
                                                rsa_token_key_modulus, x509_certificate_token_key,
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
@@ -65,23 +66,23 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
 # Private methods used
 
 def _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                        policy_option_name, description, clear_key_configuration,
-                                        open_restriction, issuer, audience, symmetric_token_key,
-                                        rsa_token_key_exponent, rsa_token_key_modulus, x509_certificate_token_key,
+                                        policy_option_name, clear_key_configuration, open_restriction,
+                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
+                                        rsa_token_key_modulus, x509_certificate_token_key,
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                         token_claims, restriction_token_type,
-                                        open_id_connect_discovery_document):
+                                        open_id_connect_discovery_document, description=None):
 
     configuration = None
     restriction = None
 
-    policy = client.get(resource_group_name, account_name, content_key_policy_name)
-    policy_options = policy and policy.options or []
+    policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
+    policy_options = policy.options if policy else []
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
-                                                       restriction_token_type)
+                                                       restriction_token_type, issuer, audience)
 
     # TODO: probably some refactor in the near future to avoid having multiple ANDs.
     if open_restriction and valid_token_restriction:
@@ -183,7 +184,8 @@ def _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponen
 
 
 def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
-                             x509_certificate_token_key, restriction_token_type):
+                             x509_certificate_token_key, restriction_token_type,
+                             issuer, audience):
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
-    return restriction_token_type and available_keys >= 1
+    return restriction_token_type and available_keys >= 1 and issuer and audience
