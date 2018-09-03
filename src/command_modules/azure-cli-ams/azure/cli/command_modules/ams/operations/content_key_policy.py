@@ -14,23 +14,21 @@ from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyCle
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
                               policy_option_name, description=None,
-                              clear_key_configuration=False, open_restriction=False):
+                              clear_key_configuration=False, open_restriction=False,
+                              issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
+                              rsa_token_key_modulus=None, x509_certificate_token_key=None,
+                              alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
+                              alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
+                              token_claims=None, restriction_token_type=None,
+                              open_id_connect_discovery_document=None):
 
-    default_configuration = None
-    default_restriction = None
-
-    if clear_key_configuration:
-        default_configuration = ContentKeyPolicyClearKeyConfiguration()
-
-    if open_restriction:
-        default_restriction = ContentKeyPolicyOpenRestriction()
-
-    options = [ContentKeyPolicyOption(name=policy_option_name,
-                                      configuration=default_configuration,
-                                      restriction=default_restriction)]
-
-    return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, options, description)
+    return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
+                                               policy_option_name, description, clear_key_configuration, open_restriction,
+                                               issuer, audience, symmetric_token_key, rsa_token_key_exponent,
+                                               rsa_token_key_modulus, x509_certificate_token_key,
+                                               alt_symmetric_token_keys, alt_rsa_token_key_exponents,
+                                               alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                               token_claims, restriction_token_type, open_id_connect_discovery_document)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -41,10 +39,45 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                                   token_claims=None, restriction_token_type=None,
                                   open_id_connect_discovery_document=None):
+
+    return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
+                                               policy_option_name, None, clear_key_configuration, open_restriction,
+                                               issuer, audience, symmetric_token_key, rsa_token_key_exponent,
+                                               rsa_token_key_modulus, x509_certificate_token_key,
+                                               alt_symmetric_token_keys, alt_rsa_token_key_exponents,
+                                               alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                               token_claims, restriction_token_type, open_id_connect_discovery_document)
+
+
+def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
+                                     policy_option_name):
+    policy = client.get(resource_group_name, account_name, content_key_policy_name)
+
+    if all(option.name != policy_option_name for option in policy.options):
+        raise CLIError('No policy option found with name "' + policy_option_name + '"')
+
+    policy.options = list(filter(lambda option: option.name != policy_option_name, policy.options))
+
+    return client.create_or_update(resource_group_name, account_name,
+                                   content_key_policy_name, policy.options)
+
+
+# Private methods used
+
+def _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
+                                        policy_option_name, description, clear_key_configuration,
+                                        open_restriction, issuer, audience, symmetric_token_key,
+                                        rsa_token_key_exponent, rsa_token_key_modulus, x509_certificate_token_key,
+                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
+                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                        token_claims, restriction_token_type,
+                                        open_id_connect_discovery_document):
+
     configuration = None
     restriction = None
 
     policy = client.get(resource_group_name, account_name, content_key_policy_name)
+    policy_options = policy.options or []
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
@@ -109,26 +142,11 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                            configuration=configuration,
                                            restriction=restriction)
 
-    policy.options.append(policy_option)
+    policy_options.append(policy_option)
 
     return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, policy.options)
+                                   content_key_policy_name, policy_options, description)
 
-
-def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
-                                     policy_option_name):
-    policy = client.get(resource_group_name, account_name, content_key_policy_name)
-
-    if all(option.name != policy_option_name for option in policy.options):
-        raise CLIError('No policy option found with name "' + policy_option_name + '"')
-
-    policy.options = list(filter(lambda option: option.name != policy_option_name, policy.options))
-
-    return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, policy.options)
-
-
-# Private methods used
 
 def _coalesce_str(value):
     return value or ''
