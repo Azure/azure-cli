@@ -9,7 +9,7 @@ from knack.util import CLIError
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
-                                     ContentKeyPolicyTokenRestriction)
+                                     ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim)
 
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -78,6 +78,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     restriction = None
 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
+
     policy_options = policy.options if policy else []
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
@@ -105,6 +106,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         _rsa_key_modulus = _coalesce_str(alt_rsa_token_key_modulus).split()
         _x509_keys = _coalesce_str(alt_x509_certificate_token_keys).split()
         alternative_keys = []
+        _token_claims = []
 
         if symmetric_token_key is not None:
             primary_verification_key = _symmetric_token_key_factory(bytearray(symmetric_token_key, 'utf-8'))
@@ -130,9 +132,14 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         for key in _x509_keys:
             alternative_keys.append(_x509_token_key_factory(key))
 
+        for key in token_claims:
+            claim = ContentKeyPolicyTokenClaim(claim_type=key,
+                                               claim_value=token_claims[key])
+            _token_claims.append(claim)
+
         restriction = ContentKeyPolicyTokenRestriction(
             issuer=issuer, audience=audience, primary_verification_key=primary_verification_key,
-            alternate_verification_keys=alternative_keys, required_claims=token_claims,
+            alternate_verification_keys=alternative_keys, required_claims=_token_claims,
             restriction_token_type=restriction_token_type,
             open_id_connect_discovery_document=open_id_connect_discovery_document)
 

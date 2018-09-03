@@ -27,7 +27,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
     default_policy_name_arg_type = CLIArgumentType(options_list=['--content-key-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
     correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Customer provided correlation data that will be returned in Job completed events. This data is in key=value format separated by spaces.", nargs='*', metavar='CORRELATION_DATA')
-    token_claim_type = CLIArgumentType(validator=validate_token_claim, help='A list of required token claims in key=value format separated by spaces.')
+    token_claim_type = CLIArgumentType(validator=validate_token_claim, help='A list of required token claims in key=value format separated by spaces.', nargs='*', metavar='ASYMMETRIC TOKEN CLAIMS')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
@@ -146,13 +146,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    action='store_true',
                    arg_group='Basic Policy Options',
                    help='Use open restriction. License or key will be delivered on every request.')
-        c.argument('policy_option_name',
-                   help='The name of the policy option.')
-
-    with self.argument_context('ams content-key-policy options add') as c:
         c.argument('policy_option_name', help='The content key policy option name.')
-        c.argument('issuer', arg_group='Token Restriction Parameters', help='The token issuer.')
-        c.argument('audience', arg_group='Token Restriction Parameters', help='The audience for the token.')
+        c.argument('issuer', arg_group='Token Restriction Parameters', required='True', help='The token issuer.')
+        c.argument('audience', arg_group='Token Restriction Parameters', required='True', help='The audience for the token.')
         c.argument('symmetric_token_key', arg_group='Token Restriction Parameters', help='The key value of the key.')
         c.argument('rsa_token_key_exponent', arg_group='Token Restriction Parameters', help='The RSA Parameter exponent.')
         c.argument('rsa_token_key_modulus', arg_group='Token Restriction Parameters', help='The RSA Parameter modulus.')
@@ -161,10 +157,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alt_rsa_token_key_exponents', arg_group='Token Restriction Parameters', help='A list of alternative rsa token key exponents separated by spaces.')
         c.argument('alt_rsa_token_key_modulus', arg_group='Token Restriction Parameters', help='A list of alternative rsa token key modulus separated by spaces.')
         c.argument('alt_x509_certificate_token_keys', arg_group='Token Restriction Parameters', help='A list of x509 certificate token keys separated by spaces.')
-        c.argument('token_claims', arg_group='Token Restriction Parameters',
-                   arg_type=token_claim_type)
+        c.argument('token_claims', arg_group='Token Restriction Parameters', arg_type=token_claim_type)
         c.argument('restriction_token_type', arg_group='Token Restriction Parameters',
-                   arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), help='The type of token.')
+                   arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), required='True', help='The type of token.')
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction Parameters', help='The OpenID connect discovery document.')
 
     with self.argument_context('ams streaming') as c:
