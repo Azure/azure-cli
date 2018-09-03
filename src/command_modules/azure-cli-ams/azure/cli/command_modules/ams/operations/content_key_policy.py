@@ -52,7 +52,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                      policy_option_name):
-    policy = client.get(resource_group_name, account_name, content_key_policy_name)
+    policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     if all(option.name != policy_option_name for option in policy.options):
         raise CLIError('No policy option found with name "' + policy_option_name + '"')
