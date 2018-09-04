@@ -161,6 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('restriction_token_type', arg_group='Token Restriction Parameters',
                    arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), help='The type of token.')
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction Parameters', help='The OpenID connect discovery document.')
+        c.argument('widevine_template', arg_group='Token Configuration Parameters', help='The Widevine template.')
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)

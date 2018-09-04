@@ -9,7 +9,8 @@ from knack.util import CLIError
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
-                                     ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim)
+                                     ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim,
+                                     ContentKeyPolicyWidevineConfiguration)
 
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -20,7 +21,7 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                               alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                               token_claims=None, restriction_token_type=None,
-                              open_id_connect_discovery_document=None):
+                              open_id_connect_discovery_document=None, widevine_template=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
                                                policy_option_name, clear_key_configuration, open_restriction,
@@ -29,7 +30,7 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               description)
+                                               widevine_template, description)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -39,7 +40,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                                   alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                                   token_claims=None, restriction_token_type=None,
-                                  open_id_connect_discovery_document=None):
+                                  open_id_connect_discovery_document=None, widevine_template=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
                                                policy_option_name, clear_key_configuration, open_restriction,
@@ -47,7 +48,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                                rsa_token_key_modulus, x509_certificate_token_key,
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
-                                               token_claims, restriction_token_type, open_id_connect_discovery_document)
+                                               token_claims, restriction_token_type, open_id_connect_discovery_document,
+                                               widevine_template)
 
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -72,7 +74,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                         token_claims, restriction_token_type,
-                                        open_id_connect_discovery_document, description=None):
+                                        open_id_connect_discovery_document, widevine_template, description=None):
 
     configuration = None
     restriction = None
@@ -89,8 +91,11 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     if open_restriction and valid_token_restriction:
         raise CLIError('You should only use one restriction type.')
 
-    if clear_key_configuration:
+    if clear_key_configuration and not widevine_template:
         configuration = ContentKeyPolicyClearKeyConfiguration()
+    elif widevine_template:
+        jsonFile = read_json(widevine_template)
+        configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=jsonFile)
 
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
@@ -132,10 +137,11 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         for key in _x509_keys:
             alternative_keys.append(_x509_token_key_factory(key))
 
-        for key in token_claims:
-            claim = ContentKeyPolicyTokenClaim(claim_type=key,
-                                               claim_value=token_claims[key])
-            _token_claims.append(claim)
+        if token_claims is not None:
+            for key in token_claims:
+                claim = ContentKeyPolicyTokenClaim(claim_type=key,
+                                                   claim_value=token_claims[key])
+                _token_claims.append(claim)
 
         restriction = ContentKeyPolicyTokenRestriction(
             issuer=issuer, audience=audience, primary_verification_key=primary_verification_key,
@@ -196,3 +202,7 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
     return restriction_token_type and available_keys >= 1 and issuer and audience
+
+def read_json(path):
+    with open(path, 'r') as file:
+        return file.read()
