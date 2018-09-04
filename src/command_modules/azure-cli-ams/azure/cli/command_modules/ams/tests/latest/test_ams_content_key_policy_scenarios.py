@@ -16,6 +16,44 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_token(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
+            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+            'issuer': 'Issuer',
+            'audience': 'Audience',
+            'symmetricTokenKey': 'a1b2c3d4e5f6g7h8i9j0',
+            'restrictionTokenType': 'Jwt',
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyTokenRestriction',
+            'openIDConnectDiscoveryDocument': 'adocument',
+            'tokenClaims': 'foo=baz baz=doo fus=rodahh'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --issuer {issuer} --audience {audience} --symmetric-token-key {symmetricTokenKey} --restriction-token-type {restrictionTokenType} --widevine-template "{jsonFile}" --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.issuer', '{issuer}'),
+            self.check('options[0].restriction.audience', '{audience}'),
+            self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('length(options[0].restriction.requiredClaims)', 3),
+            self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_widevine(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         policy_name = self.create_random_name(prefix='pn', length=12)

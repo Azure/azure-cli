@@ -157,7 +157,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alt_rsa_token_key_exponents', arg_group='Token Restriction', help='A list of alternative rsa token key exponents separated by spaces.')
         c.argument('alt_rsa_token_key_modulus', arg_group='Token Restriction', help='A list of alternative rsa token key modulus separated by spaces.')
         c.argument('alt_x509_certificate_token_keys', arg_group='Token Restriction', help='A list of x509 certificate token keys separated by spaces.')
-        c.argument('token_claims', arg_group='Token Restriction Parameters', arg_type=token_claim_type)
+        c.argument('token_claims', arg_group='Token Restriction', arg_type=token_claim_type)
         c.argument('restriction_token_type', arg_group='Token Restriction',
                    arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), help='The type of token.')
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
