@@ -94,7 +94,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     if clear_key_configuration and widevine_template:
         raise CLIError('You should only use one configuration type.')
 
-    if clear_key_configuration and not widevine_template:
+    if clear_key_configuration:
         configuration = ContentKeyPolicyClearKeyConfiguration()
 
     if widevine_template:
