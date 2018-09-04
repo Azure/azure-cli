@@ -9,6 +9,36 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class AmsContentKeyPolicyTests(ScenarioTest):
+    def _get_test_data_file(self, filename):
+        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
+        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
+        return filepath
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_widevine(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
+            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --widevine-template "{jsonFile}" --open-restriction --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}')
+        ])
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_basic(self, storage_account_for_create):
