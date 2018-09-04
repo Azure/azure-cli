@@ -40,7 +40,6 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.odatatype', '{configurationODataType}')
         ])
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_basic(self, storage_account_for_create):

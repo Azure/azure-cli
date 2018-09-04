@@ -203,6 +203,7 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
                                                        rsa_token_key_modulus, x509_certificate_token_key)
     return restriction_token_type and available_keys >= 1 and issuer and audience
 
+
 def read_json(path):
     with open(path, 'r') as file:
         return file.read()
