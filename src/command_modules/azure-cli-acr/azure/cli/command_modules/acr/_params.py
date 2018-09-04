@@ -197,7 +197,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
@@ -220,6 +219,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
+
+    with self.argument_context('acr task create') as c:
+        c.positional('context_path', help="The URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').")
+
+    with self.argument_context('acr task update') as c:
+        c.positional('context_path', help="The URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').")
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)

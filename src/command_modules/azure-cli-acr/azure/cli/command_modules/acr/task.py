@@ -45,6 +45,9 @@ logger = get_logger(__name__)
 TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
 
+DEFAULT_TIMEOUT_IN_SEC = 60*60  # 60 minutes
+DEFAULT_CPU = 2
+
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     client,
@@ -55,8 +58,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     image_names=None,
                     status='Enabled',
                     os_type=OS.linux,
-                    cpu=2,
-                    timeout=3600,
+                    cpu=DEFAULT_CPU,
+                    timeout=DEFAULT_TIMEOUT_IN_SEC,
                     docker_file=None,
                     task_file=None,
                     values_file=None,
@@ -79,7 +82,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         raise CLIError("Cannot use both --dockerfile and --task-file arguments to create a task")
     if commit_trigger_enabled and not git_access_token:
         raise CLIError("Commit trigger needs to be disabled [--commit-trigger-enabled False] " \
-        "if no --git-access-token is provided.")
+                       "if no --git-access-token is provided.")
     if docker_file is not None:
         step = DockerBuildStep(
             image_names=image_names,
@@ -101,7 +104,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     source_control_type = SourceControlType.visual_studio_team_service.value
-    if context_path is not None and 'GITHUB.COM' in context_path.upper(): # TODO: replace github.com check with something more generic?
+    if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
 
     task_create_parameters = Task(
@@ -129,7 +132,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                             scope='repo'
                         )
                     ),
-                    source_trigger_events=[SourceTriggerEvent.commit.value], #TODO: pull request?
+                    # TODO: pull request?
+                    source_trigger_events=[SourceTriggerEvent.commit.value],
                     status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
                     name=source_trigger_name if source_trigger_name else "defaultSourceTriggerName"
                 )
@@ -245,7 +249,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     source_control_type = None
     if context_path is not None:
-        if 'GITHUB.COM' in context_path.upper(): # TODO: replace github.com check with something more generic?
+        if 'GITHUB.COM' in context_path.upper():
             source_control_type = SourceControlType.github.value
         else:
             source_control_type = SourceControlType.visual_studio_team_service.value
@@ -271,7 +275,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                             token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
-                    source_trigger_events=[SourceTriggerEvent.commit], #TODO: pull request?
+                    # TODO: pull request?
+                    source_trigger_events=[SourceTriggerEvent.commit],
                     status=status,
                     name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"""
                 )
@@ -343,9 +348,9 @@ def acr_task_run(cmd,
             TaskRunRequest(
                 task_name=task_name,
                 values=(set_value if set_value else []) + (set_secret if set_secret else [])
-                )
             )
         )
+    )
 
     run_id = queued_run.run_id
     logger.warning("Queued a run with run ID: %s", run_id)
@@ -403,7 +408,8 @@ def _add_run_filter(orig_filter, name, value, operator):
     elif operator == 'eq':
         new_filter_str = "{} eq '{}'".format(name, value)
     else:
-        raise ValueError("Allowed filter operator: {}".format(['contains', 'eq']))
+        raise ValueError(
+            "Allowed filter operator: {}".format(['contains', 'eq']))
 
     return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 

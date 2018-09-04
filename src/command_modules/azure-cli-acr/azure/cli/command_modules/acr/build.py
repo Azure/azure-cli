@@ -81,7 +81,7 @@ def acr_build(cmd,
         finally:
             try:
                 logger.debug(
-                    "Deleting the archived source code from '%s'.", tar_file_path)
+                    "Deleting the archived source code from '%s'...", tar_file_path)
                 os.remove(tar_file_path)
             except OSError:
                 pass
@@ -115,8 +115,8 @@ def acr_build(cmd,
         run_request=docker_build_request))
 
     build_id = queued_build.run_id
-    logger.warning("Queued a build with build ID: %s", build_id)
-    logger.warning("Waiting for build agent...")
+    logger.warning("Queued a build with ID: %s", build_id)
+    logger.warning("Waiting for agent...")
 
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
