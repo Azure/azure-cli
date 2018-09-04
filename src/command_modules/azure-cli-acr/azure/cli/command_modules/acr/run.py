@@ -32,7 +32,7 @@ def acr_run(cmd,
             client,
             registry_name,
             source_location,
-            task_file=None,
+            task_file='acb.yaml',
             values_file=None,
             encoded_task=None,
             encoded_values=None,
@@ -45,12 +45,6 @@ def acr_run(cmd,
 
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
-
-    if not task_file and not encoded_task:
-        raise CLIError("Either --task-file or --encoded-task is required")
-
-    if task_file and encoded_task:
-        raise CLIError("Cannot use both --task-file and --encoded-task")
 
     # TODO: Remove this import once the SDK is merged.
     from ._client_factory import cf_acr_registries_build
@@ -82,20 +76,20 @@ def acr_run(cmd,
         logger.warning(
             "Sending context to {}.azurecr.io...".format(registry_name))
 
-    if task_file:
+    if encoded_task:
+        request = EncodedTaskRunRequest(
+            encoded_task_content=encoded_task,
+            encoded_values_content=encoded_values,
+            values=(set_value if set_value else []),
+            timeout=timeout,
+            platform=PlatformProperties(os=os_type)
+        )
+    else:
         request = FileTaskRunRequest(
             task_file_path=task_file,
             values_file_path=values_file,
             values=(set_value if set_value else []),
             source_location=source_location,
-            timeout=timeout,
-            platform=PlatformProperties(os=os_type)
-        )
-    else:
-        request = EncodedTaskRunRequest(
-            encoded_task_content=encoded_task,
-            encoded_values_content=encoded_values,
-            values=(set_value if set_value else []),
             timeout=timeout,
             platform=PlatformProperties(os=os_type)
         )
