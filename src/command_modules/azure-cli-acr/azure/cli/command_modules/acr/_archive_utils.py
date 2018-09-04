@@ -37,13 +37,10 @@ def upload_source_code(client, registry_name, resource_group_name,
             break
         size = size / 1024.0
 
-    logger.debug("Uploading archived source code from '%s'.", tar_file_path)
-    logger.warning(
-        "Sending build context ({0:.3f} {1}) to {2}.azurecr.io...".format(size, unit, registry_name))
-
+    logger.warning("Uploading archived source code from '%s'...", tar_file_path)
     upload_url = None
     relative_path = None
-    error_message = "Could not get build source upload URL."
+    error_message = "Could not get SAS URL to upload."
     try:
         source_upload_location = client.get_build_source_upload_url(
             resource_group_name, registry_name)
@@ -54,7 +51,7 @@ def upload_source_code(client, registry_name, resource_group_name,
         raise CLIError(error_message)
 
     if not upload_url:
-        logger.debug("%s Empty build source upload URL.", error_message)
+        logger.debug("%s Empty source upload URL.", error_message)
         raise CLIError(error_message)
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
@@ -65,11 +62,13 @@ def upload_source_code(client, registry_name, resource_group_name,
                          container_name=container_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
+    logger.warning("Sending context ({0:.3f} {1}) to {2}.azurecr.io...".format(
+        size, unit, registry_name))                         
     return relative_path
 
 
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
-    logger.warning("Packing source code into tar file to upload...")
+    logger.warning("Packing source code into tar to upload...")
 
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
     common_vcs_ignore_list = {'.git', '.gitignore',
@@ -107,11 +106,14 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
         _archive_file_recursively(tar, source_location, arcname="",
                                   parent_ignored=False, parent_matching_rule_index=ignore_list_size,
                                   ignore_check=_ignore_check)
-        # add docker_file
-        docker_file_tarinfo = tar.gettarinfo(
-            docker_file_path, docker_file_in_tar)
-        with bltn_open(docker_file_path, "rb") as f:
-            tar.addfile(docker_file_tarinfo, f)
+
+        # Add the Dockerfile if it's specified.
+        # In the case of run, there will be no Dockerfile.
+        if docker_file_path:
+            docker_file_tarinfo = tar.gettarinfo(
+                docker_file_path, docker_file_in_tar)
+            with bltn_open(docker_file_path, "rb") as f:
+                tar.addfile(docker_file_tarinfo, f)
 
 
 class IgnoreRule(object):  # pylint: disable=too-few-public-methods
