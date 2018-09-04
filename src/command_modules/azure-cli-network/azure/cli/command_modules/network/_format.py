@@ -119,8 +119,7 @@ def transform_vnet_table_output(result):
         return item
     if isinstance(result, list):
         return [_transform(r) for r in result]
-    else:
-        return _transform(result)
+    return _transform(result)
 
 
 def transform_public_ip_create_output(result):

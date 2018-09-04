@@ -215,7 +215,7 @@ def validate_delegations(cmd, namespace):
             if '/' not in item and len(item.split('.')) == 3:
                 # convert names to serviceNames
                 _, service, resource_type = item.split('.')
-                item = 'Microsoft.{}/{}'.format(service, resource_type) 
+                item = 'Microsoft.{}/{}'.format(service, resource_type)
             delegations.append(Delegation(name=str(i), service_name=item))
         namespace.delegations = delegations
 
@@ -972,7 +972,7 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
 
 
 def process_nw_flow_log_show_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
     if not is_valid_resource_id(namespace.nsg):
@@ -1170,7 +1170,7 @@ def process_nw_config_diagnostic_namespace(cmd, namespace):
             parent=namespace.parent,
             name=namespace.resource)
     elif any(id_params) or namespace.parent:
-            raise resource_usage
+        raise resource_usage
 
     # validate query
     query_usage = CLIError('usage error: --queries JSON | --destination DEST --source SRC --direction DIR '
@@ -1203,5 +1203,4 @@ def process_list_delegations_namespace(cmd, namespace):
         raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
 
     if not namespace.location:
-        from azure.cli.core.commands.validators import get_default_location_from_resource_group
         get_default_location_from_resource_group(cmd, namespace)

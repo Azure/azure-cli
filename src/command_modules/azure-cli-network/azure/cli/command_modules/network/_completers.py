@@ -71,6 +71,7 @@ def tm_endpoint_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
         if namespace.resource_group_name and namespace.profile_name \
         else []
 
+
 @Completer
 def service_endpoint_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     client = network_client_factory(cmd.cli_ctx).available_endpoint_services
