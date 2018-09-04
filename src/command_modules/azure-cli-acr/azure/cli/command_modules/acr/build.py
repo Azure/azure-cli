@@ -28,7 +28,8 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.operations import BuildsOp
 from .sdk.models import (
     DockerBuildRequest,
     PlatformProperties,
-    Architecture
+    Architecture,
+    OS
 )
 
 from ._utils import validate_managed_registry
@@ -140,7 +141,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                 min_scan_range = max(new_byte_size - amount_read - 1, 0)
                 for i in range(new_byte_size - 1, min_scan_range, -1):
                     if curr_bytes[i - 1:i + 1] == b'\r\n':
-                        flush = curr_bytes[:i]  # won't print \n
+                        flush = curr_bytes[:i] # won't print \n
                         stream = BytesIO()
                         stream.write(curr_bytes[i + 1:])
                         print(flush.decode('utf-8', errors='ignore'))
@@ -267,10 +268,11 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type='Linux'):
+              os_type=OS.linux):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
+    # TODO: remove
     from ._client_factory import cf_acr_registries_build
     client_registries = cf_acr_registries_build(cmd.cli_ctx)
 

@@ -31,7 +31,8 @@ from .sdk.models import (
     SourceTriggerUpdateParameters,
     BaseImageTriggerUpdateParameters,
     AuthInfoUpdateParameters,
-    SourceControlType
+    SourceControlType,
+    OS
 )
 from ._utils import validate_managed_registry
 from .build import acr_build_show_logs
@@ -53,7 +54,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     git_access_token=None,
                     image_names=None,
                     status='Enabled',
-                    os_type='Linux',
+                    os_type=OS.linux,
                     cpu=2,
                     timeout=3600,
                     docker_file=None,
