@@ -108,7 +108,6 @@ class TestGenerateSSHKeys(unittest.TestCase):
             public_key = '{} {}'.format(key.get_name(), key.get_base64())
             self.assertEqual(public_key, new_public_key)
 
-
     def _create_new_temp_key_file(self, key_data, suffix=""):
         with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName, delete=False, suffix=suffix) as f:
             f.write(key_data)
