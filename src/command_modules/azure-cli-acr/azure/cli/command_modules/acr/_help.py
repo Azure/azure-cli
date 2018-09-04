@@ -520,11 +520,9 @@ helps['acr build'] = """
         - name: Queue a local context, pushed to ACR with streaming logs.
           text: >
             az acr build -t sample/helloworld:{{.Run.ID}} -r MyRegistry .
-    examples:
         - name: Queue a local context, pushed to ACR without streaming logs.
           text: >
             az acr build -t sample/helloworld:{{.Run.ID}} -r MyRegistry --no-logs .
-    examples:
         - name: Queue a local context, validating the build is successful, without pushing to the registry.
           text: >
             az acr build -r MyRegistry .
@@ -536,7 +534,10 @@ helps['acr run'] = """
     examples:
         - name: Queue a local context, pushed to ACR with streaming logs.
           text: >
-            az acr run -r MyRegistry https://github.com/Azure/acr-builder.git
+            az acr run -r MyRegistry --task-file acb.yaml .
+        - name: Queue a remote git context with streaming logs.
+          text: >
+            az acr run -r MyRegistry https://github.com/Azure/acr-builder.git --task-file acb.yaml
 """
 
 
