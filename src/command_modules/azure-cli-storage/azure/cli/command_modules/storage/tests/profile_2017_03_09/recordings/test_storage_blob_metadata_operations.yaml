@@ -180,7 +180,7 @@ interactions:
       \ StorageAccountPreparer,\r\n                               JMESPathCheck, NoneCheck,\
       \ api_version_constraint)\r\nfrom knack.util import CLIError\r\nfrom azure.cli.core.profiles\
       \ import ResourceType\r\n\r\nfrom azure.cli.command_modules.storage._client_factory\
-      \ import NO_CREDENTIALS_ERROR_MESSAGE\r\nfrom .storage_test_util import StorageScenarioMixin\r\
+      \ import NO_CREDENTIALS_ERROR_MESSAGE\r\nfrom ..storage_test_util import StorageScenarioMixin\r\
       \n\r\n\r\nclass StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):\r\
       \n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer(parameter_name='source_account')\r\
       \n    @StorageAccountPreparer(parameter_name='target_account')\r\n    def test_storage_blob_incremental_copy(self,\

@@ -5,7 +5,7 @@
 
 import os
 from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
-from .storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
+from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
 class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):

@@ -3,6 +3,17 @@
 Release History
 ===============
 
+3.4.0
++++++
+* Updated to Batch SDK 5.0.0.
+
+3.3.4
++++++
+* Update adding tasks through --json-file to support AddTaskCollectionParameter syntax
+* Update documentation of accepted --json-file formats
+* Add --max-tasks-per-node-option to az batch pool create
+* Update show behavior of az batch account to show currently logged in account if no options are specified.
+
 3.3.3
 +++++
 * Update Batch Management SDK dependency

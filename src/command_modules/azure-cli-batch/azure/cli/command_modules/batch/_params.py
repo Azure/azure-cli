@@ -8,8 +8,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.mgmt.batch.models import AccountKeyType
-from azure.batch.models.batch_service_client_enums import \
-    (ComputeNodeDeallocationOption)
+from azure.batch.models import ComputeNodeDeallocationOption
 
 from azure.cli.core.commands.parameters import \
     (tags_type, get_location_type, resource_group_name_type,
@@ -37,6 +36,10 @@ def load_arguments(self, _):
 
     with self.argument_context('batch account') as c:
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'))
+
+    with self.argument_context('batch account show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.', required=False)
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.', required=False)
 
     with self.argument_context('batch account list') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group', required=False)
@@ -90,7 +93,7 @@ def load_arguments(self, _):
 
     # TODO: Refactor so the help text can be extracted automatically
     with self.argument_context('batch pool reset') as c:
-        c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON format. If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
+        c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('pool_id', help='The ID of the pool to update.')
         c.argument('application_package_references', nargs='+', type=application_package_reference_format, arg_group='Pool')
         c.argument('certificate_references', nargs='+', type=certificate_reference_format, arg_group='Pool')
@@ -130,7 +133,7 @@ def load_arguments(self, _):
         c.argument('thumbprint', help='The certificate thumbprint.', validator=validate_cert_settings)
 
     with self.argument_context('batch task create') as c:
-        c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())
+        c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON(formatted to match REST API request body). When submitting multiple tasks, accepts either an array of tasks or a TaskAddCollectionParamater. If this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('application_package_references', nargs='+', help='The space-separated list of IDs specifying the application packages to be installed. Space-separated application IDs with optional version in \'id[#version]\' format.', type=application_package_reference_format)
         c.argument('job_id', help='The ID of the job containing the task.')
         c.argument('task_id', help='The ID of the task.')

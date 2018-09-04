@@ -56,7 +56,16 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
     def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
-        return 'Bearer', 'top-secret-token-for-you', None
+        import datetime
+        fake_token = 'top-secret-token-for-you'
+        return 'Bearer', fake_token, {
+            "tokenType": "Bearer",
+            "expiresIn": 3600,
+            "expiresOn": (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "resource": args[3],
+            "accessToken": fake_token,
+            "refreshToken": fake_token
+        }
 
     mock_in_unit_test(unit_test,
                       'azure.cli.core._profile.CredsCache.retrieve_token_for_user',
