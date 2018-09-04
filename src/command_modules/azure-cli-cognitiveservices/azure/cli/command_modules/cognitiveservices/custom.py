@@ -7,6 +7,7 @@ from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.mgmt.cognitiveservices.models import CognitiveServicesAccountCreateParameters, Sku
 
 logger = get_logger(__name__)
@@ -36,6 +37,29 @@ def list_kinds(client):
     # The sku will have "kind" and we use that to extract full list of kinds.
     kinds = set([x.kind for x in client.list()])
     return sorted(list(kinds))
+
+
+def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_name=None):
+    if resource_group_name is not None or account_name is not None:
+        logger.warning(
+            'list-skus with an existing account has been deprecated and will be removed in a future release.')
+        if resource_group_name is None:
+            # account_name must not be None
+            raise CLIError('--resource-group is required when --name is specified.')
+        # keep the original behavior to avoid breaking changes
+        return cf_accounts(cmd.cli_ctx).list_skus(resource_group_name, account_name)
+
+    # in other cases, use kind and location to filter SKUs
+    def _filter_sku(_sku):
+        if kind is not None:
+            if _sku.kind != kind:
+                return False
+        if location is not None:
+            if location.lower() not in [x.lower() for x in _sku.locations]:
+                return False
+        return True
+
+    return [x for x in cf_resource_skus(cmd.cli_ctx).list() if _filter_sku(x)]
 
 
 def create(

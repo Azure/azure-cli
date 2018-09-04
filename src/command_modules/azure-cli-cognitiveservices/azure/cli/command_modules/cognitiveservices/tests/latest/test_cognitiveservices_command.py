@@ -67,7 +67,7 @@ class CognitiveServicesTests(ScenarioTest):
         self.assertTrue('Face' in results)
 
     @ResourceGroupPreparer()
-    def test_cognitiveservices_account_list_skus(self, resource_group):
+    def test_cognitiveservices_account_list_skus_legacy(self, resource_group):
 
         self.kwargs.update({
             'name': self.create_random_name(prefix='cs_cli_test_', length=16),
@@ -85,6 +85,29 @@ class CognitiveServicesTests(ScenarioTest):
         results = self.cmd('az cognitiveservices account list-skus -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(isinstance(results['value'], list))
         self.assertTrue(len(results['value']) > 0)
+
+    @ResourceGroupPreparer()
+    def test_cognitiveservices_account_list_skus(self, resource_group):
+
+        self.kwargs.update({
+            'kind': 'Face',
+            'location': 'westus'
+        })
+
+        results = self.cmd('az cognitiveservices account list-skus --kind {kind}').get_output_in_json()
+        self.assertTrue(isinstance(results, list))
+        self.assertTrue(len(results) > 0)
+
+        for sku in results:
+            self.assertTrue(sku['kind'] == self.kwargs['kind'])
+
+        results = self.cmd('az cognitiveservices account list-skus --kind {kind} --location {location}').get_output_in_json()
+        self.assertTrue(isinstance(results, list))
+        self.assertTrue(len(results) > 0)
+
+        for sku in results:
+            self.assertTrue(sku['kind'] == self.kwargs['kind'])
+            self.assertTrue(self.kwargs['location'].lower() in [x.lower() for x in sku['locations']])
 
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_list_usage(self, resource_group):
