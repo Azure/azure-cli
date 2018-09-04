@@ -87,19 +87,18 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                                        rsa_token_key_modulus, x509_certificate_token_key,
                                                        restriction_token_type, issuer, audience)
 
-    # TODO: probably some refactor in the near future to avoid having multiple ANDs.
-    if open_restriction and valid_token_restriction:
-        raise CLIError('You should only use one restriction type.')
+    if _count_truthy([open_restriction, valid_token_restriction]) > 1:
+        raise CLIError('You should only use exactly one restriction type.')
 
-    if clear_key_configuration and widevine_template:
-        raise CLIError('You should only use one configuration type.')
+    if _count_truthy([clear_key_configuration, widevine_template]) > 1:
+        raise CLIError('You should only use exactly one configuration type.')
 
     if clear_key_configuration:
         configuration = ContentKeyPolicyClearKeyConfiguration()
 
     if widevine_template:
-        jsonFile = _read_json(widevine_template)
-        configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=jsonFile)
+        json_file = _read_json(widevine_template)
+        configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=json_file)
 
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
@@ -166,8 +165,14 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                    content_key_policy_name, policy_options, description)
 
 
+# Returns string if not null, or an empty string otherwise.
 def _coalesce_str(value):
     return value or ''
+
+
+# Counts how many values are truthy on a list.
+def _count_truthy(values):
+    return len([value for value in values if value])
 
 
 def _symmetric_token_key_factory(symmetric_token_key):
@@ -186,18 +191,8 @@ def _x509_token_key_factory(x509_certificate_token_key):
 
 def _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
                                       x509_certificate_token_key):
-    available = 0
-
-    if symmetric_token_key is not None:
-        available += 1
-
-    if rsa_token_key_exponent is not None and rsa_token_key_modulus is not None:
-        available += 1
-
-    if x509_certificate_token_key is not None:
-        available += 1
-
-    return available
+    return _count_truthy([symmetric_token_key, rsa_token_key_exponent and rsa_token_key_modulus,
+                          x509_certificate_token_key])
 
 
 def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
