@@ -98,7 +98,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         configuration = ContentKeyPolicyClearKeyConfiguration()
 
     if widevine_template:
-        jsonFile = read_json(widevine_template)
+        jsonFile = _read_json(widevine_template)
         configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=jsonFile)
 
     if open_restriction:
@@ -208,6 +208,6 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
     return restriction_token_type and available_keys >= 1 and issuer and audience
 
 
-def read_json(path):
+def _read_json(path):
     with open(path, 'r') as file:
         return file.read()
