@@ -66,7 +66,7 @@ def acr_run(cmd,
 
         try:
             source_location = upload_source_code(
-                client, registry_name, resource_group_name,
+                client_registries, registry_name, resource_group_name,
                 source_location, tar_file_path, "", "")
         except Exception as err:
             raise CLIError(err)
