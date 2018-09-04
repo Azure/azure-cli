@@ -397,7 +397,7 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
-class LinuxWebappSceanrioTest(ScenarioTest):
+class LinuxWebappScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
@@ -446,7 +446,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
-class WebappACRSceanrioTest(ScenarioTest):
+class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
