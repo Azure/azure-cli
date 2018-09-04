@@ -36,7 +36,7 @@ from .sdk.models import (
 )
 from ._utils import validate_managed_registry
 from ._stream_utils import stream_logs
-from ._build_polling import get_build_with_polling
+from ._run_polling import get_run_with_polling
 
 
 logger = get_logger(__name__)
@@ -357,7 +357,7 @@ def acr_task_run(cmd,
     logger.warning("Waiting for run agent...")
 
     if no_logs:
-        return get_build_with_polling(client, run_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, True)
 

@@ -10,6 +10,8 @@ import os
 import uuid
 import tempfile
 
+from ._run_polling import get_run_with_polling
+
 from .sdk.models import (
     FileTaskRunRequest,
     PlatformProperties,
@@ -103,8 +105,7 @@ def acr_run(cmd,
     logger.warning("Queued a run with ID: %s", id)
     logger.warning("Waiting for agent...")
 
-    # TODO: Refactor polling operators.
-    # if no_logs:
-    #     return get_build_with_polling(client, id, registry_name, resource_group_name)
+    if no_logs:
+        return get_run_with_polling(client, id, registry_name, resource_group_name)
 
     return stream_logs(client, id, registry_name, resource_group_name, no_format, True)

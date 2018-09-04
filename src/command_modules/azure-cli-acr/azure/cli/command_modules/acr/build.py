@@ -21,7 +21,7 @@ from .sdk.models import (
 )
 
 from ._utils import validate_managed_registry
-from ._build_polling import get_build_with_polling
+from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -120,7 +120,7 @@ def acr_build(cmd,
     logger.warning("Waiting for agent...")
 
     if no_logs:
-        return get_build_with_polling(client, id, registry_name, resource_group_name)
+        return get_run_with_polling(client, id, registry_name, resource_group_name)
 
     return stream_logs(client, id, registry_name, resource_group_name, no_format, True)
 

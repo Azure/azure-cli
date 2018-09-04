@@ -21,7 +21,7 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
 )
 from ._utils import validate_managed_registry
 from ._stream_utils import stream_logs
-from ._build_polling import get_build_with_polling
+from ._run_polling import get_run_with_polling
 from .sdk.models import (
     OS
 )
@@ -325,7 +325,7 @@ def acr_build_task_run(cmd,
     logger.warning("Waiting for build agent...")
 
     if no_logs:
-        return get_build_with_polling(client, build_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, build_id, registry_name, resource_group_name)
 
     return stream_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
