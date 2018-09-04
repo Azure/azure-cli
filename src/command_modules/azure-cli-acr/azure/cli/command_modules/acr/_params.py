@@ -143,6 +143,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
 
+    with self.argument_context('acr run') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())

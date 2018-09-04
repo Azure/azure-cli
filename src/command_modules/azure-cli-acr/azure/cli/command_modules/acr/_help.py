@@ -530,6 +530,16 @@ helps['acr build'] = """
             az acr build -r MyRegistry .
 """
 
+helps['acr run'] = """
+    type: command
+    short-summary: Queues a quick run providing interactive feedback.
+    examples:
+        - name: Queue a local context, pushed to ACR with streaming logs.
+          text: >
+            az acr run -r MyRegistry https://github.com/Azure/acr-builder.git
+"""
+
+
 helps['acr build-task create'] = """
     type: command
     short-summary: Creates a new build definition which can be triggered by git commits or base image updates.

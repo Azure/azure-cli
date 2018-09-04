@@ -80,6 +80,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_runs
     )
 
+    acr_run_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.run#{}',
+        table_transformer=build_output_format,
+        client_factory=cf_acr_runs
+    )
+
+    # TODO: update task table_transformer
     acr_task_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
@@ -99,7 +106,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
         g.command('login', 'acr_login', table_transformer=None)
-        g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
+        g.command('show-usage', 'acr_show_usage',
+                  table_transformer=usage_output_format)
         g.generic_update_command('update',
                                  getter_name='acr_update_get',
                                  setter_name='acr_update_set',
@@ -110,6 +118,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import')
+
+    with self.command_group('acr', acr_build_util) as g:
+        g.command('build', 'acr_build')
+
+    with self.command_group('acr', acr_run_util) as g:
+        g.command('run', 'acr_run')
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
@@ -129,9 +143,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('create', 'acr_webhook_create')
         g.command('delete', 'acr_webhook_delete')
         g.show_command('show', 'acr_webhook_show')
-        g.command('get-config', 'acr_webhook_get_config', table_transformer=webhook_get_config_output_format)
-        g.command('list-events', 'acr_webhook_list_events', table_transformer=webhook_list_events_output_format)
-        g.command('ping', 'acr_webhook_ping', table_transformer=webhook_ping_output_format)
+        g.command('get-config', 'acr_webhook_get_config',
+                  table_transformer=webhook_get_config_output_format)
+        g.command('list-events', 'acr_webhook_list_events',
+                  table_transformer=webhook_list_events_output_format)
+        g.command('ping', 'acr_webhook_ping',
+                  table_transformer=webhook_ping_output_format)
         g.generic_update_command('update',
                                  getter_name='acr_webhook_update_get',
                                  setter_name='acr_webhook_update_set',
@@ -153,14 +170,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  client_factory=cf_acr_replications,
                                  table_transformer=replication_output_format)
 
-    with self.command_group('acr', acr_build_util) as g:
-        g.command('build', 'acr_build')
-
     # Deprecated (for backward compatibility).
-    with self.command_group('acr build-task', acr_build_task_util, 
-                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g: # This command group is deprecated and will be hidden immediately.
+    with self.command_group('acr build-task', acr_build_task_util,
+                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g:  # This command group is deprecated and will be hidden immediately.
         g.command('create', 'acr_build_task_create')
-        g.show_command('show', 'acr_build_task_show', table_transformer=build_task_detail_output_format)
+        g.show_command('show', 'acr_build_task_show',
+                       table_transformer=build_task_detail_output_format)
         g.command('list', 'acr_build_task_list')
         g.command('delete', 'acr_build_task_delete')
         g.command('update', 'acr_build_task_update')
@@ -177,7 +192,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr task', acr_task_util) as g:
         g.command('create', 'acr_task_create')
-        g.show_command('show', 'acr_task_show', table_transformer=task_detail_output_format)
+        g.show_command('show', 'acr_task_show',
+                       table_transformer=task_detail_output_format)
         g.command('list', 'acr_task_list')
         g.command('delete', 'acr_task_delete')
         g.command('update', 'acr_task_update')
