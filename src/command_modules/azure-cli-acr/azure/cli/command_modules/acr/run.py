@@ -37,7 +37,6 @@ def acr_run(cmd,
             encoded_task=None,
             encoded_values=None,
             set_value=None,
-            set_secret=None,
             no_format=False,
             no_logs=False,
             timeout=None,
@@ -47,7 +46,11 @@ def acr_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
-    # TODO: Validation. Only task_file_path + values_path || encoded validation
+    if not task_file and not encoded_task:
+        raise CLIError("Either --task-file or --encoded-task is required")
+
+    if task_file and encoded_task:
+        raise CLIError("Cannot use both --task-file and --encoded-task")
 
     # TODO: Remove this import once the SDK is merged.
     from ._client_factory import cf_acr_registries_build
@@ -79,25 +82,23 @@ def acr_run(cmd,
         logger.warning(
             "Sending context to {}.azurecr.io...".format(registry_name))
 
-    request = FileTaskRunRequest(
-        task_file_path=task_file,
-        values_file_path=values_file,
-        values=(set_value if set_value else []) +
-        (set_secret if set_secret else []),
-        source_location=source_location,
-        timeout=timeout,
-        platform=PlatformProperties(os=os_type)
-    )
-
-    # TODO: support encoded request.
-    # request = EncodedTaskRunRequest(
-    #     encoded_task_content=,
-    #     encoded_values_content="",
-    #     values = None,
-    #     timeout = 3000,
-    #     platform = PlatformProperties{},
-    #     agent_configuration=AgentProperties{},
-    # )
+    if task_file:
+        request = FileTaskRunRequest(
+            task_file_path=task_file,
+            values_file_path=values_file,
+            values=(set_value if set_value else []),
+            source_location=source_location,
+            timeout=timeout,
+            platform=PlatformProperties(os=os_type)
+        )
+    else:
+        request = EncodedTaskRunRequest(
+            encoded_task_content=encoded_task,
+            encoded_values_content=encoded_values,
+            values=(set_value if set_value else []),
+            timeout=timeout,
+            platform=PlatformProperties(os=os_type)
+        )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,

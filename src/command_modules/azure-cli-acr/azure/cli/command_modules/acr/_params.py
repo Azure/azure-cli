@@ -151,7 +151,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('encoded_task_file', help="The encoded task file.")
         c.argument('encoded_values_file', help="The encoded values file.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
-        c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])

@@ -77,7 +77,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
     if docker_file is None and task_file is None:
-        raise CLIError("One of --dockerfile or --task-file argument is required")
+        raise CLIError("Either --dockerfile or --task-file argument is required")
     if docker_file is not None and task_file is not None:
         raise CLIError("Cannot use both --dockerfile and --task-file arguments to create a task")
     if commit_trigger_enabled and not git_access_token:
