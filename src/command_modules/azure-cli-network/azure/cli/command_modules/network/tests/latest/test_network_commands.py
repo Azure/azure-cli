@@ -147,7 +147,6 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix list -g {rg}',
                  checks=self.is_empty())
 
-
         # Test public IP create with prefix
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
@@ -1731,7 +1730,6 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
                  checks=self.check('serviceEndpoints', None))
 
-
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
     def test_network_subnet_delegation(self, resource_group):
         self.kwargs.update({
@@ -2027,7 +2025,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'nsg': 'nsg1',
             'capture': 'capture1',
-            'private-ip':  '10.0.0.9'
+            'private-ip': '10.0.0.9'
         })
         self._configure_network_watcher()
         vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}').get_output_in_json()
@@ -2041,7 +2039,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')

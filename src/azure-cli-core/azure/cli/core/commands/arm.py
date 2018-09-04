@@ -1060,7 +1060,7 @@ def _gen_guid():
 
 
 def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
-    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     if not is_valid_resource_id(arm_id):
         raise CLIError("'{}' is not a valid ID.".format(arm_id))
@@ -1103,6 +1103,7 @@ def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
         api_version = None
         rt = next((t for t in provider.resource_types if t.resource_type.lower() == resource_type_str.lower()), None)
         if not rt:
+            from azure.cli.core.parser import IncorrectUsageError
             raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         try:
             # if the service specifies, use the default API version

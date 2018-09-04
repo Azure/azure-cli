@@ -1817,7 +1817,7 @@ def set_lb_frontend_ip_configuration(
         instance.public_ip_address = PublicIPAddress(id=public_ip_address)
 
     if public_ip_prefix:
-        instance.public_ip_prefix=SubResource(id=public_ip_prefix)
+        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
 
     return parent
 
@@ -1841,8 +1841,8 @@ def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_n
     rule = OutboundRule(
         protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
         backend_address_pool=SubResource(id=backend_address_pool),
-        frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations] \
-            if frontend_ip_configurations else None,
+        frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations]
+        if frontend_ip_configurations else None,
         allocated_outbound_ports=outbound_ports, name=item_name)
     _upsert(lb, 'outbound_rules', rule, 'name')
     poller = client.create_or_update(resource_group_name, load_balancer_name, lb)
@@ -1857,10 +1857,10 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
     _set_param(instance, 'allocated_outbound_ports', outbound_ports)
     _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
     _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
-    _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool) \
-        if backend_address_pool else None)
-    _set_param(instance, 'frontend_ip_configurations', \
-        [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
+    _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool)
+               if backend_address_pool else None)
+    _set_param(instance, 'frontend_ip_configurations',
+               [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
 
     return parent
 
@@ -2623,9 +2623,9 @@ def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, r
 
 
 def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, resource,
-                                          direction=None, protocol=None, source=None, destination=None,
-                                          destination_port=None, queries=None,
-                                          resource_group_name=None, resource_type=None, parent=None):
+                                         direction=None, protocol=None, source=None, destination=None,
+                                         destination_port=None, queries=None,
+                                         resource_group_name=None, resource_type=None, parent=None):
     TrafficQuery = cmd.get_models('TrafficQuery')
     if not queries:
         queries = [TrafficQuery(
@@ -2816,6 +2816,7 @@ def update_service_endpoint_policy(instance, tags=None):
 
     return instance
 
+
 def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
                                               service_endpoint_policy_definition_name, service, service_resources,
                                               description=None):
@@ -2825,6 +2826,7 @@ def create_service_endpoint_policy_definition(cmd, resource_group_name, service_
                                                  service_resources=service_resources)
     return client.create_or_update(resource_group_name, service_endpoint_policy_name,
                                    service_endpoint_policy_definition_name, policy_def)
+
 
 def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
     if service is not None:
@@ -2838,6 +2840,7 @@ def update_service_endpoint_policy_definition(instance, service=None, service_re
 
     return instance
 # endregion
+
 
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
