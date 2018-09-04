@@ -59,7 +59,7 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
                 return False
         return True
 
-    return list(filter(_filter_sku, cf_resource_skus(cmd.cli_ctx).list()))
+    return [x for x in cf_resource_skus(cmd.cli_ctx).list() if _filter_sku(x)]
 
 
 def create(
