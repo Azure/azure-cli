@@ -330,7 +330,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('scaleUnits', '{scaleUnits2}')
         ])
-        
+
         self.cmd('az ams streaming endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
     @ResourceGroupPreparer()
