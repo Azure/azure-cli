@@ -11,10 +11,8 @@ import os
 
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.operations import BuildsOperations
 from .sdk.models import (
     DockerBuildRequest,
     PlatformProperties,
@@ -24,63 +22,13 @@ from .sdk.models import (
 
 from ._utils import validate_managed_registry
 from ._build_polling import get_build_with_polling
-from ._azure_utils import get_blob_info
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
-
-from azure.storage.blob import (
-    AppendBlobService,
-)
 
 logger = get_logger(__name__)
 
 
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
-
-
-def acr_build_show_logs(client,
-                        build_id,
-                        registry_name,
-                        resource_group_name,
-                        no_format=False,
-                        raise_error_on_failure=False):
-    log_file_sas = None
-    error_message = "Could not get build logs for build ID: {}".format(
-        build_id)
-    try:
-        if isinstance(client, BuildsOperations):
-            # backward compatibility for build-task
-            build_log_result = client.get_log_link(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                build_id=build_id)
-        else:
-            build_log_result = client.get_log_sas_url(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                run_id=build_id)
-        log_file_sas = build_log_result.log_link
-    except (AttributeError, CloudError) as e:
-        logger.debug("%s Exception: %s", error_message, e)
-        raise CLIError(error_message)
-
-    if not log_file_sas:
-        logger.debug("%s Empty SAS URL.", error_message)
-        raise CLIError(error_message)
-
-    account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
-        log_file_sas)
-
-    stream_logs(no_format,
-                byte_size=1024,  # 1 KiB
-                timeout_in_seconds=1800,  # 30 minutes
-                blob_service=AppendBlobService(
-                    account_name=account_name,
-                    sas_token=sas_token,
-                    endpoint_suffix=endpoint_suffix),
-                container_name=container_name,
-                blob_name=blob_name,
-                raise_error_on_failure=raise_error_on_failure)
 
 
 def acr_build(cmd,
@@ -100,7 +48,7 @@ def acr_build(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
-    # TODO: remove
+    # TODO: Remove this import once the SDK is merged.
     from ._client_factory import cf_acr_registries_build
     client_registries = cf_acr_registries_build(cmd.cli_ctx)
 
@@ -173,7 +121,7 @@ def acr_build(cmd,
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def _check_local_docker_file(source_location, docker_file_path):

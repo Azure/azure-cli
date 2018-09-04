@@ -20,7 +20,7 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     DockerBuildStepUpdateParameters
 )
 from ._utils import validate_managed_registry
-from .build import acr_build_show_logs
+from ._stream_utils import stream_logs
 from ._build_polling import get_build_with_polling
 from .sdk.models import (
     OS
@@ -327,7 +327,7 @@ def acr_build_task_run(cmd,
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def acr_build_task_show_build(cmd,
@@ -411,7 +411,7 @@ def acr_build_task_logs(cmd,
                                                     build_task_name=build_task_name,
                                                     image=image))
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format)
 
 
 def _get_list_builds_message(base_message, build_task_name=None, image=None):

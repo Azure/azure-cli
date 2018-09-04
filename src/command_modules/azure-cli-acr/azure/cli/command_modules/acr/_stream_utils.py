@@ -11,19 +11,76 @@ from random import uniform
 from azure.common import AzureHttpError
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.containerregistry.v2018_02_01_preview.operations import BuildsOperations
+from azure.storage.blob import AppendBlobService
+from ._azure_utils import get_blob_info
 
 logger = get_logger(__name__)
 
-def stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                byte_size,
-                timeout_in_seconds,
-                blob_service,
-                container_name,
-                blob_name,
-                raise_error_on_failure):
+DEFAULT_CHUNK_SIZE = 1024
+DEFAULT_LOG_TIMEOUT_IN_SEC = 60 * 30  # 30 minutes
+
+
+def stream_logs(client,
+                id,
+                registry_name,
+                resource_group_name,
+                no_format=False,
+                raise_error_on_failure=False):
+    log_file_sas = None
+    is_build = isinstance(client, BuildsOperations)
+    error_msg = "Could not get logs for run ID: {}".format(id)
+    if is_build:
+        error_msg = "Could not get logs for build ID: {}".format(id)
+
+    try:
+        if is_build:
+            log_file_sas = client.get_log_link(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                build_id=id).log_link
+        else:
+            log_file_sas = client.get_log_sas_url(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                run_id=id).log_link
+    except (AttributeError, CloudError) as e:
+        logger.debug("%s Exception: %s", error_msg, e)
+        raise CLIError(error_msg)
+
+    if not log_file_sas:
+        logger.debug("%s Empty SAS URL.", error_msg)
+        raise CLIError(error_msg)
+
+    account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
+        log_file_sas)
+
+    _stream_logs(no_format,
+                 DEFAULT_CHUNK_SIZE,
+                 DEFAULT_LOG_TIMEOUT_IN_SEC,
+                 AppendBlobService(
+                     account_name=account_name,
+                     sas_token=sas_token,
+                     endpoint_suffix=endpoint_suffix),
+                 container_name,
+                 blob_name,
+                 raise_error_on_failure,
+                 is_build)
+
+
+def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+                 byte_size,
+                 timeout_in_seconds,
+                 blob_service,
+                 container_name,
+                 blob_name,
+                 raise_error_on_failure,
+                 is_build):
 
     if not no_format:
         colorama.init()
+
     stream = BytesIO()
     metadata = {}
     start = 0
@@ -122,8 +179,7 @@ def stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statemen
                 sleep_time = min(sleep_time * 2, max_sleep_time)
                 logger.debug("Resetting failure count to %d", num_fails)
 
-            # 1.0 <= x < 2.0
-            rnd = uniform(1, 2)
+            rnd = uniform(1, 2)  # 1.0 <= x < 2.0
             total_sleep_time = sleep_time + rnd
             consecutive_sleep_in_sec += total_sleep_time
             logger.debug("Base sleep time: %d, random delay: %d, total: %d, consecutive: %d",
@@ -138,34 +194,34 @@ def stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statemen
         print(curr_bytes.decode('utf-8', errors='ignore'))
 
     build_status = _get_build_status(metadata).lower()
-    logger.debug("Build status was: '%s'", build_status)
+    logger.debug("status was: '%s'", build_status)
+
+    prefix = "Run"
+    if is_build:
+        prefix = "Build"
 
     if raise_error_on_failure:
         if build_status == 'internalerror' or build_status == 'failed':
-            raise CLIError("Build failed")
+            raise CLIError("{} failed".format(prefix))
         elif build_status == 'timedout':
-            raise CLIError("Build timed out")
+            raise CLIError("{} timed out".format(prefix))
         elif build_status == 'canceled':
-            raise CLIError("Build was canceled")
+            raise CLIError("{} was canceled".format(prefix))
 
 
 def _blob_is_not_complete(metadata):
     if not metadata:
         return True
-
     for key in metadata:
         if key.lower() == 'complete':
             return False
-
     return True
 
 
 def _get_build_status(metadata):
     if metadata is None:
         return 'inprogress'
-
     for key in metadata:
         if key.lower() == 'complete':
             return metadata[key]
-
     return 'inprogress'

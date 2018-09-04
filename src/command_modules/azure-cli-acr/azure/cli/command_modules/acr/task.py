@@ -35,7 +35,7 @@ from .sdk.models import (
     OS
 )
 from ._utils import validate_managed_registry
-from .build import acr_build_show_logs
+from ._stream_utils import stream_logs
 from ._build_polling import get_build_with_polling
 
 
@@ -354,7 +354,7 @@ def acr_task_run(cmd,
     if no_logs:
         return get_build_with_polling(client, run_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, run_id, registry_name, resource_group_name, True)
+    return stream_logs(client, run_id, registry_name, resource_group_name, True)
 
 
 def acr_task_show_run(cmd,
@@ -437,7 +437,7 @@ def acr_task_logs(cmd,
                                                   task_name=task_name,
                                                   image=image))
 
-    return acr_build_show_logs(client, run_id, registry_name, resource_group_name)
+    return stream_logs(client, run_id, registry_name, resource_group_name)
 
 
 def _get_list_runs_message(base_message, task_name=None, image=None):
