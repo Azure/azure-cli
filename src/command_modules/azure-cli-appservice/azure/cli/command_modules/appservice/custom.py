@@ -683,8 +683,8 @@ def _get_acr_cred(cli_ctx, registry_name):
     if registry.admin_user_enabled:  # pylint: disable=no-member
         cred = client.list_credentials(resource_group_name, registry_name)
         return cred.username, cred.passwords[0].value
-    raise CLIError("Failed to retrieve container registry credentails. Please either provide the "
-                   "credentail or run 'az acr update -n {} --admin-enabled true' to enable "
+    raise CLIError("Failed to retrieve container registry credentials. Please either provide the "
+                   "credentials or run 'az acr update -n {} --admin-enabled true' to enable "
                    "admin first.".format(registry_name))
 
 
