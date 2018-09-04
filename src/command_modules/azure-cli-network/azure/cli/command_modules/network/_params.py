@@ -425,6 +425,7 @@ def load_arguments(self, _):
         c.argument('device_path', options_list=('--path',), arg_type=get_enum_type(device_path_values))
         c.argument('vlan_id', type=int)
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
 
     with self.argument_context('network express-route update') as c:
         c.argument('sku_family', sku_family_type, default=None)
