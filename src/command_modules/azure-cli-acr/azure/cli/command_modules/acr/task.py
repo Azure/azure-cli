@@ -353,8 +353,8 @@ def acr_task_run(cmd,
     )
 
     run_id = queued_run.run_id
-    logger.warning("Queued a run with run ID: %s", run_id)
-    logger.warning("Waiting for run agent...")
+    logger.warning("Queued a run with ID: %s", run_id)
+    logger.warning("Waiting for agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)

@@ -321,8 +321,8 @@ def acr_build_task_run(cmd,
                                       BuildTaskBuildRequest(build_task_name=build_task_name)))
 
     build_id = queued_build.build_id
-    logger.warning("Queued a build with build ID: %s", build_id)
-    logger.warning("Waiting for build agent...")
+    logger.warning("Queued a build with ID: %s", build_id)
+    logger.warning("Waiting for agent...")
 
     if no_logs:
         return get_run_with_polling(client, build_id, registry_name, resource_group_name)

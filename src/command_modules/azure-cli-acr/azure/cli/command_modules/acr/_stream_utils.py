@@ -18,7 +18,7 @@ from ._azure_utils import get_blob_info
 
 logger = get_logger(__name__)
 
-DEFAULT_CHUNK_SIZE = 1024
+DEFAULT_CHUNK_SIZE = 1024 * 4
 DEFAULT_LOG_TIMEOUT_IN_SEC = 60 * 30  # 30 minutes
 
 
