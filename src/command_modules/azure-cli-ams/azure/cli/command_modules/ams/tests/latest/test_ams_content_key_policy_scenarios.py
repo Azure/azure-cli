@@ -29,7 +29,6 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction',
             'jsonFile': self._get_test_data_file('widevineTemplate.json'),
         })
 
