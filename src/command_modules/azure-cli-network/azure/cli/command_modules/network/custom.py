@@ -1425,7 +1425,7 @@ def lists_match(l1, l2):
 # region ExpressRoutes
 def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
                          service_provider_name, location=None, tags=None, no_wait=False,
-                         sku_family=None, sku_tier=None):
+                         sku_family=None, sku_tier=None, allow_global_reach=None):
     ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = cmd.get_models(
         'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties')
     client = network_client_factory(cmd.cli_ctx).express_route_circuits
@@ -1436,13 +1436,15 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
             service_provider_name=service_provider_name,
             peering_location=peering_location,
             bandwidth_in_mbps=bandwidth_in_mbps),
-        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family)
+        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family),
+        allow_global_reach=allow_global_reach
     )
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, circuit_name, circuit)
 
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
-                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
+                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
+                         allow_global_reach=None):
     if bandwidth_in_mbps is not None:
         instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
 
@@ -1460,6 +1462,9 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
 
     if tags is not None:
         instance.tags = tags
+
+    if allow_global_reach is not None:
+        instance.allow_global_reach = allow_global_reach
 
     return instance
 
@@ -1792,8 +1797,8 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None):
-    PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
+        virtual_network_name=None, public_ip_prefix=None):
+    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if private_ip_address == '':
         instance.private_ip_allocation_method = private_ip_address_allocation
         instance.private_ip_address = None
@@ -1810,6 +1815,9 @@ def set_lb_frontend_ip_configuration(
         instance.public_ip_address = None
     elif public_ip_address is not None:
         instance.public_ip_address = PublicIPAddress(id=public_ip_address)
+
+    if public_ip_prefix:
+        instance.public_ip_prefix=SubResource(id=public_ip_prefix)
 
     return parent
 
@@ -3010,12 +3018,8 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
-                  route_table=None, service_endpoints=None, service_endpoint_policy=None):
-    '''Create a virtual network (VNet) subnet.
-    :param str address_prefix: address prefix in CIDR format.
-    :param str network_security_group: Name or ID of network security
-        group to associate with the subnet.
-    '''
+                  route_table=None, service_endpoints=None, service_endpoint_policy=None,
+                  delegations=None):
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -3032,18 +3036,15 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
         subnet.service_endpoint_policies = []
         for policy in service_endpoint_policy:
             subnet.service_endpoint_policies.append(SubResource(id=policy))
+    if delegations:
+        subnet.delegations = delegations
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None):
-    '''update existing virtual sub network
-    :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
-    :param str network_security_group: attach with existing network security group,
-        both name or id are accepted. Use empty string "" to detach it.
-    '''
+                  route_table=None, service_endpoints=None, delegations=None):
     NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
 
     if address_prefix:
@@ -3063,7 +3064,17 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         for service in service_endpoints:
             instance.service_endpoints.append(ServiceEndpoint(service=service))
 
+    if delegations:
+        instance.delegations = delegations
+
     return instance
+
+
+def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
+    client = network_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.available_resource_group_delegations.list(location, resource_group_name).value
+    return client.available_delegations.list(location).value
 
 
 def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,

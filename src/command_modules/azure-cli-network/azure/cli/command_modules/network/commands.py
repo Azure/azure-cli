@@ -47,7 +47,7 @@ from azure.cli.command_modules.network._validators import (
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace)
+    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -695,17 +695,16 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
+        g.custom_command('create', 'create_subnet')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('create', 'create_subnet')
         g.generic_update_command('update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
-
+        g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
     # endregion
 
     # region VirtualNetworkGateways
-
     with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
         g.generic_update_command('update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)

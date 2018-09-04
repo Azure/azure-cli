@@ -207,6 +207,19 @@ def validate_cert(namespace):
             pass
 
 
+def validate_delegations(cmd, namespace):
+    if namespace.delegations:
+        Delegation = cmd.get_models('Delegation')
+        delegations = []
+        for i, item in enumerate(namespace.delegations):
+            if '/' not in item and len(item.split('.')) == 3:
+                # convert names to serviceNames
+                _, service, resource_type = item.split('.')
+                item = 'Microsoft.{}/{}'.format(service, resource_type) 
+            delegations.append(Delegation(name=str(i), service_name=item))
+        namespace.delegations = delegations
+
+
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -1173,7 +1186,6 @@ def process_nw_config_diagnostic_namespace(cmd, namespace):
     get_network_watcher_from_resource(cmd, namespace)
 
 
-
 def process_lb_outbound_rule_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
 
@@ -1183,3 +1195,13 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
         if not is_valid_resource_id(namespace.backend_address_pool):
             namespace.backend_address_pool = _generate_lb_subproperty_id(
                 cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
+
+
+def process_list_delegations_namespace(cmd, namespace):
+
+    if not namespace.resource_group_name and not namespace.location:
+        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
+
+    if not namespace.location:
+        from azure.cli.core.commands.validators import get_default_location_from_resource_group
+        get_default_location_from_resource_group(cmd, namespace)
