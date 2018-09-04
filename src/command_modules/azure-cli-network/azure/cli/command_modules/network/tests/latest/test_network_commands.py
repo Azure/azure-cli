@@ -1732,12 +1732,11 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('serviceEndpoints', None))
 
 
-    #@ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
-    def test_network_subnet_delegation(self): #, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
+    def test_network_subnet_delegation(self, resource_group):
         self.kwargs.update({
             'vnet': 'vnet1',
             'subnet': 'subnet1',
-            'rg': 'tjp-vm'  # remove later
         })
         result = self.cmd('network vnet subnet list-available-delegations -l eastus').get_output_in_json()
         self.assertTrue(len(result) > 1, True)

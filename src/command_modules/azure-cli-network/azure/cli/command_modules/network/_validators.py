@@ -214,7 +214,7 @@ def validate_delegations(cmd, namespace):
         for i, item in enumerate(namespace.delegations):
             if '/' not in item and len(item.split('.')) == 3:
                 # convert names to serviceNames
-                (_, service, resource_type) = item.split('.')
+                _, service, resource_type = item.split('.')
                 item = 'Microsoft.{}/{}'.format(service, resource_type) 
             delegations.append(Delegation(name=str(i), service_name=item))
         namespace.delegations = delegations
