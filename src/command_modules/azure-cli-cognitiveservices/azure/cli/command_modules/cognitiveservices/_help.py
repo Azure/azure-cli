@@ -48,6 +48,9 @@ helps['cognitiveservices account create'] = """
         - name: --kind
           populator-commands:
             - az cognitiveservices account list-kinds
+        - name: --sku
+          populator-commands:
+            - az cognitiveservices account list-skus
     examples:
         - name: Create an S0 face API Cognitive Services account in West Europe without confirmation required.
           text: az cognitiveservices account create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
@@ -76,9 +79,20 @@ helps['cognitiveservices account update'] = """
 helps['cognitiveservices account list-skus'] = """
     type: command
     short-summary: List the SKUs avaiable for an Azure Cognitive Services account.
+    parameters:
+        - name: --name -n
+          long-summary: |
+              --kind and --location will be ignored when --name is specified.
+              --resource-group is required when when --name is specified.
+        - name: --resource-group -g
+          long-summary: |
+              --resource-group is used when when --name is specified. In other cases it will be ignored.
+        - name: --kind
+          populator-commands:
+            - az cognitiveservices account list-kinds
     examples:
         - name: Show SKUs.
-          text: az cognitiveservices account list-skus --name myresource -g cognitive-services-resource-group
+          text: az cognitiveservices account list-skus --kind Face --location westus
 """
 
 
