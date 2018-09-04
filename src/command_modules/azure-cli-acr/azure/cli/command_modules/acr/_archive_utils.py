@@ -39,7 +39,7 @@ def upload_source_code(client, registry_name, resource_group_name,
 
     logger.debug("Uploading archived source code from '%s'.", tar_file_path)
     logger.warning(
-        "Sending build context ({0:.3f} {1}) to ACR...".format(size, unit))
+        "Sending build context ({0:.3f} {1}) to {2}.azurecr.io...".format(size, unit, registry_name))
 
     upload_url = None
     relative_path = None
