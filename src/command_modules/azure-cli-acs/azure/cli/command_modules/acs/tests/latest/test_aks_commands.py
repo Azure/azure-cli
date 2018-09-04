@@ -272,7 +272,29 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key' 
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.check('[0].scope', '{vnet_subnet_id}')
+        ])
+
+
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
