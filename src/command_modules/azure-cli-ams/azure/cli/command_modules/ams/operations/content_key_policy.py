@@ -93,9 +93,11 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
 
     if clear_key_configuration and widevine_template:
         raise CLIError('You should only use one configuration type.')
-    elif clear_key_configuration and not widevine_template:
+
+    if clear_key_configuration and not widevine_template:
         configuration = ContentKeyPolicyClearKeyConfiguration()
-    elif widevine_template:
+
+    if widevine_template:
         jsonFile = read_json(widevine_template)
         configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=jsonFile)
 
