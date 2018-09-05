@@ -3,20 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from ._client_factory import cf_acr_registries
-
-
-def validate_registry_name(cmd, namespace):
-    if namespace.registry_name:
-        client = cf_acr_registries(cmd.cli_ctx)
-        registry_name = namespace.registry_name
-
-        result = client.check_name_availability(registry_name)
-
-        if not result.name_available:  # pylint: disable=no-member
-            raise CLIError(result.message)  # pylint: disable=no-member
-
 
 def validate_headers(namespace):
     """Extracts multiple space-separated headers in key[=value] format. """
