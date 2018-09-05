@@ -1773,11 +1773,15 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation='dynamic', zone=None):
+        private_ip_address_allocation=None, zone=None):
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+
+    if private_ip_address_allocation is None:
+        private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
+
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
@@ -1800,10 +1804,10 @@ def set_lb_frontend_ip_configuration(
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if private_ip_address == '':
-        instance.private_ip_allocation_method = private_ip_address_allocation
+        instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
     elif private_ip_address is not None:
-        instance.private_ip_allocation_method = private_ip_address_allocation
+        instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
 
     if subnet == '':
@@ -2853,10 +2857,10 @@ def list_traffic_manager_profiles(cmd, resource_group_name=None):
 
 
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
-                                   routing_method, unique_dns_name, monitor_path='/',
+                                   routing_method, unique_dns_name, monitor_path=None,
                                    monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
                                    profile_status=ProfileStatus.enabled.value,
-                                   ttl=30, tags=None):
+                                   ttl=30, tags=None, interval=None, timeout=None, max_failures=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
     client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
@@ -2864,13 +2868,17 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                       traffic_routing_method=routing_method,
                       dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
                       monitor_config=MonitorConfig(protocol=monitor_protocol,
-                                                   port=monitor_port, path=monitor_path))
+                                                   port=monitor_port,
+                                                   path=monitor_path,
+                                                   interval_in_seconds=interval,
+                                                   timeout_in_seconds=timeout,
+                                                   tolerated_number_of_failures=max_failures))
     return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
 
 
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
-                                   ttl=None):
+                                   ttl=None, timeout=None, interval=None, max_failures=None):
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
@@ -2884,8 +2892,16 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
         instance.monitor_config.protocol = monitor_protocol
     if monitor_port is not None:
         instance.monitor_config.port = monitor_port
-    if monitor_path is not None:
+    if monitor_path is '':
+        instance.monitor_config.path = None
+    elif monitor_path is not None:
         instance.monitor_config.path = monitor_path
+    if interval is not None:
+        instance.monitor_config.interval_in_seconds = interval
+    if timeout is not None:
+        instance.monitor_config.timeout_in_seconds = timeout
+    if max_failures is not None:
+        instance.monitor_config.tolerated_number_of_failures = max_failures
 
     # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
     for endpoint in instance.endpoints:
