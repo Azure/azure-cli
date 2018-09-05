@@ -27,7 +27,7 @@ helps['iotcentral app create'] = """
             az iotcentral app create --resource-group MyResourceGroup --name MyApp --subdomain myapp
         - name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region.
           text: >
-            az iotcentral create --resource-group MyResourceGroup --name MyApp --sku S1 --location westus
+            az iotcentral app create --resource-group MyResourceGroup --name MyApp --sku S1 --location westus
             --subdomain myapp
 """
 
@@ -37,7 +37,7 @@ helps['iotcentral app show'] = """
     examples:
         - name: Show an IoT Central application.
           text: >
-            az iotcentral show --name MyApp
+            az iotcentral app show --name MyApp
 """
 
 helps['iotcentral app update'] = """

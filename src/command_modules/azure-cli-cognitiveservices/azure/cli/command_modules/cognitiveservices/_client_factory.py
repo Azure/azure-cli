@@ -7,12 +7,12 @@
 def get_cognitiveservices_management_client(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
-    return get_mgmt_service_client(cli_ctx, CognitiveServicesManagementClient, location='notused')
-
-
-def cf_cognitive_service_accounts(cli_ctx, *_):
-    return get_cognitiveservices_management_client(cli_ctx).cognitive_services_accounts
+    return get_mgmt_service_client(cli_ctx, CognitiveServicesManagementClient)
 
 
 def cf_accounts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).accounts
+
+
+def cf_resource_skus(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).resource_skus
