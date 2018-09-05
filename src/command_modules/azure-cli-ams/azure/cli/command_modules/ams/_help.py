@@ -202,17 +202,17 @@ helps['ams content-key-policy list'] = """
     short-summary: List all the content key policies within an Azure Media Services account.
 """
 
-helps['ams content-key-policy options'] = """
+helps['ams content-key-policy option'] = """
     type: group
     short-summary: Manage options for an existing content key policy.
 """
 
-helps['ams content-key-policy options add'] = """
+helps['ams content-key-policy option add'] = """
     type: command
     short-summary: Add a new option to an existing content key policy.
 """
 
-helps['ams content-key-policy options remove'] = """
+helps['ams content-key-policy option remove'] = """
     type: command
     short-summary: Remove an option from an existing content key policy.
 """
