@@ -16,6 +16,10 @@ Release History
 * `network express-route create/update`: Add `--allow-global-reach` flag.
 * `network vnet subnet create/update`: Add support for `--delegation`.
 * Added `network vnet subnet list-available-delegations` command.
+* `network traffic-manager profile create/update`: Added support for `--interval`, `--timeout` and `--max-failures` for Monitor configuration.
+  Deprecated options `--monitor-path`, `--monitor-port` and `--monitor-protocol` in favor of `--path`, `--port`, `--protocol`.
+* `network lb frontend-ip create/update`: Fixed the logic for setting private IP allocation method. If a private IP address is provided, the
+  allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
 
 2.2.4
 +++++
