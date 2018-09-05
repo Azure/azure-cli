@@ -204,17 +204,17 @@ helps['ams content-key-policy list'] = """
 
 helps['ams content-key-policy options'] = """
     type: group
-    short-summary: Manage ContentKeyPolicyOptions for existing policies.
+    short-summary: Manage options for an existing content key policy.
 """
 
 helps['ams content-key-policy options add'] = """
     type: command
-    short-summary: Add a new ContentKeyPolicyOption for an existing policy.
+    short-summary: Add a new option to an existing content key policy.
 """
 
 helps['ams content-key-policy options remove'] = """
     type: command
-    short-summary: Remove an existing ContentKeyPolicyOption for an existing policy.
+    short-summary: Remove an option from an existing content key policy.
 """
 
 helps['ams job'] = """
