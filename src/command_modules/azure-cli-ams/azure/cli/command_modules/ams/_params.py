@@ -26,8 +26,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
     default_policy_name_arg_type = CLIArgumentType(options_list=['--content-key-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
-    correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Customer provided correlation data that will be returned in Job completed events. This data is in key=value format separated by spaces.", nargs='*', metavar='CORRELATION_DATA')
-    token_claim_type = CLIArgumentType(validator=validate_token_claim, help='A list of required token claims in key=value format separated by spaces.', nargs='*', metavar='ASYMMETRIC TOKEN CLAIMS')
+    correlation_data_type = CLIArgumentType(validator=validate_correlation_data, help="Space-separated list of customer provided correlation data that will be returned in Job completed events in key=value format.", nargs='*', metavar='CORRELATION_DATA')
+    token_claim_type = CLIArgumentType(validator=validate_token_claim, help='Space-separated list of required token claims in key=value format.', nargs='*', metavar='ASYMMETRIC TOKEN CLAIMS')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
