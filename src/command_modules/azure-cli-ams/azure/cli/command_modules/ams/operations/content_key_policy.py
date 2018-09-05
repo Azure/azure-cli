@@ -97,8 +97,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         configuration = ContentKeyPolicyClearKeyConfiguration()
 
     if widevine_template:
-        json_file = _read_json(widevine_template)
-        configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=json_file)
+        configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
 
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
