@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.4
++++++
+* Minor fixes
+
+0.2.3
++++++
+* Minor fixes
+
 0.2.2
 +++++
 * added readonly property 'pendingReplicationOperationsCount' to georecovery-alias

@@ -396,7 +396,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM.')
+            c.argument('admin_username', help='Username for the VM.', default=_get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
@@ -412,7 +412,7 @@ def load_arguments(self, _):
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
             c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
             c.ignore('disk_info', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
+            c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
 
@@ -487,3 +487,11 @@ def load_arguments(self, _):
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
     # endregion
+
+
+def _get_default_admin_username():
+    import getpass
+    try:
+        return getpass.getuser()
+    except KeyError:
+        return None

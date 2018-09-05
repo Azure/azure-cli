@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     tags_type)
 
-from azure.mgmt.maps.models.maps_management_client_enums import KeyType
+from azure.mgmt.maps.models import KeyType
 
 
 def load_arguments(self, _):

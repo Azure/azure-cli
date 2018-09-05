@@ -18,8 +18,28 @@ def list_resources(client, resource_group_name=None):
     return client.list()
 
 
+def list_usages(client, resource_group_name, account_name):
+    """
+    List usages for Azure Cognitive Services account.
+    """
+    return client.get_usages(resource_group_name, account_name).value
+
+
+def list_kinds(client):
+    """
+    List all valid kinds for Azure Cognitive Services account.
+
+    :param client: the ResourceSkusOperations
+    :return: a list
+    """
+    # The client should be ResourceSkusOperations, and list() should return a list of SKUs for all regions.
+    # The sku will have "kind" and we use that to extract full list of kinds.
+    kinds = set([x.kind for x in client.list()])
+    return sorted(list(kinds))
+
+
 def create(
-        client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
+        client, resource_group_name, account_name, sku_name, kind, location, tags=None, api_properties=None, yes=None):
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
         ' or the Translator Speech API to improve Microsoft products and services.'\
@@ -42,12 +62,17 @@ def create(
         option = prompt_y_n(hint)
         if not option:
             raise CLIError('Operation cancelled.')
-    sku = Sku(sku_name)
-    properties = {}
-    params = CognitiveServicesAccountCreateParameters(sku, kind, location, properties, tags)
+    sku = Sku(name=sku_name)
+
+    if api_properties is None:
+        properties = {}
+    else:
+        properties = {"apiProperties": api_properties}
+    params = CognitiveServicesAccountCreateParameters(sku=sku, kind=kind, location=location,
+                                                      properties=properties, tags=tags)
     return client.create(resource_group_name, account_name, params)
 
 
 def update(client, resource_group_name, account_name, sku_name=None, tags=None):
-    sku = Sku(sku_name)
+    sku = Sku(name=sku_name)
     return client.update(resource_group_name, account_name, sku, tags)

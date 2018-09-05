@@ -60,8 +60,7 @@ def cli_autho_update(instance, rights):
 # Eventhub Region
 def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
                           enabled=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
-    from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination
-    from azure.mgmt.eventhub.models.event_hub_management_client_enums import EncodingCaptureDescription
+    from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination, EncodingCaptureDescription
     eventhubparameter1 = Eventhub()
     if message_retention_in_days:
         eventhubparameter1.message_retention_in_days = message_retention_in_days

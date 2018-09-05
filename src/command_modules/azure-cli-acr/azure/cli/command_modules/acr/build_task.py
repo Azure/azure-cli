@@ -303,6 +303,7 @@ def acr_build_task_run(cmd,
                        client,  # cf_acr_builds
                        build_task_name,
                        registry_name,
+                       no_format=False,
                        no_logs=False,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -323,7 +324,7 @@ def acr_build_task_run(cmd,
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, True)
+    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def acr_build_task_show_build(cmd,
@@ -383,6 +384,7 @@ def acr_build_task_logs(cmd,
                         build_id=None,
                         build_task_name=None,
                         image=None,
+                        no_format=False,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -406,7 +408,7 @@ def acr_build_task_logs(cmd,
                                                     build_task_name=build_task_name,
                                                     image=image))
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name)
+    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format)
 
 
 def _get_list_builds_message(base_message, build_task_name=None, image=None):

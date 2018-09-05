@@ -840,7 +840,6 @@ class AzCommandGroup(CommandGroup):
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
                                custom_func_name=None, custom_func_type=None, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command
-
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
         # don't inherit deprecation info from command group

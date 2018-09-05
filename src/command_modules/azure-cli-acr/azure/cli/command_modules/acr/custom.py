@@ -51,12 +51,16 @@ def acr_create(cmd,
                admin_enabled=False,
                deployment_name=None):
     if sku in MANAGED_REGISTRY_SKU and storage_account_name:
-        raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
+        raise CLIError("Please specify '--sku {}' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
                        "to create a Classic registry using storage account `{}`."
-                       .format(storage_account_name, storage_account_name))
+                       .format(sku, storage_account_name, storage_account_name))
 
     if sku in CLASSIC_REGISTRY_SKU:
+        result = client.check_name_availability(registry_name)
+        if not result.name_available:
+            raise CLIError(result.message)
+
         logger.warning(
             "Due to the planned deprecation of the Classic registry SKU, we recommend using "
             "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
@@ -183,9 +187,11 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
                        "--password", password,
                        login_server])
             p.wait()
-        elif b'--password-stdin' in stderr:
-            pass
         else:
+            if b'--password-stdin' in stderr:
+                errors = [err for err in stderr.decode().split('\n') if '--password-stdin' not in err]
+                stderr = '\n'.join(errors).encode()
+
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)
             output.write(stderr)

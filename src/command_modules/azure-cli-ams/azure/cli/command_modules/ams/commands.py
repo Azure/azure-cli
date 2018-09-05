@@ -136,8 +136,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                          supports_no_wait=True)
         g.custom_command('create', 'create_streaming_endpoint',
+<<<<<<< HEAD
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                          supports_no_wait=True)
+=======
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
+>>>>>>> update/ams-module
         g.generic_update_command('update',
                                  setter_name='update_streaming_endpoint_setter',
                                  setter_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
