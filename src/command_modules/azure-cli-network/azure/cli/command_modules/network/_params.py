@@ -517,8 +517,13 @@ def load_arguments(self, _):
             c.argument('public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.')
             c.argument('subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
             c.argument('virtual_network_name', virtual_network_name_type, help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-            c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
             c.ignore('private_ip_address_allocation')
+
+    with self.argument_context('network lb frontend-ip create') as c:
+        c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
+
+    with self.argument_context('network lb frontend-ip update') as c:
+        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use "" to remove the static address and use a dynamic address instead.')
 
     with self.argument_context('network lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
@@ -867,13 +872,18 @@ def load_arguments(self, _):
     with self.argument_context('network traffic-manager profile') as c:
         c.argument('traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-        c.argument('monitor_path', help='Path to monitor.')
-        c.argument('monitor_port', help='Port to monitor.', type=int)
-        c.argument('monitor_protocol', monitor_protocol_type)
         c.argument('profile_status', options_list=['--status'], help='Status of the Traffic Manager profile.', arg_type=get_enum_type(ProfileStatus))
         c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic']))
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+
+    with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
+        c.argument('monitor_path', help='Path to monitor. Use "" for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
+        c.argument('monitor_port', help='Port to monitor.', type=int, options_list=['--port', c.deprecate(target='--monitor-port', redirect='--port', hide=True)])
+        c.argument('monitor_protocol', monitor_protocol_type, options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
+        c.argument('timeout', help='The time in seconds allowed for endpoints to response to a health check.', type=int)
+        c.argument('interval', help='The interval in seconds at which health checks are conducted.', type=int)
+        c.argument('max_failures', help='The number of consecutive failed health checks tolerated before an endpoint is considered degraded.', type=int)
 
     with self.argument_context('network traffic-manager profile update') as c:
         c.argument('monitor_protocol', monitor_protocol_type, default=None)
