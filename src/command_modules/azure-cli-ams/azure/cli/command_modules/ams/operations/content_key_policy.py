@@ -80,6 +80,7 @@ def update_content_key_policy(instance, description=None):
 
     return instance
 
+
 # Private methods used
 
 def _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
