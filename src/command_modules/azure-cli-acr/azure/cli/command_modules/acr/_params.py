@@ -146,10 +146,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
-        c.argument('task_file', help="The task template/definition file path relative to the source context.")
-        c.argument('values_file', help="The task values file path relative to the source context.")
-        c.argument('encoded_task_file', help="The encoded task file.")
-        c.argument('encoded_values_file', help="The encoded values file.")
+        c.argument('file', help="The task template/definition file path relative to the source context.")
+        c.argument('values', help="The task values file path relative to the source context.")
+        c.argument('encoded_file', help="The encoded task file.")
+        c.argument('encoded_values', help="The encoded values file.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
 
     with self.argument_context('acr build') as c:
@@ -191,17 +191,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('status', help='The current status of task.', arg_type=get_enum_type(TaskStatus))
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
-        # FileTaskStep parameters
-        c.argument('task_file', help="The task template/definition file path relative to the source context. Required if --dockerfile is not provided.")
-        c.argument('values_file', help="The task values/parameters file path relative to the source context.")
-
-        # DockerBuildStep parameters
-        c.argument('docker_file', options_list=['--dockerfile', '-f'], help="The relative path of the the docker file to the source code root folder. Required for a build task.")
+        # DockerBuildStep, FileTaskStep parameters
+        c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml'.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
+        c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code respository.")
         c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
@@ -226,13 +224,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
     with self.argument_context('acr task create') as c:
-        c.positional('context_path', help="The URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').")
-
-    with self.argument_context('acr task update') as c:
-        c.positional('context_path', help="The URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').")
+        c.argument('task_name', completer=None)
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
-
-    with self.argument_context('acr task create') as c:
-        c.argument('task_name', completer=None)

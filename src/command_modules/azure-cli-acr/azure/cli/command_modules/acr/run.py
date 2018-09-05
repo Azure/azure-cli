@@ -34,9 +34,9 @@ def acr_run(cmd,
             client,
             registry_name,
             source_location,
-            task_file='acb.yaml',
-            values_file=None,
-            encoded_task=None,
+            file='acb.yaml',
+            values=None,
+            encoded_file=None,
             encoded_values=None,
             set_value=None,
             no_format=False,
@@ -78,18 +78,18 @@ def acr_run(cmd,
         logger.warning(
             "Sending context to {}.azurecr.io...".format(registry_name))
 
-    if encoded_task:
+    if encoded_file:
         request = EncodedTaskRunRequest(
-            encoded_task_content=encoded_task,
+            encoded_task_content=encoded_file,
             encoded_values_content=encoded_values,
             values=(set_value if set_value else []),
             timeout=timeout,
             platform=PlatformProperties(os=os_type)
-        )
+            )
     else:
         request = FileTaskRunRequest(
-            task_file_path=task_file,
-            values_file_path=values_file,
+            task_file_path=file,
+            values_file_path=values,
             values=(set_value if set_value else []),
             source_location=source_location,
             timeout=timeout,

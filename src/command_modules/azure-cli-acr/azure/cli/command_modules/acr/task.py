@@ -47,6 +47,8 @@ DEFAULT_TOKEN_TYPE = 'PAT'
 
 DEFAULT_TIMEOUT_IN_SEC = 60*60  # 60 minutes
 DEFAULT_CPU = 2
+ALLOWED_TASK_FILE_TYPES = ('.yaml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1', '.ps', \
+'.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals
@@ -54,15 +56,14 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     context_path,
+                    file,
                     git_access_token=None,
                     image_names=None,
                     status='Enabled',
                     os_type=OS.linux,
                     cpu=DEFAULT_CPU,
                     timeout=DEFAULT_TIMEOUT_IN_SEC,
-                    docker_file=None,
-                    task_file=None,
-                    values_file=None,
+                    values=None,
                     source_trigger_name=None,
                     commit_trigger_enabled=True,
                     branch='master',
@@ -76,28 +77,25 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=None,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
-    if docker_file is None and task_file is None:
-        raise CLIError("Either --dockerfile or --task-file argument is required")
-    if docker_file is not None and task_file is not None:
-        raise CLIError("Cannot use both --dockerfile and --task-file arguments to create a task")
     if commit_trigger_enabled and not git_access_token:
         raise CLIError("Commit trigger needs to be disabled [--commit-trigger-enabled False] " \
                        "if no --git-access-token is provided.")
-    if docker_file is not None:
+
+    if file.endswith(ALLOWED_TASK_FILE_TYPES):
+        step = FileTaskStep(
+            task_file_path=file,
+            values_file_path=values,
+            context_path=context_path,
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+        )
+    else:
         step = DockerBuildStep(
             image_names=image_names,
             is_push_enabled=not no_push,
             no_cache=no_cache,
-            docker_file_path=docker_file,
+            docker_file_path=file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
             context_path=context_path
-        )
-    if task_file is not None:
-        step = FileTaskStep(
-            task_file_path=task_file,
-            values_file_path=values_file,
-            context_path=context_path,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -208,9 +206,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     image_names=None,
                     no_push=None,
                     no_cache=None,
-                    docker_file=None,
-                    task_file=None,
-                    values_file=None,
+                    file=None,
+                    values=None,
                     arg=None,
                     secret_arg=None,
                     set_value=None,
@@ -223,6 +220,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
     if isinstance(step, DockerBuildStep):
+        if file.endswith(ALLOWED_TASK_FILE_TYPES):
+            raise CLIError("File for docker build step has an invalid suffix: {}." \
+             " The following suffixes are not allowed: {}".format(file, ALLOWED_TASK_FILE_TYPES))
         if arg is None and secret_arg is None:
             arguments = None
         else:
@@ -231,18 +231,21 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             image_names=image_names,
             is_push_enabled=not no_push,
             no_cache=no_cache,
-            docker_file_path=docker_file,
+            docker_file_path=file,
             arguments=arguments,
             context_path=context_path
         )
-    if isinstance(step, FileTaskStep):
+    elif isinstance(step, FileTaskStep):
+        if not file.endswith(ALLOWED_TASK_FILE_TYPES):
+            raise CLIError("File for task build step has an invalid suffix: {}." \
+             " It must have one of the following suffixes: {}".format(file, ALLOWED_TASK_FILE_TYPES))
         if set_value is None and set_secret is None:
             values = None
         else:
             values = (set_value if set_value else []) + (set_secret if set_secret else [])
         step = FileTaskStepUpdateParameters(
-            task_file_path=task_file,
-            values_file_path=values_file,
+            task_file_path=file,
+            values_file_path=values,
             context_path=context_path,
             values=values
         )
