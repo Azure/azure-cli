@@ -30,6 +30,9 @@ class TestActions(unittest.TestCase):
     def test_generate_specfied_ssh_key_files(self):
         temp_dir_name = tempfile.mkdtemp(prefix="ssh_dir_")
 
+        # cleanup temporary directory and its contents
+        self.addCleanup(shutil.rmtree, path=temp_dir_name)
+
         # first create file paths for the keys to be generated
         _, private_key_file = tempfile.mkstemp(dir=temp_dir_name)
         public_key_file = private_key_file + '.pub'
@@ -74,9 +77,6 @@ class TestActions(unittest.TestCase):
         validate_ssh_key(args4)
         self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
         self.assertTrue(os.path.isfile(public_key_file4))
-
-        # delete temporary directory and its files
-        shutil.rmtree(temp_dir_name)
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'

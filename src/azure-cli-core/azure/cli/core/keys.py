@@ -6,6 +6,7 @@
 import os
 import os.path
 
+from knack.util import CLIError
 from knack.log import get_logger
 logger = get_logger(__name__)
 
@@ -34,30 +35,38 @@ def is_valid_ssh_rsa_public_key(openssh_pubkey):
 
 def generate_ssh_keys(private_key_filepath, public_key_filepath):
     import paramiko
+    from paramiko.ssh_exception import PasswordRequiredException, SSHException
 
-    try:
-        with open(public_key_filepath, 'r') as public_key_file:
-            public_key = public_key_file.read()
-            pub_ssh_dir, _ = os.path.split(public_key_filepath)
-            logger.warning("Public SSH key file '%s' found in dir '%s'."
-                           "Use public key file. New RSA key pair will not be generated.",
-                           public_key_filepath, pub_ssh_dir)
+    if os.path.isfile(public_key_filepath):
+        try:
+            with open(public_key_filepath, 'r') as public_key_file:
+                public_key = public_key_file.read()
+                pub_ssh_dir = os.path.dirname(public_key_filepath)
+                logger.warning("Public SSH key file '%s' found in dir '%s'."
+                               "Use public key file. New RSA key pair will not be generated.",
+                               public_key_filepath, pub_ssh_dir)
 
-            return public_key
-    except IOError:
-        pass
+                return public_key
+        except IOError as e:
+            raise CLIError(e)
 
-    ssh_dir, _ = os.path.split(private_key_filepath)
+    ssh_dir = os.path.dirname(private_key_filepath)
     if not os.path.exists(ssh_dir):
         os.makedirs(ssh_dir)
         os.chmod(ssh_dir, 0o700)
 
     if os.path.isfile(private_key_filepath):
         # try to use existing private key if it exists.
-        key = paramiko.RSAKey(filename=private_key_filepath)
-        logger.warning("Private SSH key file '%s' found in dir '%s'."
-                       " Generating public key file '%s'",
-                       private_key_filepath, ssh_dir, public_key_filepath)
+
+        try:
+            key = paramiko.RSAKey(filename=private_key_filepath)
+            logger.warning("Private SSH key file '%s' found in dir '%s'. "
+                           "Generating new Public key file '%s'",
+                           private_key_filepath, ssh_dir, public_key_filepath)
+
+        except (PasswordRequiredException, SSHException, IOError) as e:
+            raise CLIError(e)
+
     else:
         # otherwise generate new private key.
         key = paramiko.RSAKey.generate(2048)
@@ -65,7 +74,7 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
         os.chmod(private_key_filepath, 0o600)
 
     with open(public_key_filepath, 'w') as public_key_file:
-        public_key = '%s %s' % (key.get_name(), key.get_base64())
+        public_key = '{} {}'.format(key.get_name(), key.get_base64())
         public_key_file.write(public_key)
     os.chmod(public_key_filepath, 0o644)
 

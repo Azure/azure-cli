@@ -10,43 +10,29 @@ import paramiko
 import io
 import os
 import shutil
+from knack.util import CLIError
 
 from azure.cli.core.keys import generate_ssh_keys
 
 
 class TestGenerateSSHKeys(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         # set up temporary directory to be used for temp files.
-        cls._tempdirName = tempfile.mkdtemp(prefix="key_tmp_")
+        self._tempdirName = tempfile.mkdtemp(prefix="key_tmp_")
 
-        cls.key = paramiko.RSAKey.generate(2048)
+        self.key = paramiko.RSAKey.generate(2048)
         keyOutput = io.StringIO()
-        cls.key.write_private_key(keyOutput)
+        self.key.write_private_key(keyOutput)
 
-        cls.private_key = keyOutput.getvalue()
-        cls.public_key = '{} {}'.format(cls.key.get_name(), cls.key.get_base64())
-
-    @classmethod
-    def tearDownClass(cls):
-        # delete temporary directory to be used for temp files.
-        shutil.rmtree(cls._tempdirName)
+        self.private_key = keyOutput.getvalue()
+        self.public_key = '{} {}'.format(self.key.get_name(), self.key.get_base64())
 
     def tearDown(self):
-
-        # remove all temporary files/directories created by previous test method.
-        dir = self._tempdirName
-        file_paths = [os.path.join(dir, name) for name in os.listdir(dir)]
-
-        for fp in file_paths:
-            if os.path.isfile(fp):
-                os.remove(fp)
-            else:
-                shutil.rmtree(fp)
+        # delete temporary directory to be used for temp files.
+        shutil.rmtree(self._tempdirName)
 
     def test_public_key_file_exists(self):
-
         # Create public key file
         public_key_path = self._create_new_temp_key_file(self.public_key, suffix=".pub")
 
@@ -66,8 +52,38 @@ class TestGenerateSSHKeys(unittest.TestCase):
             new_private_key = f.read()
             self.assertEqual(self.private_key, new_private_key)
 
-    def test_private_key_file_exists(self):
+    def test_public_key_file_exists_no_permissions(self):
+        # Create public key file with no read or write access
+        public_key_path = self._create_new_temp_key_file(self.public_key)
+        os.chmod(public_key_path, 0o000)
 
+        # Check that CLIError exception is raised when generate_ssh_keys is called.
+        with self.assertRaises(CLIError):
+            generate_ssh_keys("", public_key_path)
+
+    def test_private_key_file_exists_no_permissions(self):
+        # Create private key file with no read or write access
+        private_key_path = self._create_new_temp_key_file(self.private_key)
+        os.chmod(private_key_path, 0o000)
+
+        # Check that CLIError exception is raised when generate_ssh_keys is called.
+        with self.assertRaises(CLIError):
+            public_key_path = private_key_path + ".pub"
+            generate_ssh_keys(private_key_path, public_key_path)
+
+    def test_private_key_file_exists_encrypted(self):
+        # Create empty private key file
+        private_key_path = self._create_new_temp_key_file("")
+
+        # Write encrypted key into file
+        self.key.write_private_key_file(private_key_path, "test")
+
+        # Check that CLIError exception is raised when generate_ssh_keys is called.
+        with self.assertRaises(CLIError):
+            public_key_path = private_key_path + ".pub"
+            generate_ssh_keys(private_key_path, public_key_path)
+
+    def test_private_key_file_exists(self):
         # Create private key file
         private_key_path = self._create_new_temp_key_file(self.private_key)
 
@@ -87,7 +103,6 @@ class TestGenerateSSHKeys(unittest.TestCase):
             self.assertEqual(self.private_key, private_key)
 
     def test_private_key_file_new(self):
-
         # create random temp file name
         f = tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName)
         f.close()
