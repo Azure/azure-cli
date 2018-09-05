@@ -20,6 +20,7 @@ Release History
   Deprecated options `--monitor-path`, `--monitor-port` and `--monitor-protocol` in favor of `--path`, `--port`, `--protocol`.
 * `network lb frontend-ip create/update`: Fixed the logic for setting private IP allocation method. If a private IP address is provided, the
   allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
+* `dns record-set * create/update`: Add support for `--target-resource`.
 
 2.2.4
 +++++
