@@ -32,7 +32,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
         # delete temporary directory to be used for temp files.
         shutil.rmtree(self._tempdirName)
 
-    def test_public_key_file_exists(self):
+    def test_when_public_key_file_exists(self):
         # Create public key file
         public_key_path = self._create_new_temp_key_file(self.public_key, suffix=".pub")
 
@@ -52,7 +52,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
             new_private_key = f.read()
             self.assertEqual(self.private_key, new_private_key)
 
-    def test_public_key_file_exists_no_permissions(self):
+    def test_error_raised_when_public_key_file_exists_no_permissions(self):
         # Create public key file with no read or write access
         public_key_path = self._create_new_temp_key_file(self.public_key)
         os.chmod(public_key_path, 0o000)
@@ -61,7 +61,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
         with self.assertRaises(CLIError):
             generate_ssh_keys("", public_key_path)
 
-    def test_private_key_file_exists_no_permissions(self):
+    def test_error_raised_when_private_key_file_exists_no_permissions(self):
         # Create private key file with no read or write access
         private_key_path = self._create_new_temp_key_file(self.private_key)
         os.chmod(private_key_path, 0o000)
@@ -71,7 +71,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
             public_key_path = private_key_path + ".pub"
             generate_ssh_keys(private_key_path, public_key_path)
 
-    def test_private_key_file_exists_encrypted(self):
+    def test_error_raised_when_private_key_file_exists_encrypted(self):
         # Create empty private key file
         private_key_path = self._create_new_temp_key_file("")
 
@@ -83,7 +83,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
             public_key_path = private_key_path + ".pub"
             generate_ssh_keys(private_key_path, public_key_path)
 
-    def test_private_key_file_exists(self):
+    def test_generate_public_key_file_from_existing_private_key_files(self):
         # Create private key file
         private_key_path = self._create_new_temp_key_file(self.private_key)
 
@@ -102,7 +102,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
             private_key = f.read()
             self.assertEqual(self.private_key, private_key)
 
-    def test_private_key_file_new(self):
+    def test_generate_new_private_public_key_files(self):
         # create random temp file name
         f = tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName)
         f.close()
@@ -126,9 +126,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
     def _create_new_temp_key_file(self, key_data, suffix=""):
         with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName, delete=False, suffix=suffix) as f:
             f.write(key_data)
-            file_path = f.name
-
-        return file_path
+            return f.name
 
 
 if __name__ == '__main__':
