@@ -12,7 +12,7 @@ from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account_trusted_provider)
 
 
-# pylint: disable=line-too-long, too-many-statements
+# pylint: disable=too-many-statements
 def load_command_table(self, _):
     from ._validators import (
         validate_subnet
@@ -59,7 +59,9 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
     # account virtual network rule operations
-    with self.command_group('dls account network-rule', dls_virtual_network_sdk, client_factory=cf_dls_account_virtual_network) as g:
+    with self.command_group('dls account network-rule',
+                            dls_virtual_network_sdk,
+                            client_factory=cf_dls_account_virtual_network) as g:
         g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
         g.generic_update_command('update')
         g.command('list', 'list_by_account')

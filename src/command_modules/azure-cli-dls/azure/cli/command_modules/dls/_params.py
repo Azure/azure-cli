@@ -63,7 +63,7 @@ def load_arguments(self, _):
     # virtual network rule
     #####
     with self.argument_context('dls account network-rule') as c:
-        c.argument('account_name', datalake_store_name_type, options_list=['--account-name'])
+        c.argument('account_name', datalake_store_name_type, options_list=['--account-name'], id_part=None)
 
         c.argument('virtual_network_rule_name',
                    options_list=['--name', '-n'],
@@ -85,6 +85,8 @@ def load_arguments(self, _):
                    options_list=['--subnet'],
                    help='Name or ID of the subnet that allows access to DLS. '
                    'If subnet name is provided, --name must be provided.')
+
+        c.extra('vnet_name', help='The virtual network rule name')
 
     with self.argument_context('dls account network-rule list') as c:
         c.argument('virtual_network_rule_name', id_part=None)
