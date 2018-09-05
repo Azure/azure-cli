@@ -31,25 +31,25 @@ def deserialize_run(response):
 
 
 def get_run_with_polling(client,
-                         id,
+                         run_id,
                          registry_name,
                          resource_group_name):
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, id, raw=True),
+            resource_group_name, registry_name, run_id, raw=True),
         deserialization_callback=deserialize_run,
         polling_method=RunPolling(
             registry_name=registry_name,
-            id=id
+            run_id=run_id
         ))
 
 
 class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, registry_name, id, timeout=30):
+    def __init__(self, registry_name, run_id, timeout=30):
         self._registry_name = registry_name
-        self._id = id
+        self._run_id = run_id
         self._timeout = timeout
         self._client = None
         self._response = None  # Will hold latest received response
@@ -76,12 +76,12 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
             raise CLIError("The run with ID '{}' finished with unsuccessful status '{}'. "
                            "Show run details by 'az acr task show-run -r {} --run-id {}'. "
                            "Show run logs by 'az acr task logs -r {} --run-id {}'.".format(
-                               self._id,
+                               self._run_id,
                                self.operation_status,
                                self._registry_name,
-                               self._id,
+                               self._run_id,
                                self._registry_name,
-                               self._id
+                               self._run_id
                            ))
 
     def status(self):

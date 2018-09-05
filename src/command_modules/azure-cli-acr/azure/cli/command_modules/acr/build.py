@@ -87,8 +87,7 @@ def acr_build(cmd,
                 pass
     else:
         source_location = check_remote_source_code(source_location)
-        logger.warning(
-            "Sending context to {}.azurecr.io...".format(registry_name))
+        logger.warning("Sending context to %s.azurecr.io...", registry_name)
 
     if no_push:
         is_push_enabled = False
@@ -115,14 +114,14 @@ def acr_build(cmd,
         registry_name=registry_name,
         run_request=docker_build_request))
 
-    id = queued_build.run_id
-    logger.warning("Queued a build with ID: %s", id)
+    run_id = queued_build.run_id
+    logger.warning("Queued a build with ID: %s", run_id)
     logger.warning("Waiting for agent...")
 
     if no_logs:
-        return get_run_with_polling(client, id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
 
 
 def _check_local_docker_file(source_location, docker_file_path):

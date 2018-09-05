@@ -3,23 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.log import get_logger
-from knack.util import CLIError
-
 import os
 import uuid
 import tempfile
-
+from knack.log import get_logger
+from knack.util import CLIError
+from azure.cli.core.commands import LongRunningOperation
 from ._run_polling import get_run_with_polling
-
 from .sdk.models import (
     FileTaskRunRequest,
     PlatformProperties,
     OS,
     EncodedTaskRunRequest
 )
-from azure.cli.core.commands import LongRunningOperation
-
 from ._stream_utils import stream_logs
 from ._utils import validate_managed_registry
 from ._client_factory import cf_acr_registries_build
@@ -49,7 +45,6 @@ def acr_run(cmd,
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
     # TODO: Remove this import once the SDK is merged.
-    from ._client_factory import cf_acr_registries_build
     client_registries = cf_acr_registries_build(cmd.cli_ctx)
 
     if os.path.exists(source_location):
@@ -75,8 +70,7 @@ def acr_run(cmd,
                 pass
     else:
         source_location = check_remote_source_code(source_location)
-        logger.warning(
-            "Sending context to {}.azurecr.io...".format(registry_name))
+        logger.warning("Sending context to %s.azurecr.io...", registry_name)
 
     if encoded_file:
         request = EncodedTaskRunRequest(
@@ -85,7 +79,7 @@ def acr_run(cmd,
             values=(set_value if set_value else []),
             timeout=timeout,
             platform=PlatformProperties(os=os_type)
-            )
+        )
     else:
         request = FileTaskRunRequest(
             task_file_path=file,
@@ -101,11 +95,11 @@ def acr_run(cmd,
         registry_name=registry_name,
         run_request=request))
 
-    id = queued.run_id
-    logger.warning("Queued a run with ID: %s", id)
+    run_id = queued.run_id
+    logger.warning("Queued a run with ID: %s", run_id)
     logger.warning("Waiting for agent...")
 
     if no_logs:
-        return get_run_with_polling(client, id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)

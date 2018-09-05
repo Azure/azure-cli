@@ -3,22 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.log import get_logger
-from knack.util import CLIError
 import tarfile
 import os
 import re
 import codecs
-import requests
-
-from ._azure_utils import get_blob_info
-
 from builtins import open as bltn_open
+import requests
+from knack.log import get_logger
+from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-
 from azure.storage.blob import (
     BlockBlobService,
 )
+from ._azure_utils import get_blob_info
 
 logger = get_logger(__name__)
 
@@ -37,7 +34,8 @@ def upload_source_code(client, registry_name, resource_group_name,
             break
         size = size / 1024.0
 
-    logger.warning("Uploading archived source code from '%s'...", tar_file_path)
+    logger.warning(
+        "Uploading archived source code from '%s'...", tar_file_path)
     upload_url = None
     relative_path = None
     error_message = "Could not get SAS URL to upload."
@@ -63,7 +61,7 @@ def upload_source_code(client, registry_name, resource_group_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
     logger.warning("Sending context ({0:.3f} {1}) to {2}.azurecr.io...".format(
-        size, unit, registry_name))                         
+        size, unit, registry_name))
     return relative_path
 
 
