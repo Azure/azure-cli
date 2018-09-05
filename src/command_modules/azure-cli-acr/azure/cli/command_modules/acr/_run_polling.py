@@ -53,8 +53,8 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self._timeout = timeout
         self._client = None
         self._response = None  # Will hold latest received response
-        self._url = None  # The URL used to get the build
-        self._deserialize = None  # The deserializer for build
+        self._url = None  # The URL used to get the run
+        self._deserialize = None  # The deserializer for Run
         self.operation_status = ""
         self.operation_result = None
 
@@ -75,7 +75,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
             from knack.util import CLIError
             raise CLIError("The run with ID '{}' finished with unsuccessful status '{}'. "
                            "Show run details by 'az acr task show-run -r {} --run-id {}'. "
-                           "Show build logs by 'az acr task logs -r {} --run-id {}'.".format(
+                           "Show run logs by 'az acr task logs -r {} --run-id {}'.".format(
                                self._id,
                                self.operation_status,
                                self._registry_name,

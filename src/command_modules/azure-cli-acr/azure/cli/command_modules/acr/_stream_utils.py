@@ -29,13 +29,10 @@ def stream_logs(client,
                 no_format=False,
                 raise_error_on_failure=False):
     log_file_sas = None
-    is_build = isinstance(client, BuildsOperations)
-    error_msg = "Could not get logs for run ID: {}".format(id)
-    if is_build:
-        error_msg = "Could not get logs for build ID: {}".format(id)
+    error_msg = "Could not get logs for ID: {}".format(id)
 
     try:
-        if is_build:
+        if isinstance(client, BuildsOperations):
             log_file_sas = client.get_log_link(
                 resource_group_name=resource_group_name,
                 registry_name=registry_name,
@@ -65,8 +62,7 @@ def stream_logs(client,
                      endpoint_suffix=endpoint_suffix),
                  container_name,
                  blob_name,
-                 raise_error_on_failure,
-                 is_build)
+                 raise_error_on_failure)
 
 
 def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
@@ -75,8 +71,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                  blob_service,
                  container_name,
                  blob_name,
-                 raise_error_on_failure,
-                 is_build):
+                 raise_error_on_failure):
 
     if not no_format:
         colorama.init()
@@ -193,20 +188,16 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     if curr_bytes:
         print(curr_bytes.decode('utf-8', errors='ignore'))
 
-    build_status = _get_build_status(metadata).lower()
+    build_status = _get_run_status(metadata).lower()
     logger.debug("status was: '%s'", build_status)
-
-    prefix = "Run"
-    if is_build:
-        prefix = "Build"
 
     if raise_error_on_failure:
         if build_status == 'internalerror' or build_status == 'failed':
-            raise CLIError("{} failed".format(prefix))
+            raise CLIError("Run failed")
         elif build_status == 'timedout':
-            raise CLIError("{} timed out".format(prefix))
+            raise CLIError("Run timed out")
         elif build_status == 'canceled':
-            raise CLIError("{} was canceled".format(prefix))
+            raise CLIError("Run was canceled")
 
 
 def _blob_is_not_complete(metadata):
@@ -218,7 +209,7 @@ def _blob_is_not_complete(metadata):
     return True
 
 
-def _get_build_status(metadata):
+def _get_run_status(metadata):
     if metadata is None:
         return 'inprogress'
     for key in metadata:
