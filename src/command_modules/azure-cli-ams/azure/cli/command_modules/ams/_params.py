@@ -10,7 +10,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import (get_role_definition_name_completion_list, get_cdn_provider_completion_list,
-                                                       get_default_streaming_policies_completion_list)
+                                                       get_default_streaming_policies_completion_list, get_token_type_completion_list)
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType,
                                      StreamOptionsFlag, ContentKeyPolicyRestrictionTokenType)
@@ -159,7 +159,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alt_x509_certificate_token_keys', arg_group='Token Restriction', help='Space-separated list of x509 certificate token keys.')
         c.argument('token_claims', arg_group='Token Restriction', arg_type=token_claim_type)
         c.argument('restriction_token_type', arg_group='Token Restriction',
-                   arg_type=get_enum_type(ContentKeyPolicyRestrictionTokenType), help='The type of token.')
+                   help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
         c.argument('widevine_template', arg_group='Widevine Configuration', help='A path to a JSON file which contains a Widevine template.')
 
