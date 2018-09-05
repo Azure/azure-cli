@@ -13,7 +13,7 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_default_streaming_policies_completion_list, get_token_type_completion_list)
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType,
-                                     StreamOptionsFlag, ContentKeyPolicyRestrictionTokenType)
+                                     StreamOptionsFlag)
 
 from ._validators import validate_storage_account_id, datetime_format, validate_correlation_data, validate_token_claim
 
