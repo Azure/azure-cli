@@ -4,7 +4,7 @@ Release History
 ===============
 2.2.2
 +++++
-* Minor fixes
+* `--auth-mode login` parameter allows use of user's login credentials for blob and queue authorization.
 
 2.2.1
 +++++
