@@ -373,7 +373,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
-    @ResourceGroupPreparer(location='westcentralus')
+    @ResourceGroupPreparer()
     def test_storage_blob_update_service_properties(self, resource_group):
         storage_account = self.create_random_name(prefix='account', length=24)
 
