@@ -26,7 +26,7 @@ from azure.cli.command_modules.network._validators import (
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations)
+    validate_service_endpoint_policy, validate_delegations, validate_subresource_list)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -328,6 +328,9 @@ def load_arguments(self, _):
         c.argument('zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
+    with self.argument_context('network dns list-references') as c:
+        c.argument('target_resources', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
+
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
@@ -346,6 +349,7 @@ def load_arguments(self, _):
         c.ignore('if_none_match')
 
     with self.argument_context('network dns record-set') as c:
+        c.argument('target_resource', min_api='2018-05-01', help='ID of an Azure resource from which the DNS resource value is taken.')
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
@@ -723,7 +727,7 @@ def load_arguments(self, _):
         c.argument('dest_resource', arg_group='Destination')
         c.argument('dest_address', arg_group='Destination')
         c.argument('dest_port', type=int, arg_group='Destination')
-        c.argument('protocol', arg_type=get_enum_type(Protocol))
+        c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to test on.')
 
     with self.argument_context('network watcher test-connectivity', arg_group='HTTP Configuration') as c:
         c.argument('method', arg_type=get_enum_type(HTTPMethod), help='HTTP method to use.')

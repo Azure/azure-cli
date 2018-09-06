@@ -446,6 +446,15 @@ def get_servers_validator(camel_case=False):
     return validate_servers
 
 
+def validate_subresource_list(cmd, namespace):
+    if namespace.target_resources:
+        SubResource = cmd.get_models('SubResource')
+        subresources = []
+        for item in namespace.target_resources:
+            subresources.append(SubResource(id=item))
+        namespace.target_resources = subresources
+
+
 def validate_target_listener(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):

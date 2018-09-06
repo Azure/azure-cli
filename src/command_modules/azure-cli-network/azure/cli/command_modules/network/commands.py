@@ -22,7 +22,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
-    cf_service_endpoint_policy_definitions)
+    cf_service_endpoint_policy_definitions, cf_dns_references)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -76,12 +76,21 @@ def load_command_table(self, _):
 
     network_dns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations.zones_operations#ZonesOperations.{}',
-        client_factory=cf_dns_mgmt_zones
+        client_factory=cf_dns_mgmt_zones,
+        resource_type=ResourceType.MGMT_NETWORK_DNS
     )
 
     network_dns_record_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.{}',
         client_factory=cf_dns_mgmt_record_sets,
+        resource_type=ResourceType.MGMT_NETWORK_DNS
+    )
+
+    network_dns_reference_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.dns.operations.dns_resource_reference_operations#DnsResourceReferenceOperations.{}',
+        client_factory=cf_dns_references,
+        resource_type=ResourceType.MGMT_NETWORK_DNS,
+        min_api='2018-05-01'
     )
 
     network_endpoint_service_sdk = CliCommandType(
@@ -337,10 +346,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ddos_plans')
         g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_ddos_plan')
-
     # endregion
 
     # region DNS
+    with self.command_group('network dns', network_dns_reference_sdk) as g:
+        g.command('list-references', 'get_by_target_resources')
+
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get', table_transformer=transform_dns_zone_table_output)
@@ -361,7 +372,7 @@ def load_command_table(self, _):
     if self.supported_api_version(resource_type=ResourceType.MGMT_NETWORK_DNS, min_api='2018-02-01'):
         supported_records.append('caa')
     for record in supported_records:
-        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk) as g:
+        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
             g.command('delete', 'delete', confirmation=True)
             g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
