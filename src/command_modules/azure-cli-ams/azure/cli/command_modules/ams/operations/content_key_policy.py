@@ -87,11 +87,11 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                                        rsa_token_key_modulus, x509_certificate_token_key,
                                                        restriction_token_type, issuer, audience)
 
-    if _count_truthy([open_restriction, valid_token_restriction]) > 1:
-        raise CLIError('You should only use exactly one restriction type.')
+    if _count_truthy([open_restriction, valid_token_restriction]) != 1:
+        raise CLIError('You should use exactly one restriction type.')
 
-    if _count_truthy([clear_key_configuration, widevine_template]) > 1:
-        raise CLIError('You should only use exactly one configuration type.')
+    if _count_truthy([clear_key_configuration, widevine_template]) != 1:
+        raise CLIError('You should use exactly one configuration type.')
 
     if clear_key_configuration:
         configuration = ContentKeyPolicyClearKeyConfiguration()
@@ -123,8 +123,6 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         elif x509_certificate_token_key is not None:
             primary_verification_key = _x509_token_key_factory(
                 bytearray(x509_certificate_token_key.replace('\\n', '\n'), 'utf-8'))
-        else:
-            raise CLIError('Invalid token key.')  # This should not happen.. but just in case.
 
         # Extra validation to make sure exponents and modulus have the same cardinality
         if len(_rsa_key_exponents) != len(_rsa_key_modulus):
@@ -152,7 +150,8 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
             open_id_connect_discovery_document=open_id_connect_discovery_document)
 
     if restriction is None or configuration is None:
-        raise CLIError('You must have one restriction and one configuration.')
+        raise CLIError(
+            'Could not build content key policy option due to invalid restriction or configuration.')
 
     policy_option = ContentKeyPolicyOption(name=policy_option_name,
                                            configuration=configuration,
