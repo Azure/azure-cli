@@ -165,7 +165,7 @@ helps['vmss create'] = """
               --image debian --secrets "$vm_secrets"
         - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
           text: >
-             az vm create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+             az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a debian VM scaleset with a user assigned identity.
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
@@ -204,7 +204,7 @@ helps['vm availability-set convert'] = """
     short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
     examples:
         - name: Convert an availabiity set to use managed disks by name.
-          text: vm availability-set convert -g MyResourceGroup -n MyAvSet
+          text: az vm availability-set convert -g MyResourceGroup -n MyAvSet
         - name: Convert an availability set to use managed disks by ID.
           text: >
             az vm availability-set convert --ids $(az vm availability-set list -g MyResourceGroup --query "[].id" -o tsv)
@@ -1246,12 +1246,13 @@ helps['vm identity show'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
     type: command
-    short-summary: run command on a vm
+    short-summary: Execute a specific run command on a vm.
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"

@@ -9,13 +9,11 @@ from knack.util import CLIError
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
-    Location
+    Location,
+    DatabaseAccountKind
 )
-from azure.mgmt.cosmosdb.models.cosmos_db_enums import DatabaseAccountKind
-
 
 logger = get_logger(__name__)
-
 
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",
@@ -108,13 +106,13 @@ def cli_cosmosdb_update(client,
     # pylint: disable=too-many-boolean-expressions
     if capabilities is not None:
         if locations or \
-           default_consistency_level is not None or \
-           max_staleness_prefix is not None or \
-           max_interval is not None or \
-           ip_range_filter is not None or \
-           enable_automatic_failover is not None or \
-           enable_virtual_network is not None or \
-           virtual_network_rules is not None:
+                default_consistency_level is not None or \
+                max_staleness_prefix is not None or \
+                max_interval is not None or \
+                ip_range_filter is not None or \
+                enable_automatic_failover is not None or \
+                enable_virtual_network is not None or \
+                virtual_network_rules is not None:
             raise CLIError("Cannot set capabilities and update properties at the same time. {0}".format(locations))
 
         else:
@@ -126,15 +124,14 @@ def cli_cosmosdb_update(client,
     # Workaround until PATCH support for all properties
     # pylint: disable=too-many-boolean-expressions
     if tags is not None:
-        if not locations and\
-           default_consistency_level is None and\
-           max_staleness_prefix is None and\
-           max_interval is None and\
-           ip_range_filter is None and\
-           enable_automatic_failover is None and\
-           enable_virtual_network is None and\
-           virtual_network_rules is None:
-
+        if not locations and \
+                default_consistency_level is None and \
+                max_staleness_prefix is None and \
+                max_interval is None and \
+                ip_range_filter is None and \
+                enable_automatic_failover is None and \
+                enable_virtual_network is None and \
+                virtual_network_rules is None:
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
             docdb_account = client.get(resource_group_name, account_name)
@@ -142,8 +139,8 @@ def cli_cosmosdb_update(client,
 
     update_consistency_policy = False
     if max_interval is not None or \
-       max_staleness_prefix is not None or \
-       default_consistency_level is not None:
+            max_staleness_prefix is not None or \
+            default_consistency_level is not None:
         update_consistency_policy = True
 
     if max_staleness_prefix is None:

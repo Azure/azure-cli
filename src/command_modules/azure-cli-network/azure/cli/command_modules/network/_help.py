@@ -553,7 +553,7 @@ helps['network application-gateway rule show'] = """
     short-summary: Get the details of a rule.
     examples:
         - name: Get the details of a rule.
-          text: az network application-gateway rule list -g MyResourceGroup --gateway-name MyAppGateway -n MyRule
+          text: az network application-gateway rule show -g MyResourceGroup --gateway-name MyAppGateway -n MyRule
 """
 
 helps['network application-gateway rule update'] = """
@@ -684,7 +684,7 @@ helps['network application-gateway ssl-policy predefined show'] = """
     short-summary: Gets SSL predefined policy with the specified policy name.
     examples:
         - name: Gets SSL predefined policy with the specified policy name.
-          text: az network application-gateway ssl-policy show -n AppGwSslPolicy20170401
+          text: az network application-gateway ssl-policy predefined show -n AppGwSslPolicy20170401
 """
 
 
@@ -1902,11 +1902,6 @@ helps['network express-route peering create'] = """
                 --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 \\
                 --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30 \\
                 --advertised-public-prefixes 101.0.0.0/30
-        - name: Add IPv6 settings to existing IPv4 config for Microsoft peering.
-          text: |
-            az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
-                --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
-                --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
 """
 
 helps['network express-route peering delete'] = """
@@ -2909,7 +2904,7 @@ helps['network route-filter list'] = """
     short-summary: List route filters.
     examples:
         - name: List route filters in a resource group.
-          text: az network route-filter delete -g MyResourceGroup
+          text: az network route-filter list -g MyResourceGroup
 """
 
 helps['network route-filter show'] = """
@@ -2957,7 +2952,7 @@ helps['network route-filter rule delete'] = """
     short-summary: Delete a rule from a route filter.
     examples:
         - name: Delete a rule from a route filter.
-          text: az network route-filter rule create -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule
+          text: az network route-filter rule delete -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule
 """
 
 helps['network route-filter rule list'] = """
@@ -3351,7 +3346,7 @@ helps['network vpn-connection delete'] = """
     short-summary: Delete a VPN connection.
     examples:
         - name: Delete a VPN connection.
-          text: az network vpn-connection create -g MyResourceGroup -n MyConnection
+          text: az network vpn-connection delete -g MyResourceGroup -n MyConnection
 """
 
 helps['network vpn-connection list'] = """

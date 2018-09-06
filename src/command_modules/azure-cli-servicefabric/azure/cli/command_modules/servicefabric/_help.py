@@ -216,5 +216,5 @@ helps["sf application certificate add"] = """
     examples:
         - name: Add an application certificate.
           text: >
-            az sf cluster application certificate add -g group-name -n cluster1  --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}'
+            az sf application certificate add -g group-name -n cluster1  --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}'
 """

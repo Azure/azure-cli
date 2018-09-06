@@ -2,9 +2,15 @@
 
 Release History
 ===============
+
+2.0.46
+++++++
+* Minor fixes.
+
 2.0.45
 ++++++
-* Minor fixes
+* Fix issue of loading empty configuration file.
+* Azure Stack: support new profile 2018-03-01-hybrid
 
 2.0.44
 ++++++

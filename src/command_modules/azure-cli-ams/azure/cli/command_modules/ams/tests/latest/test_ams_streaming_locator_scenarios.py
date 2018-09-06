@@ -100,6 +100,6 @@ class AmsStreamingLocatorTests(ScenarioTest):
         self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --content-key-policy-name {contentKeyPolicyName} --streaming-policy-name {streamingPolicyName} --asset-name {assetName}')
 
         self.cmd('az ams streaming locator get-content-keys -a {amsname} -n {streamingLocatorName} -g {rg}', checks=[
-           self.check('length(@)', 1),
-           self.check('@[0].policyName', '{contentKeyPolicyName}')
+            self.check('length(@)', 1),
+            self.check('@[0].policyName', '{contentKeyPolicyName}')
         ])

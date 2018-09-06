@@ -2,6 +2,13 @@
 
 Release History
 ===============
+2.2.2
++++++
+* Minor fixes
+
+2.2.1
++++++
+* `storage share policy show`: exception handling to exit with code 3 upon a missing resource for consistency.
 
 2.2.0
 +++++

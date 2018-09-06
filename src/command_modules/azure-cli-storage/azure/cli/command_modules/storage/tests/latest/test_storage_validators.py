@@ -15,9 +15,11 @@ from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type,
                                                            ipv4_range_type, resource_type_type, services_type,
-                                                           process_blob_source_uri, get_char_options_validator)
+                                                           process_blob_source_uri, get_char_options_validator,
+                                                           get_source_file_or_blob_service_client,
+                                                           validate_encryption_source,
+                                                           validate_encryption_services)
 from azure.cli.testsdk import api_version_constraint
-from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
 
 class MockCLI(CLI):
@@ -160,8 +162,6 @@ class TestEncryptionValidators(unittest.TestCase):
         self.cli = MockCLI()
 
     def test_validate_encryption_services(self):
-        from azure.cli.command_modules.storage._validators import validate_encryption_services
-
         ns = Namespace(encryption_services=['blob'], _cmd=MockCmd(self.cli))
         validate_encryption_services(MockCmd(self.cli), ns)
         self.assertIsNotNone(ns.encryption_services.blob)
@@ -182,8 +182,6 @@ class TestEncryptionValidators(unittest.TestCase):
         self.assertTrue(ns.encryption_services.file.enabled)
 
     def test_validate_encryption_source(self):
-        from azure.cli.command_modules.storage._validators import validate_encryption_source
-
         with self.assertRaises(ValueError):
             validate_encryption_source(MockCmd(self.cli),
                                        Namespace(encryption_key_source='Microsoft.Keyvault', _cmd=MockCmd(self.cli)))
