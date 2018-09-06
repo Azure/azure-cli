@@ -329,7 +329,7 @@ def load_arguments(self, _):
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
     with self.argument_context('network dns list-references') as c:
-        c.argument('target_resources', nargs='+', validator=validate_subresource_list)
+        c.argument('target_resources', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
 
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
@@ -727,7 +727,7 @@ def load_arguments(self, _):
         c.argument('dest_resource', arg_group='Destination')
         c.argument('dest_address', arg_group='Destination')
         c.argument('dest_port', type=int, arg_group='Destination')
-        c.argument('protocol', arg_type=get_enum_type(Protocol))
+        c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to test on.')
 
     with self.argument_context('network watcher test-connectivity', arg_group='HTTP Configuration') as c:
         c.argument('method', arg_type=get_enum_type(HTTPMethod), help='HTTP method to use.')

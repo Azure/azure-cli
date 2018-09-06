@@ -251,8 +251,10 @@ class DnsScenarioTest(ScenarioTest):
 
         self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
 
-        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}')
-        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --target-resource ""')
+        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
+                 checks=self.check("targetResource.id.contains(@, '{tm}')", True))
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --target-resource ""',
+                 checks=self.check('targetResource.id', None))
 
 
 class DnsParseZoneFiles(unittest.TestCase):

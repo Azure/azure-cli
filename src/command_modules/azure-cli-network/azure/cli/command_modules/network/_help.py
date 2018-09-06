@@ -3368,6 +3368,14 @@ helps['network vnet subnet list'] = """
           text: az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
 """
 
+helps['network vnet subnet list-available-delegations'] = """
+    type: command
+    short-summary: List the services available for subnet delegation.
+    examples:
+        - name: Retrieve the service names for available delegations in the West US region.
+          text: az network vnet subnet list-available-delegations -l westus --query [].serviceName
+"""
+
 helps['network vnet subnet show'] = """
     type: command
     short-summary: Show details of a subnet.

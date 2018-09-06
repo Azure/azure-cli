@@ -955,8 +955,8 @@ def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, 
         target_resource=SubResource(id=target_resource) if target_resource else None
     )
     return client.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_set_type, record_set, if_match=if_match,
-                                if_none_match='*' if if_none_match else None)
+                                   record_set_type, record_set, if_match=if_match,
+                                   if_none_match='*' if if_none_match else None)
 
 
 def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
@@ -969,7 +969,7 @@ def list_dns_record_set(client, resource_group_name, zone_name, record_type=None
 def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
     if metadata is not None:
         instance.metadata = metadata
-    if target_resource is '':
+    if target_resource == '':
         instance.target_resource = None
     elif target_resource is not None:
         SubResource = cmd.get_models('SubResource')
@@ -1072,6 +1072,9 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements
 def _build_record(cmd, data):
+    AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord, NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord = \
+        cmd.get_models('AaaaRecord', 'ARecord', 'CaaRecord', 'CnameRecord', 'MxRecord', 'NsRecord',
+                       'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord')
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
@@ -1202,14 +1205,14 @@ def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ip
     AaaaRecord = cmd.get_models('AaaaRecord')
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address):
     ARecord = cmd.get_models('ARecord')
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             'arecords')
 
 
@@ -1217,14 +1220,14 @@ def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, val
     CaaRecord = cmd.get_models('CaaRecord')
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname):
     CnameRecord = cmd.get_models('CnameRecord')
     record = CnameRecord(cname=cname)
     record_type = 'cname'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
 
@@ -1232,21 +1235,21 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
     MxRecord = cmd.get_models('MxRecord')
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname):
     NsRecord = cmd.get_models('NsRecord')
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
     PtrRecord = cmd.get_models('PtrRecord')
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
@@ -1267,7 +1270,7 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record.expire_time = expire_time or record.expire_time
     record.minimum_ttl = minimum_ttl or record.minimum_ttl
 
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
 
@@ -1276,7 +1279,7 @@ def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, pri
     SrvRecord = cmd.get_models('SrvRecord')
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value):
@@ -1293,7 +1296,7 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
     final_str = ''.join(record.value)
     final_len = len(final_str)
     assert original_len == final_len
-    return _add_save_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
@@ -1390,13 +1393,13 @@ def _add_record(record_set, record, record_type, is_list=False):
         setattr(record_set, record_property, record)
 
 
-def _add_save_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True):
-    ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        RecordSet = cli_ctx.get_models('RecordSet')
+        RecordSet = cmd.get_models('RecordSet')
         record_set = RecordSet(ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
@@ -2922,7 +2925,7 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
         instance.monitor_config.protocol = monitor_protocol
     if monitor_port is not None:
         instance.monitor_config.port = monitor_port
-    if monitor_path is '':
+    if monitor_path == '':
         instance.monitor_config.path = None
     elif monitor_path is not None:
         instance.monitor_config.path = monitor_path
