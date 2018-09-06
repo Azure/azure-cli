@@ -2892,6 +2892,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
     client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
+    if monitor_path is None and monitor_protocol == 'HTTP':
+        monitor_path = '/'
     profile = Profile(location='global', tags=tags, profile_status=profile_status,
                       traffic_routing_method=routing_method,
                       dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
