@@ -2443,12 +2443,12 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False):
+                         location=None, no_wait=False, tags=None):
     client = _compute_client_factory(cmd.cli_ctx)
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    gallery = Gallery(description=description, location=location)
+    gallery = Gallery(description=description, location=location, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
@@ -2458,7 +2458,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
                          eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
-                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None):
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
@@ -2481,16 +2481,17 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
-                         purchase_plan=purchase_plan, location=location, eula=eula)
+                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
 def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
                  location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
-                 replica_count=None):
+                 replica_count=None, tags=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
-    GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion, TargetRegion = cmd.get_models(
-        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion', 'TargetRegion')
+    ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
+        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
+        'TargetRegion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     regions_info = [TargetRegion(name=location)]
@@ -2508,9 +2509,9 @@ def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, man
         managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
-    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
-                                                   target_regions=regions_info, source=source, replica_count=replica_count)
-    image_version = GalleryImageVersion(publishing_profile=profile, location=location)
+    profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
+                                            target_regions=regions_info, source=source, replica_count=replica_count)
+    image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
                                                           gallery_name=gallery_name,

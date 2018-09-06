@@ -50,7 +50,7 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
     # region MixedScopes
-    for scope in ['vm', 'disk', 'snapshot', 'image']:
+    for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
             c.argument('tags', tags_type)
 
@@ -502,7 +502,7 @@ def load_arguments(self, _):
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
-        c.argument('os_type',  arg_type=get_enum_type(['Windows', 'Linux']), help=' the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
+        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
         c.ignore('os_state')  # service is not ready
         c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
         c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
@@ -530,7 +530,7 @@ def load_arguments(self, _):
         c.argument('managed_image', help='the name or resource id of a managed image')
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
-        c.argument('target_regions',nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
+        c.argument('target_regions', nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
