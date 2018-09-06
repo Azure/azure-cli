@@ -732,12 +732,12 @@ helps['functionapp config ssl upload'] = """
 """
 
 helps['functionapp config show'] = """
-    type: group
+    type: command
     short-summary: Get the details of a web app's configuration.
 """
 
 helps['functionapp config set'] = """
-    type: group
+    type: command
     short-summary: Set the web app's configuration.
 """
 
