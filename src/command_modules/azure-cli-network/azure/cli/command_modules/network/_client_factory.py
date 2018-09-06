@@ -151,6 +151,12 @@ def cf_tm_geographic(cli_ctx, _):
     return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).geographic_hierarchies
 
 
+def cf_dns_references(cli_ctx, _):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).dns_resource_reference
+
+
 def cf_dns_mgmt_zones(cli_ctx, _):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
