@@ -2661,7 +2661,7 @@ class VMGenericUpdate(ScenarioTest):
 
 class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(location='westcentralus')
-    def test_gallery_e2e(self, resource_group):
+    def gallery_e2e(self, resource_group):  # TODO: bring it back when the service is ready
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': 'gallery1',
