@@ -486,26 +486,24 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
-    with self.argument_context('image gallery') as c:
+    with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
-        c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], help='gallery image name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['image gallery show', 'image gallery delete', 'image gallery show-image', 'image gallery delete-image', 'image gallery show-image-version', 'image gallery delete-image-version']:
+    for scope in ['sig show', 'image gallery delete', 'sig image-definition show', 'sig image-definition delete', 'sig image-definition show', 'sig image-version delete']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-            c.argument('gallery_image_name', options_list=['--gallery-image-name', '-i'], id_part='child_name_1', help='gallery image name')
+            c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
             c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
             c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
 
-    with self.argument_context('image gallery create-image') as c:
+    with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
-
-        # c.argument('os_state', arg_type=get_enum_type(['Generalized', 'Specialized']))
+        c.argument('os_type',  arg_type=get_enum_type(['Windows', 'Linux']), help=' the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
         c.ignore('os_state')  # service is not ready
-
         c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
         c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
         c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in MB')
@@ -521,26 +519,22 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
 
-    with self.argument_context('image gallery create') as c:
+    with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
-    with self.argument_context('image gallery create-image') as c:
-        c.argument('description', help='the description of the gallery image')
-    with self.argument_context('image gallery create-image-version') as c:
+    with self.argument_context('sig image-definition create') as c:
+        c.argument('description', help='the description of the gallery image definition')
+    with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
-
-        c.argument('description', help='the description of the gallery image')
+        c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='the name or resource id of a managed image')
+        c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
+        c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
+        c.argument('target_regions',nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
         c.argument('version', help='image version')
-
-        # c.argument('latest', arg_type=get_three_state_flag(),
-        #           help="people deploying VMs with 'latest' as version will use this version")
-        c.ignore('latest')  # service is not ready
-
-        c.argument('regions', nargs='*', help='space separated regions the image version will be published to')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
-    with self.argument_context('image gallery show-image-version') as c:
+    with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     # endregion
 

@@ -2479,27 +2479,37 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
-                         os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
+                         os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
 def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
-                 location=None, regions=None, latest=None, end_of_life_date=None):
+                 location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
+                 replica_count=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
-    GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion = cmd.get_models(
-        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion')
+    GalleryImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion, TargetRegion = cmd.get_models(
+        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion', 'TargetRegion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    regions = regions or [location]
+    regions_info = [TargetRegion(name=location)]
+    if target_regions:
+        regions_info = []
+        for t in target_regions:
+            parts = t.split('=', 1)
+            if len(parts) == 1:
+                regions_info.append(TargetRegion(name=parts[0]))
+            else:
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=int(parts[1])))
+
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
-    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=None if not latest else not(latest),
-                                                   end_of_life_date=end_of_life_date, regions=regions)
     if not is_valid_resource_id(managed_image):
         managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
-    profile.source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+    source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+    profile = GalleryImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
+                                                   target_regions=regions_info, source=source, replica_count=replica_count)
     image_version = GalleryImageVersion(publishing_profile=profile, location=location)
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,

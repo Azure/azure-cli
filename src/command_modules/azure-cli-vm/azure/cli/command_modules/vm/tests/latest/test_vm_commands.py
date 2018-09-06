@@ -2670,23 +2670,23 @@ class VMGalleryImage(ScenarioTest):
             'captured': 'managedImage1'
         })
 
-        self.cmd('image gallery create -g {rg} --gallery-name {gallery}')
-        self.cmd('image gallery list -g {rg}')
-        self.cmd('image gallery show -g {rg} --gallery-name {gallery}')
-        self.cmd('image gallery create-image -g {rg} --gallery-name {gallery} --gallery-image-name {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('image gallery list-images -g {rg} --gallery-name {gallery}')
-        self.cmd('image gallery show-image -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig list -g {rg}')
+        self.cmd('sig show -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('vm create -g {rg} -n {vm} --image debian --generate-ssh-keys')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('image gallery create-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version} --managed-image {captured}')
-        self.cmd('image gallery list-image-versions -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
-        self.cmd('image gallery show-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}')
+        self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
 
-        self.cmd('image gallery delete-image-version -g {rg} --gallery-name {gallery} --gallery-image-name {image} --gallery-image-version {version}')
-        self.cmd('image gallery delete-image -g {rg} --gallery-name {gallery} --gallery-image-name {image}')
-        self.cmd('image gallery delete -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
 # endregion
 

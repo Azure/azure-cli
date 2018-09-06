@@ -1421,35 +1421,45 @@ helps['identity list-operations'] = """
     short-summary: Lists available operations for the Managed Identity provider
 """
 
-helps['image gallery'] = """
+helps['sig'] = """
     type: group
     short-summary: manage shared image gallery
 """
 
-helps['image gallery create'] = """
+helps['sig create'] = """
     type: command
     short-summary: create a share image gallery.
 """
 
-helps['image gallery list'] = """
+helps['sig list'] = """
     type: command
     short-summary: list share image galleries.
 """
 
-helps['image gallery create-image'] = """
-    type: command
-    short-summary: create a gallery image
-    examples:
-        - name: Create an linux image
-          text: |
-            az image gallery create-image -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+helps['sig image-definition'] = """
+    type: group
+    short-summary: create an image definition
 """
 
-helps['image gallery create-image-version'] = """
+helps['sig image-definition create'] = """
+    type: command
+    short-summary: create a gallery image definition
+    examples:
+        - name: Create a linux image defintion
+          text: |
+            az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+"""
+
+helps['sig image-version'] = """
+    type: group
+    short-summary: create a new version from an image defintion
+"""
+
+helps['sig image-version create'] = """
     type: command
     short-summary: creat a new image version
     examples:
         - name: add a new version
           text: |
-            az image gallery create-image-version -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+            az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
 """

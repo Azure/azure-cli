@@ -336,20 +336,23 @@ def load_command_table(self, _):
         g.command('get-latest', 'get_latest')
         g.command('start', 'start_os_upgrade')
 
-    with self.command_group('image gallery', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
+    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'delete')
+        g.generic_update_command('update')
 
-    with self.command_group('image gallery', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
-        g.custom_command('create-image', 'create_gallery_image')  # consider merge with PIR
-        g.command('list-images', 'list_by_gallery')
-        g.command('show-image', 'get')
-        g.command('delete-image', 'delete')
+    with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
+        g.custom_command('create', 'create_gallery_image')
+        g.command('list', 'list_by_gallery')
+        g.command('show', 'get')
+        g.command('delete', 'delete')
+        g.generic_update_command('update')
 
-    with self.command_group('image gallery', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.command('delete-image-version', 'delete')
-        g.command('show-image-version', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
-        g.command('list-image-versions', 'list_by_gallery_image')
-        g.custom_command('create-image-version', 'upload_image')
+    with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
+        g.command('delete', 'delete')
+        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
+        g.command('list', 'list_by_gallery_image')
+        g.custom_command('create', 'upload_image')
+        g.generic_update_command('update')
