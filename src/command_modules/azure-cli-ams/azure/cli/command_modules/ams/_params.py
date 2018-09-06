@@ -10,7 +10,8 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import (get_role_definition_name_completion_list, get_cdn_provider_completion_list,
-                                                       get_default_streaming_policies_completion_list, get_token_type_completion_list)
+                                                       get_default_streaming_policies_completion_list, get_token_type_completion_list,
+                                                       get_fairplay_rentalandlease_completion_list)
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType,
                                      StreamOptionsFlag)
@@ -162,6 +163,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
         c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON widevine template. Use @{file} to load from a file.')
+        c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay ASk.')
+        c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
+        c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The Base64 representation of FairPlay certificate in PKCS 12 (pfx) format (including private key).')
+        c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
+        c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
@@ -219,7 +225,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('availability_set_name', help='AvailabilitySet name.')
         c.argument('max_cache_age', help='Max cache age.')
         c.argument('custom_host_names', nargs='+', help='Space-separated list of custom host names for the streaming endpoint. Use "" to clear existing list.')
-        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}'.format(", ".join(get_cdn_provider_completion_list())))
+        c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}.'.format(", ".join(get_cdn_provider_completion_list())))
         c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
         c.argument('client_access_policy', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
         c.argument('cross_domain_policy', help='The local full path to the crossdomain.xml used by Silverlight.')
