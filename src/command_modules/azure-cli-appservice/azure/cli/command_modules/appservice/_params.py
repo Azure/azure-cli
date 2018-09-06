@@ -23,6 +23,7 @@ AUTH_TYPES = {
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
+FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled' ]
 
 # pylint: disable=too-many-statements
 
@@ -234,6 +235,7 @@ def load_arguments(self, _):
         c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
         c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+        c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'. Other allwoed values are 'FtpsOnly' or 'Disabled'", arg_type=get_enum_type(FTPS_STATE_TYPES))
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
