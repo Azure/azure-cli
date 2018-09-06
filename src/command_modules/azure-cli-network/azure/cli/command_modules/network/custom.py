@@ -36,6 +36,13 @@ def _log_pprint_template(template):
     logger.info('==== END TEMPLATE ====')
 
 
+def _get_from_collection(collection, value, key_name):
+    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
+    if not match:
+        raise CLIError("Item '{}' not found.".format(value))
+    return match
+
+
 def _upsert(parent, collection_name, obj_to_add, key_name):
     if not getattr(parent, collection_name, None):
         setattr(parent, collection_name, [])
@@ -2459,6 +2466,51 @@ def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=No
         if destination_port_range is not None else instance.destination_port_range
     instance.priority = priority if priority is not None else instance.priority
     return instance
+# endregion
+
+
+# region NetworkProfiles
+def create_network_profile(cmd, resource_group_name, network_profile_name, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).network_profiles
+    NetworkProfile = cmd.get_models('NetworkProfile')
+    profile = NetworkProfile(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, network_profile_name, profile)
+
+
+def update_network_profile(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+
+def list_network_profiles(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).network_profiles
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_all()
+
+
+def create_np_container_nic_config(cmd, resource_group_name, network_profile_name, nic_config_name):
+    ContainerNetworkInterfaceConfiguration = cmd.get_models('ContainerNetworkInterfaceConfiguration')
+    client = network_client_factory(cmd.cli_ctx).network_profiles
+    profile = client.get(resource_group_name, network_profile_name)
+    nic_config = ContainerNetworkInterfaceConfiguration(name=nic_config_name)
+    _upsert(profile, 'container_network_interface_configurations', nic_config, 'name')
+    poller = client.create_or_update(resource_group_name, network_profile_name, profile)
+    return _get_property(poller.result().container_network_interface_configurations, nic_config_name)
+
+
+def create_np_container_ip_config(cmd, resource_group_name, network_profile_name, nic_config_name,
+                                  ip_config_name, subnet, virtual_network_name=None):
+    IPConfigurationProfile, SubResource = cmd.get_models('IPConfigurationProfile', 'SubResource')
+    ip_config = IPConfigurationProfile(name=ip_config_name, subnet=SubResource(id=subnet))
+
+    client = network_client_factory(cmd.cli_ctx).network_profiles
+    profile = client.get(resource_group_name, network_profile_name)
+    nic_config = _get_from_collection(profile.container_network_interface_configurations, nic_config_name, 'name')
+    _upsert(nic_config, 'ip_configurations', ip_config, 'name')
+    poller = client.create_or_update(resource_group_name, network_profile_name, profile)
+    return _get_property(poller.result().container_network_interface_configurations, nic_config_name)
 # endregion
 
 
