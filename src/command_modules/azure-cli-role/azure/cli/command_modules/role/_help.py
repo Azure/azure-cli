@@ -155,6 +155,10 @@ helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
 """
+helps['ad user get-member-groups'] = """
+    type: command
+    short-summary: Get groups of which the user is a member
+"""
 helps['role'] = """
     type: group
     short-summary: Manage user roles for access control with Azure Active Directory and service principals.

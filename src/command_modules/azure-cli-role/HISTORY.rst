@@ -5,7 +5,7 @@ Release History
 
 2.1.5
 ++++++
-* Minor fixes.
+* support list user's group memberships
 
 2.1.4
 ++++++

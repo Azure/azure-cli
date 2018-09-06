@@ -80,6 +80,11 @@ def load_arguments(self, _):
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag())
 
+    with self.argument_context('ad user get-member-groups') as c:
+        c.argument('upn_or_object_id', help='The object ID or principal name of the user for which to get information')
+        c.argument('security_enabled_only', action='store_true',
+                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.')
+
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
         for arg in VARIANT_GROUP_ID_ARGS:
