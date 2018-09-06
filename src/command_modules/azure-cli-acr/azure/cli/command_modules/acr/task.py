@@ -74,7 +74,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     set_value=None,
                     set_secret=None,
                     base_image_trigger_name=None,
-                    base_image_trigger_enabled=None,
+                    base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
     if commit_trigger_enabled and not git_access_token:
