@@ -97,7 +97,7 @@ def acr_run(cmd,
         run_request=request))
 
     id = queued.run_id
-    logger.warning("Queued a run ID: %s", id)
+    logger.warning("Queued a run with ID: %s", id)
 
     if no_wait:
         return queued
