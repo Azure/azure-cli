@@ -506,7 +506,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         use32_bit_worker_process=None,  # pylint: disable=unused-argument
                         min_tls_version=None,  # pylint: disable=unused-argument
                         http20_enabled=None,  # pylint: disable=unused-argument
-                        app_command_line=None):  # pylint: disable=unused-argument
+                        app_command_line=None,  # pylint: disable=unused-argument
+                        ftps_state=None):  # pylint: disable=unused-argument
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
