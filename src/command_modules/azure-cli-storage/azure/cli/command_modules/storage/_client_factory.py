@@ -132,3 +132,8 @@ def multi_service_properties_factory(cli_ctx, kwargs):
 
 def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts
+
+
+
+def cf_blob_data_gen_update(cli_ctx, kwargs):
+    return blob_data_service_factory(cli_ctx, kwargs.copy())

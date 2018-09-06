@@ -127,10 +127,13 @@ class StorageArgumentContext(AzArgumentContext):
 
 
 class StorageCommandGroup(AzCommandGroup):
-    def storage_command(self, name, method_name=None, command_type=None, oauth=False, **kwargs):
+    def storage_command(self, name, method_name=None, command_type=None, oauth=False, generic_update=None, **kwargs):
         """ Registers an Azure CLI Storage Data Plane command. These commands always include the four parameters which
         can be used to obtain a storage client: account-name, account-key, connection-string, and sas-token. """
-        if command_type:
+        if generic_update:
+            command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+            self.generic_update_command(name, **kwargs)
+        elif command_type:
             command_name = self.command(name, method_name, command_type=command_type, **kwargs)
         else:
             command_name = self.command(name, method_name, **kwargs)
