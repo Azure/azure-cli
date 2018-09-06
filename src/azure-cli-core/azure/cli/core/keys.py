@@ -57,13 +57,11 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
 
     if os.path.isfile(private_key_filepath):
         # try to use existing private key if it exists.
-
         try:
             key = paramiko.RSAKey(filename=private_key_filepath)
             logger.warning("Private SSH key file '%s' found in dir '%s'. "
                            "Generating new Public key file '%s'",
                            private_key_filepath, ssh_dir, public_key_filepath)
-
         except (PasswordRequiredException, SSHException, IOError) as e:
             raise CLIError(e)
 
