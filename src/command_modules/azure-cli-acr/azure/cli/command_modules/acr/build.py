@@ -44,7 +44,7 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type=OS.linux):
+              os_type=OS.linux.value):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 

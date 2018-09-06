@@ -39,7 +39,7 @@ def acr_run(cmd,
             no_logs=False,
             timeout=None,
             resource_group_name=None,
-            os_type=OS.linux):
+            os_type=OS.linux.value):
 
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)

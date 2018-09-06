@@ -43,7 +43,7 @@ def acr_build_task_create(cmd,  # pylint: disable=too-many-locals
                           git_access_token,
                           alias=None,
                           status='Enabled',
-                          os_type=OS.linux,
+                          os_type=OS.linux.value,
                           cpu=2,
                           timeout=3600,
                           commit_trigger_enabled=True,
