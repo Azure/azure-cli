@@ -37,6 +37,7 @@ def acr_run(cmd,
             set_value=None,
             no_format=False,
             no_logs=False,
+            no_wait=False,
             timeout=None,
             resource_group_name=None,
             os_type=OS.linux.value):
@@ -95,9 +96,13 @@ def acr_run(cmd,
         registry_name=registry_name,
         run_request=request))
 
-    run_id = queued.run_id
-    logger.warning("Queued a run with ID: %s", run_id)
-    logger.warning("Waiting for agent...")
+    id = queued.run_id
+    logger.warning("Queued a run with ID: %s", id)
+
+    if no_wait:
+        return queued
+
+    logger.warning("Waiting for an agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)

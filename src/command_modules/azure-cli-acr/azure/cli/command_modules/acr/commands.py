@@ -123,7 +123,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('build', 'acr_build')
 
     with self.command_group('acr', acr_run_util) as g:
-        g.command('run', 'acr_run')
+        g.command('run', 'acr_run', supports_no_wait=True)
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
@@ -198,7 +198,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_task_delete')
         g.command('update', 'acr_task_update')
         g.command('run', 'acr_task_run', client_factory=cf_acr_runs,
-                  table_transformer=run_output_format)
+                  table_transformer=run_output_format, supports_no_wait=True)
         g.command('list-runs', 'acr_task_list_runs', client_factory=cf_acr_runs,
                   table_transformer=run_output_format)
         g.command('show-run', 'acr_task_show_run', client_factory=cf_acr_runs,
