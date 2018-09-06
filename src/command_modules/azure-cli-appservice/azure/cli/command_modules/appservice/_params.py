@@ -23,7 +23,7 @@ AUTH_TYPES = {
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
-FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled' ]
+FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 
 # pylint: disable=too-many-statements
 
