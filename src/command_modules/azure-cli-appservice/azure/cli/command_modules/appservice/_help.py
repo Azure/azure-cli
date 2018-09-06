@@ -731,6 +731,16 @@ helps['functionapp config ssl upload'] = """
     short-summary: Upload an SSL certificate to a function app.
 """
 
+helps['functionapp config show'] = """
+    type: group
+    short-summary: Get the details of a web app's configuration.
+"""
+
+helps['functionapp config set'] = """
+    type: group
+    short-summary: Set the web app's configuration.
+"""
+
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
