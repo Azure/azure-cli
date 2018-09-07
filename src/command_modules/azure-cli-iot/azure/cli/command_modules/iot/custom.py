@@ -657,7 +657,7 @@ def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoin
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     updated_route = next((route for route in hub.properties.routing.routes
-                         if route.name.lower() == route_name.lower()), None)
+                          if route.name.lower() == route_name.lower()), None)
     if updated_route:
         updated_route.source = updated_route.source if source_type is None else source_type
         updated_route.endpoint_names = updated_route.endpoint_names if endpoint_name is None else endpoint_name.split()
@@ -793,5 +793,11 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
         elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.event_hubs):
             eh_endpoints = [e for e in endpoints.event_hubs if e.name.lower() != endpoint_name.lower()]
             endpoints.event_hubs = eh_endpoints
+
+    if not endpoint_type and not endpoint_name:
+        endpoints.service_bus_queues = []
+        endpoints.service_bus_topics = []
+        endpoints.storage_containers = []
+        endpoints.event_hubs = []
 
     return endpoints

@@ -5,7 +5,6 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
-import random
 
 
 class IoTHubTest(ScenarioTest):
@@ -156,15 +155,15 @@ class IoTHubTest(ScenarioTest):
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
         # Test 'az iot hub routing-endpoint create'
-        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c {6}'
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
-                 checks=[self.check('length(properties.routing.endpoints.eventHubs[*])', 1),
-                         self.check('properties.routing.endpoints.eventHubs[0].resourceGroup', rg),
-                         self.check('properties.routing.endpoints.eventHubs[0].subscriptionId', subscription_id),
-                         self.check('properties.routing.endpoints.eventHubs[0].name', endpoint_name),
-                         self.check('length(properties.routing.endpoints.serviceBusQueues[*])', 0),
-                         self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
-                         self.check('length(properties.routing.endpoints.storageContainers[*])', 0)])
+                 checks=[self.check('length(eventHubs[*])', 1),
+                         self.check('eventHubs[0].resourceGroup', rg),
+                         self.check('eventHubs[0].subscriptionId', subscription_id),
+                         self.check('eventHubs[0].name', endpoint_name),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 0)])
 
         # Test 'az iot hub routing-endpoint list'
         self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1}'
@@ -196,13 +195,13 @@ class IoTHubTest(ScenarioTest):
         enabled = True
         self.cmd('iot hub route create --hub-name {0} -g {1} -n {2} -s {3} --en {4} -c {5} -e {6}'
                  .format(hub, rg, route_name, source_type, endpoint_name, condition, enabled),
-                 checks=[self.check('length(properties.routing.routes[*])', 1),
-                         self.check('properties.routing.routes[0].name', route_name),
-                         self.check('properties.routing.routes[0].source', source_type),
-                         self.check('properties.routing.routes[0].isEnabled', enabled),
-                         self.check('properties.routing.routes[0].condition', condition),
-                         self.check('length(properties.routing.routes[0].endpointNames[*])', 1),
-                         self.check('properties.routing.routes[0].endpointNames[0]', endpoint_name)])
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route list'
         self.cmd('iot hub route list --hub-name {0} -g {1}'.format(hub, rg),
@@ -249,33 +248,33 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub route update'
         self.cmd('iot hub route update --hub-name {0} -g {1} -n {2} -s {3}'.format(hub, rg, route_name, new_source_type),
-                 checks=[self.check('length(properties.routing.routes[*])', 1),
-                         self.check('properties.routing.routes[0].name', route_name),
-                         self.check('properties.routing.routes[0].source', new_source_type),
-                         self.check('properties.routing.routes[0].isEnabled', enabled),
-                         self.check('properties.routing.routes[0].condition', condition),
-                         self.check('length(properties.routing.routes[0].endpointNames[*])', 1),
-                         self.check('properties.routing.routes[0].endpointNames[0]', endpoint_name)])
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', new_source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route delete'
         self.cmd('iot hub route delete --hub-name {0} -g {1}'.format(hub, rg), checks=[
-                 self.check('length(properties.routing.routes[*])', 0)
+                 self.check('length([*])', 0)
                  ])
 
         # Test 'az iot hub routing-endpoint delete'
-        self.cmd('iot hub routing-endpoint delete --hub-name {0} -g {1}'.format(hub, rg),
-                 checks=[self.check('length(properties.routing.endpoints.eventHubs[*])', 0),
-                         self.check('length(properties.routing.endpoints.serviceBusQueues[*])', 0),
-                         self.check('length(properties.routing.endpoints.serviceBusTopics[*])', 0),
-                         self.check('length(properties.routing.endpoints.storageContainers[*])', 0)])
+        self.cmd('iot hub routing-endpoint delete --hub-name {0} -g {1} -n {2}'.format(hub, rg, endpoint_name),
+                 checks=[self.check('length(eventHubs[*])', 0),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 0)])
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = self.create_random_name('ehNamespace', 20)
-        eventHub = self.create_random_name('eventHub', 20)
-        eventHubPolicy = self.create_random_name('eventHubPolicy', 20)
+        ehNamespace = 'ehNamespaceiothubfortest'
+        eventHub = 'eventHubiothubfortest'
+        eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
 
         self.cmd('eventhubs namespace create --resource-group {0} --name {1}'
