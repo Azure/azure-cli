@@ -2,6 +2,52 @@
 
 Release History
 ===============
+2.2.1
++++++
+* `storage share policy show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+2.2.0
++++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
+* Make '--resource-group' parameter optional for 'storage account' commands.
+* Remove 'Failed precondition' warnings for individual failures in batch commands for single aggregated message.
+* blob/file delete-batch commands no longer output array of nulls.
+* blob download/upload/delete-batch commands will read sas-token from container url
+
+2.1.1
++++++
+* Allows download of large files using a single connection.
+* Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Added `pageRanges` property to `storage blob show` output that will be populated for page blobs.
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* Changed table output for `storage blob download` to be more readable.
+
+2.0.34
+++++++
+* Added extra mimetypes for json and javascript to be inferred from file extensions.
+
+2.0.33
+++++++
+* Added completer for `--account-name` argument.
+* Fixed problem with `storage entity query`.
+
+2.0.32
+++++++
+* Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.
+* Expose --socket-timeout for blob uploads and downloads.
+* Treat blob names that start with path separators as relative paths.
+* `storage blob copy` Allow --source-sas with starting query char, '?'
+* `storage entity query` Fix --marker to accept list of key=values.
 
 2.0.31
 ++++++

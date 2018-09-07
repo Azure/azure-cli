@@ -296,6 +296,11 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             time.sleep(30)
             getaliasprimarynamespace = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
+        while getaliasprimarynamespace['pendingReplicationOperationsCount'] != 0 and getaliasprimarynamespace['pendingReplicationOperationsCount'] is not None:
+            time.sleep(30)
+            getaliasprimarynamespace = self.cmd(
+                'eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
+
         # Break Pairing
         self.cmd('eventhubs georecovery-alias break-pair  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}')
 
@@ -315,6 +320,11 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         while getaliasaftercreate['provisioningState'] != ProvisioningStateDR.succeeded.value:
             time.sleep(30)
             getaliasaftercreate = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
+
+        while getaliasaftercreate['pendingReplicationOperationsCount'] != 0 and getaliasaftercreate['pendingReplicationOperationsCount'] is not None:
+            time.sleep(30)
+            getaliasaftercreate = self.cmd(
+                'eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
         # FailOver
         self.cmd('eventhubs georecovery-alias fail-over  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}')

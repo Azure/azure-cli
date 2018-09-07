@@ -3,6 +3,30 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Fix index url failing requests.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.0
++++++
+* `extension list-available` will only show extensions compatible with CLI version.
+
+0.0.15
+++++++
+* Minor fixes
+
+0.0.14
+++++++
+* Be more resilient to system error when removing an extension.
+
+0.0.13
+++++++
+* Pin version of `wheel` so extensions can get metadata shown again.
+
 0.0.12
 ++++++
 * Linux distro check message should be output to debug instead of warning.

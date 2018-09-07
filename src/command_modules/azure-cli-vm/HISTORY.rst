@@ -2,6 +2,70 @@
 
 Release History
 ===============
+2.2.2
+++++++
+* `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
+
+2.2.1
+++++++
+* vm list-skus: add a few common filters to make the command easier to use 
+
+2.2.0
+++++++
+* availability set: support list by subscription
+* vm/vmss: support StandardSSD_LRS
+* vm/vmss: support application security group on creating VM scale set
+* BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
+                   in dictionary format
+* Consuming multi api azure.mgmt.authorization package for azure stack support
+
+2.1.0
++++++
+* BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `vm/vmss extension set/delete`: Added `--no-wait` support.
+* Added `vm extension wait`.
+
+2.0.35
+++++++
+* msi: support removing system assigned identity
+
+2.0.34
+++++++
+* vm create: refine vm size check for accelerated networking support
+* vmss create: warn about the default vm size will be switched from "Standard_D1_v2" to "Standard_DS1_v2"
+* vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
+
+2.0.33
+++++++
+* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
+* `vm create`: support `--accelerated-networking`
+* `vm/vmss extension image list`: absorb 404 when an image type is not found
+* `identity create`: support `--tags`
+
+2.0.32
+++++++
+* BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support
+                   can be accessed through `vm update` or `vm disk attach`
+* vm/vmss extension: fix an incorrect extension image matching logic
+* vm create: expose `--boot-diagnostics-storage` to capture boot log
+* vm/vmss update: expose `--license-type`
+* vm/vmss: use PATCH for updating identities
+
+2.0.31
+++++++
+* vm: fix an invalid detection logic on unmanaged blob uri
+* vm: support disk encryption w/o user provided service principals 
+* BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
+* vmss: support eviction policy
+* BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
+* vm: support write accelerator
+* vmss: expose `az vmss perform-maintenance`
+* `vm diagnostics set`: detect VM's OS type reliably
+* `vm resize`: check if the requested size is different than currently set and update only on change
+
 2.0.30
 ++++++
 * `vmss create`: support to configure platform fault domain count

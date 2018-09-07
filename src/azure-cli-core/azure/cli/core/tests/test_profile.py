@@ -18,7 +18,7 @@ from azure.mgmt.resource.subscriptions.models import \
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
 
@@ -82,28 +82,8 @@ class TestProfile(unittest.TestCase):
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
 
-        cls.test_cloud_shell_msi_access_token = (
-            'yJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3'
-            'ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwcz'
-            'ovL3N0cy53aW5kb3dzLm5ldC81NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTIwMjgzODI3LCJuYmY'
-            'iOjE1MjAyODM4MjcsImV4cCI6MTUyMDI4ODAyNiwiYWNyIjoiMSIsImFpbyI6IkFWUUFxLzhHQUFBQXppd1c2VE1heElJeGxxVkR3TnAx'
-            'MkZvNG5IeVc3NnFXd0ZlS2VlanlYTmdrRUFlckNBM1JoQ0ZLU3VMOGRaQXVBQnd6cTErOTgzdlRoK1dHMTdqa0NWSWVtN1JwYXU5M3Zla'
-            '2RVbkxxdVpRPSIsImFsdHNlY2lkIjoiNTo6MTAwMzAwMDA4MDFDNDREMyIsImFtciI6WyJyc2EiXSwiYXBwaWQiOiJiNjc3YzI5MC1jZj'
-            'RiLTRhOGUtYTYwZS05MWJhNjUwYTRhYmUiLCJhcHBpZGFjciI6IjIiLCJlX2V4cCI6MjYzMDk5LCJlbWFpbCI6Inl1Z2FuZ3dAbWljcm9'
-            'zb2Z0LmNvbSIsImZhbWlseV9uYW1lIjoiV2FuZyIsImdpdmVuX25hbWUiOiJZdWdhbmciLCJncm91cHMiOlsiZTRiYjBiNTYtMTAxNC00'
-            'MGY4LTg4YWItM2Q4YThjYjBlMDg2Il0sImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiL'
-            'TJkN2NkMDExZGI0Ny8iLCJpcGFkZHIiOiIxNjcuMjIwLjEuMjM0IiwibmFtZSI6Ill1Z2FuZyBXYW5nIiwib2lkIjoiODllZDViZTgtZm'
-            'Y5Ny00MWI1LWFiMTEtMDU1ZTFlM2NjMzRiIiwicHVpZCI6IjEwMDNCRkZEOTU5Rjg5NTUiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24'
-            'iLCJzdWIiOiIyRFhuT05jNUVBcjZhXzNVcmtSUmJRQXZHbnh6cUFhLUhMVnMxcld3Z3RJIiwidGlkIjoiNTQ4MjZiMjItMzhkNi00ZmIy'
-            'LWJhZDktYjdiOTNhM2U5YzVhIiwidW5pcXVlX25hbWUiOiJ5dWdhbmd3QG1pY3Jvc29mdC5jb20iLCJ1dGkiOiJESGNDOFQwYkJrLTh5W'
-            'VB2cjlBQ0FBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDVlMTAiXX0.U5rdKCPd_3'
-            'EsleHmZhWaYe19I3jNzFSwvzn84f8cExXbgxkK-X8ejkE_J4A_SufHnaI1x_QHgEIpbIz6RD99tUyccI-emNCpJpM7Ucfhl779gAOdVzy'
-            '75Nc87RhXOXVObNlfvay_BKJ3bDEcayXeoRcPRa2uJ-4c8t6rAqFAHi8UrxOOo2lTTJqhWWlLJ00qY3y31MJQqR_ThwMyaHrORgrnMS6_'
-            '2if0WIg9-BMDbZYiSOIHKJApZNBi2W1Bl-S4FIkh_e70QWQn1h5p1D8eGmnI1vSyCwb6PpIYW93vldYe0Q4hketRlDXyGlOmRZywN7eHZ'
-            'qUGFKxJnyEx9rKrvg')
-
     def test_normalize(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
@@ -126,7 +106,7 @@ class TestProfile(unittest.TestCase):
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
     def test_update_add_two_different_subscriptions(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -178,7 +158,7 @@ class TestProfile(unittest.TestCase):
         self.assertFalse(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_update_with_same_subscription_added_twice(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -201,7 +181,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_set_active_subscription(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -222,7 +202,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_default_active_subscription_to_non_disabled_one(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -236,7 +216,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
     def test_get_subscription(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -255,7 +235,7 @@ class TestProfile(unittest.TestCase):
         self.assertRaises(CLIError, profile.get_subscription, "random_id")
 
     def test_get_auth_info_fail_on_user_account(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -269,7 +249,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.profiles.get_api_version', autospec=True)
     def test_subscription_finder_constructor(self, get_api_mock):
-        cli = TestCli()
+        cli = DummyCli()
         get_api_mock.return_value = '2016-06-01'
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
@@ -278,7 +258,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
@@ -287,7 +267,8 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, False, finder)
+        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, use_device_code=False,
+                                            allow_no_subscriptions=False, subscription_finder=finder)
         # action
         extended_info = profile.get_sp_auth_info()
         # assert
@@ -298,7 +279,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual('https://management.azure.com/', extended_info['resourceManagerEndpointUrl'])
 
     def test_get_auth_info_for_newly_created_service_principal(self):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
@@ -317,7 +298,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_create_account_without_subscriptions_thru_service_principal(self, mock_auth_context):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
-        cli = TestCli()
+        cli = DummyCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = []
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
@@ -332,6 +313,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      True,
                                                      self.tenant_id,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -346,7 +328,7 @@ class TestProfile(unittest.TestCase):
     def test_create_account_without_subscriptions_thru_common_tenant(self, mock_auth_context):
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
-        cli = TestCli()
+        cli = DummyCli()
         tenant_object = mock.MagicMock()
         tenant_object.id = "foo-bar"
         tenant_object.tenant_id = self.tenant_id
@@ -366,6 +348,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      False,
                                                      None,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -378,7 +361,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_create_account_without_subscriptions_without_tenant(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         finder = mock.MagicMock()
         finder.find_through_interactive_flow.return_value = []
         storage_mock = {'subscriptions': []}
@@ -390,6 +373,7 @@ class TestProfile(unittest.TestCase):
                                                      'my-secret',
                                                      False,
                                                      None,
+                                                     use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
@@ -398,7 +382,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         # setup
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
 
@@ -416,7 +400,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', return_value=None)
     def test_create_token_cache(self, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         mock_read_file.return_value = []
         profile = Profile(cli_ctx=cli, use_global_creds_cache=False, async_persist=False)
         cache = profile._creds_cache.adal_token_cache
@@ -425,7 +409,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_load_cached_tokens(self, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         mock_read_file.return_value = [TestProfile.token_entry1]
         profile = Profile(cli_ctx=cli, use_global_creds_cache=False, async_persist=False)
         cache = profile._creds_cache.adal_token_cache
@@ -440,30 +424,81 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials(self, mock_get_token, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
         mock_get_token.return_value = (some_token_type, TestProfile.raw_token1)
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
+                                                     [test_subscription],
                                                      False)
         profile._set_subscriptions(consolidated)
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # verify
-        self.assertEqual(subscription_id, '1')
+        self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
         token_type, token = cred._token_retriever()
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
-        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, test_tenant_id,
                                                'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_login_credentials_aux_subscriptions(self, mock_get_token, mock_read_cred_file):
+        cli = DummyCli()
+        raw_token2 = 'some...secrets2'
+        token_entry2 = {
+            "resource": "https://management.core.windows.net/",
+            "tokenType": "Bearer",
+            "_authority": "https://login.microsoftonline.com/common",
+            "accessToken": raw_token2,
+        }
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [TestProfile.token_entry1, token_entry2]
+        mock_get_token.side_effect = [(some_token_type, TestProfile.raw_token1), (some_token_type, raw_token2)]
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_subscription_id2 = '12345678-1bf0-4dda-aec3-cb9272f09591'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_tenant_id2 = '12345678-38d6-4fb2-bad9-b7b93a3e4321'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, test_tenant_id)
+        test_subscription2 = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id2),
+                                              'MSI-DEV-INC2', self.state1, test_tenant_id2)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [test_subscription, test_subscription2],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id,
+                                                                 aux_subscriptions=[test_subscription_id2])
+
+        # verify
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # verify the cred._tokenRetriever is a working lambda
+        token_type, token = cred._token_retriever()
+        self.assertEqual(token, self.raw_token1)
+        self.assertEqual(some_token_type, token_type)
+
+        token2 = cred._external_tenant_token_retriever()
+        self.assertEqual(len(token2), 1)
+        self.assertEqual(token2[0][1], raw_token2)
+
+        self.assertEqual(mock_get_token.call_count, 2)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
@@ -471,7 +506,7 @@ class TestProfile(unittest.TestCase):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
@@ -502,7 +537,7 @@ class TestProfile(unittest.TestCase):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
@@ -533,7 +568,7 @@ class TestProfile(unittest.TestCase):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
@@ -564,7 +599,7 @@ class TestProfile(unittest.TestCase):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
@@ -593,7 +628,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
         mock_get_token.return_value = (some_token_type, TestProfile.raw_token1,
@@ -625,7 +660,7 @@ class TestProfile(unittest.TestCase):
         mock_read_cred_file.return_value = []
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
@@ -650,7 +685,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
         mock_get_token.return_value = (some_token_type, TestProfile.raw_token1)
@@ -672,7 +707,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_data_lake_client(self, mock_get_token, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
         mock_get_token.return_value = (some_token_type, TestProfile.raw_token1)
@@ -694,7 +729,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.persist_cached_creds', autospec=True)
     def test_logout(self, mock_persist_creds, mock_read_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         # setup
         mock_read_cred_file.return_value = [TestProfile.token_entry1]
 
@@ -715,7 +750,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._delete_file', autospec=True)
     def test_logout_all(self, mock_delete_cred_file):
-        cli = TestCli()
+        cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
@@ -737,7 +772,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_thru_username_password(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
@@ -757,7 +792,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_thru_username_non_password(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_username_password.return_value = None
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: None)
         # action
@@ -785,7 +820,7 @@ class TestProfile(unittest.TestCase):
         mock_get_token_endpoint.return_value = "http://great_endpoint"
         mock_msi_auth.return_value = MSRestAzureAuthStub()
 
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
 
         # action
@@ -811,7 +846,7 @@ class TestProfile(unittest.TestCase):
                 self.config = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -847,7 +882,7 @@ class TestProfile(unittest.TestCase):
                 self.config = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -892,6 +927,8 @@ class TestProfile(unittest.TestCase):
                 self.token = None
                 self.client_id = kwargs.get('client_id')
                 self.object_id = kwargs.get('object_id')
+                # since msrestazure 0.4.34, set_token in init
+                self.set_token()
 
             def set_token(self):
                 # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
@@ -905,7 +942,7 @@ class TestProfile(unittest.TestCase):
                     mock_obj.status, mock_obj.reason = 400, 'Bad Request'
                     raise HTTPError(response=mock_obj)
 
-        profile = Profile(cli_ctx=TestCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
 
         mock_subscription_finder.return_value = SubscriptionFinderStub()
@@ -930,7 +967,7 @@ class TestProfile(unittest.TestCase):
                 self.config = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
@@ -956,7 +993,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
     def test_find_subscriptions_thru_username_password_adfs(self, mock_acquire_token,
                                                             mock_acquire_token_username_password):
-        cli = TestCli()
+        cli = DummyCli()
         TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
 
         def test_acquire_token(self, resource, username, password, client_id):
@@ -985,7 +1022,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile.logger', autospec=True)
     def test_find_subscriptions_thru_username_password_with_account_disabled(self, mock_logger, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
         mock_auth_context.acquire_token.side_effect = AdalError('Account is disabled')
         mock_arm_client = mock.MagicMock()
@@ -1004,7 +1041,7 @@ class TestProfile(unittest.TestCase):
         def just_raise(ex):
             raise ex
 
-        cli = TestCli()
+        cli = DummyCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.side_effect = lambda: just_raise(
             ValueError("'tenants.list' should not occur"))
@@ -1017,8 +1054,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual([self.subscription1], subs)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
-        cli = TestCli()
+    def test_find_subscriptions_through_device_code_flow(self, mock_auth_context):
+        cli = DummyCli()
         test_nonsense_code = {'message': 'magic code for you'}
         mock_auth_context.acquire_user_code.return_value = test_nonsense_code
         mock_auth_context.acquire_token_with_device_code.return_value = self.token_entry1
@@ -1040,11 +1077,43 @@ class TestProfile(unittest.TestCase):
             mgmt_resource, self.user1, mock.ANY)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_subscriptions_through_authorization_code_flow(self, _get_authorization_code_mock, mock_auth_context):
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+        _get_authorization_code_mock.return_value = {
+            'code': 'code1',
+            'reply_url': 'http://localhost:8888'
+        }
+        mgmt_resource = 'https://management.core.windows.net/'
+        temp_token_cache = mock.MagicMock()
+        type(mock_auth_context).cache = temp_token_cache
+        temp_token_cache.read_items.return_value = []
+        mock_auth_context.acquire_token_with_authorization_code.return_value = self.token_entry1
+
+        # action
+        subs = finder.find_through_authorization_code_flow(None, mgmt_resource, 'https:/some_aad_point/common')
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        mock_auth_context.acquire_token.assert_called_once_with(mgmt_resource, self.user1, mock.ANY)
+        mock_auth_context.acquire_token_with_authorization_code.assert_called_once_with('code1',
+                                                                                        'http://localhost:8888',
+                                                                                        mgmt_resource, mock.ANY,
+                                                                                        None)
+        _get_authorization_code_mock.assert_called_once_with(mgmt_resource, 'https:/some_aad_point/common')
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_interactive_from_particular_tenent(self, mock_auth_context):
         def just_raise(ex):
             raise ex
 
-        cli = TestCli()
+        cli = DummyCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.side_effect = lambda: just_raise(
             ValueError("'tenants.list' should not occur"))
@@ -1058,7 +1127,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_from_service_principal_id(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
@@ -1077,7 +1146,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_from_service_principal_using_cert(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         mock_auth_context.acquire_token_with_client_certificate.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
@@ -1100,7 +1169,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_refresh_accounts_one_user_account(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
@@ -1123,7 +1192,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_refresh_accounts_one_user_account_one_sp_account(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
@@ -1152,7 +1221,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_refresh_accounts_with_nothing(self, mock_auth_context):
-        cli = TestCli()
+        cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
@@ -1172,7 +1241,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1190,7 +1259,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_credscache_load_tokens_and_sp_creds_with_cert(self, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1206,10 +1275,27 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    def test_credscache_retrieve_sp_secret_with_cert(self, mock_read_file):
+        cli = DummyCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "certificateFile": 'junkcert.pem'
+        }
+        mock_read_file.return_value = [test_sp]
+
+        # action
+        creds_cache = CredsCache(cli, async_persist=False)
+        creds_cache.load_adal_token_cache()
+
+        # assert
+        self.assertEqual(creds_cache.retrieve_secret_of_service_principal(test_sp['servicePrincipalId']), None)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_add_new_sp_creds(self, _, mock_open_for_write, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1237,7 +1323,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_add_preexisting_sp_creds(self, _, mock_open_for_write, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1252,12 +1338,36 @@ class TestProfile(unittest.TestCase):
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
+        self.assertFalse(mock_open_for_write.called)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_add_preexisting_sp_new_secret(self, _, mock_open_for_write, mock_read_file):
+        cli = DummyCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = [test_sp]
+        creds_cache = CredsCache(cli, async_persist=False)
+
+        new_creds = test_sp.copy()
+        new_creds['accessToken'] = 'Secret2'
+        # action
+        creds_cache.save_service_principal_cred(new_creds)
+
+        # assert
+        self.assertEqual(creds_cache._service_principal_creds, [new_creds])
+        self.assertTrue(mock_open_for_write.called)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_remove_creds(self, _, mock_open_for_write, mock_read_file):
-        cli = TestCli()
+        cli = DummyCli()
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1288,7 +1398,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('os.open', autospec=True)
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, _, mock_open_for_write, mock_read_file):  # pylint: disable=line-too-long
-        cli = TestCli()
+        cli = DummyCli()
         token_entry2 = {
             "accessToken": "new token",
             "tokenType": "Bearer",
@@ -1325,7 +1435,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
     def test_credscache_good_error_on_file_corruption(self, mock_read_file):
         mock_read_file.side_effect = ValueError('a bad error for you')
-        cli = TestCli()
+        cli = DummyCli()
 
         # action
         creds_cache = CredsCache(cli, async_persist=False)
@@ -1359,7 +1469,7 @@ class TestProfile(unittest.TestCase):
         })
 
     def test_detect_adfs_authority_url(self):
-        cli = TestCli()
+        cli = DummyCli()
         adfs_url_1 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs/'
         cli.cloud.endpoints.active_directory = adfs_url_1
         storage_mock = {'subscriptions': None}
@@ -1367,7 +1477,7 @@ class TestProfile(unittest.TestCase):
 
         # test w/ trailing slash
         r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, adfs_url_1)
+        self.assertEqual(r.authority.url, adfs_url_1.rstrip('/'))
 
         # test w/o trailing slash
         adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
@@ -1400,7 +1510,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
-        super(SubscriptionStub, self).__init__(policies, 'some_authorization_source')
+        super(SubscriptionStub, self).__init__(subscription_policies=policies, authorization_source='some_authorization_source')
         self.id = id
         self.display_name = display_name
         self.state = state

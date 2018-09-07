@@ -2,6 +2,57 @@
 
 Release History
 ===============
+2.2.4
++++++
+* `network application-gateway ssl-policy predefined show`: exception handling to exit with code 3 upon a missing resource for consistency
+
+2.2.3
++++++
+* Minor fixes
+
+2.2.2
++++++
+* `dns`: Added dns support to 2017-03-09-profile for Azure Stack 
+
+2.2.1
+++++++
+* Minor fixes
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `network nic create/update/delete`: Add `--no-wait` support.
+* Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
+* `network nsg rule list`: Added `--include-default` flag to include default security rules in the output.
+
+2.1.5
+++++++
+* `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)
+
+2.1.4
+++++++
+* `network lb probe create`: support `Https` protocol [#6571](https://github.com/Azure/azure-cli/issues/6571)
+* `network traffic-manager endpoint create/update`: Fix issue where `--endpoint-status` was case sensitive. [#6502](https://github.com/Azure/azure-cli/issues/6502)
+
+2.1.3
+++++++
+* `network vnet peering`: a few improvements
+
+2.1.2
+++++++
+* `network watcher show-topology`: Fix issue where command would not work with vnet and/or subnet name. [#6326](https://github.com/Azure/azure-cli/issues/6326)
+
+2.1.1
+++++++
+* `network watcher`: Fix issue where certain commands would claim Network Watcher is not enabled for regions when it actually is. [#6264](https://github.com/Azure/azure-cli/issues/6264)
+
+2.1.0
+++++++
+* BREAKING CHANGE: `express-route auth list`, `express-route peering list`, `nic ip-config list`
+                   `nsg rule list`, `route-filter rule list`, `route-table route list`,
+                   `traffic-manager endpoint list`: Removed the `--ids` parameter.
 
 2.0.28
 ++++++

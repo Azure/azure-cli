@@ -3,6 +3,79 @@
 Release History
 ===============
 
+2.0.45
+++++++
+* Fix issue of loading empty configuration file.
+* Azure Stack: support new profile 2018-03-01-hybrid
+
+2.0.44
+++++++
+* use knack/0.4.2 with fix towards numeric value display in table output
+* Introduce YAML output format
+* Overhaul telemetry upload mechanism
+
+2.0.43
+++++++
+* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Minor fixes
+
+2.0.42
+++++++
+* login: support browser based login in WSL bash window
+* Adds `--force-string` flag to all generic update commands.
+
+2.0.41
+++++++
+* Minor fixes
+* Update PyYAML dependency to 4.2b4
+
+2.0.40
+++++++
+* authentication: support authorization code flow for interactive login
+
+2.0.39
+++++++
+* MSI packaging change
+
+2.0.38
+++++++
+* Add global support for `--subscription` to most commands.
+
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36	
+++++++	
+* Minor fixes
+
+2.0.35
+++++++
+* Added method of registering `show` commands to fail with exit code of 3.
+
+2.0.34
+++++++
+* core: support cross tenant resource referencing
+* Improve telemetry upload reliability
+  1. Remove retry. Once failed stop uploading.
+  2. Update the process start configuration to prevent upload process from blocking the CLI process.
+
+2.0.33
+++++++
+* core: ignore FileNotFoundError error on expanding `@`
+
+2.0.32
+++++++
+* auth: fix a unhandled exception when retrieve secrets from a service principal account with cert
+* auth: improve the logic of detecting msi based account
+* Added limited support for positional arguments.
+* Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)
+* Improves piping scenarios from commands when using `--ids`. Supports `-o tsv` with a query specified or `-o json`
+  without specifying a query.
+* Display command suggestions on error if users have typo in their commands
+* More friendly error when users type `az ''`
+* Support custom resource types for command modules and extensions
+
 2.0.31
 ++++++
 * Allow other sources to add additional tab completion choices via event hook

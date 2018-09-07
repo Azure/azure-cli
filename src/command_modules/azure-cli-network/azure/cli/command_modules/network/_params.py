@@ -151,7 +151,7 @@ def load_arguments(self, _):
             c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
 
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
-            c.argument('resource_name', options_list=('--gateway-name',))
+            c.argument('resource_name', options_list=['--gateway-name'])
 
     for item in ['create', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -619,6 +619,7 @@ def load_arguments(self, _):
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
+        c.argument('include_default', help='Include default security rules in the output.')
 
     with self.argument_context('network nsg rule create') as c:
         c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
@@ -829,7 +830,7 @@ def load_arguments(self, _):
         c.argument('profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
         c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
         c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
-        c.argument('endpoint_status', help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
+        c.argument('endpoint_status', arg_type=get_enum_type(['Enabled', 'Disabled']), help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
         c.argument('min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
         c.argument('priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
         c.argument('target', help='Fully-qualified DNS name of the endpoint.')
@@ -850,6 +851,9 @@ def load_arguments(self, _):
         c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Control whether DDoS protection is enabled.', min_api='2017-09-01')
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
+
+    with self.argument_context('network vnet check-ip-address') as c:
+        c.argument('ip_address', required=True)
 
     with self.argument_context('network vnet create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
@@ -878,6 +882,10 @@ def load_arguments(self, _):
         c.argument('network_security_group', validator=get_nsg_validator())
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+
+    for scope in ['network vnet subnet list', 'network vnet peering list']:
+        with self.argument_context(scope) as c:
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
 
     # endregion
 
@@ -966,4 +974,25 @@ def load_arguments(self, _):
             c.argument(dest, arg_type=get_enum_type(model))
         c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
         c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+    # endregion
+
+    # region Remove --ids from listsaz
+    for scope in ['express-route auth', 'express-route peering']:
+        with self.argument_context('network {} list'.format(scope)) as c:
+            c.argument('circuit_name', id_part=None)
+
+    with self.argument_context('network nic ip-config list') as c:
+        c.argument('resource_name', id_part=None)
+
+    with self.argument_context('network nsg rule list') as c:
+        c.argument('network_security_group_name', id_part=None)
+
+    with self.argument_context('network route-filter rule list') as c:
+        c.argument('route_filter_name', id_part=None)
+
+    with self.argument_context('network route-table route list') as c:
+        c.argument('route_table_name', id_part=None)
+
+    with self.argument_context('network traffic-manager endpoint list') as c:
+        c.argument('profile_name', id_part=None)
     # endregion

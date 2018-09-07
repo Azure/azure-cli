@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -152,6 +153,155 @@ helps['account lock update'] = """
           text: >
             az account lock update --name lockName --notes newNotesHere --lock-type CanNotDelete
     """
+helps['account management-group'] = """
+    type: group
+    short-summary: Manage Azure Management Groups.
+"""
+
+helps['account management-group subscription'] = """
+    type: group
+    short-summary: Subscription operations for Management Groups.
+"""
+
+helps['account management-group list'] = """
+    type: command
+    short-summary: List all management groups.
+    long-summary: List of all management groups in the current tenant.
+    examples:
+        - name: List all management groups
+          text: >
+             az account management-group list
+"""
+
+helps['account management-group show'] = """
+    type: command
+    short-summary: Get a specific management group.
+    long-summary: Get the details of the management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+        - name: --expand -e
+          type: bool
+          short-summary: If given, lists the children in the first level of hierarchy.
+        - name: --recurse -r
+          type: bool
+          short-summary: If given, lists the children in all levels of hierarchy.
+    examples:
+        - name: Get a management group.
+          text: >
+             az account management-group show --name GroupName
+        - name: Get a management group with children in the first level of hierarchy.
+          text: >
+             az account management-group show --name GroupName -e
+        - name: Get a management group with children in all levels of hierarchy.
+          text: >
+             az account management-group show --name GroupName -e -r
+"""
+
+helps['account management-group create'] = """
+    type: command
+    short-summary: Create a new management group.
+    long-summary: Create a new management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+        - name: --display-name -d
+          type: string
+          short-summary: Sets the display name of the management group. If null, the group name is set as the display name.
+        - name: --parent -p
+          type: string
+          short-summary: Sets the parent of the management group. Can be the fully qualified id or the name of the management group. If null, the root tenant group is set as the parent.
+    examples:
+        - name: Create a new management group.
+          text: >
+             az account management-group create --name GroupName
+        - name: Create a new management group with a specific display name.
+          text: >
+             az account management-group create --name GroupName --display-name DisplayName
+        - name: Create a new management group with a specific parent.
+          text: >
+             az account management-group create --name GroupName --parent ParentId/ParentName
+        - name: Create a new management group with a specific display name and parent.
+          text: >
+             az account management-group create --name GroupName --display-name DisplayName --parent ParentId/ParentName
+"""
+
+helps['account management-group update'] = """
+    type: command
+    short-summary: Update an existing management group.
+    long-summary: Update an existing management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+        - name: --display-name -d
+          type: string
+          short-summary: Updates the display name of the management group. If null, no change is made.
+        - name: --parent -p
+          type: string
+          short-summary: Update the parent of the management group. Can be the fully qualified id or the name of the management group. If null, no change is made.
+    examples:
+        - name: Update an existing management group with a specific display name.
+          text: >
+             az account management-group update --name GroupName --display-name DisplayName
+        - name: Update an existing management group with a specific parent.
+          text: >
+             az account management-group update --name GroupName --parent ParentId/ParentName
+        - name: Update an existing management group with a specific display name and parent.
+          text: >
+             az account management-group update --name GroupName --display-name DisplayName --parent ParentId/ParentName
+"""
+
+helps['account management-group delete'] = """
+    type: command
+    short-summary: Delete an existing management group.
+    long-summary: Delete an existing management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+    examples:
+        - name: Delete an existing management group
+          text: >
+             az account management-group delete --name GroupName
+"""
+
+helps['account management-group subscription add'] = """
+    type: command
+    short-summary: Add a subscription to a management group.
+    long-summary: Add a subscription to a management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+        - name: --subscription -s
+          type: string
+          short-summary: Subscription Id or Name
+    examples:
+        - name: Add a subscription to a management group.
+          text: >
+             az account management-group subscription add --name GroupName --subscription Subscription
+"""
+
+helps['account management-group subscription remove'] = """
+    type: command
+    short-summary: Remove an existing subscription from a management group.
+    long-summary: Remove an existing subscription from a management group.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Name of the management group.
+        - name: --subscription -s
+          type: string
+          short-summary: Subscription Id or Name
+    examples:
+        - name: Remove an existing subscription from a management group.
+          text: >
+             az account management-group subscription remove --name GroupName --subscription Subscription
+"""
+
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
@@ -224,7 +374,7 @@ helps['policy set-definition create'] = """
             examples:
                 - name: Create a policy set definition.
                   text: |
-                    az policy setdefinition create -n readOnlyStorage --definitions '[
+                    az policy set-definition create -n readOnlyStorage --definitions '[
                             {
                                 "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
                             }
@@ -309,7 +459,7 @@ helps['resource show'] = """
     examples:
         - name: Show a virtual machine resource named 'MyVm'.
           text: >
-            az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Show a web app using a resource identifier.
           text: >
             az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
@@ -330,7 +480,7 @@ helps['resource delete'] = """
     examples:
         - name: Delete a virtual machine named 'MyVm'.
           text: >
-            az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Delete a web app using a resource identifier.
           text: >
             az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
@@ -517,6 +667,57 @@ helps['group deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.
 """
+helps['deployment'] = """
+    type: group
+    short-summary: Manage Azure Resource Manager deployments at subscription scope.
+"""
+helps['deployment create'] = """
+    type: command
+    short-summary: Start a deployment.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    examples:
+        - name: Create a deployment from a remote template file, using parameters from a local JSON file.
+          text: >
+            az deployment create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        - name: Create a deployment from a local template file, using parameters from a JSON string.
+          text: |
+            az deployment create --location WestUS --template-file azuredeploy.json --parameters '{
+                    "policyName": {
+                        "value": "policy2"
+                    }
+                }'
+        - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
+          text: >
+            az deployment create --location WestUS --template-file azuredeploy.json \\
+                --parameters @params.json --parameters MyValue=This MyArray=@array.json
+"""
+helps['deployment export'] = """
+    type: command
+    short-summary: Export the template used for a deployment.
+"""
+helps['deployment validate'] = """
+    type: command
+    short-summary: Validate whether a template is syntactically correct.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+"""
+helps['deployment wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a deployment condition is met.
+"""
+helps['deployment operation'] = """
+    type: group
+    short-summary: Manage deployment operations.
+"""
 helps['group lock'] = """
     type: group
     short-summary: Manage Azure resource group locks.
@@ -609,7 +810,7 @@ helps['resource link'] = """
 helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Create a link from {SourceID} to {ResourceID} with notes
           text: >
@@ -618,7 +819,7 @@ helps['resource link create'] = """
 helps['resource link update'] = """
     type: command
     short-summary: Update link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Update the notes for {LinkID} notes "some notes to explain this link"
           text: >
@@ -627,7 +828,7 @@ helps['resource link update'] = """
 helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Delete link {LinkID}
           text: >
@@ -647,7 +848,7 @@ helps['resource link list'] = """
 helps['resource link show'] = """
     type: command
     short-summary: Get details for a resource link.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 """
 helps['resource lock'] = """
     type: group

@@ -150,11 +150,9 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.is_empty())
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}')
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
@@ -170,11 +168,11 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network vnet create -n {resvnet} -g {rg}')
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
-        self.cmd('network dns zone create -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
+        self.cmd('network dns zone create -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet} --tags foo=doo')
         self.cmd('network dns zone list -g {rg}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets ""')
+        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets "" --tags foo=boo')
         self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
 
         base_record_sets = 1
@@ -231,11 +229,10 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.is_empty())
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}')
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
@@ -404,7 +401,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com.' + zn)])
         self._check_txt(zone, 'longtxt2.' + zn, [(100, 500, None)])
         self._check_txt(zone, 'longtxt.' + zn, [(999, 944, None)])
-        self._check_txt(zone, 'spf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
+        self._check_txt(zone, 'myspf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
         self._check_txt(zone, zn, [
             (200, None, 'this is another SPF, this time as TXT'),
             (200, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')  # pylint: disable=line-too-long

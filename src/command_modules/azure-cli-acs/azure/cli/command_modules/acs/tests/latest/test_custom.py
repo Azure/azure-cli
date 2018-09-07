@@ -6,8 +6,10 @@
 # pylint: skip-file
 import mock
 import os
+import platform
 import requests
 import tempfile
+import shutil
 import unittest
 import yaml
 
@@ -17,7 +19,8 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
                                                    regions_in_prod)
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
-                                                  create_application)
+                                                  create_application, _update_addons,
+                                                  _ensure_container_insights_for_monitoring, k8s_install_cli)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -53,7 +56,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
     def test_add_role_assignment_exists(self):
@@ -71,7 +74,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
     def test_add_role_assignment_fails(self):
@@ -89,14 +92,14 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.kubernetes)
+            orchestrator_type=ContainerServiceOrchestratorTypes.kubernetes)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
@@ -109,9 +112,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
+        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.dcos)
+            orchestrator_type=ContainerServiceOrchestratorTypes.dcos)
         client, cmd = mock.MagicMock(), mock.MagicMock()
 
         with mock.patch(
@@ -199,6 +202,107 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(len(merged['users']), 2)
         self.assertEqual(merged['users'], ['user1', 'user2'])
         self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_merge_admin_credentials(self):
+        existing = tempfile.NamedTemporaryFile(delete=False)
+        existing.close()
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj1 = {
+            'apiVersion': 'v1',
+            'clusters': [
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'contexts': [
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'current-context': 'aztest',
+            'kind': 'Config',
+            'preferences': {},
+            'users': [
+                {
+                    'name': 'clusterUser_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'clientcertificatedata1',
+                        'client-key-data': 'clientkeydata1',
+                        'token': 'token1'
+                    }
+                }
+            ]
+        }
+        with open(existing.name, 'w+') as stream:
+            yaml.dump(obj1, stream)
+        self.addCleanup(os.remove, existing.name)
+        obj2 = {
+            'apiVersion': 'v1',
+            'clusters': [
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata2',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'contexts': [
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterAdmin_aztest_aztest'
+                    },
+                    'name': 'aztest'
+                }
+            ],
+            'current-context': 'aztest',
+            'kind': 'Config',
+            'preferences': {},
+            'users': [
+                {
+                    'name': 'clusterAdmin_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'someclientcertificatedata2',
+                        'client-key-data': 'someclientkeydata2',
+                        'token': 'token2'
+                    }
+                }
+            ]
+        }
+        with open(addition.name, 'w+') as stream:
+            yaml.dump(obj2, stream)
+        self.addCleanup(os.remove, addition.name)
+
+        merge_kubernetes_configurations(existing.name, addition.name)
+
+        with open(existing.name, 'r') as stream:
+            merged = yaml.load(stream)
+        self.assertEqual(len(merged['clusters']), 2)
+        self.assertEqual([c['cluster'] for c in merged['clusters']],
+                         [{'certificate-authority-data': 'certificateauthoritydata1',
+                           'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'},
+                          {'certificate-authority-data': 'certificateauthoritydata2',
+                           'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'}])
+        self.assertEqual(len(merged['contexts']), 2)
+        self.assertEqual(merged['contexts'],
+                         [{'context': {'cluster': 'aztest', 'user': 'clusterUser_aztest_aztest'},
+                           'name': 'aztest'},
+                          {'context': {'cluster': 'aztest', 'user': 'clusterAdmin_aztest_aztest'},
+                           'name': 'aztest-admin'}])
+        self.assertEqual(len(merged['users']), 2)
+        self.assertEqual([u['name'] for u in merged['users']],
+                         ['clusterUser_aztest_aztest', 'clusterAdmin_aztest_aztest'])
+        self.assertEqual(merged['current-context'], 'aztest-admin')
 
     def test_merge_credentials_missing(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
@@ -317,4 +421,99 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
 
         # assert we handled such error
-        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+        self.assertTrue(
+            'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
+    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
+        # http_application_routing enabled
+        instance = mock.MagicMock()
+        instance.addon_profiles = None
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'http_application_routing', enable=True)
+        self.assertIn('httpApplicationRouting', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(addon_profile.enabled)
+
+        # http_application_routing enabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'http_application_routing', enable=False)
+        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertFalse(addon_profile.enabled)
+
+        # monitoring added
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=True)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertTrue(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertFalse(routing_addon_profile.enabled)
+
+        # monitoring disabled, routing enabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
+                                  'http_application_routing', enable=True)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertFalse(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(routing_addon_profile.enabled)
+        self.assertEqual(sorted(list(instance.addon_profiles)), ['httpApplicationRouting', 'omsagent'])
+
+        # monitoring enabled and then enabled again should error
+        instance = mock.Mock()
+        instance.addon_profiles = None
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'monitoring', enable=True)
+        with self.assertRaises(CLIError):
+            instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                      'clitest000001', 'monitoring', enable=True)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
+    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
+        cmd = mock.Mock()
+        addon = mock.Mock()
+        wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
+        addon.config = {
+            'logAnalyticsWorkspaceResourceID': wsID
+        }
+        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
+        args, kwargs = invoke_def.call_args
+        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
+        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_cli_emit_warnings(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'kubectl.exe')
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 2 warnings, 1st for download result; 2nd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+
+            if platform.system() == 'Windows':
+                # try again with install location in PATH, we should only get one more warning
+                os.environ['PATH'] += ';' + temp_dir
+                k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+                self.assertEqual(logger_mock.warning.call_count, 3)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_cli_create_installation_dir(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
+            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)

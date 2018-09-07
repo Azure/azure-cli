@@ -6,6 +6,7 @@
 import os
 import os.path
 import re
+from math import ceil
 
 from knack.log import get_logger
 
@@ -30,6 +31,8 @@ def validate_connector_name(namespace):
 
 
 def validate_ssh_key(namespace):
+    if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
+        return
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
@@ -107,3 +110,13 @@ def validate_linux_host_name(namespace):
     if not found:
         raise CLIError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
+
+
+def validate_max_pods(namespace):
+    """Validates that max_pods is set to a reasonable minimum number."""
+    # kube-proxy and kube-svc reside each nodes,
+    # 2 kube-proxy pods, 1 azureproxy/heapster/dashboard/tunnelfront are in kube-system
+    minimum_pods_required = ceil((namespace.node_count * 2 + 6 + 1) / namespace.node_count)
+    if namespace.max_pods != 0 and namespace.max_pods < minimum_pods_required:
+        raise CLIError('--max-pods must be at least {} for a managed Kubernetes cluster to function.'
+                       .format(minimum_pods_required))

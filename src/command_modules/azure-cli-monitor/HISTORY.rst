@@ -3,6 +3,35 @@
 Release History
 ===============
 
+0.2.3
++++++
+* Added `monitor metrics alert` commands for near-realtime metric alerts.
+* Deprecated `monitor alert` commands.
+
+0.2.2
++++++
+* Minor fixes
+
+0.2.1
++++++
+* Minor fixes
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.8
+++++++
+* Minor fixes.
+
+0.1.7
++++++
+* Minor fixes.
+
+0.1.6
++++++
+* Minor fixes.
+
 0.1.5
 +++++
 * Minor fixes.

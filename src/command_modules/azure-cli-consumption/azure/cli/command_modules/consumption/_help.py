@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -62,4 +63,29 @@ helps['consumption marketplace'] = """
 helps['consumption marketplace list'] = """
     type: command
     short-summary: List the marketplace for an Azure subscription within a billing period.
+"""
+
+helps['consumption budget'] = """
+    type: group
+    short-summary: Manage budgets for an Azure subscription.
+"""
+
+helps['consumption budget list'] = """
+    type: command
+    short-summary: List budgets for an Azure subscription.
+"""
+
+helps['consumption budget show'] = """
+    type: command
+    short-summary: Show budget for an Azure subscription.
+"""
+
+helps['consumption budget create'] = """
+    type: command
+    short-summary: Create a budget for an Azure subscription.
+"""
+
+helps['consumption budget delete'] = """
+    type: command
+    short-summary: Delete a budget for an Azure subscription.
 """

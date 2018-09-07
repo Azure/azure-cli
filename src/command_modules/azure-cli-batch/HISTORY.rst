@@ -3,8 +3,50 @@
 Release History
 ===============
 
+3.3.3
++++++
+* Update Batch Management SDK dependency
+
+3.3.2
++++++
+* Update Key Vault SDK dependency
+
+3.3.1
++++++
+* Fix bug when show AAD token in cloudshell
+
+3.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Fix bug on using token credential on cloud shell mode
+* When use json file as input parameter, deserialize content with case insentive.
+
+3.2.6
++++++
+* Minor fixes
+
+3.2.5
++++++
+* Minor fixes
+
+3.2.4
++++++
+* Remove azure-batch-extensions dependency.
+
+3.2.3
++++++
+* Fixed bug in Pool list table formatting: issue #4378.
+
+3.2.2
++++++
+* Updated to Batch SDK 4.1.2.
+
+3.2.1
++++++
+* Minor fixes.
+
 3.2.0
-++++++
++++++
 * Updated to Batch SDK 4.1.1.
 * `sdist` is now compatible with wheel 0.31.0
 

@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -10,6 +11,11 @@ from knack.help_files import helps
 vm_ids_example = """        - name: {0}
           text: >
             az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+"""
+
+helps['vm secret'] = """
+    type: group
+    short-summary: Manage VM secrets.
 """
 
 helps['vm secret add'] = """
@@ -129,7 +135,7 @@ helps['vmss create'] = """
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
-            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+            az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
             az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
@@ -159,7 +165,7 @@ helps['vmss create'] = """
               --image debian --secrets "$vm_secrets"
         - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
           text: >
-             az vm create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+             az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a debian VM scaleset with a user assigned identity.
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
@@ -198,7 +204,7 @@ helps['vm availability-set convert'] = """
     short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
     examples:
         - name: Convert an availabiity set to use managed disks by name.
-          text: vm availability-set convert -g MyResourceGroup -n MyAvSet
+          text: az vm availability-set convert -g MyResourceGroup -n MyAvSet
         - name: Convert an availability set to use managed disks by ID.
           text: >
             az vm availability-set convert --ids $(az vm availability-set list -g MyResourceGroup --query "[].id" -o tsv)
@@ -214,6 +220,11 @@ helps['vm extension set'] = """
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
                 --vm-name MyVm --resource-group MyResourceGroup \\
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+"""
+
+helps['vm extension wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
 """
 
 helps['vm availability-set delete'] = """
@@ -379,7 +390,7 @@ helps['vm convert'] = """
 
 helps['vm'] = """
     type: group
-    short-summary: Provision Linux or Windows virtual machines.
+    short-summary: Manage Linux or Windows virtual machines.
 """
 helps['vm user'] = """
     type: group
@@ -535,7 +546,7 @@ helps['vm diagnostics set'] = """
                 | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
-                --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
+                --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
             protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
@@ -595,7 +606,7 @@ helps['vm unmanaged-disk attach'] = """
 
 helps['vm unmanaged-disk detach'] = """
     type: command
-    short-summary: Detatch an unmanaged disk from a VM.
+    short-summary: Detach an unmanaged disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
@@ -604,11 +615,11 @@ helps['vm unmanaged-disk detach'] = """
 
 helps['vm unmanaged-disk list'] = """
     type: command
-    short-summary: List unamanaged disks of a VM.
+    short-summary: List unmanaged disks of a VM.
     examples:
         - name: List the unmanaged disks attached to a VM.
           text: az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm
-        - name: List unamanaged disks with IDs containing the string "data_disk".
+        - name: List unmanaged disks with IDs containing the string "data_disk".
           text: >
             az vm unmanaged-disk list --ids \\
                 $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
@@ -616,7 +627,7 @@ helps['vm unmanaged-disk list'] = """
 
 helps['vm disk detach'] = """
     type: command
-    short-summary: Detatch a managed disk from a VM.
+    short-summary: Detach a managed disk from a VM.
     examples:
         - name: Detach a data disk from a VM.
           text: >
@@ -1108,6 +1119,12 @@ helps['vm list-skus'] = """
     examples:
         - name: List all SKUs in the West US region.
           text: az vm list-skus -l westus
+        - name: List all available vm sizes in the East US2 region which support availability zone.
+          text: az vm list-skus -l eastus2 --zone
+        - name: List all available vm sizes in the East US2 region which support availability zone with name like "standard_ds1...".
+          text: az vm list-skus -l eastus2 --zone --size standard_ds1
+        - name: List availability set related sku information in The West US region.
+          text: az vm list-skus -l westus --resource-type availabilitySets
 """
 
 helps['vm open-port'] = """
@@ -1206,16 +1223,20 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VM with the 'Reader' role.
-          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader
+        - name: Enable system assigned identity on a VM with the 'Reader' role.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove user assigned identities from a VM.
+    short-summary: (PREVIEW) Remove managed service identities from a VM.
     examples:
+        - name: Remove system assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 
 helps['vm identity show'] = """
@@ -1225,17 +1246,18 @@ helps['vm identity show'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
     type: command
-    short-summary: run command on a vm
+    short-summary: Execute a specific run command on a vm.
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
         - name: invoke command with parameters
-          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
+          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
 """
 
 helps['vmss identity'] = """
@@ -1248,16 +1270,20 @@ helps['vmss identity assign'] = """
     short-summary: Enable managed service identity on a VMSS.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VMSS with the 'Owner' role.
-          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner
+        - name: Enable system assigned identity on a VMSS with the 'Owner' role.
+          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vmss identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
     examples:
+        - name: Remove system assigned identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
-          text: az vmss identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities readerId writerId
+        - name: Remove system assigned identity and a user identity
+          text: az vmss identity remove -g MyResourceGroup -n MyVmss --identities [system] readerId
 """
 
 helps['vmss identity show'] = """

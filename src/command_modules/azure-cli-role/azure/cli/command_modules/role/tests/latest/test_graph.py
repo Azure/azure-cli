@@ -32,7 +32,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             self.check('[0].servicePrincipalNames[0]', '{app_id_uri}'),
             self.check('length([*])', 1),
         ])
-        self.cmd('ad sp reset-credentials -n {app_id_uri}',
+        self.cmd('ad sp credential reset -n {app_id_uri}',
                  checks=self.check('name', '{app_id_uri}'))
         # cleanup
         self.cmd('ad sp delete --id {app_id_uri}')  # this whould auto-delete the app as well
@@ -67,16 +67,16 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             ])
         }
         result = self.cmd("ad app create --display-name {native_app_name} --native-app --required-resource-accesses '{required_access}'", checks=[
-            self.check('additionalProperties.publicClient', True),
-            self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+            self.check('publicClient', True),
+            self.check('requiredResourceAccess|[0].resourceAccess|[0].id',
                        '5778995a-e1bf-45b8-affa-663a9f3f4d04')
         ]).get_output_in_json()
         self.kwargs['id'] = result['appId']
         try:
             self.cmd("ad app update --id {id} --required-resource-accesses '{required_access2}'")
             self.cmd('ad app show --id {id}', checks=[
-                self.check('additionalProperties.publicClient', True),
-                self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+                self.check('publicClient', True),
+                self.check('requiredResourceAccess|[0].resourceAccess|[0].id',
                            '311a71cc-e848-46a1-bdf8-97ff7156d8e6')
             ])
         except Exception:
@@ -109,6 +109,11 @@ class ApplicationSetScenarioTest(ScenarioTest):
         self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
         self.cmd('ad app show --id {app}',
                  checks=self.check('replyUrls[0]', '{reply_uri}'))
+
+        # invoke generic update
+        self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
+        self.cmd('ad app show --id {app}',
+                 checks=self.check('oauth2AllowUrlPathMatching', True))
 
         # delete app
         self.cmd('ad app delete --id {app}')

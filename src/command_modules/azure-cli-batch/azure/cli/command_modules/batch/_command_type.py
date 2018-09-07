@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 import re
 from six import string_types
 
@@ -17,6 +16,7 @@ from azure.cli.command_modules.batch import _parameter_format as pformat
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
+from azure.cli.core.util import get_file_json
 
 
 _CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
@@ -279,18 +279,19 @@ class BatchArgumentTree(object):
         self._request_param['name'] = name
         self._request_param['model'] = model.split('.')[-1]
 
-    def deserialize_json(self, client, kwargs, json_obj):
+    def deserialize_json(self, kwargs, json_obj):
         """Deserialize the contents of a JSON file into the request body
         parameter.
-        :param client: An Azure Batch SDK client
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
         from msrest.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
-            kwargs[self._request_param['name']] = client._deserialize(  # pylint: disable=protected-access
-                self._request_param['model'], json_obj)
+            import azure.batch.models
+            model_type = getattr(azure.batch.models, self._request_param['model'])
+            # Use from_dict in order to deserialize with case insensitive
+            kwargs[self._request_param['name']] = model_type.from_dict(json_obj)
         except DeserializationError as error:
             message += ": {}".format(error)
             raise ValueError(message.format(self._request_param['model']))
@@ -404,8 +405,7 @@ class BatchArgumentTree(object):
         try:
             if namespace.json_file:
                 try:
-                    with open(namespace.json_file) as file_handle:
-                        namespace.json_file = json.load(file_handle)
+                    namespace.json_file = get_file_json(namespace.json_file)
                 except EnvironmentError:
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:
@@ -479,7 +479,7 @@ class AzureBatchDataPlaneCommand(object):
 
                 # Build the request parameters from command line arguments
                 if json_file:
-                    self.parser.deserialize_json(client, kwargs, json_file)
+                    self.parser.deserialize_json(kwargs, json_file)
                     for arg, _ in self.parser:
                         del kwargs[arg]
                 else:

@@ -37,8 +37,7 @@ def create_lab_vm(client, resource_group_name, lab_name, name, notes=None, image
                   disk_type=None, expiration_date=None, formula=None, ip_configuration=None,
                   network_interface=None, os_type=None, saved_secret=None):
     """ Command to create vm of in the Azure DevTest Lab """
-    from azure.mgmt.devtestlabs.models.lab_virtual_machine_creation_parameter import \
-        LabVirtualMachineCreationParameter
+    from azure.mgmt.devtestlabs.models import LabVirtualMachineCreationParameter
 
     is_ssh_authentication = authentication_type == 'ssh'
 
@@ -89,9 +88,7 @@ def create_environment(client, resource_group_name, lab_name, name, arm_template
                        artifact_source_name=None, user_name="@me", tags=None):
     """ Command to create an environment the Azure DevTest Lab """
 
-    from azure.mgmt.devtestlabs.models.environment_deployment_properties \
-        import EnvironmentDeploymentProperties
-    from azure.mgmt.devtestlabs.models.dtl_environment import DtlEnvironment
+    from azure.mgmt.devtestlabs.models import EnvironmentDeploymentProperties, DtlEnvironment
 
     environment_deployment_properties = EnvironmentDeploymentProperties(arm_template, parameters)
     dtl_environment = DtlEnvironment(tags=tags,

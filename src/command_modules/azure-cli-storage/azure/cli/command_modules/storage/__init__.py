@@ -140,23 +140,9 @@ class StorageCommandGroup(AzCommandGroup):
         command_name = self.custom_command(name, method_name, **kwargs)
         self._register_data_plane_account_arguments(command_name)
 
-    def get_handler_suppress_404(self):
-
-        # pylint: disable=inconsistent-return-statements
-        def handler(ex):
-            from azure.cli.core.profiles import get_sdk
-
-            t_error = get_sdk(self.command_loader.cli_ctx,
-                              ResourceType.DATA_STORAGE,
-                              'common._error#AzureMissingResourceHttpError')
-            if isinstance(ex, t_error):
-                return None
-            raise ex
-
-        return handler
-
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
+        from azure.cli.core.commands.parameters import get_resource_name_completion_list
         from azure.cli.command_modules.storage._validators import validate_client_parameters
         command = self.command_loader.command_table.get(command_name, None)
         if not command:
@@ -165,6 +151,7 @@ class StorageCommandGroup(AzCommandGroup):
         group_name = 'Storage Account'
         command.add_argument('account_name', '--account-name', required=False, default=None,
                              arg_group=group_name,
+                             completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),
                              help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT. Must be '
                                   'used in conjunction with either storage account key or a SAS token. If neither are '
                                   'present, the command will try to query the storage account key using the '

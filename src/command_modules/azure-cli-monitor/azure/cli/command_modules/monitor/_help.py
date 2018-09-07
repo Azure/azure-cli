@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -58,8 +59,6 @@ helps['monitor alert update'] = """
     type: command
     short-summary: Update a metric-based alert rule.
     parameters:
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
         - name: --description
           short-summary: Description of the rule.
         - name: --condition
@@ -195,7 +194,95 @@ helps['monitor metrics list-definitions'] = """
     short-summary: Lists the metric definitions for the resource.
 """
 
-# endregion
+helps['monitor metrics alert'] = """
+    type: group
+    short-summary: Manage near-realtime metric alert rules.
+"""
+
+helps['monitor metrics alert create'] = """
+    type: command
+    short-summary: Create an alert rule.
+    parameters:
+        - name: --action -a
+          short-summary: Add an action group and optional webhook properties to fire when the alert is triggered.
+          long-summary: |
+            Usage:   --action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]
+
+            Multiple action groups can be specified by using more than one `--action` argument.
+        - name: --disabled
+          short-summary: Create the rule in a disabled state.
+        - name: --condition
+          short-summary: The condition which triggers the rule.
+          long-summary: |
+            Usage:  --conditon {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+                               [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
+                               [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
+
+            Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
+
+            Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+
+            Multiple conditons can be specified by using more than one `--condition` argument.
+    examples:
+        - name: Create a high CPU usage alert on a VM with no actions.
+          text: >
+            az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90"
+        - name: Create a high CPU usage alert on a VM with email and webhook actions.
+          text: |
+            az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
+                --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
+                --action {actionGroupId} apiKey={APIKey} type=HighCPU
+        - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
+          text: |
+            az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
+                --description "Storage Slow Transactions" \\
+                --condition "total transactions > 5 where ResponseType includes Success" \\
+                --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"
+"""
+
+
+helps['monitor metrics alert update'] = """
+    type: command
+    short-summary: Update an alert rule.
+    parameters:
+        - name: --add-condition
+          short-summary: Add a condition which triggers the rule.
+          long-summary: |
+            Usage:  --add-conditon {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+                                   [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
+                                   [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
+
+            Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
+
+            Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+
+            Multiple conditons can be specified by using more than one `--condition` argument.
+        - name: --remove-conditions
+          short-summary: Space-separated list of condition names to remove.
+        - name: --add-action
+          short-summary: Add an action group and optional webhook properties to fire when the alert is triggered.
+          long-summary: |
+            Usage:   --add-action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]
+
+            Multiple action groups can be specified by using more than one `--action` argument.
+        - name: --remove-actions
+          short-summary: Space-separated list of action group names to remove.
+"""
+
+helps['monitor metrics alert delete'] = """
+    type: command
+    short-summary: Delete an alert rule.
+    """
+
+helps['monitor metrics alert list'] = """
+    type: command
+    short-summary: List alert rules.
+    """
+
+helps['monitor metrics alert show'] = """
+    type: command
+    short-summary: Show an alert rule.
+    """
 
 helps['monitor log-profiles'] = """
             type: group
@@ -207,8 +294,6 @@ helps['monitor log-profiles create'] = """
             parameters:
                 - name: --name -n
                   short-summary: The name of the log profile.
-                - name: --location -l
-                  short-summary:
                 - name: --locations
                   short-summary: Space-separated list of regions for which Activity Log events should be stored.
                 - name: --categories
@@ -235,6 +320,10 @@ helps['monitor log-profiles update'] = """
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
+            """
+helps['monitor diagnostic-settings categories'] = """
+            type: group
+            short-summary: Retrieve service diagnostic settings categories.
             """
 helps['monitor diagnostic-settings create'] = """
             type: command
@@ -493,7 +582,7 @@ helps['monitor autoscale rule delete'] = """
 
 helps['monitor autoscale-settings'] = """
             type: group
-            short-summary: (DEPRECATED) Manage autoscale settings.
+            short-summary: Manage autoscale settings.
             """
 helps['monitor autoscale-settings update'] = """
             type: command

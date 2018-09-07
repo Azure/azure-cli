@@ -23,13 +23,22 @@ def error_pass(_, message):  # pylint: disable=unused-argument
     return
 
 
+def _check_value_muted(_, action, value):
+    # patch for AzCliCommandParser that does no logging
+    if action.choices is not None and value not in action.choices:
+        import argparse
+        msg = 'invalid choice: {}'.format(value)
+        raise argparse.ArgumentError(action, msg)
+
+
 def sort_completions(completions_gen):
     """ sorts the completions """
+    from knack.help import REQUIRED_TAG
 
     def _get_weight(val):
         """ weights the completions with required things first the lexicographically"""
         priority = ''
-        if val.display_meta and val.display_meta.startswith('[REQUIRED]'):
+        if val.display_meta and val.display_meta.startswith(REQUIRED_TAG):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
@@ -45,7 +54,7 @@ class AzCompleter(Completer):
         self.started = False
 
         # dictionary of command to descriptions
-        self.command_description = None
+        self.command_description = {}
         # a list of all the possible parameters
         self.completable_param = None
         # the command tree
@@ -99,9 +108,10 @@ class AzCompleter(Completer):
 
     def initialize_command_table_attributes(self):
         from ._dump_commands import FreshTable
-        self.cmdtab = FreshTable(self.shell_ctx).command_table
-        if self.cmdtab:
-            self.parser.load_command_table(self.cmdtab)
+        loader = FreshTable(self.shell_ctx).loader
+        if loader and loader.command_table:
+            self.cmdtab = loader.command_table
+            self.parser.load_command_table(loader)
             self.argsfinder = ArgsFinder(self.parser)
 
     def validate_param_completion(self, param, leftover_args):
@@ -188,15 +198,23 @@ class AzCompleter(Completer):
                         return arg
         return None
 
+    # pylint: disable=protected-access
     def mute_parse_args(self, text):
         """ mutes the parser error when parsing, then puts it back """
         error = AzCliCommandParser.error
-        AzCliCommandParser.error = error_pass
+        _check_value = AzCliCommandParser._check_value
 
-        parse_args = self.argsfinder.get_parsed_args(
-            parse_quotes(text, quotes=False, string=False))
+        AzCliCommandParser.error = error_pass
+        AzCliCommandParser._check_value = _check_value_muted
+
+        # No exception is expected. However, we add this try-catch block, as this may have far-reaching effects.
+        try:
+            parse_args = self.argsfinder.get_parsed_args(parse_quotes(text, quotes=False, string=False))
+        except Exception:  # pylint: disable=broad-except
+            pass
 
         AzCliCommandParser.error = error
+        AzCliCommandParser._check_value = _check_value
         return parse_args
 
     # pylint: disable=too-many-branches

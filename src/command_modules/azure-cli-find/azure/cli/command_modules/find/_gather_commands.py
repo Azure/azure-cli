@@ -5,6 +5,7 @@
 
 import yaml
 
+from knack.help import REQUIRED_TAG
 from knack.help_files import helps
 
 
@@ -27,7 +28,7 @@ def build_command_table(cli_ctx):
             required = ''
             help_desc = ''
             if cmd_table[command].arguments[key].type.settings.get('required'):
-                required = '[REQUIRED]'
+                required = REQUIRED_TAG
             if cmd_table[command].arguments[key].type.settings.get('help'):
                 help_desc = cmd_table[command].arguments[key].type.settings.get('help')
 

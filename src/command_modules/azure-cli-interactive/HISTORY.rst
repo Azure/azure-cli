@@ -3,6 +3,46 @@
 Release History
 ===============
 
+0.3.28
+++++++
+* Minor fixes
+
+0.3.27
+++++++
+* Minor fixes
+
+0.3.26
+++++++
+* Minor fixes
+
+0.3.25
+++++++
+* Update PyYAML dependency to 4.2b4
+
+0.3.24
+++++++
+* Minor fixes
+
+0.3.23
+++++++
+* Minor fixes
+
+0.3.22
+++++++
+* Fix dependency versions.
+
+0.3.21
+++++++
+* Mute logging from parser for completions.
+* Made interactive more resistant to stale/corrupted help caches.
+
+0.3.20
+++++++
+* Allow interactive completers to function with positional arguments.
+* More user-friendly output when users type '\'.
+* Fix completions for parameters with no help.
+* Fix descriptions for command-groups.
+
 0.3.19
 ++++++
 * Stops completions upon unrecognized commands.

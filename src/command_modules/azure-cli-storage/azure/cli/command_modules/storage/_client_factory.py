@@ -19,14 +19,18 @@ No credentials specified to access storage service. Please provide any of the fo
 """
 
 
-def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None):
+def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+                                    socket_timeout=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+                                   socket_timeout=socket_timeout,
                                    endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint)
 
 
-def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None):
+def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+                                 socket_timeout=None):
     try:
-        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token)
+        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+                                               socket_timeout)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
@@ -65,7 +69,8 @@ def blob_data_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx, blob_service, kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
+                                        sas_token=kwargs.pop('sas_token', None),
+                                        socket_timeout=kwargs.pop('socket_timeout', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):

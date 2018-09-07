@@ -3,6 +3,30 @@
 Release History
 ===============
 
+0.3.1
++++++
+* Minor fixes
+
+0.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.2.5
++++++
+* Added 'postgres/myql server vnet-rule' commands.
+
+0.2.4
++++++
+* Minor fix allowing elastic server update using skuname.
+
+0.2.3
++++++
+* Minor fixes.
+
+0.2.2
++++++
+* Minor help fix.
+
 0.2.1
 +++++
 * Introduce georestore command.

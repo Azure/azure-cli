@@ -113,11 +113,31 @@ def transform_traffic_manager_create_output(result):
 
 
 def transform_nic_create_output(result):
-    return {'NewNIC': result.result()}
+    if result:
+        return {'NewNIC': result.result()}
+    return None
 
 
 def transform_nsg_create_output(result):
     return {'NewNSG': result.result()}
+
+
+def transform_nsg_rule_table_output(result):
+    item = OrderedDict()
+    item['Name'] = result['name']
+    item['ResourceGroup'] = result['resourceGroup']
+    item['Priority'] = result['priority']
+    item['SourcePortRanges'] = result['sourcePortRange'] or ' '.join(result['sourcePortRanges'])
+    item['SourceAddressPrefixes'] = result['sourceAddressPrefix'] or ' '.join(result['sourceAddressPrefixes'])
+    item['SourceASG'] = result['sourceApplicationSecurityGroups'] or 'None'
+    item['Access'] = result['access']
+    item['Protocol'] = result['protocol']
+    item['Direction'] = result['direction']
+    item['DestinationPortRanges'] = result['destinationPortRange'] or ' '.join(result['destinationPortRanges'])
+    item['DestinationAddressPrefixes'] = result['destinationAddressPrefix'] or \
+        ' '.join(result['destinationAddressPrefixes'])
+    item['DestinationASG'] = result['destinationApplicationSecurityGroups'] or 'None'
+    return item
 
 
 def transform_vnet_gateway_create_output(result):

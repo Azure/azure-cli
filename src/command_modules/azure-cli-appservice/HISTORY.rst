@@ -2,6 +2,52 @@
 
 Release History
 ===============
+
+0.2.3
++++++
+* support CORS on functionapp & webapp
+* arm tag support on create commands
+* `webapp/functionapp identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+
+0.2.2
++++++
+* fix a bug that prevent from creating a function-app using storage accounts in external resource groups
+* fix a crash on zip deployment
+
+0.2.1
++++++
+* Minor fixes.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* appservice: allow PremiumV2 skus
+
+0.1.36
+++++++
+* webapp/functionapp: Adding support for disabling identity az webapp identity remove. Preview tag removed for Identity feature.
+
+0.1.35
+++++++
+* dependencies: remove the cap on the urllib as newer requests was released
+* functionapp create: support to use appservice plan from external resource groups
+
+0.1.34
+++++++
+* dependencies: cap the urllib to 1.22 to avoid conflit with requests 2.18.4
+
+0.1.33
+++++++
+* webapp/functionapp: improve generic update commands
+* webapp/functionapp: webapp deployment source config-zip supports async operation with status updates for long running operation 
+
+0.1.32
+++++++
+* webapp: fix a bug in `az webapp delete` when `--slot` is provided
+* webapp: remove `--runtime-version` from `az webapp auth update` as it's not very public ready
+* webapp: az webapp config set support for min_tls_version & https2.0
+* webapp: az webapp create support for multicontainers
+
 0.1.31
 ++++++
 * (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago

@@ -152,3 +152,13 @@ Examples
         az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type
         Standard_LRS
 ```
+
+## Online Reference Documentation ##
+
+The help that you author above will be available online as reference documentation.
+
+https://docs.microsoft.com/en-us/cli/azure/reference-index
+
+If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
+
+https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json

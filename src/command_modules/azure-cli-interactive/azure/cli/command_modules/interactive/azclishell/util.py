@@ -8,6 +8,11 @@ import sys
 import struct
 import platform
 
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
+
 
 def get_window_dim():
     """ gets the dimensions depending on python version and os"""
@@ -55,17 +60,13 @@ def parse_quotes(cmd, quotes=True, string=True):
     """ parses quotes """
     import shlex
 
-    if quotes:
-        args = shlex.split(cmd)
-    else:
-        args = cmd.split()
+    try:
+        args = shlex.split(cmd) if quotes else cmd.split()
+    except ValueError as exception:
+        logger.error(exception)
+        return []
 
-    if string:
-        str_args = []
-        for arg in args:
-            str_args.append(str(arg))
-        return str_args
-    return args
+    return [str(arg) for arg in args] if string else args
 
 
 def get_os_clear_screen_word():

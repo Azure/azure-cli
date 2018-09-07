@@ -36,14 +36,20 @@ def _resource_links_client_factory(cli_ctx, **_):
 
 def _authorization_management_client(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    return get_mgmt_service_client(cli_ctx, AuthorizationManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
 
 
 def _resource_managedapps_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.resource.managedapplications import ApplicationClient
     return get_mgmt_service_client(cli_ctx, ApplicationClient)
+
+
+def _resource_managementgroups_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.managementgroups import ManagementGroupsAPI
+    return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
 
 
 def cf_resource_groups(cli_ctx, _):
@@ -96,3 +102,11 @@ def cf_resource_managedapplications(cli_ctx, _):
 
 def cf_resource_managedappdefinitions(cli_ctx, _):
     return _resource_managedapps_client_factory(cli_ctx).application_definitions
+
+
+def cf_management_groups(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).management_groups
+
+
+def cf_management_group_subscriptions(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).management_group_subscriptions

@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
@@ -62,7 +62,7 @@ def load_command_table(self, _):
 
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('create', 'create')
         g.custom_command('set', 'update_application')
         g.command('delete', 'delete', confirmation=True)
@@ -70,11 +70,11 @@ def load_command_table(self, _):
     with self.command_group('batch application package', get_mgmt_type('application_package'), client_factory=get_mgmt_factory('application_package'))as g:
         g.custom_command('create', 'create_application_package')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('activate', 'activate')
 
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
-        g.command('show', 'get_quotas')
+        g.show_command('show', 'get_quotas')
 
     # Data Plane Commands
     with self.command_group('batch application summary', get_data_type('application')) as g:

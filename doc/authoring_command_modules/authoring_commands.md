@@ -34,12 +34,14 @@ The document provides instructions and guidelines on how to author individual co
 
 [15. Preventing particular extensions from being loading](#extension-suppression)
 
+[16. Deprecating Commands and Arguments](#deprecating-commands-and-arguments)
+
 Authoring Commands
 =============================
 
 ## Write the Command Loader
 
-As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
+As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
 
 ```Python
 class MyCommandsLoader(AzCommandsLoader):
@@ -99,8 +101,9 @@ with self.command_group('mymod', mymod_sdk) as g:
     # (3) Registering different types of commands
     g.command('command1', 'do_something_1')
     g.custom_command('command2', 'do_something_2')
-    g.generic_update('update', custom_function_name='my_custom_update')
-    g.generic_wait('wait')
+    g.generic_update_command('update', custom_function_name='my_custom_update')
+    g.wait_command('wait')
+    g.show_command('show')
 ```
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.  See below for amplifying information.
@@ -141,23 +144,43 @@ The signature for `custom_command` is exactly the same as `command`. The only di
 
 See the section on "Suppporting Generic Update"
 
-***generic_wait_command***
+***wait_command***
 
 The generic wait command provides a templated solution for polling Azure resources until specific conditions are met.
 
 ```Python
-generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs)
+wait_command(self, name, getter_name='get', **kwargs)
 ```
 
 - `name`: The name of the command within the command group. Commonly called 'wait'.
 - `getter_name`: The name of the method for the object getter, relative to the path specified in `operations_tmpl`.
-- `getter_type`: A `CliCommandType` object to apply to this command (optional).
 - `kwargs`: any supported kwarg.
 
 Since most wait commands rely on a simple GET call from the SDK, most of these entries simply look like:
 ```Python
-   g.generic_wait_command('wait')
+   g.wait_command('wait')
 ```
+
+***custom_wait_command***
+
+Similar to `custom_command` and `command`, the signature for `custom_wait_command` is exactly the same as `wait_command` but uses `custom_command_type` as the fallback for missings kwargs.
+
+***show_command***
+
+The generic show command ensures a consistent behavior when encountering a missing Azure resource. 
+With little exception, all `show` commands should be registered using this method or `custom_show_command` to ensure consistency.
+
+```Python
+show_command(self, name, getter_name='get', **kwargs)
+```
+
+- `name`: The name of the command within the command group. Commonly called 'show'.
+- `getter_name`: The name of the method for the object getter, relative to the path specified in `operations_tmpl`.
+- `kwargs`: any supported kwarg.
+
+***custom_show_command***
+
+Similar to `custom_command` and `command`, the signature for `custom_show_command` is exactly the same as `show_command` but uses `custom_command_type` as the fallback for missings kwargs.
 
 **(4) Supporting --no-wait**
 
@@ -289,9 +312,9 @@ Additional Topics
 
 ## Keyword Argument Reference
 
-**Overview of Keyword Arguments in Azure CLI 2.0**
+**Overview of Keyword Arguments in the Azure CLI**
 
-When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
+When writing commands for the Azure CLI, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
 
 ![](/doc/assets/annotated-kwarg-structure.gif)
 
@@ -366,7 +389,7 @@ The following kwargs may be inherited from the command loader:
 
 Most ARM resources can be identified by an ID. In many cases, for example `show` and `delete` commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
+Azure CLI supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `AzArgumentContext.argument`.
 
@@ -733,3 +756,51 @@ class MyCommandsLoader(AzCommandsLoader):
                                                                                        reason='These commands are now in the CLI.',
                                                                                        recommend_remove=True))
 ```
+
+## Deprecating Commands and Arguments
+
+The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arugments are supported when deprecating an item:
+
+- `target`: The thing being deprecated. This is often not needed as in most cases the CLI can figure out what is being deprecated.
+- `redirect`: This is the alternative that should be used in lieu of the deprecated thing. If not provided, the item is expected to be removed in the future with no replacement.
+- `hide`: Hide the deprecated item from the help system, reducing discoverability, but still allow it to be used. Accepts either the boolean `True` to immediately hide the item or a core CLI version. If a version is supplied, the item will appear until the core CLI rolls to the specified value, after which it will be hidden.
+- `expiration`: Accepts a core CLI version at which the deprecated item will no longer function. This version will be communicated in all warning messages. 
+
+Deprecation of different command elements are usually accomplished using the `deprecate_info` kwarg in conjunction with a `deprecate` helper method.
+
+***Deprecate Command Group***
+```Python
+with self.command_group('test', test_sdk, deprecate_info=self.deprecate(redirect='new-test', hide=True)) as g:
+  g.show_command('show', 'get')
+  g.command('list', 'list')
+```
+
+This will deprecate the entire command group `test`. Note that call to `self.deprecate`, calling the deprecate helper method off of the command loader. The warning message for this would read: ```This command group has been deprecated and will be removed in a future release. Use `new-test` instead.```
+
+Additionally, since the command group is deprecated then, by extension, all of the commands within it are deprecated as well. They will not be marked as such, but will display a warning:
+
+```This command has been implicitly deprecated because command group `test` is deprecated and will be removed in a future release. Use `new-test` instead.```
+
+***Deprecate Command***
+```Python
+with self.command_group('test', test_sdk) as g:
+  g.command('show-parameters', 'get_params', deprecate_info=g.deprecate(redirect='test show', expiration='2.1.0'))
+```
+
+This will deprecate the command `test show-parameters`. Note that call to `g.deprecate`, calling the deprecate helper method off of the command group. The warning message for this would read: ```This command has been deprecated and will be removed in version 2.1.0. Use `test show` instead.```
+
+***Deprecate Argument***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('junk_flag', help='Something we no longer want to support.' deprecate_info=c.deprecate(expiration='2.1.0'))
+```
+
+This will deprecate the argument `--junk-flag` on `test show-parameters`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Argument `--junk-flag` has been deprecated and will be removed in version 2.1.0.```
+
+***Deprecate Argument Option***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('resource', options_list=['--resource', c.deprecate(target='--resource-id', redirect='--target')])
+```
+
+This will deprecate the argument `--resource-id` option on `test show-parameters` in favor of `--resource`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Option `--resource-id` has been deprecated and will be removed in a future release. Use `--resource` instead.``` Here you must specify `target` in order to identify the deprecated option. When an option value is deprecated, it appears in help as two separate arguments, with the deprecation warning on the deprecated option. 

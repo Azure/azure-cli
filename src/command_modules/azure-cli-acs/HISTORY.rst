@@ -3,9 +3,83 @@
 Release History
 ===============
 
+2.3.2
++++++
+* `az aks create` now defaults to Standard_DS2_v2 VMs.
+
+2.3.1
++++++
+* `az aks get-credentials` will now call new apis to get cluster credential.
+
+2.3.0
++++++
+* `az acs/aks install-cli` will install to under %USERPROFILE%\.azure-kubectl on Windows
+* `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+* Create role assignment to the subnet when it's provided.
+* Add new option "skip role assignment" for subnet when it's provided
+* Skip role assignment to subnet when assignment already exists
+
+2.2.2
++++++
+* Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
+* changes for consuming multi api azure.mgmt.authorization package
+
+2.2.1
++++++
+* Depdendency update: paramiko >= 2.0.8
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `az aks create` will error out if `--max-pods` is less than 5
+
+2.1.3
++++++
+* Update PyYAML dependency to 4.2b4
+* Handle monitoring solution through its subscription ID
+
+2.1.2
++++++
+* Breaking change: Enable Kubernetes role-based access control by default.
+* Add a `--disable-rbac` argument and deprecate `--enable-rbac` since it's the default now.
+* Updated options for `az aks browse` command. Added `--listen-port` support.
+* Update the default helm chart package for `az aks install-connector` command. Use virtual-kubelet-for-aks-latest.tgz.
+* added `az aks enable-addons` and `disable-addons` commands to update an existing cluster
+
+2.1.1
++++++
+* Updated options of `az aks use-dev-spaces` command. Added `--update` support.
+* `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
+* expose read-only "nodeResourceGroup" property on managed clusters
+* fix `az acs browse` command error
+
+2.1.0
++++++
+* `az aks create` understands advanced networking (VNet) options
+* `az aks create` accepts options to enable Log Analytics monitoring and HTTP application routing addons
+* `az aks create --no-ssh-key` creates a cluster without using local SSH keys
+* `az aks create --enable-rbac` creates a cluster with Kubernetes Role-Based Access Control
+* `az aks create` handles Azure Active Directory auth options (PREVIEW)
+
+2.0.34
+++++++
+* `az aks get-credentials` creates the kube config file with more secure filesystem permissions
+* make --connector-name optional for `aks install-connector`, `aks upgrade-connector` and `aks remove-connector`
+* add 2 new Azure Container Instance regions for `aks install-connector`
+* `aks install-connector` add the normalized location into the helm release name and node name
+
+2.0.33
+++++++
+* add new Dev-Spaces commands: `az aks use-dev-spaces` and `az aks remove-dev-spaces`
+* fix typo in help message
+
+2.0.32
+++++++
+* remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
 2.0.31
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 2.0.30

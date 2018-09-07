@@ -123,6 +123,9 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
             profile.capacity.minimum = min_count
             profile.capacity.maximum = max_count
 
+    if not instance.notifications:
+        return instance
+
     notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
 
     # process removals

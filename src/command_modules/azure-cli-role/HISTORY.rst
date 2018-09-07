@@ -2,10 +2,55 @@
 
 Release History
 ===============
+2.1.4
+++++++
+* Minor fixes.
+
+
+2.1.3
+++++++
+* role assignment: fix a recent regression that principalName is missing
+
+2.1.2
+++++++
+* support for stack profile 2017-03-09-profile
+
+2.1.1
++++++
+* `ad app update`: Fixes issue where generic update parameters would not work correctly.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+2.0.27
+++++++
+* Minor fixes.
+
+2.0.26
+++++++
+* Minor fixes.
+
+2.0.25
+++++++
+* ad: remove stack traces from graph exceptions before surface to users
+* ad sp create: do not throw if CLI can't resolve app id
+
+2.0.25
+++++++
+* Minor fixes.
+
+2.0.24
+++++++
+* ad app update: add generic update support
+
+2.0.23
+++++++
+* BREAKING CHANGE: remove deprecated `az ad sp reset-credentials`
+* Minor fixes.
 
 2.0.22
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 2.0.21

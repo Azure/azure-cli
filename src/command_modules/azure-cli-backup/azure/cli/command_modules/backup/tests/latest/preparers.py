@@ -18,8 +18,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
         super(VaultPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -38,7 +38,6 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         self._cleanup(name, self.resource_group)
 
     def _get_resource_group(self, **kwargs):
@@ -77,8 +76,8 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
         super(VMPreparer, self).__init__(name_prefix, 15)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -90,13 +89,16 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-password %j^VYw9Q3Z@Cu$*h'
-            execute(self.cli_ctx, cmd.format(name, self.resource_group))
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {}'
+            param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
+                                               '%j^VYw9Q3Z@Cu$*h')
+            cmd = 'az vm create {}'.format(param_string)
+            execute(self.cli_ctx, cmd.format(name, self.resource_group, name))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Resource group deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -124,8 +126,8 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
         super(ItemPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -146,7 +148,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -182,8 +184,8 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
         super(PolicyPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -208,7 +210,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -235,8 +237,8 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
         super(RPPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -260,7 +262,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # Vault deletion will take care of this.
         pass
 
     def _get_resource_group(self, **kwargs):

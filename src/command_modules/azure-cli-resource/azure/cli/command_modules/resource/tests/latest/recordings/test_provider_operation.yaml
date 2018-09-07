@@ -7,12 +7,12 @@ interactions:
       CommandName: [provider operation show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.compute?$expand=resourceTypes&api-version=2018-01-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.compute?api-version=2018-01-01-preview&$expand=resourceTypes
   response:
     body: {string: '{"displayName":"Microsoft Compute","operations":[{"name":"Microsoft.Compute/register/action","displayName":"Register
         Subscription for Compute","description":"Registers Subscription with Microsoft.Compute
@@ -96,7 +96,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
         Machine Scale Set Instance View","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/instanceView/read","displayName":"Get
         Virtual Machine Scale Set Instance View","description":"Gets the instance
         view of the Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/osUpgradeHistory","displayName":"Virtual
@@ -176,7 +197,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
         View of Virtual Machine in Scale Set","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/instanceView/read","displayName":"Gets
         Instance View of a Virtual Machine in a Virtual Machine Scale Set","description":"Retrieves
         the instance view of a Virtual Machine in a VM Scale Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"images","displayName":"Images","operations":[{"name":"Microsoft.Compute/images/read","displayName":"Get
@@ -258,7 +300,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
         Machine Size","operations":[{"name":"Microsoft.Compute/virtualMachines/vmSizes/read","displayName":"Lists
         Available Virtual Machine Sizes","description":"Lists available sizes the
         virtual machine can be updated to","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
@@ -298,9 +361,9 @@ interactions:
         VMExtension Version","description":"Get the properties of a VMExtension Version","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['37752']
+      content-length: ['45882']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 17:14:31 GMT']
+      date: ['Tue, 12 Jun 2018 23:17:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -320,12 +383,12 @@ interactions:
       CommandName: [provider operation show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.compute?$expand=resourceTypes&api-version=2018-01-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.compute?api-version=2018-01-01-preview&$expand=resourceTypes
   response:
     body: {string: '{"displayName":"Microsoft Compute","operations":[{"name":"Microsoft.Compute/register/action","displayName":"Register
         Subscription for Compute","description":"Registers Subscription with Microsoft.Compute
@@ -409,7 +472,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
         Machine Scale Set Instance View","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/instanceView/read","displayName":"Get
         Virtual Machine Scale Set Instance View","description":"Gets the instance
         view of the Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/osUpgradeHistory","displayName":"Virtual
@@ -489,7 +573,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
         View of Virtual Machine in Scale Set","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/instanceView/read","displayName":"Gets
         Instance View of a Virtual Machine in a Virtual Machine Scale Set","description":"Retrieves
         the instance view of a Virtual Machine in a VM Scale Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"images","displayName":"Images","operations":[{"name":"Microsoft.Compute/images/read","displayName":"Get
@@ -571,7 +676,28 @@ interactions:
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
         number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
         Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
-        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Per
+        Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"Per
+        Disk QD","displayName":"Data Disk QD","displayDescription":"Data Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"SlotId","displayName":"LUN","internalName":"SlotId","toBeExportedForShoebox":true}]},{"name":"OS
+        Per Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Total
+        Bytes/Sec read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Total
+        Bytes/Sec written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Total
+        IOPS done while reading from a single disk during monitoring period for OS
+        disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS Per
+        Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Total
+        IOPS done while writing to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
+        Per Disk QD","displayName":"OS Disk QD","displayDescription":"OS Disk Queue
+        Depth(or Queue Length)","unit":"Count","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
         Machine Size","operations":[{"name":"Microsoft.Compute/virtualMachines/vmSizes/read","displayName":"Lists
         Available Virtual Machine Sizes","description":"Lists available sizes the
         virtual machine can be updated to","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
@@ -611,9 +737,9 @@ interactions:
         VMExtension Version","description":"Get the properties of a VMExtension Version","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['37752']
+      content-length: ['45882']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 17:14:31 GMT']
+      date: ['Tue, 12 Jun 2018 23:17:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -633,12 +759,12 @@ interactions:
       CommandName: [provider operation show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
+          msrest_azure/0.4.31 azure-mgmt-authorization/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.34]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.storage?$expand=resourceTypes&api-version=2018-01-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Authorization/providerOperations/microsoft.storage?api-version=2018-01-01-preview&$expand=resourceTypes
   response:
     body: {string: "{\"displayName\":\"Microsoft Storage\",\"operations\":[{\"name\"\
         :\"Microsoft.Storage/register/action\",\"displayName\":\"Registers the Storage\
@@ -680,52 +806,51 @@ interactions:
         :[{\"name\":\"UsedCapacity\",\"displayName\":\"Used capacity\",\"displayDescription\"\
         :\"Account used capacity\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\"\
         ,\"fillGapWithZero\":false,\"category\":\"Capacity\",\"resourceIdDimensionNameOverride\"\
-        :\"AccountResourceId\",\"supportedTimeGrainTypes\":[\"PT1H\",\"PT6H\",\"PT12H\"\
-        ,\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\"\
-        ,\"Maximum\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\"\
-        ,\"displayDescription\":\"The number of requests made to a storage service\
-        \ or the specified API operation. This number includes successful and failed\
-        \ requests, as well as requests which produced errors. Use ResponseType dimension\
-        \ for the number of different type of response.\",\"unit\":\"Count\",\"aggregationType\"\
-        :\"Total\",\"dimensions\":[{\"name\":\"ResponseType\",\"displayName\":\"Response\
-        \ type\",\"toBeExportedForShoebox\":true},{\"name\":\"GeoType\",\"displayName\"\
-        :\"Geo type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\"\
-        :\"API name\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"\
-        category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\"\
-        ,\"supportedAggregationTypes\":[\"Total\"]},{\"name\":\"Ingress\",\"displayName\"\
-        :\"Ingress\",\"displayDescription\":\"The amount of ingress data, in bytes.\
-        \ This number includes ingress from an external client into Azure Storage\
-        \ as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\"\
-        :\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo type\"\
-        ,\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"\
-        API name\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"\
-        category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\"\
-        ,\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
-        ]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\"\
-        :\"The amount of egress data, in bytes. This number includes egress from an\
-        \ external client into Azure Storage as well as egress within Azure. As a\
-        \ result, this number does not reflect billable egress.\",\"unit\":\"Bytes\"\
-        ,\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\"\
-        :\"Geo type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\"\
-        :\"API name\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"\
-        category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\"\
-        ,\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
-        ]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success Server Latency\"\
-        ,\"displayDescription\":\"The average latency used by Azure Storage to process\
-        \ a successful request, in milliseconds. This value does not include the network\
-        \ latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\"\
-        :\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo type\"\
-        ,\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"\
-        API name\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"\
-        category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\"\
-        ,\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
-        ]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success E2E Latency\"\
-        ,\"displayDescription\":\"The average end-to-end latency of successful requests\
-        \ made to a storage service or the specified API operation, in milliseconds.\
-        \ This value includes the required processing time within Azure Storage to\
-        \ read the request, send the response, and receive acknowledgment of the response.\"\
+        :\"AccountResourceId\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\"\
+        ,\"displayName\":\"Transactions\",\"displayDescription\":\"The number of requests\
+        \ made to a storage service or the specified API operation. This number includes\
+        \ successful and failed requests, as well as requests which produced errors.\
+        \ Use ResponseType dimension for the number of different type of response.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"ResponseType\",\"displayName\":\"Response type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\"\
+        :\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\"]},{\"name\"\
+        :\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\":\"The amount\
+        \ of ingress data, in bytes. This number includes ingress from an external\
+        \ client into Azure Storage as well as ingress within Azure.\",\"unit\":\"\
+        Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\"\
+        ,\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"name\":\"\
+        ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\":true}],\"\
+        fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\"\
+        :\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\"\
+        ,\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\"\
+        ,\"displayDescription\":\"The amount of egress data, in bytes. This number\
+        \ includes egress from an external client into Azure Storage as well as egress\
+        \ within Azure. As a result, this number does not reflect billable egress.\"\
+        ,\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"\
+        name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\"\
+        :\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\"\
+        ,\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\"\
+        :\"Success Server Latency\",\"displayDescription\":\"The average latency used\
+        \ by Azure Storage to process a successful request, in milliseconds. This\
+        \ value does not include the network latency specified in AverageE2ELatency.\"\
         ,\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\"\
         :[{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\"\
+        :\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\"\
+        ,\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\"\
+        :\"Success E2E Latency\",\"displayDescription\":\"The average end-to-end latency\
+        \ of successful requests made to a storage service or the specified API operation,\
+        \ in milliseconds. This value includes the required processing time within\
+        \ Azure Storage to read the request, send the response, and receive acknowledgment\
+        \ of the response.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\"\
+        ,\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
         :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
         :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\"\
         :\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\"\
@@ -764,28 +889,26 @@ interactions:
         \ bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\"\
         :[{\"name\":\"BlobType\",\"displayName\":\"Blob type\",\"toBeExportedForShoebox\"\
         :true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\"\
-        :[\"PT1H\",\"PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\"\
-        ,\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"BlobCount\",\"displayName\"\
-        :\"Blob Count\",\"displayDescription\":\"The number of Blob in the storage\
-        \ account\u2019s Blob service.\",\"unit\":\"Count\",\"aggregationType\":\"\
-        Total\",\"dimensions\":[{\"name\":\"BlobType\",\"displayName\":\"Blob type\"\
-        ,\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\"\
-        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"PT6H\",\"PT12H\",\"\
-        P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"\
-        Maximum\"]},{\"name\":\"ContainerCount\",\"displayName\":\"Blob Container\
-        \ Count\",\"displayDescription\":\"The number of containers in the storage\
-        \ account\u2019s Blob service.\",\"unit\":\"Count\",\"aggregationType\":\"\
-        Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\"\
-        :[\"PT1H\",\"PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\"\
-        ,\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\",\"displayName\"\
-        :\"Transactions\",\"displayDescription\":\"The number of requests made to\
-        \ a storage service or the specified API operation. This number includes successful\
-        \ and failed requests, as well as requests which produced errors. Use ResponseType\
-        \ dimension for the number of different type of response.\",\"unit\":\"Count\"\
-        ,\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"ResponseType\"\
-        ,\"displayName\":\"Response type\",\"toBeExportedForShoebox\":true},{\"name\"\
-        :\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"\
-        name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :[\"PT1H\"],\"supportedAggregationTypes\":[\"Total\",\"Minimum\",\"Maximum\"\
+        ]},{\"name\":\"BlobCount\",\"displayName\":\"Blob Count\",\"displayDescription\"\
+        :\"The number of Blob in the storage account\u2019s Blob service.\",\"unit\"\
+        :\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"BlobType\"\
+        ,\"displayName\":\"Blob type\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\"\
+        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"\
+        supportedAggregationTypes\":[\"Total\",\"Minimum\",\"Maximum\"]},{\"name\"\
+        :\"ContainerCount\",\"displayName\":\"Blob Container Count\",\"displayDescription\"\
+        :\"The number of containers in the storage account\u2019s Blob service.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"\
+        category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\"\
+        ,\"displayName\":\"Transactions\",\"displayDescription\":\"The number of requests\
+        \ made to a storage service or the specified API operation. This number includes\
+        \ successful and failed requests, as well as requests which produced errors.\
+        \ Use ResponseType dimension for the number of different type of response.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"ResponseType\",\"displayName\":\"Response type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
         :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
         :[\"Total\"]},{\"name\":\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\"\
         :\"The amount of ingress data, in bytes. This number includes ingress from\
@@ -886,7 +1009,10 @@ interactions:
         name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action\"\
         ,\"displayName\":\"Add blob content\",\"description\":\"Returns the result\
         \ of adding blob content\",\"origin\":null,\"properties\":null,\"isDataAction\"\
-        :true}]},{\"name\":\"storageAccounts/tableServices/providers/Microsoft.Insights/metricDefinitions\"\
+        :true},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/runAsSuperUser/action\"\
+        ,\"displayName\":\"Execute the command as super user\",\"description\":\"\
+        Returns the result of the blob command\",\"origin\":null,\"properties\":null,\"\
+        isDataAction\":true}]},{\"name\":\"storageAccounts/tableServices/providers/Microsoft.Insights/metricDefinitions\"\
         ,\"displayName\":\"Table service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/providers/Microsoft.Insights/metricDefinitions/read\"\
         ,\"displayName\":\"Get list of Microsoft Storage Metrics definitions\",\"\
         description\":\"Get list of Microsoft Storage Metrics definitions.\",\"origin\"\
@@ -894,27 +1020,26 @@ interactions:
         :[{\"name\":\"TableCapacity\",\"displayName\":\"Table Capacity\",\"displayDescription\"\
         :\"The amount of storage used by the storage account\u2019s Table service\
         \ in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"TableCount\",\"displayName\":\"Table\
-        \ Count\",\"displayDescription\":\"The number of table in the storage account\u2019\
-        s Table service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"TableEntityCount\",\"displayName\"\
-        :\"Table Entity Count\",\"displayDescription\":\"The number of table entities\
-        \ in the storage account\u2019s Table service.\",\"unit\":\"Count\",\"aggregationType\"\
-        :\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\"\
-        :[\"PT1H\",\"PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\"\
-        ,\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\",\"displayName\"\
-        :\"Transactions\",\"displayDescription\":\"The number of requests made to\
-        \ a storage service or the specified API operation. This number includes successful\
-        \ and failed requests, as well as requests which produced errors. Use ResponseType\
-        \ dimension for the number of different type of response.\",\"unit\":\"Count\"\
-        ,\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"ResponseType\"\
-        ,\"displayName\":\"Response type\",\"toBeExportedForShoebox\":true},{\"name\"\
-        :\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"\
-        name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"\
+        supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
+        ]},{\"name\":\"TableCount\",\"displayName\":\"Table Count\",\"displayDescription\"\
+        :\"The number of table in the storage account\u2019s Table service.\",\"unit\"\
+        :\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
+        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"TableEntityCount\"\
+        ,\"displayName\":\"Table Entity Count\",\"displayDescription\":\"The number\
+        \ of table entities in the storage account\u2019s Table service.\",\"unit\"\
+        :\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
+        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\"\
+        ,\"displayName\":\"Transactions\",\"displayDescription\":\"The number of requests\
+        \ made to a storage service or the specified API operation. This number includes\
+        \ successful and failed requests, as well as requests which produced errors.\
+        \ Use ResponseType dimension for the number of different type of response.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"ResponseType\",\"displayName\":\"Response type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
         :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
         :[\"Total\"]},{\"name\":\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\"\
         :\"The amount of ingress data, in bytes. This number includes ingress from\
@@ -979,27 +1104,26 @@ interactions:
         :[{\"name\":\"FileCapacity\",\"displayName\":\"File Capacity\",\"displayDescription\"\
         :\"The amount of storage used by the storage account\u2019s File service in\
         \ bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"FileCount\",\"displayName\":\"File\
-        \ Count\",\"displayDescription\":\"The number of file in the storage account\u2019\
-        s File service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"FileShareCount\",\"displayName\":\"\
-        File Share Count\",\"displayDescription\":\"The number of file shares in the\
-        \ storage account\u2019s File service.\",\"unit\":\"Count\",\"aggregationType\"\
-        :\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\"\
-        :[\"PT1H\",\"PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\"\
-        ,\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\",\"displayName\"\
-        :\"Transactions\",\"displayDescription\":\"The number of requests made to\
-        \ a storage service or the specified API operation. This number includes successful\
-        \ and failed requests, as well as requests which produced errors. Use ResponseType\
-        \ dimension for the number of different type of response.\",\"unit\":\"Count\"\
-        ,\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"ResponseType\"\
-        ,\"displayName\":\"Response type\",\"toBeExportedForShoebox\":true},{\"name\"\
-        :\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"\
-        name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"\
+        supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
+        ]},{\"name\":\"FileCount\",\"displayName\":\"File Count\",\"displayDescription\"\
+        :\"The number of file in the storage account\u2019s File service.\",\"unit\"\
+        :\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
+        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"FileShareCount\"\
+        ,\"displayName\":\"File Share Count\",\"displayDescription\":\"The number\
+        \ of file shares in the storage account\u2019s File service.\",\"unit\":\"\
+        Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
+        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\"\
+        ,\"displayName\":\"Transactions\",\"displayDescription\":\"The number of requests\
+        \ made to a storage service or the specified API operation. This number includes\
+        \ successful and failed requests, as well as requests which produced errors.\
+        \ Use ResponseType dimension for the number of different type of response.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"ResponseType\",\"displayName\":\"Response type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
         :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
         :[\"Total\"]},{\"name\":\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\"\
         :\"The amount of ingress data, in bytes. This number includes ingress from\
@@ -1052,8 +1176,18 @@ interactions:
         isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/providers/Microsoft.Insights/diagnosticSettings/write\"\
         ,\"displayName\":\"Write diagnostic setting\",\"description\":\"Creates or\
         \ updates the diagnostic setting for the resource.\",\"origin\":\"system\"\
-        ,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/queueServices\"\
-        ,\"displayName\":\"Storage Queue Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\"\
+        ,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/fileShare\"\
+        ,\"displayName\":\"Storage File Service FileShare\",\"operations\":[{\"name\"\
+        :\"Microsoft.Storage/storageAccounts/fileServices/fileShare/read\",\"displayName\"\
+        :\"Read FileShare\",\"description\":\"Allows user to read fileshare\",\"origin\"\
+        :null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/fileShare/write\"\
+        ,\"displayName\":\"Write FileShare\",\"description\":\"Allows user to write\
+        \ to a fileshare\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"\
+        name\":\"Microsoft.Storage/storageAccounts/fileServices/fileShare/delete\"\
+        ,\"displayName\":\"Delete FileShare\",\"description\":\"Allows user to delete\
+        \ fileshare\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"\
+        name\":\"storageAccounts/queueServices\",\"displayName\":\"Storage Queue Services\"\
+        ,\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\"\
         ,\"displayName\":\"Get queue service properties or statistics\",\"description\"\
         :\"Returns queue service properties or statistics.\",\"origin\":null,\"properties\"\
         :null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/write\"\
@@ -1067,36 +1201,34 @@ interactions:
         :[{\"name\":\"QueueCapacity\",\"displayName\":\"Queue Capacity\",\"displayDescription\"\
         :\"The amount of storage used by the storage account\u2019s Queue service\
         \ in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"QueueCount\",\"displayName\":\"Queue\
-        \ Count\",\"displayDescription\":\"The number of queue in the storage account\u2019\
-        s Queue service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\"\
-        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"\
-        PT6H\",\"PT12H\",\"P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\"\
-        ,\"Minimum\",\"Maximum\"]},{\"name\":\"QueueMessageCount\",\"displayName\"\
-        :\"Queue Message Count\",\"displayDescription\":\"The approximate number of\
-        \ queue messages in the storage account\u2019s Queue service.\",\"unit\":\"\
-        Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
-        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\",\"PT6H\",\"PT12H\",\"\
-        P1D\"],\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"\
-        Maximum\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"\
-        displayDescription\":\"The number of requests made to a storage service or\
-        \ the specified API operation. This number includes successful and failed\
-        \ requests, as well as requests which produced errors. Use ResponseType dimension\
-        \ for the number of different type of response.\",\"unit\":\"Count\",\"aggregationType\"\
-        :\"Total\",\"dimensions\":[{\"name\":\"ResponseType\",\"displayName\":\"Response\
-        \ type\",\"toBeExportedForShoebox\":true},{\"name\":\"GeoType\",\"displayName\"\
-        :\"Geo type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\"\
-        :\"API name\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"\
-        category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\"]},{\"\
-        name\":\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\":\"The\
-        \ amount of ingress data, in bytes. This number includes ingress from an external\
-        \ client into Azure Storage as well as ingress within Azure.\",\"unit\":\"\
-        Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\"\
-        ,\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"name\":\"\
-        ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\":true}],\"\
-        fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
+        :false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"\
+        supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"\
+        ]},{\"name\":\"QueueCount\",\"displayName\":\"Queue Count\",\"displayDescription\"\
+        :\"The number of queue in the storage account\u2019s Queue service.\",\"unit\"\
+        :\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\"\
+        :\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"QueueMessageCount\"\
+        ,\"displayName\":\"Queue Message Count\",\"displayDescription\":\"The approximate\
+        \ number of queue messages in the storage account\u2019s Queue service.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"\
+        category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\"\
+        :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Transactions\"\
+        ,\"displayName\":\"Transactions\",\"displayDescription\":\"The number of requests\
+        \ made to a storage service or the specified API operation. This number includes\
+        \ successful and failed requests, as well as requests which produced errors.\
+        \ Use ResponseType dimension for the number of different type of response.\"\
+        ,\"unit\":\"Count\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"ResponseType\",\"displayName\":\"Response type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\"\
+        :true},{\"name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
+        :[\"Total\"]},{\"name\":\"Ingress\",\"displayName\":\"Ingress\",\"displayDescription\"\
+        :\"The amount of ingress data, in bytes. This number includes ingress from\
+        \ an external client into Azure Storage as well as ingress within Azure.\"\
+        ,\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\"\
+        :\"GeoType\",\"displayName\":\"Geo type\",\"toBeExportedForShoebox\":true},{\"\
+        name\":\"ApiName\",\"displayName\":\"API name\",\"toBeExportedForShoebox\"\
+        :true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\"\
         :[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"\
         displayName\":\"Egress\",\"displayDescription\":\"The amount of egress data,\
         \ in bytes. This number includes egress from an external client into Azure\
@@ -1183,15 +1315,19 @@ interactions:
         ,\"operations\":[{\"name\":\"Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action\"\
         ,\"displayName\":\"Delete virtual network or subnets notifications\",\"description\"\
         :\"Notifies Microsoft.Storage that virtual network or subnet is being deleted\"\
-        ,\"origin\":null,\"properties\":null,\"isDataAction\":false}]}],\"id\":\"\
-        /providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\"\
+        ,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"\
+        locations/usages\",\"displayName\":\"Usage Metrics\",\"operations\":[{\"name\"\
+        :\"Microsoft.Storage/locations/usages/read\",\"displayName\":\"Get Subscription\
+        \ Usages\",\"description\":\"Returns the limit and the current usage count\
+        \ for resources in the specified subscription\",\"origin\":null,\"properties\"\
+        :null,\"isDataAction\":false}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\"\
         ,\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"\
         }"}
     headers:
       cache-control: [no-cache]
-      content-length: ['41473']
+      content-length: ['42492']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 13 Mar 2018 17:14:32 GMT']
+      date: ['Tue, 12 Jun 2018 23:17:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]

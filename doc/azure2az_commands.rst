@@ -1,7 +1,7 @@
 
-Azure XPlat CLI to Azure CLI 2.0 commands
+Azure classic CLI to Azure CLI commands
 =========================================
-Below is a list of common Azure XPlat commands and their Azure CLI 2.0 equivalent.
+Below is a list of common Azure classic CLI commands and their Azure CLI equivalent.
 
 Services included:
 
@@ -11,7 +11,7 @@ Services included:
 * VM
 
 ==========================================================   ==========================================================
-Azure XPlat CLI                                              Azure CLI 2.0
+Azure classic CLI                                            Azure CLI
 ==========================================================   ==========================================================
 azure account clear                                          az account clear
 azure account list                                           az account list
