@@ -82,7 +82,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                         token_claims, restriction_token_type,
-                                        open_id_connect_discovery_document, widevine_template, 
+                                        open_id_connect_discovery_document, widevine_template,
                                         ask, fair_play_pfx_password, fair_play_pfx,
                                         rental_and_lease_key_type, rental_duration, description=None):
 
