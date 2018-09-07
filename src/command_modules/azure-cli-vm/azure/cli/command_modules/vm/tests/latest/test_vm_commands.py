@@ -2669,7 +2669,7 @@ class VMGalleryImage(ScenarioTest):
             'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
-            'image_id':''
+            'image_id': 'TBD'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
@@ -2679,7 +2679,7 @@ class VMGalleryImage(ScenarioTest):
                  checks=self.check('name', self.kwargs['image']))
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
-                 checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
         self.kwargs['image_id'] = res['id']
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults --generate-ssh-keys')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
