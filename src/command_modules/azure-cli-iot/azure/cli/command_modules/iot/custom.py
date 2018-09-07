@@ -779,7 +779,7 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
             endpoints.storage_containers = []
         elif EndpointType.EventHub.value == endpoint_type.lower():
             endpoints.event_hubs = []
-    
+
     if endpoint_name:
         if any(e.name.lower() == endpoint_name.lower() for e in endpoints.service_bus_queues):
             sbq_endpoints = [e for e in endpoints.service_bus_queues if e.name.lower() != endpoint_name.lower()]
@@ -793,5 +793,5 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
         elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.event_hubs):
             eh_endpoints = [e for e in endpoints.event_hubs if e.name.lower() != endpoint_name.lower()]
             endpoints.event_hubs = eh_endpoints
-    
+
     return endpoints
