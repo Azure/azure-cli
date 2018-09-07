@@ -545,7 +545,7 @@ def load_arguments(self, _):
     with self.argument_context('network lb rule') as c:
         c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
         c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
-
+        c.argument('disable_outbound_snat', min_api='2018-08-01', help='Configures SNAT for the VMs in the backend pool to use the publicIP address specified in the frontend of the load balancing rule.', arg_type=get_three_state_flag())
     # endregion
 
     # region LocalGateway
