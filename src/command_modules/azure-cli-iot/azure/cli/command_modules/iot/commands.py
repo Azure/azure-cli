@@ -13,10 +13,12 @@ class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-
         result = super(PolicyUpdateResultTransform, self).__call__(poller)
         return result.properties.authorization_policies
 
+
 class EndpointUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         result = super(EndpointUpdateResultTransform, self).__call__(poller)
         return result.properties.routing.endpoints
+
 
 class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
