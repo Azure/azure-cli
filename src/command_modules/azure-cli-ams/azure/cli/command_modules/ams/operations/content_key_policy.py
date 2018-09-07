@@ -236,12 +236,25 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
                              issuer, audience):
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
-    return all([restriction_token_type, available_keys >= 1, issuer, audience])
+    return _validate_all_conditions(
+        [restriction_token_type, available_keys >= 1, issuer, audience],
+        'Malformed content key policy token restriction.')
 
 
 def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
                                   rental_and_lease_key_type, rental_duration):
-    return all([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
+    return _validate_all_conditions(
+        [ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration],
+        'Malformed content key policy FairPlay configuration.')
+
+
+def _validate_all_conditions(conditions, error_if_malformed):
+    well_formed = all(conditions)
+
+    if _count_truthy(conditions) >= 1 and not well_formed:
+        raise CLIError(error_if_malformed)
+
+    return well_formed
 
 
 def _read_json(path):
