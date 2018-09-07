@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_data_gen_update, blob_data_service_factory,
-                                                               page_blob_service_factory, file_data_service_factory,
-                                                               queue_data_service_factory, table_data_service_factory,
-                                                               cloud_storage_account_service_factory,
-                                                               multi_service_properties_factory)
+from azure.cli.command_modules.storage._client_factory import (
+    cf_sa, cf_blob_data_gen_update, blob_data_service_factory, page_blob_service_factory, file_data_service_factory,
+    queue_data_service_factory, table_data_service_factory, cloud_storage_account_service_factory,
+    multi_service_properties_factory)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
