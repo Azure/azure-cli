@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import shutil
 import tempfile
 import unittest
 import mock
@@ -26,8 +27,16 @@ from knack.util import CLIError
 
 class TestActions(unittest.TestCase):
     def test_generate_specfied_ssh_key_files(self):
-        _, private_key_file = tempfile.mkstemp()
+        temp_dir_name = tempfile.mkdtemp(prefix="ssh_dir_")
+
+        # cleanup temporary directory and its contents
+        self.addCleanup(shutil.rmtree, path=temp_dir_name)
+
+        # first create file paths for the keys to be generated
+        _, private_key_file = tempfile.mkstemp(dir=temp_dir_name)
         public_key_file = private_key_file + '.pub'
+        os.remove(private_key_file)
+
         args = mock.MagicMock()
         args.ssh_key_value = public_key_file
         args.generate_ssh_keys = True
@@ -50,7 +59,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(generated_public_key_string, args.ssh_key_value)
 
         # 3 verify we do not generate unless told so
-        _, private_key_file2 = tempfile.mkstemp()
+        _, private_key_file2 = tempfile.mkstemp(dir=temp_dir_name)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
         args3.ssh_key_value = public_key_file2
@@ -59,7 +68,7 @@ class TestActions(unittest.TestCase):
             validate_ssh_key(args3)
 
         # 4 verify file naming if the pub file doesn't end with .pub
-        _, public_key_file4 = tempfile.mkstemp()
+        _, public_key_file4 = tempfile.mkstemp(dir=temp_dir_name)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
         args4.ssh_key_value = public_key_file4
