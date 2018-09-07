@@ -128,6 +128,14 @@ class TestAPIProfiles(unittest.TestCase):
             self.assertTrue(
                 supported_api_version(cli, ResourceType.MGMT_KEYVAULT, min_api='6.0', max_api='8.0'))
 
+    def test_supported_api_version_min_max_constraint_semver_boundaries(self):
+        cli = DummyCli()
+        cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
+        test_profile = {'2017-01-01-profile': {ResourceType.MGMT_KEYVAULT: '7.0'}}
+        with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
+            self.assertTrue(
+                supported_api_version(cli, ResourceType.MGMT_KEYVAULT, min_api='7.0', max_api='7.0'))
+
     def test_supported_api_version_max_constraint_not_supported(self):
         cli = DummyCli()
         cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
