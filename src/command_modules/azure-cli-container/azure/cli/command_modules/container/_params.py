@@ -15,7 +15,7 @@ from ._validators import validate_volume_mount_path, validate_secrets, validate_
 
 # pylint: disable=line-too-long
 
-IP_ADDRESS_TYPES = ['Public']
+IP_ADDRESS_TYPES = ['Public', 'Private']
 
 
 def _environment_variables_type(value):
