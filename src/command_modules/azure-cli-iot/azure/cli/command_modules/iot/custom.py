@@ -33,7 +33,7 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.command_modules.iot.shared import (EndpointType)
+from azure.cli.command_modules.iot.shared import EndpointType
 
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate
@@ -531,7 +531,7 @@ def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_ty
                 resource_group=endpoint_resource_group
             )
         )
-    if EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+    elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
         hub.properties.routing.endpoints.service_bus_queues.append(
             RoutingServiceBusQueueEndpointProperties(
                 connection_string=connection_string,
@@ -540,7 +540,7 @@ def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_ty
                 resource_group=endpoint_resource_group
             )
         )
-    if EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+    elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
         hub.properties.routing.endpoints.service_bus_topics.append(
             RoutingServiceBusTopicEndpointProperties(
                 connection_string=connection_string,
@@ -549,8 +549,8 @@ def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_ty
                 resource_group=endpoint_resource_group
             )
         )
-    if EndpointType.AzureStorageContainer.value == endpoint_type.lower():
-        if container_name is None:
+    elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+        if not container_name:
             raise CLIError("Container name is required.")
         hub.properties.routing.endpoints.storage_containers.append(
             RoutingStorageContainerProperties(
@@ -623,8 +623,10 @@ def iot_hub_route_create(client, hub_name, route_name, source_type, endpoint_nam
 def iot_hub_route_list(client, hub_name, source_type=None, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
-    return [route for route in hub.properties.routing.routes if route.source.lower() == (source_type.lower()
-                                                                                         if source_type else route.source.lower())]
+    if source_type:
+        return [route for route in hub.properties.routing.routes if route.source.lower() == source_type.lower()]
+    else:
+        return hub.properties.routing.routes
 
 
 def iot_hub_route_show(client, hub_name, route_name, resource_group_name=None):
@@ -643,20 +645,19 @@ def iot_hub_route_delete(client, hub_name, route_name=None, source_type=None, re
         hub.properties.routing.routes = []
     if route_name:
         hub.properties.routing.routes = [route for route in hub.properties.routing.routes
-                                         if route.name.lower() != (route.name.lower()
-                                                                   if route_name is None else route_name.lower())]
+                                         if route.name.lower() != route_name.lower()]
     if source_type:
         hub.properties.routing.routes = [route for route in hub.properties.routing.routes
-                                         if route.source.lower() != (route.source.lower()
-                                                                     if source_type is None else source_type.lower())]
+                                         if route.source.lower() != source_type.lower()]
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
-def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None, condition=None,
-                         resource_group_name=None):
+def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None,
+                         condition=None, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
-    updated_route = next((route for route in hub.properties.routing.routes if route.name.lower() == route_name.lower()), None)
+    updated_route = next((route for route in hub.properties.routing.routes
+                         if route.name.lower() == route_name.lower()), None)
     if updated_route:
         updated_route.source = updated_route.source if source_type is None else source_type
         updated_route.endpoint_names = updated_route.endpoint_names if endpoint_name is None else endpoint_name.split()
@@ -769,32 +770,28 @@ def _convert_rights_to_access_rights(right_list):
 
 
 def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
-    if EndpointType.ServiceBusQueue.value == (EndpointType.ServiceBusQueue.value
-                                              if endpoint_type is None else endpoint_type.lower()):
-        new_service_bus_queues = [service_bus_queue for service_bus_queue in endpoints.service_bus_queues
-                                  if service_bus_queue.name.lower() != (service_bus_queue.name.lower()
-                                                                        if endpoint_name is None else endpoint_name.lower())]
-        endpoints.service_bus_queues = new_service_bus_queues
-
-    if EndpointType.ServiceBusTopic.value == (EndpointType.ServiceBusTopic.value
-                                              if endpoint_type is None else endpoint_type.lower()):
-        new_service_bus_topics = [service_bus_topic for service_bus_topic in endpoints.service_bus_topics
-                                  if service_bus_topic.name.lower() != (service_bus_topic.name.lower()
-                                                                        if endpoint_name is None else endpoint_name.lower())]
-        endpoints.service_bus_topics = new_service_bus_topics
-
-    if EndpointType.AzureStorageContainer.value == (EndpointType.AzureStorageContainer.value
-                                                    if endpoint_type is None else endpoint_type.lower()):
-        new_storage_containers = [storage_container for storage_container in endpoints.storage_containers
-                                  if storage_container.name.lower() != (storage_container.name.lower()
-                                                                        if endpoint_name is None else endpoint_name.lower())]
-        endpoints.storage_containers = new_storage_containers
-
-    if EndpointType.EventHub.value == (EndpointType.EventHub.value
-                                       if endpoint_type is None else endpoint_type.lower()):
-        new_event_hubs = [event_hub for event_hub in endpoints.event_hubs
-                          if event_hub.name.lower() != (event_hub.name.lower()
-                                                        if endpoint_name is None else endpoint_name.lower())]
-        endpoints.event_hubs = new_event_hubs
-
+    if endpoint_type:
+        if EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+            endpoints.service_bus_queues = []
+        elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+            endpoints.service_bus_topics = []
+        elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+            endpoints.storage_containers = []
+        elif EndpointType.EventHub.value == endpoint_type.lower():
+            endpoints.event_hubs = []
+    
+    if endpoint_name:
+        if any(e.name.lower() == endpoint_name.lower() for e in endpoints.service_bus_queues):
+            sbq_endpoints = [e for e in endpoints.service_bus_queues if e.name.lower() != endpoint_name.lower()]
+            endpoints.service_bus_queues = sbq_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.service_bus_topics):
+            sbt_endpoints = [e for e in endpoints.service_bus_topics if e.name.lower() != endpoint_name.lower()]
+            endpoints.service_bus_topics = sbt_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.storage_containers):
+            sc_endpoints = [e for e in endpoints.storage_containers if e.name.lower() != endpoint_name.lower()]
+            endpoints.storage_containers = sc_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.event_hubs):
+            eh_endpoints = [e for e in endpoints.event_hubs if e.name.lower() != endpoint_name.lower()]
+            endpoints.event_hubs = eh_endpoints
+    
     return endpoints
