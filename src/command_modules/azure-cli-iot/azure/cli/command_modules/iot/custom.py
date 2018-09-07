@@ -625,8 +625,7 @@ def iot_hub_route_list(client, hub_name, source_type=None, resource_group_name=N
     hub = iot_hub_get(client, hub_name, resource_group_name)
     if source_type:
         return [route for route in hub.properties.routing.routes if route.source.lower() == source_type.lower()]
-    else:
-        return hub.properties.routing.routes
+    return hub.properties.routing.routes
 
 
 def iot_hub_route_show(client, hub_name, route_name, resource_group_name=None):
