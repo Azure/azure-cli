@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
+import base64
+
 from knack.util import CLIError
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
@@ -32,8 +34,8 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               widevine_template, description, ask, fair_play_pfx_password,
-                                               fair_play_pfx, rental_and_lease_key_type, rental_duration)
+                                               widevine_template, ask, fair_play_pfx_password,
+                                               fair_play_pfx, rental_and_lease_key_type, rental_duration, description)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -90,7 +92,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     policy_options = policy.options if policy else []
-    policy_description = policy.description if policy else description
+    policy_description = policy.description if not description else description
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
@@ -115,7 +117,8 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     if valid_fairplay_configuration:
         configuration = ContentKeyPolicyFairPlayConfiguration(
             ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
-            fair_play_pfx=fair_play_pfx, rental_and_lease_key_type=rental_and_lease_key_type,
+            fair_play_pfx=_base64(_read_binary(fair_play_pfx)).decode('ascii'),
+            rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)
 
     if open_restriction:
@@ -226,5 +229,17 @@ def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
 
 
 def _read_json(path):
-    with open(path, 'r') as file:
+    return _read(path, 'r')
+
+
+def _read_binary(path):
+    return _read(path, 'rb')
+
+
+def _read(path, readType):
+    with open(path, readType) as file:
         return file.read()
+
+
+def _base64(data):
+    return base64.b64encode(data)
