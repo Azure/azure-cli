@@ -65,6 +65,22 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
                                    content_key_policy_name, policy.options)
 
 
+def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
+                                     parameters):
+    return client.update(resource_group_name, account_name,
+                         content_key_policy_name, parameters.options, parameters.description)
+
+
+def update_content_key_policy(instance, description=None):
+    if not instance:
+        raise CLIError('The content key policy was not found.')
+
+    if description is not None:
+        instance.description = description
+
+    return instance
+
+
 # Private methods used
 
 def _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,

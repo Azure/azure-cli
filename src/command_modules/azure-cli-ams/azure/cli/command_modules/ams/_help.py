@@ -197,6 +197,11 @@ helps['ams content-key-policy delete'] = """
     short-summary: Delete a content key policy.
 """
 
+helps['ams content-key-policy update'] = """
+    type: command
+    short-summary: Update an existing content key policy.
+"""
+
 helps['ams content-key-policy list'] = """
     type: command
     short-summary: List all the content key policies within an Azure Media Services account.
