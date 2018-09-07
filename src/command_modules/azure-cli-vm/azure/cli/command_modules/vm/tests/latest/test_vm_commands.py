@@ -2660,8 +2660,8 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    @ResourceGroupPreparer(location='westcentralus')
-    def gallery_e2e(self, resource_group):  # TODO: bring it back when the service is ready
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_gallery_e2e(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': 'gallery1',
@@ -2670,21 +2670,27 @@ class VMGalleryImage(ScenarioTest):
             'captured': 'managedImage1'
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig list -g {rg}')
-        self.cmd('sig show -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                 checks=self.check('name', self.kwargs['image']))
         self.cmd('vm create -g {rg} -n {vm} --image debian --generate-ssh-keys')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}')
-        self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
-        self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}',
+                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
+                 checks=self.check('name', self.kwargs['version']))
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        time.sleep(60)  # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 

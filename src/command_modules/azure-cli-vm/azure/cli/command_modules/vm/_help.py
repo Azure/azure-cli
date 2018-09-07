@@ -1436,6 +1436,11 @@ helps['sig list'] = """
     short-summary: list share image galleries.
 """
 
+helps['sig update'] = """
+    type: command
+    short-summary: update a share image gallery.
+"""
+
 helps['sig image-definition'] = """
     type: group
     short-summary: create an image definition
@@ -1450,6 +1455,11 @@ helps['sig image-definition create'] = """
             az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
 """
 
+helps['sig image-definition update'] = """
+    type: command
+    short-summary: update a share image defintiion.
+"""
+
 helps['sig image-version'] = """
     type: group
     short-summary: create a new version from an image defintion
@@ -1462,4 +1472,9 @@ helps['sig image-version create'] = """
         - name: add a new version
           text: |
             az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+"""
+
+helps['sig image-version update'] = """
+    type: command
+    short-summary: update a share image version
 """
