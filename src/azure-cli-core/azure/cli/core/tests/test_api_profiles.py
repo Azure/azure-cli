@@ -49,13 +49,6 @@ class TestAPIProfiles(unittest.TestCase):
             with self.assertRaises(APIVersionException):
                 get_api_version(cli, ResourceType.MGMT_STORAGE)
 
-    def test_supported_api_version_invalid_profile_name(self):
-        # Invalid name for the profile name
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='not-a-real-profile')
-        with self.assertRaises(ValueError):
-            supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01')
-
     def test_get_api_version_invalid_rt_2(self):
         # None is not a valid resource type
         cli = DummyCli()
@@ -70,41 +63,6 @@ class TestAPIProfiles(unittest.TestCase):
         cli = DummyCli()
         with self.assertRaises(ValueError):
             supported_api_version(cli, PROFILE_TYPE)
-
-    def test_supported_api_profile_min_constraint(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile')
-        self.assertTrue(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01'))
-
-    def test_supported_api_profile_min_constraint_not_supported(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile-preview')
-        self.assertFalse(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-02'))
-
-    def test_supported_api_profile_min_max_constraint(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile')
-        self.assertTrue(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01', max_api='2000-01-01'))
-
-    def test_supported_api_profile_max_constraint_not_supported(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile')
-        self.assertFalse(supported_api_version(cli, PROFILE_TYPE, max_api='1999-12-30'))
-
-    def test_supported_api_profile_preview_constraint(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile')
-        self.assertTrue(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01-preview'))
-
-    def test_supported_api_profile_preview_constraint_in_profile(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='2000-01-01-profile-preview')
-        self.assertFalse(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01'))
-
-    def test_supported_api_profile_latest(self):
-        cli = DummyCli()
-        cli.cloud = Cloud('TestCloud', profile='latest')
-        self.assertTrue(supported_api_version(cli, PROFILE_TYPE, min_api='2000-01-01'))
 
     def test_supported_api_version_no_constraints(self):
         # At least a min or max version must be specified
