@@ -64,7 +64,7 @@ def load_arguments(self, _):
     #####
     with self.argument_context('dls account network-rule') as c:
         c.argument('account_name', datalake_store_name_type, options_list=['--account-name'], id_part=None)
-        c.argument('resource_group_name', resource_group_name_type, id_part='name')
+        c.argument('resource_group_name', resource_group_name_type, id_part='resource_group')
 
         c.argument('virtual_network_rule_name',
                    options_list=['--name', '-n'],
