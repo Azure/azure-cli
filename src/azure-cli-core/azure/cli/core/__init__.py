@@ -283,7 +283,7 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
 class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
+    def __init__(self, cli_ctx=None, min_profile=None, max_profile=None,
                  command_group_cls=None, argument_context_cls=None, suppress_extension=None,
                  **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext

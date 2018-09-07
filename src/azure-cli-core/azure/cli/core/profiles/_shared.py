@@ -228,37 +228,28 @@ class _SemVerAPIFormat(object):
 class _DateAPIFormat(object):
     """ Class to support comparisons for API versions in
         YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
-        or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.
+        or any string that starts with YYYY-MM-DD format.
     """
 
     def __init__(self, api_version_str):
         try:
-            self.latest = self.preview = False
+            self.preview = False
             self.yyyy = self.mm = self.dd = None
-            if api_version_str == 'latest':
-                self.latest = True
-            else:
-                if 'preview' in api_version_str:
-                    self.preview = True
-                parts = api_version_str.split('-')
-                self.yyyy = int(parts[0])
-                self.mm = int(parts[1])
-                self.dd = int(parts[2])
+            if 'preview' in api_version_str:
+                self.preview = True
+            parts = api_version_str.split('-')
+            self.yyyy = int(parts[0])
+            self.mm = int(parts[1])
+            self.dd = int(parts[2])
         except (ValueError, TypeError):
             raise ValueError('The API version {} is not in a '
                              'supported format'.format(api_version_str))
 
     def __eq__(self, other):
-        return self.latest == other.latest and self.yyyy == other.yyyy and self.mm == other.mm and \
+        return self.yyyy == other.yyyy and self.mm == other.mm and \
             self.dd == other.dd and self.preview == other.preview
 
     def __lt__(self, other):  # pylint: disable=too-many-return-statements
-        if self.latest or other.latest:
-            if not self.latest and other.latest:
-                return True
-            if self.latest and not other.latest:
-                return False
-            return False
         if self.yyyy < other.yyyy:
             return True
         if self.yyyy == other.yyyy:
