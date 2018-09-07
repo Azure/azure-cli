@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.4
++++++
+* Added ability to restart and stop a running container group
+
 0.3.3
 +++++
 * Add '--secure-environment-variables' for passing secure environment variables to a container
