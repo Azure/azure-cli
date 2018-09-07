@@ -121,11 +121,3 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
             instance.archive_name_format = archive_name_format
 
     return instance
-
-
-# pylint: disable=inconsistent-return-statements
-def empty_on_404(ex):
-    from azure.mgmt.eventhub.models import ErrorResponseException
-    if isinstance(ex, ErrorResponseException) and ex.response.status_code == 404:
-        return None
-    raise ex

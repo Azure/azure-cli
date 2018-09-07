@@ -14,8 +14,7 @@ def load_command_table(self, _):
                                                                      event_hub_mgmt_client_factory,
                                                                      consumer_groups_mgmt_client_factory,
                                                                      disaster_recovery_mgmt_client_factory)
-    from .custom import empty_on_404
-    from ._exception_handler import response_exception_handler
+    from ._exception_handler import response_exception_handler, empty_on_404
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations.namespaces_operations#NamespacesOperations.{}',

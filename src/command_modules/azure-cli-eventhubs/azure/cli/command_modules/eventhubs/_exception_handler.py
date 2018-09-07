@@ -23,3 +23,11 @@ def response_exception_handler(ex):
         import sys
         from six import reraise
         reraise(*sys.exc_info())
+
+
+# pylint: disable=inconsistent-return-statements
+def empty_on_404(ex):
+    from azure.mgmt.eventhub.models import ErrorResponseException
+    if isinstance(ex, ErrorResponseException) and ex.response.status_code == 404:
+        return None
+    raise ex
