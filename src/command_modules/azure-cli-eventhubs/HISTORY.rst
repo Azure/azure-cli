@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.5
++++++
+* exception handling fixed
+
 0.2.4
 +++++
 * Minor fixes
