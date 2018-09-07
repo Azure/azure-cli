@@ -166,7 +166,7 @@ def create_container(cmd,
         mounts.append(gitrepo_volume_mount)
 
     if network_profile and ip_address:
-         raise CLIError('Can not use "--network-profile" with IP address type "Public".')
+        raise CLIError('Can not use "--network-profile" with IP address type "Public".')
     elif network_profile and dns_name_label:
         raise CLIError('Can not use "--network-profile" with "--dns_name_label".')
 
