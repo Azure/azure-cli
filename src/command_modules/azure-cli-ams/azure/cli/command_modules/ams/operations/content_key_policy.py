@@ -6,6 +6,8 @@
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
 from knack.util import CLIError
 
+from azure.cli.command_modules.ams._utils import parse_bytearrays_in_policy
+
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
@@ -49,8 +51,7 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
     if with_secrets:
         content_key_policy = client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
                                                          content_key_policy_name=content_key_policy_name)
-        content_key_policy.options[0].restriction.primary_verification_key.key_value = bytes(content_key_policy.options[0].restriction.primary_verification_key.key_value).decode("utf-8")
-        return content_key_policy
+        return parse_bytearrays_in_policy(content_key_policy)
     else:
         return client.get(resource_group_name=resource_group_name, account_name=account_name,
                           content_key_policy_name=content_key_policy_name)
