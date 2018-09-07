@@ -13,7 +13,7 @@ from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):

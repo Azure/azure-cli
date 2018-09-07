@@ -9,6 +9,7 @@ Release History
 * Add new command `az cognitiveservices account list-kinds`
 * Add new command `az cognitiveservices account list`
 * Deprecate `az cognitiveservices list`
+* --name is now optional for `az cognitiveservices account list-skus`
 
 0.2.1
 +++++

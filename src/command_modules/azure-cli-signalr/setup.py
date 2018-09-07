@@ -32,7 +32,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-signalr==0.1.0',
+    'azure-mgmt-signalr==0.1.1',
     'azure-cli-core'
 ]
 
