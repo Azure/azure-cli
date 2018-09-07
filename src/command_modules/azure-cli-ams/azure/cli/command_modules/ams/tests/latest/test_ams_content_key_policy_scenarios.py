@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
@@ -65,6 +66,39 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
             self.check('length(options[0].restriction.requiredClaims)', 3),
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_fairplay(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
+            'ask': 'testtesttesttest',
+            'fairPlayPfx': self._get_test_data_file('testCert2.pfx'),
+            'fairPlayPfxPassword': 'password',
+            'rentalAndLeaseKeyType': 'Undefined',
+            'rentalDuration': 60,
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --open-restriction --description {description} --ask {ask} --fair-play-pfx "{fairPlayPfx}" --fair-play-pfx-password {fairPlayPfxPassword} --rental-and-lease-key-type {rentalAndLeaseKeyType} --rental-duration {rentalDuration} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
+            self.check('options[0].configuration.rentalDuration', '{rentalDuration}')
         ])
 
     @ResourceGroupPreparer()

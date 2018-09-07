@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
+import base64
+
 from knack.util import CLIError
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
                                      ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim,
-                                     ContentKeyPolicyWidevineConfiguration)
+                                     ContentKeyPolicyWidevineConfiguration, ContentKeyPolicyFairPlayConfiguration)
 
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -21,7 +23,9 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                               alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                               token_claims=None, restriction_token_type=None,
-                              open_id_connect_discovery_document=None, widevine_template=None):
+                              open_id_connect_discovery_document=None, widevine_template=None,
+                              ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
+                              rental_and_lease_key_type=None, rental_duration=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
                                                policy_option_name, clear_key_configuration, open_restriction,
@@ -30,7 +34,8 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               widevine_template, description)
+                                               widevine_template, ask, fair_play_pfx_password,
+                                               fair_play_pfx, rental_and_lease_key_type, rental_duration, description)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -40,7 +45,9 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                                   alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                                   token_claims=None, restriction_token_type=None,
-                                  open_id_connect_discovery_document=None, widevine_template=None):
+                                  open_id_connect_discovery_document=None, widevine_template=None,
+                                  ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
+                                  rental_and_lease_key_type=None, rental_duration=None):
 
     return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
                                                policy_option_name, clear_key_configuration, open_restriction,
@@ -49,7 +56,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                                alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               widevine_template)
+                                               widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
+                                               rental_and_lease_key_type, rental_duration)
 
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -90,7 +98,9 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                         token_claims, restriction_token_type,
-                                        open_id_connect_discovery_document, widevine_template, description=None):
+                                        open_id_connect_discovery_document, widevine_template,
+                                        ask, fair_play_pfx_password, fair_play_pfx,
+                                        rental_and_lease_key_type, rental_duration, description=None):
 
     configuration = None
     restriction = None
@@ -98,15 +108,20 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     policy_options = policy.options if policy else []
+    policy_description = policy.description if not description else description
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
                                                        restriction_token_type, issuer, audience)
 
+    valid_fairplay_configuration = _valid_fairplay_configuration(ask, fair_play_pfx_password,
+                                                                 fair_play_pfx, rental_and_lease_key_type,
+                                                                 rental_duration)
+
     if _count_truthy([open_restriction, valid_token_restriction]) != 1:
         raise CLIError('You should use exactly one restriction type.')
 
-    if _count_truthy([clear_key_configuration, widevine_template]) != 1:
+    if _count_truthy([clear_key_configuration, widevine_template, valid_fairplay_configuration]) != 1:
         raise CLIError('You should use exactly one configuration type.')
 
     if clear_key_configuration:
@@ -114,6 +129,13 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
 
     if widevine_template:
         configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
+
+    if valid_fairplay_configuration:
+        configuration = ContentKeyPolicyFairPlayConfiguration(
+            ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
+            fair_play_pfx=_base64(_read_binary(fair_play_pfx)).decode('ascii'),
+            rental_and_lease_key_type=rental_and_lease_key_type,
+            rental_duration=rental_duration)
 
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
@@ -176,7 +198,7 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
     policy_options.append(policy_option)
 
     return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, policy_options, description)
+                                   content_key_policy_name, policy_options, policy_description)
 
 
 # Returns string if not null, or an empty string otherwise.
@@ -214,9 +236,26 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
                              issuer, audience):
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
-    return restriction_token_type and available_keys >= 1 and issuer and audience
+    return all([restriction_token_type, available_keys >= 1, issuer, audience])
+
+
+def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
+                                  rental_and_lease_key_type, rental_duration):
+    return all([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
 
 
 def _read_json(path):
-    with open(path, 'r') as file:
+    return _read(path, 'r')
+
+
+def _read_binary(path):
+    return _read(path, 'rb')
+
+
+def _read(path, readType):
+    with open(path, readType) as file:
         return file.read()
+
+
+def _base64(data):
+    return base64.b64encode(data)
