@@ -5,6 +5,7 @@ Release History
 2.2.2
 +++++
 * `--auth-mode login` parameter allows use of user's login credentials for blob and queue authorization.
+* Added static website management capabilities with the `storage blob service-properties update` command.
 
 2.2.1
 +++++
