@@ -1019,13 +1019,14 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 def _get_authorization_code_worker(authority_url, resource, results):
     import socket
+    reply_url = None
     for port in range(8400, 9000):
         try:
             web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
             reply_url = "http://localhost:{}".format(port)
             break
-        except socket.error:
-            logger.warning("Port '%s' is taken. Trying with the next one", port)
+        except socket.error as ex:
+            logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")
