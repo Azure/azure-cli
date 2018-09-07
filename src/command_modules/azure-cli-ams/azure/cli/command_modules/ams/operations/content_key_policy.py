@@ -6,7 +6,9 @@
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._utils import parse_bytearrays_in_policy
+import json
+
+from azure.cli.command_modules.ams._utils import JsonBytearrayEncoder
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
@@ -51,7 +53,8 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
     if with_secrets:
         content_key_policy = client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
                                                          content_key_policy_name=content_key_policy_name)
-        return parse_bytearrays_in_policy(content_key_policy)
+        json_object = json.dumps(content_key_policy, cls=JsonBytearrayEncoder, indent=4)
+        return json.loads(json_object)
     else:
         return client.get(resource_group_name=resource_group_name, account_name=account_name,
                           content_key_policy_name=content_key_policy_name)
@@ -222,8 +225,3 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
     return restriction_token_type and available_keys >= 1 and issuer and audience
-
-
-def _read_json(path):
-    with open(path, 'r') as file:
-        return file.read()

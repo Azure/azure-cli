@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import uuid
 import re
 import isodate
-import json
+import json, datetime
 
 
 
@@ -50,3 +50,27 @@ def parse_bytearrays_in_policy(json):
                 key.exponent = bytes(key.exponent).decode("utf-8")
                 key.modulus = bytes(key.modulus).decode("utf-8")
     return json
+
+
+def snake_to_camel_case(snake_str):
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+
+class JsonBytearrayEncoder(json.JSONEncoder):
+    DATE_FORMAT = "%Y-%m-%d"
+    TIME_FORMAT = "%H:%M:%S"
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime("%s %s" % (self.DATE_FORMAT, self.TIME_FORMAT))
+        elif isinstance(obj, bytearray):
+            return bytes(obj).decode("utf-8")
+        try:
+            return obj.toJSON()
+        except:
+            obj = vars(obj)
+            obj.pop('additional_properties', None)
+            keys = list(obj.keys())
+            for key in keys:
+                obj[snake_to_camel_case(key)] = obj.pop(key)
+            return obj
