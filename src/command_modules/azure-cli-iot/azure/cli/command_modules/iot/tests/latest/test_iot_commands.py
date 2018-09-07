@@ -159,7 +159,6 @@ class IoTHubTest(ScenarioTest):
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
                  checks=[self.check('length(eventHubs[*])', 1),
                          self.check('eventHubs[0].resourceGroup', rg),
-                         self.check('eventHubs[0].subscriptionId', subscription_id),
                          self.check('eventHubs[0].name', endpoint_name),
                          self.check('length(serviceBusQueues[*])', 0),
                          self.check('length(serviceBusTopics[*])', 0),
@@ -170,21 +169,18 @@ class IoTHubTest(ScenarioTest):
                  .format(hub, rg),
                  checks=[self.check('length(eventHubs[*])', 1),
                          self.check('eventHubs[0].resourceGroup', rg),
-                         self.check('eventHubs[0].subscriptionId', subscription_id),
                          self.check('eventHubs[0].name', endpoint_name)])
 
         self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1} -t {2}'
                  .format(hub, rg, endpoint_type),
                  checks=[self.check('length([*])', 1),
                          self.check('[0].resourceGroup', rg),
-                         self.check('[0].subscriptionId', subscription_id),
                          self.check('[0].name', endpoint_name)])
 
         # Test 'az iot hub routing-endpoint show'
         self.cmd('iot hub routing-endpoint show --hub-name {0} -g {1} -n {2}'
                  .format(hub, rg, endpoint_name),
                  checks=[self.check('resourceGroup', rg),
-                         self.check('subscriptionId', subscription_id),
                          self.check('name', endpoint_name)])
 
         # Test 'az iot hub route create'
