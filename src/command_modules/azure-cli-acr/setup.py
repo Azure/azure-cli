@@ -56,6 +56,9 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.acr',
+        'azure.cli.command_modules.acr.sdk',
+        'azure.cli.command_modules.acr.sdk.models',
+        'azure.cli.command_modules.acr.sdk.operations'
     ],
     install_requires=DEPENDENCIES,
     package_data={'azure.cli.command_modules.acr': ['*.json']},

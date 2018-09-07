@@ -20,8 +20,11 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     DockerBuildStepUpdateParameters
 )
 from ._utils import validate_managed_registry
-from .build import acr_build_show_logs
-from ._build_polling import get_build_with_polling
+from ._stream_utils import stream_logs
+from ._run_polling import get_run_with_polling
+from .sdk.models import (
+    OS
+)
 
 
 logger = get_logger(__name__)
@@ -40,7 +43,7 @@ def acr_build_task_create(cmd,  # pylint: disable=too-many-locals
                           git_access_token,
                           alias=None,
                           status='Enabled',
-                          os_type='Linux',
+                          os_type=OS.linux.value,
                           cpu=2,
                           timeout=3600,
                           commit_trigger_enabled=True,
@@ -318,13 +321,13 @@ def acr_build_task_run(cmd,
                                       BuildTaskBuildRequest(build_task_name=build_task_name)))
 
     build_id = queued_build.build_id
-    logger.warning("Queued a build with build ID: %s", build_id)
-    logger.warning("Waiting for build agent...")
+    logger.warning("Queued a build with ID: %s", build_id)
+    logger.warning("Waiting for agent...")
 
     if no_logs:
-        return get_build_with_polling(client, build_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def acr_build_task_show_build(cmd,
@@ -408,7 +411,7 @@ def acr_build_task_logs(cmd,
                                                     build_task_name=build_task_name,
                                                     image=image))
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, no_format)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format)
 
 
 def _get_list_builds_message(base_message, build_task_name=None, image=None):
