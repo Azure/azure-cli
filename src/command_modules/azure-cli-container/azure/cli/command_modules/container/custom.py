@@ -32,7 +32,8 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile)
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
+                                                 ContainerGroupIpAddressType)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
@@ -388,7 +389,8 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 def _create_ip_address(ip_address, ports, protocol, dns_name_label):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
-        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
+                         dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
 
 
 # pylint: disable=inconsistent-return-statements
