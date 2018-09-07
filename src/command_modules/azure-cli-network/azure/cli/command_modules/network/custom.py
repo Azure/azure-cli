@@ -1928,7 +1928,7 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip='false', idle_timeout=None, enable_tcp_reset=None):
+        floating_ip='false', idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1949,7 +1949,8 @@ def create_lb_rule(
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip == 'true',
         idle_timeout_in_minutes=idle_timeout,
-        enable_tcp_reset=enable_tcp_reset)
+        enable_tcp_reset=enable_tcp_reset,
+        disable_outbound_snat=disable_outbound_snat)
     _upsert(lb, 'load_balancing_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().load_balancing_rules, item_name)
@@ -1958,12 +1959,15 @@ def create_lb_rule(
 def set_lb_rule(
         instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
+        disable_outbound_snat=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port', frontend_port)
     _set_param(instance, 'backend_port', backend_port)
     _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
     _set_param(instance, 'load_distribution', load_distribution)
+    _set_param(instance, 'disable_outbound_snat', disable_outbound_snat)
+    _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
 
     if frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
@@ -1975,9 +1979,6 @@ def set_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             _get_property(parent.backend_address_pools, backend_address_pool_name)
-
-    if enable_tcp_reset is not None:
-        instance.enable_tcp_reset = enable_tcp_reset
 
     if probe_name == '':
         instance.probe = None
