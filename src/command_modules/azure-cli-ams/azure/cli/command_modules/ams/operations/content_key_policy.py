@@ -220,12 +220,12 @@ def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_to
                              issuer, audience):
     available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key)
-    return restriction_token_type and available_keys >= 1 and issuer and audience
+    return all([restriction_token_type, available_keys >= 1, issuer, audience])
 
 
 def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
                                   rental_and_lease_key_type, rental_duration):
-    return ask and fair_play_pfx_password and fair_play_pfx and rental_and_lease_key_type and rental_duration
+    return all([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
 
 
 def _read_json(path):
