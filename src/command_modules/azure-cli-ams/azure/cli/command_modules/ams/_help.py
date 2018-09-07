@@ -200,6 +200,10 @@ helps['ams content-key-policy delete'] = """
 helps['ams content-key-policy update'] = """
     type: command
     short-summary: Update an existing content key policy.
+    examples:
+        - name: Update an existing content-key-policy, set a new description and edit its first option setting a new issuer and audience.
+          text: >
+            az ams content-key-policy update -n contentKeyPolicyName -a amsAccount --description newDescription --set options[0].restriction.issuer=newIssuer --set options[0].restriction.audience=newAudience
 """
 
 helps['ams content-key-policy list'] = """
