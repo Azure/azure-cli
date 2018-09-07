@@ -5,7 +5,7 @@ Release History
 
 0.3.4
 +++++
-* Add '--network-profile' for passing in the vnet network profile
+* Add '--network-profile' for passing in a network profile
 
 0.3.3
 +++++

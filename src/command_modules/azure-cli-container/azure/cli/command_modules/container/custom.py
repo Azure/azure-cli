@@ -32,8 +32,7 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
-                                                 ContainerGroupIpAddressType)
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
@@ -166,18 +165,16 @@ def create_container(cmd,
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
 
-
-    if network_profile and ip_address and ip_address.lower() == 'public':
-         raise CLIError('"--network-profile" requires using a private IP address.')
+    if network_profile and ip_address:
+         raise CLIError('Can not use "--network-profile" with IP address type "Public".')
+    elif network_profile and dns_name_label:
+        raise CLIError('Can not use "--network-profile" with "--dns_name_label".')
 
     cg_network_profile = None
     if network_profile:
         cg_network_profile = ContainerGroupNetworkProfile(
             id=network_profile
         )
-
-    if cg_network_profile and not ip_address:
-        ip_address = ContainerGroupIpAddressType.private
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
 
@@ -390,8 +387,6 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
-    elif (ip_address and ip_address.lower() == 'private'):
-        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], type=ContainerGroupIpAddressType.private)
 
 
 # pylint: disable=inconsistent-return-statements
