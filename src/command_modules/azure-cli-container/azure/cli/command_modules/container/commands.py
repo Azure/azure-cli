@@ -16,7 +16,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container', confirmation=True)
         g.custom_command('logs', 'container_logs', client_factory=cf_container)
         g.custom_command('restart', 'restart_container', supports_no_wait=True,
-                    table_transformer=transform_container_group)
+                         table_transformer=transform_container_group)
         g.custom_command('stop', 'stop_container')
         g.custom_command('exec', 'container_exec')
         g.custom_command('export', 'container_export')
