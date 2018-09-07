@@ -2664,10 +2664,12 @@ class VMGalleryImage(ScenarioTest):
     def test_gallery_e2e(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
+            'vm2': 'vmFromImage',
             'gallery': 'gallery1',
             'image': 'image1',
             'version': '1.1.2',
-            'captured': 'managedImage1'
+            'captured': 'managedImage1',
+            'image_id':''
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
@@ -2676,9 +2678,13 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
                  checks=self.check('name', self.kwargs['image']))
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
-        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
-                 checks=self.check('name', self.kwargs['image']))
-        self.cmd('vm create -g {rg} -n {vm} --image debian --generate-ssh-keys')
+        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                 checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+        self.kwargs['image_id'] = res['id']
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --generate-ssh-keys')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
@@ -2688,6 +2694,8 @@ class VMGalleryImage(ScenarioTest):
                  checks=self.check('length(@)', 1))
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
+
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_id}', checks=self.check('powerState', 'VM running'))
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency
