@@ -1452,7 +1452,7 @@ helps['sig image-definition create'] = """
     examples:
         - name: Create a linux image defintion
           text: |
-            az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+            az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
 """
 
 helps['sig image-definition update'] = """
@@ -1471,7 +1471,7 @@ helps['sig image-version create'] = """
     examples:
         - name: add a new version
           text: |
-            az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-name MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+            az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
 """
 
 helps['sig image-version update'] = """
