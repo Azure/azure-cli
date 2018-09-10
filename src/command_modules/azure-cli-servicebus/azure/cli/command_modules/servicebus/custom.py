@@ -410,13 +410,6 @@ def cli_migration_start(client, resource_group_name, namespace_name, target_name
     return client.get(resource_group_name, namespace_name)
 
 
-def empty_on_404(ex):
-    from azure.mgmt.servicebus.models import ErrorResponseException
-    if isinstance(ex, ErrorResponseException) and ex.response.status_code == 404:
-        return None
-    raise ex
-
-
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 

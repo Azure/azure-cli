@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.2.4
++++++
+* Implemented Exception hanlder
+
 0.2.3
 +++++
 * Minor fixes
