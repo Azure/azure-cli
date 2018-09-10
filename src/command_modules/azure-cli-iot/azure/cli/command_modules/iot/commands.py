@@ -14,6 +14,18 @@ class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-
         return result.properties.authorization_policies
 
 
+class EndpointUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(EndpointUpdateResultTransform, self).__call__(poller)
+        return result.properties.routing.endpoints
+
+
+class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(RouteUpdateResultTransform, self).__call__(poller)
+        return result.properties.routing.routes
+
+
 # Deleting IoT Hub is a long-running operation. Due to API implementation issue, 404 error will be thrown during
 # deletion of an IoT Hub.
 # This is a work around to suppress the 404 error. It should be removed after API is fixed.
@@ -109,3 +121,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('list', 'iot_hub_job_list')
         g.custom_command('show', 'iot_hub_job_get')
         g.custom_command('cancel', 'iot_hub_job_cancel')
+
+    # iot hub routing endpoint commands
+    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
+        g.custom_command('create', 'iot_hub_routing_endpoint_create',
+                         transform=EndpointUpdateResultTransform(self.cli_ctx))
+        g.custom_command('show', 'iot_hub_routing_endpoint_show')
+        g.custom_command('list', 'iot_hub_routing_endpoint_list')
+        g.custom_command('delete', 'iot_hub_routing_endpoint_delete',
+                         transform=EndpointUpdateResultTransform(self.cli_ctx))
+
+    # iot hub route commands
+    with self.command_group('iot hub route', client_factory=iot_hub_service_factory) as g:
+        g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
+        g.custom_command('show', 'iot_hub_route_show')
+        g.custom_command('list', 'iot_hub_route_list')
+        g.custom_command('delete', 'iot_hub_route_delete', transform=RouteUpdateResultTransform(self.cli_ctx))
+        g.custom_command('update', 'iot_hub_route_update', transform=RouteUpdateResultTransform(self.cli_ctx))
+        g.custom_command('test', 'iot_hub_route_test')
