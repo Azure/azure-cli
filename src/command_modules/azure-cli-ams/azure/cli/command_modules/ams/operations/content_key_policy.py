@@ -36,7 +36,6 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                token_claims, restriction_token_type, open_id_connect_discovery_document,
                                                widevine_template, description)
 
-
     if open_restriction:
         default_restriction = ContentKeyPolicyOpenRestriction()
 

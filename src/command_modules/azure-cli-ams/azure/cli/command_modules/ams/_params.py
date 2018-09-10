@@ -151,8 +151,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams content-key-policy') as c:
         c.argument('with_secrets',
-            action='store_true',
-            help='Include secret values of the content key policy.')
+                   action='store_true',
+                   help='Include secret values of the content key policy.')
 
 
     with self.argument_context('ams content-key-policy options add') as c:

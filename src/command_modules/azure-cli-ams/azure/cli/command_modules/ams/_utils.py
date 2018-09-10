@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 
 import uuid
 import re
+import json
 import isodate
-import json, datetime
 
 
 
@@ -38,18 +38,6 @@ def parse_iso_duration(str_duration):
 def camel_to_snake(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-
-
-def parse_bytearrays_in_policy(json):
-    for value in json.options:
-        key = value.restriction.primary_verification_key
-        if key.odatatype is not None:
-            if key.odatatype == "#Microsoft.Media.ContentKeyPolicySymmetricTokenKey":
-                key.key_value = bytes(key.key_value).decode("utf-8")
-            elif key.odatatype == "#Microsoft.Media.ContentKeyPolicyRsaTokenKey":
-                key.exponent = bytes(key.exponent).decode("utf-8")
-                key.modulus = bytes(key.modulus).decode("utf-8")
-    return json
 
 
 def snake_to_camel_case(snake_str):

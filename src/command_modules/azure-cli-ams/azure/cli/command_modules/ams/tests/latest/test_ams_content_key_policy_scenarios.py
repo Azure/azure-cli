@@ -162,9 +162,9 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-        
+
         self.cmd('az ams content-key-policy create -a {amsname} -g {rg} -n {contentKeyPolicyName} --clear-key-configuration --policy-option-name {policyOptionName} --symmetric-token-key {tokenKey} --issuer {issuer} --audience {audience} --restriction-token-type {restrictionTokenType}')
-        
+
         self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg}', checks=[
             self.check('options[0].restriction.primary_verification_key.key_value', None)
         ])
