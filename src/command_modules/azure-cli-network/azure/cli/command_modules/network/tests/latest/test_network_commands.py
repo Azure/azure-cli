@@ -711,8 +711,8 @@ class NetworkRouteFilterScenarioTest(ScenarioTest):
         self.cmd('network route-filter list -g {rg}')
 
         self.cmd('network route-filter rule list-service-communities')
-        self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow', expect_failure=True)
-        self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny', expect_failure=True)
+        self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow')
+        self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny')
         self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1')
         self.cmd('network route-filter rule list -g {rg} --filter-name {filter}')
         self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1')
@@ -974,7 +974,7 @@ class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
             self.check("contains(backendAddressPool.id, '{backend}')", True),
             self.check("contains(frontendIpConfigurations[0].id, '{frontend1}')", True)
         ])
-        self.cmd('network lb outbound-rule create -g {rg} --lb-name {lb} -n {rule2} --address-pool {backend} --frontend-ip-configs {frontend2} --idle-timeout 20', checks=[
+        self.cmd('network lb outbound-rule create -g {rg} --lb-name {lb} -n {rule2} --address-pool {backend} --frontend-ip-configs {frontend2} --idle-timeout 20 --protocol all', checks=[
             self.check('idleTimeoutInMinutes', 20),
             self.check("contains(backendAddressPool.id, '{backend}')", True),
             self.check("contains(frontendIpConfigurations[0].id, '{frontend2}')", True)

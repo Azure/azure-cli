@@ -1868,8 +1868,8 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
-                            backend_address_pool, frontend_ip_configurations, outbound_ports=None,
-                            protocol=None, enable_tcp_reset=None, idle_timeout=None):
+                            backend_address_pool, frontend_ip_configurations, protocol,
+                            outbound_ports=None, enable_tcp_reset=None, idle_timeout=None):
     OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).load_balancers
     lb = client.get(resource_group_name, load_balancer_name)
@@ -3126,8 +3126,8 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
     client = network_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        return client.available_resource_group_delegations.list(location, resource_group_name).value
-    return client.available_delegations.list(location).value
+        return client.available_resource_group_delegations.list(location, resource_group_name)
+    return client.available_delegations.list(location)
 
 
 def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,
