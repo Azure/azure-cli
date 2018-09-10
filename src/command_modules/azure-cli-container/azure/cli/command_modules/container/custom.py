@@ -202,7 +202,7 @@ def _get_network_profile(network_profile, ip_address, dns_name_label):
     if network_profile and ip_address:
         raise CLIError('Can not use "--network-profile" with IP address type "Public".')
     elif network_profile and dns_name_label:
-        raise CLIError('Can not use "--network-profile" with "--dns_name_label".')
+        raise CLIError('Can not use "--network-profile" with "--dns-name-label".')
 
     cg_network_profile = None
     if network_profile:
