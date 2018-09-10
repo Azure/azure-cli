@@ -96,8 +96,8 @@ def acr_run(cmd,
         registry_name=registry_name,
         run_request=request))
 
-    id = queued.run_id
-    logger.warning("Queued a run with ID: %s", id)
+    run_id = queued.run_id
+    logger.warning("Queued a run with ID: %s", run_id)
 
     if no_wait:
         return queued
