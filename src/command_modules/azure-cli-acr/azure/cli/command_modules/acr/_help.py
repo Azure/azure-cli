@@ -58,10 +58,10 @@ helps['acr run'] = """
     examples:
         - name: Queue a local context, pushed to ACR with streaming logs.
           text: >
-            az acr run -r myregistry --file bash-echo.yaml .
+            az acr run -r myregistry -f bash-echo.yaml .
         - name: Queue a remote git context with streaming logs.
           text: >
-            az acr run -r myregistry https://github.com/AzureCR/acr-tasks-sample.git --file bash-echo.yaml
+            az acr run -r myregistry https://github.com/AzureCR/acr-tasks-sample.git -f bash-echo.yaml
     """
 
 helps['acr check-name'] = """
