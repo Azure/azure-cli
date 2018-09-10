@@ -137,7 +137,10 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
-            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string')
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].zones)', 'array'),
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
         ])
 
 
