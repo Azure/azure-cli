@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.1.4
++++++
+* `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.
+
 2.1.3
 +++++
 * `provider operation show`: exception handling to exit with code 3 upon a missing resource for consistency.
-* `managedapp create --kind MarketPlace`: fixed bug in create_application where positional arguments were used instead of key-word arguments when instantiating a Plan Model.
 
 2.1.2
 +++++
