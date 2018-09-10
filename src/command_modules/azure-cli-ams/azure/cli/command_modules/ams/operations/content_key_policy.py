@@ -27,15 +27,17 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
                               rental_and_lease_key_type=None, rental_duration=None):
 
-    return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                               policy_option_name, clear_key_configuration, open_restriction,
-                                               issuer, audience, symmetric_token_key, rsa_token_key_exponent,
-                                               rsa_token_key_modulus, x509_certificate_token_key,
-                                               alt_symmetric_token_keys, alt_rsa_token_key_exponents,
-                                               alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
-                                               token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               widevine_template, ask, fair_play_pfx_password,
-                                               fair_play_pfx, rental_and_lease_key_type, rental_duration, description)
+    policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
+                                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
+                                                        rsa_token_key_modulus, x509_certificate_token_key,
+                                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
+                                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                                        token_claims, restriction_token_type, open_id_connect_discovery_document,
+                                                        widevine_template, ask, fair_play_pfx_password,
+                                                        fair_play_pfx, rental_and_lease_key_type, rental_duration)
+
+    return client.create_or_update(resource_group_name, account_name,
+                                   content_key_policy_name, [policy_option], description)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -49,25 +51,39 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
                                   rental_and_lease_key_type=None, rental_duration=None):
 
-    return _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                               policy_option_name, clear_key_configuration, open_restriction,
-                                               issuer, audience, symmetric_token_key, rsa_token_key_exponent,
-                                               rsa_token_key_modulus, x509_certificate_token_key,
-                                               alt_symmetric_token_keys, alt_rsa_token_key_exponents,
-                                               alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
-                                               token_claims, restriction_token_type, open_id_connect_discovery_document,
-                                               widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
-                                               rental_and_lease_key_type, rental_duration)
+    policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
+
+    if not policy:
+        raise CLIError('Policy with name "' + content_key_policy_name + '" does not exist in your realm.')
+
+    options = policy.options
+
+    policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
+                                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
+                                                        rsa_token_key_modulus, x509_certificate_token_key,
+                                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
+                                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                                        token_claims, restriction_token_type, open_id_connect_discovery_document,
+                                                        widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
+                                                        rental_and_lease_key_type, rental_duration)
+
+    options.append(policy_option)
+
+    return client.update(resource_group_name, account_name,
+                         content_key_policy_name, options, policy.description)
 
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
-                                     policy_option_name):
+                                     policy_option_id):
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
-    if all(option.name != policy_option_name for option in policy.options):
-        raise CLIError('No policy option found with name "' + policy_option_name + '"')
+    if not policy:
+        raise CLIError('Policy with name "' + content_key_policy_name + '" does not exist in your realm.')
 
-    policy.options = list(filter(lambda option: option.name != policy_option_name, policy.options))
+    if all(option.policy_option_id != policy_option_id for option in policy.options):
+        raise CLIError('No policy option found with id "' + policy_option_id + '"')
+
+    policy.options = list(filter(lambda option: option.policy_option_id != policy_option_id, policy.options))
 
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, policy.options)
@@ -91,8 +107,7 @@ def update_content_key_policy(instance, description=None):
 
 # Private methods used
 
-def _generate_content_key_policy_object(client, resource_group_name, account_name, content_key_policy_name,
-                                        policy_option_name, clear_key_configuration, open_restriction,
+def _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
                                         issuer, audience, symmetric_token_key, rsa_token_key_exponent,
                                         rsa_token_key_modulus, x509_certificate_token_key,
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
@@ -100,15 +115,10 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
                                         token_claims, restriction_token_type,
                                         open_id_connect_discovery_document, widevine_template,
                                         ask, fair_play_pfx_password, fair_play_pfx,
-                                        rental_and_lease_key_type, rental_duration, description=None):
+                                        rental_and_lease_key_type, rental_duration):
 
     configuration = None
     restriction = None
-
-    policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
-
-    policy_options = policy.options if policy else []
-    policy_description = policy.description if not description else description
 
     valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
                                                        rsa_token_key_modulus, x509_certificate_token_key,
@@ -191,14 +201,9 @@ def _generate_content_key_policy_object(client, resource_group_name, account_nam
         raise CLIError(
             'Could not build content key policy option due to invalid restriction or configuration.')
 
-    policy_option = ContentKeyPolicyOption(name=policy_option_name,
-                                           configuration=configuration,
-                                           restriction=restriction)
-
-    policy_options.append(policy_option)
-
-    return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, policy_options, policy_description)
+    return ContentKeyPolicyOption(name=policy_option_name,
+                                  configuration=configuration,
+                                  restriction=restriction)
 
 
 # Returns string if not null, or an empty string otherwise.

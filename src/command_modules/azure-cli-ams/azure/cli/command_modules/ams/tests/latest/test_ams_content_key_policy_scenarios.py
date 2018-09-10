@@ -116,7 +116,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json'),
             'issuer': 'Issuer',
             'audience': 'Audience',
             'symmetricTokenKey': 'a1b2c3d4e5f6g7h8i9j0',
@@ -154,7 +154,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
