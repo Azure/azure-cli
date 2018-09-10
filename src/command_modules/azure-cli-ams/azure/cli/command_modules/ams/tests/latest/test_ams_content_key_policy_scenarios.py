@@ -140,6 +140,40 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_show')
+    def test_content_key_policy_show_with_secrets(self, storage_account_for_show):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_show,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration',
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction',
+            'restrictionTokenType': 'Jwt',
+            'issuer': 'issuer',
+            'audience': 'audience',
+            'tokenKey': 'TestTokenKey'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        
+        self.cmd('az ams content-key-policy create -a {amsname} -g {rg} -n {contentKeyPolicyName} --clear-key-configuration --policy-option-name {policyOptionName} --symmetric-token-key {tokenKey} --issuer {issuer} --audience {audience} --restriction-token-type {restrictionTokenType}')
+        
+        self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg}', checks=[
+            self.check('options[0].restriction.primary_verification_key.key_value', None)
+        ])
+
+        self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg} --with-secrets', checks=[
+            self.check('options[0].restriction.primaryVerificationKey.keyValue', 'TestTokenKey')
+        ])
+
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_delete')
     def test_content_key_policy_delete_list(self, storage_account_for_delete):
         amsname = self.create_random_name(prefix='ams', length=12)
