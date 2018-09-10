@@ -536,13 +536,10 @@ helps['acr build'] = """
 helps['acr task run'] = """
     type: command
     short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
-    examples:
+    example:
         - name: Queue a local context, pushed to ACR with streaming logs.
           text: >
             az acr task run -r myregistry --task-file bash-echo.yaml .
-        - name: Queue a remote git context with streaming logs.
-          text: >
-            az acr run -r myregistry https://github.com/AzureCR/acr-tasks-sample.git --task-file bash-echo.yaml
 """
 
 

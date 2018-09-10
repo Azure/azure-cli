@@ -86,7 +86,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_runs
     )
 
-    # TODO: update task table_transformer
     acr_task_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
