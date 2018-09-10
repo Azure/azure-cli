@@ -1736,13 +1736,12 @@ class NetworkSubnetScenarioTests(ScenarioTest):
             'vnet': 'vnet1',
             'subnet': 'subnet1',
         })
-        result = self.cmd('network vnet subnet list-available-delegations -l eastus').get_output_in_json()
+        result = self.cmd('network vnet subnet list-available-delegations -l westcentralus').get_output_in_json()
         self.assertTrue(len(result) > 1, True)
         result = self.cmd('network vnet subnet list-available-delegations -g {rg}').get_output_in_json()
         self.assertTrue(len(result) > 1, True)
 
-        # TODO: Re-enable before merege...
-        # self.cmd('network vnet create -g {rg} -n {vnet}')
+        # self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
         # self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Sql/servers',
         #         checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/servers'))
         # # verify the update command, and that CLI validation will accept either serviceName or Name
