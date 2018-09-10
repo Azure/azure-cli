@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.47
+++++++
+* Add support `virtual-node` addon in aks subcommands
+
 2.0.46
 ++++++
 * Minor fixes

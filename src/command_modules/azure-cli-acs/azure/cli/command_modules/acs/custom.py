@@ -1384,7 +1384,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
-               no_wait=False):
+               virtual_node_subnet_name=None,
+               no_wait=False
+               ):
     if not no_ssh_key:
         try:
             if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
@@ -1453,7 +1455,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         subscription_id,
         resource_group_name,
         {},
-        workspace_resource_id
+        workspace_resource_id,
+        virtual_node_subnet_name,
     )
     if 'omsagent' in addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
@@ -1517,12 +1520,12 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+                              workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
@@ -1555,9 +1558,9 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
 ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
-    'monitoring': 'omsagent'
+    'monitoring': 'omsagent',
+    'virtual-node': 'aciConnector'
 }
-
 
 def aks_list(cmd, client, resource_group_name=None):
     if resource_group_name:
@@ -1648,7 +1651,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
 
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
-                   no_wait=False):
+                   subnet_name=None, no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
@@ -1657,6 +1660,10 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     # for each addons argument
     for addon_arg in addon_args:
         addon = ADDONS[addon_arg]
+        if addon == 'aciConnector':
+            # only linux is supported for now, in the future this will be a user flag
+            os_type = 'Linux'
+            addon += os_type
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -1677,6 +1684,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            elif addon == 'aciConnector'+os_type:
+                if addon_profile.enabled:
+                    raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
+                             'To change virtual-node configuration, run '
+                             '"az aks disable-addons -a virtual-node -g {resource_group_name}" '
+                             'before enabling it again.')
+                if not subnet_name:
+                    raise CLIError('The aci-connector addon requires setting a subnet name.')
+                addon_profile.config = {'SubnetName': subnet_name}
+
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -1708,7 +1725,7 @@ def _get_azext_module(extension_name, module_name):
 
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
-                        workspace_resource_id=None):
+                        workspace_resource_id=None, virtual_node_subnet_name=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -1733,6 +1750,20 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+
+    if 'virtual-node' in addons:
+        if not virtual_node_subnet_name:
+            raise CLIError('addon virtual-node requires "--virtual-node-subnet-name"')
+
+        # Only linux is supported for now, in the future this will be a user flag
+        os_type = 'Linux'
+
+        addon_profiles[ADDONS['virtual-node']+os_type] = ManagedClusterAddonProfile(
+            enabled=True, config={'SubnetName': virtual_node_subnet_name})
+        addons.remove('virtual-node')
+    elif virtual_node_subnet_name:
+        raise CLIError('"--virtual-node-subnet-name" requires "--enable-addons virtual-node"')
+
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
