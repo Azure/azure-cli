@@ -834,8 +834,7 @@ class AzCommandGroup(CommandGroup):
 
         return operations_tmpl.format(name)
 
-    def generic_update_command(self, name,
-                               getter_name='get', getter_type=None,
+    def generic_update_command(self, name, getter_name='get', getter_type=None,
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
                                custom_func_name=None, custom_func_type=None, **kwargs):
