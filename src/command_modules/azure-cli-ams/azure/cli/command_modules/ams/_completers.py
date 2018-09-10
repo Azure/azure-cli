@@ -7,7 +7,8 @@ from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.ams.operations.sp import list_role_definitions
 from azure.cli.command_modules.ams._sdk_utils import (get_stand_alone_presets, get_cdn_providers,
-                                                      get_default_streaming_policies, get_token_types)
+                                                      get_default_streaming_policies, get_token_types,
+                                                      get_rentalandlease_types)
 
 from azure.mgmt.media.models import EncoderNamedPreset
 
@@ -37,3 +38,8 @@ def get_default_streaming_policies_completion_list():
 def get_token_type_completion_list():
     token_types = get_token_types()
     return token_types
+
+
+def get_fairplay_rentalandlease_completion_list():
+    rentalandlease_types = get_rentalandlease_types()
+    return rentalandlease_types

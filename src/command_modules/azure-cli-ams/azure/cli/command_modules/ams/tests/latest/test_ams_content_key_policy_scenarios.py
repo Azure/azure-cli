@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
@@ -13,6 +14,92 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_update')
+    def test_content_key_policy_update(self, storage_account_for_update):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_update,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyClearKeyConfiguration',
+            'issuer': 'Issuer',
+            'audience': 'Audience',
+            'symmetricTokenKey': 'a1b2c3d4e5f6g7h8i9j0',
+            'restrictionTokenType': 'Jwt',
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyTokenRestriction',
+            'openIDConnectDiscoveryDocument': 'adocument',
+            'tokenClaims': 'foo=baz baz=doo fus=rodahh'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.kwargs.update({
+            'description': 'AnotherDescription',
+            'issuer': 'AnotherIssuer'
+        })
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --issuer {issuer} --audience {audience} --symmetric-token-key {symmetricTokenKey} --restriction-token-type {restrictionTokenType} --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.issuer', '{issuer}'),
+            self.check('options[0].restriction.audience', '{audience}'),
+            self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('length(options[0].restriction.requiredClaims)', 3),
+            self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
+        ])
+
+        self.cmd('az ams content-key-policy update -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --set options[0].restriction.issuer={issuer}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.issuer', '{issuer}'),
+            self.check('options[0].restriction.audience', '{audience}'),
+            self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('length(options[0].restriction.requiredClaims)', 3),
+            self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_fairplay(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
+            'ask': 'testtesttesttest',
+            'fairPlayPfx': self._get_test_data_file('testCert2.pfx'),
+            'fairPlayPfxPassword': 'password',
+            'rentalAndLeaseKeyType': 'Undefined',
+            'rentalDuration': 60,
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --open-restriction --description {description} --ask {ask} --fair-play-pfx "{fairPlayPfx}" --fair-play-pfx-password {fairPlayPfxPassword} --rental-and-lease-key-type {rentalAndLeaseKeyType} --rental-duration {rentalDuration} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
+            self.check('options[0].configuration.rentalDuration', '{rentalDuration}')
+        ])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -29,7 +116,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json'),
             'issuer': 'Issuer',
             'audience': 'Audience',
             'symmetricTokenKey': 'a1b2c3d4e5f6g7h8i9j0',
@@ -67,7 +154,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': self._get_test_data_file('widevineTemplate.json'),
+            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')

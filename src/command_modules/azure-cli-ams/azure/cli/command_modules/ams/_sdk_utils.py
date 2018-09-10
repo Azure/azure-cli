@@ -37,3 +37,7 @@ def get_default_streaming_policies():
 
 def get_token_types():
     return ['Jwt', 'Swt']
+
+
+def get_rentalandlease_types():
+    return ['Undefined', 'PersistentUnlimited', 'PersistentLimited']
