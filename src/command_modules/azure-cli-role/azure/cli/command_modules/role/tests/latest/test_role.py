@@ -220,8 +220,14 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
+            account_info = self.cmd('account show').get_output_in_json()
+            if account_info['user']['type'] == 'servicePrincipal':
+                return  # this test delete users which are beyond a SP's capacity, so quit...
+            upn = account_info['user']['name']
+            test = user + '@' + upn.split('@')[-1]
+            print(test)
             self.kwargs.update({
-                'upn': user + '@msazurestack.onmicrosoft.com',
+                'upn': test,
                 'nsg': 'nsg1'
             })
 
