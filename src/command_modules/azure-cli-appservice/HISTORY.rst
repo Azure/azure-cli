@@ -5,6 +5,7 @@ Release History
 0.2.4
 +++++
 * appservice plan, webapp & function app updated to use latest python websites SDK version
+* az webapp config set supports --fts-state property. Also added support fot az functionapp config set & show
 
 0.2.3
 +++++

@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -946,7 +946,7 @@ def list_dns_zones(cmd, resource_group_name=None):
 def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
 
-    RecordSet = cmd.get_models('RecordSet')
+    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
     SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = RecordSet(
@@ -1074,7 +1074,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
 def _build_record(cmd, data):
     AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord, NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord = \
         cmd.get_models('AaaaRecord', 'ARecord', 'CaaRecord', 'CnameRecord', 'MxRecord', 'NsRecord',
-                       'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord')
+                       'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
@@ -1110,8 +1110,8 @@ def _build_record(cmd, data):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
+    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
-    RecordSet = cmd.get_models('RecordSet')
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
@@ -1202,14 +1202,14 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address):
-    AaaaRecord = cmd.get_models('AaaaRecord')
+    AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address):
-    ARecord = cmd.get_models('ARecord')
+    ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1217,14 +1217,14 @@ def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_
 
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag):
-    CaaRecord = cmd.get_models('CaaRecord')
+    CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname):
-    CnameRecord = cmd.get_models('CnameRecord')
+    CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1232,21 +1232,21 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
 
 
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange):
-    MxRecord = cmd.get_models('MxRecord')
+    MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname):
-    NsRecord = cmd.get_models('NsRecord')
+    NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
-    PtrRecord = cmd.get_models('PtrRecord')
+    PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
@@ -1276,14 +1276,14 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
 
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target):
-    SrvRecord = cmd.get_models('SrvRecord')
+    SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value):
-    TxtRecord = cmd.get_models('TxtRecord')
+    TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = TxtRecord(value=value)
     record_type = 'txt'
     long_text = ''.join(x for x in record.value)
@@ -1301,7 +1301,7 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
                            keep_empty_record_set=False):
-    AaaaRecord = cmd.get_models('AaaaRecord')
+    AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1310,7 +1310,7 @@ def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name,
 
 def remove_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
                         keep_empty_record_set=False):
-    ARecord = cmd.get_models('ARecord')
+    ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1319,7 +1319,7 @@ def remove_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ip
 
 def remove_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value,
                           flags, tag, keep_empty_record_set=False):
-    CaaRecord = cmd.get_models('CaaRecord')
+    CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1328,7 +1328,7 @@ def remove_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
-    CnameRecord = cmd.get_models('CnameRecord')
+    CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1337,7 +1337,7 @@ def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name
 
 def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
-    MxRecord = cmd.get_models('MxRecord')
+    MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1346,7 +1346,7 @@ def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, p
 
 def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
-    NsRecord = cmd.get_models('NsRecord')
+    NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1355,7 +1355,7 @@ def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, d
 
 def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                           keep_empty_record_set=False):
-    PtrRecord = cmd.get_models('PtrRecord')
+    PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1364,7 +1364,7 @@ def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                           port, target, keep_empty_record_set=False):
-    SrvRecord = cmd.get_models('SrvRecord')
+    SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1373,7 +1373,7 @@ def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value,
                           keep_empty_record_set=False):
-    TxtRecord = cmd.get_models('TxtRecord')
+    TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = TxtRecord(value=value)
     record_type = 'txt'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -1399,7 +1399,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        RecordSet = cmd.get_models('RecordSet')
+        RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
         record_set = RecordSet(ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
