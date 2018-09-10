@@ -841,12 +841,13 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_generic_update_command
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg())
+        merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
-        custom_func_op = self._resolve_operation(merged_kwargs, custom_func_name, custom_func_type,
+        custom_func_op = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
                                                  custom_command=True) if custom_func_name else None
         _cli_generic_update_command(
             self.command_loader,
