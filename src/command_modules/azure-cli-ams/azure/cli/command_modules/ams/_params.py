@@ -168,6 +168,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The path to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
         c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
+        c.argument('play_ready_configuration', arg_group='PlayReady Configuration', help='JSON object string defining a PlayReady configuration. Use @{file} to load from a file.')
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
