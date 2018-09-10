@@ -33,9 +33,10 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
+from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -194,6 +195,26 @@ def create_container(cmd,
     container_group_client = cf_container_groups(cmd.cli_ctx)
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
 
+
+def _vent(cli_ctx, resource_group_name, vnet_name, subnet_name, subnet_address_prefix):
+    ncf = cf_network(cli_ctx)
+
+    #Create a vnet
+    AddressSpace = "10.0.0.0/16"
+    vnet = VirtualNetwork(
+        address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
+    return ncf..virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+
+    #Create a subnet
+    #Delegate the subnet - Microsoft.ContainerInstance/containerGroups
+    subnet = Subnet(name=subnet_name, address_prefix=subnet_address_prefix) 
+    ncf.subnets.create_or_update(resource_group_name, vnet_name,
+                                        subnet_name, subnet)
+
+    #create the network profile
+
+
+    return 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     log_analytics_client = cf_log_analytics(cli_ctx)
