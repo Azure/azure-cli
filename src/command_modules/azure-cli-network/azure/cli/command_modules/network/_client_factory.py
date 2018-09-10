@@ -53,6 +53,10 @@ def cf_express_route_service_providers(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_service_providers
 
 
+def cf_interface_endpoints(cli_ctx, _):
+    return network_client_factory(cli_ctx).interface_endpoints
+
+
 def cf_load_balancers(cli_ctx, _):
     return network_client_factory(cli_ctx).load_balancers
 

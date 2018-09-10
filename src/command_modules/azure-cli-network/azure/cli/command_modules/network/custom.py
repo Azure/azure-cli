@@ -1638,6 +1638,38 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # endregion
 
 
+# region InterfaceEndpoints
+def create_interface_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
+                              fqdn=None, endpoint_service=None, nics=None):
+    client = network_client_factory(cmd.cli_ctx).interface_endpoints
+    InterfaceEndpoint, SubResource = cmd.get_models(
+        'InterfaceEndpoint', 'SubResource')
+    endpoint = InterfaceEndpoint(
+        tags=tags,
+        location=location,
+        fqdn=fqdn,
+        endpoint_service=SubResource(id=endpoint_service) if endpoint_service else None,
+        subnet=SubResource(id=subnet) if subnet else None,
+        network_interfaces=[SubResource(id=nics)] if nics else None
+    )
+    return client.create_or_update(resource_group_name, interface_endpoint_name, endpoint)
+
+
+def list_interface_endpoints(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).interface_endpoints
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_by_subscription()
+
+
+def update_interface_endpoint(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+# endregion
+
+
 # region LoadBalancers
 def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
@@ -1986,8 +2018,6 @@ def set_lb_rule(
         instance.probe = _get_property(parent.probes, probe_name)
 
     return parent
-
-
 # endregion
 
 
@@ -2037,8 +2067,6 @@ def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_p
     if tags is not None:
         instance.tags = tags
     return instance
-
-
 # endregion
 
 
@@ -2275,8 +2303,6 @@ def remove_nic_ip_config_inbound_nat_rule(
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
-
-
 # endregion
 
 

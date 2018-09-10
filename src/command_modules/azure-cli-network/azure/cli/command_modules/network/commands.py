@@ -22,7 +22,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
-    cf_service_endpoint_policy_definitions, cf_dns_references)
+    cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -120,6 +120,12 @@ def load_command_table(self, _):
     network_er_peering_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.{}',
         client_factory=cf_express_route_circuit_peerings
+    )
+
+    network_interface_endpoint_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.interface_endpoints_operations#InterfaceEndpointsOperations.{}',
+        client_factory=cf_interface_endpoints,
+        min_api='2018-08-01'
     )
 
     network_lb_sdk = CliCommandType(
@@ -420,7 +426,16 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command('update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
+    # endregion
 
+    # region InterfaceEndpoint
+    with self.command_group('network interface-endpoint', network_interface_endpoint_sdk) as g:
+        # TODO: Re-enable when service team asks. See issue #7271
+        # g.custom_command('create', 'create_interface_endpoint')
+        # g.command('delete', 'delete')
+        g.custom_command('list', 'list_interface_endpoints')
+        g.show_command('show')
+        # g.generic_update_command('update', custom_func_name='update_interface_endpoint')
     # endregion
 
     # region LoadBalancers
@@ -493,11 +508,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_local_gateway', supports_no_wait=True, validator=process_local_gateway_create_namespace)
         g.generic_update_command('update', custom_func_name='update_local_gateway', supports_no_wait=True)
         g.wait_command('wait')
-
     # endregion
 
     # region NetworkInterfaces: (NIC)
-
     with self.command_group('network nic', network_nic_sdk) as g:
         g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True)
@@ -664,7 +677,6 @@ def load_command_table(self, _):
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_service_endpoint_policy_definition',
                                  setter_arg_name='service_endpoint_policy_definitions')
-
     # endregion
 
     # region TrafficManagers
