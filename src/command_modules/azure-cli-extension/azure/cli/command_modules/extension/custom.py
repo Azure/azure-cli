@@ -195,7 +195,8 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
     ext_sha256 = None
     if extension_name:
         if extension_exists(extension_name):
-            raise CLIError('The extension {} already exists.'.format(extension_name))
+            logger.warning("The extension '%s' already exists.", extension_name)
+            return
         try:
             source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
         except NoExtensionCandidatesError as err:
