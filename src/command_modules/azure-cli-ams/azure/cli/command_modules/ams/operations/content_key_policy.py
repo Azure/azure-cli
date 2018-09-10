@@ -53,6 +53,9 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
+    if not policy:
+        raise CLIError('Policy with name "' + content_key_policy_name + '" does not exist in your realm.')
+
     options = policy.options
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
