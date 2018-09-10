@@ -597,6 +597,21 @@ def create_user(client, user_principal_name, display_name, password,
     return client.create(param)
 
 
+def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    if not _is_guid(upn_or_object_id):
+        upn_or_object_id = graph_client.users.get(upn_or_object_id).object_id
+
+    results = list(graph_client.users.get_member_groups(
+        upn_or_object_id, security_enabled_only=security_enabled_only))
+    try:
+        stubs = _get_object_stubs(graph_client, results)
+    except GraphErrorException:
+        stubs = []
+    stubs = {s.object_id: s.display_name for s in stubs}
+    return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
+
+
 def create_group(client, display_name, mail_nickname):
     return client.create(GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname))
 

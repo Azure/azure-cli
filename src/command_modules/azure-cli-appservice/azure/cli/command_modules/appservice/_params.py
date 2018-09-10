@@ -23,6 +23,7 @@ AUTH_TYPES = {
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
+FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 
 # pylint: disable=too-many-statements
 
@@ -166,6 +167,24 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' cors') as c:
             c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
+        with self.argument_context(scope + ' config set') as c:
+            c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
+            c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
+            c.argument('always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
+            c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag(return_label=True))
+            c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
+            c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+            c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
+            c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
+            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
+            c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
+            c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
+            c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+            c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+            c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
+            c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+            c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.", arg_type=get_enum_type(FTPS_STATE_TYPES))
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
@@ -217,23 +236,6 @@ def load_arguments(self, _):
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
         c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
-
-    with self.argument_context('webapp config set') as c:
-        c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
-        c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
-        c.argument('always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
-        c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag(return_label=True))
-        c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
-        c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
-        c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
-        c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
-        c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
-        c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
-        c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
-        c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
-        c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
-        c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
-        c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])

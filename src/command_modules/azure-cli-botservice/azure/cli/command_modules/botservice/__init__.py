@@ -21,7 +21,7 @@ class BotServiceCommandsLoader(AzCommandsLoader):
                                                        suppress_extension=ModExtensionSuppress(
                                                            __name__,
                                                            'botservice',
-                                                           '0.3.0',
+                                                           '0.4.0',
                                                            reason='These commands are now in the CLI',
                                                            recommend_remove=True))
 

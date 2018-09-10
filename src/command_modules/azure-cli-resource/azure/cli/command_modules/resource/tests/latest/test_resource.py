@@ -256,6 +256,47 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
+class SubscriptionLevelDepolymentTest(ScenarioTest):
+    def tearDown(self):
+        self.cmd('policy assignment delete -n location-lock')
+        self.cmd('policy definition delete -n policy2')
+
+    def test_subscription_level_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
+        })
+
+        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list -n {dn}', checks=[
+            self.check('length([])', 4)
+        ])
+
+
 class DeploymentTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
@@ -306,41 +347,6 @@ class DeploymentTest(ScenarioTest):
         self.cmd('group deployment operation list -g {rg} -n {dn}', checks=[
             self.check('length([])', 2),
             self.check('[0].resourceGroup', '{rg}')
-        ])
-
-    def test_subscription_level_deployment(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
-            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
-            'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
-        })
-
-        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded'),
-        ])
-
-        self.cmd('deployment list', checks=[
-            self.check('[0].name', '{dn}'),
-        ])
-
-        self.cmd('deployment show -n {dn}', checks=[
-            self.check('name', '{dn}')
-        ])
-
-        self.cmd('deployment export -n {dn}', checks=[
-        ])
-
-        self.cmd('deployment operation list -n {dn}', checks=[
-            self.check('length([])', 4)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
