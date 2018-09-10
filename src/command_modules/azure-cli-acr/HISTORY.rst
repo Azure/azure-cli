@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.1.6
++++++
+* Add ACR Task commands.
+* Add quick run command.
+* Deprecate build-task command group.
+
 2.1.5
 +++++
 * Allow idempotent create for managed registry.
