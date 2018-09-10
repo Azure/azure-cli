@@ -244,6 +244,7 @@ def _get_value(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+
 def _get_value_arr(item, *args):
     """Get a nested array from a dict.
     :param dict item: The dict object
@@ -254,6 +255,7 @@ def _get_value_arr(item, *args):
         return item[0] if item else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
+
 
 def _get_build_trigger(image_update_trigger, git_commit_trigger):
     if git_commit_trigger.strip():

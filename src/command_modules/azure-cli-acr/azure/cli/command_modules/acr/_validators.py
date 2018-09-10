@@ -63,6 +63,7 @@ def validate_secret_arg(namespace):
             secret_arguments_list.append(validate_task_argument(item, True))
         namespace.secret_arg = secret_arguments_list
 
+
 def validate_set(namespace):
     if isinstance(namespace.set_value, list):
         set_list = []
@@ -70,12 +71,14 @@ def validate_set(namespace):
             set_list.append(validate_task_value(item, False))
         namespace.set_value = set_list
 
+
 def validate_set_secret(namespace):
     if isinstance(namespace.set_secret, list):
         set_secret_list = []
         for item in namespace.set_secret:
             set_secret_list.append(validate_task_value(item, True))
         namespace.set_secret = set_secret_list
+
 
 def validate_task_value(string, is_secret):
     """Extracts a single SetValue in key[=value] format. """
@@ -85,6 +88,7 @@ def validate_task_value(string, is_secret):
             return {'type': 'SetValue', 'name': comps[0], 'value': comps[1], 'isSecret': is_secret}
         return {'type': 'SetValue', 'name': comps[0], 'value': '', 'isSecret': is_secret}
     return None
+
 
 def validate_task_argument(string, is_secret):
     """Extracts a single argument in key[=value] format. """

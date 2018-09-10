@@ -47,9 +47,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.imageNames', ['testtask:v1']),
                          self.check('step.arguments', []),
                          self.check('step.isPushEnabled', True),
-                         self.check('step.noCache', False)
-                        ]
-                )
+                         self.check('step.noCache', False)])
 
         self.cmd('acr task list -r {registry_name}',
                  checks=[self.check('[0].name', '{task_name}')]
@@ -69,7 +67,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                  checks=[self.check('[0].type', 'Microsoft.ContainerRegistry/registries/runs'),
                          self.check('[0].runId', '{run_id}'),
                          self.check('[0].isArchiveEnabled', False)])
-        
+
         # show task properties
         self.cmd('acr task show -n {task_name} -r {registry_name}',
                  checks=[self.check('name', '{task_name}')])
@@ -77,9 +75,7 @@ class AcrTaskCommandsTests(ScenarioTest):
         # update the first task using non-default parameter values
         self.cmd('acr task update -n {task_name} -r {registry_name} --cpu 1',
                  checks=[self.check('name', '{task_name}'),
-                         self.check('agentConfiguration.cpu', 1)
-                        ]
-                )
+                         self.check('agentConfiguration.cpu', 1)])
 
         # update a run of the first task
         self.cmd('acr task update-run -r {registry_name} --run-id {run_id} --no-archive false',
