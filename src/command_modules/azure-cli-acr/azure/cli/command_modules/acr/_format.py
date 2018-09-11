@@ -190,7 +190,7 @@ def _task_format_group(item):
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
-        ('SOURCE REPOSITORY', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'repositoryUrl'))
+        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath'))
     ])
 
 
@@ -200,7 +200,7 @@ def _task_detail_format_group(item):
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
-        ('SOURCE REPOSITORY', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'repositoryUrl')),
+        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
         ('BRANCH', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'branch')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
         ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),

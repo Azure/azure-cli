@@ -52,6 +52,18 @@ helps['acr task'] = """
     short-summary: Manage a collection of steps for building, testing and OS & Framework patching container images using Azure Container Registries.
     """
 
+helps['acr run'] = """
+    type: command
+    short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
+    examples:
+        - name: Queue a local context, pushed to ACR with streaming logs.
+          text: >
+            az acr run -r myregistry -f bash-echo.yaml .
+        - name: Queue a remote git context with streaming logs.
+          text: >
+            az acr run -r myregistry https://github.com/Azure-Samples/acr-build-helloworld-node.git -f abc.yaml
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if an Azure Container Registry name is valid and available for use.
@@ -532,19 +544,6 @@ helps['acr build'] = """
           text: >
             az acr build -r myregistry .
 """
-
-helps['acr task run'] = """
-    type: command
-    short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
-    examples:
-        - name: Queue a local context, pushed to ACR with streaming logs.
-          text: >
-            az acr task run -r myregistry --task-file bash-echo.yaml .
-        - name: Queue a remote git context with streaming logs.
-          text: >
-            az acr run -r myregistry https://github.com/AzureCR/acr-tasks-sample.git --task-file bash-echo.yaml
-"""
-
 
 helps['acr build-task create'] = """
     type: command
