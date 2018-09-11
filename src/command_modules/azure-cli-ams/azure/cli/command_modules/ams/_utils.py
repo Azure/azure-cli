@@ -11,7 +11,6 @@ import json
 import isodate
 
 
-
 def _gen_guid():
     return uuid.uuid4()
 
@@ -48,14 +47,17 @@ def snake_to_camel_case(snake_str):
 class JsonBytearrayEncoder(json.JSONEncoder):
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M:%S"
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
+
+    def default(self, obj):  # pylint: disable=E0202,W0221
+        if isinstance(obj, datetime):
             return obj.strftime("%s %s" % (self.DATE_FORMAT, self.TIME_FORMAT))
-        elif isinstance(obj, bytearray):
+
+        if isinstance(obj, bytearray):
             return bytes(obj).decode("utf-8")
+
         try:
             return obj.toJSON()
-        except:
+        except Exception:  # pylint: disable=W0703
             obj = vars(obj)
             obj.pop('additional_properties', None)
             keys = list(obj.keys())

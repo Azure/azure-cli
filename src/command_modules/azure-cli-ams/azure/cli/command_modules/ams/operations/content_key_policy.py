@@ -6,9 +6,9 @@
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
 import base64
 
-from knack.util import CLIError
-
 import json
+
+from knack.util import CLIError
 
 from azure.cli.command_modules.ams._utils import JsonBytearrayEncoder
 
@@ -42,6 +42,19 @@ def create_content_key_policy(client, resource_group_name, account_name, content
 
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, [policy_option], description)
+
+
+def show_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
+                            with_secrets=False):
+
+    if with_secrets:
+        content_key_policy = client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
+                                                                       content_key_policy_name=content_key_policy_name)
+        json_object = json.dumps(content_key_policy, cls=JsonBytearrayEncoder, indent=4)
+        return json.loads(json_object)
+
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      content_key_policy_name=content_key_policy_name)
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
