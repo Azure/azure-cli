@@ -40,7 +40,9 @@ def load_arguments(self, _):
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
-    if self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
+    if self.supported_api_version(min_api='2018-06-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']))
+    elif self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
     else:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
@@ -72,6 +74,8 @@ def load_arguments(self, _):
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
+        c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
+        c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
     # endregion
 
     # region Identity

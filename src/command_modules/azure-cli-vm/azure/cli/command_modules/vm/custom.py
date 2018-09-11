@@ -254,7 +254,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None, no_wait=False, tags=None, zone=None):
+                        source_storage_account_id=None, no_wait=False, tags=None, zone=None,
+                        disk_iops_read_write=None, disk_mbps_read_write=None):
     Disk, CreationData, DiskCreateOption = cmd.get_models('Disk', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -276,6 +277,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     if zone:
         disk.zones = zone
+    if disk_iops_read_write is not None:
+        disk.disk_iops_read_write = disk_iops_read_write
+    if disk_mbps_read_write is not None:
+        disk.disk_mbps_read_write = disk_mbps_read_write
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
