@@ -758,6 +758,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
