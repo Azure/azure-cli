@@ -36,6 +36,7 @@ def validate_gitrepo_directory(ns):
     if ns.gitrepo_dir and '..' in ns.gitrepo_dir:
         raise CLIError("The git repo directory cannot contain '..'")
 
+
 def validate_network_profile(cmd, ns):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id

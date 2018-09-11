@@ -32,9 +32,14 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
+<<<<<<< HEAD
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
 from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile, 
                                        ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
+=======
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
+                                                 ContainerGroupIpAddressType)
+>>>>>>> dev
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
@@ -90,10 +95,14 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+<<<<<<< HEAD
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
                      subnet_address_prefix='10.0.0.0/24',
+=======
+                     network_profile=None,
+>>>>>>> dev
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
@@ -184,6 +193,10 @@ def create_container(cmd,
     else:
         environment_variables = environment_variables or secure_environment_variables
 
+    cg_network_profile = None
+    if network_profile:
+        cg_network_profile = ContainerGroupNetworkProfile(id=network_profile)
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -200,6 +213,7 @@ def create_container(cmd,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None,
+                            network_profile=cg_network_profile,
                             diagnostics=diagnostics,
                             tags=tags)
 
@@ -476,7 +490,8 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 def _create_ip_address(ip_address, ports, protocol, dns_name_label):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
-        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
+                         dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
 
 
 # pylint: disable=inconsistent-return-statements
