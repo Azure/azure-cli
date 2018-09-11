@@ -46,8 +46,8 @@ def ex_handler_factory(creating_plan=False):
                               "which has never contained a Windows worker, and vice versa. " +
                               "Please use a new resource group. Original error:" + detail)
             ex = CLIError(detail)
-        except Exception:  # pylint: disable=broad-except
-            pass
+        except json.JSONDecodeError:
+            ex = CLIError(ex.response.text)
         raise ex
     return _polish_bad_errors
 
@@ -137,6 +137,18 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp webjob continuous') as g:
+        g.custom_command('list', 'list_continuous_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('start', 'start_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('stop', 'stop_continuous_webjob', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp webjob triggered') as g:
+        g.custom_command('list', 'list_triggered_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('run', 'run_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('log', 'get_history_triggered_webjob', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
