@@ -89,6 +89,10 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+                     vnet_name=None,
+                     vnet_address_prefix='10.0.0.0/16',
+                     subnet_name=None,
+                     subnet_address_prefix='10.0.0.0/24',
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
@@ -98,6 +102,9 @@ def create_container(cmd,
                      file=None,
                      no_wait=False):
     """Create a container group. """
+
+    _vnet(cmd.cli_ctx, resource_group_name, vnet_name, vnet_address_prefix, subnet_name, subnet_address_prefix)
+    return
 
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -196,20 +203,44 @@ def create_container(cmd,
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
 
 
-def _vent(cli_ctx, resource_group_name, vnet_name, subnet_name, subnet_address_prefix):
+def _vnet(cli_ctx, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+    from msrestazure.azure_exceptions import CloudError
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id, is_valid_resource_id
+
+    subscription_id = get_subscription_id(cli_ctx)
+    network_id_template = resource_id(
+        subscription=subscription_id, resource_group=resource_group_name,
+        namespace='Microsoft.Network')
+
     ncf = cf_network(cli_ctx)
 
-    #Create a vnet
-    AddressSpace = "10.0.0.0/16"
-    vnet = VirtualNetwork(
-        address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
-    return ncf..virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+    if vnet_name and not vnet_address_prefix:
+        try:
+            vnet = ncf.virtual_networks.get(resource_group_name, vnet_name)
+        except CloudError as ex:
+            print(ex.message)
+            if 'was not found' in ex.message:
+                raise CLIError("testing")
+            else:
+                raise
 
-    #Create a subnet
-    #Delegate the subnet - Microsoft.ContainerInstance/containerGroups
-    subnet = Subnet(name=subnet_name, address_prefix=subnet_address_prefix) 
-    ncf.subnets.create_or_update(resource_group_name, vnet_name,
-                                        subnet_name, subnet)
+    subnet_id = subnet if is_valid_resource_id(subnet) else \
+            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+    subnet_exists = \
+        check_existence(cli_ctx, subnet, resource_group_name, 'Microsoft.Network', 'subnets', vnet_name, 'virtualNetworks')
+
+    # #Create a vnet
+    # vnet = VirtualNetwork(
+    #     address_space=AddressSpace(address_prefixes=[vnet_address_prefix]))  # pylint: disable=line-too-long
+    # return ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+
+    # #Create a subnet
+    # #Delegate the subnet - Microsoft.ContainerInstance/containerGroups
+    # subnet = Subnet(name=subnet_name, address_prefix=subnet_address_prefix) 
+    # ncf.subnets.create_or_update(resource_group_name, vnet_name,
+    #                                     subnet_name, subnet)
 
     #create the network profile
 

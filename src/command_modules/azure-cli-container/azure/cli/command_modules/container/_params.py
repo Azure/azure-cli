@@ -72,6 +72,12 @@ def load_arguments(self, _):
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 
+    with self.argument_context('container create', arg_group='Network Arguments') as c:
+        c.argument('vnet_name', help='The name of the virtual network when creating a new one or referencing an existing one.')
+        c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNet in CIDR format.')
+        c.argument('subnet', help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID.')
+        c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.')
+
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')
         c.argument('registry_username', help='The username to log in container image registry server')
