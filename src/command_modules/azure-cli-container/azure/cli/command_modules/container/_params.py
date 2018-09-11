@@ -11,7 +11,8 @@ from azure.cli.core.commands.parameters import (get_enum_type,
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (
     ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol)
-from ._validators import validate_volume_mount_path, validate_secrets, validate_gitrepo_directory
+from ._validators import (validate_volume_mount_path, validate_secrets,
+                          validate_gitrepo_directory, validate_network_profile)
 
 # pylint: disable=line-too-long
 
@@ -46,6 +47,11 @@ secrets_type = CLIArgumentType(
     nargs='+'
 )
 
+network_profile_type = CLIArgumentType(
+    validator=validate_network_profile,
+    help="The network profile name or id."
+)
+
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
@@ -70,6 +76,7 @@ def load_arguments(self, _):
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secure_environment_variables', nargs='+', type=_secure_environment_variables_type, help='A list of secure environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secrets', secrets_type)
+        c.argument('network_profile', network_profile_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 

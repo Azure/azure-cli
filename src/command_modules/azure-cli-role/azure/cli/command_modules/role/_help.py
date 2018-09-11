@@ -19,7 +19,7 @@ helps['ad sp create-for-rbac'] = """
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
@@ -86,7 +86,7 @@ helps['ad sp credential reset'] = """
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When using `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
