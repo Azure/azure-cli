@@ -51,6 +51,7 @@ secrets_type = CLIArgumentType(
 def load_arguments(self, _):
     with self.argument_context('container') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('container_group_name', options_list=['--name', '-n'], help="The name of the container group.")
         c.argument('name', options_list=['--name', '-n'], help="The name of the container group", id_part='name')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
@@ -99,12 +100,6 @@ def load_arguments(self, _):
 
     with self.argument_context('container export') as c:
         c.argument('file', options_list=['--file', '-f'], help="The file path to export the container group.")
-
-    with self.argument_context('container restart') as c:
-        c.argument('container_group_name', options_list=['--name', '-n'], help="The name of the container group to restart.")
-
-    with self.argument_context('container stop') as c:
-        c.argument('container_group_name', options_list=['--name', '-n'], help="The name of the container group to stop.")
 
     with self.argument_context('container exec') as c:
         c.argument('container_name', help='The container name where to execute the command. Can be ommitted for container groups with only one container.')
