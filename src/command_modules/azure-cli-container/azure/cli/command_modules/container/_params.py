@@ -51,6 +51,7 @@ network_profile_type = CLIArgumentType(
     help="The network profile name or id."
 )
 
+
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('container') as c:
