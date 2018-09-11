@@ -100,7 +100,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('ams content-key-policy', get_sdk('ContentKeyPolicies', get_content_key_policies_client)) as g:
         g.custom_command('create', 'create_content_key_policy',
                          custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
-        g.show_command('show', 'get')
+        g.custom_command('show', 'show_content_key_policy',
+                         custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
+        g.generic_update_command('update')
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.generic_update_command('update',
