@@ -579,7 +579,7 @@ def create_application(cmd, resource_group_name,
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
         else:
-            application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+            application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
 
     applicationParameters = None
 
