@@ -40,7 +40,7 @@ def acr_build(cmd,
               timeout=None,
               arg=None,
               secret_arg=None,
-              docker_file_path='Dockerfile',
+              docker_file_path='',
               no_format=False,
               no_push=False,
               no_logs=False,
@@ -56,7 +56,12 @@ def acr_build(cmd,
             raise CLIError(
                 "Source location should be a local directory path or remote URL.")
 
-        _check_local_docker_file(source_location, docker_file_path)
+        # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
+        # Otherwise, it's based on current working directory.
+        if not docker_file_path:
+            docker_file_path = os.path.join(source_location, "Dockerfile")
+
+        _check_local_docker_file(docker_file_path)
 
         tar_file_path = os.path.join(tempfile.gettempdir(
         ), 'build_archive_{}.tar.gz'.format(uuid.uuid4().hex))
@@ -123,7 +128,6 @@ def acr_build(cmd,
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
 
 
-def _check_local_docker_file(source_location, docker_file_path):
-    if not os.path.isfile(os.path.join(source_location, docker_file_path)):
-        raise CLIError("Unable to find '{}' in '{}'.".format(
-            docker_file_path, source_location))
+def _check_local_docker_file(docker_file_path):
+    if not os.path.isfile(docker_file_path):
+        raise CLIError("Unable to find '{}'.".format(docker_file_path))
