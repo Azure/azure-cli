@@ -377,16 +377,6 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label):
                          dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
 
 
-def restart_container(client, resource_group_name, name, no_wait=False):
-    """Restart a running container group. """
-    return sdk_no_wait(no_wait, client.restart, resource_group_name, name)
-
-
-def stop_container(client, resource_group_name, name):
-    """Stop a running container group. """
-    return client.stop(resource_group_name, name)
-
-
 # pylint: disable=inconsistent-return-statements
 def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):
     """Tail a container instance log. """
