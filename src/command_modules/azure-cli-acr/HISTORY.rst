@@ -5,6 +5,9 @@ Release History
 
 2.1.5
 +++++
+* Add ACR Task commands.
+* Add quick run command.
+* Deprecate build-task command group.
 * Allow idempotent create for managed registry.
 * Add a no-format flag for displaying build logs
 
