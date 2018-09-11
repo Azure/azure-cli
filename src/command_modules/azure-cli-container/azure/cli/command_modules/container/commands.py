@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import CliCommandType
 from ._client_factory import cf_container_groups, cf_container
 from ._format import transform_container_group_list, transform_container_group
-from azure.cli.core.commands import CliCommandType
 
 
 container_group_sdk = CliCommandType(
