@@ -33,7 +33,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
-from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace)
+from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile, 
+                                       ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
@@ -91,7 +92,7 @@ def create_container(cmd,
                      log_analytics_workspace_key=None,
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
-                     subnet_name=None,
+                     subnet=None,
                      subnet_address_prefix='10.0.0.0/24',
                      gitrepo_url=None,
                      gitrepo_dir='.',
@@ -103,7 +104,10 @@ def create_container(cmd,
                      no_wait=False):
     """Create a container group. """
 
-    _vnet(cmd.cli_ctx, resource_group_name, vnet_name, vnet_address_prefix, subnet_name, subnet_address_prefix)
+
+    if 
+    network_profile_id = _vnet(cmd.cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+
     return
 
     if file:
@@ -203,8 +207,26 @@ def create_container(cmd,
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
 
 
-def _vnet(cli_ctx, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+def _get_resource(client, resource_group_name, *subresources):
     from msrestazure.azure_exceptions import CloudError
+    try:
+        resource = client.get(resource_group_name, *subresources)
+        return resource
+    except CloudError as ex:
+        if 'was not found' in ex.message:
+            return None
+        else:
+            raise
+    
+
+def _vnet(cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+    ncf = cf_network(cli_ctx)
+    # for i in  ncf.available_delegations.list("westus"):
+    #     print(i)
+    # return
+
+    network_profile_name="test123"
+    
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -213,39 +235,68 @@ def _vnet(cli_ctx, resource_group_name, vnet_name, vnet_address_prefix, subnet, 
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
-    ncf = cf_network(cli_ctx)
+    #Check require a name for creating subnets
+    vnet = None
+    if not vnet_name:
+        return 
 
-    if vnet_name and not vnet_address_prefix:
-        try:
-            vnet = ncf.virtual_networks.get(resource_group_name, vnet_name)
-        except CloudError as ex:
-            print(ex.message)
-            if 'was not found' in ex.message:
-                raise CLIError("testing")
-            else:
-                raise
+    if is_valid_resource_id(subnet):
+        raise CLIError("Currently, using an existing subnet is not supported from the CLI. Please provide the Network Profile to use and existing subnet.")
 
-    subnet_id = subnet if is_valid_resource_id(subnet) else \
-            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+    vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name) or VirtualNetwork(
+        name=vnet_name,
+        location=location,
+        address_space=AddressSpace(address_prefixes=[vnet_address_prefix]))
 
-    subnet_exists = \
-        check_existence(cli_ctx, subnet, resource_group_name, 'Microsoft.Network', 'subnets', vnet_name, 'virtualNetworks')
+    ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+
+    d = Delegation(
+        name="Microsoft.ContainerInstance.containerGroups",
+        service_name="Microsoft.ContainerInstance/containerGroups"
+    )
+
+    subnet_ob = Subnet(
+        name=subnet,
+        address_prefix=subnet_address_prefix,
+        delegations=[d])
+
+    subnet_poller = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet, subnet_ob)
+    subnet = subnet_poller.result()
+
+    network_profile = NetworkProfile(
+        name=network_profile_name,
+        location=location,
+        container_network_interface_configurations=[ContainerNetworkInterfaceConfiguration(
+            name="eth0",
+            ip_configurations=[IPConfigurationProfile(
+                name="ipconfigprofile",
+                subnet=subnet
+            )]
+        )]
+    )
+
+    network_profile_poller = ncf.network_profiles.create_or_update(resource_group_name, network_profile_name, network_profile)
+    network_profile = network_profile_poller.result()
+
+    return network_profile.id
+    
+    
+    # net.subnet = Subnet(name=subnet, address_prefix=subnet_address_prefix)
+    
+    # if subnet:
+    #     _get_resource(ncf.subnets, resource_group_name, vnet_name, )
+
+    # subnet_id = subnet if is_valid_resource_id(subnet) else \
+    #         '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+    # subnet_exists = \
+    #     check_existence(cli_ctx, subnet, resource_group_name, 'Microsoft.Network', 'subnets', vnet_name, 'virtualNetworks')
 
     # #Create a vnet
     # vnet = VirtualNetwork(
     #     address_space=AddressSpace(address_prefixes=[vnet_address_prefix]))  # pylint: disable=line-too-long
-    # return ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+    ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
 
-    # #Create a subnet
-    # #Delegate the subnet - Microsoft.ContainerInstance/containerGroups
-    # subnet = Subnet(name=subnet_name, address_prefix=subnet_address_prefix) 
-    # ncf.subnets.create_or_update(resource_group_name, vnet_name,
-    #                                     subnet_name, subnet)
-
-    #create the network profile
-
-
-    return 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     log_analytics_client = cf_log_analytics(cli_ctx)
