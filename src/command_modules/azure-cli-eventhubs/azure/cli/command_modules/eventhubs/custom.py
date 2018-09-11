@@ -94,7 +94,7 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
                           enabled=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-
+    from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination, EncodingCaptureDescription
     if message_retention_in_days:
         instance.message_retention_in_days = message_retention_in_days
 
@@ -104,7 +104,12 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
     if status:
         instance.status = status
 
-    if instance.enabled is True or enabled is True:
+    if enabled is True:
+        if instance.capture_description is None:
+            instance.capture_description = CaptureDescription()
+            instance.capture_description.destination = Destination()
+            instance.capture_description.encoding = EncodingCaptureDescription.avro
+
         if enabled:
             instance.capture_description.enabled = enabled
         if capture_interval_seconds:
@@ -112,12 +117,12 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
         if capture_size_limit_bytes:
             instance.size_limit_in_bytes = capture_size_limit_bytes
         if destination_name:
-            instance.destination = destination_name
+            instance.capture_description.destination.name = destination_name
         if storage_account_resource_id:
-            instance.storage_account_resource_id = storage_account_resource_id
+            instance.capture_description.destination.storage_account_resource_id = storage_account_resource_id
         if blob_container:
-            instance.blob_container = blob_container
+            instance.capture_description.destination.blob_container = blob_container
         if archive_name_format:
-            instance.archive_name_format = archive_name_format
+            instance.capture_description.destination.archive_name_format = archive_name_format
 
     return instance
