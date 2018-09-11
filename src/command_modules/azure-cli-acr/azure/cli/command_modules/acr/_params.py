@@ -8,16 +8,20 @@ import argparse
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     PasswordName,
     WebhookStatus,
     WebhookAction,
+    PolicyStatus,
+    RunStatus,
+    TaskStatus,
+    BaseImageTriggerType
+)
+from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskStatus,
     OsType,
-    BuildStatus,
-    PolicyStatus
+    BuildStatus
 )
-
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_location_type,
@@ -30,11 +34,6 @@ from azure.cli.core.commands.parameters import (
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-from .sdk.models import (
-    RunStatus,
-    TaskStatus,
-    BaseImageTriggerType
-)
 from ._constants import (
     STORAGE_RESOURCE_TYPE,
     REGISTRY_RESOURCE_TYPE,

@@ -13,7 +13,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from .sdk.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     DockerBuildRequest,
     PlatformProperties,
     Architecture,
@@ -48,9 +48,8 @@ def acr_build(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
-    # TODO: Remove this import once the SDK is merged.
-    from ._client_factory import cf_acr_registries_build
-    client_registries = cf_acr_registries_build(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries
+    client_registries = cf_acr_registries(cmd.cli_ctx)
 
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):

@@ -5,7 +5,7 @@
 
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     ImportImageParameters,
     ImportSource,
     ImportMode

@@ -5,7 +5,7 @@
 
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import ReplicationUpdateParameters
+from azure.mgmt.containerregistry.v2018_09_01.models import ReplicationUpdateParameters
 
 from ._utils import (
     get_resource_group_name_by_registry_name,

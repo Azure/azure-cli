@@ -8,10 +8,7 @@ import time
 from msrest import Deserializer
 from msrest.polling import PollingMethod, LROPoller
 from msrestazure.azure_exceptions import CloudError
-
-# TODO: remove when SDK is finalized.
-from .sdk import models
-
+from azure.mgmt.containerregistry.v2018_09_01 import models
 
 FINISHED = frozenset([
     models.RunStatus.succeeded.value,

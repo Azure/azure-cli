@@ -9,16 +9,16 @@ import tempfile
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-from ._run_polling import get_run_with_polling
-from .sdk.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     FileTaskRunRequest,
     PlatformProperties,
     OS,
     EncodedTaskRunRequest
 )
+from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._utils import validate_managed_registry
-from ._client_factory import cf_acr_registries_build
+from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
@@ -45,8 +45,7 @@ def acr_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
-    # TODO: Remove this import once the SDK is merged.
-    client_registries = cf_acr_registries_build(cmd.cli_ctx)
+    client_registries = cf_acr_registries(cmd.cli_ctx)
 
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):

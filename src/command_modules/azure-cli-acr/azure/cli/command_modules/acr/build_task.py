@@ -17,14 +17,12 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskBuildRequest,
     BuildTaskUpdateParameters,
     SourceRepositoryUpdateParameters,
-    DockerBuildStepUpdateParameters
+    DockerBuildStepUpdateParameters,
+    OsType
 )
 from ._utils import validate_managed_registry
 from ._stream_utils import stream_logs
 from ._run_polling import get_run_with_polling
-from .sdk.models import (
-    OS
-)
 
 
 logger = get_logger(__name__)
@@ -43,7 +41,7 @@ def acr_build_task_create(cmd,  # pylint: disable=too-many-locals
                           git_access_token,
                           alias=None,
                           status='Enabled',
-                          os_type=OS.linux.value,
+                          os_type=OsType.linux.value,
                           cpu=2,
                           timeout=3600,
                           commit_trigger_enabled=True,

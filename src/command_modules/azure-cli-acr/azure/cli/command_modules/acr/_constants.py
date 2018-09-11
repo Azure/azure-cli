@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName
+from azure.mgmt.containerregistry.v2018_09_01.models import SkuName
 
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 

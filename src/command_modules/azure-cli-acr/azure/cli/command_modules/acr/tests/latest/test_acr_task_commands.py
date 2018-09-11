@@ -50,8 +50,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.noCache', False)])
 
         self.cmd('acr task list -r {registry_name}',
-                 checks=[self.check('[0].name', '{task_name}')]
-                )
+                 checks=[self.check('[0].name', '{task_name}')])
 
         # trigger a run from the task
         response = self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
