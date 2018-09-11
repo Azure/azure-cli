@@ -834,20 +834,20 @@ class AzCommandGroup(CommandGroup):
 
         return operations_tmpl.format(name)
 
-    def generic_update_command(self, name,
-                               getter_name='get', getter_type=None,
+    def generic_update_command(self, name, getter_name='get', getter_type=None,
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
                                custom_func_name=None, custom_func_type=None, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command
         self._check_stale()
-        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
+        merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg())
+        merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
-        custom_func_op = self._resolve_operation(merged_kwargs, custom_func_name, custom_func_type,
+        custom_func_op = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
                                                  custom_command=True) if custom_func_name else None
         _cli_generic_update_command(
             self.command_loader,
@@ -873,7 +873,7 @@ class AzCommandGroup(CommandGroup):
     def _wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_wait_command
         self._check_stale()
-        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
+        merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 
@@ -892,7 +892,7 @@ class AzCommandGroup(CommandGroup):
     def _show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
         from azure.cli.core.commands.arm import _cli_show_command
         self._check_stale()
-        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
+        merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
 

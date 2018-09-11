@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.storage._client_factory import (cf_sa, blob_data_service_factory,
+from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
                                                                page_blob_service_factory, file_data_service_factory,
                                                                queue_data_service_factory, table_data_service_factory,
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
+from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
 from azure.cli.core.profiles import ResourceType
@@ -200,6 +201,25 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('policy update', 'set_acl_policy', min_api='2017-04-17')
         g.storage_custom_command_oauth('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
+
+    blob_container_mgmt_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations.blob_containers_operations'
+                        '#BlobContainersOperations.{}',
+        client_factory=cf_blob_container_mgmt,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk) as g:
+        g.show_command('show', 'get_immutability_policy', transform=transform_immutability_policy)
+        g.command('create', 'create_or_update_immutability_policy')
+        g.command('delete', 'delete_immutability_policy', transform=lambda x: None)
+        g.command('lock', 'lock_immutability_policy')
+        g.command('extend', 'extend_immutability_policy')
+
+    with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk) as g:
+        g.command('set', 'set_legal_hold')
+        g.command('clear', 'clear_legal_hold')
+        g.show_command('show', 'get', transform=lambda x: getattr(x, 'legal_hold', x))
 
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',

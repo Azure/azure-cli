@@ -15,7 +15,14 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       IotHubSkuInfo,
                                       SharedAccessSignatureAuthorizationRule,
                                       IotHubProperties,
-                                      EventHubProperties)
+                                      EventHubProperties,
+                                      RoutingEventHubProperties,
+                                      RoutingServiceBusQueueEndpointProperties,
+                                      RoutingServiceBusTopicEndpointProperties,
+                                      RoutingStorageContainerProperties,
+                                      RouteProperties,
+                                      RoutingMessage)
+
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
@@ -26,6 +33,7 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
+from azure.cli.command_modules.iot.shared import EndpointType
 
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate
@@ -508,6 +516,171 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
     return client.iot_hub_resource.get_stats(resource_group_name, hub_name)
 
 
+def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_type,
+                                    endpoint_resource_group, endpoint_subscription_id,
+                                    connection_string, container_name=None,
+                                    resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if EndpointType.EventHub.value == endpoint_type.lower():
+        hub.properties.routing.endpoints.event_hubs.append(
+            RoutingEventHubProperties(
+                connection_string=connection_string,
+                name=endpoint_name,
+                subscription_id=endpoint_subscription_id,
+                resource_group=endpoint_resource_group
+            )
+        )
+    elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+        hub.properties.routing.endpoints.service_bus_queues.append(
+            RoutingServiceBusQueueEndpointProperties(
+                connection_string=connection_string,
+                name=endpoint_name,
+                subscription_id=endpoint_subscription_id,
+                resource_group=endpoint_resource_group
+            )
+        )
+    elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+        hub.properties.routing.endpoints.service_bus_topics.append(
+            RoutingServiceBusTopicEndpointProperties(
+                connection_string=connection_string,
+                name=endpoint_name,
+                subscription_id=endpoint_subscription_id,
+                resource_group=endpoint_resource_group
+            )
+        )
+    elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+        if not container_name:
+            raise CLIError("Container name is required.")
+        hub.properties.routing.endpoints.storage_containers.append(
+            RoutingStorageContainerProperties(
+                connection_string=connection_string,
+                name=endpoint_name,
+                subscription_id=endpoint_subscription_id,
+                resource_group=endpoint_resource_group,
+                container_name=container_name
+            )
+        )
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_routing_endpoint_list(client, hub_name, endpoint_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if not endpoint_type:
+        return hub.properties.routing.endpoints
+    elif EndpointType.EventHub.value == endpoint_type.lower():
+        return hub.properties.routing.endpoints.event_hubs
+    elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+        return hub.properties.routing.endpoints.service_bus_queues
+    elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+        return hub.properties.routing.endpoints.service_bus_topics
+    elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+        return hub.properties.routing.endpoints.storage_containers
+
+
+def iot_hub_routing_endpoint_show(client, hub_name, endpoint_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    for event_hub in hub.properties.routing.endpoints.event_hubs:
+        if event_hub.name.lower() == endpoint_name.lower():
+            return event_hub
+    for service_bus_queue in hub.properties.routing.endpoints.service_bus_queues:
+        if service_bus_queue.name.lower() == endpoint_name.lower():
+            return service_bus_queue
+    for service_bus_topic in hub.properties.routing.endpoints.service_bus_topics:
+        if service_bus_topic.name.lower() == endpoint_name.lower():
+            return service_bus_topic
+    for storage_container in hub.properties.routing.endpoints.storage_containers:
+        if storage_container.name.lower() == endpoint_name.lower():
+            return storage_container
+    raise CLIError("No endpoint found.")
+
+
+def iot_hub_routing_endpoint_delete(client, hub_name, endpoint_name=None, endpoint_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_create(client, hub_name, route_name, source_type, endpoint_name, enabled=None, condition=None,
+                         resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    hub.properties.routing.routes.append(
+        RouteProperties(
+            source=source_type,
+            name=route_name,
+            endpoint_names=endpoint_name.split(),
+            condition=('true' if condition is None else condition),
+            is_enabled=(True if enabled is None else enabled)
+        )
+    )
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_list(client, hub_name, source_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if source_type:
+        return [route for route in hub.properties.routing.routes if route.source.lower() == source_type.lower()]
+    return hub.properties.routing.routes
+
+
+def iot_hub_route_show(client, hub_name, route_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    for route in hub.properties.routing.routes:
+        if route.name.lower() == route_name.lower():
+            return route
+    raise CLIError("No route found.")
+
+
+def iot_hub_route_delete(client, hub_name, route_name=None, source_type=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if not route_name and not source_type:
+        hub.properties.routing.routes = []
+    if route_name:
+        hub.properties.routing.routes = [route for route in hub.properties.routing.routes
+                                         if route.name.lower() != route_name.lower()]
+    if source_type:
+        hub.properties.routing.routes = [route for route in hub.properties.routing.routes
+                                         if route.source.lower() != source_type.lower()]
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None,
+                         condition=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    updated_route = next((route for route in hub.properties.routing.routes
+                          if route.name.lower() == route_name.lower()), None)
+    if updated_route:
+        updated_route.source = updated_route.source if source_type is None else source_type
+        updated_route.endpoint_names = updated_route.endpoint_names if endpoint_name is None else endpoint_name.split()
+        updated_route.condition = updated_route.condition if condition is None else condition
+        updated_route.is_enabled = updated_route.is_enabled if enabled is None else enabled
+    else:
+        raise CLIError("No route found.")
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
+                       system_properties=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    route_message = RoutingMessage(
+        body=body,
+        app_properties=app_properties,
+        system_properties=system_properties
+    )
+    if route_name:
+        route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
+        return client.iot_hub_resource.test_route(hub_name, resource_group_name, route, route_message)
+    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, source_type, route_message)
+
+
 def _get_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     # Intermediate fix to support domains beyond azure-devices.net
@@ -593,3 +766,37 @@ def _check_dps_name_availability(iot_dps_resource, dps_name):
 def _convert_rights_to_access_rights(right_list):
     right_set = set(right_list)  # remove duplicate
     return ",".join(list(right_set))
+
+
+def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
+    if endpoint_type:
+        if EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+            endpoints.service_bus_queues = []
+        elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+            endpoints.service_bus_topics = []
+        elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+            endpoints.storage_containers = []
+        elif EndpointType.EventHub.value == endpoint_type.lower():
+            endpoints.event_hubs = []
+
+    if endpoint_name:
+        if any(e.name.lower() == endpoint_name.lower() for e in endpoints.service_bus_queues):
+            sbq_endpoints = [e for e in endpoints.service_bus_queues if e.name.lower() != endpoint_name.lower()]
+            endpoints.service_bus_queues = sbq_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.service_bus_topics):
+            sbt_endpoints = [e for e in endpoints.service_bus_topics if e.name.lower() != endpoint_name.lower()]
+            endpoints.service_bus_topics = sbt_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.storage_containers):
+            sc_endpoints = [e for e in endpoints.storage_containers if e.name.lower() != endpoint_name.lower()]
+            endpoints.storage_containers = sc_endpoints
+        elif any(e.name.lower() == endpoint_name.lower() for e in endpoints.event_hubs):
+            eh_endpoints = [e for e in endpoints.event_hubs if e.name.lower() != endpoint_name.lower()]
+            endpoints.event_hubs = eh_endpoints
+
+    if not endpoint_type and not endpoint_name:
+        endpoints.service_bus_queues = []
+        endpoints.service_bus_topics = []
+        endpoints.storage_containers = []
+        endpoints.event_hubs = []
+
+    return endpoints
