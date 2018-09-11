@@ -174,6 +174,10 @@ def create_container(cmd,
     else:
         environment_variables = environment_variables or secure_environment_variables
 
+    cg_network_profile = None
+    if network_profile:
+        cg_network_profile = ContainerGroupNetworkProfile(id=network_profile)
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -190,25 +194,12 @@ def create_container(cmd,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None,
-                            network_profile=_get_network_profile(network_profile, ip_address, dns_name_label),
+                            network_profile=cg_network_profile,
                             diagnostics=diagnostics,
                             tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
-
-
-def _get_network_profile(network_profile, ip_address, dns_name_label):
-    if network_profile and ip_address:
-        raise CLIError('Can not use "--network-profile" with IP address type "Public".')
-    elif network_profile and dns_name_label:
-        raise CLIError('Can not use "--network-profile" with "--dns-name-label".')
-
-    cg_network_profile = None
-    if network_profile:
-        cg_network_profile = ContainerGroupNetworkProfile(id=network_profile)
-
-    return cg_network_profile
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):

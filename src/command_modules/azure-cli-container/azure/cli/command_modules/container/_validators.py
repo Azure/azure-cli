@@ -35,3 +35,20 @@ def validate_secret(string):
 def validate_gitrepo_directory(ns):
     if ns.gitrepo_dir and '..' in ns.gitrepo_dir:
         raise CLIError("The git repo directory cannot contain '..'")
+
+def validate_network_profile(cmd, ns):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    if ns.network_profile and ns.ip_address:
+        raise CLIError('Can not use "--network-profile" with IP address type "Public".')
+    elif ns.network_profile and ns.dns_name_label:
+        raise CLIError('Can not use "--network-profile" with "--dns-name-label".')
+    elif ns.network_profile:
+        if not is_valid_resource_id(ns.network_profile):
+            ns.network_profile = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=ns.resource_group_name,
+                namespace='Microsoft.Network', type='networkProfiles',
+                name=ns.network_profile
+            )
