@@ -4,7 +4,6 @@ Release History
 ===============
 2.2.3
 ++++++
-* Minor fixes.
 * `vm list-ip-addresses`: now shows possible availability zones of public IP addresses.
 
 2.2.2
