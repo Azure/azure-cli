@@ -16,7 +16,6 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_playready_fail(self, storage_account_for_create):
@@ -38,7 +37,6 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         with self.assertRaises(CLIError):
             self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-configuration "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}')
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -116,7 +114,6 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.licenses[0].playRight.explicitAnalogTelevisionOutputRestriction.bestEffort', '{bestEffort}'),
             self.check('options[0].configuration.licenses[0].playRight.explicitAnalogTelevisionOutputRestriction.configurationData', '{configurationData}')
         ])
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
