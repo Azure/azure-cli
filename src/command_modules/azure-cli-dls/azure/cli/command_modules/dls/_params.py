@@ -20,6 +20,9 @@ from azure.mgmt.datalake.store.models import EncryptionConfigType
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
+    from ._validators import (
+        validate_subnet
+    )
     # ARGUMENT DEFINITIONS
     datalake_store_name_type = CLIArgumentType(help='Name of the Data Lake Store account.', options_list=['--account_name'], completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
 
@@ -55,6 +58,39 @@ def load_arguments(self, _):
 
     with self.argument_context('dls account list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)
+
+    #####
+    # virtual network rule
+    #####
+    with self.argument_context('dls account network-rule') as c:
+        c.argument('account_name', datalake_store_name_type, options_list=['--account-name'], id_part=None)
+        c.argument('resource_group_name', resource_group_name_type, id_part='resource_group')
+
+        c.argument('virtual_network_rule_name',
+                   options_list=['--name', '-n'],
+                   help='The virtual network rule name',
+                   id_part='name')
+
+        c.argument('subnet',
+                   options_list=['--subnet'],
+                   help='Name or ID of the subnet that allows access to DLS. '
+                   'If subnet name is provided, --name must be provided.')
+
+    with self.argument_context('dls account network-rule create') as c:
+        c.extra('vnet_name',
+                help='The virtual network rule name',
+                validator=validate_subnet)
+
+    with self.argument_context('dls account network-rule update') as c:
+        c.argument('subnet_id',
+                   options_list=['--subnet'],
+                   help='Name or ID of the subnet that allows access to DLS. '
+                   'If subnet name is provided, --name must be provided.')
+
+        c.extra('vnet_name', help='The virtual network rule name')
+
+    with self.argument_context('dls account network-rule list') as c:
+        c.argument('virtual_network_rule_name', id_part=None)
 
     # filesystem
     with self.argument_context('dls fs') as c:
