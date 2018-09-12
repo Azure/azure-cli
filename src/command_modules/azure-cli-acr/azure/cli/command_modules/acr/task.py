@@ -381,6 +381,7 @@ def acr_task_show_run(cmd,
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, run_id)
 
+
 def acr_task_cancel_run(cmd,
                         client,  # cf_acr_runs
                         run_id,
@@ -389,6 +390,7 @@ def acr_task_cancel_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.cancel(resource_group_name, registry_name, run_id)
+
 
 def acr_task_list_runs(cmd,
                        client,  # cf_acr_runs
