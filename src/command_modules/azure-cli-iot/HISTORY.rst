@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Adds support for routing IoT Hubs.
+
 0.3.1
 +++++
 * Increment DPS mgmt SDK requirement

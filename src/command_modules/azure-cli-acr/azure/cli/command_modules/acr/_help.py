@@ -64,6 +64,16 @@ helps['acr run'] = """
             az acr run -r myregistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
     """
 
+helps['acr helm'] = """
+    type: group
+    short-summary: Manage helm charts for Azure Container Registries.
+    """
+
+helps['acr helm repo'] = """
+    type: group
+    short-summary: Manage helm chart repositories for Azure Container Registries.
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if an Azure Container Registry name is valid and available for use.
@@ -678,4 +688,59 @@ helps['acr import'] = """
         - name: Import an image from a registry in a different subscription.
           text: >
             az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
+"""
+
+helps['acr helm list'] = """
+    type: command
+    short-summary: List all helm charts in a container registry.
+    examples:
+        - name: List all helm charts in a container registry
+          text: >
+            az acr helm list -n MyRegistry
+"""
+
+helps['acr helm show'] = """
+    type: command
+    short-summary: Describe a helm chart in a container registry.
+    examples:
+        - name: Show all versions of a helm chart in a container registry
+          text: >
+            az acr helm show -n MyRegistry mychart
+        - name: Show a helm chart version in a container registry.
+          text: >
+            az acr helm show -n MyRegistry mychart --version 0.3.2
+"""
+
+helps['acr helm delete'] = """
+    type: command
+    short-summary: Delete a helm chart version in a container registry.
+    examples:
+        - name: Delete all versions of a helm chart in a container registry
+          text: >
+            az acr helm delete -n MyRegistry mychart
+        - name: Delete a helm chart version in a container registry.
+          text: >
+            az acr helm delete -n MyRegistry mychart --version 0.3.2
+"""
+
+helps['acr helm push'] = """
+    type: command
+    short-summary: Push a helm chart package to a container registry.
+    examples:
+        - name: Push a chart package to a container registry.
+          text: >
+            az acr helm push -n MyRegistry mychart-0.3.2.tgz
+        - name: Push a chart package to a container registry, overwriting the existing one.
+          text: >
+            az acr helm push -n MyRegistry mychart-0.3.2.tgz --force
+"""
+
+helps['acr helm repo add'] = """
+    type: command
+    short-summary: Add a helm chart repository from a container registry through the Helm CLI.
+    long-summary: Helm must be installed on your machine.
+    examples:
+        - name: Add a helm chart repository from a container registry to manage helm charts.
+          text: >
+            az acr helm repo add -n MyRegistry
 """

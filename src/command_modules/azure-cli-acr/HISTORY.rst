@@ -8,6 +8,7 @@ Release History
 * Add ACR Task commands.
 * Add quick run command.
 * Deprecate build-task command group.
+* Add helm command group to support managing helm charts with ACR.
 * Allow idempotent create for managed registry.
 * Add a no-format flag for displaying build logs
 

@@ -162,7 +162,6 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    from subprocess import PIPE, Popen
     docker_command = _get_docker_command()
 
     login_server, username, password = get_login_credentials(
@@ -172,6 +171,7 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
+    from subprocess import PIPE, Popen
     p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,
@@ -215,7 +215,7 @@ def _get_docker_command():
         p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
     except OSError:
-        # docker is not discoverable in WSL so retry docker.exe once
+        # The executable may not be discoverable in WSL so retry *.exe once
         try:
             docker_command = 'docker.exe'
             p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)

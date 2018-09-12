@@ -1945,6 +1945,38 @@ helps['network express-route peering update'] = """
 """
 # endregion
 
+# region Interface Endpoint
+helps['network interface-endpoint'] = """
+    type: group
+    short-summary: Manage interface endpoints.
+"""
+
+# helps['network interface-endpoint create'] = """
+#    type: command
+#    short-summary: Create an interface endpoint.
+# """
+
+# helps['network interface-endpoint delete'] = """
+#    type: command
+#    short-summary: Delete an interface endpoint.
+# """
+
+helps['network interface-endpoint list'] = """
+    type: command
+    short-summary: List interface endpoints.
+"""
+
+helps['network interface-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an interface endpoint.
+"""
+
+# helps['network interface-endpoint update'] = """
+#    type: command
+#    short-summary: Update an interface endpoint.
+# """
+# endregion
+
 # region Load Balancer
 helps['network lb'] = """
     type: group
@@ -2203,6 +2235,38 @@ helps['network lb inbound-nat-rule update'] = """
           text: |
             az network lb inbound-nat-rule update -g MyResourceGroup --lb-name MyLb -n MyNatRule \\
                 --floating-ip false --idle-timeout 5
+"""
+# endregion
+
+# region Load Balancer outbound rule
+helps['network lb outbound-rule'] = """
+    type: group
+    short-summary: Manage outbound rules of a load balancer.
+"""
+
+helps['network lb outbound-rule create'] = """
+    type: command
+    short-summary: Create an outbound-rule.
+"""
+
+helps['network lb outbound-rule delete'] = """
+    type: command
+    short-summary: Delete an outbound-rule.
+"""
+
+helps['network lb outbound-rule list'] = """
+    type: command
+    short-summary: List outbound rules.
+"""
+
+helps['network lb outbound-rule show'] = """
+    type: command
+    short-summary: Get the details of an outbound rule.
+"""
+
+helps['network lb outbound-rule update'] = """
+    type: command
+    short-summary: Update an outbound-rule.
 """
 # endregion
 
@@ -2720,6 +2784,31 @@ helps['network nsg rule update'] = """
 """
 # endregion
 
+# region NetworkProfile
+helps['network profile'] = """
+    type: group
+    short-summary: Manage network profiles.
+    long-summary: >
+        To create a network profile, see the create command for the relevant resource. Currently,
+        only Azure Container Instances are supported.
+"""
+
+helps['network profile delete'] = """
+    type: command
+    short-summary: Delete a network profile.
+"""
+
+helps['network profile list'] = """
+    type: command
+    short-summary: List network profiles.
+"""
+
+helps['network profile show'] = """
+    type: command
+    short-summary: Get the details of a network profile.
+"""
+# endregion
+
 # region Public IP
 helps['network public-ip'] = """
     type: group
@@ -2777,6 +2866,36 @@ helps['network public-ip update'] = """
     examples:
         - name: Update a public IP resource with a DNS name label and static allocation.
           text: az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
+"""
+
+helps['network public-ip prefix'] = """
+    type: group
+    short-summary: Manage public IP prefix resources.
+"""
+
+helps['network public-ip prefix create'] = """
+    type: command
+    short-summary: Create a public IP prefix resource.
+"""
+
+helps['network public-ip prefix delete'] = """
+    type: command
+    short-summary: Delete a public IP prefix resource.
+"""
+
+helps['network public-ip prefix list'] = """
+    type: command
+    short-summary: List public IP prefix resources.
+"""
+
+helps['network public-ip prefix show'] = """
+    type: command
+    short-summary: Get the details of a public IP prefix resource.
+"""
+
+helps['network public-ip prefix update'] = """
+    type: command
+    short-summary: Update a public IP prefix resource.
 """
 # endregion
 
@@ -2992,6 +3111,78 @@ helps['network route-filter rule update'] = """
             az network route-filter rule update -g MyResourceGroup --filter-name MyRouteFilter \\
                 -n MyRouteFilterRule --add communities='12076:5010'
 """
+# endregion
+
+# region Service Endpoint
+helps['network service-endpoint'] = """
+    type: group
+    short-summary: Manage policies related to service endpoints.
+"""
+
+helps['network service-endpoint policy'] = """
+    type: group
+    short-summary: Manage service endpoint policies.
+"""
+
+helps['network service-endpoint policy create'] = """
+    type: command
+    short-summary: Create a service endpoint policy.
+"""
+
+helps['network service-endpoint policy delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy.
+"""
+
+helps['network service-endpoint policy list'] = """
+    type: command
+    short-summary: List service endpoint policies.
+"""
+
+helps['network service-endpoint policy show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy.
+"""
+
+helps['network service-endpoint policy update'] = """
+    type: command
+    short-summary: Update a service endpoint policy.
+"""
+
+helps['network service-endpoint policy-definition'] = """
+    type: group
+    short-summary: Manage service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition create'] = """
+    type: command
+    short-summary: Create a service endpoint policy definition.
+    parameters:
+        - name: --service
+          populator-commands:
+          - az network service-endpoint list
+"""
+
+helps['network service-endpoint policy-definition delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition list'] = """
+    type: command
+    short-summary: List service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition update'] = """
+    type: command
+    short-summary: Update a service endpoint policy definition.
+"""
+
 # endregion
 
 # region Traffic Manager
@@ -3231,7 +3422,15 @@ helps['network vnet subnet list'] = """
     short-summary: List the subnets in a virtual network.
     examples:
         - name: List the subnets in a virtual network.
-          text: az network vnet subnet list -g MyResourceGroup -n MyVNet
+          text: az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
+"""
+
+helps['network vnet subnet list-available-delegations'] = """
+    type: command
+    short-summary: List the services available for subnet delegation.
+    examples:
+        - name: Retrieve the service names for available delegations in the West US region.
+          text: az network vnet subnet list-available-delegations -l westus --query [].serviceName
 """
 
 helps['network vnet subnet show'] = """
@@ -3745,6 +3944,34 @@ helps['network watcher test-ip-flow'] = """
             az network watcher test-ip-flow -g MyResourceGroup --direction Outbound \\
                 --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm MyVm
 """
+
+helps['network watcher run-configuration-diagnostic'] = """
+    type: command
+    short-summary: Run a configuration diagnostic on a target resource.
+    long-summary: >
+        Requires that Network Watcher is enabled for the region in which the target is located.
+    examples:
+        - name: Run configuration diagnostic on a VM with a single query.
+          text: |
+            az network watcher run-configuration-diagnostic --resource {VM_ID}
+               --direction Inbound --protocol TCP --source 12.11.12.14 --destination 10.1.1.4 --port 12100
+        - name: Run configuration diagnostic on a VM with multiple queries.
+          text: |
+            az network watcher run-configuration-diagnostic --resource {VM_ID}
+                --queries '[
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.0/32",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Outbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                }]'
+"""
 # endregion
 
 # region Network Watcher Connection Monitor
@@ -3856,7 +4083,7 @@ helps['network watcher packet-capture create'] = """
         - name: --vm
           short-summary: Name or ID of the VM to target.
         - name: --filters
-          short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
+          short-summary: JSON encoded list of packet filters. Use `@{path}` to load from file.
     examples:
         - name: Create a packet capture session on a VM.
           text: az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm --storage-account MyStorageAccount
