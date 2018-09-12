@@ -1311,7 +1311,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2euap')
-    def test_vm_ultra_ssd_storage_sku(self, resource_group):
+    def vm_ultra_ssd_storage_sku(self, resource_group):  # TODO bring it back once service end is working
 
         self.kwargs.update({
             'vm': 'vm-ultrassd',
