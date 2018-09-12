@@ -189,7 +189,7 @@ def _task_format_group(item):
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
+        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath'))
     ])
 
@@ -199,9 +199,9 @@ def _task_detail_format_group(item):
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'status')),
+        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('BRANCH', _get_value((_get_value_arr(item, 'trigger', 'sourceTriggers')), 'sourceRepository', 'branch')),
+        ('BRANCH',_get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
         ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
         ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
@@ -241,18 +241,6 @@ def _get_value(item, *args):
         for arg in args:
             item = item[arg]
         return str(item) if item else ' '
-    except (KeyError, TypeError, IndexError):
-        return ' '
-
-
-def _get_value_arr(item, *args):
-    """Get a nested array from a dict.
-    :param dict item: The dict object
-    """
-    try:
-        for arg in args:
-            item = item[arg]
-        return item[0] if item else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

@@ -130,7 +130,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                             scope='repo'
                         )
                     ),
-                    # TODO: pull request?
                     source_trigger_events=[SourceTriggerEvent.commit.value],
                     status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
                     name=source_trigger_name if source_trigger_name else "defaultSourceTriggerName"
@@ -143,16 +142,14 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             ) if base_image_trigger_enabled else None
         )
     )
+
     try:
-        task = LongRunningOperation(cmd.cli_ctx)(
-            client.create(resource_group_name=resource_group_name,
-                          registry_name=registry_name,
-                          task_name=task_name,
-                          task_create_parameters=task_create_parameters))
+        return client.create(resource_group_name=resource_group_name,
+                             registry_name=registry_name,
+                             task_name=task_name,
+                             task_create_parameters=task_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
-
-    return task
 
 
 def acr_task_show(cmd,
@@ -165,9 +162,8 @@ def acr_task_show(cmd,
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if not with_secure_properties:
-        return client.get(resource_group_name, registry_name, task_name)
-    else:
         return client.get_details(resource_group_name, registry_name, task_name)
+    return client.get(resource_group_name, registry_name, task_name)
 
 
 def acr_task_list(cmd,
@@ -194,7 +190,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     resource_group_name=None,
-                    # build task parameters
+                    # task parameters
                     status=None,
                     os_type=None,
                     cpu=None,
@@ -280,7 +276,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                             token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
-                    # TODO: pull request?
                     source_trigger_events=[SourceTriggerEvent.commit],
                     status=status,
                     name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"""

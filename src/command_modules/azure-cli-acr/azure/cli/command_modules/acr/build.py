@@ -53,8 +53,7 @@ def acr_build(cmd,
 
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):
-            raise CLIError(
-                "Source location should be a local directory path or remote URL.")
+            raise CLIError("Source location should be a local directory path or remote URL.")
 
         # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
         # Otherwise, it's based on current working directory.
@@ -84,8 +83,7 @@ def acr_build(cmd,
             raise CLIError(err)
         finally:
             try:
-                logger.debug(
-                    "Deleting the archived source code from '%s'...", tar_file_path)
+                logger.debug("Deleting the archived source code from '%s'...", tar_file_path)
                 os.remove(tar_file_path)
             except OSError:
                 pass
@@ -100,8 +98,7 @@ def acr_build(cmd,
             is_push_enabled = True
         else:
             is_push_enabled = False
-            logger.warning(
-                "'--image or -t' is not provided. Skipping image push after build.")
+            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
     docker_build_request = DockerBuildRequest(
         image_names=image_names,

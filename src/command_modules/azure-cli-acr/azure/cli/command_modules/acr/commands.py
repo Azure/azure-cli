@@ -170,8 +170,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  table_transformer=replication_output_format)
 
     # Deprecated (for backward compatibility).
-    with self.command_group('acr build-task', acr_build_task_util,
-                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g:  # This command group is deprecated and will be hidden immediately.
+    with self.command_group('acr build-task',
+                            acr_build_task_util,
+                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g:
         g.command('create', 'acr_build_task_create')
         g.show_command('show', 'acr_build_task_show',
                        table_transformer=build_task_detail_output_format)

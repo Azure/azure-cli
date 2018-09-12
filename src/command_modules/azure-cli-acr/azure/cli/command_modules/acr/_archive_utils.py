@@ -12,9 +12,7 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.storage.blob import (
-    BlockBlobService,
-)
+from azure.storage.blob import BlockBlobService
 from ._azure_utils import get_blob_info
 
 logger = get_logger(__name__)
@@ -23,8 +21,10 @@ logger = get_logger(__name__)
 def upload_source_code(client, registry_name, resource_group_name,
                        source_location, tar_file_path,
                        docker_file_path, docker_file_in_tar):
-    _pack_source_code(source_location, tar_file_path,
-                      docker_file_path, docker_file_in_tar)
+    _pack_source_code(source_location,
+                      tar_file_path,
+                      docker_file_path,
+                      docker_file_in_tar)
 
     size = os.path.getsize(tar_file_path)
     unit = 'GiB'
@@ -34,8 +34,7 @@ def upload_source_code(client, registry_name, resource_group_name,
             break
         size = size / 1024.0
 
-    logger.warning(
-        "Uploading archived source code from '%s'...", tar_file_path)
+    logger.warning("Uploading archived source code from '%s'...", tar_file_path)
     upload_url = None
     relative_path = None
     error_message = "Could not get SAS URL to upload."
