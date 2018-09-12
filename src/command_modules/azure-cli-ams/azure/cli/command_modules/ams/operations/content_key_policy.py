@@ -4,15 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
-import base64
+import base64, json
 
+from datetime import timedelta
 from knack.util import CLIError
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
                                      ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim,
-                                     ContentKeyPolicyWidevineConfiguration, ContentKeyPolicyFairPlayConfiguration)
+                                     ContentKeyPolicyWidevineConfiguration, ContentKeyPolicyFairPlayConfiguration,
+                                     ContentKeyPolicyPlayReadyConfiguration, ContentKeyPolicyPlayReadyLicense,
+                                     ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader,
+                                     ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier,
+                                     ContentKeyPolicyPlayReadyPlayRight,
+                                     ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction)
 
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -128,10 +134,13 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
                                                                  fair_play_pfx, rental_and_lease_key_type,
                                                                  rental_duration)
 
+    valid_playready_configuration = _valid_playready_configuration(play_ready_configuration)
+
     if _count_truthy([open_restriction, valid_token_restriction]) != 1:
         raise CLIError('You should use exactly one restriction type.')
 
-    if _count_truthy([clear_key_configuration, widevine_template, valid_fairplay_configuration]) != 1:
+    if _count_truthy([clear_key_configuration, widevine_template, 
+                      valid_fairplay_configuration, valid_playready_configuration]) != 1:
         raise CLIError('You should use exactly one configuration type.')
 
     if clear_key_configuration:
@@ -147,6 +156,9 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)
 
+    if valid_playready_configuration:
+        configuration = _play_ready_configuration_factory(json.loads(play_ready_configuration))
+        
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
 
@@ -210,6 +222,9 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 def _coalesce_str(value):
     return value or ''
 
+def _coalesce_timedelta(value):
+    return value and timedelta(seconds=value) or None
+
 
 # Counts how many values are truthy on a list.
 def _count_truthy(values):
@@ -252,6 +267,118 @@ def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
         [ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration],
         'Malformed content key policy FairPlay configuration.')
 
+
+def _valid_playready_configuration(play_ready_configuration):
+
+    def __valid_license(lic):
+        return _validate_all_conditions([lic.get('allow_test_devices') is not None,
+                                         lic.get('license_type') in ['NonPersistent', 'Persistent'],
+                                         __valid_content_key_location(lic.get('content_key_location')),
+                                         lic.get('content_type') in ['Unspecified', 'UltraVioletDownload', 'UltraVioletStreaming'],
+                                         lic.get('play_right') is None or __valid_play_right(lic.get('play_right'))],
+                                        'Malformed PlayReady license.')
+
+    def __valid_content_key_location(loc):
+        return (loc.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader' or
+                (loc.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier' and
+                 loc.get('key_id') is not None))
+
+    def __valid_play_right(prl):
+        return _validate_all_conditions([(prl.get('explicit_analog_television_output_restriction') is None or
+                                          __valid_eator(prl.get('explicit_analog_television_output_restriction'))),
+                                         prl.get('digital_video_only_content_restriction') is not None,
+                                         prl.get('image_constraint_for_analog_component_video_restriction') is not None,
+                                         prl.get('image_constraint_for_analog_computer_monitor_restriction') is not None,
+                                         prl.get('allow_passing_video_content_to_unknown_output') in ['NotAllowed', 'Allowed',
+                                                                                                      'AllowedWithVideoConstriction']],
+                                        'Malformed license PlayRight.')
+
+    def __valid_eator(eator):
+        return _validate_all_conditions([eator.get('best_effort') is not None,
+                                         eator.get('configuration_data') is not None],
+                                        'Malformed explicit analog television output restriction.')
+
+    cfg = None
+
+    try:
+        cfg = json.loads(play_ready_configuration)
+    except ValueError as err:
+        raise CLIError('Malformed JSON: ' + str(err))
+
+    return _validate_all_conditions(
+        [cfg.get('licenses') is not None,
+         len(cfg.get('licenses')) > 0,
+         all(__valid_license(l) for l in cfg.get('licenses'))],
+        'Malformed content key policy PlayReady configuration'
+    )
+
+
+def _play_ready_configuration_factory(content):
+
+    def __get_content_key_location(ckl):
+        content_key_location = None
+        if ckl.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader':
+            content_key_location = ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader()
+        elif ckl.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier':
+            content_key_location = ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier(
+                key_id=ckl.get('key_id')
+            )
+        return content_key_location
+
+    def __get_eator(eator):
+        if eator is None:
+            return None
+        return ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction(
+            best_effort=eator.get('best_effort'),
+            configuration_data=eator.get('configuration_data')
+        )
+
+    def __get_play_right(prl):
+        if prl is None:
+            return None
+        return ContentKeyPolicyPlayReadyPlayRight(
+            first_play_expiration=_coalesce_timedelta(prl.get('first_play_expiration')),
+            scms_restriction=prl.get('scms_restriction'),
+            agc_and_color_stripe_restriction=prl.get('agc_and_color_stripe_restriction'),
+            explicit_analog_television_output_restriction=
+                __get_eator(prl.get('explicit_analog_television_output_restriction')),
+            digital_video_only_content_restriction=prl.get('digital_video_only_content_restriction'),
+            image_constraint_for_analog_component_video_restriction=
+                prl.get('image_constraint_for_analog_component_video_restriction'),
+            image_constraint_for_analog_computer_monitor_restriction=
+                prl.get('image_constraint_for_analog_computer_monitor_restriction'),
+            allow_passing_video_content_to_unknown_output=
+                prl.get('allow_passing_video_content_to_unknown_output'),
+            uncompressed_digital_video_opl=prl.get('uncompressed_digital_video_opl'),
+            compressed_digital_video_opl=prl.get('compressed_digital_video_opl'),
+            analog_video_opl=prl.get('analog_video_opl'),
+            compressed_digital_audio_opl=prl.get('compressed_digital_audio_opl'),
+            uncompressed_digital_audio_opl=prl.get('uncompressed_digital_audio_opl')            
+        )
+
+    def __get_license(lic):
+        return ContentKeyPolicyPlayReadyLicense(
+            allow_test_devices=lic.get('allow_test_devices'),
+            begin_date=lic.get('begin_date'),
+            expiration_date=lic.get('expiration_date'),
+            relative_begin_date=_coalesce_timedelta(lic.get('relative_begin_date')),
+            relative_expiration_date=_coalesce_timedelta(lic.get('relative_expiration_date')),
+            grace_period=_coalesce_timedelta(lic.get('grace_period')),
+            play_right=__get_play_right(lic.get('play_right')),
+            license_type=lic.get('license_type'),
+            content_key_location=__get_content_key_location(
+                lic.get('content_key_location')
+            ),
+            content_type=lic.get('content_type')
+        )
+
+    def __get_licenses(lics):
+        return [__get_license(lic) for lic in lics]
+
+    return ContentKeyPolicyPlayReadyConfiguration(
+        licenses=__get_licenses(content.get('licenses')),
+        response_custom_data=content.get('response_custom_data')
+    )
 
 def _validate_all_conditions(conditions, error_if_malformed):
     well_formed = all(conditions)
