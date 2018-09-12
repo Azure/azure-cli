@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
-import base64, json
+import base64
+import json
 
 from datetime import timedelta
 from knack.util import CLIError
@@ -139,7 +140,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
     if _count_truthy([open_restriction, valid_token_restriction]) != 1:
         raise CLIError('You should use exactly one restriction type.')
 
-    if _count_truthy([clear_key_configuration, widevine_template, 
+    if _count_truthy([clear_key_configuration, widevine_template,
                       valid_fairplay_configuration, valid_playready_configuration]) != 1:
         raise CLIError('You should use exactly one configuration type.')
 
@@ -158,7 +159,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     if valid_playready_configuration:
         configuration = _play_ready_configuration_factory(json.loads(play_ready_configuration))
-        
+
     if open_restriction:
         restriction = ContentKeyPolicyOpenRestriction()
 
@@ -222,8 +223,9 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 def _coalesce_str(value):
     return value or ''
 
+
 def _coalesce_timedelta(value):
-    return value and timedelta(seconds=value) or None
+    return timedelta(seconds=value) if value else None
 
 
 # Counts how many values are truthy on a list.
@@ -340,20 +342,16 @@ def _play_ready_configuration_factory(content):
             first_play_expiration=_coalesce_timedelta(prl.get('first_play_expiration')),
             scms_restriction=prl.get('scms_restriction'),
             agc_and_color_stripe_restriction=prl.get('agc_and_color_stripe_restriction'),
-            explicit_analog_television_output_restriction=
-                __get_eator(prl.get('explicit_analog_television_output_restriction')),
+            explicit_analog_television_output_restriction=__get_eator(prl.get('explicit_analog_television_output_restriction')),
             digital_video_only_content_restriction=prl.get('digital_video_only_content_restriction'),
-            image_constraint_for_analog_component_video_restriction=
-                prl.get('image_constraint_for_analog_component_video_restriction'),
-            image_constraint_for_analog_computer_monitor_restriction=
-                prl.get('image_constraint_for_analog_computer_monitor_restriction'),
-            allow_passing_video_content_to_unknown_output=
-                prl.get('allow_passing_video_content_to_unknown_output'),
+            image_constraint_for_analog_component_video_restriction=prl.get('image_constraint_for_analog_component_video_restriction'),
+            image_constraint_for_analog_computer_monitor_restriction=prl.get('image_constraint_for_analog_computer_monitor_restriction'),
+            allow_passing_video_content_to_unknown_output=prl.get('allow_passing_video_content_to_unknown_output'),
             uncompressed_digital_video_opl=prl.get('uncompressed_digital_video_opl'),
             compressed_digital_video_opl=prl.get('compressed_digital_video_opl'),
             analog_video_opl=prl.get('analog_video_opl'),
             compressed_digital_audio_opl=prl.get('compressed_digital_audio_opl'),
-            uncompressed_digital_audio_opl=prl.get('uncompressed_digital_audio_opl')            
+            uncompressed_digital_audio_opl=prl.get('uncompressed_digital_audio_opl')
         )
 
     def __get_license(lic):
@@ -379,6 +377,7 @@ def _play_ready_configuration_factory(content):
         licenses=__get_licenses(content.get('licenses')),
         response_custom_data=content.get('response_custom_data')
     )
+
 
 def _validate_all_conditions(conditions, error_if_malformed):
     well_formed = all(conditions)
