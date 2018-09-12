@@ -10,13 +10,12 @@ try:
 except ImportError:
     from urllib import unquote
 
-from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
 
-from ._utils import validate_managed_registry
+from ._utils import validate_managed_registry, user_confirmation
 from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,
@@ -436,7 +435,7 @@ def acr_repository_delete(cmd,
             yes=yes)
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
     else:
-        _user_confirmation("Are you sure you want to delete the repository '{}' "
+        user_confirmation("Are you sure you want to delete the repository '{}' "
                            "and all images under it?".format(repository), yes)
         path = '/v2/_acr/{}/repository'.format(repository)
 
@@ -502,7 +501,7 @@ def _legacy_delete(cmd,
     # If manifest is not specified
     if manifest is None:
         if not tag:
-            _user_confirmation("Are you sure you want to delete the repository '{}' "
+            user_confirmation("Are you sure you want to delete the repository '{}' "
                                "and all images under it?".format(repository), yes)
             path = '/v2/_acr/{}/repository'.format(repository)
         else:
@@ -510,7 +509,7 @@ def _legacy_delete(cmd,
                 "This command is deprecated. The new command for this operation "
                 "is 'az acr repository untag --name %s --image %s:%s'.",
                 registry_name, repository, tag)
-            _user_confirmation("Are you sure you want to delete the tag '{}:{}'?".format(repository, tag), yes)
+            user_confirmation("Are you sure you want to delete the tag '{}:{}'?".format(repository, tag), yes)
             path = '/v2/_acr/{}/tags/{}'.format(repository, tag)
     # If --manifest is specified as a flag
     elif not manifest:
@@ -588,19 +587,9 @@ def _delete_manifest_confirmation(login_server,
     if filter_by_manifest:
         images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in filter_by_manifest])
         message += " and all the following images: {}".format(images)
-    _user_confirmation("{}.\nAre you sure you want to continue?".format(message))
+    user_confirmation("{}.\nAre you sure you want to continue?".format(message))
 
     return manifest
-
-
-def _user_confirmation(message, yes=False):
-    if yes:
-        return
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-    except NoTTYException:
-        raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
 
 
 def get_image_digest(cli_ctx, registry_name, resource_group_name, image):

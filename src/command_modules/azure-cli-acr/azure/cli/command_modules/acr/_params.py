@@ -238,6 +238,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr helm delete') as c:
         c.positional('chart', help='The helm chart name.')
+        c.argument('prov', help='Only delete the provenance file.', action='store_true')
 
     with self.argument_context('acr helm push') as c:
         c.positional('chart_package', help="The helm chart package.", completer=FilesCompleter())

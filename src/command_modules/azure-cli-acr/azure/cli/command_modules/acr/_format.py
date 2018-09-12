@@ -58,10 +58,6 @@ def task_output_format(result):
     return _output_format(result, _task_format_group)
 
 
-def task_detail_output_format(result):
-    return _output_format(result, _task_detail_format_group)
-
-
 def build_output_format(result):
     return _output_format(result, _build_format_group)
 
@@ -190,18 +186,8 @@ def _task_format_group(item):
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
-        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath'))
-    ])
-
-
-def _task_detail_format_group(item):
-    return OrderedDict([
-        ('Name', _get_value(item, 'name')),
-        ('PLATFORM', _get_value(item, 'platform', 'os')),
-        ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('BRANCH',_get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
+        ('BRANCH', _get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
         ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
         ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
