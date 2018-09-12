@@ -20,7 +20,8 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskStatus,
     OsType,
-    BuildStatus
+    BuildStatus,
+    BaseImageTriggerType as BuildBaseImageTriggerType
 )
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
@@ -175,7 +176,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('branch', help="The source control branch name.")
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
-        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
+        c.argument('base_image_trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BuildBaseImageTriggerType))
         # build parameters
         c.argument('top', help='Limit the number of latest builds in the results.')
         c.argument('build_id', help='The unique build identifier.')

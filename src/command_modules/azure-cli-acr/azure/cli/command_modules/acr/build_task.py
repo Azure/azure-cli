@@ -310,8 +310,8 @@ def acr_build_task_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
-    from ._client_factory import cf_acr_registries
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_builds
+    client_registries = cf_acr_registries_builds(cmd.cli_ctx)
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(
         client_registries.queue_build(resource_group_name,
