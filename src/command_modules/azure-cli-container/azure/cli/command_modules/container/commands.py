@@ -5,14 +5,13 @@
 
 from ._client_factory import cf_container_groups, cf_container
 from ._format import transform_container_group_list, transform_container_group
-from ._validators import process_container_create_namespace
 
 
 def load_command_table(self, _):
     with self.command_group('container', client_factory=cf_container_groups) as g:
         g.custom_command('list', 'list_containers', table_transformer=transform_container_group_list)
         g.custom_command('create', 'create_container', supports_no_wait=True,
-                         table_transformer=transform_container_group, validator=process_container_create_namespace)
+                         table_transformer=transform_container_group)
         g.custom_show_command('show', 'get_container', table_transformer=transform_container_group)
         g.custom_command('delete', 'delete_container', confirmation=True)
         g.custom_command('logs', 'container_logs', client_factory=cf_container)

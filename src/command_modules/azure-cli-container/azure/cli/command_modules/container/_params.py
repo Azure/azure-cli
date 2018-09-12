@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (
     ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol)
-from ._validators import (validate_volume_mount_path, validate_secrets,
+from ._validators import (validate_volume_mount_path, validate_secrets, validate_subnet,
                           validate_gitrepo_directory, validate_network_profile)
 
 # pylint: disable=line-too-long
@@ -75,14 +75,14 @@ def load_arguments(self, _):
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secure_environment_variables', nargs='+', type=_secure_environment_variables_type, help='A list of secure environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secrets', secrets_type)
-        c.argument('network_profile', network_profile_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 
     with self.argument_context('container create', arg_group='Network Arguments') as c:
+        c.argument('network_profile', network_profile_type)
         c.argument('vnet_name', help='The name of the virtual network when creating a new one or referencing an existing one.')
         c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNet in CIDR format.')
-        c.argument('subnet', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID.')
+        c.argument('subnet', options_list=['--subnet'], validator=validate_subnet, help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID.')
         c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.')
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
