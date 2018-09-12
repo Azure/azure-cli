@@ -17,7 +17,13 @@ from knack.log import get_logger
 from azure.cli.core.util import should_disable_connection_verify
 
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials, get_authorization_header, log_registry_response
+from ._docker_utils import (
+    request_data_from_registry,
+    get_access_credentials,
+    get_authorization_header,
+    log_registry_response,
+    parse_error_message
+)
 
 
 logger = get_logger(__name__)
@@ -30,7 +36,6 @@ DETAIL_NOT_SUPPORTED = 'Detail is only supported for managed registries.'
 ATTRIBUTES_NOT_SUPPORTED = 'Attributes are only supported for managed registries.'
 METADATA_NOT_SUPPORTED = 'Metadata is only supported for managed registries.'
 
-ALLOWED_HTTP_METHOD = ['get', 'patch', 'delete']
 ORDERBY_PARAMS = {
     'time_asc': 'timeasc',
     'time_desc': 'timedesc'
@@ -38,89 +43,7 @@ ORDERBY_PARAMS = {
 MANIFEST_V2_HEADER = {
     'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
 }
-DEFAULT_PAGINATION = 20
-
-
-def _parse_error_message(error_message, response):
-    import json
-    try:
-        server_message = json.loads(response.text)['errors'][0]['message']
-        error_message = 'Error: {}'.format(server_message) if server_message else error_message
-    except (ValueError, KeyError, TypeError, IndexError):
-        pass
-
-    if not error_message.endswith('.'):
-        error_message = '{}.'.format(error_message)
-
-    try:
-        correlation_id = response.headers['x-ms-correlation-request-id']
-        return '{} Correlation ID: {}.'.format(error_message, correlation_id)
-    except (KeyError, TypeError, AttributeError):
-        return error_message
-
-
-def _request_data_from_registry(http_method,
-                                login_server,
-                                path,
-                                username,
-                                password,
-                                result_index=None,
-                                json_payload=None,
-                                params=None,
-                                retry_times=3,
-                                retry_interval=5):
-    if http_method not in ALLOWED_HTTP_METHOD:
-        raise ValueError("Allowed http method: {}".format(ALLOWED_HTTP_METHOD))
-
-    if http_method in ['get', 'delete'] and json_payload:
-        raise ValueError("Empty json payload is required for http method: {}".format(http_method))
-
-    if http_method in ['patch'] and not json_payload:
-        raise ValueError("Non-empty json payload is required for http method: {}".format(http_method))
-
-    url = 'https://{}{}'.format(login_server, path)
-    headers = get_authorization_header(username, password)
-
-    for i in range(0, retry_times):
-        errorMessage = None
-        try:
-            response = requests.request(
-                method=http_method,
-                url=url,
-                headers=headers,
-                params=params,
-                json=json_payload,
-                verify=(not should_disable_connection_verify())
-            )
-            log_registry_response(response)
-
-            if response.status_code == 200:
-                result = response.json()[result_index] if result_index else response.json()
-                next_link = response.headers['link'] if 'link' in response.headers else None
-                return result, next_link
-            elif response.status_code == 202:
-                result = None
-                try:
-                    result = response.json()[result_index] if result_index else response.json()
-                except ValueError:
-                    logger.debug('Response is empty or is not a valid json.')
-                return result, None
-            elif response.status_code == 204:
-                return None, None
-            elif response.status_code == 401:
-                raise CLIError(_parse_error_message('Authentication required.', response))
-            elif response.status_code == 404:
-                raise CLIError(_parse_error_message('The requested data does not exist.', response))
-            else:
-                raise Exception(_parse_error_message('Could not {} the requested data.'.format(http_method), response))
-        except CLIError:
-            raise
-        except Exception as e:  # pylint: disable=broad-except
-            errorMessage = str(e)
-            logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
-            time.sleep(retry_interval)
-
-    raise CLIError(errorMessage)
+DEFAULT_PAGINATION = 100
 
 
 def _get_manifest_digest(login_server, repository, tag, username, password, retry_times=3, retry_interval=5):
@@ -141,11 +64,11 @@ def _get_manifest_digest(login_server, repository, tag, username, password, retr
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
             elif response.status_code == 401:
-                raise CLIError(_parse_error_message('Authentication required.', response))
+                raise CLIError(parse_error_message('Authentication required.', response))
             elif response.status_code == 404:
-                raise CLIError(_parse_error_message('The manifest does not exist.', response))
+                raise CLIError(parse_error_message('The manifest does not exist.', response))
             else:
-                raise Exception(_parse_error_message('Could not get manifest digest.', response))
+                raise Exception(parse_error_message('Could not get manifest digest.', response))
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -179,7 +102,7 @@ def _obtain_data_from_registry(login_server,
             params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
             top -= params['n']
 
-        result, next_link = _request_data_from_registry(
+        result, next_link = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
@@ -408,7 +331,7 @@ def _acr_repository_attributes_helper(cli_ctx,
 
     # Non-GET request doesn't return the entity so there is always a GET reqeust
     if http_method != 'get':
-        _request_data_from_registry(
+        request_data_from_registry(
             http_method=http_method,
             login_server=login_server,
             path=path,
@@ -417,7 +340,7 @@ def _acr_repository_attributes_helper(cli_ctx,
             result_index=result_index,
             json_payload=json_payload)
 
-    return _request_data_from_registry(
+    return request_data_from_registry(
         http_method='get',
         login_server=login_server,
         path=path,
@@ -446,7 +369,7 @@ def acr_repository_untag(cmd,
         repository=repository,
         permission='*')
 
-    return _request_data_from_registry(
+    return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
         path='/v2/_acr/{}/tags/{}'.format(repository, tag),
@@ -517,7 +440,7 @@ def acr_repository_delete(cmd,
                            "and all images under it?".format(repository), yes)
         path = '/v2/_acr/{}/repository'.format(repository)
 
-    return _request_data_from_registry(
+    return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
         path=path,
@@ -626,7 +549,7 @@ def _legacy_delete(cmd,
             yes=yes)
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
 
-    return _request_data_from_registry(
+    return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
         path=path,
