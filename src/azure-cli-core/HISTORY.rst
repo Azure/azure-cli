@@ -11,6 +11,7 @@ Release History
 ++++++
 * Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
   file if public key file is missing. (#4725, #6780)
+* CLI now has generic behavior to handle "Bad Request" errors.
 
 2.0.45
 ++++++
@@ -25,7 +26,7 @@ Release History
 
 2.0.43
 ++++++
-* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Consuming mult api azure.mgmt.azutorization package for stack support
 * Minor fixes
 
 2.0.42

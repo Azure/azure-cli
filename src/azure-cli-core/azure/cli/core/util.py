@@ -22,10 +22,24 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
+    from msrest.exceptions import HttpOperationError
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
+        return 1
+    elif isinstance(ex, HttpOperationError):
+        try:
+            response_dict = json.loads(ex.response.json())
+            if 'error' in response_dict:
+                code = "{} - ".format(response_dict['error']['code']) if response_dict['error']['code'] else ""
+                message = response_dict['error']['message'] if response_dict['error']['message'] else ex.message
+                logger.error("{}{}".format(code, message))
+            else:
+                logger.error(ex)
+        except ValueError:
+            # ValueError if response body does not contain valid json.
+            logger.error(ex)
         return 1
 
     logger.exception(ex)
