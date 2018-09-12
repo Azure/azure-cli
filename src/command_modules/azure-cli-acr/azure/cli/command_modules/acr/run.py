@@ -67,7 +67,7 @@ def acr_run(cmd,
                 pass
     else:
         source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to %s.azurecr.io...", registry_name)
+        logger.warning("Sending context to registry: %s...", registry_name)
 
     request = FileTaskRunRequest(
         task_file_path=file,

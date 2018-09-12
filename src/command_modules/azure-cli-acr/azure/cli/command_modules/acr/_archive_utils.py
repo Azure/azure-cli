@@ -60,7 +60,7 @@ def upload_source_code(client, registry_name, resource_group_name,
                          container_name=container_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
-    logger.warning("Sending context ({0:.3f} {1}) to {2}.azurecr.io...".format(
+    logger.warning("Sending context ({0:.3f} {1}) to registry: {2}...".format(
         size, unit, registry_name))
     return relative_path
 
