@@ -105,6 +105,43 @@ helps['dls account firewall delete'] = """
     short-summary: Deletes a firewall rule in a Data Lake Store account.
 """
 
+helps['dls account network-rule'] = """
+    type: group
+    short-summary: (PREVIEW) Manage Data Lake Store account virtual network rules.
+"""
+
+helps['dls account network-rule create'] = """
+    type: command
+    short-summary: Creates a virtual network rule in a Data Lake Store account.
+    parameters:
+        - name: --subnet
+          type: string
+          short-summary: 'The subnet name or id for the virtual network rule.'
+        - name: --vnet-name
+          type: string
+          short-summary: 'The name of the virtual network rule.'
+"""
+
+helps['dls account network-rule update'] = """
+    type: command
+    short-summary: Updates a virtual network rule in a Data Lake Store account.
+"""
+
+helps['dls account network-rule show'] = """
+    type: command
+    short-summary: Get the details of a virtual network rule in a Data Lake Store account.
+"""
+
+helps['dls account network-rule list'] = """
+    type: command
+    short-summary: Lists virtual network rules in a Data Lake Store account.
+"""
+
+helps['dls account network-rule delete'] = """
+    type: command
+    short-summary: Deletes a virtual network rule in a Data Lake Store account.
+"""
+
 helps['dls fs'] = """
     type: group
     short-summary: (PREVIEW) Manage a Data Lake Store filesystem.
