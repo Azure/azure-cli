@@ -2784,6 +2784,31 @@ helps['network nsg rule update'] = """
 """
 # endregion
 
+# region NetworkProfile
+helps['network profile'] = """
+    type: group
+    short-summary: Manage network profiles.
+    long-summary: >
+        To create a network profile, see the create command for the relevant resource. Currently,
+        only Azure Container Instances are supported.
+"""
+
+helps['network profile delete'] = """
+    type: command
+    short-summary: Delete a network profile.
+"""
+
+helps['network profile list'] = """
+    type: command
+    short-summary: List network profiles.
+"""
+
+helps['network profile show'] = """
+    type: command
+    short-summary: Get the details of a network profile.
+"""
+# endregion
+
 # region Public IP
 helps['network public-ip'] = """
     type: group

@@ -2200,5 +2200,18 @@ class ServiceEndpointScenarioTest(ScenarioTest):
                  checks=self.check("contains(serviceEndpointPolicies[0].id, '{policy}')", True))
 
 
+class NetworkProfileScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_profile')
+    def test_network_profile(self, resource_group):
+
+        # no e2e scenario without create. Testing path to service only.
+        self.cmd('network profile list')
+        self.cmd('network profile list -g {rg}')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network profile show -g {rg} -n dummy')
+        self.cmd('network profile delete -g {rg} -n dummy -y')
+
+
 if __name__ == '__main__':
     unittest.main()
