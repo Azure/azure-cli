@@ -143,17 +143,17 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/ManagedClusters'))
         c.argument('name', name_type, help='Name of the managed cluster.',
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/ManagedClusters'))
-        c.argument('kubernetes_version', options_list=['--kubernetes-version', '-k'], validator=validate_k8s_version)
-        c.argument('node_count', options_list=['--node-count', '-c'], type=int)
-        c.argument('tags', tags_type)
 
     with self.argument_context('aks create') as c:
         c.argument('name', validator=validate_linux_host_name)
         c.argument('kubernetes_version', completer=get_k8s_versions_completion_list)
         c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
+        c.argument('admin_password', required=False, default='replacepassword1234$', help='Only used if node_windows=true')
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('nodepool_name', type=str, default='nodepool1', help='node pool name, truncated to 12 characters')
+        c.argument('node_count', options_list=['--node-count', '-c'], type=int)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -171,6 +171,7 @@ def load_arguments(self, _):
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
+        c.argument('tags', tags_type)
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
@@ -209,6 +210,10 @@ def load_arguments(self, _):
 
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
+
+    with self.argument_context('aks scale') as c:
+        c.argument('nodepool_name', type=str, default='nodepool1', help='node pool name, truncated to 12 characters')
+        c.argument('node_count', options_list=['--node-count', '-c'], type=int)
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

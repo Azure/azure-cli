@@ -1364,6 +1364,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
+               nodepool_name="nodepool1",
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1401,8 +1402,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
+    if nodepool_name == "":
+        nodepool_name = "nodepool1"
+
     agent_pool_profile = ManagedClusterAgentPoolProfile(
-        name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        name=nodepool_name[:12],  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1572,10 +1576,12 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
+def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="nodepool1", no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    for agent_profile in instance.agent_pool_profiles:
+        if agent_profile.name == nodepool_name:
+            agent_profile.count = int(node_count)  # pylint: disable=no-member
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None

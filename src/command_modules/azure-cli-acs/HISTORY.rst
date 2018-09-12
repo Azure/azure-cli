@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.4
++++++
+* `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
+
 2.3.3
 +++++
 * bugfix: creating role assignment for vnet-subnet-id when not specifying service principal and skip-role-assignemnt
