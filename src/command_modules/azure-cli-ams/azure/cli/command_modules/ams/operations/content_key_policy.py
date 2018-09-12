@@ -396,8 +396,8 @@ def _read_binary(path):
     return _read(path, 'rb')
 
 
-def _read(path, readType):
-    with open(path, readType) as file:
+def _read(path, read_type):
+    with open(path, read_type) as file:
         return file.read()
 
 
