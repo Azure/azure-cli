@@ -76,10 +76,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage', arg_group='Precondition') as c:
-        c.argument('if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        c.argument('if_modified_since',
+                   help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
                    type=get_datetime_type(False))
         c.argument('if_unmodified_since',
-                   help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+                   help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
                    type=get_datetime_type(False))
         c.argument('if_match')
         c.argument('if_none_match')
@@ -378,6 +379,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container lease') as c:
         c.argument('container_name', container_name_type)
+
+    with self.argument_context('storage container') as c:
+        c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage container immutability-policy') as c:
+        c.argument('immutability_period_since_creation_in_days', options_list='--period')
+        c.argument('container_name', container_name_type)
+
+    with self.argument_context('storage container legal-hold') as c:
+        c.argument('container_name', container_name_type)
+        c.argument('tags', nargs='+', help='Each tag should be 3 to 23 alphanumeric characters and is '
+                                           'normalized to lower case')
 
     with self.argument_context('storage container list') as c:
         c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745

@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.2.3
++++++
+* Add completer for  `--sku`, `--kind`, `--location` arguments
+
+0.2.2
++++++
+* Add new command `az cognitiveservices account list-usage`
+* Add new command `az cognitiveservices account list-kinds`
+* Add new command `az cognitiveservices account list`
+* Deprecate `az cognitiveservices list`
+* --name is now optional for `az cognitiveservices account list-skus`
+
 0.2.1
 +++++
 * Add new parameter --api-properties, which is required for creating some of the services.

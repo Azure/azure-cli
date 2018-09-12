@@ -237,6 +237,25 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_alias')
+    def test_dns_alias(self, resource_group):
+
+        self.kwargs.update({
+            'zone': 'mytestzone1.com',
+            'tm_dns': 'mytesttrafficmanager12',
+            'tm': 'tm1'
+        })
+
+        self.cmd('network dns zone create -g {rg} -n {zone}')
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method geographic').get_output_in_json()
+
+        self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
+
+        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
+                 checks=self.check("targetResource.id.contains(@, '{tm}')", True))
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --target-resource ""',
+                 checks=self.check('targetResource.id', None))
+
 
 class DnsParseZoneFiles(unittest.TestCase):
     def _check_soa(self, zone, zone_name, ttl, serial_number, refresh, retry, expire, min_ttl):

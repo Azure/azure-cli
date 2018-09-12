@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.2.2
++++++
+* `--auth-mode login` parameter allows use of user's login credentials for blob and queue authorization.
+* Added `storage container immutability-policy/legal-hold` to manage immutable storage.
+
 2.2.1
 +++++
 * `storage share policy show`: exception handling to exit with code 3 upon a missing resource for consistency.

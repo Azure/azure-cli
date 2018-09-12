@@ -34,8 +34,7 @@ class ChannelTests(ScenarioTest):
         ])
 
         self.cmd('az bot webchat show -g {rg} -n {botname} --with-secrets', checks=[
-            self.check('properties.properties.sites.length(@)', 1),
-            self.check('properties.properties.sites[0].isEnabled', True),
+            self.check('properties.properties.sites.length(@)', 0),
         ])
 
     @ResourceGroupPreparer(random_name_length=20)

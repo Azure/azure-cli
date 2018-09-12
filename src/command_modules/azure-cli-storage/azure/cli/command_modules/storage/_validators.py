@@ -13,6 +13,7 @@ from azure.cli.command_modules.storage._client_factory import get_storage_data_s
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
+from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -20,7 +21,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements,too-many-lines
 def _query_account_key(cli_ctx, account_name):
     """Query the storage account key. This is used when the customer doesn't offer account key but name."""
     rg, scf = _query_account_rg(cli_ctx, account_name)
@@ -41,6 +42,20 @@ def _query_account_rg(cli_ctx, account_name):
         from msrestazure.tools import parse_resource_id
         return parse_resource_id(acc.id)['resource_group'], scf
     raise ValueError("Storage account '{}' not found.".format(account_name))
+
+
+def _create_token_credential(cli_ctx):
+    from knack.cli import EVENT_CLI_POST_EXECUTE
+
+    TokenCredential = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#TokenCredential')
+
+    token_credential = TokenCredential()
+    updater = TokenUpdater(token_credential, cli_ctx)
+
+    def _cancel_timer_event_handler(_, **__):
+        updater.cancel()
+    cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, _cancel_timer_event_handler)
+    return token_credential
 
 
 # region PARAMETER VALIDATORS
@@ -74,6 +89,27 @@ def validate_client_parameters(cmd, namespace):
 
     def get_config_value(section, key, default):
         return cmd.cli_ctx.config.get(section, key, default)
+
+    if hasattr(n, 'auth_mode'):
+        auth_mode = n.auth_mode or get_config_value('storage', 'auth_mode', None)
+        del n.auth_mode
+        if not n.account_name:
+            n.account_name = get_config_value('storage', 'account', None)
+        if auth_mode == 'login':
+            n.token_credential = _create_token_credential(cmd.cli_ctx)
+
+            # give warning if there are account key args being ignored
+            account_key_args = [n.account_key and "--account-key", n.sas_token and "--sas-token",
+                                n.connection_string and "--connection-string"]
+            account_key_args = [arg for arg in account_key_args if arg]
+
+            if account_key_args:
+                from knack.log import get_logger
+
+                logger = get_logger(__name__)
+                logger.warning('In "login" auth mode, the following arguments are ignored: %s',
+                               ' ,'.join(account_key_args))
+            return
 
     if not n.connection_string:
         n.connection_string = get_config_value('storage', 'connection_string', None)
@@ -479,6 +515,7 @@ def get_file_path_validator(default_file_param=None):
         if default_file_param and '.' not in file_name:
             dir_name = path
             file_name = os.path.split(getattr(namespace, default_file_param))[1]
+        dir_name = None if dir_name in ('', '.') else dir_name
         namespace.directory_name = dir_name
         namespace.file_name = file_name
         del namespace.path

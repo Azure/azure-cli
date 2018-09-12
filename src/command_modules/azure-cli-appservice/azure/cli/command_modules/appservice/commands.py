@@ -192,6 +192,10 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_identity')
         g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
+    with self.command_group('functionapp config') as g:
+        g.custom_command('set', 'update_site_configs')
+        g.custom_show_command('show', 'get_site_configs')
+
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
         g.custom_command('set', 'update_app_settings')

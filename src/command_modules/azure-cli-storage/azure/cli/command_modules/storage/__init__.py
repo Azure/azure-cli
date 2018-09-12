@@ -127,7 +127,7 @@ class StorageArgumentContext(AzArgumentContext):
 
 
 class StorageCommandGroup(AzCommandGroup):
-    def storage_command(self, name, method_name=None, command_type=None, **kwargs):
+    def storage_command(self, name, method_name=None, command_type=None, oauth=False, **kwargs):
         """ Registers an Azure CLI Storage Data Plane command. These commands always include the four parameters which
         can be used to obtain a storage client: account-name, account-key, connection-string, and sas-token. """
         if command_type:
@@ -135,10 +135,48 @@ class StorageCommandGroup(AzCommandGroup):
         else:
             command_name = self.command(name, method_name, **kwargs)
         self._register_data_plane_account_arguments(command_name)
+        if oauth:
+            self._register_data_plane_oauth_arguments(command_name)
 
-    def storage_custom_command(self, name, method_name, **kwargs):
+    def storage_command_oauth(self, *args, **kwargs):
+        _merge_new_exception_handler(kwargs, self.get_handler_suppress_403())
+        self.storage_command(*args, oauth=True, **kwargs)
+
+    def storage_custom_command(self, name, method_name, oauth=False, **kwargs):
         command_name = self.custom_command(name, method_name, **kwargs)
         self._register_data_plane_account_arguments(command_name)
+        if oauth:
+            self._register_data_plane_oauth_arguments(command_name)
+
+    def storage_custom_command_oauth(self, *args, **kwargs):
+        _merge_new_exception_handler(kwargs, self.get_handler_suppress_403())
+        self.storage_custom_command(*args, oauth=True, **kwargs)
+
+    def get_handler_suppress_403(self):
+        def handler(ex):
+            from azure.cli.core.profiles import get_sdk
+            from knack.log import get_logger
+
+            logger = get_logger(__name__)
+            t_error = get_sdk(self.command_loader.cli_ctx,
+                              ResourceType.DATA_STORAGE,
+                              'common._error#AzureHttpError')
+            if isinstance(ex, t_error) and ex.status_code == 403:
+                message = """
+You do not have the required permissions needed to perform this operation.
+Depending on your operation, you may need to be assigned one of the following roles:
+    "Storage Blob Data Contributor (Preview)"
+    "Storage Blob Data Reader (Preview)"
+    "Storage Queue Data Contributor (Preview)"
+    "Storage Queue Data Reader (Preview)"
+
+If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
+                """
+                logger.error(message)
+                return
+            raise ex
+
+        return handler
 
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
@@ -169,6 +207,36 @@ class StorageCommandGroup(AzCommandGroup):
                              arg_group=group_name,
                              help='A Shared Access Signature (SAS). Must be used in conjunction with storage account '
                                   'name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+
+    def _register_data_plane_oauth_arguments(self, command_name):
+        from azure.cli.core.commands.parameters import get_enum_type
+
+        # The CLI's argument registration methods assume command table has finished loading and contain checks
+        # that reflect the state of the CLI at that point in time.
+        # The following code bypasses those checks, as these arguments are registered in tandem with commands.
+        if command_name not in self.command_loader.command_table:
+            return
+        self.command_loader.command_name = command_name
+
+        with self.command_loader.argument_context(command_name, min_api='2017-11-09') as c:
+            c.extra('auth_mode', arg_type=get_enum_type(['login', 'key']),
+                    help='The mode in which to run the command. "login" mode will directly use your login credentials '
+                         'for the authentication. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
+
+
+def _merge_new_exception_handler(kwargs, handler):
+    first = kwargs.get('exception_handler')
+
+    def new_handler(ex):
+        try:
+            handler(ex)
+        except Exception:  # pylint: disable=broad-except
+            if not first:
+                raise
+            first(ex)
+    kwargs['exception_handler'] = new_handler
 
 
 COMMAND_LOADER_CLS = StorageCommandsLoader

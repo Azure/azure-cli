@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.4.0
++++++
+* Add CosmosDb in the reserved resource enum type
+* Add name property in Patch model
 
 0.3.2
 +++++

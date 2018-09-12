@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>MSBuild|{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
     </CommandLineArguments>
@@ -51,7 +51,6 @@
     <Compile Include="azure-cli-core\azure\cli\core\parser.py" />
     <Compile Include="azure-cli-core\azure\cli\core\profiles\_shared.py" />
     <Compile Include="azure-cli-core\azure\cli\core\profiles\__init__.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\telemetry_upload.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_add_resourcegroup_transform.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_api_profiles.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_application.py" />
@@ -218,6 +217,25 @@
     <Compile Include="command_modules\azure-cli-billing\azure\cli\command_modules\billing\__init__.py" />
     <Compile Include="command_modules\azure-cli-billing\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-billing\setup.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\channel_operations.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\commands.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\custom.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\test_authsetting_commands.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\test_bot_commands.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\test_channel_commands.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\_exception_handler.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\_help.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\_params.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\_webutils.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-botservice\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-botservice\setup.py" />
     <Compile Include="command_modules\azure-cli-cdn\azure\cli\command_modules\cdn\commands.py" />
     <Compile Include="command_modules\azure-cli-cdn\azure\cli\command_modules\cdn\custom.py" />
     <Compile Include="command_modules\azure-cli-cdn\azure\cli\command_modules\cdn\tests\latest\scenario_mixin.py" />
@@ -843,6 +861,14 @@
     <Folder Include="command_modules\azure-cli-billing\azure\cli\command_modules\billing\" />
     <Folder Include="command_modules\azure-cli-billing\azure\cli\command_modules\billing\tests\" />
     <Folder Include="command_modules\azure-cli-billing\azure\cli\command_modules\billing\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-botservice\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\" />
     <Folder Include="command_modules\azure-cli-cdn\" />
     <Folder Include="command_modules\azure-cli-cdn\azure\" />
     <Folder Include="command_modules\azure-cli-cdn\azure\cli\" />
@@ -1199,6 +1225,20 @@
     <Content Include="command_modules\azure-cli-billing\MANIFEST.in" />
     <Content Include="command_modules\azure-cli-billing\README.rst" />
     <Content Include="command_modules\azure-cli-billing\setup.cfg" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\functionapp.template.json" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_auth_setting.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_directline_channel.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_msteams_channel.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_registration_bot.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_service_providers.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_skype_channel.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_webapp_bot.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\tests\latest\recordings\test_webchat_channel.yaml" />
+    <Content Include="command_modules\azure-cli-botservice\azure\cli\command_modules\botservice\webapp.template.json" />
+    <Content Include="command_modules\azure-cli-botservice\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-botservice\MANIFEST.in" />
+    <Content Include="command_modules\azure-cli-botservice\README.rst" />
+    <Content Include="command_modules\azure-cli-botservice\setup.cfg" />
     <Content Include="command_modules\azure-cli-cdn\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-cdn\MANIFEST.in" />
     <Content Include="command_modules\azure-cli-cdn\README.rst" />
@@ -1344,20 +1384,18 @@
     <Content Include="command_modules\azure-cli-vm\linter_exclusions.yml" />
   </ItemGroup>
   <ItemGroup>
-    <Interpreter Include="..\env\">
-      <Id>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</Id>
-      <BaseInterpreter>Global|PythonCore|3.5-32</BaseInterpreter>
-      <Version>3.5</Version>
-      <Description>env (Python 3.5)</Description>
-      <InterpreterPath>Scripts\python.exe</InterpreterPath>
-      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <LibraryPath>Lib\</LibraryPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X86</Architecture>
-    </Interpreter>
+    <InterpreterReference Include="Global|PythonCore|3.6" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.6" />
+    <Interpreter Include="..\env\">
+      <Id>env</Id>
+      <Version>3.6</Version>
+      <Description>env (Python 3.6 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>

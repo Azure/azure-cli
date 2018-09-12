@@ -5,7 +5,8 @@ Release History
 
 2.2.3
 +++++
-* restricting keyvault storage commmands to the latest API profile
+* Restrict keyvault storage commmands to the latest API profile
+* Fixed Key Vault key import for RSA keys
 
 2.2.2
 +++++
