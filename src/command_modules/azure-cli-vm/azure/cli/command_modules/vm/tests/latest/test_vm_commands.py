@@ -1310,6 +1310,37 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2euap')
+    def test_vm_ultra_ssd_storage_sku(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-ultrassd',
+            'vm2': 'vm-ultrassd2',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'disk3': 'd3',
+            'disk4': 'd4'
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk show -g {rg} -n {disk1}')
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2euap')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2euap')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --disk {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 

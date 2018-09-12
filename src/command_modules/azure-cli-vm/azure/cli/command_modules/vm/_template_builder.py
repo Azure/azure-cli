@@ -250,8 +250,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None):
 
     os_caching = disk_info['os'].get('caching')
-    # TODO: split out the storage_sku for os disk or individual data disks
-    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_profile
+    # TODO: split out the storage_sku for os disk(can't be ultra-ssd) and individual data disks
+    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_sku
 
     def _build_os_profile():
 
@@ -390,7 +390,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
     if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled':ultra_ssd_enabled}
+        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -658,8 +658,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     # Build storage profile
     storage_properties = {}
     os_caching = disk_info['os'].get('caching')
-    # TODO: split out the storage_sku for os disk or individual data disks
-    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_profile
+    # TODO: split out the storage_sku for os disk(can't be ultra-ssd) and individual data disks
+    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_sku
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
