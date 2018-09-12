@@ -7,6 +7,12 @@ from base64 import b64encode
 from knack.util import CLIError
 
 
+def process_container_create_namespace(cmd, ns):
+    if ns.vnet_name and not ns.subnet:
+        raise CLIError("'--subnet' is required when using  a virtual network.")
+    if ns.subnet and not ns.vnet_name:
+        raise CLIError("'--vnet-name' is required when using a virtual network.")
+
 def validate_volume_mount_path(ns):
     if ns.azure_file_volume_mount_path and ':' in ns.azure_file_volume_mount_path:
         raise CLIError("The volume mount path cannot contain ':'")

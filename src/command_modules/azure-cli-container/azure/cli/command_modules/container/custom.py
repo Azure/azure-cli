@@ -32,14 +32,10 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-<<<<<<< HEAD
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
-from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile, 
-                                       ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
-=======
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType)
->>>>>>> dev
+from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile, 
+                                       ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
@@ -95,14 +91,11 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
-<<<<<<< HEAD
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
                      subnet_address_prefix='10.0.0.0/24',
-=======
                      network_profile=None,
->>>>>>> dev
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
@@ -114,7 +107,6 @@ def create_container(cmd,
     """Create a container group. """
 
 
-    if 
     network_profile_id = _vnet(cmd.cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
 
     return
