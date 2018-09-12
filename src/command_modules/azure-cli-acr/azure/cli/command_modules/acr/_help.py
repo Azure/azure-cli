@@ -488,7 +488,16 @@ helps['acr task show-run'] = """
     examples:
         - name:  Get the details of a run, displaying the results in a table.
           text: >
-            az acr task show-run -n MyTask -r myregistry --run-id runId -o table
+            az acr task show-run -r myregistry --run-id runId -o table
+"""
+
+helps['acr task cancel-run'] = """
+    type: command
+    short-summary: Cancel a specified run of an Azure Container Registry.
+    examples:
+        - name:  Cancel a run
+          text: >
+            az acr task cancel-run -r myregistry --run-id runId
 """
 
 helps['acr task run'] = """
