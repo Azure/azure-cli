@@ -227,7 +227,6 @@ def _get_resource(client, resource_group_name, *subresources):
             raise
 
 
-
 def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
     containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
 

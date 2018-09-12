@@ -6,6 +6,8 @@ Release History
 0.3.4
 +++++
 * Add '--network-profile' for passing in a network profile
+* Add '--subnet', '--vnet_name', to allow creating container groups in a VNET
+* Update the table output to show the status of the container group
 
 0.3.3
 +++++
