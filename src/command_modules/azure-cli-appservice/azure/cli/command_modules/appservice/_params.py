@@ -10,7 +10,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
-from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
 
@@ -188,6 +188,9 @@ def load_arguments(self, _):
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
+    with self.argument_context('webapp config storage-account list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
@@ -226,6 +229,19 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+
+    with self.argument_context('webapp config storage-account') as c:
+        c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
+        c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type', arg_type=get_enum_type(AzureStorageType))
+        c.argument('account_name', options_list=['--account-name', '-a'], help='storage account name')
+        c.argument('share_name', options_list=['--share-name', '--sn'], help='share name (Azure Files) or container name (Azure Blob Storage)')
+        c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
+        c.argument('mount_path', options_list=['--mount-path', '-m'], help='path to mount storage volume within web app')
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+    with self.argument_context('webapp config storage-account add') as c:
+        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+    with self.argument_context('webapp config storage-account update') as c:
+        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
 
     with self.argument_context('webapp config container') as c:
         c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'], help='the container registry server url')
