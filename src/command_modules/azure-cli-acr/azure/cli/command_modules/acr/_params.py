@@ -227,3 +227,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
+
+    with self.argument_context('acr helm') as c:
+        c.argument('resource_group_name', help=argparse.SUPPRESS)
+        c.argument('repository', help=argparse.SUPPRESS)
+        c.argument('version', help='The helm chart version.')
+
+    with self.argument_context('acr helm show') as c:
+        c.positional('chart', help='The helm chart name.')
+
+    with self.argument_context('acr helm delete') as c:
+        c.positional('chart', help='The helm chart name.')
+
+    with self.argument_context('acr helm push') as c:
+        c.positional('chart_package', help="The helm chart package.", completer=FilesCompleter())
+        c.argument('force', help='Overwrite the existing chart package.', action='store_true')

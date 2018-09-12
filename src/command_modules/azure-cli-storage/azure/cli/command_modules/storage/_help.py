@@ -414,6 +414,21 @@ helps['storage container policy'] = """
     short-summary: Manage container stored access policies.
 """
 
+helps['storage container immutability-policy'] = """
+    type: group
+    short-summary: Manage container immutability policies.
+"""
+
+helps['storage container legal-hold'] = """
+    type: group
+    short-summary: Manage container legal holds.
+"""
+
+helps['storage container legal-hold show'] = """
+    type: command
+    short-summary: Get the legal hold properties of a container.
+"""
+
 helps['storage cors'] = """
     type: group
     short-summary: Manage storage service Cross-Origin Resource Sharing (CORS).

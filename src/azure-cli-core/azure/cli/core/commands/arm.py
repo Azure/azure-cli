@@ -1057,3 +1057,60 @@ def resolve_role_id(cli_ctx, role, scope):
 def _gen_guid():
     import uuid
     return uuid.uuid4()
+
+
+def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+
+    if not is_valid_resource_id(arm_id):
+        raise CLIError("'{}' is not a valid ID.".format(arm_id))
+
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    if not api_version:
+
+        parts = parse_resource_id(arm_id)
+
+        # to retrieve the provider, we need to know the namespace
+        namespaces = {k: v for k, v in parts.items() if 'namespace' in k}
+
+        # every ARM ID has at least one namespace, so start with that
+        namespace = namespaces.pop('namespace')
+        namespaces.pop('resource_namespace')
+        # find the most specific child namespace (if any) and use that value instead
+        highest_child = 0
+        for k, v in namespaces.items():
+            child_number = int(k.split('_')[2])
+            if child_number > highest_child:
+                namespace = v
+                highest_child = child_number
+
+        # retrieve provider info for the namespace
+        provider = client.providers.get(namespace)
+
+        # assemble the resource type key used by the provider list operation.  type1/type2/type3/...
+        resource_type_str = ''
+        if not highest_child:
+            resource_type_str = parts['resource_type']
+        else:
+            types = {int(k.split('_')[2]): v for k, v in parts.items() if k.startswith('child_type')}
+            for k in sorted(types.keys()):
+                if k < highest_child:
+                    continue
+                resource_type_str = '{}{}/'.format(resource_type_str, parts['child_type_{}'.format(k)])
+            resource_type_str = resource_type_str.rstrip('/')
+
+        api_version = None
+        rt = next((t for t in provider.resource_types if t.resource_type.lower() == resource_type_str.lower()), None)
+        if not rt:
+            from azure.cli.core.parser import IncorrectUsageError
+            raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
+        try:
+            # if the service specifies, use the default API version
+            api_version = rt.default_api_version
+        except AttributeError:
+            # if the service doesn't specify, use the most recent non-preview API version unless there is only a
+            # single API version. API versions are returned by the service in a sorted list
+            api_version = next((x for x in rt.api_versions if not x.endswith('preview')), rt.api_versions[0])
+
+    return client.resources.get_by_id(arm_id, api_version)

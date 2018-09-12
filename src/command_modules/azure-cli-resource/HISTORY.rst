@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.1.4
++++++
+* `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.
+* Restrict `feature` commands to supported profiles.
+
 2.1.3
 +++++
 * `provider operation show`: exception handling to exit with code 3 upon a missing resource for consistency.
