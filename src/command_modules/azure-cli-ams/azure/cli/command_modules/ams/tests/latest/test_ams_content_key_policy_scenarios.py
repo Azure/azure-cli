@@ -7,6 +7,7 @@ import base64
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.core.util import CLIError
 
 
 class AmsContentKeyPolicyTests(ScenarioTest):
@@ -14,6 +15,108 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
+
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_playready_fail(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'playReadyPath': '@' + self._get_test_data_file('invalidPlayReadyTemplate.json'),
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        with self.assertRaises(CLIError):
+            self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-configuration "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}')
+
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_playready_success(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyPlayReadyConfiguration',
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction',
+            'playReadyPath': '@' + self._get_test_data_file('validPlayReadyTemplate.json'),
+            'responseCustomData': 'custom data',
+            'allowTestDevices': True,
+            'beginDate': None,
+            'expirationDate': '2098-09-15T18:53:00+00:00',
+            'relativeBeginDate': '-1 day, 0:00:00',
+            'relativeExpirationDate': None,
+            'gracePeriod': '2:00:00',
+            'licenseType': 'Persistent',
+            'contentType': 'Unspecified',
+            'keyLocationODataType': '#Microsoft.Media.ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier',
+            'keyId': '12345678-aaaa-bbbb-cccc-ddddeeeeffff',
+            'firstPlayExpiration': '10 days, 0:00:00',
+            'scmsRestriction': 1,
+            'agcAndColorStripeRestriction': 2,
+            'digitalVideoOnlyContentRestriction': False,
+            'imageConstraintForAnalogComponentVideoRestriction': False,
+            'imageConstraintForAnalogComputerMonitorRestriction': False,
+            'allowPassingVideoContentToUnknownOutput': 'Allowed',
+            'uncompressedDigitalVideoOpl': 300,
+            'compressedDigitalVideoOpl': 500,
+            'analogVideoOpl': 200,
+            'compressedDigitalAudioOpl': 300,
+            'uncompressedDigitalAudioOpl': 300,
+            'bestEffort': True,
+            'configurationData': 0
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-configuration "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.responseCustomData', '{responseCustomData}'),
+            self.check('options[0].configuration.licenses[0].allowTestDevices', '{allowTestDevices}'),
+            self.check('options[0].configuration.licenses[0].beginDate', '{beginDate}'),
+            self.check('options[0].configuration.licenses[0].expirationDate', '{expirationDate}'),
+            self.check('options[0].configuration.licenses[0].relativeBeginDate', '{relativeBeginDate}'),
+            self.check('options[0].configuration.licenses[0].relativeExpirationDate', '{relativeExpirationDate}'),
+            self.check('options[0].configuration.licenses[0].gracePeriod', '{gracePeriod}'),
+            self.check('options[0].configuration.licenses[0].licenseType', '{licenseType}'),
+            self.check('options[0].configuration.licenses[0].contentType', '{contentType}'),
+            self.check('options[0].configuration.licenses[0].contentKeyLocation.odatatype', '{keyLocationODataType}'),
+            self.check('options[0].configuration.licenses[0].contentKeyLocation.keyId', '{keyId}'),
+            self.check('options[0].configuration.licenses[0].playRight.firstPlayExpiration', '{firstPlayExpiration}'),
+            self.check('options[0].configuration.licenses[0].playRight.scmsRestriction', '{scmsRestriction}'),
+            self.check('options[0].configuration.licenses[0].playRight.agcAndColorStripeRestriction', '{agcAndColorStripeRestriction}'),
+            self.check('options[0].configuration.licenses[0].playRight.digitalVideoOnlyContentRestriction', '{digitalVideoOnlyContentRestriction}'),
+            self.check('options[0].configuration.licenses[0].playRight.imageConstraintForAnalogComponentVideoRestriction', '{imageConstraintForAnalogComponentVideoRestriction}'),
+            self.check('options[0].configuration.licenses[0].playRight.imageConstraintForAnalogComputerMonitorRestriction', '{imageConstraintForAnalogComputerMonitorRestriction}'),
+            self.check('options[0].configuration.licenses[0].playRight.allowPassingVideoContentToUnknownOutput', '{allowPassingVideoContentToUnknownOutput}'),
+            self.check('options[0].configuration.licenses[0].playRight.uncompressedDigitalVideoOpl', '{uncompressedDigitalVideoOpl}'),
+            self.check('options[0].configuration.licenses[0].playRight.compressedDigitalVideoOpl', '{compressedDigitalVideoOpl}'),
+            self.check('options[0].configuration.licenses[0].playRight.analogVideoOpl', '{analogVideoOpl}'),
+            self.check('options[0].configuration.licenses[0].playRight.compressedDigitalAudioOpl', '{compressedDigitalAudioOpl}'),
+            self.check('options[0].configuration.licenses[0].playRight.uncompressedDigitalAudioOpl', '{uncompressedDigitalAudioOpl}'),
+            self.check('options[0].configuration.licenses[0].playRight.explicitAnalogTelevisionOutputRestriction.bestEffort', '{bestEffort}'),
+            self.check('options[0].configuration.licenses[0].playRight.explicitAnalogTelevisionOutputRestriction.configurationData', '{configurationData}')
+        ])
+
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
