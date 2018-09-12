@@ -502,7 +502,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None):
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -619,7 +619,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
-        boot_diagnostics_storage_uri=boot_diagnostics_storage)
+        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -1806,7 +1806,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None):
+                application_security_groups=None, ultra_ssd_enabled=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2005,7 +2005,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy, application_security_groups=application_security_groups)
+        eviction_policy=eviction_policy, application_security_groups=application_security_groups,
+        ultra_ssd_enabled=ultra_ssd_enabled)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

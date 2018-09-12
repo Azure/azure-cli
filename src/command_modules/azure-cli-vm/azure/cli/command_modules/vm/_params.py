@@ -419,6 +419,8 @@ def load_arguments(self, _):
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
+            c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                       help='(PREVIEW)Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
