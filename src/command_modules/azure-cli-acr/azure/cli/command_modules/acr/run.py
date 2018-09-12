@@ -12,8 +12,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     FileTaskRunRequest,
     PlatformProperties,
-    OS,
-    EncodedTaskRunRequest
+    OS
 )
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
@@ -32,8 +31,6 @@ def acr_run(cmd,
             source_location,
             file='acb.yaml',
             values=None,
-            encoded_file=None,
-            encoded_values=None,
             set_value=None,
             no_format=False,
             no_logs=False,
@@ -72,23 +69,14 @@ def acr_run(cmd,
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to %s.azurecr.io...", registry_name)
 
-    if encoded_file:
-        request = EncodedTaskRunRequest(
-            encoded_task_content=encoded_file,
-            encoded_values_content=encoded_values,
-            values=(set_value if set_value else []),
-            timeout=timeout,
-            platform=PlatformProperties(os=os_type)
-        )
-    else:
-        request = FileTaskRunRequest(
-            task_file_path=file,
-            values_file_path=values,
-            values=(set_value if set_value else []),
-            source_location=source_location,
-            timeout=timeout,
-            platform=PlatformProperties(os=os_type)
-        )
+    request = FileTaskRunRequest(
+        task_file_path=file,
+        values_file_path=values,
+        values=(set_value if set_value else []),
+        source_location=source_location,
+        timeout=timeout,
+        platform=PlatformProperties(os=os_type)
+    )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,

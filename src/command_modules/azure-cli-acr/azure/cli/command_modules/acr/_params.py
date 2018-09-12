@@ -149,8 +149,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context.")
         c.argument('values', help="The task values file path relative to the source context.")
-        c.argument('encoded_file', help="The encoded task file.")
-        c.argument('encoded_values', help="The encoded values file.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
 
     with self.argument_context('acr build') as c:
