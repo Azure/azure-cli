@@ -347,6 +347,7 @@ def load_arguments(self, _):
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
+        c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
 
     with self.argument_context('vmss encryption') as c:
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))

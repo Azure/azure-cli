@@ -2285,7 +2285,7 @@ def set_vmss_diagnostics_extension(
 
 # region VirtualMachineScaleSets Disks (Managed)
 def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
-                                     caching=None, disk=None):
+                                     caching=None, disk=None, sku=None):
 
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
@@ -2293,11 +2293,11 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
             luns = [d.lun for d in data_disks]
             lun = max(luns) + 1 if luns else 0
         if existing_disk is None:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty,
-                                 disk_size_gb=size_gb, caching=caching)
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
+                                 caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
         else:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach,
-                                 managed_disk=ManagedDiskParameters(id=existing_disk), caching=caching)
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach, caching=caching,
+                                 managed_disk=ManagedDiskParameters(id=existing_disk, storage_account_type=sku))
 
         data_disks.append(data_disk)
         storage_profile.data_disks = data_disks

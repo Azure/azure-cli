@@ -1341,6 +1341,26 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
+    def test_vmss_ultra_ssd_storage_sku(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'vm-ultrassd',
+            'vmss2': 'vm-ultrassd2'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vmss disk attach -g {rg} -n {vmss2} --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 
