@@ -747,6 +747,23 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
 class FunctionAppOnLinux(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
