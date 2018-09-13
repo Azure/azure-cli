@@ -273,31 +273,26 @@ def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
 def _valid_playready_configuration(play_ready_configuration):
 
     def __valid_license(lic):
-        return _validate_all_conditions([lic.get('allow_test_devices') is not None,
-                                         lic.get('license_type') in ['NonPersistent', 'Persistent'],
-                                         __valid_content_key_location(lic.get('content_key_location')),
-                                         lic.get('content_type') in ['Unspecified', 'UltraVioletDownload', 'UltraVioletStreaming'],
-                                         lic.get('play_right') is None or __valid_play_right(lic.get('play_right'))],
+        return _validate_all_conditions([lic.get('allowTestDevices') is not None,
+                                         lic.get('licenseType') in ['NonPersistent', 'Persistent'],
+                                         lic.get('contentKeyLocation') is not None,
+                                         lic.get('contentType') in ['Unspecified', 'UltraVioletDownload', 'UltraVioletStreaming'],
+                                         lic.get('playRight') is None or __valid_play_right(lic.get('playRight'))],
                                         'Malformed PlayReady license.')
 
-    def __valid_content_key_location(loc):
-        return (loc.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader' or
-                (loc.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier' and
-                 loc.get('key_id') is not None))
-
     def __valid_play_right(prl):
-        return _validate_all_conditions([(prl.get('explicit_analog_television_output_restriction') is None or
-                                          __valid_eator(prl.get('explicit_analog_television_output_restriction'))),
-                                         prl.get('digital_video_only_content_restriction') is not None,
-                                         prl.get('image_constraint_for_analog_component_video_restriction') is not None,
-                                         prl.get('image_constraint_for_analog_computer_monitor_restriction') is not None,
-                                         prl.get('allow_passing_video_content_to_unknown_output') in ['NotAllowed', 'Allowed',
-                                                                                                      'AllowedWithVideoConstriction']],
+        return _validate_all_conditions([(prl.get('explicitAnalogTelevisionOutputRestriction') is None or
+                                          __valid_eator(prl.get('explicitAnalogTelevisionOutputRestriction'))),
+                                         prl.get('digitalVideoOnlyContentRestriction') is not None,
+                                         prl.get('imageConstraintForAnalogComponentVideoRestriction') is not None,
+                                         prl.get('imageConstraintForAnalogComputerMonitorRestriction') is not None,
+                                         prl.get('allowPassingVideoContentToUnknownOutput') in ['NotAllowed', 'Allowed',
+                                                                                                'AllowedWithVideoConstriction']],
                                         'Malformed license PlayRight.')
 
     def __valid_eator(eator):
-        return _validate_all_conditions([eator.get('best_effort') is not None,
-                                         eator.get('configuration_data') is not None],
+        return _validate_all_conditions([eator.get('bestEffort') is not None,
+                                         eator.get('configurationData') is not None],
                                         'Malformed explicit analog television output restriction.')
 
     cfg = None
@@ -318,56 +313,53 @@ def _valid_playready_configuration(play_ready_configuration):
 def _play_ready_configuration_factory(content):
 
     def __get_content_key_location(ckl):
-        content_key_location = None
-        if ckl.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader':
-            content_key_location = ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader()
-        elif ckl.get('type') == 'ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier':
-            content_key_location = ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier(
-                key_id=ckl.get('key_id')
+        if ckl.get('keyId'):
+            return ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier(
+                key_id=ckl.get('keyId')
             )
-        return content_key_location
+        return ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader()
 
     def __get_eator(eator):
         if eator is None:
             return None
         return ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction(
-            best_effort=eator.get('best_effort'),
-            configuration_data=eator.get('configuration_data')
+            best_effort=eator.get('bestEffort'),
+            configuration_data=eator.get('configurationData')
         )
 
     def __get_play_right(prl):
         if prl is None:
             return None
         return ContentKeyPolicyPlayReadyPlayRight(
-            first_play_expiration=_coalesce_timedelta(prl.get('first_play_expiration')),
-            scms_restriction=prl.get('scms_restriction'),
-            agc_and_color_stripe_restriction=prl.get('agc_and_color_stripe_restriction'),
-            explicit_analog_television_output_restriction=__get_eator(prl.get('explicit_analog_television_output_restriction')),
-            digital_video_only_content_restriction=prl.get('digital_video_only_content_restriction'),
-            image_constraint_for_analog_component_video_restriction=prl.get('image_constraint_for_analog_component_video_restriction'),
-            image_constraint_for_analog_computer_monitor_restriction=prl.get('image_constraint_for_analog_computer_monitor_restriction'),
-            allow_passing_video_content_to_unknown_output=prl.get('allow_passing_video_content_to_unknown_output'),
-            uncompressed_digital_video_opl=prl.get('uncompressed_digital_video_opl'),
-            compressed_digital_video_opl=prl.get('compressed_digital_video_opl'),
-            analog_video_opl=prl.get('analog_video_opl'),
-            compressed_digital_audio_opl=prl.get('compressed_digital_audio_opl'),
-            uncompressed_digital_audio_opl=prl.get('uncompressed_digital_audio_opl')
+            first_play_expiration=_coalesce_timedelta(prl.get('firstPlayExpiration')),
+            scms_restriction=prl.get('scmsRestriction'),
+            agc_and_color_stripe_restriction=prl.get('agcAndColorStripeRestriction'),
+            explicit_analog_television_output_restriction=__get_eator(prl.get('explicitAnalogTelevisionOutputRestriction')),
+            digital_video_only_content_restriction=prl.get('digitalVideoOnlyContentRestriction'),
+            image_constraint_for_analog_component_video_restriction=prl.get('imageConstraintForAnalogComponentVideoRestriction'),
+            image_constraint_for_analog_computer_monitor_restriction=prl.get('imageConstraintForAnalogComputerMonitorRestriction'),
+            allow_passing_video_content_to_unknown_output=prl.get('allowPassingVideoContentToUnknownOutput'),
+            uncompressed_digital_video_opl=prl.get('uncompressedDigitalVideoOpl'),
+            compressed_digital_video_opl=prl.get('compressedDigitalVideoOpl'),
+            analog_video_opl=prl.get('analogVideoOpl'),
+            compressed_digital_audio_opl=prl.get('compressedDigitalAudioOpl'),
+            uncompressed_digital_audio_opl=prl.get('uncompressedDigitalAudioOpl')
         )
 
     def __get_license(lic):
         return ContentKeyPolicyPlayReadyLicense(
-            allow_test_devices=lic.get('allow_test_devices'),
-            begin_date=lic.get('begin_date'),
-            expiration_date=lic.get('expiration_date'),
-            relative_begin_date=_coalesce_timedelta(lic.get('relative_begin_date')),
-            relative_expiration_date=_coalesce_timedelta(lic.get('relative_expiration_date')),
-            grace_period=_coalesce_timedelta(lic.get('grace_period')),
-            play_right=__get_play_right(lic.get('play_right')),
-            license_type=lic.get('license_type'),
+            allow_test_devices=lic.get('allowTestDevices'),
+            begin_date=lic.get('beginDate'),
+            expiration_date=lic.get('expirationDate'),
+            relative_begin_date=_coalesce_timedelta(lic.get('relativeBeginDate')),
+            relative_expiration_date=_coalesce_timedelta(lic.get('relativeExpirationDate')),
+            grace_period=_coalesce_timedelta(lic.get('gracePeriod')),
+            play_right=__get_play_right(lic.get('playRight')),
+            license_type=lic.get('licenseType'),
             content_key_location=__get_content_key_location(
-                lic.get('content_key_location')
+                lic.get('contentKeyLocation')
             ),
-            content_type=lic.get('content_type')
+            content_type=lic.get('contentType')
         )
 
     def __get_licenses(lics):
@@ -375,7 +367,7 @@ def _play_ready_configuration_factory(content):
 
     return ContentKeyPolicyPlayReadyConfiguration(
         licenses=__get_licenses(content.get('licenses')),
-        response_custom_data=content.get('response_custom_data')
+        response_custom_data=content.get('responseCustomData')
     )
 
 
