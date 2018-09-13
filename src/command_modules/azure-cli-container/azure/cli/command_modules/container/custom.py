@@ -34,13 +34,12 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType)
-from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile, 
+from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile,
                                        ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
-
 
 
 logger = get_logger(__name__)
@@ -242,7 +241,7 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
         subnet_name = parse_resource_id(subnet)['resource_name']
 
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
-    #For an existing subnet, validate and add delegation if needed
+    # For an existing subnet, validate and add delegation if needed
     if subnet:
         for endpoint in (subnet.service_endpoints or []):
             if endpoint.service != "Microsoft.ContainerInstance":

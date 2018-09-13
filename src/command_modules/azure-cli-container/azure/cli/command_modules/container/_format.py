@@ -50,6 +50,7 @@ def _format_ip_address(container_group):
         return '{0}:{1}'.format(ip_address.get('ip'), ports)
     return None
 
+
 def _format_status(container_group):
     return container_group['instanceView']['state'] or container_group['provisioningState']
 
