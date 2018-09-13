@@ -32,8 +32,8 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
-                                                 ContainerGroupIpAddressType)
+                                                 ContainerGroupIpAddressType, GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics,
+                                                 ContainerGroupNetworkProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource

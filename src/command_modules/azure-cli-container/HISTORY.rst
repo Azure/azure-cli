@@ -5,6 +5,7 @@ Release History
 
 0.3.4
 +++++
+* Added ability to restart and stop a running container group
 * Add '--network-profile' for passing in a network profile
 
 0.3.3
