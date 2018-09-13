@@ -8,7 +8,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     Registry,
     RegistryUpdateParameters,
     StorageAccountProperties,

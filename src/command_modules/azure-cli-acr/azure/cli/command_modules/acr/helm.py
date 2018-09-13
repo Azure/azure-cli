@@ -9,6 +9,7 @@ from os.path import isdir
 from knack.util import CLIError
 from knack.log import get_logger
 
+from ._utils import user_confirmation
 from ._docker_utils import get_access_credentials, request_data_from_registry
 
 
@@ -74,7 +75,16 @@ def acr_helm_delete(cmd,
                     repository='repo',
                     resource_group_name=None,
                     username=None,
-                    password=None):
+                    password=None,
+                    prov=False,
+                    yes=False):
+    if version:
+        message = "This operation will delete the chart package '{}'".format(
+            _get_chart_package_name(chart, version, prov))
+    else:
+        message = "This operation will delete all versions of the chart '{}'".format(chart)
+    user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
+
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
@@ -87,7 +97,7 @@ def acr_helm_delete(cmd,
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path=_get_blobs_path(repository, chart, version) if version else _get_charts_path(repository, chart),
+        path=_get_blobs_path(repository, chart, version, prov) if version else _get_charts_path(repository, chart),
         username=username,
         password=password)[0]
 
@@ -187,12 +197,18 @@ def _get_charts_path(repository, chart=None, version=None):
 
 
 def _get_blobs_path(repository, chart, version=None, prov=False):
-    path = '/helm/v1/{}/_blobs/{}'.format(repository, chart)
+    path = '/helm/v1/{}/_blobs'.format(repository)
 
     if version:
-        path = '{}-{}.tgz'.format(path, version)
+        return '{}/{}'.format(path, _get_chart_package_name(chart, version, prov))
+
+    return '{}/{}'.format(path, chart)
+
+
+def _get_chart_package_name(chart, version, prov=False):
+    chart_package_name = '{}-{}.tgz'.format(chart, version)
 
     if prov:
-        path = '{}.prov'.format(path)
+        return '{}.prov'.format(chart_package_name)
 
-    return path
+    return chart_package_name
