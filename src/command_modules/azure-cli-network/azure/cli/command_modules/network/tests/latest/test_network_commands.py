@@ -857,6 +857,30 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
         ])
 
 
+class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_global_reach')
+    def test_network_express_route_global_reach(self, resource_group):
+
+        self.kwargs.update({
+            'er1': 'er1',
+            'er2': 'er2',
+            'conn12': 'conn12',
+        })
+
+        self.cmd('network express-route create -g {rg} -n {er1} --allow-global-reach --bandwidth 50 --peering-location Area51 --provider "Microsoft ER Test" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er1} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+
+        self.cmd('network express-route create -g {rg} -n {er2} --allow-global-reach --bandwidth 50 --peering-location "Denver Test" --provider "Test Provider NW" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
+
+        # These commands won't succeed because circuit creation requires a manual step from the service.
+        with self.assertRaisesRegexp(CLIError, 'An error occurred'):
+            self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
+        self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+        self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+
+
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
