@@ -16,7 +16,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'rg_loc': 'westcentralus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': '876f8fa70f2261aa6c293d63e1f2889c73f40cdd ',
+            'git_access_token': 'c79e207682b7aeea3d94313f66f0dc328c1c4a62',
             'context': 'https://github.com/ankurkhemani/acr-helloworld.git',
             'file': './AcrHelloworld/Dockerfile',
             'image': 'testtask:v1',
@@ -83,7 +83,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('isArchiveEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
 
-        # test build task delete
+        # test task delete
         self.cmd('acr task delete -n {task_name} -r {registry_name}')
 
         # test acr delete
