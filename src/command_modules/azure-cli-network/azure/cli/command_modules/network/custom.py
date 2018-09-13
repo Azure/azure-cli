@@ -849,24 +849,19 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
     from azure.cli.core.commands import LongRunningOperation
 
     ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan', 'SubResource')
-    plan = DdosProtectionPlan(
-        name=ddos_plan_name,
-        location=location,
-        tags=tags
-    )
     if not vnets:
         # if no VNETs can do a simple PUT
-        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)
+        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, location=location, tags=tags)
 
     # if VNETs specified, have to create the protection plan and then add the VNETs
     plan_id = LongRunningOperation(cmd.cli_ctx)(
-        ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)).id
+        ddos_client.create_or_update(resource_group_name, ddos_plan_name, location=location, tags=tags)).id
 
+    SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
-    for subresource in vnets:
+    for vnet_subresource in vnets:
         vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
-        id_parts = parse_resource_id(subresource.id)
+        id_parts = parse_resource_id(vnet_subresource.id)
         vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
         vnet.ddos_protection_plan = SubResource(id=plan_id)
         vnet_client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
