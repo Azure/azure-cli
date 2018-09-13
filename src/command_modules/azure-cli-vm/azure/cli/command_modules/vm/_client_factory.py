@@ -84,6 +84,18 @@ def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
 
 
+def cf_galleries(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).galleries
+
+
+def cf_gallery_images(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).gallery_images
+
+
+def cf_gallery_image_versions(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).gallery_image_versions
+
+
 # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
 def msi_client_factory(cli_ctx, **_):
     from azure.mgmt.msi import ManagedServiceIdentityClient

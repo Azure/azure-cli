@@ -2,10 +2,9 @@
 
 Release History
 ===============
-
 2.2.3
 ++++++
-* Minor fixes.
+* support shared image gallery through `az sig`
 
 2.2.2
 ++++++

@@ -254,7 +254,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None, no_wait=False, tags=None, zone=None):
+                        source_storage_account_id=None, no_wait=False, tags=None, zone=None,
+                        disk_iops_read_write=None, disk_mbps_read_write=None):
     Disk, CreationData, DiskCreateOption = cmd.get_models('Disk', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -276,6 +277,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     if zone:
         disk.zones = zone
+    if disk_iops_read_write is not None:
+        disk.disk_iops_read_write = disk_iops_read_write
+    if disk_mbps_read_write is not None:
+        disk.disk_mbps_read_write = disk_mbps_read_write
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
@@ -497,7 +502,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None):
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -614,7 +619,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
-        boot_diagnostics_storage_uri=boot_diagnostics_storage)
+        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -1801,7 +1806,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None):
+                application_security_groups=None, ultra_ssd_enabled=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2000,7 +2005,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy, application_security_groups=application_security_groups)
+        eviction_policy=eviction_policy, application_security_groups=application_security_groups,
+        ultra_ssd_enabled=ultra_ssd_enabled)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2279,7 +2285,7 @@ def set_vmss_diagnostics_extension(
 
 # region VirtualMachineScaleSets Disks (Managed)
 def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
-                                     caching=None, disk=None):
+                                     caching=None, disk=None, sku=None):
 
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
@@ -2287,11 +2293,11 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
             luns = [d.lun for d in data_disks]
             lun = max(luns) + 1 if luns else 0
         if existing_disk is None:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty,
-                                 disk_size_gb=size_gb, caching=caching)
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
+                                 caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
         else:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach,
-                                 managed_disk=ManagedDiskParameters(id=existing_disk), caching=caching)
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach, caching=caching,
+                                 managed_disk=ManagedDiskParameters(id=existing_disk, storage_account_type=sku))
 
         data_disks.append(data_disk)
         storage_profile.data_disks = data_disks
@@ -2430,4 +2436,100 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
     return _remove_identities(cmd, resource_group_name, vmss_name, identities,
                               _get_vmss,
                               _set_vmss)
+# endregion
+
+# region image galleries
+
+
+def list_image_galleries(cmd, resource_group_name=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.galleries.list_by_resource_group(resource_group_name)
+    return client.galleries.list()
+
+
+def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
+                         location=None, no_wait=False, tags=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    Gallery = cmd.get_models('Gallery')
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    gallery = Gallery(description=description, location=location, tags=(tags or {}))
+
+    client = _compute_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
+
+
+def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
+                         os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
+                         eula=None, description=None, location=None,
+                         minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
+    # pylint: disable=line-too-long
+    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
+        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
+    client = _compute_client_factory(cmd.cli_ctx)
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
+    recommendation = None
+    if any([minimum_cpu_core, maximum_cpu_core, minimum_memory, maximum_memory]):
+        cpu_recommendation, memory_recommendation = None, None
+        if any([minimum_cpu_core, maximum_cpu_core]):
+            cpu_recommendation = ResourceRange(min=minimum_cpu_core, max=maximum_cpu_core)
+        if any([minimum_memory, maximum_memory]):
+            memory_recommendation = ResourceRange(min=minimum_memory, max=maximum_memory)
+        recommendation = RecommendedMachineConfiguration(v_cp_us=cpu_recommendation, memory=memory_recommendation)
+    purchase_plan = None
+    if any([plan_name, plan_publisher, plan_product]):
+        purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
+
+    image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
+                         os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
+                         recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
+                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
+    return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
+
+
+def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
+                 location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
+                 replica_count=None, tags=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
+        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
+        'TargetRegion')
+    client = _compute_client_factory(cmd.cli_ctx)
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    regions_info = [TargetRegion(name=location)]
+    if target_regions:
+        regions_info = []
+        for t in target_regions:
+            parts = t.split('=', 1)
+            if len(parts) == 1:
+                regions_info.append(TargetRegion(name=parts[0]))
+            else:
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=int(parts[1])))
+
+    end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
+    if not is_valid_resource_id(managed_image):
+        managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                    namespace='Microsoft.Compute', type='images', name=managed_image)
+    source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+    profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
+                                            target_regions=regions_info, source=source, replica_count=replica_count)
+    image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+
+    return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
+                                                          gallery_name=gallery_name,
+                                                          gallery_image_name=gallery_image_name,
+                                                          gallery_image_version_name=gallery_image_version,
+                                                          gallery_image_version=image_version)
+
+
+def fix_gallery_image_date_info(date_info):
+    # here we add needed time, if only date is provided, so the setting can be accepted by servie end
+    if date_info and 't' not in date_info.lower():
+        date_info += 'T12:59:59Z'
+    return date_info
+
 # endregion
