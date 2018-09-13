@@ -13,10 +13,10 @@ class AcrTaskCommandsTests(ScenarioTest):
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
             'task_name': 'testTask',
-            'rg_loc': 'westus',
+            'rg_loc': 'westcentralus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': '5aaba7ff1ac0a01629aaeeebcf5199d3c69543e5',
+            'git_access_token': '876f8fa70f2261aa6c293d63e1f2889c73f40cdd ',
             'context': 'https://github.com/ankurkhemani/acr-helloworld.git',
             'file': './AcrHelloworld/Dockerfile',
             'image': 'testtask:v1',
