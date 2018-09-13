@@ -42,8 +42,8 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
             with open(public_key_filepath, 'r') as public_key_file:
                 public_key = public_key_file.read()
                 pub_ssh_dir = os.path.dirname(public_key_filepath)
-                logger.warning("Public SSH key file '%s' found in dir '%s'."
-                               "Use public key file. New RSA key pair will not be generated.",
+                logger.warning("Public SSH key file '%s' already exists in the directory of '%s'."
+                               "New SSH key files will not be generated.",
                                public_key_filepath, pub_ssh_dir)
 
                 return public_key
@@ -59,8 +59,8 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
         # try to use existing private key if it exists.
         try:
             key = paramiko.RSAKey(filename=private_key_filepath)
-            logger.warning("Private SSH key file '%s' found in dir '%s'. "
-                           "Generating new Public key file '%s'",
+            logger.warning("Private SSH key file '%s' was found in the directory of '%s'. "
+                           "We will generate a paired public key file '%s'",
                            private_key_filepath, ssh_dir, public_key_filepath)
         except (PasswordRequiredException, SSHException, IOError) as e:
             raise CLIError(e)
