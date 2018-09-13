@@ -64,7 +64,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     cpu=DEFAULT_CPU,
                     timeout=DEFAULT_TIMEOUT_IN_SEC,
                     values=None,
-                    source_trigger_name=None,
+                    source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
                     branch='master',
                     no_push=False,
@@ -73,7 +73,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     secret_arg=None,
                     set_value=None,
                     set_secret=None,
-                    base_image_trigger_name=None,
+                    base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
@@ -105,6 +105,34 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
 
+    source_triggers = None
+    if commit_trigger_enabled:
+        source_triggers = [
+            SourceTrigger(
+                source_repository=SourceProperties(
+                    source_control_type=source_control_type,
+                    repository_url=context_path,
+                    branch=branch,
+                    source_control_auth_properties=AuthInfo(
+                        token=git_access_token,
+                        token_type=DEFAULT_TOKEN_TYPE,
+                        scope='repo'
+                    )
+                ),
+                source_trigger_events=[SourceTriggerEvent.commit.value],
+                status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
+                name=source_trigger_name
+            )
+        ]
+
+    base_image_trigger = None
+    if base_image_trigger_enabled:
+        base_image_trigger = BaseImageTrigger(
+            base_image_trigger_type=base_image_trigger_type,
+            status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
+            name=base_image_trigger_name
+        )
+
     task_create_parameters = Task(
         location=registry.location,
         step=step,
@@ -118,28 +146,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             cpu=cpu
         ),
         trigger=TriggerProperties(
-            source_triggers=[
-                SourceTrigger(
-                    source_repository=SourceProperties(
-                        source_control_type=source_control_type,
-                        repository_url=context_path,
-                        branch=branch,
-                        source_control_auth_properties=AuthInfo(
-                            token=git_access_token,
-                            token_type=DEFAULT_TOKEN_TYPE,
-                            scope='repo'
-                        )
-                    ),
-                    source_trigger_events=[SourceTriggerEvent.commit.value],
-                    status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
-                    name=source_trigger_name if source_trigger_name else "defaultSourceTriggerName"
-                )
-            ] if commit_trigger_enabled else None,
-            base_image_trigger=BaseImageTrigger(
-                base_image_trigger_type=base_image_trigger_type,
-                status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
-                name=base_image_trigger_name if base_image_trigger_name else "defaultBaseimageTriggerName"
-            ) if base_image_trigger_enabled else None
+            source_triggers=source_triggers,
+            base_image_trigger=base_image_trigger
         )
     )
 
@@ -291,7 +299,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     ),
                     source_trigger_events=[SourceTriggerEvent.commit],
                     status=status,
-                    name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"""
+                    name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"
                 )
             ]
         if base_image_trigger_enabled or base_image_trigger is not None:
