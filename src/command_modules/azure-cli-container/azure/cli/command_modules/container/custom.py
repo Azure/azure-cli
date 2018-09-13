@@ -67,6 +67,7 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.delete(resource_group_name, name)
 
 
+# pylint: disable=too-many-statements
 def create_container(cmd,
                      resource_group_name,
                      name=None,
