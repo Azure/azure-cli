@@ -534,7 +534,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
         c.argument('description', help='the description of the gallery image version')
-        c.argument('managed_image', help='the name or resource id of a managed image')
+        c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
         c.argument('target_regions', nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
