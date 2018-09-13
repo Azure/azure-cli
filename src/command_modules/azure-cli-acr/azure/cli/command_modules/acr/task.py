@@ -232,7 +232,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             values_file_path=values,
             context_path=context_path,
             values=set_values
-            )
+        )
     elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = DockerBuildStepUpdateParameters(
             image_names=image_names,
@@ -241,7 +241,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=arguments,
             context_path=context_path
-            )
+        )
     elif step:
         if isinstance(step, DockerBuildStep):
             step = DockerBuildStepUpdateParameters(
@@ -251,7 +251,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 docker_file_path=file,
                 arguments=arguments,
                 context_path=context_path
-                )
+            )
 
         elif isinstance(step, FileTaskStep):
             step = FileTaskStepUpdateParameters(
