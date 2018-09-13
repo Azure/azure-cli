@@ -26,6 +26,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+    # temporary fix to allow idempotent create when value is None. (sdk defaults with False)
+    params.is_hns_enabled = None
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
