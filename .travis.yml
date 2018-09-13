@@ -23,6 +23,10 @@ jobs:
       env: PURPOSE='Headers'
       script: ./scripts/ci/precheck_header.sh
       python: 3.6
+    - stage: precheck
+      env: PURPOSE='Dependency Check'
+      script: ./scripts/dependency/check.sh
+      python: 3.6
     - stage: verify
       env: PURPOSE='Lint Command Table and Help'
       script: ./scripts/ci/verify_linter.sh
