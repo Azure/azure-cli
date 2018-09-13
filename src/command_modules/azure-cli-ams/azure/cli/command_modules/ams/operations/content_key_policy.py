@@ -28,8 +28,7 @@ from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyCle
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
                               policy_option_name, description=None,
                               clear_key_configuration=False, open_restriction=False,
-                              issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
-                              rsa_token_key_modulus=None, x509_certificate_token_key=None,
+                              issuer=None, audience=None, token_key=None, symmetric=False, rsa=False, x509=False,
                               alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                               alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                               token_claims=None, restriction_token_type=None,
@@ -38,8 +37,7 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               rental_and_lease_key_type=None, rental_duration=None, play_ready_configuration=None):
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
-                                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
-                                                        rsa_token_key_modulus, x509_certificate_token_key,
+x509_certificate_token_key                                                        issuer, audience, token_key, symmetric, rsa, x509,
                                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                         token_claims, restriction_token_type, open_id_connect_discovery_document,
@@ -65,8 +63,7 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                   policy_option_name, clear_key_configuration=False, open_restriction=False,
-                                  issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
-                                  rsa_token_key_modulus=None, x509_certificate_token_key=None,
+                                  issuer=None, audience=None, token_key=None, symmetric=False, rsa=False, x509=False,
                                   alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
                                   alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
                                   token_claims=None, restriction_token_type=None,
@@ -82,8 +79,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
     options = policy.options
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
-                                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
-                                                        rsa_token_key_modulus, x509_certificate_token_key,
+                                                        issuer, audience, token_key, symmetric, rsa, x509,
                                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                                         token_claims, restriction_token_type, open_id_connect_discovery_document,
@@ -131,8 +127,7 @@ def update_content_key_policy(instance, description=None):
 # Private methods used
 
 def _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
-                                        issuer, audience, symmetric_token_key, rsa_token_key_exponent,
-                                        rsa_token_key_modulus, x509_certificate_token_key,
+                                        issuer, audience, token_key, symmetric, rsa, x509,
                                         alt_symmetric_token_keys, alt_rsa_token_key_exponents,
                                         alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
                                         token_claims, restriction_token_type,
