@@ -436,7 +436,7 @@ def acr_repository_delete(cmd,
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
     else:
         user_confirmation("Are you sure you want to delete the repository '{}' "
-                           "and all images under it?".format(repository), yes)
+                          "and all images under it?".format(repository), yes)
         path = '/v2/_acr/{}/repository'.format(repository)
 
     return request_data_from_registry(
@@ -502,7 +502,7 @@ def _legacy_delete(cmd,
     if manifest is None:
         if not tag:
             user_confirmation("Are you sure you want to delete the repository '{}' "
-                               "and all images under it?".format(repository), yes)
+                              "and all images under it?".format(repository), yes)
             path = '/v2/_acr/{}/repository'.format(repository)
         else:
             logger.warning(

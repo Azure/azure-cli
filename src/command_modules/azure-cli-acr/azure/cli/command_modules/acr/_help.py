@@ -58,10 +58,10 @@ helps['acr run'] = """
     examples:
         - name: Queue a local context, pushed to ACR with streaming logs.
           text: >
-            az acr run -r myregistry -f bash-echo.yaml .
+            az acr run -r MyRegistry -f bash-echo.yaml .
         - name: Queue a remote git context with streaming logs.
           text: >
-            az acr run -r myregistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
+            az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
     """
 
 helps['acr helm'] = """
@@ -113,7 +113,7 @@ helps['acr delete'] = """
     examples:
         - name: Delete an Azure Container Registry.
           text: >
-            az acr delete -n myregistry
+            az acr delete -n MyRegistry
 """
 
 helps['acr show'] = """
@@ -302,7 +302,7 @@ helps['acr webhook list'] = """
     examples:
         - name: List webhooks and show the results in a table.
           text: >
-            az acr webhook list -r myregistry -o table
+            az acr webhook list -r MyRegistry -o table
 """
 
 helps['acr webhook create'] = """
@@ -311,10 +311,10 @@ helps['acr webhook create'] = """
     examples:
         - name: Create a webhook for an Azure Container Registry that will deliver docker push and delete events to a service URI.
           text: >
-            az acr webhook create -n MyWebhook -r myregistry --uri http://myservice.com --actions push delete
+            az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
         - name: Create a webhook for an Azure Container Registry that will deliver docker push events to a service URI with a basic authentication header.
           text: >
-            az acr webhook create -n MyWebhook -r myregistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
+            az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
 """
 
 helps['acr webhook delete'] = """
@@ -323,7 +323,7 @@ helps['acr webhook delete'] = """
     examples:
         - name: Delete a webhook from an Azure Container Registry.
           text: >
-            az acr webhook delete -n MyWebhook -r myregistry
+            az acr webhook delete -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook show'] = """
@@ -332,7 +332,7 @@ helps['acr webhook show'] = """
     examples:
         - name: Get the details of a webhook.
           text: >
-            az acr webhook show -n MyWebhook -r myregistry
+            az acr webhook show -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook update'] = """
@@ -341,13 +341,13 @@ helps['acr webhook update'] = """
     examples:
         - name: Update headers for a webhook.
           text: >
-            az acr webhook update -n MyWebhook -r myregistry --headers "Authorization=Basic 000000"
+            az acr webhook update -n MyWebhook -r MyRegistry --headers "Authorization=Basic 000000"
         - name: Update the service URI and actions for a webhook.
           text: >
-            az acr webhook update -n MyWebhook -r myregistry --uri http://myservice.com --actions push delete
+            az acr webhook update -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
         - name: Disable a webhook.
           text: >
-            az acr webhook update -n MyWebhook -r myregistry --status disabled
+            az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
 
 helps['acr webhook get-config'] = """
@@ -356,7 +356,7 @@ helps['acr webhook get-config'] = """
     examples:
         - name: Get the configuration information for a webhook.
           text: >
-            az acr webhook get-config -n MyWebhook -r myregistry
+            az acr webhook get-config -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook ping'] = """
@@ -365,7 +365,7 @@ helps['acr webhook ping'] = """
     examples:
         - name: Trigger a ping event for a webhook.
           text: >
-            az acr webhook ping -n MyWebhook -r myregistry
+            az acr webhook ping -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook list-events'] = """
@@ -374,7 +374,7 @@ helps['acr webhook list-events'] = """
     examples:
         - name: List recent events for a webhook.
           text: >
-            az acr webhook list-events -n MyWebhook -r myregistry
+            az acr webhook list-events -n MyWebhook -r MyRegistry
 """
 
 helps['acr replication list'] = """
@@ -383,7 +383,7 @@ helps['acr replication list'] = """
     examples:
         - name: List replications and show the results in a table.
           text: >
-            az acr replication list -r myregistry -o table
+            az acr replication list -r MyRegistry -o table
 """
 
 helps['acr replication create'] = """
@@ -392,7 +392,7 @@ helps['acr replication create'] = """
     examples:
         - name: Create a replicated region for an Azure Container Registry.
           text: >
-            az acr replication create -r myregistry -l westus
+            az acr replication create -r MyRegistry -l westus
 """
 
 helps['acr replication delete'] = """
@@ -401,7 +401,7 @@ helps['acr replication delete'] = """
     examples:
         - name: Delete a replicated region from an Azure Container Registry.
           text: >
-            az acr replication delete -n MyReplication -r myregistry
+            az acr replication delete -n MyReplication -r MyRegistry
 """
 
 helps['acr replication show'] = """
@@ -410,7 +410,7 @@ helps['acr replication show'] = """
     examples:
         - name: Get the details of a replicated region
           text: >
-            az acr replication show -n MyReplication -r myregistry
+            az acr replication show -n MyReplication -r MyRegistry
 """
 
 helps['acr replication update'] = """
@@ -419,7 +419,7 @@ helps['acr replication update'] = """
     examples:
         - name: Update tags for a replication
           text: >
-            az acr replication update -n MyReplication -r myregistry --tags key1=value1 key2=value2
+            az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
 """
 
 helps['acr task create'] = """
@@ -428,10 +428,10 @@ helps['acr task create'] = """
     examples:
         - name: Create a task that builds hello-world, without triggers
           text: >
-            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile  --commit-trigger-enabled false
+            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile  --commit-trigger-enabled false
         - name: Create a task that builds hello-world, with git commit webhook based triggers
           text: >
-            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
+            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
 """
 
 helps['acr task show'] = """
@@ -440,11 +440,11 @@ helps['acr task show'] = """
     examples:
         - name: Get the properties of a task, displaying the results in a table.
           text: >
-            az acr task show -n MyTask -r myregistry -o table
+            az acr task show -n MyTask -r MyRegistry -o table
 
         - name: Get the properties of a task, including secure properties.
           text: >
-            az acr task show -n MyTask -r myregistry --with-secure-properties
+            az acr task show -n MyTask -r MyRegistry --with-secure-properties
 """
 
 helps['acr task list'] = """
@@ -453,7 +453,7 @@ helps['acr task list'] = """
     examples:
         - name: List tasks and show the results in a table.
           text: >
-            az acr task list -r myregistry -o table
+            az acr task list -r MyRegistry -o table
 """
 
 helps['acr task delete'] = """
@@ -462,7 +462,7 @@ helps['acr task delete'] = """
     examples:
         - name: Delete a task from an Azure Container Registry.
           text: >
-            az acr task delete -n MyTask -r myregistry
+            az acr task delete -n MyTask -r MyRegistry
 """
 
 helps['acr task update'] = """
@@ -471,7 +471,7 @@ helps['acr task update'] = """
     examples:
         - name: Update base image updates to trigger on all dependent images of a multi-stage dockerfile, and status of a task in an Azure Container Registry.
           text: >
-            az acr task update -n MyTask -r myregistry --base-image-trigger All --status Disabled
+            az acr task update -n MyTask -r MyRegistry --base-image-trigger All --status Disabled
 """
 
 helps['acr task list-runs'] = """
@@ -480,16 +480,16 @@ helps['acr task list-runs'] = """
     examples:
         - name: List all of the runs for a registry and show the results in a table.
           text: >
-            az acr task list-runs -r myregistry -o table
+            az acr task list-runs -r MyRegistry -o table
         - name: List runs for a task and show the results in a table.
           text: >
-            az acr task list-runs -r myregistry -n MyTask -o table
+            az acr task list-runs -r MyRegistry -n MyTask -o table
         - name: List the last 10 successful runs for a registry and show the results in a table.
           text: >
-            az acr task list-runs -r myregistry --run-status Succeeded --top 10 -o table
+            az acr task list-runs -r MyRegistry --run-status Succeeded --top 10 -o table
         - name: List all of the runs that built the image 'hello-world' for a registry and show the results in a table.
           text: >
-            az acr task list-runs -r myregistry --image hello-world -o table
+            az acr task list-runs -r MyRegistry --image hello-world -o table
 """
 
 helps['acr task show-run'] = """
@@ -498,7 +498,7 @@ helps['acr task show-run'] = """
     examples:
         - name:  Get the details of a run, displaying the results in a table.
           text: >
-            az acr task show-run -r myregistry --run-id runId -o table
+            az acr task show-run -r MyRegistry --run-id runId -o table
 """
 
 helps['acr task cancel-run'] = """
@@ -507,7 +507,7 @@ helps['acr task cancel-run'] = """
     examples:
         - name:  Cancel a run
           text: >
-            az acr task cancel-run -r myregistry --run-id runId
+            az acr task cancel-run -r MyRegistry --run-id runId
 """
 
 helps['acr task run'] = """
@@ -516,7 +516,7 @@ helps['acr task run'] = """
     examples:
         - name: Trigger a task.
           text: >
-            az acr task run -n MyTask -r myregistry
+            az acr task run -n MyTask -r MyRegistry
 """
 
 helps['acr task update-run'] = """
@@ -525,7 +525,7 @@ helps['acr task update-run'] = """
     examples:
         - name: Update an existing run to be archived.
           text: >
-            az acr task update-run -r myregistry --run-id runId --no-archive false
+            az acr task update-run -r MyRegistry --run-id runId --no-archive false
 """
 
 helps['acr task logs'] = """
@@ -534,16 +534,16 @@ helps['acr task logs'] = """
     examples:
         - name: Show logs for the last created run in the registry.
           text: >
-            az acr task logs -r myregistry
+            az acr task logs -r MyRegistry
         - name: Show logs for the last created run in the registry, filtered by task.
           text: >
-            az acr task logs -r myregistry -n MyTask
+            az acr task logs -r MyRegistry -n MyTask
         - name: Show logs for a particular run.
           text: >
-            az acr task logs -r myregistry --run-id runId
+            az acr task logs -r MyRegistry --run-id runId
         - name: Show logs for the last created run in the registry that built the image 'hello-world'.
           text: >
-            az acr task logs -r myregistry --image hello-world
+            az acr task logs -r MyRegistry --image hello-world
 """
 
 helps['acr build'] = """
@@ -552,16 +552,16 @@ helps['acr build'] = """
     examples:
         - name: Queue a local context (folder), pushed to ACR when complete, with streaming logs.
           text: >
-            az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry .
+            az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry .
         - name: Queue a local context, pushed to ACR without streaming logs.
           text: >
-            az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry --no-logs .
+            az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry --no-logs .
         - name: Queue a local context to validate a build is successful, without pushing to the registry using the --no-push parameter.
           text: >
-            az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry --no-push .
+            az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry --no-push .
         - name: Queue a local context to validate a build is successful, without pushing to the registry. Removing the -t parameter defaults to --no-push
           text: >
-            az acr build -r myregistry .
+            az acr build -r MyRegistry .
 """
 
 helps['acr build-task create'] = """
@@ -570,10 +570,10 @@ helps['acr build-task create'] = """
     examples:
         - name: Create a build definition without git commits and base image updates.
           text: >
-            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --commit-trigger-enabled false
+            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --commit-trigger-enabled false
         - name: Create a build definition which updates on git commits and base image updates (--git-access-token must have permissions to create github webhooks).
           text: >
-            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --git-access-token 0000000000000000000000000000000000000000
+            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --git-access-token 0000000000000000000000000000000000000000
 """
 
 helps['acr build-task show'] = """
@@ -582,10 +582,10 @@ helps['acr build-task show'] = """
     examples:
         - name: Get the details of a build task, displaying the results in a table.
           text: >
-            az acr build-task show -n MyBuildTask -r myregistry -o table
+            az acr build-task show -n MyBuildTask -r MyRegistry -o table
         - name: Get the details of a build task including secure properties.
           text: >
-            az acr build-task show -n MyBuildTask -r myregistry --with-secure-properties
+            az acr build-task show -n MyBuildTask -r MyRegistry --with-secure-properties
 """
 
 helps['acr build-task list'] = """
@@ -594,7 +594,7 @@ helps['acr build-task list'] = """
     examples:
         - name: List build tasks and show the results in a table.
           text: >
-            az acr build-task list -r myregistry -o table
+            az acr build-task list -r MyRegistry -o table
 """
 
 helps['acr build-task delete'] = """
@@ -603,7 +603,7 @@ helps['acr build-task delete'] = """
     examples:
         - name: Delete a build task from an Azure Container Registry
           text: >
-            az acr build-task delete -n MyBuildTask -r myregistry
+            az acr build-task delete -n MyBuildTask -r MyRegistry
 """
 
 helps['acr build-task update'] = """
@@ -612,7 +612,7 @@ helps['acr build-task update'] = """
     examples:
         - name: Update the git access token for a build definition in an Azure Container Registry.
           text: >
-            az acr build-task update -n MyBuildTask -r myregistry --git-access-token 0000000000000000000000000000000000000000
+            az acr build-task update -n MyBuildTask -r MyRegistry --git-access-token 0000000000000000000000000000000000000000
 """
 
 helps['acr build-task list-builds'] = """
@@ -621,16 +621,16 @@ helps['acr build-task list-builds'] = """
     examples:
         - name: List builds for a build task and show the results in a table.
           text: >
-            az acr build-task list-builds -n MyBuildTask -r myregistry -o table
+            az acr build-task list-builds -n MyBuildTask -r MyRegistry -o table
         - name: List all of the builds for a registry displaying the results in a table.
           text: >
-            az acr build-task list-builds -r myregistry -o table
+            az acr build-task list-builds -r MyRegistry -o table
         - name: List the last 10 successful builds for a registry displaying the results in a table.
           text: >
-            az acr build-task list-builds -r myregistry --build-status Succeeded --top 10 -o table
+            az acr build-task list-builds -r MyRegistry --build-status Succeeded --top 10 -o table
         - name: List all of the builds that built the image 'hello-world' for an Azure Container Registry, displaying the results in a table.
           text: >
-            az acr build-task list-builds -r myregistry --image hello-world -o table
+            az acr build-task list-builds -r MyRegistry --image hello-world -o table
 """
 
 helps['acr build-task show-build'] = """
@@ -639,7 +639,7 @@ helps['acr build-task show-build'] = """
     examples:
         - name:  Get the details of a build, displaying the results in a table.
           text: >
-            az acr build-task show-build -n MyBuildTask -r myregistry --build-id aab1 -o table
+            az acr build-task show-build -n MyBuildTask -r MyRegistry --build-id aab1 -o table
 """
 
 helps['acr build-task run'] = """
@@ -648,7 +648,7 @@ helps['acr build-task run'] = """
     examples:
         - name: Trigger a build task.
           text: >
-            az acr build-task run -n MyBuildTask -r myregistry
+            az acr build-task run -n MyBuildTask -r MyRegistry
 """
 
 helps['acr build-task update-build'] = """
@@ -657,7 +657,7 @@ helps['acr build-task update-build'] = """
     examples:
         - name: Update an existing build to be archived.
           text: >
-            az acr build-task update-build -r myregistry --build-id MyBuild --no-archive false
+            az acr build-task update-build -r MyRegistry --build-id MyBuild --no-archive false
 """
 
 helps['acr build-task logs'] = """
@@ -666,16 +666,16 @@ helps['acr build-task logs'] = """
     examples:
         - name: Show logs for the last created build in the registry.
           text: >
-            az acr build-task logs -r myregistry
+            az acr build-task logs -r MyRegistry
         - name: Show logs for the last created build in the registry, filtered by build task.
           text: >
-            az acr build-task logs -r myregistry -n MyBuildTask
+            az acr build-task logs -r MyRegistry -n MyBuildTask
         - name: Show logs for a particular build.
           text: >
-            az acr build-task logs -r myregistry --build-id aa1b
+            az acr build-task logs -r MyRegistry --build-id aa1b
         - name: Show logs for the last created build in the registry that built the image 'hello-world'.
           text: >
-            az acr build-task logs -r myregistry --image hello-world
+            az acr build-task logs -r MyRegistry --image hello-world
 """
 
 helps['acr import'] = """
@@ -692,55 +692,55 @@ helps['acr import'] = """
 
 helps['acr helm list'] = """
     type: command
-    short-summary: List all helm charts in a container registry.
+    short-summary: List all helm charts in an Azure Container Registry.
     examples:
-        - name: List all helm charts in a container registry
+        - name: List all helm charts in an Azure Container Registry
           text: >
             az acr helm list -n MyRegistry
 """
 
 helps['acr helm show'] = """
     type: command
-    short-summary: Describe a helm chart in a container registry.
+    short-summary: Describe a helm chart in an Azure Container Registry.
     examples:
-        - name: Show all versions of a helm chart in a container registry
+        - name: Show all versions of a helm chart in an Azure Container Registry
           text: >
             az acr helm show -n MyRegistry mychart
-        - name: Show a helm chart version in a container registry.
+        - name: Show a helm chart version in an Azure Container Registry
           text: >
             az acr helm show -n MyRegistry mychart --version 0.3.2
 """
 
 helps['acr helm delete'] = """
     type: command
-    short-summary: Delete a helm chart version in a container registry.
+    short-summary: Delete a helm chart version in an Azure Container Registry.
     examples:
-        - name: Delete all versions of a helm chart in a container registry
+        - name: Delete all versions of a helm chart in an Azure Container Registry
           text: >
             az acr helm delete -n MyRegistry mychart
-        - name: Delete a helm chart version in a container registry.
+        - name: Delete a helm chart version in an Azure Container Registry
           text: >
             az acr helm delete -n MyRegistry mychart --version 0.3.2
 """
 
 helps['acr helm push'] = """
     type: command
-    short-summary: Push a helm chart package to a container registry.
+    short-summary: Push a helm chart package to an Azure Container Registry.
     examples:
-        - name: Push a chart package to a container registry.
+        - name: Push a chart package to an Azure Container Registry
           text: >
             az acr helm push -n MyRegistry mychart-0.3.2.tgz
-        - name: Push a chart package to a container registry, overwriting the existing one.
+        - name: Push a chart package to an Azure Container Registry, overwriting the existing one.
           text: >
             az acr helm push -n MyRegistry mychart-0.3.2.tgz --force
 """
 
 helps['acr helm repo add'] = """
     type: command
-    short-summary: Add a helm chart repository from a container registry through the Helm CLI.
+    short-summary: Add a helm chart repository from an Azure Container Registry through the Helm CLI.
     long-summary: Helm must be installed on your machine.
     examples:
-        - name: Add a helm chart repository from a container registry to manage helm charts.
+        - name: Add a helm chart repository from an Azure Container Registry to manage helm charts.
           text: >
             az acr helm repo add -n MyRegistry
 """
