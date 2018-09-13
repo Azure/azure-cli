@@ -36,6 +36,13 @@ def _log_pprint_template(template):
     logger.info('==== END TEMPLATE ====')
 
 
+def _get_from_collection(collection, value, key_name):
+    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
+    if not match:
+        raise CLIError("Item '{}' not found.".format(value))
+    return match
+
+
 def _upsert(parent, collection_name, obj_to_add, key_name):
     if not getattr(parent, collection_name, None):
         setattr(parent, collection_name, [])
@@ -1500,6 +1507,28 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
+def create_express_route_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
+                                    peer_circuit, address_prefix, authorization_key=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
+    ExpressRouteCircuitConnection, SubResource = cmd.get_models('ExpressRouteCircuitConnection', 'SubResource')
+    source_circuit = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='expressRouteCircuits',
+        name=circuit_name,
+        child_type_1='peerings',
+        child_name_1=peering_name
+    )
+    conn = ExpressRouteCircuitConnection(
+        express_route_circuit_peering=SubResource(id=source_circuit),
+        peer_express_route_circuit_peering=SubResource(id=peer_circuit),
+        address_prefix=address_prefix,
+        authorization_key=authorization_key
+    )
+    return client.create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
+
+
 def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv6Network
     prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
@@ -2459,6 +2488,15 @@ def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=No
         if destination_port_range is not None else instance.destination_port_range
     instance.priority = priority if priority is not None else instance.priority
     return instance
+# endregion
+
+
+# region NetworkProfiles
+def list_network_profiles(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).network_profiles
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_all()
 # endregion
 
 
