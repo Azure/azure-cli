@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
 ls -la $share_folder/build
@@ -12,6 +10,8 @@ pip install -e ./tools
 [ -d privates ] && pip install -qqq privates/*.whl
 pip install $ALL_MODULES
 
+set -e
+
 output=$(az cloud list-profiles -otsv)
 
 for profile in $output; do
@@ -21,3 +21,5 @@ for profile in $output; do
     azdev verify load-all
     echo $profile "profile has been verified."
 done
+
+echo "Successfully loaded all commands in each profile."
