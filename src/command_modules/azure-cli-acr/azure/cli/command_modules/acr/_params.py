@@ -82,7 +82,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('image_names', arg_type=image_by_tag_type, action='append')
-        c.argument('timeout', type=int, help='The build timeout in seconds.')
+        c.argument('timeout', type=int, help='The timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
         c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
@@ -199,10 +199,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo).")
-        c.argument('arg', help="Argument in 'name[=value]' format.", action='append', validator=validate_arg)
-        c.argument('secret_arg', help="Secret argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
-        c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
-        c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
+        c.argument('arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
+        c.argument('secret_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
+        c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret task value in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
         c.argument('source_trigger_name', help="The name of the source trigger.")
