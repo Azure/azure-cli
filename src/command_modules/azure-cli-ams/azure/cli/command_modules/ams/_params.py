@@ -171,6 +171,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
         c.argument('play_ready_configuration', arg_group='PlayReady Configuration', help='JSON PlayReady license template. Use @{file} to load from a file.')
 
+    with self.argument_context('ams content-key-policy show') as c:
+        c.argument('with_secrets',
+                   action='store_true',
+                   help='Include secret values of the content key policy.')
+
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('default_content_key_policy_name', default_policy_name_arg_type)

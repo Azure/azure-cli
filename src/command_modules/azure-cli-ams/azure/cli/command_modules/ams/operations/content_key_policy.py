@@ -7,9 +7,11 @@
 import base64
 import json
 
+import json
+
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._utils import parse_timedelta
+from azure.cli.command_modules.ams._utils import parse_timedelta, JsonBytearrayEncoder
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
@@ -48,6 +50,19 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                    content_key_policy_name, [policy_option], description)
 
 
+def show_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
+                            with_secrets=False):
+
+    if with_secrets:
+        content_key_policy = client.get_policy_properties_with_secrets(resource_group_name=resource_group_name, account_name=account_name,
+                                                                       content_key_policy_name=content_key_policy_name)
+        json_object = json.dumps(content_key_policy, cls=JsonBytearrayEncoder, indent=4)
+        return json.loads(json_object)
+
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      content_key_policy_name=content_key_policy_name)
+
+
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                   policy_option_name, clear_key_configuration=False, open_restriction=False,
                                   issuer=None, audience=None, symmetric_token_key=None, rsa_token_key_exponent=None,
@@ -62,7 +77,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     if not policy:
-        raise CLIError('Policy with name "' + content_key_policy_name + '" does not exist in your realm.')
+        raise CLIError('The content key policy was not found.')
 
     options = policy.options
 
@@ -86,15 +101,15 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     if not policy:
-        raise CLIError('Policy with name "' + content_key_policy_name + '" does not exist in your realm.')
+        raise CLIError('The content key policy was not found.')
 
     if all(option.policy_option_id != policy_option_id for option in policy.options):
         raise CLIError('No policy option found with id "' + policy_option_id + '"')
 
     policy.options = list(filter(lambda option: option.policy_option_id != policy_option_id, policy.options))
 
-    return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, policy.options)
+    return client.update(resource_group_name, account_name,
+                         content_key_policy_name, policy.options)
 
 
 def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
