@@ -61,7 +61,8 @@ def load_command_table(self, _):
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
-        g.custom_command('install-connector', 'k8s_install_connector', deprecate_info=g.deprecate(redirect="az aks enable-addons virtual-node", hide=True))
+        g.custom_command('install-connector', 'k8s_install_connector',
+                         deprecate_info=g.deprecate(redirect="az aks enable-addons virtual-node", hide=True))
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
         g.custom_command('remove-connector', 'k8s_uninstall_connector')
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
