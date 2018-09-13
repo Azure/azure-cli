@@ -1507,6 +1507,28 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
+def create_express_route_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
+                                    peer_circuit, address_prefix, authorization_key=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
+    ExpressRouteCircuitConnection, SubResource = cmd.get_models('ExpressRouteCircuitConnection', 'SubResource')
+    source_circuit = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='expressRouteCircuits',
+        name=circuit_name,
+        child_type_1='peerings',
+        child_name_1=peering_name
+    )
+    conn = ExpressRouteCircuitConnection(
+        express_route_circuit_peering=SubResource(id=source_circuit),
+        peer_express_route_circuit_peering=SubResource(id=peer_circuit),
+        address_prefix=address_prefix,
+        authorization_key=authorization_key
+    )
+    return client.create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
+
+
 def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv6Network
     prefixes = prefixes if isinstance(prefixes, list) else [prefixes]

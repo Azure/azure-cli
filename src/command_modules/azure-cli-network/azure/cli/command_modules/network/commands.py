@@ -22,7 +22,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
-    cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints, cf_network_profiles)
+    cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints, cf_network_profiles,
+    cf_express_route_circuit_connections)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -109,6 +110,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.{}',
         client_factory=cf_express_route_circuit_authorizations,
         min_api='2016-09-01'
+    )
+
+    network_erconn_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_circuit_connections_operations#ExpressRouteCircuitConnectionsOperations.{}',
+        client_factory=cf_express_route_circuit_connections,
+        min_api='2018-07-01'
     )
 
     network_ersp_sdk = CliCommandType(
@@ -432,6 +439,11 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command('update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
+
+    with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
+        g.custom_command('create', 'create_express_route_connection')
+        g.command('delete', 'delete')
+        g.show_command('show')
     # endregion
 
     # region InterfaceEndpoint
