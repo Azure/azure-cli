@@ -17,14 +17,18 @@ from ._format import (
     replication_output_format,
     build_task_output_format,
     build_task_detail_output_format,
-    build_output_format
+    build_output_format,
+    task_output_format,
+    run_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_build_tasks,
-    cf_acr_builds
+    cf_acr_builds,
+    cf_acr_tasks,
+    cf_acr_runs
 )
 
 
@@ -72,13 +76,29 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_build_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.build#{}',
         table_transformer=build_output_format,
-        client_factory=cf_acr_builds
+        client_factory=cf_acr_runs
+    )
+
+    acr_run_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.run#{}',
+        table_transformer=run_output_format,
+        client_factory=cf_acr_runs
+    )
+
+    acr_task_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.task#{}',
+        table_transformer=task_output_format,
+        client_factory=cf_acr_tasks
     )
 
     acr_build_task_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.build_task#{}',
         table_transformer=build_task_detail_output_format,
         client_factory=cf_acr_build_tasks
+    )
+
+    acr_helm_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.helm#{}'
     )
 
     with self.command_group('acr', acr_custom_util) as g:
@@ -94,8 +114,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  setter_name='acr_update_set',
                                  custom_func_name='acr_update_custom',
                                  custom_func_type=acr_custom_util,
-                                 client_factory=cf_acr_registries,
-                                 table_transformer=registry_output_format)
+                                 client_factory=cf_acr_registries)
 
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import')
@@ -126,8 +145,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  setter_name='acr_webhook_update_set',
                                  custom_func_name='acr_webhook_update_custom',
                                  custom_func_type=acr_webhook_util,
-                                 client_factory=cf_acr_webhooks,
-                                 table_transformer=webhook_output_format)
+                                 client_factory=cf_acr_webhooks)
 
     with self.command_group('acr replication', acr_replication_util) as g:
         g.command('list', 'acr_replication_list')
@@ -139,13 +157,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  setter_name='acr_replication_update_set',
                                  custom_func_name='acr_replication_update_custom',
                                  custom_func_type=acr_replication_util,
-                                 client_factory=cf_acr_replications,
-                                 table_transformer=replication_output_format)
+                                 client_factory=cf_acr_replications)
 
     with self.command_group('acr', acr_build_util) as g:
         g.command('build', 'acr_build')
 
-    with self.command_group('acr build-task', acr_build_task_util) as g:
+    with self.command_group('acr', acr_run_util) as g:
+        g.command('run', 'acr_run', supports_no_wait=True)
+
+    # Deprecated (for backward compatibility).
+    with self.command_group('acr build-task',
+                            acr_build_task_util,
+                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g:
         g.command('create', 'acr_build_task_create')
         g.show_command('show', 'acr_build_task_show')
         g.command('list', 'acr_build_task_list', table_transformer=build_task_output_format)
@@ -162,6 +185,32 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('logs', 'acr_build_task_logs', client_factory=cf_acr_builds,
                   table_transformer=None)
 
+    with self.command_group('acr task', acr_task_util) as g:
+        g.command('create', 'acr_task_create')
+        g.show_command('show', 'acr_task_show')
+        g.command('list', 'acr_task_list')
+        g.command('delete', 'acr_task_delete')
+        g.command('update', 'acr_task_update')
+        g.command('run', 'acr_task_run', client_factory=cf_acr_runs,
+                  table_transformer=run_output_format, supports_no_wait=True)
+        g.command('list-runs', 'acr_task_list_runs', client_factory=cf_acr_runs,
+                  table_transformer=run_output_format)
+        g.command('show-run', 'acr_task_show_run', client_factory=cf_acr_runs,
+                  table_transformer=run_output_format)
+        g.command('cancel-run', 'acr_task_cancel_run', client_factory=cf_acr_runs,
+                  table_transformer=None)
+        g.command('update-run', 'acr_task_update_run', client_factory=cf_acr_runs,
+                  table_transformer=run_output_format)
+        g.command('logs', 'acr_task_logs', client_factory=cf_acr_runs,
+                  table_transformer=None)
+
     with self.command_group('acr config content-trust', acr_policy_util) as g:
         g.command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
+
+    with self.command_group('acr helm', acr_helm_util) as g:
+        g.command('list', 'acr_helm_list')
+        g.command('show', 'acr_helm_show')
+        g.command('delete', 'acr_helm_delete')
+        g.command('push', 'acr_helm_push')
+        g.command('repo add', 'acr_helm_repo_add')

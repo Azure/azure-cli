@@ -168,6 +168,76 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
+def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
+                              share_name, access_key, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    if custom_id in azure_storage_accounts.properties:
+        raise CLIError("Site already configured with an Azure storage account with the id '{}'. "
+                       "Use 'az webapp config storage-account update' to update an existing "
+                       "Azure storage account configuration.".format(custom_id))
+
+    azure_storage_accounts.properties[custom_id] = AzureStorageInfoValue(type=storage_type, account_name=account_name,
+                                                                         share_name=share_name, access_key=access_key,
+                                                                         mount_path=mount_path)
+    client = web_client_factory(cmd.cli_ctx)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
+def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
+                                 share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    existing_account_config = azure_storage_accounts.properties.pop(custom_id, None)
+
+    if not existing_account_config:
+        raise CLIError("No Azure storage account configuration found with the id '{}'. "
+                       "Use 'az webapp config storage-account add' to add a new "
+                       "Azure storage account configuration.".format(custom_id))
+
+    new_account_config = AzureStorageInfoValue(
+        type=storage_type or existing_account_config.type,
+        account_name=account_name or existing_account_config.account_name,
+        share_name=share_name or existing_account_config.share_name,
+        access_key=access_key or existing_account_config.access_key,
+        mount_path=mount_path or existing_account_config.mount_path
+    )
+
+    azure_storage_accounts.properties[custom_id] = new_account_config
+
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
@@ -457,6 +527,19 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     return result
 
 
+def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                     'list_azure_storage_accounts', slot)
+
+    slot_azure_storage_config_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                                                     .azure_storage_config_names or []
+
+    return [{'name': p,
+             'value': result.properties[p],
+             'slotSetting': p in slot_azure_storage_config_names} for p in result.properties]
+
+
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
@@ -576,6 +659,29 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
                                          app_settings.properties, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+
+
+def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+    client = web_client_factory(cmd.cli_ctx)
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+    is_slot_settings = False
+
+    azure_storage_accounts.properties.pop(custom_id, None)
+    if slot_cfg_names.azure_storage_config_names and custom_id in slot_cfg_names.azure_storage_config_names:
+        slot_cfg_names.azure_storage_config_names.remove(custom_id)
+        is_slot_settings = True
+
+    if is_slot_settings:
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    return result.properties
 
 
 def _ssl_context():
@@ -1699,9 +1805,9 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    consumption_plan_location=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None,
-                    deployment_container_image_name=None, tags=None):
+                    os_type=None, runtime=None, consumption_plan_location=None,
+                    deployment_source_url=None, deployment_source_branch='master',
+                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1719,7 +1825,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
-    else:
+        # if os_type is None, the os type is windows
+        is_linux = os_type and os_type.lower() == 'linux'
+
+        # for linux consumption plan app the os_type should be Linux & should have a runtime specified
+        # currently in other cases the runtime is ignored
+        if is_linux and not runtime:
+            raise CLIError("usage error: --runtime RUNTIME required for linux functions apps with consumption plan.")
+
+    else:  # apps with SKU based plan
         if is_valid_resource_id(plan):
             parse_result = parse_resource_id(plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
@@ -1729,8 +1843,18 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
-        if is_linux:
-            functionapp_def.kind = 'functionapp,linux'
+        functionapp_def.server_farm_id = plan
+        functionapp_def.location = location
+
+    con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
+
+    if is_linux:
+        functionapp_def.kind = 'functionapp,linux'
+        functionapp_def.reserved = True
+        if consumption_plan_location:
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
+        else:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
@@ -1744,15 +1868,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
                 site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
-        else:
-            functionapp_def.kind = 'functionapp'
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
-
-        functionapp_def.server_farm_id = plan
-        functionapp_def.location = location
-
-    con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
-
+    else:
+        functionapp_def.kind = 'functionapp'
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -1768,8 +1886,13 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
-                             deployment_source_branch, deployment_local_git)
+    if consumption_plan_location and is_linux:
+        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
+                       "created but is not active until content is published using"
+                       "Azure Portal or the Functions Core Tools.", name)
+    else:
+        _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
+                                 deployment_source_branch, deployment_local_git)
 
     return functionapp
 

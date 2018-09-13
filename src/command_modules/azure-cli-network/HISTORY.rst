@@ -2,9 +2,29 @@
 
 Release History
 ===============
+
 2.2.5
 +++++
-* Minor fixes
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
+* Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
+* Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
+* Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
+* Add `--disable-outbound-snat` to `network lb rule create/update`.
+* Allow `network watcher flow-log show/configure` to be used with classic NSGs.
+* Add `network watcher run-configuration-diagnostic` command.
+* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.
+* `network express-route create/update`: Add `--allow-global-reach` flag.
+* `network vnet subnet create/update`: Add support for `--delegation`.
+* Added `network vnet subnet list-available-delegations` command.
+* `network traffic-manager profile create/update`: Added support for `--interval`, `--timeout` and `--max-failures` for Monitor configuration.
+  Deprecated options `--monitor-path`, `--monitor-port` and `--monitor-protocol` in favor of `--path`, `--port`, `--protocol`.
+* `network lb frontend-ip create/update`: Fixed the logic for setting private IP allocation method. If a private IP address is provided, the
+  allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
+* `dns record-set * create/update`: Add support for `--target-resource`.
+* Add `network interface-endpoint` commands to query interface endpoint objects.
+* Add `network profile show/list/delete` for partial management of network profiles.
+* Add `network express-route peering connection` commands to manage peering connections between ExpressRoutes.
 
 2.2.4
 +++++

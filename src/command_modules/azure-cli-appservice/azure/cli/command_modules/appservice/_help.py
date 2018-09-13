@@ -119,6 +119,47 @@ examples:
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
 
+helps['webapp config storage-account'] = """
+type: group
+short-summary: Manage a web app's Azure storage account configurations.
+"""
+
+helps['webapp config storage-account list'] = """
+type: command
+short-summary: Get a web app's Azure storage account configurations.
+"""
+
+helps['webapp config storage-account add'] = """
+type: command
+short-summary: Add an Azure storage account configuration to a web app.
+examples:
+    - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
+      text: >
+        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --type AzureFiles \\
+          --account-name MyStorageAccount \\
+          --share-name MyShare \\
+          --access-key MyAccessKey \\
+          --mount-path /path/to/mount
+"""
+
+helps['webapp config storage-account update'] = """
+type: command
+short-summary: Update an existing Azure storage account configuration on a web app.
+examples:
+    - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
+      text: >
+        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --mount-path /path/to/new/mount
+"""
+
+helps['webapp config storage-account delete'] = """
+type: command
+short-summary: Delete a web app's Azure storage account configuration.
+"""
+
 helps['webapp config connection-string'] = """
 type: group
 short-summary: Manage a web app's connection strings.

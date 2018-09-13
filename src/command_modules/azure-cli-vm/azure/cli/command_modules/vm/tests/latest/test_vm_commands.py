@@ -222,8 +222,7 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
         vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
-        self.cmd('vm capture -g {rg} -n {vm} --vhd-name-prefix vmtest',
-                 checks=self.is_empty())
+        self.cmd('vm capture -g {rg} -n {vm} --vhd-name-prefix vmtest')
 
         # capture to a custom image
         self.kwargs['image'] = 'myImage'
@@ -1309,6 +1308,57 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'StandardSSD_LRS'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
+    def test_vm_ultra_ssd_storage_sku(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-ultrassd',
+            'vm2': 'vm-ultrassd2',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'disk3': 'd3',
+            'disk4': 'd4'
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk show -g {rg} -n {disk1}')
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --disk {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
+    def test_vmss_ultra_ssd_storage_sku(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'vm-ultrassd',
+            'vmss2': 'vm-ultrassd2'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vmss disk attach -g {rg} -n {vmss2} --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
 
 
@@ -2658,6 +2708,50 @@ class VMGenericUpdate(ScenarioTest):
         self.cmd('vm update -g {rg} -n {vm} --remove storageProfile.dataDisks', checks=[
             self.check('storageProfile.dataDisks', [])
         ])
+
+
+class VMGalleryImage(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_gallery_e2e(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vm2': 'vmFromImage',
+            'gallery': 'gallery1',
+            'image': 'image1',
+            'version': '1.1.2',
+            'captured': 'managedImage1',
+            'image_id': 'TBD'
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
+        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+        self.kwargs['image_id'] = res['id']
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --generate-ssh-keys')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}',
+                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
+                 checks=self.check('name', self.kwargs['version']))
+
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_id}', checks=self.check('powerState', 'VM running'))
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
 # endregion
 

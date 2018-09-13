@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.3
+++++++
+* support shared image gallery through `az sig`
+
 2.2.2
 ++++++
 * `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency

@@ -40,7 +40,9 @@ def load_arguments(self, _):
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
-    if self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
+    if self.supported_api_version(min_api='2018-06-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']))
+    elif self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
     else:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
@@ -50,7 +52,7 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
     # region MixedScopes
-    for scope in ['vm', 'disk', 'snapshot', 'image']:
+    for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
             c.argument('tags', tags_type)
 
@@ -72,6 +74,8 @@ def load_arguments(self, _):
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
+        c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
+        c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
     # endregion
 
     # region Identity
@@ -343,6 +347,7 @@ def load_arguments(self, _):
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
+        c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
 
     with self.argument_context('vmss encryption') as c:
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
@@ -391,7 +396,7 @@ def load_arguments(self, _):
             c.argument('size', help='The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
             c.argument('image', completer=get_urn_aliases_completion_list)
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-            c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
+            c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
@@ -415,6 +420,8 @@ def load_arguments(self, _):
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
+            c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                       help='(PREVIEW)Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -486,6 +493,56 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
+    with self.argument_context('sig') as c:
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
+        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
+
+    for scope in ['sig show', 'image gallery delete', 'sig image-definition show', 'sig image-definition delete', 'sig image-definition show', 'sig image-version delete']:
+        with self.argument_context(scope) as c:
+            c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+            c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
+            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
+            c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
+
+    with self.argument_context('sig image-definition create') as c:
+        c.argument('offer', options_list=['--offer', '-f'], help='image offer')
+        c.argument('sku', options_list=['--sku', '-s'], help='image sku')
+        c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
+        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
+        c.ignore('os_state')  # service is not ready
+        c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
+        c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
+        c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in MB')
+        c.argument('maximum_memory', type=int, arg_group='Recommendation', help='maximum memory in MB')
+
+        c.argument('plan_publisher', help='plan publisher', arg_group='Purchase plan')
+        c.argument('plan_name', help='plan name', arg_group='Purchase plan')
+        c.argument('plan_product', help='plan product', arg_group='Purchase plan')
+
+        c.argument('eula', help='The Eula agreement for the gallery image')
+        c.argument('privacy_statement_uri', help='The privacy statement uri')
+        c.argument('release_note_uri', help='The release note uri')
+        c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
+        c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
+
+    with self.argument_context('sig create') as c:
+        c.argument('description', help='the description of the gallery')
+    with self.argument_context('sig image-definition create') as c:
+        c.argument('description', help='the description of the gallery image definition')
+    with self.argument_context('sig image-version create') as c:
+        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
+                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
+        c.argument('description', help='the description of the gallery image version')
+        c.argument('managed_image', help='image name(if in the same resource group) or resource id')
+        c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
+        c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
+        c.argument('target_regions', nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
+        c.argument('version', help='image version')
+        c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
+
+    with self.argument_context('sig image-version show') as c:
+        c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     # endregion
 
 
