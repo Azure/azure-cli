@@ -27,11 +27,16 @@ def _is_guid(guid):
 def parse_iso_duration(str_duration):
     iso_duration_format_value = None
     if str_duration:
-        datetime_duration = datetime.strptime(str_duration, '%H:%M:%S')
-        iso_duration_format_value = isodate.duration_isoformat(timedelta(hours=datetime_duration.hour,
-                                                                         minutes=datetime_duration.minute,
-                                                                         seconds=datetime_duration.second))
+        iso_duration_format_value = isodate.duration_isoformat(parse_timedelta(str_duration))
     return iso_duration_format_value
+
+
+def parse_timedelta(str_duration):
+    if str_duration:
+        datetime_duration = datetime.strptime(str_duration, '%H:%M:%S')
+    return timedelta(hours=datetime_duration.hour or 0,
+                     minutes=datetime_duration.minute or 0,
+                     seconds=datetime_duration.second or 0)
 
 
 def camel_to_snake(name):

@@ -163,12 +163,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('restriction_token_type', arg_group='Token Restriction',
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
-        c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON widevine template. Use @{file} to load from a file.')
+        c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON Widevine license template. Use @{file} to load from a file.')
         c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay ASK.')
         c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The path to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
         c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
+        c.argument('play_ready_configuration', arg_group='PlayReady Configuration', help='JSON PlayReady license template. Use @{file} to load from a file.')
 
     with self.argument_context('ams content-key-policy show') as c:
         c.argument('with_secrets',
