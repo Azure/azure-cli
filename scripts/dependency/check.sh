@@ -12,14 +12,14 @@ echo "Created temporary folder $VENV_DIR" >&2
 REQU_NAME="`dirname $0`/requirements.`uname`.external.txt"
 echo "Baseline requirements file $REQU_NAME"
 
-python -m pip install virtualenv
-python -m virtualenv $VENV_DIR
+python3 -m venv $VENV_DIR
 
 . $VENV_DIR/bin/activate
+pip install -U pip
 
 echo "Virtual environemtn established at $VENV_DIR." >&2
-echo "   Python path `which python`" >&2
-echo "   `python --version`" >&2
+echo "   Python path `which python3`" >&2
+echo "   `python3 --version`" >&2
 
 echo "Install Telemetry" >&2
 pip install -e src/azure-cli-telemetry -q --log pip.log
@@ -30,7 +30,7 @@ pip install -e src/azure-cli-core -q --log pip.log
 echo "Install Namespace Package" >&2
 pip install -e src/azure-cli-nspkg -q --log pip.log
 
-for setups in `find src/command_modules -name setup.py`; do
+for setups in `find src/command_modules -name setup.py | sort`; do
     dir_path=`dirname $setups`
     echo "Install $dir_path" >&2
     pip install -e $dir_path -q --log pip.log
