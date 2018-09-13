@@ -17,7 +17,7 @@ output=$(az cloud list-profiles -otsv)
 for profile in $output; do
     echo
     echo "Verifying profile:" $profile
-    az cloud update --profile latest
+    az cloud update --profile $profile
     azdev verify load-all
     echo $profile "profile has been verified."
 done
