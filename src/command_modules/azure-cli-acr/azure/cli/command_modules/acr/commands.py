@@ -81,6 +81,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_build_tasks
     )
 
+    acr_helm_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.helm#{}'
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -165,3 +169,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr config content-trust', acr_policy_util) as g:
         g.command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
+
+    with self.command_group('acr helm', acr_helm_util) as g:
+        g.command('list', 'acr_helm_list')
+        g.command('show', 'acr_helm_show')
+        g.command('delete', 'acr_helm_delete')
+        g.command('push', 'acr_helm_push')
+        g.command('repo add', 'acr_helm_repo_add')

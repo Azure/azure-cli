@@ -57,6 +57,7 @@ network_profile_type = CLIArgumentType(
 def load_arguments(self, _):
     with self.argument_context('container') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('container_group_name', options_list=['--name', '-n'], help="The name of the container group.")
         c.argument('name', options_list=['--name', '-n'], help="The name of the container group", id_part='name')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 

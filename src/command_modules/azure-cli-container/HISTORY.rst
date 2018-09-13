@@ -5,6 +5,7 @@ Release History
 
 0.3.4
 +++++
+* Added ability to restart and stop a running container group
 * Add '--network-profile' for passing in a network profile
 * Add '--subnet', '--vnet_name', to allow creating container groups in a VNET
 * Update the table output to show the status of the container group
