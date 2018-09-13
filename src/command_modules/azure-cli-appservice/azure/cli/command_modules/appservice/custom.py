@@ -1942,7 +1942,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
     import requests
     import time
     num_trials = 1
-    while num_trials < 200:
+    while num_trials < 10:
         time.sleep(15)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
@@ -1952,7 +1952,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
             break
         elif res_dict['status'] == 4:
             break
-        logger.warning(res_dict['progress'])
+        logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict['status'] != 4:
         logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'

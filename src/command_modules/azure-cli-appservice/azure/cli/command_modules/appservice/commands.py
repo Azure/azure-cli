@@ -35,19 +35,22 @@ def ex_handler_factory(creating_plan=False):
         import json
         from knack.util import CLIError
         try:
-            detail = json.loads(ex.response.text)['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text)['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with linux worker is not supported in current region. For " +
+                                  "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                                  "azure/app-service-web/app-service-linux-intro")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
             ex = CLIError(detail)
-        except json.JSONDecodeError:
-            ex = CLIError(ex.response.text)
+        except Exception:  # pylint: disable=broad-except
+            pass
         raise ex
     return _polish_bad_errors
 
