@@ -788,7 +788,9 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                     }
 
                     try:
-                        public_ip_addr_info['zone'] = public_ip_address.zones[0] if public_ip_address.zones else None
+                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
+                    except (IndexError, TypeError):
+                        public_ip_addr_info['zone'] = None
                     except AttributeError:
                         pass
 
