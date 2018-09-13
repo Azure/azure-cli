@@ -320,6 +320,37 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
+        # site azure storage account configurations tests
+        # add
+        byos_resource_group = 'yili-cus-stage-01'  # on the beta stamp msftintch1501
+        byos_app_name = 'patle-byos'
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
+                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(byos_resource_group, byos_app_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+        # update
+        self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
+                 .format(byos_resource_group, byos_app_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
+        # list
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck('[0].name', 'Id')])
+        # delete
+        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 0)])
+
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
                  '--slot-settings c3=conn3'.format(resource_group, webapp_name))
@@ -712,6 +743,23 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name), checks=[
             self.check('clientAffinityEnabled', True)
         ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 

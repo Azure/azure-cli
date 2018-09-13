@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.3.4
++++++
+* install-connector: Beginning deprecation process for install-connector. This will be replaced with the enable-addons command
+  with the new virtual-node add-on
+
 2.3.3
 +++++
 * bugfix: creating role assignment for vnet-subnet-id when not specifying service principal and skip-role-assignemnt

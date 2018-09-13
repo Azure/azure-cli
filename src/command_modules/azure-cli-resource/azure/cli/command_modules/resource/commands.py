@@ -8,7 +8,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import handle_template_based_exception
 
@@ -191,7 +191,8 @@ def load_command_table(self, _):
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=ResourceType.MGMT_RESOURCE_FEATURES) as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
+                            min_api='2018-03-02-hybrid') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)

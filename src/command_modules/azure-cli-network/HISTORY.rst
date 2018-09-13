@@ -23,6 +23,8 @@ Release History
   allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
 * `dns record-set * create/update`: Add support for `--target-resource`.
 * Add `network interface-endpoint` commands to query interface endpoint objects.
+* Add `network profile show/list/delete` for partial management of network profiles.
+* Add `network express-route peering connection` commands to manage peering connections between ExpressRoutes.
 
 2.2.4
 +++++

@@ -857,6 +857,30 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
         ])
 
 
+class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_global_reach')
+    def test_network_express_route_global_reach(self, resource_group):
+
+        self.kwargs.update({
+            'er1': 'er1',
+            'er2': 'er2',
+            'conn12': 'conn12',
+        })
+
+        self.cmd('network express-route create -g {rg} -n {er1} --allow-global-reach --bandwidth 50 --peering-location Area51 --provider "Microsoft ER Test" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er1} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+
+        self.cmd('network express-route create -g {rg} -n {er2} --allow-global-reach --bandwidth 50 --peering-location "Denver Test" --provider "Test Provider NW" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
+
+        # These commands won't succeed because circuit creation requires a manual step from the service.
+        with self.assertRaisesRegexp(CLIError, 'An error occurred'):
+            self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
+        self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+        self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+
+
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
@@ -2198,6 +2222,19 @@ class ServiceEndpointScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --service-endpoints Microsoft.Storage --service-endpoint-policy {policy}',
                  checks=self.check("contains(serviceEndpointPolicies[0].id, '{policy}')", True))
+
+
+class NetworkProfileScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_profile')
+    def test_network_profile(self, resource_group):
+
+        # no e2e scenario without create. Testing path to service only.
+        self.cmd('network profile list')
+        self.cmd('network profile list -g {rg}')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network profile show -g {rg} -n dummy')
+        self.cmd('network profile delete -g {rg} -n dummy -y')
 
 
 if __name__ == '__main__':

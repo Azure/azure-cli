@@ -26,7 +26,8 @@ from azure.cli.command_modules.network._validators import (
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations, validate_subresource_list)
+    validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
+    validate_er_peer_circuit)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -84,6 +85,7 @@ def load_arguments(self, _):
         c.argument('private_ip_address', private_ip_address_type)
         c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
         c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.', min_api='2018-07-01')
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 
     # region ApplicationGateways
@@ -309,8 +311,6 @@ def load_arguments(self, _):
     # region ApplicationSecurityGroups
     with self.argument_context('network asg') as c:
         c.argument('application_security_group_name', name_arg_type, id_part='name', help='The name of the application security group.')
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-
     # endregion
 
     # region DDoS Protection Plans
@@ -318,7 +318,6 @@ def load_arguments(self, _):
         for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
             c.argument(dest, name_arg_type, help='Name of the DDoS protection plan.', id_part='name')
         c.argument('vnets', nargs='*', help='Space-separated list of VNets (name or IDs) to associate with the plan.', validator=get_vnet_validator('vnets'))
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 
     # region DNS
@@ -428,7 +427,6 @@ def load_arguments(self, _):
         c.argument('peering_location', help="Name of the peering location.")
         c.argument('device_path', options_list=('--path',), arg_type=get_enum_type(device_path_values))
         c.argument('vlan_id', type=int)
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
 
     with self.argument_context('network express-route update') as c:
@@ -461,6 +459,12 @@ def load_arguments(self, _):
         c.argument('ip_version', min_api='2017-06-01', help='The IP version to update Microsoft Peering settings for.', arg_group='Microsoft Peering', arg_type=get_enum_type(['IPv4', 'IPv6']))
         c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
 
+    with self.argument_context('network express-route peering connection') as c:
+        c.argument('authorization_key', help='The authorization key used when the peer circuit is in another subscription.')
+        c.argument('address_prefix', help='/29 IP address space to carve out customer addresses for tunnels.')
+        c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part='child_name_1')
+        c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering connection.', id_part='child_name_2')
+        c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
     # endregion
 
     # region InterfaceEndpoint
@@ -570,7 +574,6 @@ def load_arguments(self, _):
         with self.argument_context('network {}'.format(item)) as c:
             c.argument('asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
             c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
-
     # endregion
 
     # region NetworkInterfaces (NIC)
@@ -641,7 +644,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network nsg create') as c:
         c.argument('name', name_arg_type)
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
@@ -680,6 +682,7 @@ def load_arguments(self, _):
     # region NetworkWatchers
     with self.argument_context('network watcher') as c:
         c.argument('network_watcher_name', name_arg_type, help='Name of the Network Watcher.')
+        c.argument('location', validator=None)
         c.ignore('watcher_rg')
         c.ignore('watcher_name')
 
@@ -788,6 +791,13 @@ def load_arguments(self, _):
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
+    # region NetworkProfile
+    network_profile_name = CLIArgumentType(options_list='--profile-name', metavar='NAME', help='The network profile name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkProfiles'))
+
+    with self.argument_context('network profile') as c:
+        c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
+    # endregion
+
     # region PublicIPAddresses
     with self.argument_context('network public-ip') as c:
         c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
@@ -814,7 +824,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip prefix') as c:
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. XX.XX.XX.XX/<Length>)')
     # endregion
 
@@ -823,18 +832,11 @@ def load_arguments(self, _):
         c.argument('route_filter_name', name_arg_type, help='Name of the route filter.')
         c.argument('expand', arg_type=get_enum_type(['peerings']))
 
-    with self.argument_context('network route-filter create') as c:
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-
     with self.argument_context('network route-filter rule') as c:
         c.argument('route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
         c.argument('rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name_1')
         c.argument('access', help='The access type of the rule.', arg_type=get_enum_type(Access))
         c.argument('communities', nargs='+')
-
-    with self.argument_context('network route-filter rule create') as c:
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-
     # endregion
 
     # region RouteTables
@@ -863,7 +865,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network service-endpoint policy') as c:
         c.argument('service_endpoint_policy_name', service_endpoint_policy_name, options_list=['--name', '-n'])
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
     with self.argument_context('network service-endpoint policy show') as c:
         c.ignore('expand')

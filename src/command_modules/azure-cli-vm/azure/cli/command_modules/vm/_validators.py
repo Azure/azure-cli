@@ -291,7 +291,7 @@ def _get_storage_profile_description(profile):
 
 def _validate_managed_disk_sku(sku):
 
-    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']
+    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']
     if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
@@ -402,20 +402,46 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
+    if namespace.storage_sku == 'UltraSSD_LRS' and namespace.ultra_ssd_enabled is None:
+        namespace.ultra_ssd_enabled = True
+
     # Now verify that the status of required and forbidden parameters
     validate_parameter_set(
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
-    image_data_disks = None
+    image_data_disks_num = 0
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        image_info = compute_client.images.get(res['resource_group'], res['name'])
+        if res['type'].lower() == 'images':
+            image_info = compute_client.images.get(res['resource_group'], res['name'])
+            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+        elif res['type'].lower() == 'galleries':
+            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
+                                                           gallery_name=res['name'],
+                                                           gallery_image_name=res['child_name_1'])
+            namespace.os_type = image_info.os_type.value
+            gallery_image_version = res.get('child_name_2', '')
+            if gallery_image_version.lower() in ['latest', '']:
+                image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
+                    resource_group_name=res['resource_group'], gallery_name=res['name'],
+                    gallery_image_name=res['child_name_1'])
+                image_version_infos = [x for x in image_version_infos if not x.publishing_profile.exclude_from_latest]
+                if not image_version_infos:
+                    raise CLIError('There is no latest image version exists for "{}"'.format(namespace.image))
+                image_version_info = sorted(image_version_infos, key=lambda x: x.publishing_profile.published_date)[-1]
+            else:
+                image_version_info = compute_client.gallery_image_versions.get(
+                    resource_group_name=res['resource_group'], gallery_name=res['name'],
+                    gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
+            image_data_disks_num = len(image_version_info.storage_profile.data_disk_images or [])
+        else:
+            raise CLIError('usage error: unrecognized image informations "{}"'.format(namespace.image))
+
         # pylint: disable=no-member
-        namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-        image_data_disks = image_info.storage_profile.data_disks
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
@@ -432,7 +458,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
+    namespace.disk_info = normalize_disk_info(image_data_disks_num=image_data_disks_num,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,

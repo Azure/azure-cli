@@ -41,6 +41,10 @@ def cf_express_route_circuit_authorizations(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_authorizations
 
 
+def cf_express_route_circuit_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_circuit_connections
+
+
 def cf_express_route_circuit_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_peerings
 
@@ -67,6 +71,10 @@ def cf_local_network_gateways(cli_ctx, _):
 
 def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
+
+
+def cf_network_profiles(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_profiles
 
 
 def cf_network_security_groups(cli_ctx, _):
