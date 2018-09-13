@@ -161,7 +161,7 @@ def acr_task_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    if not with_secure_properties:
+    if with_secure_properties:
         return client.get_details(resource_group_name, registry_name, task_name)
     return client.get(resource_group_name, registry_name, task_name)
 

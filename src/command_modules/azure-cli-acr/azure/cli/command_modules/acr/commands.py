@@ -17,18 +17,18 @@ from ._format import (
     replication_output_format,
     build_task_output_format,
     build_task_detail_output_format,
-    task_output_format,
     build_output_format,
+    task_output_format,
     run_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
     cf_acr_replications,
     cf_acr_webhooks,
-    cf_acr_tasks,
-    cf_acr_runs,
+    cf_acr_build_tasks,
     cf_acr_builds,
-    cf_acr_build_tasks
+    cf_acr_tasks,
+    cf_acr_runs
 )
 
 
@@ -119,12 +119,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import')
 
-    with self.command_group('acr', acr_build_util) as g:
-        g.command('build', 'acr_build')
-
-    with self.command_group('acr', acr_run_util) as g:
-        g.command('run', 'acr_run', supports_no_wait=True)
-
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
         g.command('renew', 'acr_credential_renew')
@@ -164,6 +158,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  custom_func_name='acr_replication_update_custom',
                                  custom_func_type=acr_replication_util,
                                  client_factory=cf_acr_replications)
+
+    with self.command_group('acr', acr_build_util) as g:
+        g.command('build', 'acr_build')
+
+    with self.command_group('acr', acr_run_util) as g:
+        g.command('run', 'acr_run', supports_no_wait=True)
 
     # Deprecated (for backward compatibility).
     with self.command_group('acr build-task',

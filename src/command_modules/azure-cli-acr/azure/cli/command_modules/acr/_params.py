@@ -80,6 +80,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('image_names', arg_type=image_by_tag_type, action='append')
         c.argument('timeout', type=int, help='The build timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
@@ -101,7 +102,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr repository') as c:
         c.argument('repository', help="The name of the repository.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
-        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('top', type=int, help='Limit the number of items in the results.')
         c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
         c.argument('detail', help='Show detailed information.', action='store_true')

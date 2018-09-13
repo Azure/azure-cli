@@ -222,7 +222,6 @@ def _get_value(item, *args):
     """Get a nested value from a dict.
     :param dict item: The dict object
     """
-
     try:
         for arg in args:
             item = item[arg]
