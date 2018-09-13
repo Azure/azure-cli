@@ -947,7 +947,7 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
         # stop
         self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
                  .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
-                    JMESPathCheck('status', 'Disabling')])
+                     JMESPathCheck('status', 'Disabling')])
 
 
 if __name__ == '__main__':
