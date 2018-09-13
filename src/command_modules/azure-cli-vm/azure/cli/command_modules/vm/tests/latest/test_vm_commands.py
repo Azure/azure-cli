@@ -103,13 +103,15 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'centralus',
             'vm': 'vm-with-public-ip',
-            'allocation': 'dynamic'
+            'allocation': 'dynamic',
+            'zone': 2
         })
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password')
+        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
+                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone}')
         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vm}'),
@@ -138,7 +140,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
-            self.check('type([0].virtualMachine.network.publicIpAddresses[0].zones)', 'array'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
         ])

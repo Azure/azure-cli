@@ -783,7 +783,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                     }
 
                     if hasattr(public_ip_address, 'zones'):
-                        public_ip_addr_info['zones'] = public_ip_address.zones if public_ip_address.zones else []
+                        public_ip_addr_info['zone'] = public_ip_address.zones[0] if public_ip_address.zones else None
 
                     network_info['publicIpAddresses'].append(public_ip_addr_info)
 
