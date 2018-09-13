@@ -782,8 +782,10 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                         'ipAllocationMethod': public_ip_address.public_ip_allocation_method
                     }
 
-                    if hasattr(public_ip_address, 'zones'):
+                    try:
                         public_ip_addr_info['zone'] = public_ip_address.zones[0] if public_ip_address.zones else None
+                    except AttributeError:
+                        pass
 
                     network_info['publicIpAddresses'].append(public_ip_addr_info)
 
