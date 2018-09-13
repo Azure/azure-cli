@@ -1859,7 +1859,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    if(consumption_plan_location and is_linux):
+    if consumption_plan_location and is_linux:
         logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
                        "created but is not active until content is published using"
                        "Azure Portal or the Functions Core Tools.", name)
