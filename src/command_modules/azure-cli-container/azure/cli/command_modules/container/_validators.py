@@ -5,6 +5,8 @@
 
 from base64 import b64encode
 from knack.util import CLIError
+from azure.cli.core.commands.client_factory import get_subscription_id
+from msrestazure.tools import is_valid_resource_id, resource_id
 
 
 def validate_volume_mount_path(ns):
@@ -38,16 +40,11 @@ def validate_gitrepo_directory(ns):
 
 
 def validate_subnet(ns):
-    if ns.vnet_name and not ns.subnet:
-        raise CLIError("'--subnet' is required when using  a virtual network.")
-    if ns.subnet and not ns.vnet_name:
-        raise CLIError("'--vnet-name' is required when using a virtual network.")
+    if not is_valid_resource_id(ns.subnet) and ((ns.vnet_name and not ns.subnet) or (ns.subnet and not ns.vnet_name)):
+        raise CLIError('usage error: --vnet-name NAME --subnet NAME | --subnet ID')
 
 
 def validate_network_profile(cmd, ns):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
     if ns.network_profile and ns.ip_address:
         raise CLIError('Can not use "--network-profile" with IP address type "Public".')
     elif ns.network_profile and ns.dns_name_label:

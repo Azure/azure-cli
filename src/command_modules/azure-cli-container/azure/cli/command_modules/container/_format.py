@@ -59,6 +59,7 @@ def _format_network(container_group):
     ip_address = container_group.get('ipAddress')
     if ip_address:
         return ip_address['type']
+    return None
 
 
 def transform_container_group(result):

@@ -38,7 +38,6 @@ from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Del
                                        ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
 
 
@@ -238,7 +237,11 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
 
     subnet_name = subnet
     if is_valid_resource_id(subnet):
-        subnet_name = parse_resource_id(subnet)['resource_name']
+        parsed_subnet_id = parse_resource_id(subnet)
+        subnet_name = parsed_subnet_id['resource_name']
+        vnet_name = parsed_subnet_id['name']
+
+    default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
 
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
     # For an existing subnet, validate and add delegation if needed
@@ -253,6 +256,10 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
             for delegation in subnet.delegations:
                 if delegation.name != containerInstanceDelegationName:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationName))
+
+        network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
+        if network_profile:
+            return network_profile.id
 
     # Create new subnet and Vnet if not exists
     else:
@@ -269,14 +276,11 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
             address_prefix=subnet_address_prefix,
             delegations=[aci_delegation])
 
-        subnet_poller = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet)
-        subnet = subnet_poller.result()
-
-    network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
+        subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     # In all cases, create the network profile with aci NIC
     network_profile = NetworkProfile(
-        name=network_profile_name,
+        name=default_network_profile_name,
         location=location,
         container_network_interface_configurations=[ContainerNetworkInterfaceConfiguration(
             name="eth0",
@@ -287,8 +291,7 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
         )]
     )
 
-    network_profile_poller = ncf.network_profiles.create_or_update(resource_group_name, network_profile_name, network_profile)
-    network_profile = network_profile_poller.result()
+    network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
 
     return network_profile.id
 

@@ -79,7 +79,7 @@ def load_arguments(self, _):
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 
-    with self.argument_context('container create', arg_group='Network Arguments') as c:
+    with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
         c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.')
         c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNET in CIDR format.')
