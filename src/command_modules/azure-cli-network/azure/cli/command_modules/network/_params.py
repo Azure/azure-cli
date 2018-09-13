@@ -26,7 +26,8 @@ from azure.cli.command_modules.network._validators import (
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations, validate_subresource_list)
+    validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
+    validate_er_peer_circuit)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -458,6 +459,12 @@ def load_arguments(self, _):
         c.argument('ip_version', min_api='2017-06-01', help='The IP version to update Microsoft Peering settings for.', arg_group='Microsoft Peering', arg_type=get_enum_type(['IPv4', 'IPv6']))
         c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
 
+    with self.argument_context('network express-route peering connection') as c:
+        c.argument('authorization_key', help='The authorization key.')
+        c.argument('address_prefix', help='/29 IP address space to carve out customer addresses for tunnels.')
+        c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering.', id_part='child_name_1')
+        c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering connection.', id_part='child_name_2')
+        c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
     # endregion
 
     # region InterfaceEndpoint
