@@ -7,8 +7,9 @@
 import base64
 import json
 
-from datetime import timedelta
 from knack.util import CLIError
+
+from azure.cli.command_modules.ams._utils import parse_timedelta
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
@@ -225,7 +226,7 @@ def _coalesce_str(value):
 
 
 def _coalesce_timedelta(value):
-    return timedelta(seconds=value) if value else None
+    return parse_timedelta(value) if value else None
 
 
 # Counts how many values are truthy on a list.
