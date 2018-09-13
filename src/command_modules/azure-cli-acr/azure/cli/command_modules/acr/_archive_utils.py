@@ -18,9 +18,13 @@ from ._azure_utils import get_blob_info
 logger = get_logger(__name__)
 
 
-def upload_source_code(client, registry_name, resource_group_name,
-                       source_location, tar_file_path,
-                       docker_file_path, docker_file_in_tar):
+def upload_source_code(client,
+                       registry_name,
+                       resource_group_name,
+                       source_location,
+                       tar_file_path,
+                       docker_file_path,
+                       docker_file_in_tar):
     _pack_source_code(source_location,
                       tar_file_path,
                       docker_file_path,
@@ -51,8 +55,7 @@ def upload_source_code(client, registry_name, resource_group_name,
         logger.debug("%s Empty source upload URL.", error_message)
         raise CLIError(error_message)
 
-    account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
-        upload_url)
+    account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(upload_url)
     BlockBlobService(account_name=account_name,
                      sas_token=sas_token,
                      endpoint_suffix=endpoint_suffix).create_blob_from_path(
@@ -68,14 +71,12 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
     logger.warning("Packing source code into tar to upload...")
 
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
-    common_vcs_ignore_list = {'.git', '.gitignore',
-                              '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
+    common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
 
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
         # ignore common vcs dir or file
         if tarinfo.name in common_vcs_ignore_list:
-            logger.warning(
-                "Excluding '%s' based on default ignore rules", tarinfo.name)
+            logger.warning("Excluding '%s' based on default ignore rules", tarinfo.name)
             return True, parent_matching_rule_index
 
         if ignore_list is None:
@@ -100,8 +101,11 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
 
     with tarfile.open(tar_file_path, "w:gz") as tar:
         # need to set arcname to empty string as the archive root path
-        _archive_file_recursively(tar, source_location, arcname="",
-                                  parent_ignored=False, parent_matching_rule_index=ignore_list_size,
+        _archive_file_recursively(tar,
+                                  source_location,
+                                  arcname="",
+                                  parent_ignored=False,
+                                  parent_matching_rule_index=ignore_list_size,
                                   ignore_check=_ignore_check)
 
         # Add the Dockerfile if it's specified.

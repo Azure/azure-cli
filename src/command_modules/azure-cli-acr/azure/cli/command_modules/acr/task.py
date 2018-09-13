@@ -215,15 +215,25 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
-    if isinstance(step, DockerBuildStep):
-        if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
-            raise CLIError("File for docker build step has an invalid suffix: {}."
-                           " The following suffixes are not allowed: {}"
-                           .format(file, ALLOWED_TASK_FILE_TYPES))
-        if arg is None and secret_arg is None:
-            arguments = None
-        else:
-            arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
+
+    if arg is None and secret_arg is None:
+        arguments = None
+    else:
+        arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
+
+    if set_value is None and set_secret is None:
+        set_values = None
+    else:
+        set_values = (set_value if set_value else []) + (set_secret if set_secret else [])
+
+    if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
+        step = FileTaskStepUpdateParameters(
+            task_file_path=file,
+            values_file_path=values,
+            context_path=context_path,
+            values=set_values
+            )
+    elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = DockerBuildStepUpdateParameters(
             image_names=image_names,
             is_push_enabled=not no_push,
@@ -231,25 +241,28 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=arguments,
             context_path=context_path
-        )
-    elif isinstance(step, FileTaskStep):
-        if file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
-            raise CLIError("File for task build step has an invalid suffix: {}."
-                           " It must have one of the following suffixes: {}"
-                           .format(file, ALLOWED_TASK_FILE_TYPES))
-        if set_value is None and set_secret is None:
-            values = None
-        else:
-            values = (set_value if set_value else []) + (set_secret if set_secret else [])
-        step = FileTaskStepUpdateParameters(
-            task_file_path=file,
-            values_file_path=values,
-            context_path=context_path,
-            values=values
-        )
+            )
+    elif step:
+        if isinstance(step, DockerBuildStep):
+            step = DockerBuildStepUpdateParameters(
+                image_names=image_names,
+                is_push_enabled=not no_push,
+                no_cache=no_cache,
+                docker_file_path=file,
+                arguments=arguments,
+                context_path=context_path
+                )
+
+        elif isinstance(step, FileTaskStep):
+            step = FileTaskStepUpdateParameters(
+                task_file_path=file,
+                values_file_path=values,
+                context_path=context_path,
+                values=set_values
+            )
 
     source_control_type = None
-    if context_path is not None:
+    if context_path:
         if 'GITHUB.COM' in context_path.upper():
             source_control_type = SourceControlType.github.value
         else:
