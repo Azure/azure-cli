@@ -1946,7 +1946,7 @@ helps['network express-route peering update'] = """
 
 helps['network express-route peering connection'] = """
     type: group
-    short-summary: Manage ExpressRoute peering connections.
+    short-summary: Manage ExpressRoute circuit connections.
 """
 
 helps['network express-route peering connection create'] = """
@@ -1962,12 +1962,12 @@ helps['network express-route peering connection create'] = """
 
 helps['network express-route peering connection delete'] = """
     type: command
-    short-summary: Delete an ExpressRoute peering connection.
+    short-summary: Delete an ExpressRoute circuit connection.
 """
 
 helps['network express-route peering connection show'] = """
     type: command
-    short-summary: Get the details of an ExpressRoute peering connection.
+    short-summary: Get the details of an ExpressRoute circuit connection.
 """
 # endregion
 

@@ -460,9 +460,9 @@ def load_arguments(self, _):
         c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
 
     with self.argument_context('network express-route peering connection') as c:
-        c.argument('authorization_key', help='The authorization key.')
+        c.argument('authorization_key', help='The authorization key used when the peer circuit is in another subscription.')
         c.argument('address_prefix', help='/29 IP address space to carve out customer addresses for tunnels.')
-        c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering.', id_part='child_name_1')
+        c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part='child_name_1')
         c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering connection.', id_part='child_name_2')
         c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
     # endregion
