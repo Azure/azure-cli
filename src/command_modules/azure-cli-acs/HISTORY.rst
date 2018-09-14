@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.5
++++++
+* install-connector: Updates the install-connector command to set the AKS Master FQDN
+
 2.3.4
 +++++
 * install-connector: Beginning deprecation process for install-connector. This will be replaced with the enable-addons command
