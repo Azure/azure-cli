@@ -16,6 +16,7 @@ from azure.cli.command_modules.rdbms.validators import configuration_value_valid
 def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     server_completers = {
+        'mariadb': get_resource_name_completion_list('Microsoft.DBForMariaDB/servers'),
         'mysql': get_resource_name_completion_list('Microsoft.DBForMySQL/servers'),
         'postgres': get_resource_name_completion_list('Microsoft.DBForPostgreSQL/servers')
     }
@@ -56,15 +57,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server wait'.format(command_group)) as c:
             c.ignore('created', 'deleted', 'updated')
 
+    _complex_params('mariadb')
     _complex_params('mysql')
     _complex_params('postgres')
 
-    for scope in ['mysql', 'postgres']:
+    for scope in ['mariadb', 'mysql', 'postgres']:
         with self.argument_context(scope) as c:
             c.argument('name', options_list=['--sku-name'], required=True)
             c.argument('server_name', completer=server_completers[scope], options_list=['--server-name', '-s'], help='Name of the server.')
 
-    for scope in ['mysql server', 'postgres server']:
+    for scope in ['mariadb server', 'mysql server', 'postgres server']:
         with self.argument_context(scope) as c:
             c.ignore('family', 'capacity', 'tier')
 
@@ -79,18 +81,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('backup_retention_days', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained.')
             c.argument('tags', tags_type)
 
-    for scope in ['mysql server-logs', 'postgres server-logs']:
+    for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
             c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
             c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time, default value is 72.')
             c.argument('filename_contains', help='The pattern that file name should match.')
 
-    for scope in ['mysql db', 'postgres db']:
+    for scope in ['mariadb db', 'mysql db', 'postgres db']:
         with self.argument_context(scope) as c:
             c.argument('database_name', options_list=['--name', '-n'])
 
-    for scope in ['mysql server firewall-rule', 'postgres server firewall-rule']:
+    for scope in ['mariadb server firewall-rule', 'mysql server firewall-rule', 'postgres server firewall-rule']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule.')
@@ -108,7 +110,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)
 
-    for scope in ['mysql server configuration', 'postgres server configuration']:
+    for scope in ['mariadb server configuration', 'mysql server configuration', 'postgres server configuration']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])

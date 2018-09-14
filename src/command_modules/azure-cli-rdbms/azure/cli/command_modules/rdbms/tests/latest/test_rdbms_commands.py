@@ -69,6 +69,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
+    def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
+        self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
+
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
@@ -243,6 +248,14 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='mariadb')
+    def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
+        self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_db_mgmt(resource_group, server, database_engine)
+        self._test_configuration_mgmt(resource_group, server, database_engine)
+        self._test_log_file_mgmt(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
@@ -431,7 +444,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  checks=JMESPathCheck('type(@)', 'array'))
 
     def _test_configuration_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql':
+        if database_engine == 'mysql' or database_engine == 'mariadb':
             config_name = 'log_slow_admin_statements'
             default_value = 'OFF'
             new_value = 'ON'
@@ -468,7 +481,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('type(@)', 'array')])
 
     def _test_log_file_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql':
+        if database_engine == 'mysql' or database_engine == 'mariadb':
             config_name = 'slow_query_log'
             new_value = 'ON'
 
