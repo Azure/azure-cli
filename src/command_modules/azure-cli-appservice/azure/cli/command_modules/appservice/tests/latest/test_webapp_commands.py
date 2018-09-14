@@ -906,5 +906,49 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         self.assertEqual(asp_F1, result)
 
 
+class WebappTriggeredWebJobListTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_triggeredWebjob_list(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-triggered'
+
+        # list test
+        self.cmd('webapp webjob triggered list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/triggeredwebjobs')])
+
+
+class WebappContinuousWebJobE2ETest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_continuousWebjob_e2e(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-continuous'
+
+        # list test
+        self.cmd('webapp webjob continuous list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/continuouswebjobs')])
+        # start
+        self.cmd('webapp webjob continuous start -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Running')])
+        # stop
+        self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Disabling')])
+
+
 if __name__ == '__main__':
     unittest.main()
