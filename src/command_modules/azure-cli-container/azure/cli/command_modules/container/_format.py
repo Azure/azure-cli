@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 from collections import OrderedDict
-from azure.mgmt.containerinstance.models import ContainerGroupIpAddressType
 
 
 def _get_images(container_group):
@@ -42,7 +41,7 @@ def _format_ip_address(container_group):
     if ip_address:
         ports = ip_address['ports'] or []
 
-        if ip_address['type'] == ContainerGroupIpAddressType.private:
+        if ip_address['type'] == 'Private':
             for container in container_group.get('containers'):
                 ports += container.get('ports')
 
