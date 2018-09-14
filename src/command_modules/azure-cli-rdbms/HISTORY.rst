@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Add support for MariaDB service
+
 0.3.1
 +++++
 * Minor fixes
