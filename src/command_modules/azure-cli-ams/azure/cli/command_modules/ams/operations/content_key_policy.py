@@ -6,8 +6,10 @@
 # pylint: disable=line-too-long, too-many-arguments, too-many-locals, too-many-branches
 import base64
 import json
+import codecs
 
-import json
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 from knack.util import CLIError
 
@@ -138,8 +140,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
     configuration = None
     restriction = None
 
-    valid_token_restriction = _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent,
-                                                       rsa_token_key_modulus, x509_certificate_token_key,
+    valid_token_restriction = _valid_token_restriction(token_key, rsa, x509, symmetric,
                                                        restriction_token_type, issuer, audience)
 
     valid_fairplay_configuration = _valid_fairplay_configuration(ask, fair_play_pfx_password,
@@ -175,8 +176,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         restriction = ContentKeyPolicyOpenRestriction()
 
     if valid_token_restriction:
-        if _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
-                                             rsa_token_key_modulus, x509_certificate_token_key) != 1:
+        if _count_truthy([rsa, x509, symmetric]) != 1:
             raise CLIError('You should use alternative (alt) token keys if you have more than one token key.')
 
         primary_verification_key = None
@@ -187,18 +187,13 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         alternative_keys = []
         _token_claims = []
 
-        if symmetric_token_key is not None:
-            primary_verification_key = _symmetric_token_key_factory(bytearray(symmetric_token_key, 'utf-8'))
-        elif rsa_token_key_exponent is not None and rsa_token_key_modulus is not None:
-            primary_verification_key = _rsa_token_key_factory(
-                bytearray(rsa_token_key_exponent, 'utf-8'), bytearray(rsa_token_key_modulus, 'utf-8'))
-        elif x509_certificate_token_key is not None:
+        if symmetric:
+            primary_verification_key = _symmetric_token_key_factory(bytearray(token_key, 'utf-8'))
+        elif rsa:
+            primary_verification_key = _rsa_token_key_factory(_read(token_key, 'r'))
+        elif x509:
             primary_verification_key = _x509_token_key_factory(
-                bytearray(x509_certificate_token_key.replace('\\n', '\n'), 'utf-8'))
-
-        # Extra validation to make sure exponents and modulus have the same cardinality
-        if len(_rsa_key_exponents) != len(_rsa_key_modulus):
-            raise CLIError('The number of alternative RSA key exponents and modulus differ.')
+                bytearray(_read_binary(token_key)))
 
         for key in _symmetric_keys:
             alternative_keys.append(_symmetric_token_key_factory(key))
@@ -248,9 +243,17 @@ def _symmetric_token_key_factory(symmetric_token_key):
     return ContentKeyPolicySymmetricTokenKey(key_value=symmetric_token_key)
 
 
-def _rsa_token_key_factory(rsa_token_key_exponent, rsa_token_key_modulus):
+def _rsa_token_key_factory(rsa_content):
+    rsa_key = serialization.load_pem_public_key(
+        rsa_content.encode('ascii'),
+        backend=default_backend()
+    )
+
+    exp = rsa_key.public_numbers().e
+    mod = rsa_key.public_numbers().n
+
     return ContentKeyPolicyRsaTokenKey(
-        exponent=rsa_token_key_exponent, modulus=rsa_token_key_modulus)
+        exponent=bytearray(_int2bytes(exp)), modulus=bytearray(_int2bytes(mod)))
 
 
 def _x509_token_key_factory(x509_certificate_token_key):
@@ -258,30 +261,21 @@ def _x509_token_key_factory(x509_certificate_token_key):
         raw_body=x509_certificate_token_key)
 
 
-def _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
-                                      x509_certificate_token_key):
-    return _count_truthy([symmetric_token_key, rsa_token_key_exponent and rsa_token_key_modulus,
-                          x509_certificate_token_key])
-
-
-def _valid_token_restriction(symmetric_token_key, rsa_token_key_exponent, rsa_token_key_modulus,
-                             x509_certificate_token_key, restriction_token_type,
-                             issuer, audience):
-    available_keys = _token_restriction_keys_available(symmetric_token_key, rsa_token_key_exponent,
-                                                       rsa_token_key_modulus, x509_certificate_token_key)
+def _valid_token_restriction(token_key, rsa, x509, symmetric, restriction_token_type, issuer, audience):
     return _validate_all_conditions(
-        [restriction_token_type, available_keys >= 1, issuer, audience],
+        [restriction_token_type, token_key and any([rsa, x509, symmetric]), issuer, audience],
         'Malformed content key policy token restriction.')
 
 
-def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
-                                  rental_and_lease_key_type, rental_duration):
+def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration):
     return _validate_all_conditions(
         [ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration],
         'Malformed content key policy FairPlay configuration.')
 
 
 def _valid_playready_configuration(play_ready_configuration):
+    if play_ready_configuration is None:
+        return False
 
     def __valid_license(lic):
         return _validate_all_conditions([lic.get('allowTestDevices') is not None,
@@ -406,3 +400,10 @@ def _read(path, read_type):
 
 def _base64(data):
     return base64.b64encode(data)
+
+
+def _int2bytes(int_value):
+    hex_value = '{0:x}'.format(int_value)
+    # make length of hex_value a multiple of two
+    hex_value = '0' * (len(hex_value) % 2) + hex_value
+    return codecs.decode(hex_value, 'hex_codec')
