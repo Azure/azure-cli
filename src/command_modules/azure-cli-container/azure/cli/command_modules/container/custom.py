@@ -37,7 +37,6 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
 from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile,
                                        ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
 
 
@@ -227,6 +226,8 @@ def _get_resource(client, resource_group_name, *subresources):
 
 
 def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+
     containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
 
     aci_delegation = Delegation(
@@ -298,6 +299,8 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
+    from msrestazure.tools import parse_resource_id
+
     log_analytics_client = cf_log_analytics(cli_ctx)
 
     for workspace in log_analytics_client.list():
