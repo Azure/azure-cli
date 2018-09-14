@@ -37,6 +37,13 @@ def validate_gitrepo_directory(ns):
         raise CLIError("The git repo directory cannot contain '..'")
 
 
+def validate_subnet(ns):
+    from msrestazure.tools import is_valid_resource_id
+
+    if not is_valid_resource_id(ns.subnet) and ((ns.vnet_name and not ns.subnet) or (ns.subnet and not ns.vnet_name)):
+        raise CLIError('usage error: --vnet-name NAME --subnet NAME | --subnet ID')
+
+
 def validate_network_profile(cmd, ns):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id
