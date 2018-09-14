@@ -51,7 +51,7 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
-def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,
+def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None, # pylint: disable=too-many-statements
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
                   tags=None):
@@ -266,7 +266,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     return response
 
 
-def get_sku_name(tier):
+def get_sku_name(tier): # pylint: disable=too-many-return-statements
     tier = tier.upper()
     if tier == 'F1' or tier == "FREE":
         return 'FREE'
@@ -544,7 +544,8 @@ def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None
     web_app = get_webapp(cmd, resource_group_name, name, slot)
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
-    return update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
+    return update_site_configs(cmd, resource_group_name, name,
+                               linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
 
 
 def _delete_linux_fx_version(cmd, resource_group_name, name, slot=None):
@@ -1073,7 +1074,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
         _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
-    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def, reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
+    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
+                              reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
     print(plan_def)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
