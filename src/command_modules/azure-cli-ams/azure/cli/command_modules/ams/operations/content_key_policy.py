@@ -192,17 +192,16 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         elif rsa:
             primary_verification_key = _rsa_token_key_factory(_read(token_key, 'r'))
         elif x509:
-            primary_verification_key = _x509_token_key_factory(
-                bytearray(_read_binary(token_key)))
+            primary_verification_key = _x509_token_key_factory(_read_binary(token_key))
 
-        for key in _symmetric_keys:
-            alternative_keys.append(_symmetric_token_key_factory(key))
-
-        for exp, mod in zip(_rsa_key_exponents, _rsa_key_modulus):
-            alternative_keys.append(_rsa_token_key_factory(exp, mod))
-
-        for key in _x509_keys:
-            alternative_keys.append(_x509_token_key_factory(key))
+        #for key in _symmetric_keys:
+        #    alternative_keys.append(_symmetric_token_key_factory(key))
+        #
+        #for exp, mod in zip(_rsa_key_exponents, _rsa_key_modulus):
+        #    alternative_keys.append(_rsa_token_key_factory(exp, mod))
+        #
+        #for key in _x509_keys:
+        #    alternative_keys.append(_x509_token_key_factory(key))
 
         if token_claims is not None:
             for key in token_claims:
