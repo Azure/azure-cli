@@ -1942,7 +1942,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
     import requests
     import time
     num_trials = 1
-    while num_trials < 200:
+    while num_trials < 10:
         time.sleep(15)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
@@ -1952,9 +1952,65 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
             break
         elif res_dict['status'] == 4:
             break
-        logger.warning(res_dict['progress'])
+        logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict['status'] != 4:
         logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
             beforing launching the app""", deployment_status_url)
     return res_dict
+
+
+def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_continuous_web_jobs', slot)
+
+
+def start_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def stop_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.stop_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.stop_continuous_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def remove_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_continuous_web_job(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.delete_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def list_triggered_webjobs(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+
+
+def run_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.run_triggered_web_job_slot(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_triggered_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.run_triggered_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_triggered_web_job(resource_group_name, name, webjob_name)
+
+
+def remove_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name)
+
+
+def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_triggered_web_job_history_slot(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
