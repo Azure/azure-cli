@@ -418,7 +418,7 @@ def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, conne
             values += ",env.aciResourceGroup=" + aci_resource_group
         if norm_location:
             values += ",env.aciRegion=" + norm_location
-        # Currently, we need to set the master FQDN.   
+        # Currently, we need to set the master FQDN.
         # This is temporary and we should remove it when possible
         values += ",env.masterUri=" + k8s_master
         if helm_cmd == "install":
