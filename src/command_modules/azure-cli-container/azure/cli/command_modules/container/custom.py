@@ -230,7 +230,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
     containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
-        name="Microsoft.ContainerInstance.containerGroups",
+        name="Microsoft.ContainerInstance/containerGroups",
         service_name="Microsoft.ContainerInstance/containerGroups"
     )
 
@@ -255,7 +255,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
             subnet.delegations = [aci_delegation]
         else:
             for delegation in subnet.delegations:
-                if delegation.name != containerInstanceDelegationName:
+                if delegation.service_name != containerInstanceDelegationName:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationName))
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
