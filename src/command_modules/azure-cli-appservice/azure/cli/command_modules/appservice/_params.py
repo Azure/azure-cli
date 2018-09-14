@@ -110,19 +110,7 @@ def load_arguments(self, _):
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
 
-    with self.argument_context('webapp webjob continuous list') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-    with self.argument_context('webapp webjob continuous start') as c:
-        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
-    with self.argument_context('webapp webjob continuous stop') as c:
-        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
-    with self.argument_context('webapp webjob continuous remove') as c:
-        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
-    with self.argument_context('webapp webjob triggered run') as c:
-        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
-    with self.argument_context('webapp webjob triggered remove') as c:
-        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
-    with self.argument_context('webapp webjob triggered log') as c:
+    with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
