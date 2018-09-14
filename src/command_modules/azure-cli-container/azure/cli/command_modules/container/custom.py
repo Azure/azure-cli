@@ -34,10 +34,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType)
-from azure.mgmt.network.models import (Subnet, VirtualNetwork, AddressSpace, Delegation, NetworkProfile,
-                                       ContainerNetworkInterfaceConfiguration, IPConfigurationProfile)
 from azure.cli.core.util import sdk_no_wait
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
 
 
@@ -182,7 +179,7 @@ def create_container(cmd,
 
     # Set up VNET, subnet and network profile if needed
     if subnet and vnet_name and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd.cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
 
     cg_network_profile = None
     if network_profile:
@@ -226,15 +223,18 @@ def _get_resource(client, resource_group_name, *subresources):
             raise
 
 
-def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
-    containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
+def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+    from azure.cli.core.profiles import ResourceType
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
+    containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
+    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
         name="Microsoft.ContainerInstance.containerGroups",
         service_name="Microsoft.ContainerInstance/containerGroups"
     )
 
-    ncf = cf_network(cli_ctx)
+    ncf = cf_network(cmd.cli_ctx)
 
     subnet_name = subnet
     if is_valid_resource_id(subnet):
@@ -264,6 +264,8 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
 
     # Create new subnet and Vnet if not exists
     else:
+        Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet','VirtualNetwork', 
+                                                              'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
             ncf.virtual_networks.create_or_update(resource_group_name,
@@ -278,6 +280,11 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
             delegations=[aci_delegation])
 
         subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+
+    NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
+                                                                                                    'ContainerNetworkInterfaceConfiguration',
+                                                                                                    'IPConfigurationProfile',
+                                                                                                    resource_type=ResourceType.MGMT_NETWORK)
 
     # In all cases, create the network profile with aci NIC
     network_profile = NetworkProfile(
@@ -298,6 +305,7 @@ def _get_vnet_network_profile(cli_ctx, location, resource_group_name, vnet_name,
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
+    from msrestazure.tools import parse_resource_id
     log_analytics_client = cf_log_analytics(cli_ctx)
 
     for workspace in log_analytics_client.list():
