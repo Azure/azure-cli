@@ -112,6 +112,8 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
+    with self.argument_context('webapp webjob continuous list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
