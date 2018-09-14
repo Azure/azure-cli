@@ -92,10 +92,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
 
-    with self.argument_context('webapp list-deleted') as c:
+    with self.argument_context('webapp deleted list') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the deleted web app')
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
 
-    with self.argument_context('webapp restore-deleted') as c:
+    with self.argument_context('webapp deleted restore') as c:
         c.argument('deleted_id', options_list=['--deleted-id'], help='Resource ID of the deleted web app')
         c.argument('name', options_list=['--name', '-n'], help='name of the web app to restore the deleted content to')
         c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')

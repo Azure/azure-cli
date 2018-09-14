@@ -71,8 +71,6 @@ def load_command_table(self, _):
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_command('list-deleted', 'list_deleted_webapp')
-        g.custom_command('restore-deleted', 'restore_deleted_webapp')
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
@@ -176,6 +174,10 @@ def load_command_table(self, _):
     with self.command_group('webapp auth') as g:
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
+
+    with self.command_group('webapp deleted') as g:
+        g.custom_command('list', 'list_deleted_webapp')
+        g.custom_command('restore', 'restore_deleted_webapp')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))

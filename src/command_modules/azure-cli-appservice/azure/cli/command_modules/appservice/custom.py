@@ -348,8 +348,8 @@ def list_webapp(cmd, resource_group_name=None):
     return [r for r in result if 'function' not in r.kind]
 
 
-def list_deleted_webapp(cmd, resource_group_name=None, name=None):
-    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name)
+def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
+    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
     return sorted(result, key=lambda site: site.deleted_site_id)
 
 
@@ -379,13 +379,15 @@ def _list_app(cli_ctx, resource_group_name=None):
     return result
 
 
-def _list_deleted_app(cli_ctx, resource_group_name=None, name=None):
+def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
     result = list(client.deleted_web_apps.list())
     if resource_group_name:
         result = [r for r in result if r.resource_group == resource_group_name]
     if name:
         result = [r for r in result if r.deleted_site_name.lower() == name.lower()]
+    if slot:
+        result = [r for r in result if r.slot.lower() == slot.lower()]
     return result
 
 
