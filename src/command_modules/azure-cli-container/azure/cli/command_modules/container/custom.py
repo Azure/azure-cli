@@ -264,7 +264,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
 
     # Create new subnet and Vnet if not exists
     else:
-        Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet','VirtualNetwork', 
+        Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet', 'VirtualNetwork',
                                                               'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
