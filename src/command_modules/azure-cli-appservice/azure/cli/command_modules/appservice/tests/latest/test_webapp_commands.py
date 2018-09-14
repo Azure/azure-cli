@@ -709,7 +709,7 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
-        deleted_apps = self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
+        self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
 

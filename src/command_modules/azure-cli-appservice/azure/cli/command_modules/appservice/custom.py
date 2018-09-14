@@ -354,13 +354,8 @@ def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
 
 
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
-    client = web_client_factory(cmd.cli_ctx)
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
-
-    if slot:
-        return client.web_apps.restore_from_deleted_app_slot(resource_group_name, name, request, slot)
-
-    return client.web_apps.restore_from_deleted_app(resource_group_name, name, request)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
 
 
 def list_function_app(cmd, resource_group_name=None):
@@ -389,7 +384,6 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     if slot:
         result = [r for r in result if r.slot.lower() == slot.lower()]
     return result
-
 
 
 def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
