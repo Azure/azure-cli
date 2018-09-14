@@ -227,7 +227,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-    containerInstanceDelegationName = "Microsoft.ContainerInstance.containerGroups"
+    containerInstanceDelegationServiceName = "Microsoft.ContainerInstance/containerGroups"
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
         name="Microsoft.ContainerInstance.containerGroups",
@@ -255,8 +255,8 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
             subnet.delegations = [aci_delegation]
         else:
             for delegation in subnet.delegations:
-                if delegation.name != containerInstanceDelegationName:
-                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationName))
+                if delegation.service_name != containerInstanceDelegationServiceName:
+                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationServiceName))
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
         if network_profile:
