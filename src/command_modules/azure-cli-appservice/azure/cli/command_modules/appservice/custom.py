@@ -51,7 +51,7 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
-def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None, # pylint: disable=too-many-statements
+def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
                   tags=None):
@@ -266,7 +266,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     return response
 
 
-def get_sku_name(tier): # pylint: disable=too-many-return-statements
+def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     tier = tier.upper()
     if tier == 'F1' or tier == "FREE":
         return 'FREE'
