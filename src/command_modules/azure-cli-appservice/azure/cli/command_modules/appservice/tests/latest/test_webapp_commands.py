@@ -11,6 +11,7 @@ import tempfile
 import requests
 
 from azure_devtools.scenario_tests import record_only
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck)
 
@@ -697,6 +698,32 @@ class WebappSSLCertTest(ScenarioTest):
         ])
         self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+
+
+class WebappUndeleteTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_deleted_list(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_name = self.create_random_name(prefix='delete-me-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('[0].deletedSiteName', webapp_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_deleted_restore(self, resource_group):
+        plan = self.create_random_name(prefix='undelete-plan', length=24)
+        webapp_name = self.create_random_name(prefix='undelete-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        # A snapshot must be available to restore a deleted app. The app must exist for at least an hour prior to deletion to have a snapshot.
+        # Using a pre-configured deleted app in this test.
+        deleted_app_id = self.cmd('webapp deleted list -g {} -n {}'.format('nicking', 'nickingdeletedwordpress')).get_output_in_json()[0]['id']
+        self.cmd('webapp deleted restore --deleted-id {} -g {} -n {}'.format(deleted_app_id, resource_group, webapp_name))
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):

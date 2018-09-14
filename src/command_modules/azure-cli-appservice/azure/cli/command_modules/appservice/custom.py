@@ -30,7 +30,8 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
+                                   DeletedAppRestoreRequest)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -347,6 +348,16 @@ def list_webapp(cmd, resource_group_name=None):
     return [r for r in result if 'function' not in r.kind]
 
 
+def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
+    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
+    return sorted(result, key=lambda site: site.deleted_site_id)
+
+
+def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
+    request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
+
+
 def list_function_app(cmd, resource_group_name=None):
     result = _list_app(cmd.cli_ctx, resource_group_name)
     return [r for r in result if 'function' in r.kind]
@@ -360,6 +371,18 @@ def _list_app(cli_ctx, resource_group_name=None):
         result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
+    return result
+
+
+def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
+    client = web_client_factory(cli_ctx)
+    result = list(client.deleted_web_apps.list())
+    if resource_group_name:
+        result = [r for r in result if r.resource_group == resource_group_name]
+    if name:
+        result = [r for r in result if r.deleted_site_name.lower() == name.lower()]
+    if slot:
+        result = [r for r in result if r.slot.lower() == slot.lower()]
     return result
 
 

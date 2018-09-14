@@ -92,6 +92,16 @@ def load_arguments(self, _):
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
 
+    with self.argument_context('webapp deleted list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
+
+    with self.argument_context('webapp deleted restore') as c:
+        c.argument('deleted_id', options_list=['--deleted-id'], help='Resource ID of the deleted web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the web app to restore the deleted content to')
+        c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
+        c.argument('restore_content_only', action='store_true', help='restore only deleted files without web app settings')
+
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
