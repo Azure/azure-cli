@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.47
+++++++
+* Minor fixes
+
 2.0.46
 ++++++
 * Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
