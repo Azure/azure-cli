@@ -123,7 +123,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
-        self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent')
+        self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent', False)
 
     def test_merge_credentials_broken_yaml(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
@@ -151,7 +151,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             yaml.dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
-        self.assertRaises(CLIError, merge_kubernetes_configurations, existing.name, addition.name)
+        self.assertRaises(CLIError, merge_kubernetes_configurations, existing.name, addition.name, False)
 
     def test_merge_credentials(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
@@ -191,7 +191,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             yaml.dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
-        merge_kubernetes_configurations(existing.name, addition.name)
+        merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
@@ -283,7 +283,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             yaml.dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
-        merge_kubernetes_configurations(existing.name, addition.name)
+        merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
@@ -338,7 +338,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             yaml.dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
-        merge_kubernetes_configurations(existing.name, addition.name)
+        merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
@@ -357,38 +357,98 @@ class AcsCustomCommandTest(unittest.TestCase):
         addition.close()
         obj1 = {
             'clusters': [
-                'cluster1',
-                'cluster2'
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://cluster1-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster1'
+                },
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://cluster2-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster2'
+                }
             ],
             'contexts': [
-                'context1',
-                'context2'
+                {
+                    'context': {
+                        'cluster': 'cluster1',
+                        'user': 'cluster1User_aztest_aztest'
+                    },
+                    'name': 'context1'
+                },
+                {
+                    'context': {
+                        'cluster': 'cluster1',
+                        'user': 'cluster1User_aztest_aztest'
+                    },
+                    'name': 'context2'
+                }
             ],
             'users': [
-                'user1',
-                'user2'
+                {
+                    'name': 'cluster1User_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'someclientcertificatedata2',
+                        'client-key-data': 'someclientkeydata2',
+                        'token': 'token2'
+                    }
+                },
+                {
+                    'name': 'cluster2User_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'someclientcertificatedata2',
+                        'client-key-data': 'someclientkeydata2',
+                        'token': 'token2'
+                    }
+                }
             ],
-            'current-context': 'cluster1',
+            'current-context': 'context1',
         }
         with open(existing.name, 'w+') as stream:
             yaml.dump(obj1, stream)
 
         obj2 = {
             'clusters': [
-                'cluster2'
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://other2-aztest-abc456-abcd4567.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster2'
+                }
             ],
             'contexts': [
-                'context2'
+                {
+                    'context': {
+                        'cluster': 'cluster2',
+                        'user': 'cluster1_aztest_aztest'
+                    },
+                    'name': 'context2'
+                }
             ],
             'users': [
-                'user2'
+                {
+                    'name': 'cluster2User_aztest_aztest',
+                    'user': {
+                        'client-certificate-data': 'someclientcertificatedata2',
+                        'client-key-data': 'someclientkeydata2',
+                        'token': 'token3'
+                    }
+                }
             ],
-            'current-context': 'cluster2',
+            'current-context': 'some-context',
         }
 
         with open(addition.name, 'w+') as stream:
             yaml.dump(obj2, stream)
-        merge_kubernetes_configurations(existing.name, addition.name)
+        with self.assertRaises(CLIError):
+            merge_kubernetes_configurations(existing.name, addition.name, False)
+
+        merge_kubernetes_configurations(existing.name, addition.name, True)
         self.addCleanup(os.remove, addition.name)
 
         with open(existing.name, 'r') as stream:
@@ -396,11 +456,23 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.addCleanup(os.remove, existing.name)
 
         self.assertEqual(len(merged['clusters']), 2)
-        self.assertEqual(merged['clusters'], ['cluster1', 'cluster2'])
+        expected_clusters = [
+            obj1['clusters'][0],
+            obj2['clusters'][0]
+        ]
+        self.assertEqual(merged['clusters'], expected_clusters)
         self.assertEqual(len(merged['contexts']), 2)
-        self.assertEqual(merged['contexts'], ['context1', 'context2'])
+        expected_contexts = [
+            obj1['contexts'][0],
+            obj2['contexts'][0]
+        ]
+        self.assertEqual(merged['contexts'], expected_contexts)
         self.assertEqual(len(merged['users']), 2)
-        self.assertEqual(merged['users'], ['user1', 'user2'])
+        expected_users = [
+            obj1['users'][0],
+            obj2['users'][0]
+        ]
+        self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
