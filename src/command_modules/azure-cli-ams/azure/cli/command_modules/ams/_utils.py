@@ -58,7 +58,7 @@ class JsonBytearrayEncoder(json.JSONEncoder):
             return obj.strftime("%s %s" % (self.DATE_FORMAT, self.TIME_FORMAT))
 
         if isinstance(obj, bytearray):
-            return bytes(obj).decode("utf-8")
+            return bytes(obj).decode('utf-8', 'ignore')
 
         try:
             return obj.toJSON()
