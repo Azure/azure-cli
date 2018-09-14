@@ -20,7 +20,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
-        provider = 'Microsoft.DBforMySql'
+        provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         provider = 'Microsoft.DBforMariaDB'
 
@@ -80,7 +80,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
 def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
-        provider = 'Microsoft.DBforMySql'
+        provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         provider = 'Microsoft.DBforMariaDB'
 
@@ -140,7 +140,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                        backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
-        provider = 'Microsoft.DBforMySql'
+        provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         provider = 'Microsoft.DBforMariaDB'
 
