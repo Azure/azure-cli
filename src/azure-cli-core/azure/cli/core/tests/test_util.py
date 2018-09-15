@@ -187,9 +187,7 @@ class TestBase64ToHex(unittest.TestCase):
 class TestHandleException(unittest.TestCase):
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handles_keyboardinterrupt(self, mock_logger_error):
-        from knack.util import CLIError
-
+    def test_handle_exception_keyboardinterrupt(self, mock_logger_error):
         # create test KeyboardInterrupt Exception
         keyboard_interrupt_ex = KeyboardInterrupt("KeyboardInterrupt")
 
@@ -201,7 +199,7 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handles_clierror(self, mock_logger_error):
+    def test_handle_exception_clierror(self, mock_logger_error):
         from knack.util import CLIError
 
         # create test CLIError Exception
@@ -217,7 +215,7 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handles_clouderror(self, mock_logger_error):
+    def test_handle_exception_clouderror(self, mock_logger_error):
         from msrestazure.azure_exceptions import CloudError
 
         # create test CloudError Exception
@@ -235,7 +233,7 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, mock_cloud_error.args[1])
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handles_httpoperationerror_typical_response_error(self, mock_logger_error):
+    def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
         err_code = "BadRequest"
@@ -254,8 +252,7 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handles_httpoperationerror_atypical_response_content(self, mock_logger_error):
-
+    def test_handle_exception_httpoperationerror_atypical_response_content(self, mock_logger_error):
         # 1. test error in response, but has str value.
 
         # create test HttpOperationError Exception
