@@ -30,15 +30,19 @@ def handle_exception(ex):
         return 1
     elif isinstance(ex, HttpOperationError):
         try:
-            response_dict = json.loads(ex.response.json())
-            if 'error' in response_dict:
-                code = "{} - ".format(response_dict['error']['code']) if response_dict['error']['code'] else ""
-                message = response_dict['error']['message'] if response_dict['error']['message'] else ex.message
+            response_dict = json.loads(ex.response.text)
+            error = response_dict['error']
+
+            # ARM should use ODATA v4. So should try this first.
+            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+            if isinstance(error, dict):
+                code = "{} - ".format(error.get('code', 'Unknown Code'))
+                message = error.get('message', ex)
                 logger.error("{}{}".format(code, message))
             else:
-                logger.error(ex)
-        except ValueError:
-            # ValueError if response body does not contain valid json.
+                logger.error(error)
+
+        except (json.JSONDecodeError, KeyError):
             logger.error(ex)
         return 1
 

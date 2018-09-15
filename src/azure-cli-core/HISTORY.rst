@@ -26,7 +26,7 @@ Release History
 
 2.0.43
 ++++++
-* Consuming mult api azure.mgmt.azutorization package for stack support
+* Consuming mult api azure.mgmt.authorization package for stack support
 * Minor fixes
 
 2.0.42
