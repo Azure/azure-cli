@@ -147,14 +147,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    action='store_true',
                    arg_group='Basic Policy Options',
                    help='Use open restriction. License or key will be delivered on every request.')
+        c.argument('symmetric',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
+                   help='Use a symmetric token key.')
+        c.argument('rsa',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
+                   help='Use an RSA certificate as a token key.')
+        c.argument('x509',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
+                   help='Use a certificate in PKCS12 format (X509Certificate2 in .NET) as a token key.')
         c.argument('policy_option_name', help='The content key policy option name.')
         c.argument('policy_option_id', help='The content key policy option identifier.')
         c.argument('issuer', arg_group='Token Restriction', help='The token issuer.')
         c.argument('audience', arg_group='Token Restriction', help='The audience for the token.')
-        c.argument('symmetric_token_key', arg_group='Token Restriction', help='The key value of the key.')
-        c.argument('rsa_token_key_exponent', arg_group='Token Restriction', help='The RSA Parameter exponent.')
-        c.argument('rsa_token_key_modulus', arg_group='Token Restriction', help='The RSA Parameter modulus.')
-        c.argument('x509_certificate_token_key', arg_group='Token Restriction', help='The raw data field of a certificate in PKCS 12 format (X509Certificate2 in .NET) with \\n as newlines')
+        c.argument('token_key', arg_group='Token Restriction', help='Either a string (for symmetric key) or a filepath to a certificate (x509, rsa). Must be used with a Token Restriction Key Type flag.')
         c.argument('alt_symmetric_token_keys', arg_group='Token Restriction', help='Space-separated list of alternative symmetric token keys.')
         c.argument('alt_rsa_token_key_exponents', arg_group='Token Restriction', help='Space-separated list of alternative rsa token key exponents.')
         c.argument('alt_rsa_token_key_modulus', arg_group='Token Restriction', help='Space-separated list of alternative rsa token key modulus.')
@@ -166,7 +175,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON Widevine license template. Use @{file} to load from a file.')
         c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay ASK.')
         c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
-        c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The path to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
+        c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The filepath to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
         c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
         c.argument('play_ready_configuration', arg_group='PlayReady Configuration', help='JSON PlayReady license template. Use @{file} to load from a file.')
