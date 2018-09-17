@@ -1358,10 +1358,12 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         return
 
+
 def _trim_nodepoolname(nodepool_name):
     if nodepool_name == "":
         return "nodepool1"
     return nodepool_name[:12]
+
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
