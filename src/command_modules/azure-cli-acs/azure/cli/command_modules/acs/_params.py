@@ -149,7 +149,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks create') as c:
         c.argument('name', validator=validate_linux_host_name)
-        c.argument('kubernetes_version', options_list=['--kubernetes-version', '-k'], completer=get_k8s_versions_completion_list)
+        c.argument('kubernetes_version', completer=get_k8s_versions_completion_list)
         c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
@@ -212,7 +212,7 @@ def load_arguments(self, _):
                    help='The OS type of the connector')
 
     with self.argument_context('aks upgrade') as c:
-        c.argument('kubernetes_version', options_list=['--kubernetes-version', '-k'], completer=get_k8s_upgrades_completion_list)
+        c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name', type=str, default='nodepool1',
