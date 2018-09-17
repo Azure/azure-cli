@@ -42,7 +42,7 @@ def handle_exception(ex):
             else:
                 logger.error(error)
 
-        except (json.JSONDecodeError, KeyError):
+        except (ValueError, KeyError):
             logger.error(ex)
         return 1
 
