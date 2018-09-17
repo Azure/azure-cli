@@ -11,7 +11,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_images, cf_run_commands,
                                                           cf_rolling_upgrade_commands,
                                                           cf_msi_user_identities_operations,
-                                                          cf_msi_operations_operations)
+                                                          cf_msi_operations_operations, cf_galleries,
+                                                          cf_gallery_images, cf_gallery_image_versions)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -120,6 +121,21 @@ def load_command_table(self, _):
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
         client_factory=cf_ni
+    )
+
+    compute_galleries_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.galleries_operations#GalleriesOperations.{}',
+        client_factory=cf_galleries,
+    )
+
+    compute_gallery_images_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        client_factory=cf_gallery_images,
+    )
+
+    compute_gallery_image_versions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.gallery_image_versions_operations#GalleryImageVersionsOperations.{}',
+        client_factory=cf_gallery_image_versions,
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -319,3 +335,24 @@ def load_command_table(self, _):
         g.command('cancel', 'cancel')
         g.command('get-latest', 'get_latest')
         g.command('start', 'start_os_upgrade')
+
+    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
+        g.custom_command('create', 'create_image_gallery')
+        g.command('show', 'get')
+        g.custom_command('list', 'list_image_galleries')
+        g.command('delete', 'delete')
+        g.generic_update_command('update')
+
+    with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
+        g.custom_command('create', 'create_gallery_image')
+        g.command('list', 'list_by_gallery')
+        g.command('show', 'get')
+        g.command('delete', 'delete')
+        g.generic_update_command('update')
+
+    with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
+        g.command('delete', 'delete')
+        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
+        g.command('list', 'list_by_gallery_image')
+        g.custom_command('create', 'upload_image')
+        g.generic_update_command('update')

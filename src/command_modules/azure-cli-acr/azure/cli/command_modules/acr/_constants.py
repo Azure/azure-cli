@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import SkuName
+from azure.mgmt.containerregistry.v2018_09_01.models import SkuName
 
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 
@@ -13,6 +13,8 @@ WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'
 REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 BUILD_TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/buildTasks'
 BUILD_STEP_RESOURCE_TYPE = BUILD_TASK_RESOURCE_TYPE + '/steps'
+
+TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 
 CLASSIC_REGISTRY_SKU = [SkuName.classic.value]
 MANAGED_REGISTRY_SKU = [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]

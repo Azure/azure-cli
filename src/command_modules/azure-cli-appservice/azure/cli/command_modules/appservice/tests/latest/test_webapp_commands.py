@@ -11,6 +11,7 @@ import tempfile
 import requests
 
 from azure_devtools.scenario_tests import record_only
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck)
 
@@ -105,7 +106,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.2"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
@@ -117,7 +118,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
@@ -163,7 +164,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = 'webapp-quick-linux-cd'
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
@@ -190,7 +191,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
         # sanity check the traces
@@ -699,6 +700,32 @@ class WebappSSLCertTest(ScenarioTest):
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
 
+class WebappUndeleteTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_deleted_list(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_name = self.create_random_name(prefix='delete-me-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('[0].deletedSiteName', webapp_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_deleted_restore(self, resource_group):
+        plan = self.create_random_name(prefix='undelete-plan', length=24)
+        webapp_name = self.create_random_name(prefix='undelete-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        # A snapshot must be available to restore a deleted app. The app must exist for at least an hour prior to deletion to have a snapshot.
+        # Using a pre-configured deleted app in this test.
+        deleted_app_id = self.cmd('webapp deleted list -g {} -n {}'.format('nicking', 'nickingdeletedwordpress')).get_output_in_json()[0]['id']
+        self.cmd('webapp deleted restore --deleted-id {} -g {} -n {}'.format(deleted_app_id, resource_group, webapp_name))
+
+
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
     @ResourceGroupPreparer(parameter_name='resource_group2')
@@ -887,6 +914,50 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         asp_F1 = self.cmd('appservice list-locations --sku F1').get_output_in_json()
         result = self.cmd('appservice list-locations --sku Free').get_output_in_json()
         self.assertEqual(asp_F1, result)
+
+
+class WebappTriggeredWebJobListTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_triggeredWebjob_list(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-triggered'
+
+        # list test
+        self.cmd('webapp webjob triggered list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/triggeredwebjobs')])
+
+
+class WebappContinuousWebJobE2ETest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_continuousWebjob_e2e(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-continuous'
+
+        # list test
+        self.cmd('webapp webjob continuous list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/continuouswebjobs')])
+        # start
+        self.cmd('webapp webjob continuous start -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Running')])
+        # stop
+        self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Disabling')])
 
 
 if __name__ == '__main__':

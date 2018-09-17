@@ -209,14 +209,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.MGMT_STORAGE
     )
 
-    with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk) as g:
+    with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk,
+                            min_api='2018-02-01') as g:
         g.show_command('show', 'get_immutability_policy', transform=transform_immutability_policy)
         g.command('create', 'create_or_update_immutability_policy')
         g.command('delete', 'delete_immutability_policy', transform=lambda x: None)
         g.command('lock', 'lock_immutability_policy')
         g.command('extend', 'extend_immutability_policy')
 
-    with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk) as g:
+    with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk,
+                            min_api='2018-02-01') as g:
         g.command('set', 'set_legal_hold')
         g.command('clear', 'clear_legal_hold')
         g.show_command('show', 'get', transform=lambda x: getattr(x, 'legal_hold', x))

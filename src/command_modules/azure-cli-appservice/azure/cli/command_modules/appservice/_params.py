@@ -91,6 +91,16 @@ def load_arguments(self, _):
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
 
+    with self.argument_context('webapp deleted list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
+
+    with self.argument_context('webapp deleted restore') as c:
+        c.argument('deleted_id', options_list=['--deleted-id'], help='Resource ID of the deleted web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the web app to restore the deleted content to')
+        c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
+        c.argument('restore_content_only', action='store_true', help='restore only deleted files without web app settings')
+
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
@@ -108,6 +118,13 @@ def load_arguments(self, _):
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
+
+    with self.argument_context('webapp webjob') as c:
+        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
+    with self.argument_context('webapp webjob continuous list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+    with self.argument_context('webapp webjob triggered list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope + ' create') as c:
@@ -314,6 +331,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
+
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)

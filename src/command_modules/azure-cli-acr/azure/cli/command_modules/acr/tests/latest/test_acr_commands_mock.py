@@ -11,7 +11,7 @@ import json
 import unittest
 import mock
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import Registry, Sku
+from azure.mgmt.containerregistry.v2018_09_01.models import Registry, Sku
 
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
@@ -552,7 +552,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
         # Delete all versions of a chart
-        acr_helm_delete(cmd, 'testregistry', 'mychart1', repository='testrepository')
+        acr_helm_delete(cmd, 'testregistry', 'mychart1', repository='testrepository', yes=True)
         mock_requests_get.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/helm/v1/testrepository/_charts/mychart1',
@@ -563,7 +563,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
         # Delete one version of a chart
-        acr_helm_delete(cmd, 'testregistry', 'mychart1', version='0.2.1', repository='testrepository')
+        acr_helm_delete(cmd, 'testregistry', 'mychart1', version='0.2.1', repository='testrepository', yes=True)
         mock_requests_get.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/helm/v1/testrepository/_blobs/mychart1-0.2.1.tgz',

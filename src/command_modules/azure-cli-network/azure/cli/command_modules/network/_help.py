@@ -1943,6 +1943,32 @@ helps['network express-route peering update'] = """
                 --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
 """
+
+helps['network express-route peering connection'] = """
+    type: group
+    short-summary: Manage ExpressRoute circuit connections.
+"""
+
+helps['network express-route peering connection create'] = """
+    type: command
+    short-summary: Create connections between two ExpressRoute circuits.
+    examples:
+        - name: Create connection between two ExpressRoute circuits with AzurePrivatePeering settings.
+          text: |
+            az network express-route peering connection create -g MyResourceGroup --circuit-name \\
+                MyCircuit --peering-name AzurePrivatePeering -n myConnection --peer-circuit \\
+                MyOtherCircuit --address-prefix 104.0.0.0/29
+"""
+
+helps['network express-route peering connection delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute circuit connection.
+"""
+
+helps['network express-route peering connection show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute circuit connection.
+"""
 # endregion
 
 # region Interface Endpoint

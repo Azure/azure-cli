@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.3.4
+2.3.5
 +++++
 * `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
+
+2.3.4
++++++
+* install-connector: Updates the install-connector command to set the AKS Master FQDN
 
 2.3.3
 +++++

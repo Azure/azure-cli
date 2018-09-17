@@ -562,6 +562,61 @@ helps['webapp config backup restore'] = """
     short-summary: Restore a web app from a backup.
 """
 
+helps['webapp webjob'] = """
+    type: group
+    short-summary: Allows management operations for webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous'] = """
+    type: group
+    short-summary: Allows management operations of continuous webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous list'] = """
+    type: command
+    short-summary: List all continuous webjobs on a selected webapp.
+"""
+
+helps['webapp webjob continuous start'] = """
+    type: command
+    short-summary: Start a specific continuous webjob on a selected webapp.
+"""
+
+helps['webapp webjob continuous stop'] = """
+    type: command
+    short-summary: Stop a specific continuous webjob.
+"""
+
+helps['webapp webjob continuous remove'] = """
+    type: command
+    short-summary: Delete a specific continuous webjob.
+"""
+
+helps['webapp webjob triggered'] = """
+    type: group
+    short-summary: Allows management operations of triggered webjobs on a webapp.
+"""
+
+helps['webapp webjob triggered list'] = """
+    type: command
+    short-summary: List all triggered webjobs hosted on a webapp.
+"""
+
+helps['webapp webjob triggered run'] = """
+    type: command
+    short-summary: Run a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered remove'] = """
+    type: command
+    short-summary: Delete a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered log'] = """
+    type: command
+    short-summary: Get history of a specific triggered webjob hosted on a webapp.
+"""
+
 helps['webapp browse'] = """
     type: command
     short-summary: Open a web app in a browser.
@@ -593,6 +648,30 @@ helps['webapp list-runtimes'] = """
     type: command
     short-summary: List available built-in stacks which can be used for web apps.
 """
+
+helps['webapp deleted'] = """
+    type: group
+    short-summary: Manage deleted web apps.
+"""
+
+helps['webapp deleted list'] = """
+    type: command
+    short-summary: List web apps that have been deleted.
+"""
+
+helps['webapp deleted restore'] = """
+    type: command
+    short-summary: Restore a deleted web app.
+    long-summary: Restores the files and settings of a deleted web app to the specified web app.
+    examples:
+        - name: Restore a deleted app to the Staging slot of MySite.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+"""
+
 
 helps['webapp delete'] = """
     type: command

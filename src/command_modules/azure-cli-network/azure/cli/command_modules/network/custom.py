@@ -849,24 +849,19 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
     from azure.cli.core.commands import LongRunningOperation
 
     ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan', 'SubResource')
-    plan = DdosProtectionPlan(
-        name=ddos_plan_name,
-        location=location,
-        tags=tags
-    )
     if not vnets:
         # if no VNETs can do a simple PUT
-        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)
+        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, location=location, tags=tags)
 
     # if VNETs specified, have to create the protection plan and then add the VNETs
     plan_id = LongRunningOperation(cmd.cli_ctx)(
-        ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)).id
+        ddos_client.create_or_update(resource_group_name, ddos_plan_name, location=location, tags=tags)).id
 
+    SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
-    for subresource in vnets:
+    for vnet_subresource in vnets:
         vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
-        id_parts = parse_resource_id(subresource.id)
+        id_parts = parse_resource_id(vnet_subresource.id)
         vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
         vnet.ddos_protection_plan = SubResource(id=plan_id)
         vnet_client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
@@ -1505,6 +1500,28 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
         instance.allow_global_reach = allow_global_reach
 
     return instance
+
+
+def create_express_route_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
+                                    peer_circuit, address_prefix, authorization_key=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
+    ExpressRouteCircuitConnection, SubResource = cmd.get_models('ExpressRouteCircuitConnection', 'SubResource')
+    source_circuit = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='expressRouteCircuits',
+        name=circuit_name,
+        child_type_1='peerings',
+        child_name_1=peering_name
+    )
+    conn = ExpressRouteCircuitConnection(
+        express_route_circuit_peering=SubResource(id=source_circuit),
+        peer_express_route_circuit_peering=SubResource(id=peer_circuit),
+        address_prefix=address_prefix,
+        authorization_key=authorization_key
+    )
+    return client.create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
 def _validate_ipv6_address_prefixes(prefixes):

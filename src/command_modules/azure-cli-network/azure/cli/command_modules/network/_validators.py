@@ -232,6 +232,26 @@ def validate_dns_record_type(namespace):
             return
 
 
+def validate_er_peer_circuit(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+
+    if not is_valid_resource_id(namespace.peer_circuit):
+        peer_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='expressRouteCircuits',
+            name=namespace.peer_circuit,
+            child_type_1='peerings',
+            child_name_1=namespace.peering_name)
+
+    # if the circuit ID is provided, we need to append /peerings/{peering_name}
+    if namespace.peering_name not in peer_id:
+        peer_id = '{}/peerings/{}'.format(peer_id, namespace.peering_name)
+
+    namespace.peer_circuit = peer_id
+
+
 def validate_inbound_nat_rule_id_list(cmd, namespace):
     _generate_lb_id_list_from_names_or_ids(
         cmd.cli_ctx, namespace, 'load_balancer_inbound_nat_rule_ids', 'inboundNatRules')

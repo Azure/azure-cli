@@ -75,6 +75,10 @@ jobs:
       env: PURPOSE='Integration'
       python: 2.7
     - stage: verify
+      script: ./scripts/ci/test_profile_integration.sh
+      env: PURPOSE='Integration for profiles'
+      python: 3.6
+    - stage: verify
       script: ./scripts/ci/test_perf.sh
       env: PURPOSE='Module Load Performance'
       python: 3.6
