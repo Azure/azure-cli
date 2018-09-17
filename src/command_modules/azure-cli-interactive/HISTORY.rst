@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.29
+++++++
+* Fix command loading problem in interactive that was caused by deprecated objects.
+
 0.3.28
 ++++++
 * Minor fixes
