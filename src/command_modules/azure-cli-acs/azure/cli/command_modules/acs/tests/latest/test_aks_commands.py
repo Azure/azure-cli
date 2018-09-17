@@ -195,6 +195,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': self.create_random_name('cliakstest', 16),
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
@@ -203,9 +204,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create --no-wait
-        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --nodepool-name {nodepool_name}' \
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --nodepool-name {nodepool_name} ' \
                      '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
-                     '--tags scenario_test -c 1 --no-wait'
+                     '--ssh-key-value {ssh_key_value} --tags scenario_test -c 1 --no-wait'
         self.cmd(create_cmd, checks=[self.is_empty()])
 
         # wait
