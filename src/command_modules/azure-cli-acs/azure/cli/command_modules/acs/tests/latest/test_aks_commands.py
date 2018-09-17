@@ -189,7 +189,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_custom_nodepool_name_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_default_service_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         self.kwargs.update({
             'resource_group': resource_group,
@@ -240,7 +240,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
-
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -302,7 +301,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -340,7 +338,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
         # create cluster without skip_role_assignment
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key' 
+                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key'
 
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
@@ -350,7 +348,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(check_role_assignment_cmd, checks=[
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
-
 
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
@@ -458,6 +455,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         subnet_name = self.create_random_name('clisubnet', 16)
         address_prefix = "192.168.0.0/16"
         subnet_prefix = "192.168.0.0/24"
-        vnet_subnet =self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")

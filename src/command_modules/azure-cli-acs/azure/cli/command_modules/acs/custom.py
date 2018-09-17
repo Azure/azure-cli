@@ -1358,6 +1358,10 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         return
 
+def _trim_nodepoolname(nodepool_name):
+    if nodepool_name == "":
+        return "nodepool1"
+    return nodepool_name[:12]
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -1405,11 +1409,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
-    if nodepool_name == "":
-        nodepool_name = "nodepool1"
-
     agent_pool_profile = ManagedClusterAgentPoolProfile(
-        name=nodepool_name,  # Must be 12 chars or less before ACS RP adds to it, but unittests fail, keeping it as is
+        name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
