@@ -31,17 +31,14 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               policy_option_name, description=None,
                               clear_key_configuration=False, open_restriction=False,
                               issuer=None, audience=None, token_key=None, symmetric=False, rsa=False, x509=False,
-                              alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
-                              alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
-                              token_claims=None, restriction_token_type=None,
-                              open_id_connect_discovery_document=None, widevine_template=None,
-                              ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
+                              alt_symmetric_token_keys=None, alt_rsa_token_keys=None, alt_x509_certificate_token_keys=None,
+                              token_claims=None, restriction_token_type=None, open_id_connect_discovery_document=None,
+                              widevine_template=None, ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
                               rental_and_lease_key_type=None, rental_duration=None, play_ready_configuration=None):
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
                                                         issuer, audience, token_key, symmetric, rsa, x509,
-                                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
-                                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                                        alt_symmetric_token_keys, alt_rsa_token_keys, alt_x509_certificate_token_keys,
                                                         token_claims, restriction_token_type, open_id_connect_discovery_document,
                                                         widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
                                                         rental_and_lease_key_type, rental_duration, play_ready_configuration)
@@ -66,11 +63,9 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
                                   policy_option_name, clear_key_configuration=False, open_restriction=False,
                                   issuer=None, audience=None, token_key=None, symmetric=False, rsa=False, x509=False,
-                                  alt_symmetric_token_keys=None, alt_rsa_token_key_exponents=None,
-                                  alt_rsa_token_key_modulus=None, alt_x509_certificate_token_keys=None,
-                                  token_claims=None, restriction_token_type=None,
-                                  open_id_connect_discovery_document=None, widevine_template=None,
-                                  ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
+                                  alt_symmetric_token_keys=None, alt_rsa_token_keys=None, alt_x509_certificate_token_keys=None,
+                                  token_claims=None, restriction_token_type=None, open_id_connect_discovery_document=None,
+                                  widevine_template=None, ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
                                   rental_and_lease_key_type=None, rental_duration=None, play_ready_configuration=None):
 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
@@ -82,8 +77,7 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
                                                         issuer, audience, token_key, symmetric, rsa, x509,
-                                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
-                                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
+                                                        alt_symmetric_token_keys, alt_rsa_token_keys, alt_x509_certificate_token_keys,
                                                         token_claims, restriction_token_type, open_id_connect_discovery_document,
                                                         widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
                                                         rental_and_lease_key_type, rental_duration, play_ready_configuration)
@@ -130,11 +124,9 @@ def update_content_key_policy(instance, description=None):
 
 def _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
                                         issuer, audience, token_key, symmetric, rsa, x509,
-                                        alt_symmetric_token_keys, alt_rsa_token_key_exponents,
-                                        alt_rsa_token_key_modulus, alt_x509_certificate_token_keys,
-                                        token_claims, restriction_token_type,
-                                        open_id_connect_discovery_document, widevine_template,
-                                        ask, fair_play_pfx_password, fair_play_pfx,
+                                        alt_symmetric_token_keys, alt_rsa_token_keys, alt_x509_certificate_token_keys,
+                                        token_claims, restriction_token_type, open_id_connect_discovery_document,
+                                        widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
                                         rental_and_lease_key_type, rental_duration, play_ready_configuration):
 
     configuration = None
@@ -180,10 +172,6 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
             raise CLIError('You should use alternative (alt) token keys if you have more than one token key.')
 
         primary_verification_key = None
-        _symmetric_keys = _coalesce_str(alt_symmetric_token_keys).split()
-        _rsa_key_exponents = _coalesce_str(alt_rsa_token_key_exponents).split()
-        _rsa_key_modulus = _coalesce_str(alt_rsa_token_key_modulus).split()
-        _x509_keys = _coalesce_str(alt_x509_certificate_token_keys).split()
         alternative_keys = []
         _token_claims = []
 
@@ -194,14 +182,14 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         elif x509:
             primary_verification_key = _x509_token_key_factory(_read(token_key, 'r'))
 
-        # for key in _symmetric_keys:
-        #    alternative_keys.append(_symmetric_token_key_factory(key))
-        #
-        # for exp, mod in zip(_rsa_key_exponents, _rsa_key_modulus):
-        #    alternative_keys.append(_rsa_token_key_factory(exp, mod))
-        #
-        # for key in _x509_keys:
-        #    alternative_keys.append(_x509_token_key_factory(key))
+        for key in _coalesce_lst(alt_symmetric_token_keys):
+            alternative_keys.append(_symmetric_token_key_factory(bytearray(key, 'utf-8')))
+
+        for key in _coalesce_lst(alt_rsa_token_keys):
+            alternative_keys.append(_rsa_token_key_factory(_read(key, 'r')))
+
+        for key in _coalesce_lst(alt_x509_certificate_token_keys):
+            alternative_keys.append(_x509_token_key_factory(_read(key, 'r')))
 
         if token_claims is not None:
             for key in token_claims:
@@ -225,8 +213,8 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
 
 # Returns string if not null, or an empty string otherwise.
-def _coalesce_str(value):
-    return value or ''
+def _coalesce_lst(value):
+    return value or []
 
 
 def _coalesce_timedelta(value):

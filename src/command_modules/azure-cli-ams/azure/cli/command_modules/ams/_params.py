@@ -164,10 +164,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('issuer', arg_group='Token Restriction', help='The token issuer.')
         c.argument('audience', arg_group='Token Restriction', help='The audience for the token.')
         c.argument('token_key', arg_group='Token Restriction', help='Either a string (for symmetric key) or a filepath to a certificate (x509, rsa). Must be used with a Token Restriction Key Type flag.')
-        c.argument('alt_symmetric_token_keys', arg_group='Token Restriction', help='Space-separated list of alternative symmetric token keys.')
-        c.argument('alt_rsa_token_key_exponents', arg_group='Token Restriction', help='Space-separated list of alternative rsa token key exponents.')
-        c.argument('alt_rsa_token_key_modulus', arg_group='Token Restriction', help='Space-separated list of alternative rsa token key modulus.')
-        c.argument('alt_x509_certificate_token_keys', arg_group='Token Restriction', help='Space-separated list of x509 certificate token keys.')
+        c.argument('alt_symmetric_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternative symmetric token keys.')
+        c.argument('alt_rsa_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternative rsa token keys.')
+        c.argument('alt_x509_certificate_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of x509 certificate token keys.')
         c.argument('token_claims', arg_group='Token Restriction', arg_type=token_claim_type)
         c.argument('restriction_token_type', arg_group='Token Restriction',
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
