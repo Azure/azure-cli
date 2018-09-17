@@ -401,10 +401,6 @@ def _b64_to_str(data):
     return base64.b64encode(data)
 
 
-def _b64_from_str(string):
-    return base64.b64decode(string)
-
-
 def _int2bytes(int_value):
     hex_value = '{0:x}'.format(int_value)
     # make length of hex_value a multiple of two
