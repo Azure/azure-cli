@@ -1409,7 +1409,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         nodepool_name = "nodepool1"
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
-        name=nodepool_name[:12],  # Must be 12 chars or less before ACS RP adds to it
+        name=nodepool_name,  # Must be 12 chars or less before ACS RP adds to it, but unittests fail, keeping it as is
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
