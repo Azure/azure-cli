@@ -345,7 +345,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'restrictionTokenType': 'Jwt',
             'issuer': 'issuer',
             'audience': 'audience',
-            'tokenKey': self._get_test_data_file('x509Token.pks')
+            'tokenKey': self._get_test_data_file('x509Token.pem')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -353,12 +353,12 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.cmd('az ams content-key-policy create -a {amsname} -g {rg} -n {contentKeyPolicyName} --clear-key-configuration --policy-option-name {policyOptionName} --token-key "{tokenKey}" --x509 --issuer {issuer} --audience {audience} --restriction-token-type {restrictionTokenType}')
 
         self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg}', checks=[
-            self.check('options[0].restriction.primary_verification_key.key_value', None)
+            self.check('options[0].restriction.primaryVerificationKey.rawBody', None)
         ])
 
-        self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg} --with-secrets', checks=[
-            self.check('options[0].restriction.primaryVerificationKey.keyValue', 'TestTokenKey')
-        ])
+        output = self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg} --with-secrets').get_output_in_json()
+
+        self.assertNotEquals(output.get('options')[0].get('restriction').get('primaryVerificationKey').get('rawBody'), None)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_delete')

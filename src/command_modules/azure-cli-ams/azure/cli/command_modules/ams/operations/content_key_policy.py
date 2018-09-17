@@ -165,7 +165,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
     if valid_fairplay_configuration:
         configuration = ContentKeyPolicyFairPlayConfiguration(
             ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
-            fair_play_pfx=_base64(_read_binary(fair_play_pfx)).decode('ascii'),
+            fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)
 
@@ -192,7 +192,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         elif rsa:
             primary_verification_key = _rsa_token_key_factory(_read(token_key, 'r'))
         elif x509:
-            primary_verification_key = _x509_token_key_factory(_read_binary(token_key))
+            primary_verification_key = _x509_token_key_factory(_read(token_key, 'r'))
 
         #for key in _symmetric_keys:
         #    alternative_keys.append(_symmetric_token_key_factory(key))
@@ -255,9 +255,9 @@ def _rsa_token_key_factory(rsa_content):
         exponent=bytearray(_int2bytes(exp)), modulus=bytearray(_int2bytes(mod)))
 
 
-def _x509_token_key_factory(x509_certificate_token_key):
+def _x509_token_key_factory(content):
     return ContentKeyPolicyX509CertificateTokenKey(
-        raw_body=x509_certificate_token_key)
+        raw_body=bytearray(content, 'ascii'))
 
 
 def _valid_token_restriction(token_key, rsa, x509, symmetric, restriction_token_type, issuer, audience):
@@ -397,8 +397,12 @@ def _read(path, read_type):
         return file.read()
 
 
-def _base64(data):
+def _b64_to_str(data):
     return base64.b64encode(data)
+
+
+def _b64_from_str(string):
+    return base64.b64decode(string)
 
 
 def _int2bytes(int_value):

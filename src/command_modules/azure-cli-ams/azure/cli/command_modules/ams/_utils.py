@@ -9,7 +9,7 @@ import uuid
 import re
 import json
 import isodate
-
+import base64
 
 def _gen_guid():
     return uuid.uuid4()
