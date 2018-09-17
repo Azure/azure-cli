@@ -21,6 +21,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
                                 TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
                                 PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
 
+from azure.cli.command_modules.batch import _command_type as command_helpers
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
@@ -288,16 +289,20 @@ def update_pool(client,
 
 def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
              select=None, expand=None):
+    result = None
     if job_schedule_id:
         option1 = JobListFromJobScheduleOptions(filter=filter,
                                                 select=select,
                                                 expand=expand)
-        return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
-                                                  job_list_from_job_schedule_options=option1))
+        result = list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
+                                                    job_list_from_job_schedule_options=option1))
     option2 = JobListOptions(filter=filter,
                              select=select,
                              expand=expand)
-    return list(client.list(job_list_options=option2))
+    result = list(client.list(job_list_options=option2))
+    if select:
+        result = command_helpers._trim_select_raw(result, select)
+    return result
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints, AffinityInformation)

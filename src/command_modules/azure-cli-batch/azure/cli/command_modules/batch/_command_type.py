@@ -18,9 +18,71 @@ from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
 from azure.cli.core.util import get_file_json
 
-
 _CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
+
+
+def _find_kw(kw, arguments):
+    if isinstance(arguments, dict):
+        for k, v in arguments.items():
+            if k == kw:
+                return v
+            if isinstance(v, list):
+                for item in v:
+                    result = _find_kw(kw, item)
+                    if result:
+                        return result
+            try:
+                v = v.__dict__
+            except AttributeError:
+                pass
+            if isinstance(v, dict):
+                result = _find_kw(kw, v)
+                if result:
+                    return result
+        return None
+
+
+def _trim_select_raw(results, select_vals_raw):
+    select_vals = []
+    for vals in select_vals_raw.split(','):
+        select_vals.append(vals.split('/'))
+    return _trim_select(results, select_vals, 0)
+
+
+def _trim_select(results, select_vals, depth):
+    if isinstance(results, list):
+        # traverse non-empty list elements
+        return [val for val in (_trim_select(obj, select_vals, depth) for obj in results) if val]
+
+    try:
+        results = results.__dict__
+    except AttributeError:
+        pass
+
+    if isinstance(results, dict):
+        new_results = {}
+
+        # Assemble current depth select terms
+        curr_level_vals = {}
+        for vals in select_vals:
+            if len(vals) > depth:
+                curr_level_vals[vals[depth]] = vals
+
+        # Search for current depth select terms
+        for k, v in results.items():
+            if k not in curr_level_vals.keys():
+                continue
+            else:
+                if len(curr_level_vals[k]) > depth + 1:
+                    res = _trim_select(v, select_vals, depth + 1)
+                    if res:
+                        new_results[k] = res
+                else:
+                    new_results[k] = v
+
+        return new_results
+    return None
 
 
 def _load_model(name):
@@ -512,12 +574,16 @@ class AzureBatchDataPlaneCommand(object):
                         for data in result:
                             file_handle.write(data)
                     return
-
                 # Otherwise handle based on return type of results
                 elif isinstance(result, Paged):
-                    return list(result)
+                    result = list(result)
 
+                # Filter returned object on select clause
+                select_clause = _find_kw('select', kwargs)
+                if select_clause:
+                    result = _trim_select_raw(result, select_clause)
                 return result
+
             except BatchErrorException as ex:
                 try:
                     message = ex.error.message.value
