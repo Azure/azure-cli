@@ -189,7 +189,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_default_service_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_scale_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         self.kwargs.update({
             'resource_group': resource_group,
@@ -218,7 +218,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
-            self.check('agentPoolProfiles[0].osType', 'Windows'),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
