@@ -22,10 +22,28 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
+    from msrest.exceptions import HttpOperationError
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
+        return 1
+    elif isinstance(ex, HttpOperationError):
+        try:
+            response_dict = json.loads(ex.response.text)
+            error = response_dict['error']
+
+            # ARM should use ODATA v4. So should try this first.
+            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+            if isinstance(error, dict):
+                code = "{} - ".format(error.get('code', 'Unknown Code'))
+                message = error.get('message', ex)
+                logger.error("%s%s", code, message)
+            else:
+                logger.error(error)
+
+        except (ValueError, KeyError):
+            logger.error(ex)
         return 1
 
     logger.exception(ex)
