@@ -779,12 +779,20 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
                 if ip_configuration.public_ip_address:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
-                    network_info['publicIpAddresses'].append({
+
+                    public_ip_addr_info = {
                         'id': public_ip_address.id,
                         'name': public_ip_address.name,
                         'ipAddress': public_ip_address.ip_address,
                         'ipAllocationMethod': public_ip_address.public_ip_allocation_method
-                    })
+                    }
+
+                    try:
+                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
+                    except (AttributeError, IndexError, TypeError):
+                        pass
+
+                    network_info['publicIpAddresses'].append(public_ip_addr_info)
 
             result.append({
                 'virtualMachine': {
