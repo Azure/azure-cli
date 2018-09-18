@@ -189,11 +189,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_scale_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
-            'name': self.create_random_name('cliakstest', 16),
+            'name': aks_name,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
@@ -203,14 +204,22 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'nodepool_name': self.create_random_name('np', 12)
         })
 
-        # create --no-wait
+        # create
         create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --nodepool-name {nodepool_name} ' \
                      '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
-                     '--ssh-key-value {ssh_key_value} --tags scenario_test -c 1 --no-wait'
-        self.cmd(create_cmd, checks=[self.is_empty()])
+                     '--ssh-key-value {ssh_key_value} --tags scenario_test -c 1'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded')
+        ])
 
-        # wait
-        self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
 
         # show
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
