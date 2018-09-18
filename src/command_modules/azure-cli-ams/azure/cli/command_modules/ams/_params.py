@@ -158,6 +158,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('x509',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
+                   help='Use a certificate in PKCS12 format (X509Certificate2 in .NET) as an alternative token key.')
+        c.argument('alt_key_symmetric',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
+                   help='Use a symmetric key as an alternative token key.')
+        c.argument('alt_key_rsa',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
+                   help='Use an RSA certificate as an alternative token key.')
+        c.argument('alt_key_x509',
+                   action='store_true',
+                   arg_group='Token Restriction Key Type',
                    help='Use a certificate in PKCS12 format (X509Certificate2 in .NET) as a token key.')
         c.argument('policy_option_name', help='The content key policy option name.')
         c.argument('policy_option_id', help='The content key policy option identifier.')

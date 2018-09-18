@@ -105,7 +105,24 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
 
 
 def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
-                                     parameters):
+                                     parameters, alt_key_symmetric=False, alt_key_rsa=False, alt_key_x509=False):
+    def __get_alt_key(key):
+        if alt_key_symmetric:
+            return _symmetric_token_key_factory(key)
+        if alt_key_rsa:
+            return _rsa_token_key_factory(key)
+        if alt_key_x509:
+            return _x509_token_key_factory(key)
+        raise CLIError('You must use one flag for an alternative token key.')
+
+    if _count_truthy([alt_key_symmetric, alt_key_rsa, alt_key_x509]) > 1:
+        raise CLIError('You must use exactly one flag for an alternative token key.')
+
+    for option in parameters.options:
+        if isinstance(option.restriction, ContentKeyPolicyTokenRestriction):
+            alt_keys = option.restriction.alternate_verification_keys
+            option.restriction.alternate_verification_keys = [__get_alt_key(key) if isinstance(key, str) else key for key in alt_keys]
+
     return client.update(resource_group_name, account_name,
                          content_key_policy_name, parameters.options, parameters.description)
 
@@ -176,20 +193,20 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         _token_claims = []
 
         if symmetric:
-            primary_verification_key = _symmetric_token_key_factory(bytearray(token_key, 'utf-8'))
+            primary_verification_key = _symmetric_token_key_factory(token_key)
         elif rsa:
-            primary_verification_key = _rsa_token_key_factory(_read(token_key, 'r'))
+            primary_verification_key = _rsa_token_key_factory(token_key)
         elif x509:
-            primary_verification_key = _x509_token_key_factory(_read(token_key, 'r'))
+            primary_verification_key = _x509_token_key_factory(token_key)
 
         for key in _coalesce_lst(alt_symmetric_token_keys):
-            alternative_keys.append(_symmetric_token_key_factory(bytearray(key, 'utf-8')))
+            alternative_keys.append(_symmetric_token_key_factory(key))
 
         for key in _coalesce_lst(alt_rsa_token_keys):
-            alternative_keys.append(_rsa_token_key_factory(_read(key, 'r')))
+            alternative_keys.append(_rsa_token_key_factory(key))
 
         for key in _coalesce_lst(alt_x509_certificate_token_keys):
-            alternative_keys.append(_x509_token_key_factory(_read(key, 'r')))
+            alternative_keys.append(_x509_token_key_factory(key))
 
         if token_claims is not None:
             for key in token_claims:
@@ -226,13 +243,15 @@ def _count_truthy(values):
     return len([value for value in values if value])
 
 
-def _symmetric_token_key_factory(symmetric_token_key):
-    return ContentKeyPolicySymmetricTokenKey(key_value=symmetric_token_key)
+def _symmetric_token_key_factory(input_symmetric):
+    key = bytearray(input_symmetric, 'utf-8')
+    return ContentKeyPolicySymmetricTokenKey(key_value=key)
 
 
-def _rsa_token_key_factory(rsa_content):
+def _rsa_token_key_factory(input_rsa):
+    content = _read(input_rsa, 'r')
     rsa_key = serialization.load_pem_public_key(
-        rsa_content.encode('ascii'),
+        content.encode('ascii'),
         backend=default_backend()
     )
 
@@ -243,7 +262,8 @@ def _rsa_token_key_factory(rsa_content):
         exponent=bytearray(_int2bytes(exp)), modulus=bytearray(_int2bytes(mod)))
 
 
-def _x509_token_key_factory(content):
+def _x509_token_key_factory(input_x509):
+    content = _read(input_x509, 'r')
     return ContentKeyPolicyX509CertificateTokenKey(
         raw_body=bytearray(content, 'ascii'))
 
