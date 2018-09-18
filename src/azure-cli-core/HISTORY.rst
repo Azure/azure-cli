@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.47
+++++++
+* Introduces generic behavior to handle "Bad Request" errors.
 
 2.0.47
 ++++++
@@ -11,7 +14,6 @@ Release History
 ++++++
 * Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
   file if public key file is missing. (#4725, #6780)
-* CLI now has generic behavior to handle "Bad Request" errors.
 
 2.0.45
 ++++++

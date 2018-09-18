@@ -211,7 +211,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(err_msg) == mock_logger_error.call_args)
+        self.assertEqual(mock.call(err_msg), mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -229,7 +229,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(mock_cloud_error.args[0]) == mock_logger_error.call_args)
+        self.assertEqual(mock.call(mock_cloud_error.args[0]), mock_logger_error.call_args)
         self.assertEqual(ex_result, mock_cloud_error.args[1])
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -241,19 +241,19 @@ class TestHandleException(unittest.TestCase):
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
-        expected_message = "{} - {}".format(err_code, err_msg)
+        expected_call = mock.call("%s%s", "{} - ".format(err_code), err_msg)
 
         # call handle_exception
         ex_result = handle_exception(mock_http_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(expected_message) == mock_logger_error.call_args)
+        self.assertEqual(expected_call, mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
-    def test_handle_exception_httpoperationerror_atypical_response_content(self, mock_logger_error):
-        # 1. test error in response, but has str value.
+    def test_handle_exception_httpoperationerror_error_key_has_string_value(self, mock_logger_error):
+        # test error in response, but has str value.
 
         # create test HttpOperationError Exception
         err_msg = "BadRequest"
@@ -268,10 +268,12 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(expected_message) == mock_logger_error.call_args)
+        self.assertEqual(mock.call(expected_message), mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
 
-        # 2. test error not in response
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_no_error_key(self, mock_logger_error):
+        # test error not in response
 
         # create test HttpOperationError Exception
         err_msg = "BadRequest"
@@ -279,17 +281,17 @@ class TestHandleException(unittest.TestCase):
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
-        expected_message = "{}".format(err_msg)
-
         # call handle_exception
         ex_result = handle_exception(mock_http_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(mock_http_error) == mock_logger_error.call_args)
+        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
 
-        # 3. test no response text
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_no_response_text(self, mock_logger_error):
+        # test no response text
 
         # create test HttpOperationError Exception
         response_text = ""
@@ -301,7 +303,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertTrue(mock.call(mock_http_error) == mock_logger_error.call_args)
+        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
 
     @staticmethod

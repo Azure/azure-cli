@@ -38,7 +38,7 @@ def handle_exception(ex):
             if isinstance(error, dict):
                 code = "{} - ".format(error.get('code', 'Unknown Code'))
                 message = error.get('message', ex)
-                logger.error("{}{}".format(code, message))
+                logger.error("%s%s", code, message)
             else:
                 logger.error(error)
 
