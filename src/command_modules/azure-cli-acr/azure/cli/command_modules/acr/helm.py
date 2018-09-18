@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-from os.path import isdir
+from os.path import isdir, basename
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -113,7 +113,7 @@ def acr_helm_push(cmd,
     if isdir(chart_package):
         raise CLIError("Please run 'helm package {}' to generate a chart package first.".format(chart_package))
 
-    if not re.match(VALID_NAME, chart_package):
+    if not re.match(VALID_NAME, basename(chart_package)):
         raise CLIError("Invalid helm package name '{}'. Is it a '*.tgz' or '*.tgz.prov' file?".format(chart_package))
 
     login_server, username, password = get_access_credentials(
