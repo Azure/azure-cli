@@ -4,7 +4,8 @@ Release History
 ===============
 2.2.3
 ++++++
-* support shared image gallery through `az sig`
+* support shared image gallery through `az sig`.
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
 
 2.2.2
 ++++++
