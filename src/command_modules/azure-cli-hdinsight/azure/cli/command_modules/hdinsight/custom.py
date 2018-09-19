@@ -13,31 +13,31 @@ logger = get_logger(__name__)
 
 def create_cluster(cmd, client, cluster_name, resource_group_name, location=None, tags=None, no_wait=False,
                    cluster_version='default', cluster_type='hadoop', cluster_tier=None, cluster_configurations=None, component_version=None,
-                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
-                   workernode_count=3, workernode_data_disk_groups=None,
+                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None, workernode_count=3,
+                   workernode_data_disks_per_node=None, workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
                    http_username=None, http_password=None, ssh_username=None, ssh_password=None, ssh_public_key=None,
-                   storage_account=None, storage_account_key=None, storage_default_container=None, additional_storage_accounts=None,
-                   virtual_network=None, subnet_name=None, security_profile=None):
-    from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, Tier, \
+                   storage_account=None, storage_account_key=None, storage_default_container=None, storage_default_filesystem=None,
+                   virtual_network=None, subnet_name=None):
+    from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, VirtualNetworkProfile, DataDisksGroups
 
     # Update optional parameters with defaults
-    additional_storage_accounts = additional_storage_accounts or []
+    additional_storage_accounts = []  # TODO: Add support for additional storage accounts
     location = location or _get_rg_location(cmd.cli_ctx, resource_group_name)
 
-    # Format dictionary and free-form arguments
+    # Format dictionary/free-form arguments
     if cluster_configurations:
         import json
         try:
             cluster_configurations = json.loads(cluster_configurations)
-        except Exception as ex:
+        except ValueError as ex:
             raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(ex.message))
     if component_version:
         import json
         try:
             component_version = json.loads(component_version)
-        except Exception as ex:
+        except ValueError as ex:
             raise CLIError('The component_version argument must be valid JSON. Error: {}'.format(ex.message))
 
     # Validate whether HTTP credentials were provided
@@ -69,25 +69,40 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
     if not (ssh_password or ssh_public_key):
         raise CLIError('An SSH password or public key is required.')
 
-    # Validate storage info
-    wasb_param_set = {
-        'storage_account': storage_account,
-        'storage_account_key': storage_account_key,
-        'storage_default_container': storage_default_container
-    }
-    _validate_parameter_set('WASB', wasb_param_set)
+    # Validate storage info parameters
+    if _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
+        raise CLIError('If a storage details are specified, the storage account, storage account key, and either the default container or default filesystem must be specified.')
+    if storage_default_container and storage_default_filesystem:
+        raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
-    virtual_network_profile = (virtual_network or subnet_name) and VirtualNetworkProfile(
-                                  id=virtual_network,
-                                  subnet=subnet_name
-                              )
+    # Validate network profile parameters
+    if _all_or_none(virtual_network, subnet_name):
+        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be specified.')
+    virtual_network_profile = virtual_network and VirtualNetworkProfile(
+        id=virtual_network,
+        subnet=subnet_name
+    )
+
+    # Validate data disk parameters
+    if not workernode_data_disks_per_node and workernode_data_disk_storage_account_type:
+        raise CLIError("Cannot define data disk storage account type unless disks per node is defined.")
+    if not workernode_data_disks_per_node and workernode_data_disk_size:
+        raise CLIError("Cannot define data disk size unless disks per node is defined.")
+    workernode_data_disk_groups = [
+        DataDisksGroups(
+            disks_per_node=workernode_data_disks_per_node,
+            storage_account_type=workernode_data_disk_storage_account_type,
+            disk_size_gb=workernode_data_disk_size
+        )
+    ] if workernode_data_disks_per_node else []
+
     os_profile = OsProfile(
-                     linux_operating_system_profile=LinuxOperatingSystemProfile(
-                         username=ssh_username,
-                         password=ssh_password,
-                         ssh_public_key=ssh_public_key
-                     )
-                 )
+        linux_operating_system_profile=LinuxOperatingSystemProfile(
+            username=ssh_username,
+            password=ssh_password,
+            ssh_public_key=ssh_public_key
+        )
+    )
 
     create_params = ClusterCreateParametersExtended(
         location=location,
@@ -145,16 +160,16 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                     ] if edgenode_size else []
                 )
             ),
-            security_profile=security_profile,
             storage_profile=StorageProfile(
                 storageaccounts=[
                     StorageAccount(
                         name=storage_account,
                         key=storage_account_key,
                         container=storage_default_container,
+                        file_system=storage_default_filesystem,
                         is_default=True
                     )
-                ]
+                ] if storage_account else []
                 + [
                     StorageAccount(
                         name=s.storage_account,
@@ -175,15 +190,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
     return client.create(resource_group_name, cluster_name, create_params)
 
 
-def _validate_parameter_set(param_set_name, param_set):
-    """
-    Validates that if any parameter in the set is provided, all parameters are.
-    :param param_set_name: Name of the parameter set for error message purposes.
-    :param param_set: Dictionary where the key as parameter name and value as parameter value.
-    """
-    if any(param_set.values()) and not all(param_set.values()):
-        raise CLIError('Missing parameters in argument group "{}": {}'
-                       .format(param_set_name, [k for k, v in param_set.items() if not v]))
+def _all_or_none(*params):
+    return all(params) or not any(params)
 
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
