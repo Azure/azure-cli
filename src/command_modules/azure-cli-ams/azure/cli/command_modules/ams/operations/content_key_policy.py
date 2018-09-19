@@ -105,23 +105,41 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
 
 
 def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
-                                     parameters, alt_key_symmetric=False, alt_key_rsa=False, alt_key_x509=False):
-    def __get_alt_key(key):
-        if alt_key_symmetric:
+                                     parameters, alt_key_symmetric=False, alt_key_rsa=False, alt_key_x509=False,
+                                     symmetric=False, rsa=False, x509=False):
+    def __get_key(key):
+        if alt_key_symmetric or symmetric:
             return _symmetric_token_key_factory(key)
-        if alt_key_rsa:
+        if alt_key_rsa or rsa:
             return _rsa_token_key_factory(key)
-        if alt_key_x509:
+        if alt_key_x509 or x509:
             return _x509_token_key_factory(key)
-        raise CLIError('You must use one flag for an alternative token key.')
+        raise CLIError('You must use one flag for an alternate token key.')
 
-    if _count_truthy([alt_key_symmetric, alt_key_rsa, alt_key_x509]) > 1:
-        raise CLIError('You must use exactly one flag for an alternative token key.')
+    truthy_alts = _count_truthy([alt_key_symmetric, alt_key_rsa, alt_key_x509])
+    truthy_keys = _count_truthy([symmetric, rsa, x509])
 
-    for option in parameters.options:
-        if isinstance(option.restriction, ContentKeyPolicyTokenRestriction):
-            alt_keys = option.restriction.alternate_verification_keys
-            option.restriction.alternate_verification_keys = [__get_alt_key(key) if isinstance(key, str) else key for key in alt_keys]
+    if truthy_alts > 1:
+        raise CLIError('You must use exactly one flag for an alternate token key.')
+
+    if truthy_keys > 1:
+        raise CLIError('You must use exactly one flag for a token key.')
+
+    if truthy_alts == 1 and truthy_keys == 1:
+        raise CLIError('You must either update a token key or an alternate key')
+
+    if truthy_keys == 1:
+        for option in parameters.options:
+            if isinstance(option.restriction, ContentKeyPolicyTokenRestriction):
+                if isinstance(option.restriction.primary_verification_key, str):
+                    key = option.restriction.primary_verification_key
+                    option.restriction.primary_verification_key = __get_key(key)
+
+    if truthy_alts == 1:
+        for option in parameters.options:
+            if isinstance(option.restriction, ContentKeyPolicyTokenRestriction):
+                alt_keys = option.restriction.alternate_verification_keys
+                option.restriction.alternate_verification_keys = [__get_key(key) if isinstance(key, str) else key for key in alt_keys]
 
     return client.update(resource_group_name, account_name,
                          content_key_policy_name, parameters.options, parameters.description)
@@ -186,7 +204,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     if valid_token_restriction:
         if _count_truthy([rsa, x509, symmetric]) != 1:
-            raise CLIError('You should use alternative (alt) token keys if you have more than one token key.')
+            raise CLIError('You should use alternate (alt) token keys if you have more than one token key.')
 
         primary_verification_key = None
         alternative_keys = []
