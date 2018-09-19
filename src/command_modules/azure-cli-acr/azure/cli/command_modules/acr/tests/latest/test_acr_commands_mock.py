@@ -25,7 +25,8 @@ from azure.cli.command_modules.acr.repository import (
 from azure.cli.command_modules.acr.helm import (
     acr_helm_list,
     acr_helm_show,
-    acr_helm_delete
+    acr_helm_delete,
+    acr_helm_push
 )
 from azure.cli.command_modules.acr._docker_utils import (
     get_login_credentials,
@@ -65,7 +66,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': None
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # List repositories using Bearer auth on a managed registry
@@ -81,7 +81,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': None
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
@@ -121,7 +120,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': None
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Show tags using Bearer auth on a managed registry
@@ -140,7 +138,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': 'timedesc'
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
@@ -179,7 +176,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': None
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Show manifests using Bearer auth with detail
@@ -196,7 +192,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': 'timedesc'
             },
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
@@ -229,7 +224,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Show attributes for an image by tag
@@ -242,7 +236,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Show attributes for an image by manifest digest
@@ -255,7 +248,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
@@ -292,7 +284,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete image by tag
@@ -312,7 +303,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete image by manifest digest
@@ -326,7 +316,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Untag image
@@ -339,7 +328,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete tag (deprecating)
@@ -350,7 +338,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete manifest with tag (deprecating)
@@ -367,7 +354,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete manifest with digest (deprecating)
@@ -378,7 +364,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
@@ -488,7 +473,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
@@ -524,7 +508,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Show one version of a chart
@@ -535,7 +518,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
@@ -559,7 +541,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
 
         # Delete one version of a chart
@@ -570,5 +551,59 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params=None,
             json=None,
-            data=None,
             verify=mock.ANY)
+
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    def test_file_open_and_read(self, mock_open_method):
+        # assert on the number of times open().write was called.
+        self.assertEqual(mock_open_method().write.call_count,
+                        0)
+
+    @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_helm_push(self, mock_requests_get, mock_get_access_credentials):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        mock_requests_get.return_value = response
+
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+
+        # Push a chart
+        with mock.patch('builtins.open') as mock_open:
+            mock_open.return_value = mock.MagicMock()
+            acr_helm_push(cmd, 'testregistry', './charts/mychart1-0.2.1.tgz', repository='testrepository')
+            mock_requests_get.assert_called_with(
+                method='put',
+                url='https://testregistry.azurecr.io/helm/v1/testrepository/_blobs/mychart1-0.2.1.tgz',
+                headers=get_authorization_header(EMPTY_GUID, 'password'),
+                params=None,
+                data=mock_open.return_value.__enter__.return_value,
+                verify=mock.ANY)
+
+        # Push a prov file
+        with mock.patch('builtins.open') as mock_open:
+            mock_open.return_value = mock.MagicMock()
+            acr_helm_push(cmd, 'testregistry', 'mychart1-0.2.1.tgz.prov', repository='testrepository')
+            mock_requests_get.assert_called_with(
+                method='put',
+                url='https://testregistry.azurecr.io/helm/v1/testrepository/_blobs/mychart1-0.2.1.tgz.prov',
+                headers=get_authorization_header(EMPTY_GUID, 'password'),
+                params=None,
+                data=mock_open.return_value.__enter__.return_value,
+                verify=mock.ANY)
+
+        # Push a chart
+        with mock.patch('builtins.open') as mock_open:
+            mock_open.return_value = mock.MagicMock()
+            acr_helm_push(cmd, 'testregistry', './charts/mychart1-0.2.1.tgz', repository='testrepository', force=True)
+            mock_requests_get.assert_called_with(
+                method='patch',
+                url='https://testregistry.azurecr.io/helm/v1/testrepository/_blobs/mychart1-0.2.1.tgz',
+                headers=get_authorization_header(EMPTY_GUID, 'password'),
+                params=None,
+                data=mock_open.return_value.__enter__.return_value,
+                verify=mock.ANY)

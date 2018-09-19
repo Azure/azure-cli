@@ -127,15 +127,13 @@ def acr_helm_push(cmd,
         permission='*')
 
     try:
-        with open(chart_package, 'rb') as input_file:
-            return request_data_from_registry(
-                http_method='patch' if force else 'put',
-                login_server=login_server,
-                path=_get_blobs_path(repository, chart_name),
-                username=username,
-                password=password,
-                data_payload=input_file,
-                retry_times=1)[0]
+        return request_data_from_registry(
+            http_method='patch' if force else 'put',
+            login_server=login_server,
+            path=_get_blobs_path(repository, chart_name),
+            username=username,
+            password=password,
+            file_payload=chart_package)[0]
     except OSError as e:
         raise CLIError(e)
 
