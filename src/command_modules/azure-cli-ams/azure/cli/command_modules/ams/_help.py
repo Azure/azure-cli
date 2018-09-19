@@ -204,6 +204,9 @@ helps['ams content-key-policy update'] = """
         - name: Update an existing content-key-policy, set a new description and edit its first option setting a new issuer and audience.
           text: >
             az ams content-key-policy update -n contentKeyPolicyName -a amsAccount --description newDescription --set options[0].restriction.issuer=newIssuer --set options[0].restriction.audience=newAudience
+        - name: Add an alternate verification key to a token restriction of an existing content key policy.
+          text: >
+            az ams content-key-policy update -n contentKeyPolicyName -a amsAccount --add options[0].restriction.alternateVerificationKeys "alternateSymmetricKey" --alt-key-symmetric
 """
 
 helps['ams content-key-policy list'] = """
