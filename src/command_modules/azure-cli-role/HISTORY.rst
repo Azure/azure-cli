@@ -4,7 +4,8 @@ Release History
 ===============
 2.1.6
 ++++++
-* create-for-rbac: ensure home page is always "https"
+* role: ensure role definition create & update commands accept multiple permission configurations
+* create-for-rbac: ensure home page uri is always "https"
 
 2.1.5
 ++++++
