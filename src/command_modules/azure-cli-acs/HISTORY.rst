@@ -6,6 +6,7 @@ Release History
 2.3.4
 +++++
 * install-connector: Updates the install-connector command to set the AKS Master FQDN
+* bugfix: Fall back to 'scp' when Parimiko fails.
 
 2.3.3
 +++++

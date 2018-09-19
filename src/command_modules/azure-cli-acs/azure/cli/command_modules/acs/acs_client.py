@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import socket
+import subprocess
 import threading
 from time import sleep
 from os.path import expanduser, join, isfile
@@ -76,6 +77,7 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
         scp.close()
     except paramiko.ssh_exception.SSHException:
         subprocess.call(["scp", "{}@{}:{}".format(user, host, src), dest])
+
 
 class ACSClient(object):
     def __init__(self, client=None):
