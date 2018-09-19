@@ -154,7 +154,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('rsa',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
-                   help='Use an RSA certificate as a token key.')
+                   help='Use an RSA public key as a token key.')
         c.argument('x509',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
@@ -166,7 +166,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alt_key_rsa',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
-                   help='Use an RSA certificate as an alternate token key.')
+                   help='Use an RSA public key as an alternate token key.')
         c.argument('alt_key_x509',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
@@ -175,7 +175,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('policy_option_id', help='The content key policy option identifier.')
         c.argument('issuer', arg_group='Token Restriction', help='The token issuer.')
         c.argument('audience', arg_group='Token Restriction', help='The audience for the token.')
-        c.argument('token_key', arg_group='Token Restriction', help='Either a string (for symmetric key) or a filepath to a certificate (x509, rsa). Must be used with a Token Restriction Key Type flag.')
+        c.argument('token_key', arg_group='Token Restriction', help='Either a string (for symmetric key) or a filepath to a certificate (x509) or public key (rsa). Must be used with a Token Restriction Key Type flag.')
         c.argument('alt_symmetric_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate symmetric token keys.')
         c.argument('alt_rsa_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate rsa token keys.')
         c.argument('alt_x509_certificate_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate x509 certificate token keys.')
@@ -189,7 +189,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The filepath to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
         c.argument('rental_duration', arg_group='FairPlay Configuration', help='The rental duration. Must be greater than or equal to 0.')
-        c.argument('play_ready_configuration', arg_group='PlayReady Configuration', help='JSON PlayReady license template. Use @{file} to load from a file.')
+        c.argument('play_ready_template', arg_group='PlayReady Configuration', help='JSON PlayReady license template. Use @{file} to load from a file.')
 
     with self.argument_context('ams content-key-policy show') as c:
         c.argument('with_secrets',

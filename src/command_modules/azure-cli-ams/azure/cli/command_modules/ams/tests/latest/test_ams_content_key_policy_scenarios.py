@@ -36,7 +36,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
         with self.assertRaises(CLIError):
-            self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-configuration "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}')
+            self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-template "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -84,7 +84,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-configuration "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}', checks=[
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-template "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
             self.check('options[0].configuration.odatatype', '{configurationODataType}'),
             self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
