@@ -207,7 +207,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
             raise CLIError('You should use alternate (alt) token keys if you have more than one token key.')
 
         primary_verification_key = None
-        alternative_keys = []
+        alternate_keys = []
         _token_claims = []
 
         if symmetric:
@@ -218,13 +218,13 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
             primary_verification_key = _x509_token_key_factory(token_key)
 
         for key in _coalesce_lst(alt_symmetric_token_keys):
-            alternative_keys.append(_symmetric_token_key_factory(key))
+            alternate_keys.append(_symmetric_token_key_factory(key))
 
         for key in _coalesce_lst(alt_rsa_token_keys):
-            alternative_keys.append(_rsa_token_key_factory(key))
+            alternate_keys.append(_rsa_token_key_factory(key))
 
         for key in _coalesce_lst(alt_x509_certificate_token_keys):
-            alternative_keys.append(_x509_token_key_factory(key))
+            alternate_keys.append(_x509_token_key_factory(key))
 
         if token_claims is not None:
             for key in token_claims:
@@ -234,7 +234,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
         restriction = ContentKeyPolicyTokenRestriction(
             issuer=issuer, audience=audience, primary_verification_key=primary_verification_key,
-            alternate_verification_keys=alternative_keys, required_claims=_token_claims,
+            alternate_verification_keys=alternate_keys, required_claims=_token_claims,
             restriction_token_type=restriction_token_type,
             open_id_connect_discovery_document=open_id_connect_discovery_document)
 
