@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.6
+++++++
+* create-for-rbac: ensure home page is always "https"
 
 2.1.5
 ++++++
