@@ -187,7 +187,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
@@ -216,7 +216,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # list
         self.cmd('aks list -g {resource_group}', checks=[
-            self.check('[0].type', '{resource_type}'),
             StringContainCheck(aks_name),
             StringContainCheck(resource_group)
         ])
@@ -226,7 +225,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
