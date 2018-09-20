@@ -553,12 +553,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch("builtins.open", new_callable=mock.mock_open)
-    def test_file_open_and_read(self, mock_open_method):
-        # assert on the number of times open().write was called.
-        self.assertEqual(mock_open_method().write.call_count,
-                        0)
-
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_helm_push(self, mock_requests_get, mock_get_access_credentials):
@@ -596,7 +590,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                 data=mock_open.return_value.__enter__.return_value,
                 verify=mock.ANY)
 
-        # Push a chart
+        # Force push a chart
         with mock.patch('builtins.open') as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_helm_push(cmd, 'testregistry', './charts/mychart1-0.2.1.tgz', repository='testrepository', force=True)
