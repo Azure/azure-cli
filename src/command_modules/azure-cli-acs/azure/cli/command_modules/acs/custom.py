@@ -2023,7 +2023,7 @@ def _ensure_aks_service_principal(cli_ctx,
             if not client_secret:
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
             if not service_principal:
@@ -2059,7 +2059,7 @@ def _ensure_service_principal(cli_ctx,
             if not client_secret:
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
             if not service_principal:
