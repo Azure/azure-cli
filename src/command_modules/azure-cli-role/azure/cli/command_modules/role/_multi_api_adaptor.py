@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.profiles import ResourceType, get_sdk
-
+from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 
 class MultiAPIAdaptor(object):
     # We will bridge all the code difference here caused by SDK breaking changes
     def __init__(self, cli_ctx):
-        self.old_api = cli_ctx.cloud.profile != 'latest'
+        self.old_api = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION,
+                                             max_api='2015-07-01')
         self.cli_ctx = cli_ctx
 
     def _init_individual_permission(self, cfg):
