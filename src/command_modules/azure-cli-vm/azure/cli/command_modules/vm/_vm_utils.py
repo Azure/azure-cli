@@ -128,7 +128,7 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None):
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
@@ -139,32 +139,31 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     from msrestazure.tools import is_valid_resource_id
     info = {}
     attach_data_disks = attach_data_disks or []
-    image_data_disks = image_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     info['os'] = {}
 
-    for i in range(len(image_data_disks) + len(data_disk_sizes_gb) + len(attach_data_disks)):
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb) + len(attach_data_disks)):
         info[i] = {
             'lun': i
         }
 
     # fill in storage sku for managed data disks
-    for i in range(len(image_data_disks) + len(data_disk_sizes_gb)):
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
         info[i]['managedDisk'] = {'storageAccountType': storage_sku}
 
     # fill in createOption
-    for i in range(len(image_data_disks)):
+    for i in range(image_data_disks_num):
         info[i]['createOption'] = 'fromImage'
-    base = len(image_data_disks)
+    base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
         info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
-    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'attach'
 
     # fill in attached data disks details
-    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    base = image_data_disks_num + len(data_disk_sizes_gb)
     for i, d in enumerate(attach_data_disks):
         if is_valid_resource_id(d):
             info[base + i]['managedDisk'] = {'id': d}

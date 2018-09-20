@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.3.5
++++++
+* bugfix: Fall back to 'scp' when Parimiko fails.
+* `az aks create` no longer requires --aad-tenant-id
+
+2.3.4
++++++
+* install-connector: Updates the install-connector command to set the AKS Master FQDN
+
 2.3.3
 +++++
 * bugfix: creating role assignment for vnet-subnet-id when not specifying service principal and skip-role-assignemnt

@@ -176,8 +176,7 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                         "Microsoft.Authorization/*/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"],
+                        "Microsoft.Insights/alertRules/*"],
             "DataActions": [
                 "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
             ],
@@ -195,17 +194,26 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+        # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
             time.sleep(180)
-            self.cmd('role definition list -n {role}',
-                     checks=self.check('[0].roleName', '{role}'))
+            role = self.cmd('role definition list -n {role}',
+                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+            # verify we can update
+            role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
+            with open(temp_file, 'w') as f:
+                json.dump(role[0], f)
+            self.cmd('role definition update --role-definition {template}',
+                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
+            time.sleep(30)
+
             self.cmd('role definition delete -n {role}',
                      checks=self.is_empty())
-            time.sleep(60)
+            time.sleep(120)
             self.cmd('role definition list -n {role}',
                      checks=self.is_empty())
 
@@ -221,7 +229,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@msazurestack.onmicrosoft.com',
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
                 'nsg': 'nsg1'
             })
 

@@ -2,6 +2,15 @@
 
 Release History
 ===============
+2.2.4
+++++++
+* `az sig`: fix update commands, support --no-wait on managing image versions
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+
+2.2.3
+++++++
+* support shared image gallery through `az sig`.
+
 2.2.2
 ++++++
 * `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency

@@ -30,7 +30,8 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
+                                   DeletedAppRestoreRequest)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -167,6 +168,76 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
+def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
+                              share_name, access_key, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    if custom_id in azure_storage_accounts.properties:
+        raise CLIError("Site already configured with an Azure storage account with the id '{}'. "
+                       "Use 'az webapp config storage-account update' to update an existing "
+                       "Azure storage account configuration.".format(custom_id))
+
+    azure_storage_accounts.properties[custom_id] = AzureStorageInfoValue(type=storage_type, account_name=account_name,
+                                                                         share_name=share_name, access_key=access_key,
+                                                                         mount_path=mount_path)
+    client = web_client_factory(cmd.cli_ctx)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
+def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
+                                 share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False):
+    from azure.mgmt.web.models import AzureStorageInfoValue
+
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+
+    existing_account_config = azure_storage_accounts.properties.pop(custom_id, None)
+
+    if not existing_account_config:
+        raise CLIError("No Azure storage account configuration found with the id '{}'. "
+                       "Use 'az webapp config storage-account add' to add a new "
+                       "Azure storage account configuration.".format(custom_id))
+
+    new_account_config = AzureStorageInfoValue(
+        type=storage_type or existing_account_config.type,
+        account_name=account_name or existing_account_config.account_name,
+        share_name=share_name or existing_account_config.share_name,
+        access_key=access_key or existing_account_config.access_key,
+        mount_path=mount_path or existing_account_config.mount_path
+    )
+
+    azure_storage_accounts.properties[custom_id] = new_account_config
+
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    if slot_setting:
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
+        if custom_id not in slot_cfg_names.azure_storage_config_names:
+            slot_cfg_names.azure_storage_config_names.append(custom_id)
+            client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
@@ -277,6 +348,16 @@ def list_webapp(cmd, resource_group_name=None):
     return [r for r in result if 'function' not in r.kind]
 
 
+def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
+    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
+    return sorted(result, key=lambda site: site.deleted_site_id)
+
+
+def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
+    request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
+
+
 def list_function_app(cmd, resource_group_name=None):
     result = _list_app(cmd.cli_ctx, resource_group_name)
     return [r for r in result if 'function' in r.kind]
@@ -290,6 +371,18 @@ def _list_app(cli_ctx, resource_group_name=None):
         result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
+    return result
+
+
+def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
+    client = web_client_factory(cli_ctx)
+    result = list(client.deleted_web_apps.list())
+    if resource_group_name:
+        result = [r for r in result if r.resource_group == resource_group_name]
+    if name:
+        result = [r for r in result if r.deleted_site_name.lower() == name.lower()]
+    if slot:
+        result = [r for r in result if r.slot.lower() == slot.lower()]
     return result
 
 
@@ -430,6 +523,19 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     return result
 
 
+def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                     'list_azure_storage_accounts', slot)
+
+    slot_azure_storage_config_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                                                     .azure_storage_config_names or []
+
+    return [{'name': p,
+             'value': result.properties[p],
+             'slotSetting': p in slot_azure_storage_config_names} for p in result.properties]
+
+
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
@@ -549,6 +655,29 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
                                          app_settings.properties, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+
+
+def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
+    azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                     'list_azure_storage_accounts', slot)
+    client = web_client_factory(cmd.cli_ctx)
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+    is_slot_settings = False
+
+    azure_storage_accounts.properties.pop(custom_id, None)
+    if slot_cfg_names.azure_storage_config_names and custom_id in slot_cfg_names.azure_storage_config_names:
+        slot_cfg_names.azure_storage_config_names.remove(custom_id)
+        is_slot_settings = True
+
+    if is_slot_settings:
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         slot, client)
+
+    return result.properties
 
 
 def _ssl_context():
@@ -1819,7 +1948,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
     import requests
     import time
     num_trials = 1
-    while num_trials < 200:
+    while num_trials < 10:
         time.sleep(15)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
@@ -1829,9 +1958,65 @@ def _check_zip_deployment_status(deployment_status_url, authorization):
             break
         elif res_dict['status'] == 4:
             break
-        logger.warning(res_dict['progress'])
+        logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict['status'] != 4:
         logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
             beforing launching the app""", deployment_status_url)
     return res_dict
+
+
+def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_continuous_web_jobs', slot)
+
+
+def start_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def stop_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.stop_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.stop_continuous_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def remove_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_continuous_web_job(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.delete_continuous_web_job(resource_group_name, name, webjob_name)
+
+
+def list_triggered_webjobs(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+
+
+def run_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.run_triggered_web_job_slot(resource_group_name, name, webjob_name, slot)
+        return client.web_apps.get_triggered_web_job_slot(resource_group_name, name, webjob_name, slot)
+    client.web_apps.run_triggered_web_job(resource_group_name, name, webjob_name)
+    return client.web_apps.get_triggered_web_job(resource_group_name, name, webjob_name)
+
+
+def remove_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name)
+
+
+def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_triggered_web_job_history_slot(resource_group_name, name, webjob_name, slot)
+    return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)

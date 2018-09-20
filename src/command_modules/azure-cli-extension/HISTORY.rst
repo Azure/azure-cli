@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Attempting to add an extension that is already installed will not raise an exception.
+
 0.2.1
 +++++
 * Fix index url failing requests.

@@ -35,16 +35,19 @@ def ex_handler_factory(creating_plan=False):
         import json
         from knack.util import CLIError
         try:
-            detail = json.loads(ex.response.text)['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text)['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with linux worker is not supported in current region. For " +
+                                  "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                                  "azure/app-service-web/app-service-linux-intro")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
             ex = CLIError(detail)
         except Exception:  # pylint: disable=broad-except
             pass
@@ -107,6 +110,12 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_connection_strings')
         g.custom_command('delete', 'delete_connection_strings')
 
+    with self.command_group('webapp config storage-account') as g:
+        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404)
+        g.custom_command('add', 'add_azure_storage_account')
+        g.custom_command('update', 'update_azure_storage_account')
+        g.custom_command('delete', 'delete_azure_storage_accounts')
+
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_hostnames')
@@ -131,6 +140,18 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp webjob continuous') as g:
+        g.custom_command('list', 'list_continuous_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('start', 'start_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('stop', 'stop_continuous_webjob', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp webjob triggered') as g:
+        g.custom_command('list', 'list_triggered_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('run', 'run_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('log', 'get_history_triggered_webjob', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
@@ -168,6 +189,10 @@ def load_command_table(self, _):
     with self.command_group('webapp auth') as g:
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
+
+    with self.command_group('webapp deleted') as g:
+        g.custom_command('list', 'list_deleted_webapp')
+        g.custom_command('restore', 'restore_deleted_webapp')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
