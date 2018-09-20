@@ -142,6 +142,7 @@ for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
     set ALL_MODULES=!ALL_MODULES! %%i
 )
 echo All modules: %ALL_MODULES%
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
