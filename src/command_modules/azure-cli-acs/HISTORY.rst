@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.5
++++++
+* `az aks create` no longer requires --aad-tenant-id
+
 2.3.4
 +++++
 * install-connector: Updates the install-connector command to set the AKS Master FQDN
