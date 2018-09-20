@@ -9,7 +9,7 @@ from azure.cli.core.commands.parameters import get_enum_type, name_type, get_res
 
 
 def load_arguments(self, _):
-    from ._completers import get_storage_account_completion_list
+    from ._completers import storage_account_completion_list
     from knack.arguments import CLIArgumentType
     node_size_type = CLIArgumentType(help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
@@ -40,7 +40,7 @@ def load_arguments(self, _):
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)
         c.argument('workernode_count', help='The number of worker nodes.')
-        c.argument('storage_account', arg_group='Storage', completer=get_storage_account_completion_list,
+        c.argument('storage_account', arg_group='Storage', completer=storage_account_completion_list,
                    help='The storage account, e.g. <name>.blob.core.windows.net.')
         c.argument('storage_account_key', arg_group='Storage',
                    help='The storage account key.')

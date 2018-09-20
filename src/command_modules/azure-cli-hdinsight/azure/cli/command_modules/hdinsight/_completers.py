@@ -8,7 +8,7 @@ from azure.cli.core.decorators import Completer
 
 
 @Completer
-def get_storage_account_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
+def storage_account_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     resource_type = 'Microsoft.Storage/storageaccounts'
     rg = getattr(namespace, 'resource_group_name', None)
     if rg:
