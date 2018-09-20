@@ -234,7 +234,7 @@ def _run_format_group(item):
 
 def _helm_format_group(item):
     description = _get_value(item, 'description')
-    if len(description) > 57: # Similar to helm client
+    if len(description) > 57:  # Similar to helm client
         description = description[:57] + '...'
 
     return OrderedDict([
