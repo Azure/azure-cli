@@ -2178,17 +2178,15 @@ def _validate_aci_location(norm_location):
 
 
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
-               location=None,
-               node_vm_size="Standard_D4s_v3",
-               node_count=3,
-               fqdn='',
-               aad_client_app_id=None,
-               aad_client_app_secret=None,
-               aad_tenant_id=None,
-               tags=None,
-               no_wait=False):
-
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+                     location=None,
+                     node_vm_size="Standard_D4s_v3",
+                     node_count=3,
+                     fqdn='',
+                     aad_client_app_id=None,
+                     aad_client_app_secret=None,
+                     aad_tenant_id=None,
+                     tags=None,
+                     no_wait=False):
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
@@ -2225,18 +2223,18 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     if any([aad_client_app_id, aad_client_app_secret, aad_tenant_id]):
         identity_providers.append(
             OpenShiftManagedClusterIdentityProviders(
-                name='Azure AD', 
+                name='Azure AD',
                 provider=OpenShiftManagedClusterServiceAADIdentityProvider(
-                    kind='AADIdentityProvider', 
-                    client_id=aad_client_app_id, 
-                    secret=aad_client_app_secret, 
+                    kind='AADIdentityProvider',
+                    client_id=aad_client_app_id,
+                    secret=aad_client_app_secret,
                     tenant_id=aad_tenant_id
                 )
             )
         )
-    auth_profile=OpenShiftManagedClusterAuthProfile(identity_providers=identity_providers)
+    auth_profile = OpenShiftManagedClusterAuthProfile(identity_providers=identity_providers)
 
-    default_router_profile=OpenShiftRouterProfile(name='default')
+    default_router_profile = OpenShiftRouterProfile(name='default')
 
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
@@ -2247,7 +2245,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         master_pool_profile=agent_master_pool_profile,
         router_profiles=[default_router_profile])
 
-    # We don't creating the AADIdentity for the user right now but maybe later so keeping this 
+    # We don't creating the AADIdentity for the user right now but maybe later so keeping this
     # Keeping this Due to SPN replication latency, we do a few retries here
     max_retry = 30
     retry_exception = Exception(None)
@@ -2264,9 +2262,11 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 raise ex
     raise retry_exception
 
+
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return [mc][0]
+
 
 def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
     instance = client.get(resource_group_name, name)

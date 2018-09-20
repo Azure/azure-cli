@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Add ManagedApplicationPreparer
+
 0.2.1
 +++++
 * Minor fixes

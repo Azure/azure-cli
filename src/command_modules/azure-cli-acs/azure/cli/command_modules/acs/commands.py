@@ -91,4 +91,3 @@ def load_command_table(self, _):
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
         g.custom_show_command('show', 'openshift_show')
         g.wait_command('wait')
-

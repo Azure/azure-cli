@@ -245,6 +245,7 @@ def load_arguments(self, _):
         c.argument('aad_client_app_secret')
         c.argument('aad_tenant_id')
 
+
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':

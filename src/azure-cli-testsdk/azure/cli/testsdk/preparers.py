@@ -173,6 +173,7 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_sp_name:
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
+
 # Managed Application preparer
 
 # pylint: disable=too-many-instance-attributes
@@ -190,7 +191,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
         self.parameter_secret = parameter_secret
         self.parameter_tenant = parameter_tenant
         self.result = {}
-        self.app_name=app_name
+        self.app_name = app_name
         self.dev_setting_app_name = os.environ.get(dev_setting_app_name, None)
         self.dev_setting_app_secret = os.environ.get(dev_setting_app_secret, None)
         self.dev_setting_app_tenant = os.environ.get(dev_setting_app_tenant, None)
@@ -198,8 +199,9 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_app_name:
-            template = 'az ad app create --display-name {} --key-type Password --password {} --identifier-uris http://microsoft.onmicrosoft.com/{}'
-            self.result = execute(self.cli_ctx, template.format(name,name,name)).get_output_in_json()
+            template = 'az ad app create --display-name {} --key-type Password --password {} --identifier-uris ' \
+                       'http://microsoft.onmicrosoft.com/{}'
+            self.result = execute(self.cli_ctx, template.format(name, name, name)).get_output_in_json()
             self.test_class_instance.kwargs[self.key] = name
             # The slice is the easiest way for know to return the Teanant from the same command
             return {self.parameter_name: self.result['appId'], self.parameter_secret: name,
