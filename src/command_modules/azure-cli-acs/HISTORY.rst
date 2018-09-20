@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.6
++++++
+* Add Managed OpenShift commands
+
 2.3.5
 +++++
 * bugfix: Fall back to 'scp' when Parimiko fails.
