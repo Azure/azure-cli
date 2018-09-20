@@ -1364,6 +1364,7 @@ def _trim_nodepoolname(nodepool_name):
         return "nodepool1"
     return nodepool_name[:12]
 
+
 def _validate_ssh_key(no_ssh_key, ssh_key_value):
     if not no_ssh_key:
         try:
@@ -1372,6 +1373,7 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
         except (TypeError, ValueError):
             shortened_key = truncate_text(ssh_key_value)
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
+
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
