@@ -10,6 +10,7 @@ except ImportError:
 import json
 import unittest
 import mock
+import sys
 
 from azure.mgmt.containerregistry.v2018_09_01.models import Registry, Sku
 
@@ -566,8 +567,10 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
+        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+
         # Push a chart
-        with mock.patch('builtins.open') as mock_open:
+        with mock.patch(builtins_open) as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_helm_push(cmd, 'testregistry', './charts/mychart1-0.2.1.tgz', repository='testrepository')
             mock_requests_get.assert_called_with(
@@ -579,7 +582,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                 verify=mock.ANY)
 
         # Push a prov file
-        with mock.patch('builtins.open') as mock_open:
+        with mock.patch(builtins_open) as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_helm_push(cmd, 'testregistry', 'mychart1-0.2.1.tgz.prov', repository='testrepository')
             mock_requests_get.assert_called_with(
@@ -591,7 +594,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                 verify=mock.ANY)
 
         # Force push a chart
-        with mock.patch('builtins.open') as mock_open:
+        with mock.patch(builtins_open) as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_helm_push(cmd, 'testregistry', './charts/mychart1-0.2.1.tgz', repository='testrepository', force=True)
             mock_requests_get.assert_called_with(
