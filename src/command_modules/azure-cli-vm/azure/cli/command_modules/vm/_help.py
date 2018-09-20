@@ -1468,16 +1468,14 @@ helps['sig image-version'] = """
 helps['sig image-version create'] = """
     type: command
     short-summary: creat a new image version
+    long-summary : this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
     examples:
         - name: add a new image version
           text: |
             az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
-        - name: add a new image version and don't wait on it
+        - name: add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
           text: |
             az sig image-version create --no-wait -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image imageInTheSameResourceGroup
-        - name: you can wait later for it is done
-          text: |
-            az sig image-version wait --updated -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0
 """
 
 helps['sig image-version update'] = """
@@ -1487,4 +1485,13 @@ helps['sig image-version update'] = """
         - name: replicate to a new region
           text: |
             az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+"""
+
+helps['sig image-version wait'] = """
+    type: command
+    short-summary: wait for image version related operation
+    examples:
+        - name: wait for an image version gets updated
+          text: |
+            az sig image-version wait --updated -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0
 """
