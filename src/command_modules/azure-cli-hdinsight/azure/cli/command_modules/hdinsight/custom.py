@@ -58,6 +58,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         cluster_configurations = dict()
     if 'gateway' not in cluster_configurations:
         cluster_configurations['gateway'] = dict()
+    if 'restAuthCredential.isEnabled' not in cluster_configurations['gateway']:
+        cluster_configurations['gateway']['restAuthCredential.isEnabled'] = 'true'
     if not is_username_in_cluster_config:
         cluster_configurations['gateway']['restAuthCredential.username'] = http_username
     if not is_password_in_cluster_config:
@@ -70,13 +72,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         raise CLIError('An SSH password or public key is required.')
 
     # Validate storage info parameters
-    if _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
-        raise CLIError('If a storage details are specified, the storage account, storage account key, and either the default container or default filesystem must be specified.')
+    if not _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
+        raise CLIError('If storage details are specified, the storage account, storage account key, and either the default container or default filesystem must be specified.')
     if storage_default_container and storage_default_filesystem:
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Validate network profile parameters
-    if _all_or_none(virtual_network, subnet_name):
+    if not _all_or_none(virtual_network, subnet_name):
         raise CLIError('Either both the virtual network and subnet should be specified, or neither should be specified.')
     virtual_network_profile = virtual_network and VirtualNetworkProfile(
         id=virtual_network,
@@ -88,13 +90,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         raise CLIError("Cannot define data disk storage account type unless disks per node is defined.")
     if not workernode_data_disks_per_node and workernode_data_disk_size:
         raise CLIError("Cannot define data disk size unless disks per node is defined.")
-    workernode_data_disk_groups = [
+    workernode_data_disk_groups = workernode_data_disks_per_node and [
         DataDisksGroups(
             disks_per_node=workernode_data_disks_per_node,
             storage_account_type=workernode_data_disk_storage_account_type,
             disk_size_gb=workernode_data_disk_size
         )
-    ] if workernode_data_disks_per_node else []
+    ]
 
     os_profile = OsProfile(
         linux_operating_system_profile=LinuxOperatingSystemProfile(

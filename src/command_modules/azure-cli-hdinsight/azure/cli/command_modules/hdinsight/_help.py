@@ -9,5 +9,22 @@ from knack.help_files import helps
 
 helps['hdinsight'] = """
     type: group
+    short-summary: Manage HDInsight resources.
+"""
+
+helps['hdinsight cluster'] = """
+    type: group
     short-summary: Manage HDInsight clusters.
+"""
+
+helps['hdinsight cluster create'] = """
+    type: command
+    short-summary: Creates a new cluster.
+    examples:
+        - name: Create a cluster with an existing storage account.
+          text: |-
+              az hdinsight cluster create -n MyCluster -g MyResourceGroup \\
+              -u admin -p <password> -U sshuser -P <password> \\
+              --storage-account myStorageAccount.blob.core.windows.net \\
+              --storage-account-key <key> --storage-default-container default
 """
