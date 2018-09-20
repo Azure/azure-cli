@@ -526,3 +526,73 @@ helps['aks wait'] = """
           text: |-
             az aks wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
 """
+
+# OpenShift command help
+
+helps['openshift'] = """
+     type: group
+     short-summary: Manage Azure OpenShift Services.
+"""
+
+helps['openshift create'] = """
+    type: command
+    short-summary: Create a new managed OpenShift cluster.
+    parameters:
+        - name: --node-vm-size -s
+          type: string
+          short-summary: Size of Virtual Machines to create as OpenShift nodes.
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the OpenShift node pool.
+        - name: --fqdn
+          type: string
+          short-summary: FQDN for OpenShift API server loadbalancer internal hostname. For example
+                         myopenshiftcluster.eastus.cloudapp.azure.com
+        - name: --aad-client-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory client application of type "Native".
+        - name: --aad-client-app-secret
+          type: string
+          short-summary: The secret of an Azure Active Directory client application.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: The ID of an Azure Active Directory tenant.
+
+    examples:
+        - name: Create an OpenShift cluster.
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
+                --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID>
+        - name: Create an OpenShift cluster with 5 compute nodes.
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
+                --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID> --node-count 5
+"""
+
+helps['openshift scale'] = """
+    type: command
+    short-summary: Scale the compute pool in a managed OpenShift cluster.
+    parameters:
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the OpenShift compute pool.
+"""
+
+helps['openshift show'] = """
+    type: command
+    short-summary: Show the details for a managed OpenShift cluster.
+"""
+
+helps['openshift delete'] = """
+    type: command
+    short-summary: Delete a managed OpenShift cluster.
+"""
+
+helps['openshift wait'] = """
+    type: command
+    short-summary: Wait for a managed OpenShift cluster to reach a desired state.
+    long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
+                  wait for it to complete.
+    examples:
+        - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
+          text: |-
+            az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
+"""

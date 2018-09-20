@@ -173,6 +173,45 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_sp_name:
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
+# Managed Application preparer
+
+# pylint: disable=too-many-instance-attributes
+class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest', parameter_name='aad_client_app_id',
+                 parameter_secret='aad_client_app_secret', app_name='app_name',
+                 parameter_tenant='aad_tenant_id',
+                 dev_setting_app_name='AZURE_CLI_TEST_DEV_APP_NAME',
+                 dev_setting_app_secret='AZURE_CLI_TEST_DEV_APP_SECRET',
+                 dev_setting_app_tenant='AZURE_CLI_TEST_DEV_APP_TENANT',
+                 key='app'):
+        super(ManagedApplicationPreparer, self).__init__(name_prefix, 24)
+        self.cli_ctx = get_dummy_cli()
+        self.parameter_name = parameter_name
+        self.parameter_secret = parameter_secret
+        self.parameter_tenant = parameter_tenant
+        self.result = {}
+        self.app_name=app_name
+        self.dev_setting_app_name = os.environ.get(dev_setting_app_name, None)
+        self.dev_setting_app_secret = os.environ.get(dev_setting_app_secret, None)
+        self.dev_setting_app_tenant = os.environ.get(dev_setting_app_tenant, None)
+        self.key = key
+
+    def create_resource(self, name, **kwargs):
+        if not self.dev_setting_app_name:
+            template = 'az ad app create --display-name {} --key-type Password --password {} --identifier-uris http://microsoft.onmicrosoft.com/{}'
+            self.result = execute(self.cli_ctx, template.format(name,name,name)).get_output_in_json()
+            self.test_class_instance.kwargs[self.key] = name
+            # The slice is the easiest way for know to return the Teanant from the same command
+            return {self.parameter_name: self.result['appId'], self.parameter_secret: name,
+                    self.parameter_tenant: self.result['odata.metadata'][26:62]}
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: self.dev_setting_sp_name,
+                self.parameter_secret: self.dev_setting_app_secret,
+                self.parameter_tenant: self.dev_setting_app_tenant}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.dev_setting_app_name:
+            execute(self.cli_ctx, 'az ad app delete --id {}'.format(self.result['appId']))
 
 # Utility
 

@@ -56,6 +56,17 @@ from azure.mgmt.containerservice.models import ManagedCluster
 from azure.mgmt.containerservice.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.models import OSType
+from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProviders
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterServiceAADIdentityProvider
+from azure.mgmt.containerservice.models import OpenShiftManagedCluster
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterMasterPoolProfile
+from azure.mgmt.containerservice.models import OpenShiftContainerServiceVMSize
+from azure.mgmt.containerservice.models import OpenShiftRouterProfile
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
+
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
@@ -2153,3 +2164,106 @@ def _validate_aci_location(norm_location):
     if norm_location not in aci_locations:
         raise CLIError('Azure Container Instance is not available at location "{}".'.format(norm_location) +
                        ' The available locations are "{}"'.format(','.join(aci_locations)))
+
+
+def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
+               location=None,
+               node_vm_size="Standard_D4s_v3",
+               node_count=3,
+               fqdn='',
+               aad_client_app_id=None,
+               aad_client_app_secret=None,
+               aad_tenant_id=None,
+               tags=None,
+               no_wait=False):
+
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
+
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = rg_location
+
+    agent_pool_profiles = []
+    agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
+        name='compute',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(node_count),
+        vm_size=node_vm_size,
+        os_type="Linux",
+        role=OpenShiftAgentPoolProfileRole.compute
+    )
+
+    agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
+        name='infra',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(2),
+        vm_size="Standard_D4s_v3",
+        os_type="Linux",
+        role=OpenShiftAgentPoolProfileRole.infra
+    )
+
+    agent_pool_profiles.append(agent_node_pool_profile)
+    agent_pool_profiles.append(agent_infra_pool_profile)
+
+    agent_master_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
+        name='master',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(3),
+        vm_size="Standard_D2s_v3",
+        os_type="Linux"
+    )
+    identity_providers = []
+
+    if any([aad_client_app_id, aad_client_app_secret, aad_tenant_id]):
+        identity_providers.append(
+            OpenShiftManagedClusterIdentityProviders(
+                name='Azure AD', 
+                provider=OpenShiftManagedClusterServiceAADIdentityProvider(
+                    kind='AADIdentityProvider', 
+                    client_id=aad_client_app_id, 
+                    secret=aad_client_app_secret, 
+                    tenant_id=aad_tenant_id
+                )
+            )
+        )
+    auth_profile=OpenShiftManagedClusterAuthProfile(identity_providers=identity_providers)
+
+    default_router_profile=OpenShiftRouterProfile(name='default')
+
+    osamc = OpenShiftManagedCluster(
+        location=location, tags=tags,
+        open_shift_version="v3.10",
+        fqdn=fqdn,
+        auth_profile=auth_profile,
+        agent_pool_profiles=agent_pool_profiles,
+        master_pool_profile=agent_master_pool_profile,
+        router_profiles=[default_router_profile])
+
+    # We don't creating the AADIdentity for the user right now but maybe later so keeping this 
+    # Keeping this Due to SPN replication latency, we do a few retries here
+    max_retry = 30
+    retry_exception = Exception(None)
+    for _ in range(0, max_retry):
+        try:
+            # long_running_operation_timeout=300
+            return sdk_no_wait(no_wait, client.create_or_update,
+                               resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+        except CloudError as ex:
+            retry_exception = ex
+            if 'not found in Active Directory tenant' in ex.message:
+                time.sleep(3)
+            else:
+                raise ex
+    raise retry_exception
+
+def openshift_show(cmd, client, resource_group_name, name):
+    mc = client.get(resource_group_name, name)
+    return [mc][0]
+
+def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    # TODO: change this approach when we support multiple agent pools.
+    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+
+    # null out the AAD profile and add manually the masterAP name because otherwise validation complains
+    instance.master_pool_profile.name = "master"
+    instance.auth_profile = None
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)

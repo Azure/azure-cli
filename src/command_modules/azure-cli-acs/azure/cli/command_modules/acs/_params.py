@@ -228,6 +228,22 @@ def load_arguments(self, _):
     with self.argument_context('aks remove-dev-spaces') as c:
         c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
+    # OpenShift command argument configuration
+    with self.argument_context('openshift') as c:
+        c.argument('resource_name', name_type, help='Name of the managed OpenShift cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
+        c.argument('name', name_type, help='Name of the managed OpenShift cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
+        c.argument('node_count', options_list=['--node-count', '-c'], type=int, default=4)
+        c.argument('tags', tags_type)
+
+    with self.argument_context('openshift create') as c:
+        c.argument('name', validator=validate_linux_host_name)
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
+        c.argument('fqdn')
+        c.argument('aad_client_app_id')
+        c.argument('aad_client_app_secret')
+        c.argument('aad_tenant_id')
 
 def _get_default_install_location(exe_name):
     system = platform.system()
