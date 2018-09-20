@@ -13,7 +13,7 @@ def load_arguments(self, _):
     from knack.arguments import CLIArgumentType
     node_size_type = CLIArgumentType(help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
-    with self.argument_context('hdinsight cluster') as c:
+    with self.argument_context('hdinsight') as c:
         c.argument('cluster_name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
                    help='The name of the cluster.')
         c.argument('cluster_version', options_list=['--version', '-v'],

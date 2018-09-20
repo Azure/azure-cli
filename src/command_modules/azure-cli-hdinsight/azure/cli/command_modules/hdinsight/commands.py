@@ -15,7 +15,7 @@ def load_command_table(self, _):
         client_factory=cf_hdinsight_clusters
     )
 
-    with self.command_group('hdinsight cluster', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
+    with self.command_group('hdinsight', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
         g.custom_command('create', 'create_cluster', supports_no_wait=True)
         g.command('resize', 'resize', supports_no_wait=True)
         g.show_command('show', 'get')

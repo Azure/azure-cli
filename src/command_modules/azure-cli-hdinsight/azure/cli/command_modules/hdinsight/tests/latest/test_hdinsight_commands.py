@@ -60,7 +60,7 @@ class HDInsightClusterTests(ScenarioTest):
             'ssh-password': 'Password1!'
         })
 
-        create_cluster_format = 'az hdinsight cluster create -n {name} -g {rg} -l {loc} ' \
+        create_cluster_format = 'az hdinsight create -n {name} -g {rg} -l {loc} ' \
                                 '-u {http-user} -p {http-password} -U {ssh-user} -P {ssh-password} ' \
                                 + ' '.join(additional_create_arguments)
         self.cmd(create_cluster_format, checks=[
