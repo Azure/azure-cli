@@ -1016,7 +1016,7 @@ def create_service_principal_for_rbac(
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
-                                         homepage='http://' + app_display_name,
+                                         homepage='https://' + app_display_name,
                                          identifier_uris=[name],
                                          available_to_other_tenants=False,
                                          password=password,
