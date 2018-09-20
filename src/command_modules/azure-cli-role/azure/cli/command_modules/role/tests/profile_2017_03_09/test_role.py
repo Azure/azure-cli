@@ -177,12 +177,6 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                         "Microsoft.Resources/subscriptions/resourceGroups/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
                         "Microsoft.Insights/alertRules/*"],
-            "DataActions": [
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
-            ],
-            "NotDataActions": [
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-            ],
             "AssignableScopes": ["/subscriptions/{}".format(subscription_id)]
         }
         _, temp_file = tempfile.mkstemp()
@@ -197,25 +191,20 @@ class RoleCreateScenarioTest(RoleScenarioTest):
         # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
-                self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
-                self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
+                self.check('properties.permissions[0].actions[0]', 'Microsoft.Compute/*/read')
             ])
             time.sleep(180)
-            role = self.cmd('role definition list -n {role}',
-                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+            self.cmd('role definition list -n {role}', checks=self.check('[0].properties.roleName', '{role}'))
             # verify we can update
-            role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
+            template['Actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
-                json.dump(role[0], f)
-            self.cmd('role definition update --role-definition {template}',
-                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
+                json.dump(template, f)
+            self.cmd('role definition update --role-definition {template}', checks=self.check('properties.permissions[0].actions[-1]', 'Microsoft.Support/*'))
             time.sleep(30)
 
-            self.cmd('role definition delete -n {role}',
-                     checks=self.is_empty())
+            self.cmd('role definition delete -n {role}', checks=self.is_empty())
             time.sleep(120)
-            self.cmd('role definition list -n {role}',
-                     checks=self.is_empty())
+            self.cmd('role definition list -n {role}', checks=self.is_empty())
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
@@ -247,7 +236,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
                     self.check("length([])", 1),
-                    self.check("[0].principalName", self.kwargs["upn"])
+                    self.check("[0].properties.principalName", self.kwargs["upn"])
                 ])
 
                 # test couple of more general filters
@@ -279,41 +268,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
-    @ResourceGroupPreparer(name_prefix='cli_role_audit')
-    @AllowLargeResponse()
-    def test_role_assignment_audits(self, resource_group):
-        if self.run_under_service_principal():
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            user = self.create_random_name('testuser', 15)
-            self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
-            })
-
-            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-
-            try:
-                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
-
-                if self.is_live or self.in_recording:
-                    now = datetime.datetime.utcnow()
-                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
-                                                             now.minute, now.second)
-                    time.sleep(60)
-                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
-                else:
-                    # NOTE: get the time range from the recording file and use them below for playback
-                    start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
-                    result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
-                                      start_time, end_time)).get_output_in_json()
-
-                self.assertTrue([x for x in result if (resource_group in x['scope'] and
-                                                       x['principalName'] == self.kwargs['upn'])])
-            finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
-
 
 class RoleAssignmentListScenarioTest(ScenarioTest):
 
@@ -322,12 +276,12 @@ class RoleAssignmentListScenarioTest(ScenarioTest):
     def test_assignments_for_co_admins(self, resource_group):
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
+        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
         self.cmd('role assignment list -g {}'.format(resource_group), checks=[
             self.check("length([])", 0)
         ])
         result = self.cmd('role assignment list -g {} --include-classic-administrator'.format(resource_group)).get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
+        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
 if __name__ == '__main__':
