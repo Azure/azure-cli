@@ -11,6 +11,12 @@ def cf_resource_groups(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).resource_groups
 
 
+def cf_storage(cli_ctx, *_, **__):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.storage import StorageManagementClient
+    return get_mgmt_service_client(cli_ctx, StorageManagementClient)
+
+
 def cf_hdinsight(cli_ctx, *_, **__):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.hdinsight import HDInsightManagementClient
