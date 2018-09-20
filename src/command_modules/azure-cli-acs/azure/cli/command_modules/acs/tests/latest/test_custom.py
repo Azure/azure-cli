@@ -160,15 +160,36 @@ class AcsCustomCommandTest(unittest.TestCase):
         addition.close()
         obj1 = {
             'clusters': [
-                'cluster1'
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster1'
+                }
             ],
             'contexts': [
-                'context1'
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'context1'
+                }
             ],
+            'current-context': 'context1',
+            'kind': 'Config',
+            'preferences': {},
             'users': [
-                'user1'
-            ],
-            'current-context': 'cluster1',
+                {
+                    'name': 'user1',
+                    'user': {
+                        'client-certificate-data': 'clientcertificatedata1',
+                        'client-key-data': 'clientkeydata1',
+                        'token': 'token1'
+                    }
+                }
+            ]
         }
         with open(existing.name, 'w+') as stream:
             yaml.dump(obj1, stream)
@@ -176,15 +197,36 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         obj2 = {
             'clusters': [
-                'cluster2'
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster2'
+                }
             ],
             'contexts': [
-                'context2'
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'context2'
+                }
             ],
+            'current-context': 'aztest',
+            'kind': 'Config',
+            'preferences': {},
             'users': [
-                'user2'
-            ],
-            'current-context': 'cluster2',
+                {
+                    'name': 'user2',
+                    'user': {
+                        'client-certificate-data': 'clientcertificatedata1',
+                        'client-key-data': 'clientkeydata1',
+                        'token': 'token1'
+                    }
+                }
+            ]
         }
 
         with open(addition.name, 'w+') as stream:
@@ -196,11 +238,11 @@ class AcsCustomCommandTest(unittest.TestCase):
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
         self.assertEqual(len(merged['clusters']), 2)
-        self.assertEqual(merged['clusters'], ['cluster1', 'cluster2'])
+        self.assertEqual(merged['clusters'], [obj1['clusters'][0], obj2['clusters'][0]])
         self.assertEqual(len(merged['contexts']), 2)
-        self.assertEqual(merged['contexts'], ['context1', 'context2'])
+        self.assertEqual(merged['contexts'], [obj1['contexts'][0], obj2['contexts'][0]])
         self.assertEqual(len(merged['users']), 2)
-        self.assertEqual(merged['users'], ['user1', 'user2'])
+        self.assertEqual(merged['users'], [obj1['users'][0], obj2['users'][0]])
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     def test_merge_admin_credentials(self):
@@ -250,7 +292,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             'clusters': [
                 {
                     'cluster': {
-                        'certificate-authority-data': 'certificateauthoritydata2',
+                        'certificate-authority-data': 'certificateauthoritydata1',
                         'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
                     },
                     'name': 'aztest'
@@ -287,11 +329,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
-        self.assertEqual(len(merged['clusters']), 2)
+        self.assertEqual(len(merged['clusters']), 1)
         self.assertEqual([c['cluster'] for c in merged['clusters']],
                          [{'certificate-authority-data': 'certificateauthoritydata1',
-                           'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'},
-                          {'certificate-authority-data': 'certificateauthoritydata2',
                            'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'}])
         self.assertEqual(len(merged['contexts']), 2)
         self.assertEqual(merged['contexts'],
@@ -312,12 +352,27 @@ class AcsCustomCommandTest(unittest.TestCase):
         obj1 = {
             'clusters': None,
             'contexts': [
-                'context1'
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'context1'
+                }
             ],
+            'current-context': 'context1',
+            'kind': 'Config',
+            'preferences': {},
             'users': [
-                'user1'
-            ],
-            'current-context': 'cluster1',
+                {
+                    'name': 'user1',
+                    'user': {
+                        'client-certificate-data': 'clientcertificatedata1',
+                        'client-key-data': 'clientkeydata1',
+                        'token': 'token1'
+                    }
+                }
+            ]
         }
         with open(existing.name, 'w+') as stream:
             yaml.dump(obj1, stream)
@@ -325,13 +380,27 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         obj2 = {
             'clusters': [
-                'cluster2'
+                {
+                    'cluster': {
+                        'certificate-authority-data': 'certificateauthoritydata1',
+                        'server': 'https://aztest-aztest-abc123-abcd1234.hcp.eastus.azmk8s.io:443'
+                    },
+                    'name': 'cluster2'
+                }
             ],
             'contexts': [
-                'context2'
+                {
+                    'context': {
+                        'cluster': 'aztest',
+                        'user': 'clusterUser_aztest_aztest'
+                    },
+                    'name': 'context2'
+                }
             ],
-            'users': None,
-            'current-context': 'cluster2',
+            'current-context': 'context2',
+            'kind': 'Config',
+            'preferences': {},
+            'users': None
         }
 
         with open(addition.name, 'w+') as stream:
@@ -343,11 +412,11 @@ class AcsCustomCommandTest(unittest.TestCase):
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
         self.assertEqual(len(merged['clusters']), 1)
-        self.assertEqual(merged['clusters'], ['cluster2'])
+        self.assertEqual(merged['clusters'], [obj2['clusters'][0]])
         self.assertEqual(len(merged['contexts']), 2)
-        self.assertEqual(merged['contexts'], ['context1', 'context2'])
+        self.assertEqual(merged['contexts'], [obj1['contexts'][0], obj2['contexts'][0]])
         self.assertEqual(len(merged['users']), 1)
-        self.assertEqual(merged['users'], ['user1'])
+        self.assertEqual(merged['users'], [obj1['users'][0]])
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     def test_merge_credentials_already_present(self):

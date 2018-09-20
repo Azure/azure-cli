@@ -7,6 +7,7 @@ Release History
 +++++
 * bugfix: Fall back to 'scp' when Parimiko fails.
 * `az aks create` no longer requires --aad-tenant-id
+* bugfix: improve merging of kubernetes credentials when duplicate entries are present.
 
 2.3.4
 +++++

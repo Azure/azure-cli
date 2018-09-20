@@ -997,10 +997,10 @@ def _handle_merge(existing, addition, key, replace):
         for i in addition[key]:
             for j in existing[key]:
                 if i['name'] == j['name']:
-                    if replace:
+                    if replace or i == j:
                         existing[key].remove(j)
                     else:
-                        raise CLIError('An object named {} already exists in {}'.format(i['name'], key))
+                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
             existing[key].append(i)
 
 
