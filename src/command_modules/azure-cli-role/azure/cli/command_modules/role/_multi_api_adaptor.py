@@ -5,6 +5,7 @@
 
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 
+
 class MultiAPIAdaptor(object):
     # We will bridge all the code difference here caused by SDK breaking changes
     def __init__(self, cli_ctx):
