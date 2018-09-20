@@ -11,7 +11,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import (get_role_definition_name_completion_list, get_cdn_provider_completion_list,
                                                        get_default_streaming_policies_completion_list, get_token_type_completion_list,
-                                                       get_fairplay_rentalandlease_completion_list)
+                                                       get_fairplay_rentalandlease_completion_list, get_token_completion_list)
 
 from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEventInputProtocol, LiveEventEncodingType,
                                      StreamOptionsFlag)
@@ -147,18 +147,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    action='store_true',
                    arg_group='Basic Policy Options',
                    help='Use open restriction. License or key will be delivered on every request.')
-        c.argument('symmetric',
-                   action='store_true',
-                   arg_group='Token Restriction Key Type',
-                   help='Use a symmetric token key.')
-        c.argument('rsa',
-                   action='store_true',
-                   arg_group='Token Restriction Key Type',
-                   help='Use an RSA public key as a token key.')
-        c.argument('x509',
-                   action='store_true',
-                   arg_group='Token Restriction Key Type',
-                   help='Use a certificate in PKCS12 format (X509Certificate2 in .NET) as a token key.')
         c.argument('alt_key_symmetric',
                    action='store_true',
                    arg_group='Token Restriction Key Type',
@@ -176,6 +164,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('issuer', arg_group='Token Restriction', help='The token issuer.')
         c.argument('audience', arg_group='Token Restriction', help='The audience for the token.')
         c.argument('token_key', arg_group='Token Restriction', help='Either a string (for symmetric key) or a filepath to a certificate (x509) or public key (rsa). Must be used with a Token Restriction Key Type flag.')
+        c.argument('token_type', arg_group='Token Restriction', help='The type of the token key to be used for the primary verification key. Allowed values: {}'.format(", ".join(get_token_completion_list())))
         c.argument('alt_symmetric_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate symmetric token keys.')
         c.argument('alt_rsa_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate rsa token keys.')
         c.argument('alt_x509_certificate_token_keys', nargs='+', arg_group='Token Restriction', help='Space-separated list of alternate x509 certificate token keys.')

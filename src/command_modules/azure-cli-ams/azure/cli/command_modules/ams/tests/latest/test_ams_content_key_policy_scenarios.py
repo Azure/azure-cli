@@ -133,6 +133,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'issuer': 'Issuer',
             'audience': 'Audience',
             'tokenKey': 'a1b2c3d4e5f6g7h8i9j0',
+            'tokenType': 'Symmetric',
             'restrictionTokenType': 'Jwt',
             'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyTokenRestriction',
             'openIDConnectDiscoveryDocument': 'adocument',
@@ -146,7 +147,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'issuer': 'AnotherIssuer'
         })
 
-        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --symmetric --restriction-token-type {restrictionTokenType} --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --token-type {tokenType} --restriction-token-type {restrictionTokenType} --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
             self.check('options[0].configuration.odatatype', '{configurationODataType}'),
             self.check('options[0].restriction.issuer', '{issuer}'),
@@ -220,6 +221,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'issuer': 'Issuer',
             'audience': 'Audience',
             'tokenKey': self._get_test_data_file('rsaToken.pem'),
+            'tokenType': 'RSA',
             'restrictionTokenType': 'Jwt',
             'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyTokenRestriction',
             'openIDConnectDiscoveryDocument': 'adocument',
@@ -228,7 +230,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --rsa --restriction-token-type {restrictionTokenType} --widevine-template "{jsonFile}" --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --token-type {tokenType} --restriction-token-type {restrictionTokenType} --widevine-template "{jsonFile}" --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
             self.check('options[0].configuration.odatatype', '{configurationODataType}'),
             self.check('options[0].restriction.issuer', '{issuer}'),
@@ -345,12 +347,13 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'restrictionTokenType': 'Jwt',
             'issuer': 'issuer',
             'audience': 'audience',
-            'tokenKey': self._get_test_data_file('x509Token.pem')
+            'tokenKey': self._get_test_data_file('x509Token.pem'),
+            'tokenType': 'X509'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams content-key-policy create -a {amsname} -g {rg} -n {contentKeyPolicyName} --clear-key-configuration --policy-option-name {policyOptionName} --token-key "{tokenKey}" --x509 --issuer {issuer} --audience {audience} --restriction-token-type {restrictionTokenType}')
+        self.cmd('az ams content-key-policy create -a {amsname} -g {rg} -n {contentKeyPolicyName} --clear-key-configuration --policy-option-name {policyOptionName} --token-key "{tokenKey}" --token-type {tokenType} --issuer {issuer} --audience {audience} --restriction-token-type {restrictionTokenType}')
 
         self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg}', checks=[
             self.check('options[0].restriction.primaryVerificationKey.rawBody', None)

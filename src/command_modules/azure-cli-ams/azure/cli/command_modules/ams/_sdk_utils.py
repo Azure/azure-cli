@@ -41,3 +41,7 @@ def get_token_types():
 
 def get_rentalandlease_types():
     return ['Undefined', 'PersistentUnlimited', 'PersistentLimited']
+
+
+def get_tokens():
+    return ['Symmetric', 'RSA', 'X509']
