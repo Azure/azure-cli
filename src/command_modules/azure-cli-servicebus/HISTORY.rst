@@ -5,7 +5,7 @@ Release History
 
 0.2.4
 +++++
-* Implemented Exception hanlder
+* az servicebus now properly handles error responses
 
 0.2.3
 +++++
