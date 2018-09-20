@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.3.5
+2.3.6
 +++++
 * `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
+
+2.3.5
++++++
+* `az aks create` no longer requires --aad-tenant-id
 
 2.3.4
 +++++

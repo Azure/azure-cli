@@ -352,7 +352,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete', 'delete')
-        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
+        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'upload_image')
         g.generic_update_command('update')

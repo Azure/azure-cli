@@ -1364,6 +1364,14 @@ def _trim_nodepoolname(nodepool_name):
         return "nodepool1"
     return nodepool_name[:12]
 
+def _validate_ssh_key(no_ssh_key, ssh_key_value):
+    if not no_ssh_key:
+        try:
+            if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
+                raise ValueError()
+        except (TypeError, ValueError):
+            shortened_key = truncate_text(ssh_key_value)
+            raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -1395,13 +1403,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
-    if not no_ssh_key:
-        try:
-            if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
-                raise ValueError()
-        except (TypeError, ValueError):
-            shortened_key = truncate_text(ssh_key_value)
-            raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
+    _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
@@ -1470,6 +1472,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
+        if aad_tenant_id is None:
+            profile = Profile(cli_ctx=cmd.cli_ctx)
+            _, _, aad_tenant_id = profile.get_login_credentials()
+
         aad_profile = ManagedClusterAADProfile(
             client_app_id=aad_client_app_id,
             server_app_id=aad_server_app_id,

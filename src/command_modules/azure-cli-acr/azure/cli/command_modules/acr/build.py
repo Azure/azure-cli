@@ -96,6 +96,7 @@ def acr_build(cmd,
     else:
         if image_names:
             is_push_enabled = True
+            _warn_unsupported_image_name(image_names)
         else:
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
@@ -123,6 +124,13 @@ def acr_build(cmd,
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+
+
+def _warn_unsupported_image_name(image_names):
+    for img in image_names:
+        if ".Build.ID" in img:
+            logger.warning(".Build.ID is no longer supported as a valid substitution, use .Run.ID instead.")
+            break
 
 
 def _check_local_docker_file(docker_file_path):

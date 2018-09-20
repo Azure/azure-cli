@@ -15,12 +15,12 @@ helps['monitor'] = """
 
 helps['monitor alert'] = """
     type: group
-    short-summary: Manage metric-based alert rules.
+    short-summary: Manage classic metric-based alert rules.
 """
 
 helps['monitor alert create'] = """
     type: command
-    short-summary: Create a metric-based alert rule.
+    short-summary: Create a classic metric-based alert rule.
     parameters:
         - name: --action -a
           short-summary: Add an action to fire when the alert is triggered.
@@ -57,7 +57,7 @@ helps['monitor alert create'] = """
 
 helps['monitor alert update'] = """
     type: command
-    short-summary: Update a metric-based alert rule.
+    short-summary: Update a classic metric-based alert rule.
     parameters:
         - name: --description
           short-summary: Description of the rule.
@@ -201,7 +201,7 @@ helps['monitor metrics alert'] = """
 
 helps['monitor metrics alert create'] = """
     type: command
-    short-summary: Create an alert rule.
+    short-summary: Create a metric-based alert rule.
     parameters:
         - name: --action -a
           short-summary: Add an action group and optional webhook properties to fire when the alert is triggered.
@@ -243,7 +243,7 @@ helps['monitor metrics alert create'] = """
 
 helps['monitor metrics alert update'] = """
     type: command
-    short-summary: Update an alert rule.
+    short-summary: Update a metric-based alert rule.
     parameters:
         - name: --add-condition
           short-summary: Add a condition which triggers the rule.
@@ -271,17 +271,17 @@ helps['monitor metrics alert update'] = """
 
 helps['monitor metrics alert delete'] = """
     type: command
-    short-summary: Delete an alert rule.
+    short-summary: Delete a metrics-based alert rule.
     """
 
 helps['monitor metrics alert list'] = """
     type: command
-    short-summary: List alert rules.
+    short-summary: List metric-based alert rules.
     """
 
 helps['monitor metrics alert show'] = """
     type: command
-    short-summary: Show an alert rule.
+    short-summary: Show a metrics-based alert rule.
     """
 
 helps['monitor log-profiles'] = """

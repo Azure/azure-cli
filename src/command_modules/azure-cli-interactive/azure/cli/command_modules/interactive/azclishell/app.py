@@ -665,7 +665,7 @@ class AzInteractiveShell(object):
                     self.output.flush()
                 else:
                     formatter = self.cli_ctx.output.get_formatter(self.cli_ctx.invocation.data['output'])
-                    self.cli_ctx.output.out(result, formatter=formatter)
+                    self.cli_ctx.output.out(result, formatter=formatter, out_file=sys.stdout)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
