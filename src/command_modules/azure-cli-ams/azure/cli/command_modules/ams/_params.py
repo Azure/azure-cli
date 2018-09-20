@@ -141,11 +141,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('description', help='The content key policy description.')
         c.argument('clear_key_configuration',
                    action='store_true',
-                   arg_group='Basic Policy Options',
+                   arg_group='Clear Key Configuration (AES Encryption)',
                    help='Use Clear Key configuration, a.k.a AES encryption. It\'s intended for non-DRM keys.')
         c.argument('open_restriction',
                    action='store_true',
-                   arg_group='Basic Policy Options',
+                   arg_group='Open Restriction',
                    help='Use open restriction. License or key will be delivered on every request.')
         c.argument('alt_key_symmetric',
                    action='store_true',
