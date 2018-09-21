@@ -123,7 +123,7 @@ class FreshTable(object):
         # dump into the cache file
         command_file = shell_ctx.config.get_help_files()
         with open(os.path.join(get_cache_dir(shell_ctx), command_file), 'w') as help_file:
-            json.dump(cmd_table_data, help_file)
+            json.dump(cmd_table_data, help_file, default=lambda x: x.target or '', skipkeys=True)
 
 
 def load_help_files(data):

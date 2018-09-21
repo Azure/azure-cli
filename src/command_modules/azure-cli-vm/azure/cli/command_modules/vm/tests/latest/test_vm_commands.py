@@ -103,13 +103,15 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'centralus',
             'vm': 'vm-with-public-ip',
-            'allocation': 'dynamic'
+            'allocation': 'dynamic',
+            'zone': 2
         })
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password')
+        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
+                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone}')
         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vm}'),
@@ -137,7 +139,10 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
-            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string')
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
         ])
 
 
@@ -2711,7 +2716,7 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
@@ -2720,7 +2725,8 @@ class VMGalleryImage(ScenarioTest):
             'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
-            'image_id': 'TBD'
+            'image_id': 'TBD',
+            'location2': 'westus2'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
@@ -2732,7 +2738,7 @@ class VMGalleryImage(ScenarioTest):
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
         self.kwargs['image_id'] = res['id']
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
 
@@ -2746,7 +2752,10 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_id}', checks=self.check('powerState', 'VM running'))
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --add publishingProfile.targetRegions name={location2}',
+                 checks=self.check('name', self.kwargs['version']))
+
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency

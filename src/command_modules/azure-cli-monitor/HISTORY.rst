@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.4
++++++
+* Minor fixes
+
 0.2.3
 +++++
 * Added `monitor metrics alert` commands for near-realtime metric alerts.

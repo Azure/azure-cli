@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.3.30
+++++++
+* Fix error found on windows where commands fail to run properly.
+
+0.3.29
+++++++
+* Fix command loading problem in interactive that was caused by deprecated objects.
+
 0.3.28
 ++++++
 * Minor fixes

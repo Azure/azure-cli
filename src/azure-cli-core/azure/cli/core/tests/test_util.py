@@ -9,11 +9,11 @@ import sys
 import unittest
 import mock
 import tempfile
-from datetime import date, time, datetime
+import json
 
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
-     open_page_in_browser, can_launch_browser)
+     open_page_in_browser, can_launch_browser, handle_exception)
 
 
 class TestUtils(unittest.TestCase):
@@ -182,6 +182,141 @@ class TestBase64ToHex(unittest.TestCase):
 
     def test_b64_to_hex_type(self):
         self.assertIsInstance(b64_to_hex(self.base64), str)
+
+
+class TestHandleException(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_keyboardinterrupt(self, mock_logger_error):
+        # create test KeyboardInterrupt Exception
+        keyboard_interrupt_ex = KeyboardInterrupt("KeyboardInterrupt")
+
+        # call handle_exception
+        ex_result = handle_exception(keyboard_interrupt_ex)
+
+        # test behavior
+        self.assertFalse(mock_logger_error.called)
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_clierror(self, mock_logger_error):
+        from knack.util import CLIError
+
+        # create test CLIError Exception
+        err_msg = "Error Message"
+        cli_error = CLIError(err_msg)
+
+        # call handle_exception
+        ex_result = handle_exception(cli_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(mock.call(err_msg), mock_logger_error.call_args)
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_clouderror(self, mock_logger_error):
+        from msrestazure.azure_exceptions import CloudError
+
+        # create test CloudError Exception
+        err_detail = "There was a Cloud Error."
+        err_msg = "CloudError"
+        mock_cloud_error = mock.MagicMock(spec=CloudError)
+        mock_cloud_error.args = (err_detail, err_msg)
+
+        # call handle_exception
+        ex_result = handle_exception(mock_cloud_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(mock.call(mock_cloud_error.args[0]), mock_logger_error.call_args)
+        self.assertEqual(ex_result, mock_cloud_error.args[1])
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
+        # create test HttpOperationError Exception
+        err_msg = "Bad Request because of some incorrect param"
+        err_code = "BadRequest"
+        err = dict(error=dict(code=err_code, message=err_msg))
+        response_text = json.dumps(err)
+        mock_http_error = self._get_mock_HttpOperationError(response_text)
+
+        expected_call = mock.call("%s%s", "{} - ".format(err_code), err_msg)
+
+        # call handle_exception
+        ex_result = handle_exception(mock_http_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(expected_call, mock_logger_error.call_args)
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_error_key_has_string_value(self, mock_logger_error):
+        # test error in response, but has str value.
+
+        # create test HttpOperationError Exception
+        err_msg = "BadRequest"
+        err = dict(error=err_msg)
+        response_text = json.dumps(err)
+        mock_http_error = self._get_mock_HttpOperationError(response_text)
+
+        expected_message = "{}".format(err_msg)
+
+        # call handle_exception
+        ex_result = handle_exception(mock_http_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(mock.call(expected_message), mock_logger_error.call_args)
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_no_error_key(self, mock_logger_error):
+        # test error not in response
+
+        # create test HttpOperationError Exception
+        err_msg = "BadRequest"
+        err = dict(foo=err_msg)
+        response_text = json.dumps(err)
+        mock_http_error = self._get_mock_HttpOperationError(response_text)
+
+        # call handle_exception
+        ex_result = handle_exception(mock_http_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    def test_handle_exception_httpoperationerror_no_response_text(self, mock_logger_error):
+        # test no response text
+
+        # create test HttpOperationError Exception
+        response_text = ""
+
+        mock_http_error = self._get_mock_HttpOperationError(response_text)
+
+        # call handle_exception
+        ex_result = handle_exception(mock_http_error)
+
+        # test behavior
+        self.assertTrue(mock_logger_error.called)
+        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertEqual(ex_result, 1)
+
+    @staticmethod
+    def _get_mock_HttpOperationError(response_text):
+        from msrest.exceptions import HttpOperationError
+        from requests import Response
+
+        mock_response = mock.MagicMock(spec=Response)
+        mock_response.text = response_text
+        mock_http_error = mock.MagicMock(spec=HttpOperationError)
+        mock_http_error.response = mock_response
+
+        return mock_http_error
 
 
 if __name__ == '__main__':

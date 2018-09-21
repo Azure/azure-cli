@@ -292,20 +292,20 @@ def request_data_from_registry(http_method,
                                password,
                                result_index=None,
                                json_payload=None,
-                               data_payload=None,
+                               file_payload=None,
                                params=None,
                                retry_times=3,
                                retry_interval=5):
     if http_method not in ALLOWED_HTTP_METHOD:
         raise ValueError("Allowed http method: {}".format(ALLOWED_HTTP_METHOD))
 
-    if json_payload and data_payload:
-        raise ValueError("One of json_payload and data_payload can be specified.")
+    if json_payload and file_payload:
+        raise ValueError("One of json_payload and file_payload can be specified.")
 
-    if http_method in ['get', 'delete'] and (json_payload or data_payload):
+    if http_method in ['get', 'delete'] and (json_payload or file_payload):
         raise ValueError("Empty payload is required for http method: {}".format(http_method))
 
-    if http_method in ['patch', 'put'] and not (json_payload or data_payload):
+    if http_method in ['patch', 'put'] and not (json_payload or file_payload):
         raise ValueError("Non-empty payload is required for http method: {}".format(http_method))
 
     url = 'https://{}{}'.format(login_server, path)
@@ -314,15 +314,26 @@ def request_data_from_registry(http_method,
     for i in range(0, retry_times):
         errorMessage = None
         try:
-            response = requests.request(
-                method=http_method,
-                url=url,
-                headers=headers,
-                params=params,
-                json=json_payload,
-                data=data_payload,
-                verify=(not should_disable_connection_verify())
-            )
+            if file_payload:
+                with open(file_payload, 'rb') as data_payload:
+                    response = requests.request(
+                        method=http_method,
+                        url=url,
+                        headers=headers,
+                        params=params,
+                        data=data_payload,
+                        verify=(not should_disable_connection_verify())
+                    )
+            else:
+                response = requests.request(
+                    method=http_method,
+                    url=url,
+                    headers=headers,
+                    params=params,
+                    json=json_payload,
+                    verify=(not should_disable_connection_verify())
+                )
+
             log_registry_response(response)
 
             if response.status_code == 200:
@@ -342,6 +353,8 @@ def request_data_from_registry(http_method,
                 raise CLIError(parse_error_message('Authentication required.', response))
             elif response.status_code == 404:
                 raise CLIError(parse_error_message('The requested data does not exist.', response))
+            elif response.status_code == 409:
+                raise CLIError(parse_error_message('Failed to request data due to a conflict.', response))
             else:
                 raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
         except CLIError:
