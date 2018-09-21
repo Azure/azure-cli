@@ -3493,7 +3493,7 @@ helps['network vnet peering create'] = """
     short-summary: Create a virtual network peering connection.
     long-summary: >
         To successfully peer two virtual networks this command must be called twice with
-        the values for --vnet-name and --remote-vnet-id reversed.
+        the values for --vnet-name and --remote-vnet reversed.
     examples:
         - name: Create a peering connection between two virtual networks.
           text: |
