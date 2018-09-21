@@ -15,7 +15,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                    cluster_version='default', cluster_type='hadoop', cluster_tier=None, cluster_configurations=None, component_version=None,
                    headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None, workernode_count=3,
                    workernode_data_disks_per_node=None, workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
-                   http_username=None, http_password=None, ssh_username=None, ssh_password=None, ssh_public_key=None,
+                   http_username=None, http_password=None, ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                    storage_account=None, storage_account_key=None, storage_default_container=None, storage_default_filesystem=None,
                    virtual_network=None, subnet_name=None):
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -45,7 +45,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
     is_username_in_cluster_config = is_cluster_config_defined and 'restAuthCredential.username' in cluster_configurations['gateway']
     is_password_in_cluster_config = is_cluster_config_defined and 'restAuthCredential.password' in cluster_configurations['gateway']
     if not (http_username or is_username_in_cluster_config):
-        raise CLIError('An HTTP username is required.')
+        http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
     if not (http_password or is_password_in_cluster_config):
         raise CLIError('An HTTP password is required.')
     if http_username and is_username_in_cluster_config:
@@ -66,8 +66,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         cluster_configurations['gateway']['restAuthCredential.password'] = http_password
 
     # Validate whether SSH credentials were provided
-    if not ssh_username:
-        raise CLIError('An SSH username is required.')
     if not (ssh_password or ssh_public_key):
         raise CLIError('An SSH password or public key is required.')
 
