@@ -19,5 +19,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_cluster', supports_no_wait=True)
         g.command('resize', 'resize', supports_no_wait=True)
         g.show_command('show', 'get')
+        g.custom_command('list', 'list_clusters')
         g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)

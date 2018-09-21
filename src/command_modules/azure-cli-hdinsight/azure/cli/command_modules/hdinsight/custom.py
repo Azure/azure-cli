@@ -67,7 +67,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
 
     # Validate whether SSH credentials were provided
     if not (ssh_password or ssh_public_key):
-        raise CLIError('An SSH password or public key is required.')
+        logger.warn("SSH credentials not specified. Using the HTTP password as the SSH password.")
+        ssh_password = http_password
 
     # Validate storage info parameters
     if not _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
@@ -77,7 +78,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
 
     # Validate network profile parameters
     if not _all_or_none(virtual_network, subnet_name):
-        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be specified.')
+        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be.')
+    # Specify virtual network profile only when network arguments are provided
     virtual_network_profile = virtual_network and VirtualNetworkProfile(
         id=virtual_network,
         subnet=subnet_name
@@ -88,6 +90,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         raise CLIError("Cannot define data disk storage account type unless disks per node is defined.")
     if not workernode_data_disks_per_node and workernode_data_disk_size:
         raise CLIError("Cannot define data disk size unless disks per node is defined.")
+    # Specify data disk groups only when disk arguments are provided
     workernode_data_disk_groups = workernode_data_disks_per_node and [
         DataDisksGroups(
             disks_per_node=workernode_data_disks_per_node,
@@ -162,6 +165,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
             ),
             storage_profile=StorageProfile(
                 storageaccounts=[
+                    # Specify storage account details only when storage arguments are provided
                     StorageAccount(
                         name=storage_account,
                         key=storage_account_key,
@@ -188,6 +192,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                            resource_group_name, cluster_name, create_params)
 
     return client.create(resource_group_name, cluster_name, create_params)
+
+
+def list_clusters(cmd, client, resource_group_name=None):
+    clusters_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+
+    return list(clusters_list)
 
 
 def _all_or_none(*params):

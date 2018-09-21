@@ -61,7 +61,7 @@ class HDInsightClusterTests(ScenarioTest):
         })
 
         create_cluster_format = 'az hdinsight create -n {name} -g {rg} -l {loc} ' \
-                                '-u {http-user} -p {http-password} -U {ssh-user} -P {ssh-password} ' \
+                                '-p {http-password} ' \
                                 + ' '.join(additional_create_arguments)
         self.cmd(create_cluster_format, checks=[
             self.check('properties.provisioningState', 'Succeeded'),

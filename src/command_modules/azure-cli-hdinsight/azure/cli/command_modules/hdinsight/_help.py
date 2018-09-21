@@ -19,7 +19,12 @@ helps['hdinsight create'] = """
         - name: Create a cluster with an existing storage account.
           text: |-
               az hdinsight cluster create -n MyCluster -g MyResourceGroup \\
-              -u admin -p <password> -U sshuser -P <password> \\
+              -p <HTTP password> \\
               --storage-account myStorageAccount.blob.core.windows.net \\
               --storage-account-key <key> --storage-default-container default
+"""
+
+helps['hdinsight list'] = """
+    type: command
+    short-summary: Lists clusters in the resource group or subscription.
 """
