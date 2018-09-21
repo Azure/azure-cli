@@ -525,8 +525,8 @@ def build_application_gateway_resource(_, name, location, tags, backend_pool_nam
 
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
-                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation, sku):
+                                 backend_port, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
+                                 private_ip_allocation, sku, instance_count, disable_overprovision):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -549,7 +549,9 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                     },
                     'protocol': 'tcp',
                     'frontendPortRangeStart': '50000',
-                    'frontendPortRangeEnd': '50119',
+                    # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+                    'frontendPortRangeEnd': str(max(50119,
+                                                    49999 + instance_count * (1 if disable_overprovision else 2))),
                     'backendPort': backend_port
                 }
             }

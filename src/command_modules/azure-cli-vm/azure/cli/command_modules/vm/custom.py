@@ -1912,8 +1912,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
         lb_resource = build_load_balancer_resource(
             cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
-            private_ip_address='', private_ip_allocation='Dynamic', sku=load_balancer_sku)
+            'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
+            private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
+            disable_overprovision=disable_overprovision)
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
