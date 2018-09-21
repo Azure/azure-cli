@@ -15,6 +15,6 @@ pip install $ALL_MODULES
 pip install "sphinx==1.6.7" -q
 echo "Installed."
 
-cd doc/sphinx; make xml
+cd doc/sphinx; make xmlwithversion
 
 echo "OK."
