@@ -481,7 +481,6 @@ class LinuxWebappScenarioTest(ScenarioTest):
 
 class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
-    @unittest.skip("After syncing from main form this some acr module is failing to load")
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
@@ -950,6 +949,39 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
                  .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
                      JMESPathCheck('status', 'Disabling')])
 
+class WebappWindowsContainerBasicE2ETest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_hyperv_e2e(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku PC2'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
+            JMESPathCheck('[0].sku.name', 'PC2')
+        ])
+        self.cmd('appservice plan list', checks=[
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
+        ])
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('name', plan)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
 
 if __name__ == '__main__':
     unittest.main()

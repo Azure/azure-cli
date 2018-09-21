@@ -280,7 +280,7 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     elif tier in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
-    elif tier.upper() in ['PC2', 'PC3', 'PC4']:
+    elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
