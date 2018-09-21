@@ -11,6 +11,7 @@ Release History
 +++++
 * bugfix: Fall back to 'scp' when Parimiko fails.
 * `az aks create` no longer requires --aad-tenant-id
+* bugfix: improve merging of kubernetes credentials when duplicate entries are present.
 * In Azure Cloud Shell, open a tunnel and report the URL
 
 2.3.4
