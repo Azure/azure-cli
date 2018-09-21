@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.3
++++++
+* Add completer for  `--sku`, `--kind`, `--location` arguments
+
 0.2.2
 +++++
 * Add new command `az cognitiveservices account list-usage`

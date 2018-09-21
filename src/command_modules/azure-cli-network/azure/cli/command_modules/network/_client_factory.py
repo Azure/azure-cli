@@ -41,6 +41,10 @@ def cf_express_route_circuit_authorizations(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_authorizations
 
 
+def cf_express_route_circuit_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_circuit_connections
+
+
 def cf_express_route_circuit_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_peerings
 
@@ -53,6 +57,10 @@ def cf_express_route_service_providers(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_service_providers
 
 
+def cf_interface_endpoints(cli_ctx, _):
+    return network_client_factory(cli_ctx).interface_endpoints
+
+
 def cf_load_balancers(cli_ctx, _):
     return network_client_factory(cli_ctx).load_balancers
 
@@ -63,6 +71,10 @@ def cf_local_network_gateways(cli_ctx, _):
 
 def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
+
+
+def cf_network_profiles(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_profiles
 
 
 def cf_network_security_groups(cli_ctx, _):
@@ -85,6 +97,10 @@ def cf_public_ip_addresses(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_addresses
 
 
+def cf_public_ip_prefixes(cli_ctx, _):
+    return network_client_factory(cli_ctx).public_ip_prefixes
+
+
 def cf_route_tables(cli_ctx, _):
     return network_client_factory(cli_ctx).route_tables
 
@@ -95,6 +111,14 @@ def cf_routes(cli_ctx, _):
 
 def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
+
+
+def cf_service_endpoint_policies(cli_ctx, _):
+    return network_client_factory(cli_ctx).service_endpoint_policies
+
+
+def cf_service_endpoint_policy_definitions(cli_ctx, _):
+    return network_client_factory(cli_ctx).service_endpoint_policy_definitions
 
 
 def cf_subnets(cli_ctx, _):
@@ -137,6 +161,12 @@ def cf_tm_geographic(cli_ctx, _):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).geographic_hierarchies
+
+
+def cf_dns_references(cli_ctx, _):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).dns_resource_reference
 
 
 def cf_dns_mgmt_zones(cli_ctx, _):

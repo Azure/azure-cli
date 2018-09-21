@@ -3,8 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import CliCommandType
 from ._client_factory import cf_container_groups, cf_container
 from ._format import transform_container_group_list, transform_container_group
+
+
+container_group_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.containerinstance.operations.container_groups_operations#ContainerGroupsOperations.{}',
+    client_factory=cf_container_groups
+)
 
 
 def load_command_table(self, _):
@@ -18,3 +25,7 @@ def load_command_table(self, _):
         g.custom_command('exec', 'container_exec')
         g.custom_command('export', 'container_export')
         g.custom_command('attach', 'attach_to_container')
+
+    with self.command_group('container', container_group_sdk) as g:
+        g.command('restart', 'restart')
+        g.command('stop', 'stop')

@@ -10,24 +10,24 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 2. Clone your repository and check out the [`dev`](https://github.com/Azure/azure-cli/tree/dev) branch.
 3. Create a new virtual environment “env” for Python in the root of your clone. You can do this by running:
 
-  #### Windows
-  ```BatchFile
-  python -m venv <clone root>\env
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  python -m venv <clone root>/env
-  ```
+    Windows:
+    ```BatchFile
+    python -m venv <clone root>\env
+    ```
+    OSX/Ubuntu (bash):
+    ```Shell
+    python -m venv <clone root>/env
+    ```
 4. Activate the env virtual environment by running:
 
-  #### Windows
-  ```BatchFile
-  <clone root>\env\scripts\activate.bat
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  . <clone root>/env/bin/activate
-  ```
+    Windows:
+    ```BatchFile
+    <clone root>\env\scripts\activate.bat
+    ```
+    OSX/Ubuntu (bash):
+    ```Shell
+    <clone root>/env/bin/activate
+    ```
 
 5. Install the dependencies and load the command modules as local packages using pip.
   ```Shell
@@ -35,21 +35,21 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
   ```
 6. Add `<clone root>\src` to your PYTHONPATH environment variable:
 
-  #### Windows
-  ```BatchFile
-  set PYTHONPATH=<clone root>\src;%PYTHONPATH%
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  export PYTHONPATH=<clone root>/src:${PYTHONPATH}
-  ```
+    Windows:
+    ```BatchFile
+    set PYTHONPATH=<clone root>\src;%PYTHONPATH%
+    ```
+    OSX/Ubuntu (bash):
+    ```Shell
+    export PYTHONPATH=<clone root>/src:${PYTHONPATH}
+    ```
 7. Setup tab completion (OSX/Ubuntu ONLY).
 
-  Open Bash or zsh window and run:
+    Open Bash or zsh window and run:
 
-  ```Shell
-  source <clone root>/src/azure-cli/az.completion.sh
-  ```
+    ```Shell
+    source <clone root>/src/azure-cli/az.completion.sh
+    ```
 
 ## Configuring your IDE
 #### Visual Studio (Windows only)

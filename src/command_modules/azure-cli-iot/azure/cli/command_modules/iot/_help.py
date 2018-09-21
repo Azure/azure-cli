@@ -514,3 +514,156 @@ helps['iot hub show-stats'] = """
     type: command
     short-summary: Get the statistics for an IoT hub.
 """
+
+helps['iot hub routing-endpoint'] = """
+    type: group
+    short-summary: Manage custom endpoints of an IoT hub.
+"""
+
+helps['iot hub routing-endpoint create'] = """
+    type: command
+    short-summary: Add an endpoint to your IoT Hub.
+    long-summary: Create a new custom endpoint in your IoT Hub.
+    examples:
+        - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group [Resource Group]
+            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
+        - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group [Resource Group]
+            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
+            --container-name [Container Name]
+"""
+
+helps['iot hub routing-endpoint list'] = """
+    type: command
+    short-summary: Get information on all the endpoints for your IoT Hub.
+    long-summary: Get information on all endpoints in your IoT Hub.
+                  You can also specify which endpoint type you want to get informaiton on.
+    examples:
+        - name: Get all the endpoints from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
+        - name: Get all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-type eventhub
+"""
+
+helps['iot hub routing-endpoint show'] = """
+    type: command
+    short-summary: Get information on mentioned endpoint for your IoT Hub.
+    long-summary: Get information on a specific endpoint in your IoT Hub
+    examples:
+        - name: Get an endpoint information from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name [Endpoint Name]
+"""
+
+helps['iot hub routing-endpoint delete'] = """
+    type: command
+    short-summary: Delete all or mentioned endpoint for your IoT Hub.
+    long-summary: Delete an endpoint for your IoT Hub. We recommend that you delete
+                  any routes to the endpoint, before deleting the endpoint.
+    examples:
+        - name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2
+        - name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-type eventhub
+        - name: Delete all the endpoints from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+"""
+
+helps['iot hub route'] = """
+    type: group
+    short-summary: Manage routes of an IoT hub.
+"""
+
+helps['iot hub route create'] = """
+    type: command
+    short-summary: Create a route in IoT Hub.
+    long-summary: Create a route to send specific data source and condition to a desired endpoint.
+    examples:
+        - name: Create a new route "R1".
+          text: >
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
+        - name: Create a new route "R1" with all parameters.
+          text: >
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
+            --condition true --enabled true
+"""
+
+helps['iot hub route list'] = """
+    type: command
+    short-summary: Get all the routes in IoT Hub.
+    long-summary: Get information on all routes from an IoT Hub.
+    examples:
+        - name: Get all route from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub
+        - name: Get all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+"""
+
+helps['iot hub route show'] = """
+    type: command
+    short-summary: Get information about the route in IoT Hub.
+    long-summary: Get information on a specific route in your IoT Hub.
+    examples:
+        - name: Get an route information from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name [Route Name]
+"""
+
+helps['iot hub route delete'] = """
+    type: command
+    short-summary: Delete all or mentioned route for your IoT Hub.
+    long-summary: Delete a route or all routes for your IoT Hub.
+    examples:
+        - name: Delete route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --route-name R1
+        - name: Delete all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+        - name: Delete all the routes from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub
+"""
+
+helps['iot hub route test'] = """
+    type: command
+    short-summary: Test all routes or mentioned route in IoT Hub.
+    long-summary: Test all existing routes or mentioned route in your IoT Hub.
+                  You can provide a sample message to test your routes.
+    examples:
+        - name: Test the route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub --route-name R1
+        - name: Test all the route of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+"""
+
+helps['iot hub route update'] = """
+    type: command
+    short-summary: Update a route in IoT Hub.
+    long-summary: Updates a route in IoT Hub. You can change the source, enpoint or query on the route.
+    examples:
+        - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route update -g MyResourceGroup --hub-name MyIotHub
+            --source-type DeviceMessages --route-name R1
+"""

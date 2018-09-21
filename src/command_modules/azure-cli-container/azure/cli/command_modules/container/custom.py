@@ -32,10 +32,11 @@ from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics)
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
+                                                 ContainerGroupIpAddressType)
 from azure.cli.core.util import sdk_no_wait
-from msrestazure.tools import parse_resource_id
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
+
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -63,6 +64,7 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.delete(resource_group_name, name)
 
 
+# pylint: disable=too-many-statements
 def create_container(cmd,
                      resource_group_name,
                      name=None,
@@ -88,6 +90,11 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+                     vnet_name=None,
+                     vnet_address_prefix='10.0.0.0/16',
+                     subnet=None,
+                     subnet_address_prefix='10.0.0.0/24',
+                     network_profile=None,
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
@@ -164,13 +171,21 @@ def create_container(cmd,
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label)
-
     # Concatenate secure and standard environment variables
     if environment_variables and secure_environment_variables:
         environment_variables = environment_variables + secure_environment_variables
     else:
         environment_variables = environment_variables or secure_environment_variables
+
+    # Set up VNET, subnet and network profile if needed
+    if subnet and vnet_name and not network_profile:
+        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+
+    cg_network_profile = None
+    if network_profile:
+        cg_network_profile = ContainerGroupNetworkProfile(id=network_profile)
+
+    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, network_profile)
 
     container = Container(name=name,
                           image=image,
@@ -188,6 +203,7 @@ def create_container(cmd,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None,
+                            network_profile=cg_network_profile,
                             diagnostics=diagnostics,
                             tags=tags)
 
@@ -195,7 +211,101 @@ def create_container(cmd,
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
 
 
+def _get_resource(client, resource_group_name, *subresources):
+    from msrestazure.azure_exceptions import CloudError
+    try:
+        resource = client.get(resource_group_name, *subresources)
+        return resource
+    except CloudError as ex:
+        if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
+            return None
+        else:
+            raise
+
+
+def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+    from azure.cli.core.profiles import ResourceType
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+
+    containerInstanceDelegationServiceName = "Microsoft.ContainerInstance/containerGroups"
+    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+    aci_delegation = Delegation(
+        name="Microsoft.ContainerInstance.containerGroups",
+        service_name="Microsoft.ContainerInstance/containerGroups"
+    )
+
+    ncf = cf_network(cmd.cli_ctx)
+
+    subnet_name = subnet
+    if is_valid_resource_id(subnet):
+        parsed_subnet_id = parse_resource_id(subnet)
+        subnet_name = parsed_subnet_id['resource_name']
+        vnet_name = parsed_subnet_id['name']
+
+    default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
+
+    subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
+    # For an existing subnet, validate and add delegation if needed
+    if subnet:
+        for endpoint in (subnet.service_endpoints or []):
+            if endpoint.service != "Microsoft.ContainerInstance":
+                raise CLIError("Can not use subnet with existing service links other than 'Microsoft.ContainerInstance'.")
+
+        if not subnet.delegations:
+            subnet.delegations = [aci_delegation]
+        else:
+            for delegation in subnet.delegations:
+                if delegation.service_name != containerInstanceDelegationServiceName:
+                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationServiceName))
+
+        network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
+        if network_profile:
+            return network_profile.id
+
+    # Create new subnet and Vnet if not exists
+    else:
+        Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet', 'VirtualNetwork',
+                                                              'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
+        vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
+        if not vnet:
+            ncf.virtual_networks.create_or_update(resource_group_name,
+                                                  vnet_name,
+                                                  VirtualNetwork(name=vnet_name,
+                                                                 location=location,
+                                                                 address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
+        subnet = Subnet(
+            name=subnet_name,
+            location=location,
+            address_prefix=subnet_address_prefix,
+            delegations=[aci_delegation])
+
+        subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+
+    NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
+                                                                                                    'ContainerNetworkInterfaceConfiguration',
+                                                                                                    'IPConfigurationProfile',
+                                                                                                    resource_type=ResourceType.MGMT_NETWORK)
+
+    # In all cases, create the network profile with aci NIC
+    network_profile = NetworkProfile(
+        name=default_network_profile_name,
+        location=location,
+        container_network_interface_configurations=[ContainerNetworkInterfaceConfiguration(
+            name="eth0",
+            ip_configurations=[IPConfigurationProfile(
+                name="ipconfigprofile",
+                subnet=subnet
+            )]
+        )]
+    )
+
+    network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
+
+    return network_profile.id
+
+
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
+    from msrestazure.tools import parse_resource_id
     log_analytics_client = cf_log_analytics(cli_ctx)
 
     for workspace in log_analytics_client.list():
@@ -370,10 +480,14 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports, protocol, dns_name_label):
+def _create_ip_address(ip_address, ports, protocol, dns_name_label, network_profile):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
-        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports], dns_name_label=dns_name_label)
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
+                         dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
+    elif network_profile:
+        return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
+                         type=ContainerGroupIpAddressType.private)
 
 
 # pylint: disable=inconsistent-return-statements

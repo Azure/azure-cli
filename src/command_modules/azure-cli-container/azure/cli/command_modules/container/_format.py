@@ -38,9 +38,26 @@ def _format_cpu_memory(container_group):
 def _format_ip_address(container_group):
     """Format IP address. """
     ip_address = container_group.get('ipAddress')
-    if ip_address is not None:
-        ports = ','.join(str(p['port']) for p in ip_address['ports'])
+    if ip_address:
+        ports = ip_address['ports'] or []
+
+        if ip_address['type'] == 'Private':
+            for container in container_group.get('containers'):
+                ports += container.get('ports')
+
+        ports = ','.join(str(p['port']) for p in ports)
         return '{0}:{1}'.format(ip_address.get('ip'), ports)
+    return None
+
+
+def _format_status(container_group):
+    return container_group['instanceView']['state'] or container_group['provisioningState']
+
+
+def _format_network(container_group):
+    ip_address = container_group.get('ipAddress')
+    if ip_address:
+        return ip_address['type']
     return None
 
 
@@ -48,9 +65,10 @@ def transform_container_group(result):
     """Transform a container group to table output. """
     return OrderedDict([('Name', result['name']),
                         ('ResourceGroup', result['resourceGroup']),
-                        ('ProvisioningState', result.get('provisioningState')),
+                        ('Status', _format_status(result)),
                         ('Image', _get_images(result)),
                         ('IP:ports', _format_ip_address(result)),
+                        ('Network', _format_network(result)),
                         ('CPU/Memory', _format_cpu_memory(result)),
                         ('OsType', result.get('osType')),
                         ('Location', result['location'])])

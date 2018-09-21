@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.47
+++++++
+* Introduces generic behavior to handle "Bad Request" errors.
 
 2.0.46
 ++++++
@@ -21,7 +24,7 @@ Release History
 
 2.0.43
 ++++++
-* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Consuming mult api azure.mgmt.authorization package for stack support
 * Minor fixes
 
 2.0.42
