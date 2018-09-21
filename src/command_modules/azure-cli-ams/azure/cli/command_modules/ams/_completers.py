@@ -6,8 +6,11 @@
 from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.ams.operations.sp import list_role_definitions
+from azure.cli.command_modules.ams._sdk_utils import (get_stand_alone_presets, get_cdn_providers,
+                                                      get_default_streaming_policies, get_token_types,
+                                                      get_rentalandlease_types, get_tokens)
 
-from azure.mgmt.media.models import (EncoderNamedPreset)
+from azure.mgmt.media.models import EncoderNamedPreset
 
 
 @Completer
@@ -22,9 +25,26 @@ def get_presets_definition_name_completion_list():
     return encoder_name_presets_list
 
 
-def get_stand_alone_presets():
-    return ['AudioAnalyzer', 'VideoAnalyzer']
+def get_cdn_provider_completion_list():
+    cdn_provider_list = get_cdn_providers()
+    return cdn_provider_list
 
 
-def is_audio_analyzer(preset_name):
-    return preset_name == 'AudioAnalyzer'
+def get_default_streaming_policies_completion_list():
+    default_streaming_policies = get_default_streaming_policies()
+    return default_streaming_policies
+
+
+def get_token_type_completion_list():
+    token_types = get_token_types()
+    return token_types
+
+
+def get_fairplay_rentalandlease_completion_list():
+    rentalandlease_types = get_rentalandlease_types()
+    return rentalandlease_types
+
+
+def get_token_completion_list():
+    tokens = get_tokens()
+    return tokens

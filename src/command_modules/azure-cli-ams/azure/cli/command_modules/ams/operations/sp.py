@@ -100,7 +100,7 @@ def _update_password_credentials(client, app_object_id, sp_password, years):
 def _get_displayable_name(graph_object):
     if graph_object.user_principal_name:
         return graph_object.user_principal_name
-    elif graph_object.service_principal_names:
+    if graph_object.service_principal_names:
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 

@@ -74,3 +74,13 @@ def update_mediaservice(instance, tags=None):
         instance.tags = tags
 
     return instance
+
+
+def check_name_availability(client, location, account_name):
+    availability = client.check_name_availability(location_name=location, name=account_name,
+                                                  type='MICROSOFT.MEDIA/MEDIASERVICES')
+
+    if availability.name_available:
+        return 'Name available.'
+
+    return availability.message

@@ -44,9 +44,14 @@ helps['ams account delete'] = """
     short-summary: Delete an Azure Media Services account.
 """
 
+helps['ams account check-name'] = """
+    type: command
+    short-summary: Checks whether the Media Service resource name is available.
+"""
+
 helps['ams account storage'] = """
     type: group
-    short-summary: Manage secondary storage for an Azure Media Services account.
+    short-summary: Manage storage for an Azure Media Services account.
 """
 
 helps['ams account storage add'] = """
@@ -78,6 +83,11 @@ helps['ams account sp reset-credentials'] = """
     short-summary: Generate a new client secret for a service principal configured for an Azure Media Services account.
 """
 
+helps['ams account storage sync-storage-keys'] = """
+    type: command
+    short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
+"""
+
 helps['ams transform'] = """
     type: group
     short-summary: Manage transforms for an Azure Media Services account.
@@ -96,7 +106,11 @@ helps['ams transform show'] = """
 helps['ams transform create'] = """
     type: command
     short-summary: Create a transform.
-"""
+    examples:
+        - name: Create a transform with AdaptiveStreaming and VideoAnalyzer built-in presets and a custom preset from a local JSON file.
+          text: >
+            az ams transform create -a myAmsAccount -n transformName -g myResourceGroup --presets AdaptiveStreaming VideoAnalyzer \"C:\\MyPresets\\CustomPreset.json\"
+    """
 
 helps['ams transform delete'] = """
     type: command
@@ -156,6 +170,63 @@ helps['ams asset delete'] = """
 helps['ams asset get-sas-urls'] = """
     type: command
     short-summary: Lists the asset SAS URLs used for uploading and downloading asset content.
+"""
+
+helps['ams asset get-encryption-key'] = """
+    type: command
+    short-summary: Get the asset storage encryption keys used to decrypt content created by version 2 of the Media Services API.
+"""
+
+helps['ams content-key-policy'] = """
+    type: group
+    short-summary: Manage content key policies for an Azure Media Services account.
+"""
+
+helps['ams content-key-policy create'] = """
+    type: command
+    short-summary: Create a new content key policy.
+"""
+
+helps['ams content-key-policy show'] = """
+    type: command
+    short-summary: Show an existing content key policy.
+"""
+
+helps['ams content-key-policy delete'] = """
+    type: command
+    short-summary: Delete a content key policy.
+"""
+
+helps['ams content-key-policy update'] = """
+    type: command
+    short-summary: Update an existing content key policy.
+    examples:
+        - name: Update an existing content-key-policy, set a new description and edit its first option setting a new issuer and audience.
+          text: >
+            az ams content-key-policy update -n contentKeyPolicyName -a amsAccount --description newDescription --set options[0].restriction.issuer=newIssuer --set options[0].restriction.audience=newAudience
+        - name: Add an alternate verification key to a token restriction of an existing content key policy.
+          text: >
+            az ams content-key-policy update -n contentKeyPolicyName -a amsAccount --add options[0].restriction.alternateVerificationKeys "alternateSymmetricKey" --alt-key-symmetric
+"""
+
+helps['ams content-key-policy list'] = """
+    type: command
+    short-summary: List all the content key policies within an Azure Media Services account.
+"""
+
+helps['ams content-key-policy option'] = """
+    type: group
+    short-summary: Manage options for an existing content key policy.
+"""
+
+helps['ams content-key-policy option add'] = """
+    type: command
+    short-summary: Add a new option to an existing content key policy.
+"""
+
+helps['ams content-key-policy option remove'] = """
+    type: command
+    short-summary: Remove an option from an existing content key policy.
 """
 
 helps['ams job'] = """
@@ -218,6 +289,11 @@ helps['ams streaming locator get-paths'] = """
     short-summary: List paths supported by a streaming locator.
 """
 
+helps['ams streaming locator get-content-keys'] = """
+    type: command
+    short-summary: List content keys used by a streaming locator.
+"""
+
 helps['ams streaming policy'] = """
     type: group
     short-summary: Manage streaming policies for an Azure Media Services account.
@@ -256,4 +332,119 @@ helps['ams streaming endpoint stop'] = """
 helps['ams streaming endpoint list'] = """
     type: command
     short-summary: List all the streaming endpoints within an Azure Media Services account.
+"""
+
+helps['ams streaming endpoint create'] = """
+    type: command
+    short-summary: Create a streaming endpoint.
+"""
+
+helps['ams streaming endpoint akamai'] = """
+    type: group
+    short-summary: Manage AkamaiAccessControl objects to be used on streaming endpoints.
+"""
+
+helps['ams streaming endpoint akamai add'] = """
+    type: command
+    short-summary: Add an AkamaiAccessControl to an existing streaming endpoint.
+"""
+
+helps['ams streaming endpoint show'] = """
+    type: command
+    short-summary: Show the details of a streaming endpoint.
+"""
+
+helps['ams streaming endpoint delete'] = """
+    type: command
+    short-summary: Delete a streaming endpoint.
+"""
+
+helps['ams streaming endpoint akamai remove'] = """
+    type: command
+    short-summary: Remove an AkamaiAccessControl from an existing streaming endpoint.
+"""
+
+helps['ams streaming endpoint scale'] = """
+    type: command
+    short-summary: Set the scale of a streaming endpoint.
+"""
+
+helps['ams streaming endpoint update'] = """
+    type: command
+    short-summary: Update the details of a streaming endpoint.
+"""
+
+helps['ams live'] = """
+    type: group
+    short-summary: Manage live streaming operations for an Azure Media Service account.
+"""
+
+helps['ams live event'] = """
+    type: group
+    short-summary: Manage live events for an Azure Media Service account.
+"""
+
+helps['ams live event create'] = """
+    type: command
+    short-summary: Create a live event.
+"""
+
+helps['ams live event start'] = """
+    type: command
+    short-summary: Start a live event.
+"""
+
+helps['ams live event show'] = """
+    type: command
+    short-summary: Show the details of a live event.
+"""
+
+helps['ams live event list'] = """
+    type: command
+    short-summary: List all the live events of an Azure Media Services account.
+"""
+
+helps['ams live event delete'] = """
+    type: command
+    short-summary: Delete a live event.
+"""
+
+helps['ams live event stop'] = """
+    type: command
+    short-summary: Stop a live event.
+"""
+
+helps['ams live event reset'] = """
+    type: command
+    short-summary: Reset a live event.
+"""
+
+helps['ams live event update'] = """
+    type: command
+    short-summary: Update the details of a live event.
+"""
+
+helps['ams live output'] = """
+    type: group
+    short-summary: Manage live outputs for an Azure Media Service account.
+"""
+
+helps['ams live output create'] = """
+    type: command
+    short-summary: Create a live output.
+"""
+
+helps['ams live output show'] = """
+    type: command
+    short-summary: Show the details of a live output.
+"""
+
+helps['ams live output list'] = """
+    type: command
+    short-summary: List all the live outputs in a live event.
+"""
+
+helps['ams live output delete'] = """
+    type: command
+    short-summary: Delete a live output.
 """

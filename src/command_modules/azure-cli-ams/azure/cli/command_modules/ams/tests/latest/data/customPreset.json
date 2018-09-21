@@ -1,0 +1,74 @@
+{
+  "Version": 1,
+  "Sources": [
+    {
+      "Streams": [],
+      "Filters": {
+        "VideoOverlay": {
+          "Position": {
+            "X": 100,
+            "Y": 100,
+            "Width": 100,
+            "Height": 50
+          },
+          "AudioGainLevel": 0,
+          "MediaParams": [
+            {
+              "OverlayLoopCount": 1
+            },
+            {
+              "IsOverlay": true,
+              "OverlayLoopCount": 1,
+              "InputLoop": true
+            }
+          ],
+          "Source": "Image001.png",
+          "Clip": {
+            "Duration": "00:00:05"
+          },
+          "FadeInDuration": {
+            "Duration": "00:00:01"
+          },
+          "FadeOutDuration": {
+            "StartTime": "00:00:03",
+            "Duration": "00:00:04"
+          }
+        }
+      },
+      "Pad": true
+    }
+  ],
+  "Codecs": [
+    {
+      "KeyFrameInterval": "00:00:02",
+      "H264Layers": [
+        {
+          "Profile": "Auto",
+          "Level": "auto",
+          "Bitrate": 1045,
+          "MaxBitrate": 1045,
+          "BufferWindow": "00:00:05",
+          "ReferenceFrames": 3,
+          "EntropyMode": "Cavlc",
+          "AdaptiveBFrame": true,
+          "Type": "H264Layer",
+          "Width": "640",
+          "Height": "360",
+          "FrameRate": "0/1"
+        }
+      ],
+      "Type": "H264Video"
+    },
+    {
+      "Type": "CopyAudio"
+    }
+  ],
+  "Outputs": [
+    {
+      "FileName": "{Basename}{Extension}",
+      "Format": {
+        "Type": "MP4Format"
+      }
+    }
+  ]
+}
