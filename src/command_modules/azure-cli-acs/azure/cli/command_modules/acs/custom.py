@@ -154,7 +154,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     if os.path.exists(browse_path):
         os.remove(browse_path)
 
-    _k8s_get_credentials_internal(name, acs_info, browse_path, ssh_key_file)
+    _k8s_get_credentials_internal(name, acs_info, browse_path, ssh_key_file, False)
 
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
@@ -944,7 +944,8 @@ def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=None):
+                        ssh_key_file=None,
+                        overwrite_existing=False):
     """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
@@ -956,10 +957,10 @@ def k8s_get_credentials(cmd, client, name, resource_group_name,
     :type ssh_key_file: str
     """
     acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file)
+    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing)
 
 
-def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
+def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing):
     if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
         raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
 
@@ -982,21 +983,26 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
     # merge things
     if path_candidate != path:
         try:
-            merge_kubernetes_configurations(path, path_candidate)
+            merge_kubernetes_configurations(path, path_candidate, overwrite_existing)
         except yaml.YAMLError as exc:
             logger.warning('Failed to merge credentials to kube config file: %s', exc)
             logger.warning('The credentials have been saved to %s', path_candidate)
 
 
-def _handle_merge(existing, addition, key):
+def _handle_merge(existing, addition, key, replace):
     if addition[key]:
         if existing[key] is None:
             existing[key] = addition[key]
             return
 
         for i in addition[key]:
-            if i not in existing[key]:
-                existing[key].append(i)
+            for j in existing[key]:
+                if i['name'] == j['name']:
+                    if replace or i == j:
+                        existing[key].remove(j)
+                    else:
+                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
+            existing[key].append(i)
 
 
 def load_kubernetes_configuration(filename):
@@ -1012,7 +1018,7 @@ def load_kubernetes_configuration(filename):
         raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
 
-def merge_kubernetes_configurations(existing_file, addition_file):
+def merge_kubernetes_configurations(existing_file, addition_file, replace):
     existing = load_kubernetes_configuration(existing_file)
     addition = load_kubernetes_configuration(addition_file)
 
@@ -1032,9 +1038,9 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     if existing is None:
         existing = addition
     else:
-        _handle_merge(existing, addition, 'clusters')
-        _handle_merge(existing, addition, 'users')
-        _handle_merge(existing, addition, 'contexts')
+        _handle_merge(existing, addition, 'clusters', replace)
+        _handle_merge(existing, addition, 'users', replace)
+        _handle_merge(existing, addition, 'contexts', replace)
         existing['current-context'] = addition['current-context']
 
     # check that ~/.kube/config is only read- and writable by its owner
@@ -1562,7 +1568,8 @@ def aks_get_versions(cmd, client, location):
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
-                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
+                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
+                        overwrite_existing=False):
     credentialResults = None
     if admin:
         credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
@@ -1574,7 +1581,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         try:
             kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
-            _print_or_merge_credentials(path, kubeconfig)
+            _print_or_merge_credentials(path, kubeconfig, overwrite_existing)
         except (IndexError, ValueError):
             raise CLIError("Fail to find kubeconfig file.")
 
@@ -2102,7 +2109,7 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     return rg.location
 
 
-def _print_or_merge_credentials(path, kubeconfig):
+def _print_or_merge_credentials(path, kubeconfig, overwrite_existing):
     """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
     stdout if the path is "-".
     """
@@ -2129,7 +2136,7 @@ def _print_or_merge_credentials(path, kubeconfig):
     try:
         additional_file.write(kubeconfig)
         additional_file.flush()
-        merge_kubernetes_configurations(path, temp_path)
+        merge_kubernetes_configurations(path, temp_path, overwrite_existing)
     except yaml.YAMLError as ex:
         logger.warning('Failed to merge credentials to kube config file: %s', ex)
     finally:
