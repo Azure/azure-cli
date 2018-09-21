@@ -1367,6 +1367,12 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
         requests.post('http://localhost:8888/closeport/8001')
 
 
+def _trim_nodepoolname(nodepool_name):
+    if not nodepool_name:
+        return "nodepool1"
+    return nodepool_name[:12]
+
+
 def _validate_ssh_key(no_ssh_key, ssh_key_value):
     if not no_ssh_key:
         try:
@@ -1385,6 +1391,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
+               nodepool_name="nodepool1",
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1417,7 +1424,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg_location
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
-        name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1591,10 +1598,12 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
+def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="nodepool1", no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    for agent_profile in instance.agent_pool_profiles:
+        if agent_profile.name == nodepool_name:
+            agent_profile.count = int(node_count)  # pylint: disable=no-member
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
