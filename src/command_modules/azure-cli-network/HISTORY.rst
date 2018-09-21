@@ -6,6 +6,8 @@ Release History
 2.2.6
 +++++
 * Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
+* `network vnet peering create`: depecrated `--remote-vnet-id` for `--remote-vnet`. Passing a name instead of resource ID to either parameter does not crash the CLI.
+* `network vnet peering create`: users can specify remote vnet's resource group through `--remote-vnet-rg` when using `--remote-vnet` to specify the name of the vnet.
 
 2.2.5
 +++++
