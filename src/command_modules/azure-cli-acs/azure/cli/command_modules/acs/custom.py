@@ -1360,7 +1360,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
 
 
 def _trim_nodepoolname(nodepool_name):
-    if nodepool_name == "":
+    if not nodepool_name:
         return "nodepool1"
     return nodepool_name[:12]
 
