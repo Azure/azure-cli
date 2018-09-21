@@ -33,3 +33,4 @@ def load_arguments(self, _):
                    help='Pricing tier for IoT Central applications. Default value is F1, which is free.')
         c.argument(
             'subdomain', help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
+        c.argument('template', help='IoT Central application template ID. Default is a blank application.')
