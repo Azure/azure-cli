@@ -32,6 +32,7 @@ from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+import requests
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
@@ -1329,9 +1330,6 @@ def subnet_role_assignment_exists(cli_ctx, scope):
 
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
-    if in_cloud_console():
-        raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
-
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
@@ -1353,7 +1351,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
-    logger.warning('Proxy running on %s', proxy_url)
+    if in_cloud_console():
+        # TODO: better error handling here.
+        response = requests.post('http://localhost:8888/openport/8001')
+        result = json.loads(response.text)
+        logger.warning('To view the console, please open % in a new tab', result['url'])
+    else:
+        logger.warning('Proxy running on %s', proxy_url)
+
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(proxy_url)
@@ -1362,7 +1367,10 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
                          "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
-        return
+        pass
+    finally:
+        # TODO: Better error handling here.
+        requests.post('http://localhost:8888/closeport/8001')
 
 
 def _validate_ssh_key(no_ssh_key, ssh_key_value):
