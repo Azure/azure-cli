@@ -31,6 +31,7 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
@@ -1329,9 +1330,13 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001',
+               enable_cloud_console_aks_browse=False):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
+
+    if in_cloud_console() and not enable_cloud_console_aks_browse:
+        raise CLIError('Browse is disabled in cloud shell by default.')
 
     proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
@@ -1351,7 +1356,13 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
+    if in_cloud_console() and enable_cloud_console_aks_browse:
+        logger.warning('***WARNING***')
+        logger.warning('Browsing the kubernetes dashboard in Cloud Shell is an alpha feature.')
+        logger.warning('The browse URL is currently obfuscated but not authenticated.')
+        logger.warning('Do not share this URL.')
+        if not prompt_y_n('Proceed?'):
+            raise CLIError("Browse aborted.")
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/8001')
         result = json.loads(response.text)
