@@ -20,7 +20,7 @@ def get_key_for_storage_account(cmd, storage_blob_endpoint, rg=None):  # pylint:
         return None
 
     keys = storage_client.storage_accounts.list_keys(rg, storage_account_name).keys
-    return keys and keys[0]
+    return keys and keys[0] and keys[0].value
 
 
 def extract_storage_account_name_from_endpoint(storage_blob_endpoint):
