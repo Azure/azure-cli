@@ -37,4 +37,4 @@ def storage_account_key_completion_list(cmd, prefix, namespace, **kwargs):  # py
     rg = getattr(namespace, 'resource_group_name', None)
 
     key = get_key_for_storage_account(cmd, storage_endpoint, rg)
-    return [key]
+    return [key] if key else []

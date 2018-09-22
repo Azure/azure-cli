@@ -21,7 +21,7 @@ helps['hdinsight create'] = """
               az hdinsight cluster create -n MyCluster -g MyResourceGroup \\
               -p <HTTP password> \\
               --storage-account myStorageAccount.blob.core.windows.net \\
-              --storage-account-key <key> --storage-default-container default
+              --storage-account-key <key>
 """
 
 helps['hdinsight list'] = """
