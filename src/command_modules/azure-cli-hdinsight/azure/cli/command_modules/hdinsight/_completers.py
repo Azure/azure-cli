@@ -24,3 +24,17 @@ def storage_account_completion_list(cmd, prefix, namespace, **kwargs):  # pylint
         return re.search('//(.*)/', uri).groups()[0]
 
     return [extract_host(extract_blob_endpoint(s)) for s in storage_accounts]
+
+
+@Completer
+def storage_account_key_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    from .util import get_key_for_storage_account
+
+    storage_endpoint = getattr(namespace, 'storage_account', None)
+    if not storage_endpoint:
+        return []
+
+    rg = getattr(namespace, 'resource_group_name', None)
+
+    key = get_key_for_storage_account(cmd, storage_endpoint, rg)
+    return [key]

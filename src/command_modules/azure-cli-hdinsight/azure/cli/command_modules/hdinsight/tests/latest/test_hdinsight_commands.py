@@ -14,6 +14,11 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster(self, storage_account_info):
         self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info))
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_minimum_arguments(self, storage_account_info):
+        self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info, specify_key=False, specify_container=False))
+
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_resize(self, storage_account_info):
@@ -75,12 +80,15 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
     @staticmethod
-    def _wasb_arguments(storage_account_info):
+    def _wasb_arguments(storage_account_info, specify_key=True, specify_container=True):
         storage_account_name, storage_account_key = storage_account_info
         storage_account_key = storage_account_key.strip()
 
-        return '--storage-account {}.blob.core.windows.net --storage-account-key "{}" --storage-default-container {}'\
-            .format(storage_account_name, storage_account_key, 'default')
+        key_args = '--storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
+        container_args = '--storage-default-container {}'.format('default') if specify_container else ""
+
+        return '--storage-account {}.blob.core.windows.net {} {}'\
+            .format(storage_account_name, key_args, container_args)
 
     @staticmethod
     def _kafka_arguments():

@@ -70,11 +70,28 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         logger.warn("SSH credentials not specified. Using the HTTP password as the SSH password.")
         ssh_password = http_password
 
+    # Validate storage arguments from the user
+    if storage_default_container and storage_default_filesystem:
+        raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
+
+    # Attempt to infer the storage account key from the endpoint
+    if not storage_account_key and storage_account and _is_wasb_endpoint(storage_account):
+        from .util import get_key_for_storage_account
+        logger.info('Storage account key for WASB account not specified. Attempting to retrieve key...')
+        key = get_key_for_storage_account(cmd, storage_account, resource_group_name)
+        if not key:
+            logger.warn('Storage account key could not be inferred from storage account.')
+        else:
+            storage_account_key = key
+
+    # Attempt to provide a default container for WASB storage accounts
+    if not storage_default_container and storage_account and _is_wasb_endpoint(storage_account):
+        storage_default_container = 'default'
+        logger.warn('Default WASB container not specified, using "{}".'.format(storage_default_container))
+
     # Validate storage info parameters
     if not _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
         raise CLIError('If storage details are specified, the storage account, storage account key, and either the default container or default filesystem must be specified.')
-    if storage_default_container and storage_default_filesystem:
-        raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Validate network profile parameters
     if not _all_or_none(virtual_network, subnet_name):
@@ -211,3 +228,7 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     return rg.location
+
+
+def _is_wasb_endpoint(storage_endpoint):
+    return '.blob.' in storage_endpoint

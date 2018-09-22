@@ -9,10 +9,10 @@ from azure.cli.core.commands.parameters import get_enum_type, name_type, get_res
 
 
 def load_arguments(self, _):
-    from ._completers import storage_account_completion_list
+    from ._completers import storage_account_completion_list, storage_account_key_completion_list
     from knack.arguments import CLIArgumentType
     node_size_type = CLIArgumentType(arg_group='Node',
-        help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+                                     help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
     with self.argument_context('hdinsight') as c:
         c.argument('cluster_name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
@@ -35,7 +35,7 @@ def load_arguments(self, _):
         c.argument('ssh_username', options_list=['--ssh-user', '-U'], arg_group='SSH',
                    help='SSH username for the cluster nodes.')
         c.argument('ssh_password', options_list=['--ssh-password', '-P'], arg_group='SSH',
-                   help='SSH password for the cluster nodes.')
+                   help='SSH password for the cluster nodes. If none specified, uses the HTTP password.')
         c.argument('ssh_public_key', options_list=['--ssh-public-key', '-K'], arg_group='SSH',
                    help='SSH public key for the cluster nodes.')
         c.argument('headnode_size', arg_type=node_size_type)
@@ -53,10 +53,10 @@ def load_arguments(self, _):
                    help='The number of worker nodes in the cluster.')
         c.argument('storage_account', arg_group='Storage', completer=storage_account_completion_list,
                    help='The storage account, e.g. "<name>.blob.core.windows.net".')
-        c.argument('storage_account_key', arg_group='Storage',
-                   help='The storage account key.')
+        c.argument('storage_account_key', arg_group='Storage', completer=storage_account_key_completion_list,
+                   help='The storage account key. If none is specified, the key is for a WASB storage account, and the user has access to the storage account, it will be retrieved automatically.')
         c.argument('storage_default_container', arg_group='Storage',
-                   help='The storage container the cluster will use. (WASB only)')
+                   help='The storage container the cluster will use. (WASB only)  Default: default.')
         c.argument('storage_default_filesystem', arg_group='Storage',
                    help='The storage filesystem the cluster will use. (ADLS Gen 2 only)')
         c.argument('virtual_network', arg_group='Network',
