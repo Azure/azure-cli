@@ -20,7 +20,7 @@ def load_arguments(self, _):
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
                    help='The HDInsight cluster version. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
-                   completer=get_generic_completion_list(["hadoop", "interactiveHive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]),
+                   completer=get_generic_completion_list(["hadoop", "interactivehive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]),
                    help='Type of HDInsight cluster, e.g. Hadoop, InteractiveHive, MLServices, etc. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#cluster-types')
         c.argument('component_version', arg_group='Cluster',
                    help='The versions of various Hadoop components, in JSON. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-component-versioning#hadoop-components-available-with-different-hdinsight-versions')
@@ -54,7 +54,7 @@ def load_arguments(self, _):
         c.argument('storage_account', arg_group='Storage', completer=storage_account_completion_list,
                    help='The storage account, e.g. "<name>.blob.core.windows.net".')
         c.argument('storage_account_key', arg_group='Storage', completer=storage_account_key_completion_list,
-                   help='The storage account key. If none is specified, the key is for a WASB storage account, and the user has access to the storage account, it will be retrieved automatically.')
+                   help='The storage account key. If no key is specified, the user specifies a WASB storage account, and the user has access to the storage account, then the key will be retrieved automatically.')
         c.argument('storage_default_container', arg_group='Storage',
                    help='The storage container the cluster will use. (WASB only)  Default: default.')
         c.argument('storage_default_filesystem', arg_group='Storage',
