@@ -6,6 +6,7 @@ Release History
 ++++++
 * `az sig`: fix update commands, support --no-wait on managing image versions
 * `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+* `az vm\vmss disk`: default disk's lun to the first available spot
 
 2.2.3
 ++++++
