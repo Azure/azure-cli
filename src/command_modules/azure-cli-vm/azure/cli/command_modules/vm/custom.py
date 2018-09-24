@@ -1172,9 +1172,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False,
 
     # pylint: disable=no-member
     if lun is None:
-        luns = ([d.lun for d in vm.storage_profile.data_disks]
-                if vm.storage_profile.data_disks else [])
-        lun = max(luns) + 1 if luns else 0
+        lun = _get_disk_lun(vm.storage_profile.data_disks)
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
@@ -2298,8 +2296,7 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
         if lun is None:
-            luns = [d.lun for d in data_disks]
-            lun = max(luns) + 1 if luns else 0
+            lun = _get_disk_lun(data_disks)
         if existing_disk is None:
             data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
                                  caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
