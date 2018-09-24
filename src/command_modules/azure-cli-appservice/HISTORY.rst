@@ -9,6 +9,9 @@ Release History
 * az webapp config set supports --fts-state property. Also added support fot az functionapp config set & show
 * webapp: add support for bring your own storage
 * webapp: add support for listing and restoring deleted apps
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
+* webapp: add support for listing and restoring deleted apps
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
 * az appserviceplan create now supports creating Windows Containers App Service Plans - Preview
 * az webapp create now supports creating and managing Windows Containers Apps - Preview
 
