@@ -500,6 +500,12 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     return client.list(filter=(' and '.join(sub_filters)))
 
 
+def list_application_owners(cmd, identifier):
+    client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_application(client.applications, identifier)
+    return client.applications.list_owners(object_id)
+
+
 def list_sps(client, spn=None, display_name=None, query_filter=None):
     sub_filters = []
     if query_filter:
@@ -785,6 +791,12 @@ def _get_app_object_id_from_sp_object_id(client, sp_object_id):
         if result:
             app_object_id = result[0].object_id
     return app_object_id
+
+
+def list_service_principal_owners(cmd, identifier):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    return client.service_principals.list_owners(sp_object_id)
 
 
 def list_service_principal_credentials(cmd, identifier, cert=False):

@@ -109,6 +109,14 @@ helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
 """
+helps['ad sp owner'] = """
+    type: group
+    short-summary: Manage service principal owners.
+"""
+helps['ad sp owner list'] = """
+    type: command
+    short-summary: List service principal owners.
+"""
 helps['ad sp show'] = """
     type: command
     short-summary: Get the details of a service principal.
@@ -150,6 +158,14 @@ helps['ad app update'] = """
           text: >
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
 
+"""
+helps['ad app owner'] = """
+    type: group
+    short-summary: Manage application owners.
+"""
+helps['ad app owner list'] = """
+    type: command
+    short-summary: List application owners.
 """
 helps['ad user list'] = """
     type: command
