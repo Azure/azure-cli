@@ -158,9 +158,12 @@ class TestExtensionCommands(unittest.TestCase):
         # Now add using name
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
-            with self.assertRaises(CLIError) as err:
+            with mock.patch('azure.cli.command_modules.extension.custom.logger') as mock_logger:
                 add_extension(extension_name=MY_EXT_NAME)
-            self.assertTrue('The extension {} already exists.'.format(MY_EXT_NAME) in str(err.exception))
+                call_args = mock_logger.warning.call_args
+                self.assertEqual("The extension '%s' already exists.", call_args[0][0])
+                self.assertEqual(MY_EXT_NAME, call_args[0][1])
+                self.assertEqual(mock_logger.warning.call_count, 1)
 
     def test_update_extension(self):
         add_extension(source=MY_EXT_SOURCE)

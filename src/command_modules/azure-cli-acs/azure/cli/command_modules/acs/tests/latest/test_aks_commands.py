@@ -187,6 +187,67 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'k8s_version': '1.8.11',
+            'nodepool_name': self.create_random_name('np', 12)
+        })
+
+        # create
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --nodepool-name {nodepool_name} ' \
+                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
+                     '--ssh-key-value {ssh_key_value} --tags scenario_test -c 1'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles', None)
+        ])
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --nodepool-name {nodepool_name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
+
+        # show again and expect failure
+        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_bad_inputs(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -247,7 +308,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -285,7 +345,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
         # create cluster without skip_role_assignment
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key' 
+                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key'
 
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
@@ -295,7 +355,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(check_role_assignment_cmd, checks=[
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
-
 
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
@@ -403,6 +462,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         subnet_name = self.create_random_name('clisubnet', 16)
         address_prefix = "192.168.0.0/16"
         subnet_prefix = "192.168.0.0/24"
-        vnet_subnet =self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")

@@ -176,8 +176,7 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                         "Microsoft.Authorization/*/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"],
+                        "Microsoft.Insights/alertRules/*"],
             "DataActions": [
                 "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
             ],
@@ -195,88 +194,90 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+        # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
             time.sleep(180)
-            self.cmd('role definition list -n {role}',
-                     checks=self.check('[0].roleName', '{role}'))
+            role = self.cmd('role definition list -n {role}',
+                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+            # verify we can update
+            role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
+            with open(temp_file, 'w') as f:
+                json.dump(role[0], f)
+            self.cmd('role definition update --role-definition {template}',
+                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
+            time.sleep(30)
+
             self.cmd('role definition delete -n {role}',
                      checks=self.is_empty())
-            time.sleep(60)
+            time.sleep(120)
             self.cmd('role definition list -n {role}',
                      checks=self.is_empty())
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
 
-    # TODO: Disabling due to inability to replay recording (Issue #7284)
-    # @ResourceGroupPreparer(name_prefix='cli_role_assign')
-    # @AllowLargeResponse()
-    # def test_role_assignment_e2e(self, resource_group):
-    #     if self.run_under_service_principal():
-    #         return  # this test delete users which are beyond a SP's capacity, so quit...
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_e2e(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
 
-    #     with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-    #         user = self.create_random_name('testuser', 15)
-    #         account_info = self.cmd('account show').get_output_in_json()
-    #         if account_info['user']['type'] == 'servicePrincipal':
-    #             return  # this test delete users which are beyond a SP's capacity, so quit...
-    #         upn = account_info['user']['name']
-    #         test = user + '@' + upn.split('@')[-1]
-    #         print(test)
-    #         self.kwargs.update({
-    #             'upn': test,
-    #             'nsg': 'nsg1'
-    #         })
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'nsg': 'nsg1'
+            })
 
-    #         self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-    #         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-    #         try:
-    #             self.cmd('network nsg create -n {nsg} -g {rg}')
-    #             result = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()
-    #             self.kwargs['nsg_id'] = result['id']
+            try:
+                self.cmd('network nsg create -n {nsg} -g {rg}')
+                result = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()
+                self.kwargs['nsg_id'] = result['id']
 
-    #             # test role assignments on a resource group
-    #             self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
-    #             self.cmd('role assignment list -g {rg}',
-    #                      checks=self.check("length([])", 1))
-    #             self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
-    #                 self.check("length([])", 1),
-    #                 self.check("[0].principalName", self.kwargs["upn"])
-    #             ])
+                # test role assignments on a resource group
+                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment list -g {rg}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
+                    self.check("length([])", 1),
+                    self.check("[0].principalName", self.kwargs["upn"])
+                ])
 
-    #             # test couple of more general filters
-    #             result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
-    #             self.assertTrue(len(result) >= 1)
+                # test couple of more general filters
+                result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
+                self.assertTrue(len(result) >= 1)
 
-    #             result = self.cmd('role assignment list --all').get_output_in_json()
-    #             self.assertTrue(len(result) >= 1)
+                result = self.cmd('role assignment list --all').get_output_in_json()
+                self.assertTrue(len(result) >= 1)
 
-    #             self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
-    #             self.cmd('role assignment list -g {rg}',
-    #                      checks=self.is_empty())
+                self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment list -g {rg}',
+                         checks=self.is_empty())
 
-    #             # test role assignments on a resource
-    #             self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
-    #             self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
-    #                      checks=self.check("length([])", 1))
-    #             self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
-    #             self.cmd('role assignment list --scope {nsg_id}',
-    #                      checks=self.is_empty())
+                # test role assignments on a resource
+                self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment list --scope {nsg_id}',
+                         checks=self.is_empty())
 
-    #             # test role assignment on subscription level
-    #             self.cmd('role assignment create --assignee {upn} --role reader')
-    #             self.cmd('role assignment list --assignee {upn} --role reader',
-    #                      checks=self.check("length([])", 1))
-    #             self.cmd('role assignment list --assignee {upn}',
-    #                      checks=self.check("length([])", 1))
-    #             self.cmd('role assignment delete --assignee {upn} --role reader')
-    #         finally:
-    #             self.cmd('ad user delete --upn-or-object-id {upn}')
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee {upn} --role reader')
+                self.cmd('role assignment list --assignee {upn} --role reader',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment delete --assignee {upn} --role reader')
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
     @AllowLargeResponse()

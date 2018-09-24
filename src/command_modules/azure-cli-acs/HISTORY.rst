@@ -3,6 +3,17 @@
 Release History
 ===============
 
+2.3.6
++++++
+* `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
+
+2.3.5
++++++
+* bugfix: Fall back to 'scp' when Parimiko fails.
+* `az aks create` no longer requires --aad-tenant-id
+* bugfix: improve merging of kubernetes credentials when duplicate entries are present.
+* In Azure Cloud Shell, open a tunnel and report the URL
+
 2.3.4
 +++++
 * install-connector: Updates the install-connector command to set the AKS Master FQDN

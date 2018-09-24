@@ -134,14 +134,14 @@ def load_command_table(self, _):
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
-    with self.command_group('keyvault storage', kv_data_sdk) as g:
-        g.keyvault_command('add', 'set_storage_account')
-        g.keyvault_command('list', 'get_storage_accounts')
-        g.keyvault_command('show', 'get_storage_account')
-        g.keyvault_command('update', 'update_storage_account')
-        g.keyvault_command('remove', 'delete_storage_account')
-        g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
-        if data_api_version != '2016_10_01':
+    if data_api_version != '2016_10_01':
+        with self.command_group('keyvault storage', kv_data_sdk) as g:
+            g.keyvault_command('add', 'set_storage_account')
+            g.keyvault_command('list', 'get_storage_accounts')
+            g.keyvault_command('show', 'get_storage_account')
+            g.keyvault_command('update', 'update_storage_account')
+            g.keyvault_command('remove', 'delete_storage_account')
+            g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
             g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
             g.keyvault_command('show-deleted', 'get_deleted_storage_account')
             g.keyvault_command('purge', 'purge_deleted_storage_account')
@@ -153,17 +153,17 @@ def load_command_table(self, _):
                               'restore_storage_account',
                               doc_string_source=data_doc_string.format('restore_storage_account'))
 
-    with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
-        g.keyvault_command('create',
-                           'set_sas_definition',
-                           doc_string_source=data_doc_string.format('set_sas_definition'))
-        g.keyvault_command('list', 'get_sas_definitions')
-        g.keyvault_command('show', 'get_sas_definition')
-        g.keyvault_command('update',
-                           'update_sas_definition',
-                           doc_string_source=data_doc_string.format('update_sas_definition'))
-        g.keyvault_command('delete', 'delete_sas_definition')
-        if data_api_version != '2016_10_01':
+    if data_api_version != '2016_10_01':
+        with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
+            g.keyvault_command('create',
+                               'set_sas_definition',
+                               doc_string_source=data_doc_string.format('set_sas_definition'))
+            g.keyvault_command('list', 'get_sas_definitions')
+            g.keyvault_command('show', 'get_sas_definition')
+            g.keyvault_command('update',
+                               'update_sas_definition',
+                               doc_string_source=data_doc_string.format('update_sas_definition'))
+            g.keyvault_command('delete', 'delete_sas_definition')
             g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
             g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
             g.keyvault_command('recover', 'recover_deleted_sas_definition')

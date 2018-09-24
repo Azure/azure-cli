@@ -2499,9 +2499,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
-                 location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
-                 replica_count=None, tags=None):
+def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
+                         gallery_image_version, location=None, target_regions=None, end_of_life_date=None,
+                         exclude_from_latest=None, replica_count=None, tags=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
