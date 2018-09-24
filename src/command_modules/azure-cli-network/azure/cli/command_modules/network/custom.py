@@ -3190,13 +3190,13 @@ def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
 
 
 def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,
-                        remote_virtual_network, remote_virtual_network_rg_name=None, allow_virtual_network_access=False,
+                        remote_virtual_network, allow_virtual_network_access=False,
                         allow_forwarded_traffic=False, allow_gateway_transit=False,
                         use_remote_gateways=False):
     if not is_valid_resource_id(remote_virtual_network):
         remote_virtual_network = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=remote_virtual_network_rg_name if remote_virtual_network_rg_name else resource_group_name,
+            resource_group=resource_group_name,
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=remote_virtual_network

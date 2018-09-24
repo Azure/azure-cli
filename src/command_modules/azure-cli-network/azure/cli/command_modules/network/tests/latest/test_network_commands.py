@@ -1648,13 +1648,13 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet1_id': vnet1_id,
             'vnet2_id': vnet2_id
         })
-        # set up gateway sharing from vnet1 to vnet2
+        # set up gateway sharing from vnet1 to vnet2. test that remote-vnet indeed accepts name or id.
         self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --allow-gateway-transit', checks=[
             self.check('allowGatewayTransit', True),
             self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
             self.check('peeringState', 'Initiated')
         ])
-        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
+        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet vnet2 --use-remote-gateways --allow-forwarded-traffic', checks=[
             self.check('useRemoteGateways', True),
             self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
             self.check('peeringState', 'Connected'),
@@ -1677,63 +1677,6 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
         self.cmd('network vnet peering delete -g {rg} -n peering2 --vnet-name vnet2')
         self.cmd('network vnet-gateway delete -g {rg} -n gateway1')
 
-    @ResourceGroupPreparer(name_prefix='cli-test_vnet_peering_group_2', parameter_name='resource_group_2')
-    @ResourceGroupPreparer(name_prefix='cli-test_vnet_peering_group_1', parameter_name='resource_group_1')
-    def test_network_vnet_peering_different_resource_groups(self, resource_group_1, resource_group_2):
-
-        self.kwargs.update({
-            'rg_1': resource_group_1,
-            'rg_2': resource_group_2
-        })
-
-        # create two vnets with non-overlapping prefixes
-        self.cmd('network vnet create -g {rg_1} -n vnet1')
-        self.cmd('network vnet create -g {rg_2} -n vnet2 --address-prefix 11.0.0.0/16 ')
-
-        # create supporting resources for gateway
-        self.cmd('network public-ip create -g {rg_2} -n ip1')
-        ip_id = self.cmd('network public-ip show -g {rg_2} -n ip1 --query id').get_output_in_json()
-        vnet_id = self.cmd('network vnet show -g {rg_2} -n vnet2 --query id').get_output_in_json()
-
-        self.kwargs.update({
-            'ip_id': ip_id,
-            'vnet_id': vnet_id
-        })
-
-        vnet1_id = self.cmd('network vnet show -g {rg_1} -n vnet1 --query id').get_output_in_json()
-        vnet2_id = self.cmd('network vnet show -g {rg_2} -n vnet2 --query id').get_output_in_json()
-
-        self.kwargs.update({
-            'vnet1_id': vnet1_id,
-            'vnet2_id': vnet2_id
-        })
-        # set up gateway sharing from vnet1 to vnet2
-        self.cmd('network vnet peering create -g {rg_2} -n peering2 --vnet-name vnet2 --remote-vnet vnet1 --remote-vnet-rg {rg_1} --allow-gateway-transit', checks=[
-            self.check('allowGatewayTransit', True),
-            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
-            self.check('remoteVirtualNetwork.resourceGroup', '{rg_1}'),
-            self.check('name','peering2'),
-            self.check('peeringState', 'Initiated')
-        ])
-        self.cmd('network vnet peering create -g {rg_1} -n peering1 --vnet-name vnet1 --remote-vnet {vnet2_id} --allow-forwarded-traffic', checks=[
-            self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
-            self.check('remoteVirtualNetwork.resourceGroup', '{rg_2}'),
-            self.check('name', 'peering1'),
-            self.check('peeringState', 'Connected'),
-            self.check('allowVirtualNetworkAccess', False),
-            self.check('allowForwardedTraffic', True)
-        ])
-        self.cmd('network vnet peering show -g {rg_1} -n peering1 --vnet-name vnet1',
-                 checks=self.check('name', 'peering1'))
-        self.cmd('network vnet peering list -g {rg_2} --vnet-name vnet2', checks=[
-            self.check('[0].name', 'peering2'),
-            self.check('length(@)', 1)
-        ])
-        self.cmd('network vnet peering delete -g {rg_1} -n peering1 --vnet-name vnet1')
-        self.cmd('network vnet peering list -g {rg_1} --vnet-name vnet1',
-                 checks=self.is_empty())
-        # must delete the second peering and the gateway or the resource group delete will fail
-        self.cmd('network vnet peering delete -g {rg_2} -n peering2 --vnet-name vnet2')
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
 
