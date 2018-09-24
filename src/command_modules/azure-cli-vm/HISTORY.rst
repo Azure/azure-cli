@@ -4,7 +4,7 @@ Release History
 ===============
 2.2.4
 ++++++
-* `vmss create`: reserve large enough frontend port range for overprovision
+* `vmss create`: reserve large enough frontend port range to handle overprovisioning
 * `az sig`: fix update commands, support --no-wait on managing image versions
 * `vm list-ip-addresses`: now shows availability zone of public IP addresses.
 
