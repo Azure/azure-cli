@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
 from knack.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['hdinsight'] = """
     type: group
@@ -26,5 +26,10 @@ helps['hdinsight create'] = """
 
 helps['hdinsight list'] = """
     type: command
-    short-summary: Lists clusters in the resource group or subscription.
+    short-summary: List clusters in the resource group or subscription.
+"""
+
+helps['hdinsight wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until an operation is complete.
 """

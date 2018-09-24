@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
@@ -11,6 +12,7 @@ from azure.cli.core.util import sdk_no_wait
 logger = get_logger(__name__)
 
 
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def create_cluster(cmd, client, cluster_name, resource_group_name, location=None, tags=None, no_wait=False,
                    cluster_version='default', cluster_type='hadoop', cluster_tier=None, cluster_configurations=None, component_version=None,
                    headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None, workernode_count=3,
@@ -32,13 +34,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         try:
             cluster_configurations = json.loads(cluster_configurations)
         except ValueError as ex:
-            raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(ex.message))
+            raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(str(ex)))
     if component_version:
         import json
         try:
             component_version = json.loads(component_version)
         except ValueError as ex:
-            raise CLIError('The component_version argument must be valid JSON. Error: {}'.format(ex.message))
+            raise CLIError('The component_version argument must be valid JSON. Error: {}'.format(str(ex)))
 
     # Validate whether HTTP credentials were provided
     is_cluster_config_defined = cluster_configurations and 'gateway' in cluster_configurations and cluster_configurations['gateway']
@@ -67,7 +69,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
 
     # Validate whether SSH credentials were provided
     if not (ssh_password or ssh_public_key):
-        logger.warn("SSH credentials not specified. Using the HTTP password as the SSH password.")
+        logger.warning("SSH credentials not specified. Using the HTTP password as the SSH password.")
         ssh_password = http_password
 
     # Validate storage arguments from the user
@@ -80,14 +82,14 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         logger.info('Storage account key for WASB account not specified. Attempting to retrieve key...')
         key = get_key_for_storage_account(cmd, storage_account, resource_group_name)
         if not key:
-            logger.warn('Storage account key could not be inferred from storage account.')
+            logger.warning('Storage account key could not be inferred from storage account.')
         else:
             storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
     if not storage_default_container and storage_account and _is_wasb_endpoint(storage_account):
         storage_default_container = 'default'
-        logger.warn('Default WASB container not specified, using "{}".'.format(storage_default_container))
+        logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
 
     # Validate storage info parameters
     if not _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
@@ -154,8 +156,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                         virtual_network_profile=virtual_network_profile,
                         data_disks_groups=workernode_data_disk_groups
                     )
-                ]
-                + (
+                ] +
+                (
                     [
                         # Specify a zookeeper role only if the zookeeper size is specified
                         Role(
@@ -166,8 +168,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                             virtual_network_profile=virtual_network_profile
                         )
                     ] if zookeepernode_size else []
-                )
-                + (
+                ) +
+                (
                     [
                         # Specify an edgenode role only if the edgenode size is specified
                         Role(
@@ -181,17 +183,19 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                 )
             ),
             storage_profile=StorageProfile(
-                storageaccounts=[
-                    # Specify storage account details only when storage arguments are provided
-                    StorageAccount(
-                        name=storage_account,
-                        key=storage_account_key,
-                        container=storage_default_container,
-                        file_system=storage_default_filesystem,
-                        is_default=True
-                    )
-                ] if storage_account else []
-                + [
+                storageaccounts=(
+                    [
+                        # Specify storage account details only when storage arguments are provided
+                        StorageAccount(
+                            name=storage_account,
+                            key=storage_account_key,
+                            container=storage_default_container,
+                            file_system=storage_default_filesystem,
+                            is_default=True
+                        )
+                    ] if storage_account else []
+                ) +
+                [
                     StorageAccount(
                         name=s.storage_account,
                         key=s.storage_account_key,
@@ -211,7 +215,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
     return client.create(resource_group_name, cluster_name, create_params)
 
 
-def list_clusters(cmd, client, resource_group_name=None):
+def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
     clusters_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
 

@@ -23,29 +23,5 @@ def cf_hdinsight(cli_ctx, *_, **__):
     return get_mgmt_service_client(cli_ctx, HDInsightManagementClient)
 
 
-def cf_hdinsight_applications(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).applications
-
-
 def cf_hdinsight_clusters(cli_ctx, *_, **__):
     return cf_hdinsight(cli_ctx).clusters
-
-
-def cf_hdinsight_configurations(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).configurations
-
-
-def cf_hdinsight_extensions(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).extensions
-
-
-def cf_hdinsight_locations(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).locations
-
-
-def cf_hdinsight_operations(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).locations
-
-
-def cf_hdinsight_script_actions(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).script_actions
