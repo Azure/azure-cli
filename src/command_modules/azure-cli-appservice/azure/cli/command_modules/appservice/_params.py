@@ -24,7 +24,6 @@ AUTH_TYPES = {
 
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
-OS_TYPES = ['Windows', 'Linux']
 
 # pylint: disable=too-many-statements
 
@@ -92,6 +91,16 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
+
+    with self.argument_context('webapp deleted list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
+
+    with self.argument_context('webapp deleted restore') as c:
+        c.argument('deleted_id', options_list=['--deleted-id'], help='Resource ID of the deleted web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the web app to restore the deleted content to')
+        c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
+        c.argument('restore_content_only', action='store_true', help='restore only deleted files without web app settings')
 
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
@@ -324,8 +333,6 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
-        c.argument('runtime', help='The function runtime stack. Currently supported for Linux apps only', arg_type=get_enum_type(['dotnet', 'node', 'python']))
-        c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
 
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:

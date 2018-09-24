@@ -904,10 +904,10 @@ def list_ddos_plans(cmd, resource_group_name=None):
 
 
 # region DNS Commands
-def create_dns_zone(cmd, client, resource_group_name, zone_name, location='global', tags=None,
+def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    zone = Zone(location=location, tags=tags)
+    zone = Zone(location='global', tags=tags)
 
     if hasattr(zone, 'zone_type'):
         zone.zone_type = zone_type

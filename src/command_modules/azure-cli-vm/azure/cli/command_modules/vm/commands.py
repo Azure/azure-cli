@@ -341,18 +341,19 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'delete')
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_arg_name='gallery')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.command('list', 'list_by_gallery')
         g.command('show', 'get')
         g.command('delete', 'delete')
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete', 'delete')
-        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Regions:join(`, `, publishingProfile.regions), ReplicationState:replicationStatus.aggregatedState}')
+        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
-        g.custom_command('create', 'upload_image')
-        g.generic_update_command('update')
+        g.custom_command('create', 'create_image_version', supports_no_wait=True)
+        g.generic_update_command('update', setter_arg_name='gallery_image_version', supports_no_wait=True)
+        g.wait_command('wait')

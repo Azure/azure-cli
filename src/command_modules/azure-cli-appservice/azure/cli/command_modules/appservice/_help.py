@@ -649,6 +649,30 @@ helps['webapp list-runtimes'] = """
     short-summary: List available built-in stacks which can be used for web apps.
 """
 
+helps['webapp deleted'] = """
+    type: group
+    short-summary: Manage deleted web apps.
+"""
+
+helps['webapp deleted list'] = """
+    type: command
+    short-summary: List web apps that have been deleted.
+"""
+
+helps['webapp deleted restore'] = """
+    type: command
+    short-summary: Restore a deleted web app.
+    long-summary: Restores the files and settings of a deleted web app to the specified web app.
+    examples:
+        - name: Restore a deleted app to the Staging slot of MySite.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+"""
+
+
 helps['webapp delete'] = """
     type: command
     short-summary: Delete a web app.

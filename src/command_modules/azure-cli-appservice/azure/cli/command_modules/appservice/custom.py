@@ -30,7 +30,8 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
+                                   DeletedAppRestoreRequest)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -352,6 +353,16 @@ def list_webapp(cmd, resource_group_name=None):
     return [r for r in result if 'function' not in r.kind]
 
 
+def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
+    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
+    return sorted(result, key=lambda site: site.deleted_site_id)
+
+
+def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
+    request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
+
+
 def list_function_app(cmd, resource_group_name=None):
     result = _list_app(cmd.cli_ctx, resource_group_name)
     return [r for r in result if 'function' in r.kind]
@@ -365,6 +376,18 @@ def _list_app(cli_ctx, resource_group_name=None):
         result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
+    return result
+
+
+def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
+    client = web_client_factory(cli_ctx)
+    result = list(client.deleted_web_apps.list())
+    if resource_group_name:
+        result = [r for r in result if r.resource_group == resource_group_name]
+    if name:
+        result = [r for r in result if r.deleted_site_name.lower() == name.lower()]
+    if slot:
+        result = [r for r in result if r.slot.lower() == slot.lower()]
     return result
 
 
@@ -1076,7 +1099,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
-    print(plan_def)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -1789,9 +1811,9 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, runtime=None, consumption_plan_location=None,
-                    deployment_source_url=None, deployment_source_branch='master',
-                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
+                    consumption_plan_location=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None,
+                    deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1809,15 +1831,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
-        # if os_type is None, the os type is windows
-        is_linux = os_type and os_type.lower() == 'linux'
-
-        # for linux consumption plan app the os_type should be Linux & should have a runtime specified
-        # currently in other cases the runtime is ignored
-        if is_linux and not runtime:
-            raise CLIError("usage error: --runtime RUNTIME required for linux functions apps with consumption plan.")
-
-    else:  # apps with SKU based plan
+    else:
         if is_valid_resource_id(plan):
             parse_result = parse_resource_id(plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
@@ -1827,18 +1841,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
-        functionapp_def.server_farm_id = plan
-        functionapp_def.location = location
-
-    con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
-
-    if is_linux:
-        functionapp_def.kind = 'functionapp,linux'
-        functionapp_def.reserved = True
-        if consumption_plan_location:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
-        else:
+        if is_linux:
+            functionapp_def.kind = 'functionapp,linux'
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
@@ -1852,9 +1856,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
                 site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
-    else:
-        functionapp_def.kind = 'functionapp'
-        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
+        else:
+            functionapp_def.kind = 'functionapp'
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
+
+        functionapp_def.server_farm_id = plan
+        functionapp_def.location = location
+
+    con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
+
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -1870,13 +1880,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    if consumption_plan_location and is_linux:
-        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
-                       "created but is not active until content is published using"
-                       "Azure Portal or the Functions Core Tools.", name)
-    else:
-        _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
-                                 deployment_source_branch, deployment_local_git)
+    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
 
     return functionapp
 

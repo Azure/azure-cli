@@ -779,12 +779,20 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
                 if ip_configuration.public_ip_address:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
-                    network_info['publicIpAddresses'].append({
+
+                    public_ip_addr_info = {
                         'id': public_ip_address.id,
                         'name': public_ip_address.name,
                         'ipAddress': public_ip_address.ip_address,
                         'ipAllocationMethod': public_ip_address.public_ip_allocation_method
-                    })
+                    }
+
+                    try:
+                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
+                    except (AttributeError, IndexError, TypeError):
+                        pass
+
+                    network_info['publicIpAddresses'].append(public_ip_addr_info)
 
             result.append({
                 'virtualMachine': {
@@ -2491,9 +2499,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
-                 location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
-                 replica_count=None, tags=None):
+def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
+                         gallery_image_version, location=None, target_regions=None, end_of_life_date=None,
+                         exclude_from_latest=None, replica_count=None, tags=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',

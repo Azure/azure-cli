@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.6
++++++
+* Support similar table format as helm client.
+
 2.1.5
 +++++
 * Add ACR Task commands.
