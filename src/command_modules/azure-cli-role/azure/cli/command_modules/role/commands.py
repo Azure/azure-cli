@@ -51,7 +51,7 @@ def get_graph_client_groups(cli_ctx, _):
     return _graph_client_factory(cli_ctx).groups
 
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
 
     role_users_sdk = CliCommandType(
@@ -88,11 +88,19 @@ def load_command_table(self, _):
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
 
+    with self.command_group('ad app owner', exception_handler=graph_err_handler) as g:
+        g.custom_command('list', 'list_application_owners', client_factory=get_graph_client_applications)
+        # TODO: Add support for 'add' and 'remove'
+
     with self.command_group('ad sp', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_service_principal')
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_sps', client_factory=get_graph_client_service_principals)
         g.custom_show_command('show', 'show_service_principal', client_factory=get_graph_client_service_principals)
+
+    with self.command_group('ad sp owner', exception_handler=graph_err_handler) as g:
+        g.custom_command('list', 'list_service_principal_owners')
+        # TODO: Add support for 'add' and 'remove'
 
     # RBAC related
     with self.command_group('ad sp', exception_handler=graph_err_handler) as g:
