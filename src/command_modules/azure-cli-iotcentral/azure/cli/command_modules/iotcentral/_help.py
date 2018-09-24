@@ -25,10 +25,10 @@ helps['iotcentral app create'] = """
         - name: Create an IoT Central application with the free pricing tier F1, in the region of the resource group.
           text: >
             az iotcentral app create --resource-group MyResourceGroup --name MyApp --subdomain myapp
-        - name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region.
+        - name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region, based on the iotc-demo template.
           text: >
             az iotcentral app create --resource-group MyResourceGroup --name MyApp --sku S1 --location westus
-            --subdomain myapp
+            --subdomain myapp --template iotc-demo@1.0.0
 """
 
 helps['iotcentral app show'] = """

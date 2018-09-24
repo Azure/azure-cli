@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.3
++++++
+* Added template option for IoT Central app create.
+
 0.1.2
 +++++
 * Minor fixes

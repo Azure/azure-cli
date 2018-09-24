@@ -13,14 +13,16 @@ class IoTCentralTest(ScenarioTest):
         app_name = 'iotcentral-app-for-cli-test'
         rg = resource_group
         location = resource_group_location
+        template = 'iotc-devkit-sample@1.0.0'
 
         # Test 'az iotcentral app create'
-        self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2}'.format(app_name, rg, app_name), checks=[
+        self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2} --template {3}'.format(app_name, rg, app_name, template), checks=[
             self.check('resourceGroup', rg),
             self.check('location', location),
             self.check('subdomain', app_name),
             self.check('displayName', app_name),
-            self.check('sku.name', 'S1')])
+            self.check('sku.name', 'S1'),
+            self.check('template', template)])
 
         # Test 'az iotcentral app show'
         self.cmd('iotcentral app show -n {0} -g {1}'.format(app_name, rg), checks=[
