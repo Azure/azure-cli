@@ -8,8 +8,6 @@
 import time
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
-from azure.mgmt.eventhub.models import ProvisioningStateDR
-from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 # pylint: disable=line-too-long
@@ -17,6 +15,8 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class EHNamespaceCURDScenarioTest(ScenarioTest):
+    from azure_devtools.scenario_tests import AllowLargeResponse
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace(self, resource_group):
@@ -241,6 +241,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_eh_alias')
     def test_eh_alias(self, resource_group):
+        from azure.mgmt.eventhub.models import ProvisioningStateDR
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',
