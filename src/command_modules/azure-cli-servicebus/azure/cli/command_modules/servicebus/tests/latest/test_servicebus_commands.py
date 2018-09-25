@@ -9,6 +9,7 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.mgmt.servicebus.models import ProvisioningStateDR
 from knack.util import CLIError
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 # pylint: disable=line-too-long
@@ -16,6 +17,7 @@ from knack.util import CLIError
 
 
 class SBNamespaceCURDScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
@@ -47,14 +49,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', self.kwargs['sku'])])
-
-        try:
-            # Create Namespace with invalid name
-            self.cmd(
-                'servicebus namespace create --resource-group {rg} --name 1122334455 --location {loc} --tags {tags} --sku {sku}',
-                checks=[self.check('sku.name', self.kwargs['sku'])])
-        except CLIError as ex:
-            self.assertTrue(str(ex).find('The specified service namespace is invalid.'))
 
         # Update Namespace
         self.cmd(
@@ -88,13 +82,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd(
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {defaultauthorizationrule}',
             checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
-
-        try:
-            # List Authorizationrule with non-existence namespace
-            self.cmd(
-                'az servicebus namespace authorization-rule list --resource-group {rg} --namespace-name clitesting11')
-        except CLIError as ex:
-            self.assertTrue(str(ex).find('Can not perform requested operation on nested resource.'))
 
 
         # Get Authorization Rule Listkeys

@@ -5,7 +5,7 @@ Release History
 
 0.2.4
 +++++
-* az servicebus now properly handles error responses
+* az servicebus now properly handles error responses for list commands
 
 0.2.3
 +++++

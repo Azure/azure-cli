@@ -13,7 +13,6 @@ def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import namespaces_mgmt_client_factory, \
         queues_mgmt_client_factory, topics_mgmt_client_factory, subscriptions_mgmt_client_factory, \
         rules_mgmt_client_factory, disaster_recovery_mgmt_client_factory, migration_mgmt_client_factory
-    from azure.cli.command_modules.servicebus._exception_handler import empty_on_404, response_exception_handler
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations.namespaces_operations#NamespacesOperations.{}',
@@ -53,7 +52,7 @@ def load_command_table(self, _):
 # Namespace Region
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
-    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
@@ -61,8 +60,8 @@ def load_command_table(self, _):
         g.command('exists', 'check_name_availability_method')
         g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom)
 
-    with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, exception_handler=response_exception_handler) as g:
-        g.command('create', 'create_or_update_authorization_rule',)
+    with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+        g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
@@ -71,15 +70,15 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
 
 # Queue Region
-    with self.command_group('servicebus queue', sb_queue_util, client_factory=queues_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus queue', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbqueue_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbqueue_update')
 
-    with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory, exception_handler=response_exception_handler) as g:
-        g.command('create', 'create_or_update_authorization_rule',)
+    with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
+        g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
@@ -88,14 +87,14 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
 
 # Topic Region
-    with self.command_group('servicebus topic', sb_topic_util, client_factory=topics_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus topic', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbtopic_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbtopic_update')
 
-    with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
@@ -105,7 +104,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
 
 # Subscription Region
-    with self.command_group('servicebus topic subscription', sb_subscriptions_util, client_factory=subscriptions_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus topic subscription', sb_subscriptions_util, client_factory=subscriptions_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbsubscription_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_topic')
@@ -113,7 +112,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_sbsubscription_update')
 
 # Rules Region
-    with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_rules_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_subscriptions')
@@ -121,7 +120,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_rules_update')
 
 # DisasterRecoveryConfigs Region
-    with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.command('set', 'create_or_update')
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -131,13 +130,13 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
 # DisasterRecoveryConfigs Authorization Region
-    with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.command('list', 'list_authorization_rules')
         g.show_command('show', 'get_authorization_rule')
         g.command('keys list', 'list_keys')
 
 # MigrationConfigs Region
-    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, exception_handler=response_exception_handler) as g:
+    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory) as g:
         g.custom_command('start', 'cli_migration_start')
         g.show_command('show', 'get')
         g.command('complete', 'complete_migration')
