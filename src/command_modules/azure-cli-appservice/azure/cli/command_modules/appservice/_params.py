@@ -195,7 +195,7 @@ def load_arguments(self, _):
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
-            c.argument('windows_fx_version', help="Preview - The docker image name used for your windows container webapp, e.g., microsoft/nanoserver:ltsc2016")
+            c.argument('windows_fx_version', help="Preview. Windows Containers web app only. The docker image name used for your windows container webapp, e.g., microsoft/nanoserver:ltsc2016")
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")

@@ -6,6 +6,7 @@ Release History
 +++++
 * az appserviceplan create now supports creating Windows Containers App Service Plans - Preview
 * az webapp create now supports creating and managing Windows Containers Apps - Preview
+* az webapp config set now supports --windows-fx-version for changing the container image for Windows Containers Apps - Preview
 
 0.2.4
 +++++

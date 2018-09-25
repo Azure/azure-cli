@@ -961,6 +961,7 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
 
 
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_webapp_hyperv_e2e(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-hyperv-e2e', length=24)
@@ -993,6 +994,10 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
+        self.cmd('webapp config set -g {} -n {} --windows-fx-version "microsoft/iis"'.format(resource_group, webapp_name))
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "microsoft/iis")
+        ])        
 
 
 if __name__ == '__main__':
