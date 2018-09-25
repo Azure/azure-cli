@@ -94,7 +94,7 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
                           enabled=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-    from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination, EncodingCaptureDescription
+    from azure.mgmt.eventhub.models import CaptureDescription, Destination, EncodingCaptureDescription
     if message_retention_in_days:
         instance.message_retention_in_days = message_retention_in_days
 
