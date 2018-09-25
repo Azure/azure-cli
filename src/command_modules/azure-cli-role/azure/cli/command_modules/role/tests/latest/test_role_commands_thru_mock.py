@@ -21,7 +21,10 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_application, _try_x509_pem,
                                                    delete_service_principal_credential,
                                                    list_service_principal_credentials,
-                                                   update_application, _get_object_stubs)
+                                                   update_application,
+                                                   _get_object_stubs,
+                                                   list_service_principal_owners,
+                                                   list_application_owners)
 
 from knack.util import CLIError
 
@@ -347,6 +350,64 @@ class TestRoleMocked(unittest.TestCase):
 
         self.assertTrue(2 == len(res))
         self.assertTrue(set([x.key_id for x in res]) == set([sp_cred.key_id, app_cred.key_id]))
+
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_list_sp_owner(self, graph_client_mock):
+
+        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
+        test_sp_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
+
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
+
+        sp = mock.MagicMock()
+        sp.object_id, sp.app_id = test_sp_object_id, test_sp_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
+
+        graph_client.service_principals.list.return_value = [sp]
+        graph_client.service_principals.list_owners.return_value = [user]
+
+        # action
+        res = list_service_principal_owners(mock.MagicMock(), test_sp_app_id)
+
+        # assert
+        graph_client.service_principals.list.assert_called_once()
+        graph_client.service_principals.list_owners.assert_called_once()
+
+        self.assertTrue(1 == len(res))
+        self.assertTrue(test_user_object_id == res[0].object_id)
+
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_role_list_app_owner(self, graph_client_mock):
+
+        test_app_object_id = '11111111-2222-3333-4444-555555555555'
+        test_app_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
+
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
+
+        app = mock.MagicMock()
+        app.object_id, app.app_id = test_app_object_id, test_app_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
+
+        graph_client.applications.list.return_value = [app]
+        graph_client.applications.list_owners.return_value = [user]
+
+        # action
+        res = list_application_owners(mock.MagicMock(), test_app_app_id)
+
+        # assert
+        graph_client.applications.list.assert_called_once()
+        graph_client.applications.list_owners.assert_called_once()
+
+        self.assertTrue(1 == len(res))
+        self.assertTrue(test_user_object_id == res[0].object_id)
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_list_sp_cert_creds(self, graph_client_mock):
