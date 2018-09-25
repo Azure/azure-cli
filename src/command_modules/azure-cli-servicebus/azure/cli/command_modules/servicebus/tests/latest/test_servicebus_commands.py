@@ -83,7 +83,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {defaultauthorizationrule}',
             checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
 
-
         # Get Authorization Rule Listkeys
         self.cmd(
             'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
