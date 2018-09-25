@@ -959,6 +959,7 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
                  .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
                      JMESPathCheck('status', 'Disabling')])
 
+
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_hyperv_e2e(self, resource_group):
@@ -992,6 +993,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
+
 
 if __name__ == '__main__':
     unittest.main()
