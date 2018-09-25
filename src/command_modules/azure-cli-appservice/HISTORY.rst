@@ -2,13 +2,16 @@
 
 Release History
 ===============
+0.2.5
++++++
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
+
 0.2.4
 +++++
 * support for webjobs(continuous and triggered) operations management
 * appservice plan, webapp & function app updated to use latest python websites SDK version
 * az webapp config set supports --fts-state property. Also added support fot az functionapp config set & show
 * webapp: add support for bring your own storage
-* az functionapp create supports creating a linux consumption plan type with a specific runtime
 * webapp: add support for listing and restoring deleted apps
 
 0.2.3
