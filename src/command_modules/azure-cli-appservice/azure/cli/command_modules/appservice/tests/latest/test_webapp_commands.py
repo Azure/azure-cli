@@ -997,7 +997,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --windows-fx-version "microsoft/iis"'.format(resource_group, webapp_name))
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', "microsoft/iis")
-        ])        
+        ])
 
 
 if __name__ == '__main__':
