@@ -9,7 +9,6 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.mgmt.servicebus.models import ProvisioningStateDR
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 # pylint: disable=line-too-long
@@ -17,6 +16,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class SBNamespaceCURDScenarioTest(ScenarioTest):
+    from azure_devtools.scenario_tests import AllowLargeResponse
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
