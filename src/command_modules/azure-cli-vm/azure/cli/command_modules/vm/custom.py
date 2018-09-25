@@ -155,7 +155,15 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk):
     AccessLevel = cmd.get_models('AccessLevel')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
-    return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
+    poller = op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
+    result = LongRunningOperation(cmd.cli_ctx)(poller)
+    try:
+        # workaround SDK serialization issue
+        result.access_sas = result.additional_properties['properties']['output']['accessSAS']
+        result.additional_properties.pop('properties')
+    except (KeyError, AttributeError):
+        pass
+    return result
 
 
 def _is_linux_os(vm):
