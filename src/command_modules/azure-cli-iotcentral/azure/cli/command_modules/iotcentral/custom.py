@@ -14,7 +14,7 @@ from ._client_factory import resource_service_factory
 logger = get_logger(__name__)
 
 
-def iotcentral_app_create(cmd, client, app_name, resource_group_name, subdomain, sku="F1", location=None, template=None):
+def iotcentral_app_create(cmd, client, app_name, resource_group_name, subdomain, sku="S1", location=None, template=None):
     cli_ctx = cmd.cli_ctx
     _check_name_availability(client, app_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)

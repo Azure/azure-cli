@@ -10,17 +10,26 @@ class IoTCentralTest(ScenarioTest):
 
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iotcentral_app(self, resource_group, resource_group_location):
-        app_name = 'iotcentral-app-for-cli-test'
+        app_name = self.create_random_name(prefix='iotc-cli-test', length=24)
+        template_app_name = app_name + '-template'
         rg = resource_group
         location = resource_group_location
         template = 'iotc-devkit-sample@1.0.0'
 
         # Test 'az iotcentral app create'
-        self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2} --template {3}'.format(app_name, rg, app_name, template), checks=[
+        self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2}'.format(app_name, rg, app_name), checks=[
             self.check('resourceGroup', rg),
             self.check('location', location),
             self.check('subdomain', app_name),
             self.check('displayName', app_name),
+            self.check('sku.name', 'S1')])
+
+        # Test 'az iotcentral app create, template application'
+        self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2} --template {3}'.format(template_app_name, rg, template_app_name, template), checks=[
+            self.check('resourceGroup', rg),
+            self.check('location', location),
+            self.check('subdomain', template_app_name),
+            self.check('displayName', template_app_name),
             self.check('sku.name', 'S1'),
             self.check('template', template)])
 
@@ -31,6 +40,19 @@ class IoTCentralTest(ScenarioTest):
             self.check('subdomain', app_name),
             self.check('displayName', app_name),
             self.check('sku.name', 'S1')])
+
+        # Test 'az iotcentral app show, template application'
+        self.cmd('iotcentral app show -n {0} -g {1}'.format(template_app_name, rg), checks=[
+            self.check('resourceGroup', rg),
+            self.check('location', location),
+            self.check('subdomain', template_app_name),
+            self.check('displayName', template_app_name),
+            self.check('sku.name', 'S1'),
+            self.check('template', template)])
+
+        # Test 'az iotcentral app delete, template application'
+        self.cmd('iotcentral app delete -n {0} -g {1}'.format(template_app_name, rg), checks=[
+            self.is_empty()])
 
         # Test 'az iotcentral app list'
         self.cmd('iotcentral app list -g {0}'.format(rg), checks=[
