@@ -563,6 +563,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('diskSizeGb', 10)
         ])
 
+        # get SAS token
+        result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
+        self.assertTrue('sv=' in result['accessSas'])
+
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
         data_disk2 = self.cmd('disk create -g {rg} -n {disk2} --source {disk1_id}').get_output_in_json()
