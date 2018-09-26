@@ -32,8 +32,11 @@ def load_arguments(self, _):
     resource_type_type = CLIArgumentType(help="The resource type (Ex: 'resC'). Can also accept namespace/type format (Ex: 'Microsoft.Provider/resC')")
     resource_namespace_type = CLIArgumentType(options_list=('--namespace',), completer=get_providers_completion_list, help="Provider namespace (Ex: 'Microsoft.Provider')")
     resource_parent_type = CLIArgumentType(required=False, options_list=['--parent'], help="The parent path (Ex: 'resA/myA/resB/myB')")
-    existing_policy_definition_name_type = CLIArgumentType(options_list=('--name', '-n'), completer=get_policy_completion_list, help='The policy definition name')
-    existing_policy_set_definition_name_type = CLIArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name')
+    existing_policy_definition_name_type = CLIArgumentType(options_list=('--name', '-n'), completer=get_policy_completion_list, help='The policy definition name.')
+    existing_policy_set_definition_name_type = CLIArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name.')
+    subscription_type = CLIArgumentType(options_list=('--subscription'), FilesCompleter=get_subscription_id_list, help='The subscription id of the policy [set] definition.')
+    management_group_name_type = CLIArgumentType(options_list=('--management-group'), help='The name of the management group of the policy [set] definition.')
+
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
     with self.argument_context('resource') as c:
@@ -91,39 +94,46 @@ def load_arguments(self, _):
     with self.argument_context('policy definition', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
         c.argument('rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
-        c.argument('display_name', help='display name of policy definition')
-        c.argument('description', help='description of policy definition')
-        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
+        c.argument('display_name', help='Display name of policy definition.')
+        c.argument('description', help='Description of policy definition.')
+        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         from azure.mgmt.resource.policy.models import PolicyMode
-        c.argument('name', options_list=('--name', '-n'), help='name of the new policy definition')
-        c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=('--mode', '-m'), help='mode of the new policy definition.', min_api='2016-12-01')
+        c.argument('name', options_list=('--name', '-n'), help='Name of the new policy definition.')
+        c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=('--mode', '-m'), help='Mode of the new policy definition.', min_api='2016-12-01')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
-        c.argument('scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
-        c.argument('disable_scope_strict_match', action='store_true', help='include assignment either inherited from parent scope or at child scope')
-        c.argument('display_name', help='display name of the assignment')
-        c.argument('policy', help='name or id of the policy definition.', completer=get_policy_completion_list)
+        c.ignore('_subscription')
+        c.argument('name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
+        c.argument('scope', help='Scope to which this policy assignment applies.')
+        c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
+        c.argument('display_name', help='Display name of the policy assignment.')
+        c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=('--name', '-n'), help='name of the new assignment')
-        c.argument('params', options_list=('--params', '-p'), help='JSON formatted string or path to file with parameter values of policy rule', min_api='2016-12-01')
+        c.argument('name', options_list=('--name', '-n'), help='Name of the new policy assignment.')
+        c.argument('params', options_list=('--params', '-p'), help='JSON formatted string or path to file with parameter values of policy rule.', min_api='2016-12-01')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
-        c.argument('policy_set_definition', options_list=('--policy-set-definition', '-d'), help='name or id of the policy set definition.')
+        c.argument('policy_set_definition', options_list=('--policy-set-definition', '-d'), help='Name or id of the policy set definition.')
         c.argument('sku', options_list=('--sku', '-s'), help='policy sku.', arg_type=get_enum_type(['free', 'standard']))
         c.argument('notscopes', options_list=('--not-scopes'), nargs='+')
 
     with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-        c.argument('name', options_list=('--name', '-n'), help='name of the new policy set definition')
-        c.argument('display_name', help='display name of policy set definition')
-        c.argument('description', help='description of policy set definition')
-        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions', type=file_type, completer=FilesCompleter())
-        c.argument('definitions', help='JSON formatted string or a path to a file or uri with such content', type=file_type, completer=FilesCompleter())
+        c.argument('display_name', help='Display name of policy set definition.')
+        c.argument('description', help='Description of policy set definition.')
+        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('management_group', arg_type=management_group_name_type)
+
+    with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=('--name', '-n'), help='Name of the new policy set definition.')
 
     with self.argument_context('group') as c:
         c.argument('tag', tag_type)
