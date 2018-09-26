@@ -191,7 +191,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
         # sanity check the traces
