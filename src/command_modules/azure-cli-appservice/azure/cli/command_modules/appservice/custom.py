@@ -73,31 +73,30 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
-    if is_linux or plan_info.is_xenon:
+    if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
             raise CLIError("usage error: --runtime | --deployment-container-image-name |"
                            " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
-        if is_linux and startup_file:
+        if startup_file:
             site_config.app_command_line = startup_file
 
-        if is_linux and runtime:
+        if runtime:
             site_config.linux_fx_version = runtime
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
         elif deployment_container_image_name:
-            fx_version = _format_fx_version(deployment_container_image_name)
-            if is_linux:
-                site_config.linux_fx_version = fx_version
-            else:
-                site_config.windows_fx_version = fx_version
+            site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                           value="false"))
-        elif is_linux and multicontainer_config_type and multicontainer_config_file:
+        elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
+
+    elif plan_info.is_xenon:  # windows container webapp
+        site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
@@ -577,7 +576,7 @@ def _delete_linux_fx_version(cmd, resource_group_name, name, slot=None):
 
 def _get_fx_version(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
-    return site_config.linux_fx_version if site_config.linux_fx_version else site_config.windows_fx_version
+    return site_config.linux_fx_version or site_config.windows_fx_version
 
 
 def url_validator(url):

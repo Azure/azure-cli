@@ -445,6 +445,9 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheck('name', webapp),
         ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('windowsFxVersion', None)
+        ])
         time.sleep(30)  # workaround the fact that a new linux web's "kind" won't be settled instantaneously
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
@@ -980,7 +983,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -990,13 +993,14 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].name', webapp_name),
             JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
-        ])
-        self.cmd('webapp config set -g {} -n {} --windows-fx-version "microsoft/iis"'.format(resource_group, webapp_name))
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('windowsFxVersion', "microsoft/iis")
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis:nanoserver-sac2016"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
+        self.cmd('webapp config set -g {} -n {} --windows-fx-version "DOCKER|microsoft/iis"'.format(resource_group, webapp_name))
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis"),
+            JMESPathCheck('linuxFxVersion', "")
         ])
 
 
