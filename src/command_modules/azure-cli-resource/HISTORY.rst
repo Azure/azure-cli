@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.1.5
++++++
+* update policy to 2018-03-01 python sdk
+* add support for management groups and subscriptions
+
 2.1.4
 +++++
 * `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.
