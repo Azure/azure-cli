@@ -1866,7 +1866,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
     else:
         functionapp_def.kind = 'functionapp'
-        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
