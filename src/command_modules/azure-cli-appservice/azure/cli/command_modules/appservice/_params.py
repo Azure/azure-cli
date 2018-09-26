@@ -69,7 +69,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host webapp on Linux worker')
-        c.argument('hyper_v', action='store_true', required=False, help='Preview - host webapp on Windows container')
+        c.argument('hyper_v', action='store_true', required=False, help='[Preview] - host webapp on Windows container')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:
