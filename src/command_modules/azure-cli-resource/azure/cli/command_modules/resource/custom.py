@@ -1204,11 +1204,11 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 
     PolicyDefinition = cmd.get_models('PolicyDefinition')
     parameters = PolicyDefinition(
-        policy_rule = rules if rules is not None else definition.policy_rule,
-        parameters = params if params is not None else definition.parameters,
-        display_name = display_name if display_name is not None else definition.display_name,
-        description = description if description is not None else definition.description,
-        metadata = metadata if metadata is not None else definition.metadata)
+        policy_rule=rules if rules is not None else definition.policy_rule,
+        parameters=params if params is not None else definition.parameters,
+        display_name=display_name if display_name is not None else definition.display_name,
+        description=description if description is not None else definition.description,
+        metadata=metadata if metadata is not None else definition.metadata)
 
     if cmd.supported_api_version(min_api='2016-12-01'):
         parameters.mode = mode
