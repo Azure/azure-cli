@@ -18,7 +18,7 @@ helps['hdinsight create'] = """
     examples:
         - name: Create a cluster with an existing storage account.
           text: |-
-              az hdinsight cluster create -n MyCluster -g MyResourceGroup \\
+              az hdinsight create -n MyCluster -g MyResourceGroup \\
               -p <HTTP password> \\
               --storage-account myStorageAccount.blob.core.windows.net \\
               --storage-account-key <key>

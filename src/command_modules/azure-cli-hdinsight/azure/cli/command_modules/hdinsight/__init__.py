@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+import azure.cli.command_modules.hdinsight._help  # pylint: disable=unused-import
 
 
 class HDInsightCommandsLoader(AzCommandsLoader):

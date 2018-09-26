@@ -19,18 +19,21 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_min_args(self, storage_account_info):
         self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info, specify_key=False, specify_container=False))
 
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_resize(self, storage_account_info):
         self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info))
 
-        resize_cluster_format = 'az hdinsight resize -n {name} -g {rg} --workernode-count 2'
-        self.cmd(resize_cluster_format, checks=[
+        resize_cluster_format = 'az hdinsight resize -n {name} -g {rg} --target-instance-count 2'
+        self.cmd(resize_cluster_format)
+
+        self.cmd('az hdinsight show -n {name} -g {rg}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.clusterState', 'Running'),
-            self.check("properties.computeProfile.roles[?name=='workernode'].targetInstanceCount", ['2'])
+            self.check("properties.computeProfile.roles[?name=='workernode'].targetInstanceCount", [2])
         ])
 
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_kafka(self, storage_account_info):
         self._create_hdinsight_cluster(
@@ -38,7 +41,7 @@ class HDInsightClusterTests(ScenarioTest):
             HDInsightClusterTests._kafka_arguments()
         )
 
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_kafka_with_optional_disk_args(self, storage_account_info):
         self._create_hdinsight_cluster(
@@ -47,7 +50,7 @@ class HDInsightClusterTests(ScenarioTest):
             HDInsightClusterTests._optional_data_disk_arguments()
         )
 
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_rserver(self, storage_account_info):
         self._create_hdinsight_cluster(
@@ -65,8 +68,7 @@ class HDInsightClusterTests(ScenarioTest):
             'ssh-password': 'Password1!'
         })
 
-        create_cluster_format = 'az hdinsight create -n {name} -g {rg} -l {loc} ' \
-                                '-p {http-password} ' \
+        create_cluster_format = 'az hdinsight create -n {name} -g {rg} -l {loc} -p {http-password} ' \
                                 + ' '.join(additional_create_arguments)
         self.cmd(create_cluster_format, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -84,10 +86,10 @@ class HDInsightClusterTests(ScenarioTest):
         storage_account_name, storage_account_key = storage_account_info
         storage_account_key = storage_account_key.strip()
 
-        key_args = '--storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
-        container_args = '--storage-default-container {}'.format('default') if specify_container else ""
+        key_args = ' --storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
+        container_args = ' --storage-default-container {}'.format('default') if specify_container else ""
 
-        return '--storage-account {}.blob.core.windows.net {} {}'\
+        return '--storage-account {}.blob.core.windows.net{}{}'\
             .format(storage_account_name, key_args, container_args)
 
     @staticmethod
@@ -100,4 +102,4 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _rserver_arguments():
-        return '-t {} --edgenode-size {}'.format('rserver', 'large')
+        return '-t {} --edgenode-size {} -v 3.6'.format('rserver', 'large')
