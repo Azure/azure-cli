@@ -440,15 +440,14 @@ helps['policy assignment create'] = """
           type: string
           short-summary: Scope to which this policy assignment applies.
     examples:
-        - name: Valid scopes are management group, subscription, resource group, and resource, for example
+        - name: Create a resource policy assignment at scope
           text: |
+           Valid scopes are management group, subscription, resource group, and resource, for example
               management group:  /providers/Microsoft.Management/managementGroups/MyManagementGroup
               subscription:      /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333
               resource group:    /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup
               resource:          /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
-        - name: Create a resource policy assignment and provide rule parameter values.
-          text: |
-                az policy assignment create --policy {PolicyName} -p '{
+                az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{
                     "allowedLocations": {
                         "value": [
                             "australiaeast",
@@ -457,9 +456,9 @@ helps['policy assignment create'] = """
                         ]
                     }
                 }'
-        - name: Apply a policy definition to management group MyManagementGroup.
+        - name: Create a resource policy assignment and provide rule parameter values.
           text: |
-                az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{
+                az policy assignment create --policy {PolicyName} -p '{
                     "allowedLocations": {
                         "value": [
                             "australiaeast",
