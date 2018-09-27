@@ -239,7 +239,8 @@ def load_arguments(self, _):
         c.argument('nic', help='NIC name or ID.', validator=validate_vm_nic)
 
     with self.argument_context('vm run-command') as c:
-        c.argument('command_id', completer=get_vm_run_command_completion_list, help="The run command ID")
+        c.argument('command_id', completer=get_vm_run_command_completion_list,
+                   help="The command id. Use 'az vm run-command list' to get the list")
 
     with self.argument_context('vm run-command invoke') as c:
         c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
