@@ -17,7 +17,8 @@ class HDInsightClusterTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_min_args(self, storage_account_info):
-        self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info, specify_key=False, specify_container=False))
+        self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info,
+                                                            specify_key=False, specify_container=False))
 
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)  # Uses 'rg' kwarg
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -73,7 +74,8 @@ class HDInsightClusterTests(ScenarioTest):
         self.cmd(create_cluster_format, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.clusterState', 'Running'),
-            self.check("properties.computeProfile.roles[?name=='headnode'].osProfile.linuxOperatingSystemProfile.username", ['sshuser'])
+            self.check("properties.computeProfile.roles[?name=='headnode']"
+                       ".osProfile.linuxOperatingSystemProfile.username", ['sshuser'])
         ])
 
         self.cmd('az hdinsight show -n {name} -g {rg}', checks=[
@@ -98,7 +100,8 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _optional_data_disk_arguments():
-        return '--workernode-data-disk-storage-account-type {} --workernode-data-disk-size {}'.format('Standard_LRS', '1023')
+        return '--workernode-data-disk-storage-account-type {} --workernode-data-disk-size {}'\
+               .format('Standard_LRS', '1023')
 
     @staticmethod
     def _rserver_arguments():

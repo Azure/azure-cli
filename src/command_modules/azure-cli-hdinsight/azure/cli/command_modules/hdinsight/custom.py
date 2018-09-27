@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
@@ -14,11 +13,15 @@ logger = get_logger(__name__)
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def create_cluster(cmd, client, cluster_name, resource_group_name, location=None, tags=None, no_wait=False,
-                   cluster_version='default', cluster_type='hadoop', cluster_tier=None, cluster_configurations=None, component_version=None,
-                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None, workernode_count=3,
-                   workernode_data_disks_per_node=None, workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
-                   http_username=None, http_password=None, ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
-                   storage_account=None, storage_account_key=None, storage_default_container=None, storage_default_filesystem=None,
+                   cluster_version='default', cluster_type='hadoop', cluster_tier=None,
+                   cluster_configurations=None, component_version=None,
+                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
+                   workernode_count=3, workernode_data_disks_per_node=None,
+                   workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
+                   http_username=None, http_password=None,
+                   ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
+                   storage_account=None, storage_account_key=None,
+                   storage_default_container=None, storage_default_filesystem=None,
                    virtual_network=None, subnet_name=None):
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
@@ -43,17 +46,22 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
             raise CLIError('The component_version argument must be valid JSON. Error: {}'.format(str(ex)))
 
     # Validate whether HTTP credentials were provided
-    is_cluster_config_defined = cluster_configurations and 'gateway' in cluster_configurations and cluster_configurations['gateway']
-    is_username_in_cluster_config = is_cluster_config_defined and 'restAuthCredential.username' in cluster_configurations['gateway']
-    is_password_in_cluster_config = is_cluster_config_defined and 'restAuthCredential.password' in cluster_configurations['gateway']
+    is_cluster_config_defined = cluster_configurations and 'gateway' in cluster_configurations and \
+        cluster_configurations['gateway']
+    is_username_in_cluster_config = is_cluster_config_defined and \
+        'restAuthCredential.username' in cluster_configurations['gateway']
+    is_password_in_cluster_config = is_cluster_config_defined and \
+        'restAuthCredential.password' in cluster_configurations['gateway']
     if not (http_username or is_username_in_cluster_config):
         http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
     if not (http_password or is_password_in_cluster_config):
         raise CLIError('An HTTP password is required.')
     if http_username and is_username_in_cluster_config:
-        raise CLIError('An HTTP username must be specified either as a command-line parameter or in the cluster configuration, but not both.')
+        raise CLIError('An HTTP username must be specified either as a command-line parameter '
+                       'or in the cluster configuration, but not both.')
     if http_password and is_password_in_cluster_config:
-        raise CLIError('An HTTP password must be specified either as a command-line parameter or in the cluster configuration, but not both.')
+        raise CLIError('An HTTP password must be specified either as a command-line parameter '
+                       'or in the cluster configuration, but not both.')
 
     # Update the cluster config with the HTTP credentials
     if not cluster_configurations:
@@ -92,8 +100,10 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
 
     # Validate storage info parameters
-    if not _all_or_none(storage_account, storage_account_key, (storage_default_container or storage_default_filesystem)):
-        raise CLIError('If storage details are specified, the storage account, storage account key, and either the default container or default filesystem must be specified.')
+    if not _all_or_none(storage_account, storage_account_key,
+                        (storage_default_container or storage_default_filesystem)):
+        raise CLIError('If storage details are specified, the storage account, storage account key, '
+                       'and either the default container or default filesystem must be specified.')
 
     # Validate network profile parameters
     if not _all_or_none(virtual_network, subnet_name):
@@ -126,6 +136,45 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         )
     )
 
+    roles = [
+        # Required roles
+        Role(
+            name="headnode",
+            target_instance_count=2,
+            hardware_profile=HardwareProfile(vm_size=headnode_size),
+            os_profile=os_profile,
+            virtual_network_profile=virtual_network_profile
+        ),
+        Role(
+            name="workernode",
+            target_instance_count=workernode_count,
+            hardware_profile=HardwareProfile(vm_size=workernode_size),
+            os_profile=os_profile,
+            virtual_network_profile=virtual_network_profile,
+            data_disks_groups=workernode_data_disk_groups
+        )
+    ]
+
+    if zookeepernode_size:
+        roles.append(
+            Role(
+                name="zookeepernode",
+                target_instance_count=3,
+                hardware_profile=HardwareProfile(vm_size=zookeepernode_size),
+                os_profile=os_profile,
+                virtual_network_profile=virtual_network_profile
+            ))
+
+    if edgenode_size:
+        roles.append(
+            Role(
+                name="edgenode",
+                target_instance_count=1,
+                hardware_profile=HardwareProfile(vm_size=edgenode_size),
+                os_profile=os_profile,
+                virtual_network_profile=virtual_network_profile
+            ))
+
     create_params = ClusterCreateParametersExtended(
         location=location,
         tags=tags,
@@ -139,48 +188,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                 component_version=component_version
             ),
             compute_profile=ComputeProfile(
-                roles=[
-                    # Required roles
-                    Role(
-                        name="headnode",
-                        target_instance_count=2,
-                        hardware_profile=HardwareProfile(vm_size=headnode_size),
-                        os_profile=os_profile,
-                        virtual_network_profile=virtual_network_profile
-                    ),
-                    Role(
-                        name="workernode",
-                        target_instance_count=workernode_count,
-                        hardware_profile=HardwareProfile(vm_size=workernode_size),
-                        os_profile=os_profile,
-                        virtual_network_profile=virtual_network_profile,
-                        data_disks_groups=workernode_data_disk_groups
-                    )
-                ] +
-                (
-                    [
-                        # Specify a zookeeper role only if the zookeeper size is specified
-                        Role(
-                            name="zookeepernode",
-                            target_instance_count=3,
-                            hardware_profile=HardwareProfile(vm_size=zookeepernode_size),
-                            os_profile=os_profile,
-                            virtual_network_profile=virtual_network_profile
-                        )
-                    ] if zookeepernode_size else []
-                ) +
-                (
-                    [
-                        # Specify an edgenode role only if the edgenode size is specified
-                        Role(
-                            name="edgenode",
-                            target_instance_count=1,
-                            hardware_profile=HardwareProfile(vm_size=edgenode_size),
-                            os_profile=os_profile,
-                            virtual_network_profile=virtual_network_profile
-                        )
-                    ] if edgenode_size else []
-                )
+                roles=roles
             ),
             storage_profile=StorageProfile(
                 storageaccounts=(
@@ -209,8 +217,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
     )
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.create,
-                           resource_group_name, cluster_name, create_params)
+        return sdk_no_wait(no_wait, client.create, resource_group_name, cluster_name, create_params)
 
     return client.create(resource_group_name, cluster_name, create_params)
 

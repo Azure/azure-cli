@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
 from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, get_resource_name_completion_list, \
     get_generic_completion_list
 
@@ -16,19 +15,26 @@ def load_arguments(self, _):
     from ._completers import storage_account_completion_list, storage_account_key_completion_list
     from knack.arguments import CLIArgumentType
     node_size_type = CLIArgumentType(arg_group='Node',
-                                     help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+                                     help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/'
+                                          'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
     with self.argument_context('hdinsight') as c:
-        c.argument('cluster_name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+        c.argument('cluster_name', arg_type=name_type,
+                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
                    help='The name of the cluster.')
         c.argument('tags', tags_type)
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
-                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
+                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/en-us/azure/'
+                        'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
                    completer=get_generic_completion_list(known_cluster_types),
-                   help='Type of HDInsight cluster, like: {}. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
+                   help='Type of HDInsight cluster, like: {}. See also: https://docs.microsoft.com/en-us/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#cluster-types'
+                        .format(', '.join(known_cluster_types)))
         c.argument('component_version', arg_group='Cluster',
-                   help='The versions of various Hadoop components, in JSON. See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-component-versioning#hadoop-components-available-with-different-hdinsight-versions')
+                   help='The versions of various Hadoop components, in JSON. See also: https://docs.microsoft.com/'
+                        'en-us/azure/hdinsight/hdinsight-component-versioning#hadoop-components-available-with-'
+                        'different-hdinsight-versions')
         c.argument('cluster_configurations', arg_group='Cluster',
                    help='Extra configurations of various components, in JSON.')
         c.argument('cluster_tier', arg_type=get_enum_type(['standard', 'premium']), arg_group='Cluster',
@@ -59,7 +65,8 @@ def load_arguments(self, _):
         c.argument('storage_account', arg_group='Storage', completer=storage_account_completion_list,
                    help='The storage account, e.g. "<name>.blob.core.windows.net".')
         c.argument('storage_account_key', arg_group='Storage', completer=storage_account_key_completion_list,
-                   help='The storage account key. A key can be retrieved automatically if the user has access to the storage account, and the storage account type is WASB.')
+                   help='The storage account key. A key can be retrieved automatically '
+                        'if the user has access to the storage account, and the storage account type is WASB.')
         c.argument('storage_default_container', arg_group='Storage',
                    help='The storage container the cluster will use. (WASB only)  Default: default.')
         c.argument('storage_default_filesystem', arg_group='Storage',
