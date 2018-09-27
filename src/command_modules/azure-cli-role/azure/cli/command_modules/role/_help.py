@@ -159,7 +159,6 @@ helps['ad app update'] = """
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
 
 """
-az_ad_app_grant_command
 helps['ad app permission'] = """
     type: group
     short-summary: manage an application's OAuth2 permissions.
