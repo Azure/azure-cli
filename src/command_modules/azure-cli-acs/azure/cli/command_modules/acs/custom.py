@@ -2049,6 +2049,7 @@ def _ensure_aks_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
+
 def _ensure_osa_aad(cli_ctx,
                     aad_client_app_id=None,
                     aad_client_app_secret=None,
@@ -2067,7 +2068,7 @@ def _ensure_osa_aad(cli_ctx,
                                     reply_urls=[reply_url],
                                     homepage=reply_url,
                                     password=aad_client_app_secret)
-        aad_client_app_id=result.app_id
+        aad_client_app_id = result.app_id
         logger.info('Created an AAD: %s', aad_client_app_id)
 
     # Get the TenantID
