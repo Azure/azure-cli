@@ -5,7 +5,7 @@ Release History
 
 0.2.4
 +++++
-* az servicebus list commands error are handled in common structure
+* az servicebus list commands errors are now handled in the typical way
 
 0.2.3
 +++++
