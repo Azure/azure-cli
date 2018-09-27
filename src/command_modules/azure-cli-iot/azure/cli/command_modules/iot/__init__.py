@@ -19,8 +19,12 @@ def handler(ctx, **kwargs):
             if not ran_before:
                 extension_text = """
 Comprehensive IoT data-plane functionality is available
-in the Azure IoT CLI Extension. For more info and install guide
-go to https://github.com/Azure/azure-iot-cli-extension
+in the Azure IoT CLI Extension. 
+
+To install the extension, run: "az extension add --name azure-cli-iot-ext"
+
+For more info and install guide go to:
+https://github.com/Azure/azure-iot-cli-extension
 """
                 logger = get_logger(__name__)
                 logger.warning(extension_text)
