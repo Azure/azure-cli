@@ -31,7 +31,9 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
+import requests
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
@@ -164,7 +166,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     if os.path.exists(browse_path):
         os.remove(browse_path)
 
-    _k8s_get_credentials_internal(name, acs_info, browse_path, ssh_key_file)
+    _k8s_get_credentials_internal(name, acs_info, browse_path, ssh_key_file, False)
 
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
@@ -954,7 +956,8 @@ def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=None):
+                        ssh_key_file=None,
+                        overwrite_existing=False):
     """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
@@ -966,10 +969,10 @@ def k8s_get_credentials(cmd, client, name, resource_group_name,
     :type ssh_key_file: str
     """
     acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file)
+    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing)
 
 
-def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
+def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing):
     if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
         raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
 
@@ -992,21 +995,26 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
     # merge things
     if path_candidate != path:
         try:
-            merge_kubernetes_configurations(path, path_candidate)
+            merge_kubernetes_configurations(path, path_candidate, overwrite_existing)
         except yaml.YAMLError as exc:
             logger.warning('Failed to merge credentials to kube config file: %s', exc)
             logger.warning('The credentials have been saved to %s', path_candidate)
 
 
-def _handle_merge(existing, addition, key):
+def _handle_merge(existing, addition, key, replace):
     if addition[key]:
         if existing[key] is None:
             existing[key] = addition[key]
             return
 
         for i in addition[key]:
-            if i not in existing[key]:
-                existing[key].append(i)
+            for j in existing[key]:
+                if i['name'] == j['name']:
+                    if replace or i == j:
+                        existing[key].remove(j)
+                    else:
+                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
+            existing[key].append(i)
 
 
 def load_kubernetes_configuration(filename):
@@ -1022,7 +1030,7 @@ def load_kubernetes_configuration(filename):
         raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
 
-def merge_kubernetes_configurations(existing_file, addition_file):
+def merge_kubernetes_configurations(existing_file, addition_file, replace):
     existing = load_kubernetes_configuration(existing_file)
     addition = load_kubernetes_configuration(addition_file)
 
@@ -1042,9 +1050,9 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     if existing is None:
         existing = addition
     else:
-        _handle_merge(existing, addition, 'clusters')
-        _handle_merge(existing, addition, 'users')
-        _handle_merge(existing, addition, 'contexts')
+        _handle_merge(existing, addition, 'clusters', replace)
+        _handle_merge(existing, addition, 'users', replace)
+        _handle_merge(existing, addition, 'contexts', replace)
         existing['current-context'] = addition['current-context']
 
     # check that ~/.kube/config is only read- and writable by its owner
@@ -1333,12 +1341,13 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
-    if in_cloud_console():
-        raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
-
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001',
+               enable_cloud_console_aks_browse=False):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
+
+    if in_cloud_console() and not enable_cloud_console_aks_browse:
+        raise CLIError('Browse is disabled in cloud shell by default.')
 
     proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
@@ -1358,7 +1367,20 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
-    logger.warning('Proxy running on %s', proxy_url)
+    if in_cloud_console() and enable_cloud_console_aks_browse:
+        logger.warning('***WARNING***')
+        logger.warning('Browsing the kubernetes dashboard in Cloud Shell is an alpha feature.')
+        logger.warning('The browse URL is currently obfuscated but not authenticated.')
+        logger.warning('Do not share this URL.')
+        if not prompt_y_n('Proceed?'):
+            raise CLIError("Browse aborted.")
+        # TODO: better error handling here.
+        response = requests.post('http://localhost:8888/openport/8001')
+        result = json.loads(response.text)
+        logger.warning('To view the console, please open % in a new tab', result['url'])
+    else:
+        logger.warning('Proxy running on %s', proxy_url)
+
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(proxy_url)
@@ -1367,7 +1389,16 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
                          "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
-        return
+        pass
+    finally:
+        # TODO: Better error handling here.
+        requests.post('http://localhost:8888/closeport/8001')
+
+
+def _trim_nodepoolname(nodepool_name):
+    if not nodepool_name:
+        return "nodepool1"
+    return nodepool_name[:12]
 
 
 def _validate_ssh_key(no_ssh_key, ssh_key_value):
@@ -1388,6 +1419,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
+               nodepool_name="nodepool1",
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1420,7 +1452,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg_location
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
-        name='nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1558,7 +1590,8 @@ def aks_get_versions(cmd, client, location):
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
-                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
+                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
+                        overwrite_existing=False):
     credentialResults = None
     if admin:
         credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
@@ -1570,7 +1603,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         try:
             kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
-            _print_or_merge_credentials(path, kubeconfig)
+            _print_or_merge_credentials(path, kubeconfig, overwrite_existing)
         except (IndexError, ValueError):
             raise CLIError("Fail to find kubeconfig file.")
 
@@ -1594,10 +1627,12 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
+def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="nodepool1", no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    for agent_profile in instance.agent_pool_profiles:
+        if agent_profile.name == nodepool_name:
+            agent_profile.count = int(node_count)  # pylint: disable=no-member
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
@@ -2034,7 +2069,7 @@ def _ensure_aks_service_principal(cli_ctx,
             if not client_secret:
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
             if not service_principal:
@@ -2103,7 +2138,7 @@ def _ensure_service_principal(cli_ctx,
             if not client_secret:
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
             if not service_principal:
@@ -2129,7 +2164,7 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     return rg.location
 
 
-def _print_or_merge_credentials(path, kubeconfig):
+def _print_or_merge_credentials(path, kubeconfig, overwrite_existing):
     """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
     stdout if the path is "-".
     """
@@ -2156,7 +2191,7 @@ def _print_or_merge_credentials(path, kubeconfig):
     try:
         additional_file.write(kubeconfig)
         additional_file.flush()
-        merge_kubernetes_configurations(path, temp_path)
+        merge_kubernetes_configurations(path, temp_path, overwrite_existing)
     except yaml.YAMLError as ex:
         logger.warning('Failed to merge credentials to kube config file: %s', ex)
     finally:

@@ -949,7 +949,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet peering') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('virtual_network_peering_name', options_list=('--name', '-n'), help='The name of the VNet peering.', id_part='child_name_1')
-        c.argument('remote_virtual_network', options_list=('--remote-vnet-id',), help='ID of the remote VNet.')
+        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='2.1.0')], help='Resource ID or name of the remote VNet.')
 
     with self.argument_context('network vnet peering create') as c:
         c.argument('allow_virtual_network_access', options_list=('--allow-vnet-access',), action='store_true', help='Allows VMs in the remote VNet to access all VMs in the local VNet.')

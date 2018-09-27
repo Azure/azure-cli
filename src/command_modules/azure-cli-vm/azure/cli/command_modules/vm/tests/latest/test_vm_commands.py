@@ -563,6 +563,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('diskSizeGb', 10)
         ])
 
+        # get SAS token
+        result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
+        self.assertTrue('sv=' in result['accessSas'])
+
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
         data_disk2 = self.cmd('disk create -g {rg} -n {disk2} --source {disk1_id}').get_output_in_json()
@@ -1278,11 +1282,22 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[1].caching', 'None')
         ])
-        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2}')
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 1),
-            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[0].lun', 2),
         ])
+
+        # ensure data disk luns are managed correctly
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].lun', 2),
+            self.check('storageProfile.dataDisks[1].lun', 0),
+        ])
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2}')
         self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('length(storageProfile.dataDisks)', 0))
@@ -1290,6 +1305,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[0].lun', 0)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')

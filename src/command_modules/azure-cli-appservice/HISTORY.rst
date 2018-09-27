@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.5
++++++
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
+
 0.2.4
 +++++
 * support for webjobs(continuous and triggered) operations management

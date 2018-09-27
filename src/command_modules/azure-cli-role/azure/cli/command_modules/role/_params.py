@@ -42,6 +42,9 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
+    with self.argument_context('ad app owner list') as c:
+        c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
+
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 
@@ -53,6 +56,9 @@ def load_arguments(self, _):
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('skip_assignment', arg_type=get_three_state_flag(), help='do not create default assignment')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
+
+    with self.argument_context('ad sp owner list') as c:
+        c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
 
     for item in ['create-for-rbac', 'credential reset']:
         with self.argument_context('ad sp {}'.format(item)) as c:

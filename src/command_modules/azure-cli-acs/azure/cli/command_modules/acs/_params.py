@@ -17,7 +17,7 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods)
+    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodepool_name)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -87,7 +87,8 @@ def load_arguments(self, _):
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
                    help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
-        c.argument('master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
+        c.argument('master_vm_size', completer=get_vm_size_completion_list,
+                   help=_get_feature_in_preview_message())
         c.argument('agent_count', type=int)
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
                    help='Generate SSH public and private key files if missing')
@@ -115,8 +116,7 @@ def load_arguments(self, _):
                    help='If true, set the default osType of agent pools to be Windows.')
         c.argument('validate', action='store_true',
                    help='Generate and validate the ARM template without creating any resources')
-        c.argument('orchestrator_version',
-                   help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
+        c.argument('orchestrator_version', help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
 
     with self.argument_context('acs scale') as c:
         c.argument('new_agent_count', type=int)
@@ -154,6 +154,8 @@ def load_arguments(self, _):
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('nodepool_name', type=str, default='nodepool1',
+                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -202,13 +204,19 @@ def load_arguments(self, _):
                    help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 
     with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector',
+                   help='The name for the ACI Connector', validator=validate_connector_name)
         c.argument('graceful', action='store_true',
                    help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+        c.argument('os_type', get_enum_type(aci_connector_os_type),
+                   help='The OS type of the connector')
 
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
+
+    with self.argument_context('aks scale') as c:
+        c.argument('nodepool_name', type=str, default='nodepool1',
+                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

@@ -365,6 +365,7 @@ The follow special kwargs are supported by argument context and its helper metho
 - `validator` - See section on [Validators](#validators)
 - `completer` - See section on [Tab Completion](#tab-completion)
 - `id_part` - See section on [Supporting the IDs Parameter](#supporting-the-ids-parameter).
+- `arg_group` - Groups arguments within this context under a group name or add an argument to the group. This group name is shown in the help for the command. For example if `arg_group` is "Network", all applicable arguments will be grouped under the heading "Network Arguments" in the help text for the command.
 
 Additionally, the following `kwargs`, supported by argparse, are supported as well:
 - `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
