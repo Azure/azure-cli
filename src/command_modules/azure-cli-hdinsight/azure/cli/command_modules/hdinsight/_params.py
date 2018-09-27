@@ -28,9 +28,9 @@ def load_arguments(self, _):
                         'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
                    completer=get_generic_completion_list(known_cluster_types),
-                   help='Type of HDInsight cluster, like: {}. See also: https://docs.microsoft.com/en-us/azure/'
-                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#cluster-types'
-                        .format(', '.join(known_cluster_types)))
+                   help='Type of HDInsight cluster, like: {}. '
+                        'See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-'
+                        'hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
         c.argument('component_version', arg_group='Cluster',
                    help='The versions of various Hadoop components, in JSON. See also: https://docs.microsoft.com/'
                         'en-us/azure/hdinsight/hdinsight-component-versioning#hadoop-components-available-with-'
@@ -66,11 +66,11 @@ def load_arguments(self, _):
                    help='The storage account, e.g. "<name>.blob.core.windows.net".')
         c.argument('storage_account_key', arg_group='Storage', completer=storage_account_key_completion_list,
                    help='The storage account key. A key can be retrieved automatically '
-                        'if the user has access to the storage account, and the storage account type is WASB.')
+                        'if the user has access to the storage account.')
         c.argument('storage_default_container', arg_group='Storage',
                    help='The storage container the cluster will use. (WASB only)  Default: default.')
         c.argument('storage_default_filesystem', arg_group='Storage',
-                   help='The storage filesystem the cluster will use. (ADLS Gen 2 only)')
+                   help='The storage filesystem the cluster will use. (DFS only)')
         c.argument('virtual_network', arg_group='Network',
                    help='The virtual network resource ID of an existing virtual network.')
         c.argument('subnet_name', arg_group='Network',

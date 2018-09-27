@@ -85,9 +85,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Attempt to infer the storage account key from the endpoint
-    if not storage_account_key and storage_account and _is_wasb_endpoint(storage_account):
+    if not storage_account_key and storage_account:
         from .util import get_key_for_storage_account
-        logger.info('Storage account key for WASB account not specified. Attempting to retrieve key...')
+        logger.info('Storage account key not specified. Attempting to retrieve key...')
         key = get_key_for_storage_account(cmd, storage_account, resource_group_name)
         if not key:
             logger.warning('Storage account key could not be inferred from storage account.')
