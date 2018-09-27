@@ -53,7 +53,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
             self.check('fqdn', '{fqdn}'),
-            self.exists('openshiftVersion')
+            self.exists('openShiftVersion')
         ])
 
         # scale up
@@ -100,7 +100,8 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
             self.check('fqdn', '{fqdn}'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('openShiftVersion')
         ])
 
         # delete
@@ -138,7 +139,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
             self.check('fqdn', '{fqdn}'),
-            self.exists('openshiftVersion')
+            self.exists('openShiftVersion')
         ])
 
         # scale up
