@@ -559,10 +559,9 @@ helps['openshift create'] = """
           short-summary: The ID of an Azure Active Directory tenant.
 
     examples:
-        - name: Create an OpenShift cluster.
+        - name: Create an OpenShift cluster and auto create an AAD Client
           text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
-                --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID>
-        - name: Create an OpenShift cluster with 5 compute nodes.
+        - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
           text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
                 --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID> --node-count 5
 """

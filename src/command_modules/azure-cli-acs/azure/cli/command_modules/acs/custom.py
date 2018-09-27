@@ -2049,6 +2049,38 @@ def _ensure_aks_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
+def _ensure_osa_aad(cli_ctx,
+                    aad_client_app_id=None,
+                    aad_client_app_secret=None,
+                    aad_tenant_id=None,
+                    identifier=None,
+                    name=None):
+    # TODO: This really needs to be unit tested.
+    rbac_client = get_graph_rbac_management_client(cli_ctx)
+    if not aad_client_app_id:
+        if not aad_client_app_secret:
+            aad_client_app_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+        reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
+        result = create_application(client=rbac_client.applications,
+                                    display_name=identifier,
+                                    identifier_uris=[reply_url],
+                                    reply_urls=[reply_url],
+                                    homepage=reply_url,
+                                    password=aad_client_app_secret)
+        aad_client_app_id=result.app_id
+        logger.info('Created an AAD: %s', aad_client_app_id)
+
+    # Get the TenantID
+    if aad_tenant_id is None:
+        profile = Profile(cli_ctx=cli_ctx)
+        _, _, aad_tenant_id = profile.get_login_credentials()
+
+    return OpenShiftManagedClusterServiceAADIdentityProvider(
+        client_id=aad_client_app_id,
+        secret=aad_client_app_secret,
+        tenant_id=aad_tenant_id,
+        kind='AADIdentityProvider')
+
 
 def _ensure_service_principal(cli_ctx,
                               service_principal=None,
@@ -2220,18 +2252,17 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     )
     identity_providers = []
 
-    if any([aad_client_app_id, aad_client_app_secret, aad_tenant_id]):
-        identity_providers.append(
-            OpenShiftManagedClusterIdentityProviders(
-                name='Azure AD',
-                provider=OpenShiftManagedClusterServiceAADIdentityProvider(
-                    kind='AADIdentityProvider',
-                    client_id=aad_client_app_id,
-                    secret=aad_client_app_secret,
-                    tenant_id=aad_tenant_id
-                )
-            )
+    osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
+                                       aad_client_app_id=aad_client_app_id,
+                                       aad_client_app_secret=aad_client_app_secret,
+                                       identifier=fqdn, name=name)
+
+    identity_providers.append(
+        OpenShiftManagedClusterIdentityProviders(
+            name='Azure AD',
+            provider=osa_aad_identity
         )
+    )
     auth_profile = OpenShiftManagedClusterAuthProfile(identity_providers=identity_providers)
 
     default_router_profile = OpenShiftRouterProfile(name='default')
