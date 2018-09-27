@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.3.6
+2.3.7
 +++++
 * Add Managed OpenShift commands
+
+2.3.6
++++++
+* `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
 
 2.3.5
 +++++
