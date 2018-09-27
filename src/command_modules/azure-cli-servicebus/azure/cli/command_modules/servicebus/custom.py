@@ -9,7 +9,6 @@
 # pylint: disable=unused-variable
 
 import re
-import time
 
 
 # Namespace Region
@@ -393,6 +392,7 @@ def cli_rules_update(instance,
 
 
 def cli_migration_start(client, resource_group_name, namespace_name, target_namespace, post_migration_name):
+    import time
 
     client.create_and_start_migration(resource_group_name, namespace_name, target_namespace, post_migration_name)
     getresponse = client.get(resource_group_name, namespace_name)
