@@ -204,7 +204,7 @@ def load_command_table(self, _):
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
     with self.command_group('functionapp') as g:
-        g.custom_command('create', 'create_function')
+        g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
