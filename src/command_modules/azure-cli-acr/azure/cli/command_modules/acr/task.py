@@ -66,6 +66,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
+                    pull_request_trigger_enabled=False,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -77,8 +78,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
-    if commit_trigger_enabled and not git_access_token:
-        raise CLIError("Commit trigger needs to be disabled [--commit-trigger-enabled False] "
+    if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
+        raise CLIError("Source control trigger needs to be disabled [--commit-trigger-enabled False --pull_request_trigger_enabled False] "
                        "if no --git-access-token is provided.")
 
     if file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -122,8 +123,42 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 source_trigger_events=[SourceTriggerEvent.commit.value],
                 status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
                 name=source_trigger_name
-            )
+            ),
+            SourceTrigger(
+                source_repository=SourceProperties(
+                    source_control_type=source_control_type,
+                    repository_url=context_path,
+                    branch=branch,
+                    source_control_auth_properties=AuthInfo(
+                        token=git_access_token,
+                        token_type=DEFAULT_TOKEN_TYPE,
+                        scope='repo'
+                    )
+                ),
+                source_trigger_events=[SourceTriggerEvent.pullrequest.value],
+                status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
+                name="foo"
+            ),
         ]
+        
+    # if pull_request_trigger_enabled:
+    #     source_triggers = [
+    #         SourceTrigger(
+    #             source_repository=SourceProperties(
+    #                 source_control_type=source_control_type,
+    #                 repository_url=context_path,
+    #                 branch=branch,
+    #                 source_control_auth_properties=AuthInfo(
+    #                     token=git_access_token,
+    #                     token_type=DEFAULT_TOKEN_TYPE,
+    #                     scope='repo'
+    #                 )
+    #             ),
+    #             source_trigger_events=[SourceTriggerEvent.pullrequest.value, SourceTriggerEvent.commit.value] if commit_trigger_enabled else [SourceTriggerEvent.pullrequest.value],
+    #             status=TriggerStatus.enabled.value if pull_request_trigger_enabled else TriggerStatus.disabled.value,
+    #             name=source_trigger_name
+    #         )
+    #     ]
 
     base_image_trigger = None
     if base_image_trigger_enabled:
