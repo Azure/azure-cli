@@ -2,6 +2,22 @@
 
 Release History
 ===============
+2.2.2
++++++
+* `--auth-mode login` parameter allows use of user's login credentials for blob and queue authorization.
+* Added `storage container immutability-policy/legal-hold` to manage immutable storage.
+
+2.2.1
++++++
+* `storage share policy show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+2.2.0
++++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
+* Make '--resource-group' parameter optional for 'storage account' commands.
+* Remove 'Failed precondition' warnings for individual failures in batch commands for single aggregated message.
+* blob/file delete-batch commands no longer output array of nulls.
+* blob download/upload/delete-batch commands will read sas-token from container url
 
 2.1.1
 +++++

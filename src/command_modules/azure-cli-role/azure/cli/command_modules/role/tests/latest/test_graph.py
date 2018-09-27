@@ -181,6 +181,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             # add user2 into group
             self.cmd('ad group member add -g {group} --member-id {user2_id}',
                      checks=self.is_empty())
+
+            # show user's group memberships
+            self.cmd('ad user get-member-groups --upn-or-object-id {user1_id}',
+                     checks=self.check('[0].displayName', self.kwargs['group']))
             # show group
             self.cmd('ad group show -g {group}', checks=[
                 self.check('objectId', '{group_id}'),

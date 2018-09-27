@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.1
++++++
+* Update azure-mgmt-cdn dependency to 3.0.0
+
 0.1.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

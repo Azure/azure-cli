@@ -110,7 +110,7 @@ set PYTHONPATH=%BUILDING_DIR%\Lib\site-packages
 del %BUILDING_DIR%\python36._pth
 
 set CLI_SRC=%REPO_ROOT%\src
-for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg) do (
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
    popd
@@ -142,6 +142,7 @@ for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
     set ALL_MODULES=!ALL_MODULES! %%i
 )
 echo All modules: %ALL_MODULES%
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 

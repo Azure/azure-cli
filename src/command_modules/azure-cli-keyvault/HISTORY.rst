@@ -3,6 +3,22 @@
 Release History
 ===============
 
+2.2.4
++++++
+* Restrict keyvault storage commmands to the latest API profile
+
+2.2.3
++++++
+* Fixed Key Vault key import for RSA keys
+
+2.2.2
++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* support KV mgmt multi-api version
+* support KV data plane multi-api version
+
 2.2.1
 +++++
 * Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
@@ -22,6 +38,9 @@ Release History
 
 2.0.24
 ++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
 * Minor fixes
 
 2.0.23

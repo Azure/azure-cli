@@ -53,3 +53,7 @@ def cf_activity_log(cli_ctx, _):
 
 def cf_event_categories(cli_ctx, _):
     return cf_monitor(cli_ctx, _).event_categories
+
+
+def cf_metric_alerts(cli_ctx, _):
+    return cf_monitor(cli_ctx, _).metric_alerts

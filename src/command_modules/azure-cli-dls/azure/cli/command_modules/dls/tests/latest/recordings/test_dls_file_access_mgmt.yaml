@@ -1,33 +1,35 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-08-15T18:14:13Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adls_access000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001","name":"cli_test_adls_access000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001","name":"cli_test_adls_access000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-08-15T18:14:13Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:31:12 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1188']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"encryptionState": "Disabled"}, "location": "eastus2"}'
+    body: '{"location": "eastus2", "properties": {"encryptionState": "Disabled"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -35,21 +37,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['70']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 datalakestoreaccountmanagementclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
-    body: {string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"935589e5-32cc-400d-b248-10ffc631abe8"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
+    body: {string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"d22b8354-3d71-4ac1-8308-8123f3abe525"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/935589e5-32cc-400d-b248-10ffc631abe80?api-version=2016-11-01&expanded=true']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/d22b8354-3d71-4ac1-8308-8123f3abe5250?api-version=2016-11-01&expanded=true']
       cache-control: [no-cache]
-      connection: [close]
       content-length: ['471']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:31:15 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:15 GMT']
       expires: ['-1']
       location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002/operationresults/0?api-version=2016-11-01']
       pragma: [no-cache]
@@ -57,7 +58,7 @@ interactions:
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1187']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -67,25 +68,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [dls account create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 datalakestoreaccountmanagementclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/935589e5-32cc-400d-b248-10ffc631abe80?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/d22b8354-3d71-4ac1-8308-8123f3abe5250?api-version=2016-11-01&expanded=true
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
-      connection: [close]
       content-length: ['23']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:31:25 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
@@ -98,25 +97,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [dls account create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 datalakestoreaccountmanagementclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/935589e5-32cc-400d-b248-10ffc631abe80?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/d22b8354-3d71-4ac1-8308-8123f3abe5250?api-version=2016-11-01&expanded=true
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
-      connection: [close]
       content-length: ['22']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:31:56 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
@@ -129,25 +126,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [dls account create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 datalakestoreaccountmanagementclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
-    body: {string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"935589e5-32cc-400d-b248-10ffc631abe8","creationTime":"2017-12-13T21:31:16.8484867Z","lastModifiedTime":"2017-12-13T21:31:16.8484867Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
+    body: {string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"d22b8354-3d71-4ac1-8308-8123f3abe525","creationTime":"2018-08-15T18:14:16.6858672Z","lastModifiedTime":"2018-08-15T18:14:16.6858672Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
     headers:
       cache-control: [no-cache]
-      connection: [close]
-      content-length: ['857']
+      content-length: ['943']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:31:56 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
@@ -161,24 +156,24 @@ interactions:
       CommandName: [dls account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 datalakestoreaccountmanagementclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
-    body: {string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"935589e5-32cc-400d-b248-10ffc631abe8","creationTime":"2017-12-13T21:31:16.8484867Z","lastModifiedTime":"2017-12-13T21:31:16.8484867Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
+    body: {string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"d22b8354-3d71-4ac1-8308-8123f3abe525","creationTime":"2018-08-15T18:14:16.6858672Z","lastModifiedTime":"2018-08-15T18:14:16.6858672Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
     headers:
       cache-control: [no-cache]
-      connection: [close]
-      content-length: ['857']
+      content-length: ['943']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:31:58 GMT']
+      date: ['Wed, 15 Aug 2018 18:14:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
@@ -190,24 +185,24 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=GETFILESTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2016-11-01
   response:
     body: {string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01 [1e7a0e1f-bb35-4c79-9314-139704fd745e][2017-12-13T13:31:59.4072779-08:00]","javaClassName":"java.io.FileNotFoundException"}}'}
+        does not exist: /adltestfolder01 [a6b077e0-9b0f-4a1d-b8d3-279637a9d7b0][2018-08-15T11:15:04.6117131-07:00]","javaClassName":"java.io.FileNotFoundException"}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['236']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:31:58 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x8309000A']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 404, message: Not Found}
 - request:
     body: null
@@ -216,23 +211,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MKDIRS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MKDIRS&api-version=2016-11-01
   response:
     body: {string: '{"boolean":true}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['16']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:31:58 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -240,23 +235,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=GETFILESTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2016-11-01
   response:
-    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1513200719527,"modificationTime":1513200719527,"replication":0,"permission":"770","owner":"5963f50c-7c43-405c-af7e-53294de76abd","group":"5963f50c-7c43-405c-af7e-53294de76abd","aclBit":false}}'}
+    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1534356904746,"modificationTime":1534356904746,"replication":0,"permission":"770","owner":"ca846d27-5f6c-4e60-a68b-937ead3cb3ed","group":"ca846d27-5f6c-4e60-a68b-937ead3cb3ed","aclBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['280']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:31:59 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -265,22 +260,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?owner=6361e05d-c381-4275-a932-5535806bb323&api-version=2016-11-01&OP=SETOWNER&group=80a3ed5f-959e-4696-ba3c-d3c8b2db6766
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=SETOWNER&api-version=2016-11-01&owner=6361e05d-c381-4275-a932-5535806bb323&group=80a3ed5f-959e-4696-ba3c-d3c8b2db6766
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:00 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -288,23 +283,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=GETFILESTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2016-11-01
   response:
-    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1513200719527,"modificationTime":1513200719527,"replication":0,"permission":"770","owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","aclBit":false}}'}
+    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1534356904746,"modificationTime":1534356904746,"replication":0,"permission":"770","owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","aclBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['280']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:00 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -313,22 +308,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&permission=777&OP=SETPERMISSION
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=SETPERMISSION&api-version=2016-11-01&permission=777
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:01 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -336,23 +331,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=GETFILESTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2016-11-01
   response:
-    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1513200719527,"modificationTime":1513200719527,"replication":0,"permission":"777","owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","aclBit":false}}'}
+    body: {string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1534356904746,"modificationTime":1534356904746,"replication":0,"permission":"777","owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","aclBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['280']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:01 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -360,23 +355,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","group::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['196']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:02 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -385,23 +380,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&aclSpec=user%3A%3Arwx%2Cgroup%3A%3Arwx%2Cother%3A%3Arwx%2Cuser%3A470c0ccf-c91a-4597-98cd-48507d2f1486%3Arwx&OP=SETACL
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=SETACL&api-version=2016-11-01&aclSpec=user%3A%3Arwx%2Cgroup%3A%3Arwx%2Cother%3A%3Arwx%2Cuser%3A470c0ccf-c91a-4597-98cd-48507d2f1486%3Arwx
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
       contentlength: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:02 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -409,23 +404,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","user:470c0ccf-c91a-4597-98cd-48507d2f1486:rwx","group::rwx","mask::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['256']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:03 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -434,23 +429,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&aclSpec=user%3A470c0ccf-c91a-4597-98cd-48507d2f1486%3A-w-&OP=MODIFYACLENTRIES
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MODIFYACLENTRIES&api-version=2016-11-01&aclSpec=user%3A470c0ccf-c91a-4597-98cd-48507d2f1486%3A-w-
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
       contentlength: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:04 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -458,23 +453,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","user:470c0ccf-c91a-4597-98cd-48507d2f1486:-w-","group::rwx","mask::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['256']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:04 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -483,23 +478,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&aclSpec=user%3A470c0ccf-c91a-4597-98cd-48507d2f1486&OP=REMOVEACLENTRIES
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=REMOVEACLENTRIES&api-version=2016-11-01&aclSpec=user%3A470c0ccf-c91a-4597-98cd-48507d2f1486
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
       contentlength: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:05 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -507,23 +502,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","group::rwx","mask::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['208']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:06 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -532,23 +527,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=REMOVEDEFAULTACL
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=REMOVEDEFAULTACL&api-version=2016-11-01
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
       contentlength: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:06 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -556,23 +551,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","group::rwx","mask::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['208']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:06 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -581,23 +576,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: PUT
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=REMOVEACL
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=REMOVEACL&api-version=2016-11-01
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['0']
       contentlength: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:07 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -605,23 +600,23 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) azure.datalake.store.lib/0.0.17
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) azure.datalake.store.lib/0.0.22
           Azure-Data-Lake-Store-SDK-For-Python]
     method: GET
-    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?api-version=2016-11-01&OP=MSGETACLSTATUS
+    uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MSGETACLSTATUS&api-version=2016-11-01
   response:
     body: {string: '{"AclStatus":{"entries":["user::rwx","group::rwx","other::rwx"],"owner":"6361e05d-c381-4275-a932-5535806bb323","group":"80a3ed5f-959e-4696-ba3c-d3c8b2db6766","permission":"777","stickyBit":false}}'}
     headers:
       cache-control: ['no-cache, no-cache, no-store, max-age=0']
       content-length: ['196']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:32:07 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       status: ['0x0']
       strict-transport-security: [max-age=15724800; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-webhdfs-version: [17.04.22.00]
+      x-ms-webhdfs-version: [17.04.24.00]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -632,9 +627,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.14393-SP0) requests/2.19.1 msrest/0.5.3
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.44]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adls_access000001?api-version=2018-05-01
@@ -643,11 +638,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:32:08 GMT']
+      date: ['Wed, 15 Aug 2018 18:15:18 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQURMUzo1RkFDQ0VTUzRKNVA3SFpXSkRBVFZXQTVVTVEyWXw4REJEQjc2QjNEQUY2QzhGLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQURMUzo1RkFDQ0VTU0Q3SkpOTlBTR1RHRjdNWkhWR1dBSnxFOTM1QThCMzBDRjAwMUZCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

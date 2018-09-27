@@ -125,7 +125,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = 'UGHH=Ytqp9pMo7IprYJHz9LBKvy0Pwbk'
+        password = 'EsYA8DyuSaNv+3HyGyHoiIIafktf0kE6'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -161,6 +161,46 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'imageRegistryCredentials[0].username', '{registry_username}'),
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
+
+    # Test create container with VNET argument validations.
+    @ResourceGroupPreparer()
+    def test_container_create_with_vnet(self, resource_group, resource_group_location):
+        from msrestazure.tools import resource_id
+        from msrestazure.azure_exceptions import CloudError
+        from knack.util import CLIError
+
+        test_sub_id = '00000000-0000-0000-0000-000000000000'
+        container_group_name = self.create_random_name('clicontainer', 16)
+        vnet_name = self.create_random_name('vent', 16)
+        subnet_name = self.create_random_name('subnet', 16)
+        network_profile_name = self.create_random_name('nprofile', 16)
+        network_profile_id = resource_id(subscription=test_sub_id,
+                                         resource_group=resource_group,
+                                         namespace='Microsoft.Network', type='networkProfiles',
+                                         name=network_profile_name)
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'vnet_name': vnet_name,
+            'subnet_name': subnet_name,
+            'network_profile_name': network_profile_name,
+            'network_profile_id': network_profile_id
+        })
+
+        # Vnet name with no subnet
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet-name {vnet_name}')
+
+        # Subnet name with no vnet name
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
+                     '--subnet {subnet_name} ')
+
+        # Network Profile doesn't exists from name
+        with self.assertRaisesRegexp(CloudError, "Azure Error: NetworkProfileNotFound"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
+                     '--network-profile {network_profile_name} ')
 
     # Test create container with azure file volume
     @ResourceGroupPreparer()

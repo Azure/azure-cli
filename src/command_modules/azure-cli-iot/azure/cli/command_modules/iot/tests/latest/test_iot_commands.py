@@ -11,11 +11,11 @@ class IoTHubTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
-        device_id_1 = 'test-device-1'
-        device_id_2 = 'test-device-2'
         hub = 'iot-hub-for-test'
         rg = resource_group
         location = resource_group_location
+        ehConnectionString = self._get_eventhub_connectionstring(rg)
+        subscription_id = self._get_current_subscription()
 
         # Test 'az iot hub create'
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4'.format(hub, rg),
@@ -26,7 +26,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.eventHubEndpoints.events.partitionCount', '4')])
 
         # Test 'az iot hub show-connection-string'
-        conn_str_pattern = r'^HostName={0}\.azure-devices\.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
+        conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
             hub)
         self.cmd('iot hub show-connection-string -n {0}'.format(hub), checks=[
             self.check_pattern('connectionString', conn_str_pattern)
@@ -135,92 +135,6 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub job cancel --hub-name {0} --job-id {1}'.format(hub, job_id),
                  expect_failure=True)
 
-        # Test 'az iot device create'
-        device_1 = device_id_1
-        self.cmd('iot device create --hub-name {0} -d {1}'.format(hub, device_1),
-                 checks=[self.check('deviceId', device_1),
-                         self.check('status', 'enabled'),
-                         self.check('statusReason', None),
-                         self.check('connectionState', 'Disconnected')])
-
-        device_2 = device_id_2
-        primary_thumbprint = 'A361EA6A7119A8B0B7BBFFA2EAFDAD1F9D5BED8C'
-        secondary_thumbprint = '14963E8F3BA5B3984110B3C1CA8E8B8988599087'
-        self.cmd('iot device create --hub-name {0} -d {1} --x509 --primary-thumbprint {2} --secondary-thumbprint {3}'
-                 .format(hub, device_2, primary_thumbprint, secondary_thumbprint),
-                 checks=[self.check('deviceId', device_2),
-                         self.check('status', 'enabled'),
-                         self.check('statusReason', None),
-                         self.check('connectionState', 'Disconnected'),
-                         self.check('authentication.symmetricKey.primaryKey', None),
-                         self.check('authentication.symmetricKey.secondaryKey', None),
-                         self.check('authentication.x509Thumbprint.primaryThumbprint', primary_thumbprint),
-                         self.check('authentication.x509Thumbprint.secondaryThumbprint', secondary_thumbprint)])
-
-        # Test 'az iot device show-connection-string'
-        conn_str_pattern = r'^HostName={0}\.azure-devices\.net;DeviceId={1};SharedAccessKey='.format(hub, device_1)
-        self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_1), checks=[
-            self.check_pattern('connectionString', conn_str_pattern)
-        ])
-
-        connection_string = 'HostName={0}.azure-devices.net;DeviceId={1};x509=true'.format(hub, device_2)
-        self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_2), checks=[
-            self.check('connectionString', connection_string)
-        ])
-
-        device_id_pattern = r'^test\-device\-\d$'
-        self.cmd('iot device show-connection-string --hub-name {0}'.format(hub), checks=[
-            self.check('length([*])', 2),
-            self.check_pattern('[0].deviceId', device_id_pattern),
-            self.check_pattern('[1].deviceId', device_id_pattern)
-        ])
-
-        # Test 'az iot device show'
-        self.cmd('iot device show --hub-name {0} -d {1}'.format(hub, device_1), checks=[
-            self.check('deviceId', device_1),
-            self.check('status', 'enabled'),
-            self.check('statusReason', None),
-            self.check('connectionState', 'Disconnected')
-        ])
-
-        # Test 'az iot device update'
-        status_reason = 'TestReason'
-        self.cmd('iot device update --hub-name {0} -d {1} --set statusReason={2}'.format(hub, device_2, status_reason),
-                 checks=[
-                     self.check('deviceId', device_2),
-                     self.check('status', 'enabled'),
-                     self.check('statusReason', status_reason),
-                     self.check('connectionState', 'Disconnected'),
-                     self.check('authentication.symmetricKey.primaryKey', None),
-                     self.check('authentication.symmetricKey.secondaryKey', None),
-                     self.check('authentication.x509Thumbprint.primaryThumbprint', primary_thumbprint),
-                     self.check('authentication.x509Thumbprint.secondaryThumbprint', secondary_thumbprint)])
-
-        # Test 'az iot device list'
-        self.cmd('iot device list --hub-name {0}'.format(hub),
-                 checks=[self.check('length([*])', 2),
-                         self.check_pattern('[0].deviceId', device_id_pattern),
-                         self.check_pattern('[1].deviceId', device_id_pattern)])
-
-        # Test 'az iot device message send'
-        self.cmd('iot device message send --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-
-        # Test 'az iot device message receive'
-        self.cmd('iot device message receive --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-
-        # Test 'az iot device message complete'
-        lock_token = '00000000-0000-0000-0000-000000000000'
-        self.cmd('iot device message complete --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
-        # Test 'az iot device message reject'
-        self.cmd('iot device message reject --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
-        # Test 'az iot device message abandon'
-        self.cmd('iot device message abandon --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
-                 expect_failure=True)
-
         # Test 'az iot hub show-quota-metrics'
         self.cmd('iot hub show-quota-metrics -n {0}'.format(hub), checks=[
             self.check('length([*])', 2),
@@ -238,9 +152,140 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('totalDeviceCount', device_count_pattern)
         ])
 
-        # Test 'az iot device delete'
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_1), checks=self.is_empty())
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_2), checks=self.is_empty())
+        endpoint_name = 'Event1'
+        endpoint_type = 'EventHub'
+        # Test 'az iot hub routing-endpoint create'
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
+                 .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
+                 checks=[self.check('length(eventHubs[*])', 1),
+                         self.check('eventHubs[0].resourceGroup', rg),
+                         self.check('eventHubs[0].name', endpoint_name),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 0)])
+
+        # Test 'az iot hub routing-endpoint list'
+        self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1}'
+                 .format(hub, rg),
+                 checks=[self.check('length(eventHubs[*])', 1),
+                         self.check('eventHubs[0].resourceGroup', rg),
+                         self.check('eventHubs[0].name', endpoint_name)])
+
+        self.cmd('iot hub routing-endpoint list --hub-name {0} -g {1} -t {2}'
+                 .format(hub, rg, endpoint_type),
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].resourceGroup', rg),
+                         self.check('[0].name', endpoint_name)])
+
+        # Test 'az iot hub routing-endpoint show'
+        self.cmd('iot hub routing-endpoint show --hub-name {0} -g {1} -n {2}'
+                 .format(hub, rg, endpoint_name),
+                 checks=[self.check('resourceGroup', rg),
+                         self.check('name', endpoint_name)])
+
+        # Test 'az iot hub route create'
+        route_name = 'route1'
+        source_type = 'DeviceMessages'
+        new_source_type = 'TwinChangeEvents'
+        condition = 'true'
+        enabled = True
+        self.cmd('iot hub route create --hub-name {0} -g {1} -n {2} -s {3} --en {4} -c {5} -e {6}'
+                 .format(hub, rg, route_name, source_type, endpoint_name, condition, enabled),
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route list'
+        self.cmd('iot hub route list --hub-name {0} -g {1}'.format(hub, rg),
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route list'
+        self.cmd('iot hub route list --hub-name {0} -g {1} -s {2}'.format(hub, rg, source_type),
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route show'
+        self.cmd('iot hub route show --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
+                 checks=[self.check('name', route_name),
+                         self.check('source', source_type),
+                         self.check('isEnabled', enabled),
+                         self.check('condition', condition),
+                         self.check('length(endpointNames[*])', 1),
+                         self.check('endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route test'
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
+                 checks=[self.check('result', 'true')])
+
+        # Test 'az iot hub route test'
+        self.cmd('iot hub route test --hub-name {0} -g {1} -s {2}'.format(hub, rg, source_type),
+                 checks=[self.check('length(routes[*])', 1),
+                         self.check('routes[0].properties.name', route_name),
+                         self.check('routes[0].properties.source', source_type),
+                         self.check('routes[0].properties.isEnabled', enabled),
+                         self.check('routes[0].properties.condition', condition),
+                         self.check('length(routes[0].properties.endpointNames[*])', 1),
+                         self.check('routes[0].properties.endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route update'
+        self.cmd('iot hub route update --hub-name {0} -g {1} -n {2} -s {3}'.format(hub, rg, route_name, new_source_type),
+                 checks=[self.check('length([*])', 1),
+                         self.check('[0].name', route_name),
+                         self.check('[0].source', new_source_type),
+                         self.check('[0].isEnabled', enabled),
+                         self.check('[0].condition', condition),
+                         self.check('length([0].endpointNames[*])', 1),
+                         self.check('[0].endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route delete'
+        self.cmd('iot hub route delete --hub-name {0} -g {1}'.format(hub, rg), checks=[
+                 self.check('length([*])', 0)
+                 ])
+
+        # Test 'az iot hub routing-endpoint delete'
+        self.cmd('iot hub routing-endpoint delete --hub-name {0} -g {1} -n {2}'.format(hub, rg, endpoint_name),
+                 checks=[self.check('length(eventHubs[*])', 0),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 0)])
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
+
+    def _get_eventhub_connectionstring(self, rg):
+        ehNamespace = 'ehNamespaceiothubfortest'
+        eventHub = 'eventHubiothubfortest'
+        eventHubPolicy = 'eventHubPolicyiothubfortest'
+        eventHubPolicyRight = 'Send'
+
+        self.cmd('eventhubs namespace create --resource-group {0} --name {1}'
+                 .format(rg, ehNamespace))
+
+        self.cmd('eventhubs eventhub create --resource-group {0} --namespace-name {1} --name {2}'
+                 .format(rg, ehNamespace, eventHub))
+
+        self.cmd('eventhubs eventhub authorization-rule create --resource-group {0} --namespace-name {1} --eventhub-name {2} --name {3} --rights {4}'
+                 .format(rg, ehNamespace, eventHub, eventHubPolicy, eventHubPolicyRight))
+
+        output = self.cmd('eventhubs eventhub authorization-rule keys list --resource-group {0} --namespace-name {1} --eventhub-name {2} --name {3}'
+                          .format(rg, ehNamespace, eventHub, eventHubPolicy))
+        return output.get_output_in_json()['primaryConnectionString']
+
+    def _get_current_subscription(self):
+        output = self.cmd('account show')
+        return output.get_output_in_json()['id']

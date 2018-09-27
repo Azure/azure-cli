@@ -17,7 +17,7 @@ from azure.cli.command_modules.cosmosdb._validators import (
 
 def load_arguments(self, _):
 
-    from azure.mgmt.cosmosdb.models.cosmos_db_enums import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind
+    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind
 
     with self.argument_context('cosmosdb') as c:
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')

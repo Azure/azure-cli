@@ -2,6 +2,32 @@
 
 Release History
 ===============
+
+2.1.6
++++++
+* Support similar table format as helm client.
+
+2.1.5
++++++
+* Add ACR Task commands.
+* Add quick run command.
+* Deprecate build-task command group.
+* Add helm command group to support managing helm charts with ACR.
+* Allow idempotent create for managed registry.
+* Add a no-format flag for displaying build logs
+
+2.1.4
++++++
+* Provide a workaround for runtime operations without ARM requests.
+* Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
+* Minor fixes
+
+2.1.3
++++++
+* Add content-trust policy commands.
+* Fix a few issues to handle .dockerignore file properly in build command.
+* Minor fixes
+
 2.1.2
 +++++
 * Minor fixes

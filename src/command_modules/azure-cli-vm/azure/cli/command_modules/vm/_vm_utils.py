@@ -100,12 +100,14 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
 
 def create_keyvault_data_plane_client(cli_ctx):
     from azure.cli.core._profile import Profile
+    from azure.cli.core.profiles import get_api_version, ResourceType
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
-    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-    return KeyVaultClient(KeyVaultAuthentication(get_token))
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -126,7 +128,7 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None):
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
@@ -137,32 +139,31 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     from msrestazure.tools import is_valid_resource_id
     info = {}
     attach_data_disks = attach_data_disks or []
-    image_data_disks = image_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     info['os'] = {}
 
-    for i in range(len(image_data_disks) + len(data_disk_sizes_gb) + len(attach_data_disks)):
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb) + len(attach_data_disks)):
         info[i] = {
             'lun': i
         }
 
     # fill in storage sku for managed data disks
-    for i in range(len(image_data_disks) + len(data_disk_sizes_gb)):
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
         info[i]['managedDisk'] = {'storageAccountType': storage_sku}
 
     # fill in createOption
-    for i in range(len(image_data_disks)):
+    for i in range(image_data_disks_num):
         info[i]['createOption'] = 'fromImage'
-    base = len(image_data_disks)
+    base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
         info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
-    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'attach'
 
     # fill in attached data disks details
-    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    base = image_data_disks_num + len(data_disk_sizes_gb)
     for i, d in enumerate(attach_data_disks):
         if is_valid_resource_id(d):
             info[base + i]['managedDisk'] = {'id': d}

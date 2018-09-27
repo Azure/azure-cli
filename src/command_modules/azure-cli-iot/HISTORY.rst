@@ -3,6 +3,22 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Adds support for routing IoT Hubs.
+
+0.3.1
++++++
+* Increment DPS mgmt SDK requirement
+* Fix internal breaking changes for SDK usage patterns
+* Apply work around (back rev API) for assocating a linked-hub due to swagger/sdk mismatch with API.
+* Update tests and DPS recording
+
+0.3.0
++++++
+* BREAKING CHANGE: Removed deprecated commands which have moved to the iot extension
+* Updated elements to not assume azure-devices.net domain
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

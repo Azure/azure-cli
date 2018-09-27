@@ -3,9 +3,22 @@
 Release History
 ===============
 
+2.1.4
++++++
+* Minor fixes
+
+2.1.3
++++++
+* Minor fixes
+
+2.1.2
+++++++
+* Minor fixes.
+
 2.1.1
 ++++++
 * Minor fixes.
+* Added az sql failover-group commands.
 
 2.1.0
 +++++

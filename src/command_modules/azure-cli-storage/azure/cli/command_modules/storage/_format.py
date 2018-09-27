@@ -147,3 +147,11 @@ def transform_file_directory_result(cli_ctx):
 
         return return_list
     return transformer
+
+
+def transform_immutability_policy(result):
+    # service returns policy with period value of "0" after it has been deleted
+    # this only shows the policy if the property value is greater than 0
+    if result.immutability_period_since_creation_in_days:
+        return result
+    return None

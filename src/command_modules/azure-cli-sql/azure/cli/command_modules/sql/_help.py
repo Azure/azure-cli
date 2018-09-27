@@ -175,12 +175,12 @@ helps['sql db export'] = """
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
         - name: Export bacpac using a storage account key.
           text: |
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key MYKEY== --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
     """
 helps['sql db import'] = """
     type: command
@@ -195,12 +195,12 @@ helps['sql db import'] = """
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
         - name: Import bacpac into an existing database using a storage account key.
           text: |
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key MYKEY== \\
                 --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
     """
 helps['sql db restore'] = """
     type: command
@@ -321,6 +321,22 @@ helps['sql elastic-pool op cancel'] = """
     examples:
         - name: Cancel an operation.
           text: az sql elastic-pool op cancel -g mygroup -s myserver -ep myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
+    """
+helps['sql failover-group'] = """
+    type: group
+    short-summary: Manage SQL Failover Groups.
+    """
+helps['sql failover-group create'] = """
+    type: command
+    short-summary: Creates a failover group.
+    """
+helps['sql failover-group update'] = """
+    type: command
+    short-summary: Updates the failover group.
+    """
+helps['sql failover-group set-primary'] = """
+    type: command
+    short-summary: Set the primary of the failover group by failing over all databases from the current primary server.
     """
 helps['sql server'] = """
     type: group

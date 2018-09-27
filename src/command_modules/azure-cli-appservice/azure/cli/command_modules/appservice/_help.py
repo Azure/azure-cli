@@ -119,6 +119,47 @@ examples:
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
 
+helps['webapp config storage-account'] = """
+type: group
+short-summary: Manage a web app's Azure storage account configurations.
+"""
+
+helps['webapp config storage-account list'] = """
+type: command
+short-summary: Get a web app's Azure storage account configurations.
+"""
+
+helps['webapp config storage-account add'] = """
+type: command
+short-summary: Add an Azure storage account configuration to a web app.
+examples:
+    - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
+      text: >
+        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --type AzureFiles \\
+          --account-name MyStorageAccount \\
+          --share-name MyShare \\
+          --access-key MyAccessKey \\
+          --mount-path /path/to/mount
+"""
+
+helps['webapp config storage-account update'] = """
+type: command
+short-summary: Update an existing Azure storage account configuration on a web app.
+examples:
+    - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
+      text: >
+        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --mount-path /path/to/new/mount
+"""
+
+helps['webapp config storage-account delete'] = """
+type: command
+short-summary: Delete a web app's Azure storage account configuration.
+"""
+
 helps['webapp config connection-string'] = """
 type: group
 short-summary: Manage a web app's connection strings.
@@ -328,7 +369,7 @@ helps['webapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az webapp source-control config-local-git \\
+            az webapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
@@ -386,6 +427,37 @@ helps['webapp traffic-routing show'] = """
 helps['webapp traffic-routing clear'] = """
     type: command
     short-summary: Clear the routing rules and send all traffic to production.
+"""
+
+helps['webapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['webapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az webapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+"""
+
+helps['webapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins
+           text: >
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+"""
+
+helps['webapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
 """
 
 helps['appservice plan'] = """
@@ -490,6 +562,61 @@ helps['webapp config backup restore'] = """
     short-summary: Restore a web app from a backup.
 """
 
+helps['webapp webjob'] = """
+    type: group
+    short-summary: Allows management operations for webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous'] = """
+    type: group
+    short-summary: Allows management operations of continuous webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous list'] = """
+    type: command
+    short-summary: List all continuous webjobs on a selected webapp.
+"""
+
+helps['webapp webjob continuous start'] = """
+    type: command
+    short-summary: Start a specific continuous webjob on a selected webapp.
+"""
+
+helps['webapp webjob continuous stop'] = """
+    type: command
+    short-summary: Stop a specific continuous webjob.
+"""
+
+helps['webapp webjob continuous remove'] = """
+    type: command
+    short-summary: Delete a specific continuous webjob.
+"""
+
+helps['webapp webjob triggered'] = """
+    type: group
+    short-summary: Allows management operations of triggered webjobs on a webapp.
+"""
+
+helps['webapp webjob triggered list'] = """
+    type: command
+    short-summary: List all triggered webjobs hosted on a webapp.
+"""
+
+helps['webapp webjob triggered run'] = """
+    type: command
+    short-summary: Run a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered remove'] = """
+    type: command
+    short-summary: Delete a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered log'] = """
+    type: command
+    short-summary: Get history of a specific triggered webjob hosted on a webapp.
+"""
+
 helps['webapp browse'] = """
     type: command
     short-summary: Open a web app in a browser.
@@ -521,6 +648,30 @@ helps['webapp list-runtimes'] = """
     type: command
     short-summary: List available built-in stacks which can be used for web apps.
 """
+
+helps['webapp deleted'] = """
+    type: group
+    short-summary: Manage deleted web apps.
+"""
+
+helps['webapp deleted list'] = """
+    type: command
+    short-summary: List web apps that have been deleted.
+"""
+
+helps['webapp deleted restore'] = """
+    type: command
+    short-summary: Restore a deleted web app.
+    long-summary: Restores the files and settings of a deleted web app to the specified web app.
+    examples:
+        - name: Restore a deleted app to the Staging slot of MySite.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+"""
+
 
 helps['webapp delete'] = """
     type: command
@@ -700,6 +851,16 @@ helps['functionapp config ssl upload'] = """
     short-summary: Upload an SSL certificate to a function app.
 """
 
+helps['functionapp config show'] = """
+    type: command
+    short-summary: Get the details of a web app's configuration.
+"""
+
+helps['functionapp config set'] = """
+    type: command
+    short-summary: Set the web app's configuration.
+"""
+
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
@@ -726,7 +887,7 @@ helps['functionapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az functionapp source-control config-local-git \\
+            az functionapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
@@ -781,4 +942,35 @@ helps['functionapp deployment source config-zip'] = """
              az functionapp deployment source config-zip \\
                  -g <myRG> -n <myAppName> \\
                  --src <zip file path location>
+"""
+
+helps['functionapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['functionapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+"""
+
+helps['functionapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins
+           text: >
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+"""
+
+helps['functionapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
 """

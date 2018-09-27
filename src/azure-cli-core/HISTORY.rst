@@ -2,10 +2,29 @@
 
 Release History
 ===============
+2.0.47
+++++++
+* Introduces generic behavior to handle "Bad Request" errors.
+
+2.0.46
+++++++
+* Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
+  file if public key file is missing. (#4725, #6780)
+
+2.0.45
+++++++
+* Fix issue of loading empty configuration file.
+* Azure Stack: support new profile 2018-03-01-hybrid
+
+2.0.44
+++++++
+* use knack/0.4.2 with fix towards numeric value display in table output
+* Introduce YAML output format
+* Overhaul telemetry upload mechanism
 
 2.0.43
 ++++++
-* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Consuming mult api azure.mgmt.authorization package for stack support
 * Minor fixes
 
 2.0.42

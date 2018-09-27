@@ -165,7 +165,7 @@ helps['vmss create'] = """
               --image debian --secrets "$vm_secrets"
         - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
           text: >
-             az vm create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+             az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a debian VM scaleset with a user assigned identity.
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
@@ -204,7 +204,7 @@ helps['vm availability-set convert'] = """
     short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
     examples:
         - name: Convert an availabiity set to use managed disks by name.
-          text: vm availability-set convert -g MyResourceGroup -n MyAvSet
+          text: az vm availability-set convert -g MyResourceGroup -n MyAvSet
         - name: Convert an availability set to use managed disks by ID.
           text: >
             az vm availability-set convert --ids $(az vm availability-set list -g MyResourceGroup --query "[].id" -o tsv)
@@ -1119,6 +1119,12 @@ helps['vm list-skus'] = """
     examples:
         - name: List all SKUs in the West US region.
           text: az vm list-skus -l westus
+        - name: List all available vm sizes in the East US2 region which support availability zone.
+          text: az vm list-skus -l eastus2 --zone
+        - name: List all available vm sizes in the East US2 region which support availability zone with name like "standard_ds1...".
+          text: az vm list-skus -l eastus2 --zone --size standard_ds1
+        - name: List availability set related sku information in The West US region.
+          text: az vm list-skus -l westus --resource-type availabilitySets
 """
 
 helps['vm open-port'] = """
@@ -1217,8 +1223,8 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VM with the 'Reader' role.
-          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader
+        - name: Enable system assigned identity on a VM with the 'Reader' role.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vm identity remove'] = """
@@ -1240,12 +1246,13 @@ helps['vm identity show'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
     type: command
-    short-summary: run command on a vm
+    short-summary: Execute a specific run command on a vm.
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
@@ -1263,8 +1270,8 @@ helps['vmss identity assign'] = """
     short-summary: Enable managed service identity on a VMSS.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable identity on a VMSS with the 'Owner' role.
-          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner
+        - name: Enable system assigned identity on a VMSS with the 'Owner' role.
+          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
 """
 
 helps['vmss identity remove'] = """
@@ -1412,4 +1419,79 @@ helps['identity list'] = """
 helps['identity list-operations'] = """
     type: command
     short-summary: Lists available operations for the Managed Identity provider
+"""
+
+helps['sig'] = """
+    type: group
+    short-summary: manage shared image gallery
+"""
+
+helps['sig create'] = """
+    type: command
+    short-summary: create a share image gallery.
+"""
+
+helps['sig list'] = """
+    type: command
+    short-summary: list share image galleries.
+"""
+
+helps['sig update'] = """
+    type: command
+    short-summary: update a share image gallery.
+"""
+
+helps['sig image-definition'] = """
+    type: group
+    short-summary: create an image definition
+"""
+
+helps['sig image-definition create'] = """
+    type: command
+    short-summary: create a gallery image definition
+    examples:
+        - name: Create a linux image defintion
+          text: |
+            az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+"""
+
+helps['sig image-definition update'] = """
+    type: command
+    short-summary: update a share image defintiion.
+"""
+
+helps['sig image-version'] = """
+    type: group
+    short-summary: create a new version from an image defintion
+"""
+
+helps['sig image-version create'] = """
+    type: command
+    short-summary: creat a new image version
+    long-summary : this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
+    examples:
+        - name: add a new image version
+          text: |
+            az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+        - name: add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
+          text: |
+            az sig image-version create --no-wait -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image imageInTheSameResourceGroup
+"""
+
+helps['sig image-version update'] = """
+    type: command
+    short-summary: update a share image version
+    examples:
+        - name: replicate to a new region
+          text: |
+            az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+"""
+
+helps['sig image-version wait'] = """
+    type: command
+    short-summary: wait for image version related operation
+    examples:
+        - name: wait for an image version gets updated
+          text: |
+            az sig image-version wait --updated -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0
 """

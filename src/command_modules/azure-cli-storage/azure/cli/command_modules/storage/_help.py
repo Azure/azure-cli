@@ -291,6 +291,9 @@ helps['storage blob upload-batch'] = """
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
           short-summary: Required if the blob has an active lease
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
 """
 
 helps['storage blob download-batch'] = """
@@ -311,6 +314,9 @@ helps['storage blob download-batch'] = """
         - name: --dryrun
           type: bool
           short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
+    examples:
+        - name: Download all blobs that end with .py
+          text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
 """
 
 helps['storage blob delete-batch'] = """
@@ -337,7 +343,11 @@ helps['storage blob delete-batch'] = """
           short-summary: An ETag value, or the wildcard character (*).
           long-summary: Specify this header to perform the operation only if the resource's ETag does not match the value specified.
                         Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
-
+    examples:
+        - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
+          text: |
+            date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 """
 
 helps['storage blob copy start-batch'] = """
@@ -402,6 +412,21 @@ helps['storage container metadata'] = """
 helps['storage container policy'] = """
     type: group
     short-summary: Manage container stored access policies.
+"""
+
+helps['storage container immutability-policy'] = """
+    type: group
+    short-summary: Manage container immutability policies.
+"""
+
+helps['storage container legal-hold'] = """
+    type: group
+    short-summary: Manage container legal holds.
+"""
+
+helps['storage container legal-hold show'] = """
+    type: command
+    short-summary: Get the legal hold properties of a container.
 """
 
 helps['storage cors'] = """
@@ -799,4 +824,47 @@ helps['storage account generate-sas'] = """
         - name: --account-name
           short-summary: 'Storage account name. Must be used in conjunction with either storage account key or a SAS
                          token. Environment Variable: AZURE_STORAGE_ACCOUNT'
+    examples:
+        - name: Generate a sas token for the account that is valid for queue and table services.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+"""
+
+helps['storage container generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for blob container and use it to upload a blob.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+"""
+
+helps['storage blob generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a blob with read-only permissions.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob generate-sas --account-name MyStorageAccount -c MyContainer -n MyBlob --permissions r --expiry $end --https-only
+"""
+
+helps['storage share generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a fileshare and use it to upload a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage share generate-sas -n MyShare --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage file upload -s MyShare --account-name MyStorageAccount --source file.txt  --sas-token $sas
+"""
+
+helps['storage file generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
 """

@@ -19,7 +19,7 @@ helps['ad sp create-for-rbac'] = """
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
@@ -86,7 +86,7 @@ helps['ad sp credential reset'] = """
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When using `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
@@ -108,6 +108,14 @@ helps['ad sp create'] = """
 helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
+"""
+helps['ad sp owner'] = """
+    type: group
+    short-summary: Manage service principal owners.
+"""
+helps['ad sp owner list'] = """
+    type: command
+    short-summary: List service principal owners.
 """
 helps['ad sp show'] = """
     type: command
@@ -151,6 +159,7 @@ helps['ad app update'] = """
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
 
 """
+az_ad_app_grant_command
 helps['ad app permission'] = """
     type: group
     short-summary: manage an application's OAuth2 permissions.
@@ -169,9 +178,21 @@ helps['ad app permission list'] = """
         - name: List the OAuth2 permissions for an existing AAD app
           text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
 """
+helps['ad app owner'] = """
+    type: group
+    short-summary: Manage application owners.
+"""
+helps['ad app owner list'] = """
+    type: command
+    short-summary: List application owners.
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
+"""
+helps['ad user get-member-groups'] = """
+    type: command
+    short-summary: Get groups of which the user is a member
 """
 helps['role'] = """
     type: group

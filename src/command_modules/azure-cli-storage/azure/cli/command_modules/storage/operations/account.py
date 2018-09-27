@@ -26,6 +26,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+    # temporary fix to allow idempotent create when value is None. (sdk defaults with False)
+    params.is_hns_enabled = None
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
@@ -74,7 +76,16 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
     return {'connectionString': connection_string}
 
 
-def show_storage_account_usage(cmd):
+def show_storage_account_usage(cmd, location):
+    scf = storage_client_factory(cmd.cli_ctx)
+    try:
+        client = scf.usages
+    except NotImplementedError:
+        client = scf.usage
+    return next((x for x in client.list_by_location(location) if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
+
+
+def show_storage_account_usage_no_location(cmd):
     scf = storage_client_factory(cmd.cli_ctx)
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
 
@@ -135,17 +146,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     return params
 
 
-def list_network_rules(client, resource_group_name, storage_account_name):
-    sa = client.get_properties(resource_group_name, storage_account_name)
+def list_network_rules(client, resource_group_name, account_name):
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     delattr(rules, 'bypass')
     delattr(rules, 'default_action')
     return rules
 
 
-def add_network_rule(cmd, client, resource_group_name, storage_account_name, action='Allow', subnet=None,
+def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
                      vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, storage_account_name)
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
         from msrestazure.tools import is_valid_resource_id
@@ -164,12 +175,12 @@ def add_network_rule(cmd, client, resource_group_name, storage_account_name, act
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, storage_account_name, params)
+    return client.update(resource_group_name, account_name, params)
 
 
-def remove_network_rule(cmd, client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
+def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, storage_account_name)
+    sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
@@ -179,4 +190,4 @@ def remove_network_rule(cmd, client, resource_group_name, storage_account_name, 
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, storage_account_name, params)
+    return client.update(resource_group_name, account_name, params)

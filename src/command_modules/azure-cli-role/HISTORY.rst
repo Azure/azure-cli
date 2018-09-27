@@ -3,6 +3,28 @@
 Release History
 ===============
 
+2.1.7
+++++++
+* ad app owner: Adds support for listing Azure AD app owners.
+* ad sp owner: Adds support for listing Azure AD service principal owners.
+
+2.1.6
+++++++
+* role: ensure role definition create & update commands accept multiple permission configurations
+* create-for-rbac: ensure home page uri is always "https"
+
+2.1.5
+++++++
+* support list user's group memberships
+
+2.1.4
+++++++
+* Minor fixes.
+
+2.1.3
+++++++
+* role assignment: fix a recent regression that principalName is missing
+
 2.1.2
 ++++++
 * support for stack profile 2017-03-09-profile

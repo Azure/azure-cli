@@ -2,6 +2,27 @@
 
 Release History
 ===============
+2.2.4
+++++++
+* `az disk grant-access`: fix the empty "accessSas" field
+* `vmss create`: reserve large enough frontend port range to handle overprovisioning
+* `az sig`: fix update commands, support --no-wait on managing image versions
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+* `az vm\vmss disk attach`: default disk's lun to the first available spot
+
+2.2.3
+++++++
+* support shared image gallery through `az sig`.
+
+2.2.2
+++++++
+* `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
+
+2.2.1
+++++++
+* vm list-skus: add a few common filters to make the command easier to use 
+
 2.2.0
 ++++++
 * availability set: support list by subscription
