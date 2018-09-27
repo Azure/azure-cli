@@ -5,8 +5,7 @@ Release History
 
 0.2.5
 +++++
-* exception handling fixed
-* fixed eventhub update command
+* Fix eventhub update command
 
 0.2.4
 +++++
