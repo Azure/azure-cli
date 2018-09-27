@@ -107,7 +107,7 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
     if enabled:
         instance.capture_description.enabled = enabled
 
-        if not instance.capture_description :
+        if not instance.capture_description:
             instance.capture_description = CaptureDescription()
             instance.capture_description.destination = Destination()
             instance.capture_description.encoding = EncodingCaptureDescription.avro
