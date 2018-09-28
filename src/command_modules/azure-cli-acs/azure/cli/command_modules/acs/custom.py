@@ -2253,6 +2253,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      aad_client_app_id=None,
                      aad_client_app_secret=None,
                      aad_tenant_id=None,
+                     vnet_subnet_id=None,
                      tags=None,
                      no_wait=False):
 
@@ -2266,7 +2267,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.compute
+        role=OpenShiftAgentPoolProfileRole.compute,
+        vnet_subnet_id=vnet_subnet_id
     )
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
@@ -2274,7 +2276,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         count=int(2),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.infra
+        role=OpenShiftAgentPoolProfileRole.infra,
+        vnet_subnet_id=vnet_subnet_id
     )
 
     agent_pool_profiles.append(agent_node_pool_profile)
@@ -2284,7 +2287,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         name='master',  # Must be 12 chars or less before ACS RP adds to it
         count=int(3),
         vm_size="Standard_D2s_v3",
-        os_type="Linux"
+        os_type="Linux",
+        vnet_subnet_id=vnet_subnet_id
     )
     identity_providers = []
 

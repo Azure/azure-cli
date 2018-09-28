@@ -557,6 +557,10 @@ helps['openshift create'] = """
         - name: --aad-tenant-id
           type: string
           short-summary: The ID of an Azure Active Directory tenant.
+        - name: --vnet-subnet-id
+          type: string
+          short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+        
 
     examples:
         - name: Create an OpenShift cluster and auto create an AAD Client
@@ -564,6 +568,8 @@ helps['openshift create'] = """
         - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
           text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
                 --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID> --node-count 5
+        - name: Create an Openshift cluster using a custom vnet
+          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN> --vnet-subnet-id "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-resource-group/providers/Microsoft.Network/virtualNetworks/openshift-vnet/subnets/default"
 """
 
 helps['openshift scale'] = """

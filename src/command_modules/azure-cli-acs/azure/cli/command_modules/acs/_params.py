@@ -252,6 +252,7 @@ def load_arguments(self, _):
         c.argument('aad_client_app_id')
         c.argument('aad_client_app_secret')
         c.argument('aad_tenant_id')
+        c.argument('vnet_subnet_id')
 
 
 def _get_default_install_location(exe_name):
