@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Introducing multiple write location support for Azure CLI - Cosmos DB
+
 0.2.1
 +++++
 * Minor fixes
