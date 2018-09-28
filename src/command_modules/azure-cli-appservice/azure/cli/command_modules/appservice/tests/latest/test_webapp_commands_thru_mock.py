@@ -25,7 +25,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_webapp,
                                                          get_streaming_log,
                                                          download_historical_logs,
-                                                         validate_linux_create_options)
+                                                         validate_container_app_create_options)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -316,14 +316,14 @@ class TestWebappMocked(unittest.TestCase):
         test_multi_container_config = 'some_config.yaml'
         test_multi_container_type = 'COMPOSE'
 
-        self.assertTrue(validate_linux_create_options(some_runtime, None, None, None))
-        self.assertTrue(validate_linux_create_options(None, test_docker_image, None, None))
-        self.assertTrue(validate_linux_create_options(None, None, test_multi_container_config, test_multi_container_type))
-        self.assertFalse(validate_linux_create_options(some_runtime, None, test_multi_container_config, test_multi_container_type))
-        self.assertFalse(validate_linux_create_options(some_runtime, None, test_multi_container_config, None))
-        self.assertFalse(validate_linux_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
-        self.assertFalse(validate_linux_create_options(None, None, test_multi_container_config, None))
-        self.assertFalse(validate_linux_create_options(None, None, None, None))
+        self.assertTrue(validate_container_app_create_options(some_runtime, None, None, None))
+        self.assertTrue(validate_container_app_create_options(None, test_docker_image, None, None))
+        self.assertTrue(validate_container_app_create_options(None, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_container_app_create_options(some_runtime, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_container_app_create_options(some_runtime, None, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(None, None, None, None))
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

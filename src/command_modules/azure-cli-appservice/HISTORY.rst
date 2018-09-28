@@ -5,6 +5,7 @@ Release History
 0.2.5
 +++++
 * az functionapp create supports creating a linux consumption plan type with a specific runtime
+* (PREVIEW) support webapps hosting on Windows containers
 
 0.2.4
 +++++
