@@ -443,6 +443,9 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheck('name', webapp),
         ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('windowsFxVersion', None)
+        ])
         time.sleep(30)  # workaround the fact that a new linux web's "kind" won't be settled instantaneously
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
@@ -973,6 +976,47 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
         self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
                  .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
                      JMESPathCheck('status', 'Disabling')])
+
+
+class WebappWindowsContainerBasicE2ETest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_hyperv_e2e(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku PC2'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
+            JMESPathCheck('[0].sku.name', 'PC2')
+        ])
+        self.cmd('appservice plan list', checks=[
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
+        ])
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('name', plan)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis:nanoserver-sac2016"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
+        self.cmd('webapp config set -g {} -n {} --windows-fx-version "DOCKER|microsoft/iis"'.format(resource_group, webapp_name))
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
 
 
 if __name__ == '__main__':
