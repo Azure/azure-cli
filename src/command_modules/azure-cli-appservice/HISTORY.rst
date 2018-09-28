@@ -4,9 +4,8 @@ Release History
 ===============
 0.2.5
 +++++
-* az appserviceplan create now supports creating Windows Containers App Service Plans - Preview
-* az webapp create now supports creating and managing Windows Containers Apps - Preview
-* az webapp config set now supports --windows-fx-version for changing the container image for Windows Containers Apps - Preview
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
+* (PREVIEW) support webapps hosting on Windows containers
 
 0.2.4
 +++++

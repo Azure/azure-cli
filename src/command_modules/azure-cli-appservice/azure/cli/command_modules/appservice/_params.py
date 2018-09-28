@@ -69,7 +69,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host webapp on Linux worker')
-        c.argument('hyper_v', action='store_true', required=False, help='[Preview] - host webapp on Windows container')
+        c.argument('hyper_v', action='store_true', required=False, help='(Preview) host webapp on Windows container')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:
@@ -195,7 +195,7 @@ def load_arguments(self, _):
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
-            c.argument('windows_fx_version', help="[Preview] Windows Containers web app only. The docker image name used for your windows container webapp, e.g., microsoft/nanoserver:ltsc2016")
+            c.argument('windows_fx_version', help="(Preview) a docker image name used for your windows ontainer webapp, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
