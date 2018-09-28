@@ -39,11 +39,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         except ValueError as ex:
             raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(str(ex)))
     if component_version:
-        import json
-        try:
-            component_version = json.loads(component_version)
-        except ValueError as ex:
-            raise CLIError('The component_version argument must be valid JSON. Error: {}'.format(str(ex)))
+        # See validator
+        component_version = {c: v for c, v in [version.split('=') for version in component_version]}
 
     # Validate whether HTTP credentials were provided
     is_cluster_config_defined = cluster_configurations and 'gateway' in cluster_configurations and \
@@ -70,10 +67,10 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
         cluster_configurations['gateway'] = dict()
     if 'restAuthCredential.isEnabled' not in cluster_configurations['gateway']:
         cluster_configurations['gateway']['restAuthCredential.isEnabled'] = 'true'
-    if not is_username_in_cluster_config:
-        cluster_configurations['gateway']['restAuthCredential.username'] = http_username
-    if not is_password_in_cluster_config:
-        cluster_configurations['gateway']['restAuthCredential.password'] = http_password
+    cluster_configurations['gateway']['restAuthCredential.username'] = http_username = \
+        http_username or cluster_configurations['gateway']['restAuthCredential.username']
+    cluster_configurations['gateway']['restAuthCredential.password'] = http_password = \
+        http_password or cluster_configurations['gateway']['restAuthCredential.password']
 
     # Validate whether SSH credentials were provided
     if not (ssh_password or ssh_public_key):

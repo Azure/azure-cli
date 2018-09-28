@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, get_resource_name_completion_list, \
     get_generic_completion_list
-
+from ._validators import validate_component_version
 
 # Cluster types may be added in the future. Therefore, this list can be used for completion, but not input validation.
 known_cluster_types = ["hadoop", "interactivehive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]
@@ -31,10 +31,13 @@ def load_arguments(self, _):
                    help='Type of HDInsight cluster, like: {}. '
                         'See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-'
                         'hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
-        c.argument('component_version', arg_group='Cluster',
-                   help='The versions of various Hadoop components, in JSON. See also: https://docs.microsoft.com/'
-                        'en-us/azure/hdinsight/hdinsight-component-versioning#hadoop-components-available-with-'
-                        'different-hdinsight-versions')
+        c.argument('component_version', arg_group='Cluster', nargs='*', validator=validate_component_version,
+                   help='The versions of various Hadoop components, in space-'
+                        'separated versions in \'component=version\' format. Example: '
+                        'Spark=2.0 Hadoop=2.7.3 '
+                        'See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight'
+                        '-component-versioning#hadoop-components-available-with-different-'
+                        'hdinsight-versions')
         c.argument('cluster_configurations', arg_group='Cluster',
                    help='Extra configurations of various components, in JSON.')
         c.argument('cluster_tier', arg_type=get_enum_type(['standard', 'premium']), arg_group='Cluster',
