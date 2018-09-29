@@ -53,4 +53,4 @@ def load_arguments(self, _):
         c.argument('default_ttl', type=int, help='Default TTL')
 
     with self.argument_context('cosmosdb create') as c:
-        c.argument('enable_multiple_write_locations', type=bool, help="Enable Multiple Write Locations")
+        c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")

@@ -171,4 +171,3 @@ class CosmosDBTests(ScenarioTest):
             self.check('enableMultipleWriteLocations', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
         ]).get_output_in_json()
-        print(account)

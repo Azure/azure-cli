@@ -52,7 +52,7 @@ def cli_cosmosdb_create(cmd, client,
                         capabilities=None,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
-                        enable_multiple_write_locations=False):
+                        enable_multiple_write_locations=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
