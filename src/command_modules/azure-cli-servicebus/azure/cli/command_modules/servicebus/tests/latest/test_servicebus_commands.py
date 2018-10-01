@@ -7,7 +7,7 @@
 
 import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
-from azure.mgmt.servicebus.models import ProvisioningStateDR
+from knack.util import CLIError
 
 
 # pylint: disable=line-too-long
@@ -15,6 +15,9 @@ from azure.mgmt.servicebus.models import ProvisioningStateDR
 
 
 class SBNamespaceCURDScenarioTest(ScenarioTest):
+    from azure_devtools.scenario_tests import AllowLargeResponse
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
@@ -416,7 +419,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_sb_alias')
     def test_sb_alias(self, resource_group):
-
+        from azure.mgmt.servicebus.models import ProvisioningStateDR
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',
@@ -566,7 +569,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_migration')
     def test_sb_migration(self, resource_group):
-
+        from azure.mgmt.servicebus.models import ProvisioningStateDR
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',

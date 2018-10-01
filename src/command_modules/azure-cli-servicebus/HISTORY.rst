@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.3.0
++++++
+* BREAKING CHANGE: 'list' commands errors for resource(s) NotFound(404) are now handled in the typical way instead of showing empty list
+
 0.2.3
 +++++
 * Minor fixes
