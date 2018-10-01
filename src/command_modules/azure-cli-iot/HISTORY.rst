@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.3.3
++++++
+* Added extension installation comand to first-run banner
 
 0.3.2
 +++++
