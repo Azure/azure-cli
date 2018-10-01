@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'azure-cli-batchai',
     'azure-cli-backup',
     'azure-cli-billing',
+    'azure-cli-botservice',
     'azure-cli-cdn',
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
