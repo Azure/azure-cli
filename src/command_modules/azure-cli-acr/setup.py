@@ -30,6 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'future',
     'azure-cli-core',
     'azure-mgmt-storage==2.0.0rc4',
     'azure-storage-blob==1.1.0',
