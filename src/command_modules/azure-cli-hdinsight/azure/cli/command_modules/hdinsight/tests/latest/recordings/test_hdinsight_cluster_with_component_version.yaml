@@ -1,0 +1,190 @@
+interactions:
+- request:
+    body: !!python/unicode '{"location": "eastus", "tags": {"date": "2018-09-28T04:11:38Z",
+      "product": "azurecli", "cause": "automation"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001?api-version=2018-05-01
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001","name":"hdicli-000001","location":"eastus","tags":{"date":"2018-09-28T04:11:38Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['258']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 28 Sep 2018 04:11:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: !!python/unicode '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "properties":
+      {"supportsHttpsTrafficOnly": false, "isHnsEnabled": false}, "location": "eastus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      Content-Length: ['148']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2018-03-01-preview
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Fri, 28 Sep 2018 04:11:43 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/7d7eadc3-38a9-4f12-8853-035410a816af?monitor=true&api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/7d7eadc3-38a9-4f12-8853-035410a816af?monitor=true&api-version=2018-03-01-preview
+  response:
+    body: {string: !!python/unicode '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["72f988bf-86f1-41af-91ab-2d7cd011db47"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-09-28T04:11:43.2873618Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-09-28T04:11:43.2873618Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-09-28T04:11:43.1625166Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1189']
+      content-type: [application/json]
+      date: ['Fri, 28 Sep 2018 04:12:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account keys list]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2018-03-01-preview
+  response:
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","value":"Y8In49Y6AzeyHARI4w01oN3bqYeh2jDtgAbefIOQrG+Cfw+YY4yZn5dsnd/FoU6g/7qyuARGZAlVWRgtrJgEZQ==","permissions":"FULL"},{"keyName":"key2","value":"j36LTo+aa+ye2rgTRrboRuiu1GGYK7rgnqxSbbVY2AauAl1DsrAyFOq3OxjChMVBe5blYybHYgUQsgkoaz9ZKA==","permissions":"FULL"}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['288']
+      content-type: [application/json]
+      date: ['Fri, 28 Sep 2018 04:12:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"properties": {"storageProfile": {"storageaccounts":
+      [{"key": "Y8In49Y6AzeyHARI4w01oN3bqYeh2jDtgAbefIOQrG+Cfw+YY4yZn5dsnd/FoU6g/7qyuARGZAlVWRgtrJgEZQ==",
+      "container": "default", "name": "hdicli000002.blob.core.windows.net", "isDefault":
+      true}]}, "computeProfile": {"roles": [{"hardwareProfile": {"vmSize": "large"},
+      "osProfile": {"linuxOperatingSystemProfile": {"username": "sshuser", "password":
+      "Password1!"}}, "targetInstanceCount": 2, "name": "headnode"}, {"hardwareProfile":
+      {"vmSize": "large"}, "osProfile": {"linuxOperatingSystemProfile": {"username":
+      "sshuser", "password": "Password1!"}}, "targetInstanceCount": 3, "name": "workernode"}]},
+      "clusterVersion": "default", "osType": "Linux", "clusterDefinition": {"kind":
+      "spark", "componentVersion": {"spark": "2.0", "hadoop": "2.7.3"}, "configurations":
+      {"gateway": {"restAuthCredential.isEnabled": "true", "restAuthCredential.username":
+      "admin", "restAuthCredential.password": "Password1!"}}}}, "location": "eastus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      Content-Length: ['987']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2015-03-01-preview
+  response:
+    body: {string: !!python/unicode '{"code":"BadRequest","message":"Invalid component
+        version for HDInsight version: 3.6 cluster type: spark"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['106']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 28 Sep 2018 04:12:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
+      x-ms-hdi-routed-to: [RegionalRp]
+      x-ms-hdi-served-by: [eastus]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001?api-version=2018-05-01
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 28 Sep 2018 04:12:09 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1IRElDTEk6MkQ3V0xEUy1FQVNUVVMiLCJqb2JMb2NhdGlvbiI6ImVhc3R1cyJ9?api-version=2018-05-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+version: 1

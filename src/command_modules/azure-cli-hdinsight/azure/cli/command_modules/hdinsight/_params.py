@@ -54,12 +54,12 @@ def load_arguments(self, _):
                    help='SSH public key for the cluster nodes.')
         c.argument('headnode_size', arg_type=node_size_type)
         c.argument('workernode_size', arg_type=node_size_type)
-        c.argument('workernode_data_disks_per_node', arg_group='Cluster',
+        c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
-        c.argument('workernode_data_disk_storage_account_type', arg_group='Cluster',
+        c.argument('workernode_data_disk_storage_account_type', arg_group='Node',
                    arg_type=get_enum_type(['standard_lrs', 'premium_lrs']),
                    help='The type of storage account that will be used for the data disks: standard_lrs or premium_lrs')
-        c.argument('workernode_data_disk_size', arg_group='Cluster',
+        c.argument('workernode_data_disk_size', arg_group='Node',
                    help='The size of the data disk in GB, e.g. 1023.')
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)

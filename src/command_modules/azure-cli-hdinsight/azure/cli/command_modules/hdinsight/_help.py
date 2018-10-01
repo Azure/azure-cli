@@ -20,7 +20,7 @@ helps['hdinsight create'] = """
           text: |-
               az hdinsight create -n MyCluster -g MyResourceGroup \\
               -p <HTTP password> \\
-              --storage-account myStorageAccount.blob.core.windows.net \\
+              --storage-account MyStorageAccount.blob.core.windows.net \\
               --storage-account-key <key>
 """
 

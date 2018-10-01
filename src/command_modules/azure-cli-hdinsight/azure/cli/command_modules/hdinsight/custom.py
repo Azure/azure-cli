@@ -38,39 +38,36 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
             cluster_configurations = json.loads(cluster_configurations)
         except ValueError as ex:
             raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(str(ex)))
+    else:
+        cluster_configurations = dict()
     if component_version:
         # See validator
         component_version = {c: v for c, v in [version.split('=') for version in component_version]}
 
     # Validate whether HTTP credentials were provided
-    is_cluster_config_defined = cluster_configurations and 'gateway' in cluster_configurations and \
-        cluster_configurations['gateway']
-    is_username_in_cluster_config = is_cluster_config_defined and \
-        'restAuthCredential.username' in cluster_configurations['gateway']
-    is_password_in_cluster_config = is_cluster_config_defined and \
-        'restAuthCredential.password' in cluster_configurations['gateway']
-    if not (http_username or is_username_in_cluster_config):
-        http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
-    if not (http_password or is_password_in_cluster_config):
-        raise CLIError('An HTTP password is required.')
-    if http_username and is_username_in_cluster_config:
+    if 'gateway' in cluster_configurations:
+        gateway_config = cluster_configurations['gateway']
+    else:
+        gateway_config = dict()
+    if http_username and 'restAuthCredential.username' in gateway_config:
         raise CLIError('An HTTP username must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')
+    else:
+        http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
+    is_password_in_cluster_config = 'restAuthCredential.password' in gateway_config
     if http_password and is_password_in_cluster_config:
         raise CLIError('An HTTP password must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')
+    if not (http_password or is_password_in_cluster_config):
+        raise CLIError('An HTTP password is required.')
 
     # Update the cluster config with the HTTP credentials
-    if not cluster_configurations:
-        cluster_configurations = dict()
-    if 'gateway' not in cluster_configurations:
-        cluster_configurations['gateway'] = dict()
-    if 'restAuthCredential.isEnabled' not in cluster_configurations['gateway']:
-        cluster_configurations['gateway']['restAuthCredential.isEnabled'] = 'true'
-    cluster_configurations['gateway']['restAuthCredential.username'] = http_username = \
-        http_username or cluster_configurations['gateway']['restAuthCredential.username']
-    cluster_configurations['gateway']['restAuthCredential.password'] = http_password = \
-        http_password or cluster_configurations['gateway']['restAuthCredential.password']
+    gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
+    http_username = http_username or gateway_config['restAuthCredential.username']
+    gateway_config['restAuthCredential.username'] = http_username
+    http_password = http_password or gateway_config['restAuthCredential.password']
+    gateway_config['restAuthCredential.password'] = http_password
+    cluster_configurations['gateway'] = gateway_config
 
     # Validate whether SSH credentials were provided
     if not (ssh_password or ssh_public_key):
@@ -151,7 +148,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
             data_disks_groups=workernode_data_disk_groups
         )
     ]
-
     if zookeepernode_size:
         roles.append(
             Role(
@@ -161,7 +157,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                 os_profile=os_profile,
                 virtual_network_profile=virtual_network_profile
             ))
-
     if edgenode_size:
         roles.append(
             Role(
@@ -171,6 +166,28 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                 os_profile=os_profile,
                 virtual_network_profile=virtual_network_profile
             ))
+
+    storage_accounts = []
+    if storage_account:
+        # Specify storage account details only when storage arguments are provided
+        storage_accounts.append(
+            StorageAccount(
+                name=storage_account,
+                key=storage_account_key,
+                container=storage_default_container,
+                file_system=storage_default_filesystem,
+                is_default=True
+            ))
+    if additional_storage_accounts:
+        storage_accounts += [
+            StorageAccount(
+                name=s.storage_account,
+                key=s.storage_account_key,
+                container=s.container,
+                is_default=False
+            )
+            for s in additional_storage_accounts
+        ]
 
     create_params = ClusterCreateParametersExtended(
         location=location,
@@ -188,27 +205,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
                 roles=roles
             ),
             storage_profile=StorageProfile(
-                storageaccounts=(
-                    [
-                        # Specify storage account details only when storage arguments are provided
-                        StorageAccount(
-                            name=storage_account,
-                            key=storage_account_key,
-                            container=storage_default_container,
-                            file_system=storage_default_filesystem,
-                            is_default=True
-                        )
-                    ] if storage_account else []
-                ) +
-                [
-                    StorageAccount(
-                        name=s.storage_account,
-                        key=s.storage_account_key,
-                        container=s.container,
-                        is_default=False
-                    )
-                    for s in additional_storage_accounts
-                ]
+                storageaccounts=storage_accounts
             )
         )
     )
