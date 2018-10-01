@@ -655,7 +655,7 @@ helps['network application-gateway ssl-policy set'] = """
           text: |
             az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --policy-type Custom --min-protocol-version TLSv1_2 \\
-                --cipher-suits TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+                --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
 """
 
 helps['network application-gateway ssl-policy show'] = """
