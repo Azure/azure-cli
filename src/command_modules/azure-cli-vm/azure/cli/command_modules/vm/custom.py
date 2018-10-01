@@ -2457,7 +2457,7 @@ def list_image_galleries(cmd, resource_group_name=None):
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    Gallery = cmd.get_models('Gallery')
+    Gallery = cmd.get_models('Gallery', )
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     gallery = Gallery(description=description, location=location, tags=(tags or {}))

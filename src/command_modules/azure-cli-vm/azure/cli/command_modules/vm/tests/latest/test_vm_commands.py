@@ -66,11 +66,11 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_images_list_thru_services(self):
-        result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
-        assert result.index('15.04') >= 0
+        result = self.cmd('vm image list -l westus --publisher Canonical --offer UbuntuServer -o tsv --all').output
+        assert result.index('16.04') >= 0
 
-        result = self.cmd('vm image list -p Canonical -f Ubuntu_Snappy_Core -o tsv --all').output
-        assert result.index('15.04') >= 0
+        result = self.cmd('vm image list -p Canonical -f UbuntuServer -o tsv --all').output
+        assert result.index('16.04') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -854,11 +854,14 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
-        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
-        self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
-            self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
-        ])
+        ]).get_output_in_json()
+        # ensure the minor version is 2+
+        minor_version = int(result['instanceView']['extensions'][0]['typeHandlerVersion'].split('.')[1])
+        self.assertGreater(minor_version, 2)
+
         result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{ext}'),
@@ -894,9 +897,8 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
         ])
 
 
-class VMExtensionImageSearchScenarioTest(ScenarioTest):
+class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
     def test_vm_extension_image_search(self):
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
@@ -908,8 +910,6 @@ class VMExtensionImageSearchScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?name == '{image}']) == length(@)", True)
         ])
-        self.cmd('vm extension image list -l westus -p {pub} --name {image} --latest',
-                 checks=self.check('length(@)', 1))
 
 
 class VMCreateUbuntuScenarioTest(ScenarioTest):
