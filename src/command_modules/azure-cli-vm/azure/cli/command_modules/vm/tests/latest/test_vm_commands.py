@@ -2733,7 +2733,7 @@ class VMGenericUpdate(ScenarioTest):
 
 class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
-    def test_gallery_e2e(self, resource_group):
+    def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
             'vm2': 'vmFromImage',
@@ -2742,6 +2742,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'image_id': 'TBD',
+            'location': resource_group_location,
             'location2': 'westus2'
         })
 
@@ -2768,7 +2769,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --add publishingProfile.targetRegions name={location2}',
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=2 {location}',
                  checks=self.check('name', self.kwargs['version']))
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))

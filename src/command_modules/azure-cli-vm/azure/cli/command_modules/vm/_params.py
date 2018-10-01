@@ -18,8 +18,8 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk,
-    validate_vmss_disk, validate_asg_names_or_ids, validate_keyvault)
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
+    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
 
 
 # pylint: disable=too-many-statements, too-many-branches
@@ -542,13 +542,16 @@ def load_arguments(self, _):
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
-        c.argument('target_regions', nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
     with self.argument_context('sig image-version update') as c:
         c.ignore('gallery_image_version')
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
+    for scope in ['sig image-version create', 'sig image-version update']:
+        with self.argument_context(scope) as c:
+            c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
+                       help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
     # endregion
 
 
