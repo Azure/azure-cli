@@ -1866,15 +1866,17 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
             if deployment_container_image_name:
+                functionapp_def.kind = 'functionapp,linux,container'
                 site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
                                                               value=deployment_container_image_name))
                 site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
+                site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
+                site_config.linux_fx_version = _format_fx_version('appsvc/azure-functions-runtime')
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
