@@ -3238,7 +3238,7 @@ helps['network traffic-manager profile create'] = """
         - name: Create a traffic manager profile with performance routing.
           text: |
             az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance \\
-                --unique-dns-name mywebapp --ttl 30 --monitor-protocol HTTP --monitor-port 80 --monitor-path "/"
+                --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
 """
 
 helps['network traffic-manager profile delete'] = """
