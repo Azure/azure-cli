@@ -352,6 +352,13 @@ class AzArgumentContext(ArgumentsContext):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
         return merge_kwargs(kwargs, base, CLI_PARAM_KWARGS)
 
+    def _ignore_if_not_registered(self, dest):
+        scope = self.scope
+        arg_registry = self.command_loader.argument_registry
+        match = arg_registry.arguments[scope].get(dest, {})
+        if not match:
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
         self._check_stale()
@@ -373,7 +380,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      operation_group=operation_group):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            self._ignore_if_not_registered(dest)
 
     def positional(self, dest, arg_type=None, **kwargs):
         self._check_stale()
@@ -406,7 +413,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      operation_group=operation_group):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            self._ignore_if_not_registered(dest)
 
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
