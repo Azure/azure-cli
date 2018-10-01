@@ -7,7 +7,6 @@ import tarfile
 import os
 import re
 import codecs
-from builtins import open as bltn_open
 import requests
 from knack.log import get_logger
 from knack.util import CLIError
@@ -113,7 +112,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
         if docker_file_path:
             docker_file_tarinfo = tar.gettarinfo(
                 docker_file_path, docker_file_in_tar)
-            with bltn_open(docker_file_path, "rb") as f:
+            with open(docker_file_path, "rb") as f:
                 tar.addfile(docker_file_tarinfo, f)
 
 
@@ -185,7 +184,7 @@ def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matchin
     if not ignored:
         # append the tar header and data to the archive
         if tarinfo.isreg():
-            with bltn_open(name, "rb") as f:
+            with open(name, "rb") as f:
                 tar.addfile(tarinfo, f)
         else:
             tar.addfile(tarinfo)
