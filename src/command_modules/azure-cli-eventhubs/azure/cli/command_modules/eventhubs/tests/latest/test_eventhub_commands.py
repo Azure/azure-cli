@@ -9,14 +9,15 @@ import time
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
-from azure.mgmt.eventhub.models import ProvisioningStateDR
-
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
 
 class EHNamespaceCURDScenarioTest(ScenarioTest):
+    from azure_devtools.scenario_tests import AllowLargeResponse
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace(self, resource_group):
         self.kwargs.update({
@@ -120,22 +121,26 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         })
 
         # Create Namespace
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+        self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
+            checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace
         self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Create Eventhub
-        self.cmd('eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
+        self.cmd(
+            'eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}',
+            checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # Get Eventhub
-        self.cmd('eventhubs eventhub show --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
+        self.cmd('eventhubs eventhub show --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}',
+                 checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # update Eventhub
         self.cmd(
-            'eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --partition-count {partitioncount}',
+            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --partition-count {partitioncount} --message-retention {messageretentionindays}',
             checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # Eventhub List
@@ -143,10 +148,14 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.assertGreater(len(listeventhub), 0)
 
         # Create Authoriazation Rule
-        self.cmd('eventhubs eventhub authorization-rule create --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --rights {accessrights}', checks=[self.check('name', self.kwargs['authoname'])])
+        self.cmd(
+            'eventhubs eventhub authorization-rule create --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --rights {accessrights}',
+            checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get Create Authorization Rule
-        self.cmd('eventhubs eventhub authorization-rule show --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}', checks=[self.check('name', self.kwargs['authoname'])])
+        self.cmd(
+            'eventhubs eventhub authorization-rule show --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}',
+            checks=[self.check('name', self.kwargs['authoname'])])
 
         # update Authoriazation Rule
         self.cmd(
@@ -154,21 +163,26 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get Authorization Rule Listkeys
-        self.cmd('eventhubs eventhub authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
+        self.cmd(
+            'eventhubs eventhub authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
 
         # Regeneratekeys - Primary
-        regenrateprimarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {primary}')
+        regenrateprimarykeyresult = self.cmd(
+            'eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {primary}')
         self.assertIsNotNone(regenrateprimarykeyresult)
 
         # Regeneratekeys - Secondary
-        regenratesecondarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {secondary}')
+        regenratesecondarykeyresult = self.cmd(
+            'eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {secondary}')
         self.assertIsNotNone(regenratesecondarykeyresult)
 
         # Delete Eventhub AuthorizationRule
-        self.cmd('eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
+        self.cmd(
+            'eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
 
         # Delete Eventhub
-        self.cmd('eventhubs eventhub delete --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}')
+        self.cmd(
+            'eventhubs eventhub delete --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}')
 
         # Delete Namespace
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
@@ -227,6 +241,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_eh_alias')
     def test_eh_alias(self, resource_group):
+        from azure.mgmt.eventhub.models import ProvisioningStateDR
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',
