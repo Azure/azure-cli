@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.5
++++++
+* Minor changes
+
 0.3.4
 +++++
 * Added ability to restart and stop a running container group
