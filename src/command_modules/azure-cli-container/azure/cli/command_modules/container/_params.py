@@ -64,8 +64,8 @@ def load_arguments(self, _):
     with self.argument_context('container create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('image', help='The container image name')
-        c.argument('cpu', type=int, help='The required number of CPU cores of the containers')
-        c.argument('memory', type=float, help='The required memory of the containers in GB')
+        c.argument('cpu', type=int, help='The required number of CPU cores of the containers, accurate to one decimal place')
+        c.argument('memory', type=float, help='The required memory of the containers in GB, accurate to one decimal place')
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
         c.argument('ip_address', arg_type=get_enum_type(IP_ADDRESS_TYPES), help='The IP address type of the container group')
         c.argument('ports', type=int, nargs='+', default=[80], help='The ports to open')
