@@ -2171,7 +2171,6 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
-                         private_ip_address_allocation=None,
                          private_ip_address_version=None,
                          make_primary=False,
                          application_security_groups=None):
@@ -2197,7 +2196,7 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
         'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
         'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
         'private_ip_address': private_ip_address,
-        'private_ip_allocation_method': private_ip_address_allocation,
+        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic'
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
         new_config_args['private_ip_address_version'] = private_ip_address_version
@@ -2216,8 +2215,8 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
                       virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None, private_ip_address_allocation=None,
-                      private_ip_address_version='ipv4', make_primary=False,
+                      private_ip_address=None,
+                      private_ip_address_version=None, make_primary=False,
                       application_security_groups=None):
     PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
 
@@ -2227,11 +2226,13 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
         instance.primary = True
 
     if private_ip_address == '':
+        # switch private IP address allocation to Dynamic if empty string is used
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
         if cmd.supported_api_version(min_api='2016-09-01'):
             instance.private_ip_address_version = 'ipv4'
     elif private_ip_address is not None:
+        # if specific address provided, allocation is static
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'static'
         if private_ip_address_version is not None:
