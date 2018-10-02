@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def create_cluster(cmd, client, cluster_name, resource_group_name, location=None, tags=None, no_wait=False,
-                   cluster_version='default', cluster_type='hadoop', cluster_tier=None,
+                   cluster_version='default', cluster_type='spark', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
                    headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
