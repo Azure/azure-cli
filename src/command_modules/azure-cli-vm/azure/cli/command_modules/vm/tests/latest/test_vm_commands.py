@@ -2153,7 +2153,7 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
-    def test_msi_no_scope(self, resource_group):
+    def test_vm_msi_no_scope(self, resource_group):
 
         self.kwargs.update({
             'vm1': 'vm1',
