@@ -125,11 +125,11 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _component_version_arguments():
-        return '-t {} --component-version {}'.format('spark', 'spark=2.0 hadoop=2.7.3')
+        return '-t {} --component-version {}'.format('spark', 'spark=2.2')
 
     @staticmethod
     def _with_cluster_config():
-        return '--cluster-configuration {}'.format(r'{\"gateway\":{\"restAuthCredential.username\":\"admin\"}')
+        return '--cluster-configurations {}'.format(r'{{\"gateway\":{{\"restAuthCredential.username\":\"admin\"}}}}')
 
     @staticmethod
     def _with_explicit_ssh_creds():

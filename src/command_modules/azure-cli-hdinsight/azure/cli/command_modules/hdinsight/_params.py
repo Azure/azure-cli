@@ -71,7 +71,8 @@ def load_arguments(self, _):
                    help='The storage account key. A key can be retrieved automatically '
                         'if the user has access to the storage account.')
         c.argument('storage_default_container', arg_group='Storage',
-                   help='The storage container the cluster will use. (WASB only)  Default: default.')
+                   help='The storage container the cluster will use. '
+                        'Uses the cluster name if none was specified. (WASB only)')
         c.argument('storage_default_filesystem', arg_group='Storage',
                    help='The storage filesystem the cluster will use. (DFS only)')
         c.argument('virtual_network', arg_group='Network',

@@ -90,7 +90,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, location=None
 
     # Attempt to provide a default container for WASB storage accounts
     if not storage_default_container and storage_account and _is_wasb_endpoint(storage_account):
-        storage_default_container = 'default'
+        storage_default_container = cluster_name
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
 
     # Validate storage info parameters
