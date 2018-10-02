@@ -138,7 +138,7 @@ helps['vmss create'] = """
             az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
-            az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
+            az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
                 --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image UbuntuLTS \\
                 --generate-ssh-keys
         - name: Create a Linux VM scale set from a custom image using the default existing public SSH key.
@@ -839,7 +839,7 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version {latest}
 """
 
 helps['vm image accept-terms'] = """
