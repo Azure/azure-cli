@@ -781,7 +781,10 @@ def process_vnet_create_namespace(cmd, namespace):
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
-        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
+        else:
+            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
     if namespace.subnet_name and not namespace.subnet_prefix:
         if isinstance(namespace.vnet_prefixes, str):
@@ -790,7 +793,8 @@ def process_vnet_create_namespace(cmd, namespace):
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
-        namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
+        subnet_prefix = '{}/{}'.format(address, subnet_mask)
+        namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
 def process_vnet_gateway_create_namespace(cmd, namespace):

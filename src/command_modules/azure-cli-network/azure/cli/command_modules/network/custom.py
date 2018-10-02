@@ -3078,7 +3078,12 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         dhcp_options=DhcpOptions(dns_servers=dns_servers),
         address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
     if subnet_name:
-        vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            vnet.subnets = [Subnet(name=subnet_name,
+                                   address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
+                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None)]
+        else:
+            vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):
         vnet.enable_ddos_protection = ddos_protection
         vnet.enable_vm_protection = vm_protection
@@ -3136,7 +3141,14 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
-    subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
+    if cmd.supported_api_version(min_api='2018-08-01'):
+        subnet = Subnet(
+            name=subnet_name,
+            address_prefixes=address_prefix if len(address_prefix) > 1 else None,
+            address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
+        )
+    else:
+        subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
@@ -3161,7 +3173,11 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
     NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
 
     if address_prefix:
-        instance.address_prefix = address_prefix
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            instance.address_prefixes = address_prefix if len(address_prefix) > 1 else None
+            instance.address_prefix = address_prefix[0] if len(address_prefix) == 1 else None
+        else:
+            instance.address_prefix = address_prefix
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
