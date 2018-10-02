@@ -7,6 +7,8 @@ Release History
 +++++
 * Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
 * `network vnet peering create`: Deprecated `--remote-vnet-id`. Added --remote-vnet which accepts a name or ID.
+* `network vnet create`: Added support for multiple subnet prefixes with `--subnet-prefixes`.
+* `network vnet subnet create/update`: Added support for multiple subnet prefixes with `--address-prefixes`.
 
 2.2.5
 +++++
