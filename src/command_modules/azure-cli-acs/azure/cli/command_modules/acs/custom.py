@@ -46,7 +46,8 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
-                                    GetObjectsParameters)
+                                    GetObjectsParameters,
+                                    ResourceAccess, RequiredResourceAccess)
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -1172,7 +1173,7 @@ def _resolve_service_principal(client, identifier):
 def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None):
+                       end_date=None, required_resource_accesses=None):
     from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
@@ -1183,7 +1184,8 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
-                                                   password_credentials=password_creds)
+                                                   password_credentials=password_creds,
+                                                   required_resource_access=required_resource_accesses)
     try:
         return client.create(app_create_param)
     except GraphErrorException as ex:
@@ -2097,12 +2099,20 @@ def _ensure_osa_aad(cli_ctx,
         if not aad_client_app_secret:
             aad_client_app_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
         reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
+
+        # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
+        resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+                                         additional_properties=None, type="Scope")
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access], 
+                                                         additional_properties=None, 
+                                                         resource_app_id="00000002-0000-0000-c000-000000000000")
         result = create_application(client=rbac_client.applications,
                                     display_name=identifier,
                                     identifier_uris=[reply_url],
                                     reply_urls=[reply_url],
                                     homepage=reply_url,
-                                    password=aad_client_app_secret)
+                                    password=aad_client_app_secret,
+                                    required_resource_accesses=[required_osa_aad_access])
         aad_client_app_id = result.app_id
         logger.info('Created an AAD: %s', aad_client_app_id)
 
@@ -2232,7 +2242,7 @@ def _remove_osa_nulls(managed_clusters):
     This works around a quirk of the SDK for python behavior. These fields are not sent
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
-    attrs = ['tags', 'public_hostname', 'plan']
+    attrs = ['tags', 'public_hostname', 'plan', 'type', 'id']
     ap_master_attrs = ['name', 'os_type']
     net_attrs = ['peer_vnet_id']
     for managed_cluster in managed_clusters:
