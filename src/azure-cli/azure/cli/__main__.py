@@ -29,23 +29,24 @@ def cli_main(cli, args):
     return cli.invoke(args)
 
 
-az_cli = get_default_cli()
+def main():
+    az_cli = get_default_cli()
 
-telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
+    telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
-try:
-    telemetry.start()
+    try:
+        telemetry.start()
 
-    exit_code = cli_main(az_cli, sys.argv[1:])
+        exit_code = cli_main(az_cli, sys.argv[1:])
 
-    if exit_code and exit_code != 0:
-        telemetry.set_failure()
-    else:
-        telemetry.set_success()
+        if exit_code and exit_code != 0:
+            telemetry.set_failure()
+        else:
+            telemetry.set_success()
 
-    sys.exit(exit_code)
-except KeyboardInterrupt:
-    telemetry.set_user_fault('keyboard interrupt')
-    sys.exit(1)
-finally:
-    telemetry.conclude()
+        return exit_code
+    except KeyboardInterrupt:
+        telemetry.set_user_fault('keyboard interrupt')
+        return 1
+    finally:
+        telemetry.conclude()
