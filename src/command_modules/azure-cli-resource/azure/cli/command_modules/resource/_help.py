@@ -321,16 +321,16 @@ helps['policy definition create'] = """
                 - name: Create a read-only policy.
                   text: |
                     az policy definition create --name readOnlyStorage --rules '{
-                            "if":
-                            {
-                                "field": "type",
-                                "equals": "Microsoft.Storage/storageAccounts/write"
-                            },
-                            "then":
-                            {
-                                "effect": "deny"
-                            }
-                        }'
+                        "if":
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Storage/storageAccounts/write"
+                        },
+                        "then":
+                        {
+                            "effect": "deny"
+                        }
+                    }'
                 - name: Create a policy parameter definition with the following example
                   text: |
                     az policy definition create --name allowedLocations --rules '{
