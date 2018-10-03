@@ -334,6 +334,27 @@ helps['policy definition create'] = """
                 - name: Create a policy parameter definition with the following example
                   text: |
                     az policy definition create -n allowedLocations --rules '{
+                        "if": {
+                        "allOf": [
+                            {
+                            "field": "location",
+                            "notIn": "[parameters('listOfAllowedLocations')]"
+                            },
+                            {
+                            "field": "location",
+                            "notEquals": "global"
+                            },
+                            {
+                            "field": "type",
+                            "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
+                            }
+                        ]
+                        },
+                        "then": {
+                        "effect": "deny"
+                        }
+                    }' \\
+                    --params '{
                         "allowedLocations": {
                             "type": "array",
                             "metadata": {
