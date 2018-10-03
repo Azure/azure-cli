@@ -904,10 +904,10 @@ def list_ddos_plans(cmd, resource_group_name=None):
 
 
 # region DNS Commands
-def create_dns_zone(cmd, client, resource_group_name, zone_name, location='global', tags=None,
+def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    zone = Zone(location=location, tags=tags)
+    zone = Zone(location='global', tags=tags)
 
     if hasattr(zone, 'zone_type'):
         zone.zone_type = zone_type
@@ -2171,7 +2171,6 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
-                         private_ip_address_allocation=None,
                          private_ip_address_version=None,
                          make_primary=False,
                          application_security_groups=None):
@@ -2197,7 +2196,7 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
         'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
         'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
         'private_ip_address': private_ip_address,
-        'private_ip_allocation_method': private_ip_address_allocation,
+        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic'
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
         new_config_args['private_ip_address_version'] = private_ip_address_version
@@ -2216,8 +2215,8 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
                       virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None, private_ip_address_allocation=None,
-                      private_ip_address_version='ipv4', make_primary=False,
+                      private_ip_address=None,
+                      private_ip_address_version=None, make_primary=False,
                       application_security_groups=None):
     PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
 
@@ -2227,11 +2226,13 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
         instance.primary = True
 
     if private_ip_address == '':
+        # switch private IP address allocation to Dynamic if empty string is used
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
         if cmd.supported_api_version(min_api='2016-09-01'):
             instance.private_ip_address_version = 'ipv4'
     elif private_ip_address is not None:
+        # if specific address provided, allocation is static
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'static'
         if private_ip_address_version is not None:
@@ -3077,7 +3078,12 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         dhcp_options=DhcpOptions(dns_servers=dns_servers),
         address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
     if subnet_name:
-        vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            vnet.subnets = [Subnet(name=subnet_name,
+                                   address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
+                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None)]
+        else:
+            vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):
         vnet.enable_ddos_protection = ddos_protection
         vnet.enable_vm_protection = vm_protection
@@ -3135,7 +3141,14 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
-    subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
+    if cmd.supported_api_version(min_api='2018-08-01'):
+        subnet = Subnet(
+            name=subnet_name,
+            address_prefixes=address_prefix if len(address_prefix) > 1 else None,
+            address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
+        )
+    else:
+        subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
@@ -3160,7 +3173,11 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
     NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
 
     if address_prefix:
-        instance.address_prefix = address_prefix
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            instance.address_prefixes = address_prefix if len(address_prefix) > 1 else None
+            instance.address_prefix = address_prefix[0] if len(address_prefix) == 1 else None
+        else:
+            instance.address_prefix = address_prefix
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
@@ -3193,6 +3210,14 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
                         remote_virtual_network, allow_virtual_network_access=False,
                         allow_forwarded_traffic=False, allow_gateway_transit=False,
                         use_remote_gateways=False):
+    if not is_valid_resource_id(remote_virtual_network):
+        remote_virtual_network = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=remote_virtual_network
+        )
     SubResource, VirtualNetworkPeering = cmd.get_models('SubResource', 'VirtualNetworkPeering')
     peering = VirtualNetworkPeering(
         id=resource_id(

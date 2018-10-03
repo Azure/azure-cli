@@ -13,7 +13,6 @@ def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import namespaces_mgmt_client_factory, \
         queues_mgmt_client_factory, topics_mgmt_client_factory, subscriptions_mgmt_client_factory, \
         rules_mgmt_client_factory, disaster_recovery_mgmt_client_factory, migration_mgmt_client_factory
-    from azure.cli.command_modules.servicebus.custom import empty_on_404
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations.namespaces_operations#NamespacesOperations.{}',
@@ -56,15 +55,15 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
-        g.custom_command('list', 'cli_namespace_list', exception_handler=empty_on_404)
+        g.custom_command('list', 'cli_namespace_list')
         g.command('delete', 'delete')
         g.command('exists', 'check_name_availability_method')
         g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom)
 
     with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update_authorization_rule',)
+        g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules', exception_handler=empty_on_404)
+        g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
         g.command('keys renew', 'regenerate_keys')
         g.command('delete', 'delete_authorization_rule')
@@ -74,14 +73,14 @@ def load_command_table(self, _):
     with self.command_group('servicebus queue', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbqueue_create')
         g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace', exception_handler=empty_on_404)
+        g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbqueue_update')
 
     with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update_authorization_rule',)
+        g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules', exception_handler=empty_on_404)
+        g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
         g.command('keys renew', 'regenerate_keys')
         g.command('delete', 'delete_authorization_rule')
@@ -91,14 +90,14 @@ def load_command_table(self, _):
     with self.command_group('servicebus topic', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbtopic_create')
         g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace', exception_handler=empty_on_404)
+        g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbtopic_update')
 
     with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
         g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules', exception_handler=empty_on_404)
+        g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
         g.command('keys renew', 'regenerate_keys')
         g.command('delete', 'delete_authorization_rule')
@@ -108,7 +107,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus topic subscription', sb_subscriptions_util, client_factory=subscriptions_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_sbsubscription_create')
         g.show_command('show', 'get')
-        g.command('list', 'list_by_topic', exception_handler=empty_on_404)
+        g.command('list', 'list_by_topic')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbsubscription_update')
 
@@ -116,7 +115,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_rules_create')
         g.show_command('show', 'get')
-        g.command('list', 'list_by_subscriptions', exception_handler=empty_on_404)
+        g.command('list', 'list_by_subscriptions')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_rules_update')
 
@@ -124,7 +123,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.command('set', 'create_or_update')
         g.show_command('show', 'get')
-        g.command('list', 'list', exception_handler=empty_on_404)
+        g.command('list', 'list')
         g.command('break-pair', 'break_pairing')
         g.command('fail-over', 'fail_over')
         g.command('exists', 'check_name_availability_method')
@@ -140,5 +139,5 @@ def load_command_table(self, _):
     with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory) as g:
         g.custom_command('start', 'cli_migration_start')
         g.show_command('show', 'get')
-        g.command('complete', 'complete_migration', exception_handler=empty_on_404)
+        g.command('complete', 'complete_migration')
         g.command('abort', 'revert')

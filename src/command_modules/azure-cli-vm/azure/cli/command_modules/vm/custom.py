@@ -779,12 +779,20 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
                 if ip_configuration.public_ip_address:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
-                    network_info['publicIpAddresses'].append({
+
+                    public_ip_addr_info = {
                         'id': public_ip_address.id,
                         'name': public_ip_address.name,
                         'ipAddress': public_ip_address.ip_address,
                         'ipAllocationMethod': public_ip_address.public_ip_allocation_method
-                    })
+                    }
+
+                    try:
+                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
+                    except (AttributeError, IndexError, TypeError):
+                        pass
+
+                    network_info['publicIpAddresses'].append(public_ip_addr_info)
 
             result.append({
                 'virtualMachine': {
@@ -1164,9 +1172,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False,
 
     # pylint: disable=no-member
     if lun is None:
-        luns = ([d.lun for d in vm.storage_profile.data_disks]
-                if vm.storage_profile.data_disks else [])
-        lun = max(luns) + 1 if luns else 0
+        lun = _get_disk_lun(vm.storage_profile.data_disks)
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
@@ -1904,8 +1910,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
         lb_resource = build_load_balancer_resource(
             cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
-            private_ip_address='', private_ip_allocation='Dynamic', sku=load_balancer_sku)
+            'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
+            private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
+            disable_overprovision=disable_overprovision)
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
@@ -2290,8 +2297,7 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
         if lun is None:
-            luns = [d.lun for d in data_disks]
-            lun = max(luns) + 1 if luns else 0
+            lun = _get_disk_lun(data_disks)
         if existing_disk is None:
             data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
                                  caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
@@ -2491,9 +2497,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def upload_image(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image, gallery_image_version,
-                 location=None, target_regions=None, end_of_life_date=None, exclude_from_latest=None,
-                 replica_count=None, tags=None):
+def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
+                         gallery_image_version, location=None, target_regions=None, end_of_life_date=None,
+                         exclude_from_latest=None, replica_count=None, tags=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',

@@ -52,7 +52,7 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
-def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,
+def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
                   tags=None):
@@ -74,8 +74,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
     if is_linux:
-        if not validate_linux_create_options(runtime, deployment_container_image_name,
-                                             multicontainer_config_type, multicontainer_config_file):
+        if not validate_container_app_create_options(runtime, deployment_container_image_name,
+                                                     multicontainer_config_type, multicontainer_config_file):
             raise CLIError("usage error: --runtime | --deployment-container-image-name |"
                            " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
         if startup_file:
@@ -88,12 +88,15 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                 raise CLIError("Linux Runtime '{}' is not supported."
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
         elif deployment_container_image_name:
-            site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+            site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                           value="false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
-            site_config.linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
+            site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
+
+    elif plan_info.is_xenon:  # windows container webapp
+        site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
@@ -108,7 +111,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if not match['displayName'].startswith('node'):
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
-
     else:  # windows webapp without runtime specified
         site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                       value=node_default_version))
@@ -129,8 +131,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def validate_linux_create_options(runtime=None, deployment_container_image_name=None,
-                                  multicontainer_config_type=None, multicontainer_config_file=None):
+def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
+                                          multicontainer_config_type=None, multicontainer_config_file=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
     opts = [runtime, deployment_container_image_name, multicontainer_config_type]
@@ -264,7 +266,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     return response
 
 
-def get_sku_name(tier):
+def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     tier = tier.upper()
     if tier == 'F1' or tier == "FREE":
         return 'FREE'
@@ -278,6 +280,8 @@ def get_sku_name(tier):
         return 'PREMIUM'
     elif tier in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    elif tier in ['PC2', 'PC3', 'PC4']:
+        return 'PremiumContainer'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -543,7 +547,7 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     return webapp
 
 
-def _format_linux_fx_version(custom_image_name, container_config_type=None):
+def _format_fx_version(custom_image_name, container_config_type=None):
     fx_version = custom_image_name.strip()
     fx_version_lower = fx_version.lower()
     # handles case of only spaces
@@ -557,18 +561,22 @@ def _format_linux_fx_version(custom_image_name, container_config_type=None):
     return fx_version
 
 
-def _add_linux_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
-    fx_version = _format_linux_fx_version(custom_image_name)
-    return update_site_configs(cmd, resource_group_name, name, linux_fx_version=fx_version, slot=slot)
+def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
+    fx_version = _format_fx_version(custom_image_name)
+    web_app = get_webapp(cmd, resource_group_name, name, slot)
+    linux_fx = fx_version if web_app.reserved else None
+    windows_fx = fx_version if web_app.is_xenon else None
+    return update_site_configs(cmd, resource_group_name, name,
+                               linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
 
 
 def _delete_linux_fx_version(cmd, resource_group_name, name, slot=None):
     return update_site_configs(cmd, resource_group_name, name, linux_fx_version=' ', slot=slot)
 
 
-def _get_linux_fx_version(cmd, resource_group_name, name, slot=None):
+def _get_fx_version(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
-    return site_config.linux_fx_version
+    return site_config.linux_fx_version or site_config.windows_fx_version
 
 
 def url_validator(url):
@@ -581,7 +589,7 @@ def url_validator(url):
 
 def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slot=None):
     from base64 import b64decode
-    linux_fx_version = _get_linux_fx_version(cmd, resource_group_name, name, slot)
+    linux_fx_version = _get_fx_version(cmd, resource_group_name, name, slot)
     if not any([linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES]):
         raise CLIError("Cannot decode config that is not one of the"
                        " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
@@ -604,7 +612,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 def update_site_configs(cmd, resource_group_name, name, slot=None,
-                        linux_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
+                        linux_fx_version=None, windows_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
                         net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
@@ -779,7 +787,7 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
-        _add_linux_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
+        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
     if websites_enable_app_service_storage:
         settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
@@ -789,7 +797,7 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
 
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
-        linux_fx_version = _format_linux_fx_version(encoded_config_file, multicontainer_config_type)
+        linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
         update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version)
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
@@ -832,7 +840,7 @@ def show_container_settings(cmd, resource_group_name, name, show_multicontainer_
 def _filter_for_container_settings(cmd, resource_group_name, name, settings,
                                    show_multicontainer_config=None, slot=None):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
-    fx_version = _get_linux_fx_version(cmd, resource_group_name, name, slot).strip()
+    fx_version = _get_fx_version(cmd, resource_group_name, name, slot).strip()
     if fx_version:
         added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
                             'value': fx_version}
@@ -1078,8 +1086,10 @@ def _linux_sku_check(sku):
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3, P1V2, P2V2, P3V2'))
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
                             location=None, tags=None):
+    if is_linux and hyper_v:
+        raise CLIError('usage error: --is-linux | --hyper-v')
     client = web_client_factory(cmd.cli_ctx)
     sku = _normalize_sku(sku)
     if location is None:
@@ -1088,7 +1098,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, sku='B1', 
         _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
-    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def, reserved=(is_linux or None), name=name)
+    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
+                              reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -1801,9 +1812,9 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    consumption_plan_location=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None,
-                    deployment_container_image_name=None, tags=None):
+                    os_type=None, runtime=None, consumption_plan_location=None,
+                    deployment_source_url=None, deployment_source_branch='master',
+                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1821,7 +1832,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
-    else:
+        # if os_type is None, the os type is windows
+        is_linux = os_type and os_type.lower() == 'linux'
+
+        # for linux consumption plan app the os_type should be Linux & should have a runtime specified
+        # currently in other cases the runtime is ignored
+        if is_linux and not runtime:
+            raise CLIError("usage error: --runtime RUNTIME required for linux functions apps with consumption plan.")
+
+    else:  # apps with SKU based plan
         if is_valid_resource_id(plan):
             parse_result = parse_resource_id(plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
@@ -1831,30 +1850,36 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
-        if is_linux:
-            functionapp_def.kind = 'functionapp,linux'
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
-            site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
-                                                          value=str(hexlify(urandom(32)).decode()).upper()))
-            if deployment_container_image_name:
-                site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
-                                                              value=deployment_container_image_name))
-                site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
-                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
-                                                              value='false'))
-            else:
-                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
-                                                              value='true'))
-                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
-        else:
-            functionapp_def.kind = 'functionapp'
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~1'))
-
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
+    if is_linux:
+        functionapp_def.kind = 'functionapp,linux'
+        functionapp_def.reserved = True
+        if consumption_plan_location:
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
+        else:
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
+            site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
+                                                          value=str(hexlify(urandom(32)).decode()).upper()))
+            if deployment_container_image_name:
+                functionapp_def.kind = 'functionapp,linux,container'
+                site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
+                                                              value=deployment_container_image_name))
+                site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
+                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
+                                                              value='false'))
+                site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+            else:
+                site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
+                                                              value='true'))
+                site_config.linux_fx_version = _format_fx_version('appsvc/azure-functions-runtime')
+    else:
+        functionapp_def.kind = 'functionapp'
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -1870,8 +1895,13 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
-                             deployment_source_branch, deployment_local_git)
+    if consumption_plan_location and is_linux:
+        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
+                       "created but is not active until content is published using"
+                       "Azure Portal or the Functions Core Tools.", name)
+    else:
+        _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
+                                 deployment_source_branch, deployment_local_git)
 
     return functionapp
 

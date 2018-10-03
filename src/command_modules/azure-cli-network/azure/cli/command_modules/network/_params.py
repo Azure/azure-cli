@@ -616,8 +616,8 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
         c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
-        c.argument('private_ip_address_allocation', ignore_type, default=IPAllocationMethod.dynamic.value)
         c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
+        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or "" to use a dynamic address.')
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
@@ -939,9 +939,12 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
-        c.argument('subnet_name', help='Name of a new subnet to create within the VNet.')
-        c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
         c.argument('vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
+
+    with self.argument_context('network vnet create', arg_group='Subnet') as c:
+        c.argument('subnet_name', help='Name of a new subnet to create within the VNet.')
+        c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX', max_api='2018-07-01')
+        c.argument('subnet_prefix', options_list='--subnet-prefixes', nargs='+', min_api='2018-08-01', help='Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIXES')
 
     with self.argument_context('network vnet update') as c:
         c.argument('address_prefixes', nargs='+')
@@ -949,7 +952,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet peering') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('virtual_network_peering_name', options_list=('--name', '-n'), help='The name of the VNet peering.', id_part='child_name_1')
-        c.argument('remote_virtual_network', options_list=('--remote-vnet-id',), help='ID of the remote VNet.')
+        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='2.1.0')], help='Resource ID or name of the remote VNet.')
 
     with self.argument_context('network vnet peering create') as c:
         c.argument('allow_virtual_network_access', options_list=('--allow-vnet-access',), action='store_true', help='Allows VMs in the remote VNet to access all VMs in the local VNet.')
@@ -959,7 +962,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name_1')
-        c.argument('address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
+        c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
+        c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.', min_api='2018-08-01')
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')

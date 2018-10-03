@@ -106,11 +106,11 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.2"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.12"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '6.1.0'),
+            JMESPathCheck('[0].value', '6.12.0'),
         ]))
 
     @ResourceGroupPreparer()
@@ -118,7 +118,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
@@ -164,7 +164,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = 'webapp-quick-linux-cd'
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
@@ -191,7 +191,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.2"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
         # sanity check the traces
@@ -323,11 +323,9 @@ class WebappConfigureTest(ScenarioTest):
 
         # site azure storage account configurations tests
         # add
-        byos_resource_group = 'yili-cus-stage-01'  # on the beta stamp msftintch1501
-        byos_app_name = 'patle-byos'
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(byos_resource_group, byos_app_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, webapp_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
             JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
@@ -336,8 +334,8 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
         self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(byos_resource_group, byos_app_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+                 .format(resource_group, webapp_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
             JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
@@ -345,11 +343,11 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
         # list
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck('[0].name', 'Id')])
         # delete
-        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(byos_resource_group, byos_app_name)).assert_with_checks([
+        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length(@)", 0)])
 
         # site connection string tests
@@ -444,6 +442,9 @@ class LinuxWebappScenarioTest(ScenarioTest):
         ])
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheck('name', webapp),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('windowsFxVersion', None)
         ])
         time.sleep(30)  # workaround the fact that a new linux web's "kind" won't be settled instantaneously
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
@@ -774,6 +775,23 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
 class FunctionAppOnLinux(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
@@ -958,6 +976,47 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
         self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
                  .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
                      JMESPathCheck('status', 'Disabling')])
+
+
+class WebappWindowsContainerBasicE2ETest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_hyperv_e2e(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku PC2'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
+            JMESPathCheck('[0].sku.name', 'PC2')
+        ])
+        self.cmd('appservice plan list', checks=[
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
+        ])
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('name', plan)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis:nanoserver-sac2016"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
+        self.cmd('webapp config set -g {} -n {} --windows-fx-version "DOCKER|microsoft/iis"'.format(resource_group, webapp_name))
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
 
 
 if __name__ == '__main__':

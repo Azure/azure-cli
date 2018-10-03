@@ -239,7 +239,8 @@ def load_arguments(self, _):
         c.argument('nic', help='NIC name or ID.', validator=validate_vm_nic)
 
     with self.argument_context('vm run-command') as c:
-        c.argument('command_id', completer=get_vm_run_command_completion_list, help="The run command ID")
+        c.argument('command_id', completer=get_vm_run_command_completion_list,
+                   help="The command id. Use 'az vm run-command list' to get the list")
 
     with self.argument_context('vm run-command invoke') as c:
         c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
@@ -528,8 +529,12 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+    with self.argument_context('sig update') as c:
+        c.ignore('gallery')
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
+    with self.argument_context('sig image-definition update') as c:
+        c.ignore('gallery_image')
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
@@ -540,7 +545,8 @@ def load_arguments(self, _):
         c.argument('target_regions', nargs='*', help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
-
+    with self.argument_context('sig image-version update') as c:
+        c.ignore('gallery_image_version')
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     # endregion

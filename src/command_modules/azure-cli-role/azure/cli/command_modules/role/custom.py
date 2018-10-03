@@ -18,6 +18,7 @@ from knack.util import CLIError, todict
 
 from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.profiles import ResourceType, get_api_version
 from azure.graphrbac.models.graph_error import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
@@ -28,10 +29,9 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
                                     ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
+from ._multi_api_adaptor import MultiAPIAdaptor
 
 logger = get_logger(__name__)
-
-_CUSTOM_RULE = 'CustomRole'
 
 # pylint: disable=too-many-lines
 
@@ -41,7 +41,7 @@ def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    return _search_role_definitions(definitions_client, name, scope, custom_role_only)
+    return _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
 
 
 def create_role_definition(cmd, role_definition):
@@ -52,32 +52,7 @@ def update_role_definition(cmd, role_definition):
     return _create_update_role_definition(cmd, role_definition, for_update=True)
 
 
-def _get_role_property(obj, property_name):
-    if isinstance(obj, dict):
-        if 'properties' in obj:
-            return obj['properties'][property_name]
-        return obj[property_name]
-
-    if hasattr(obj, 'properties'):
-        return getattr(obj.properties, property_name)
-    return getattr(obj, property_name)
-
-
-def _set_role_property(obj, property_name, property_value):
-    if isinstance(obj, dict):
-        if 'properties' in obj:
-            obj['properties'][property_name] = property_value
-        else:
-            obj[property_name] = property_value
-    else:
-        if hasattr(obj, 'properties'):
-            setattr(obj.properties, property_name, property_value)
-        else:
-            setattr(obj, property_name, property_value)
-
-
 def _create_update_role_definition(cmd, role_definition, for_update):
-    from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
     definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
@@ -99,12 +74,13 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scope = (scopes_in_definition[0] if scopes_in_definition else
                  '/subscriptions/' + definitions_client.config.subscription_id)
-        matched = _search_role_definitions(definitions_client, role_name, scope)
+        matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_name, scope)
         if len(matched) != 1:
             raise CLIError('Please provide the unique logic name of an existing role')
         role_definition['name'] = matched[0].name
         # ensure correct logical name and guid name. For update we accept both
-        role_name = _get_role_property(matched[0], 'role_name')
+        worker = MultiAPIAdaptor(cmd.cli_ctx)
+        role_name = worker.get_role_property(matched[0], 'role_name')
         role_id = matched[0].name
     else:
         role_id = _gen_guid()
@@ -112,39 +88,8 @@ def _create_update_role_definition(cmd, role_definition, for_update):
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
-    Permission, RoleDefinition, RoleDefinitionProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                                                   'Permission', 'RoleDefinition',
-                                                                   'RoleDefinitionProperties', mod='models',
-                                                                   operation_group='role_definitions')
-
-    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_definitions')
-    if version == '2015-07-01':
-        permission = Permission(actions=role_definition.get('actions', None),
-                                not_actions=role_definition.get('notActions', None))
-
-        properties = RoleDefinitionProperties(role_name=role_name,
-                                              description=role_definition.get('description', None),
-                                              type=_CUSTOM_RULE,
-                                              assignable_scopes=role_definition['assignableScopes'],
-                                              permissions=[permission])
-        definition = RoleDefinition(name=role_id, properties=properties)
-        return definitions_client.create_or_update(role_definition_id=role_id,
-                                                   scope=properties.assignable_scopes[0],
-                                                   properties=properties)
-
-    permission = Permission(actions=role_definition.get('actions', None),
-                            not_actions=role_definition.get('notActions', None),
-                            data_actions=role_definition.get('dataActions', None),
-                            not_data_actions=role_definition.get('notDataActions', None))
-
-    definition = RoleDefinition(role_name=role_name,
-                                description=role_definition.get('description', None),
-                                role_type=_CUSTOM_RULE,
-                                assignable_scopes=role_definition['assignableScopes'],
-                                permissions=[permission])
-    return definitions_client.create_or_update(role_definition_id=role_id,
-                                               scope=definition.assignable_scopes[0],
-                                               role_definition=definition)
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
+    return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
 
 
 def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
@@ -152,17 +97,18 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    roles = _search_role_definitions(definitions_client, name, scope, custom_role_only)
+    roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
 
 
-def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
+def _search_role_definitions(cli_ctx, definitions_client, name, scope, custom_role_only=False):
     roles = list(definitions_client.list(scope))
+    worker = MultiAPIAdaptor(cli_ctx)
     if name:
-        roles = [r for r in roles if r.name == name or _get_role_property(r, 'role_name') == name]
+        roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
     if custom_role_only:
-        roles = [r for r in roles if _get_role_property(r, 'role_type') == _CUSTOM_RULE]
+        roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
     return roles
 
 
@@ -176,34 +122,16 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
-    from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
-    RoleAssignmentCreateParameters, RoleAssignmentProperties = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                                                       'RoleAssignmentCreateParameters',
-                                                                       'RoleAssignmentProperties', mod='models',
-                                                                       operation_group='role_assignments')
-
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    version = getattr(get_api_version(cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'role_assignments')
-    assignment_name = _gen_guid()
-    custom_headers = None
-
-    if version == '2015-07-01':
-        properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-        return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
-                                         properties=properties,
-                                         custom_headers=custom_headers)
-
-    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
-    return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
-                                     parameters=parameters,
-                                     custom_headers=custom_headers)
+    worker = MultiAPIAdaptor(cli_ctx)
+    return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope)
 
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
@@ -242,16 +170,19 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # 2. fill in role names
     role_defs = list(definitions_client.list(
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
-    role_dics = {i.id: _get_role_property(i, 'role_name') for i in role_defs}
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
+    role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
     for i in results:
         if not i.get('roleDefinitionName'):
-            if role_dics.get(_get_role_property(i, 'roleDefinitionId')):
-                _set_role_property(i, 'roleDefinitionName', role_dics[_get_role_property(i, 'roleDefinitionId')])
+            if role_dics.get(worker.get_role_property(i, 'roleDefinitionId')):
+                worker.set_role_property(i, 'roleDefinitionName',
+                                         role_dics[worker.get_role_property(i, 'roleDefinitionId')])
             else:
                 i['roleDefinitionName'] = None  # the role definition might have been deleted
 
     # fill in principal names
-    principal_ids = set(_get_role_property(i, 'principalId') for i in results if _get_role_property(i, 'principalId'))
+    principal_ids = set(worker.get_role_property(i, 'principalId')
+                        for i in results if worker.get_role_property(i, 'principalId'))
 
     if principal_ids:
         try:
@@ -260,8 +191,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
 
             for i in [r for r in results if not r.get('principalName')]:
                 i['principalName'] = ''
-                if principal_dics.get(_get_role_property(i, 'principalId')):
-                    _set_role_property(i, 'principalName', principal_dics[_get_role_property(i, 'principalId')])
+                if principal_dics.get(worker.get_role_property(i, 'principalId')):
+                    worker.set_role_property(i, 'principalName',
+                                             principal_dics[worker.get_role_property(i, 'principalId')])
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
@@ -319,8 +251,10 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
 def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [_get_role_property(d, 'role_name'), d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
+    role_defs = {d.id: [worker.get_role_property(d, 'role_name'),
+                        d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -405,8 +339,9 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
 
 
 def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
+    worker = MultiAPIAdaptor(cli_ctx)
     co_admins = auth_client.classic_administrators.list()  # known swagger bug on api-version handling
-    co_admins = [x for x in co_admins if _get_role_property(x, 'email_address')]
+    co_admins = [x for x in co_admins if x.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
         if _is_guid(assignee):
@@ -417,30 +352,36 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
                 assignee = _get_displayable_name(result[0]).lower()
             except ValueError:
                 pass
-        co_admins = [x for x in co_admins if assignee == _get_role_property(x, 'email_address').lower()]
+        co_admins = [x for x in co_admins if assignee == x.email_address.lower()]
 
     if not co_admins:
         return []
 
     result, users = [], []
     for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
-        upn_queries = ["userPrincipalName eq '{}'".format(_get_role_property(x, 'email_address'))
+        upn_queries = ["userPrincipalName eq '{}'".format(x.email_address)
                        for x in co_admins[i:i + 10]]
         temp = list(list_users(graph_client.users, query_filter=' or '.join(upn_queries)))
         users += temp
     upns = {u.user_principal_name: u.object_id for u in users}
     for admin in co_admins:
         na_text = 'NA(classic admins)'
-        email = _get_role_property(admin, 'email_address')
+        email = admin.email_address
         result.append({
             'id': na_text,
             'name': na_text,
+        })
+        properties = {
             'principalId': upns.get(email),
             'principalName': email,
-            'roleDefinitionName': _get_role_property(admin, 'role'),
+            'roleDefinitionName': admin.role,
             'roleDefinitionId': 'NA(classic admin role)',
             'scope': '/subscriptions/' + auth_client.config.subscription_id
-        })
+        }
+        if worker.old_api:
+            result[-1]['properties'] = properties
+        else:
+            result[-1].update(properties)
     return result
 
 
@@ -496,16 +437,17 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     else:
         assignments = list(assignments_client.list())
 
+    worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
         assignments = [a for a in assignments if (
             not scope or
-            include_inherited and re.match(_get_role_property(a, 'scope'), scope, re.I) or
-            _get_role_property(a, 'scope').lower() == scope.lower()
+            include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
+            worker.get_role_property(a, 'scope').lower() == scope.lower()
         )]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [i for i in assignments if _get_role_property(i, 'role_definition_id') == role_id]
+            assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
     return assignments
 
@@ -556,6 +498,12 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
     return client.list(filter=(' and '.join(sub_filters)))
+
+
+def list_application_owners(cmd, identifier):
+    client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_application(client.applications, identifier)
+    return client.applications.list_owners(object_id)
 
 
 def list_sps(client, spn=None, display_name=None, query_filter=None):
@@ -845,6 +793,12 @@ def _get_app_object_id_from_sp_object_id(client, sp_object_id):
     return app_object_id
 
 
+def list_service_principal_owners(cmd, identifier):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    return client.service_principals.list_owners(sp_object_id)
+
+
 def list_service_principal_credentials(cmd, identifier, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client.service_principals, identifier)
@@ -1016,7 +970,7 @@ def create_service_principal_for_rbac(
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
-                                         homepage='http://' + app_display_name,
+                                         homepage='https://' + app_display_name,
                                          identifier_uris=[name],
                                          available_to_other_tenants=False,
                                          password=password,
@@ -1090,7 +1044,6 @@ def create_service_principal_for_rbac(
 
 def _get_keyvault_client(cli_ctx):
     from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import get_api_version, ResourceType
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 

@@ -138,7 +138,7 @@ helps['vmss create'] = """
             az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
-            az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
+            az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
                 --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image UbuntuLTS \\
                 --generate-ssh-keys
         - name: Create a Linux VM scale set from a custom image using the default existing public SSH key.
@@ -839,7 +839,7 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version {latest}
 """
 
 helps['vm image accept-terms'] = """
@@ -1468,13 +1468,30 @@ helps['sig image-version'] = """
 helps['sig image-version create'] = """
     type: command
     short-summary: creat a new image version
+    long-summary : this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
     examples:
-        - name: add a new version
+        - name: add a new image version
           text: |
             az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+        - name: add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
+          text: |
+            az sig image-version create --no-wait -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image imageInTheSameResourceGroup
 """
 
 helps['sig image-version update'] = """
     type: command
     short-summary: update a share image version
+    examples:
+        - name: replicate to a new region
+          text: |
+            az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+"""
+
+helps['sig image-version wait'] = """
+    type: command
+    short-summary: wait for image version related operation
+    examples:
+        - name: wait for an image version gets updated
+          text: |
+            az sig image-version wait --updated -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0
 """

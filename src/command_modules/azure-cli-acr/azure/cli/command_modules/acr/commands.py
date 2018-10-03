@@ -19,7 +19,9 @@ from ._format import (
     build_task_detail_output_format,
     build_output_format,
     task_output_format,
-    run_output_format
+    run_output_format,
+    helm_list_output_format,
+    helm_show_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
@@ -209,8 +211,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update', 'acr_config_content_trust_update')
 
     with self.command_group('acr helm', acr_helm_util) as g:
-        g.command('list', 'acr_helm_list')
-        g.command('show', 'acr_helm_show')
+        g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
+        g.command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
         g.command('delete', 'acr_helm_delete')
         g.command('push', 'acr_helm_push')
         g.command('repo add', 'acr_helm_repo_add')

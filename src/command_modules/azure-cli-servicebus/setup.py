@@ -13,7 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.2.3"
+VERSION = "0.3.0"
 
 
 # The full list of classifiers is available at

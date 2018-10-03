@@ -66,6 +66,20 @@ def run_output_format(result):
     return _output_format(result, _run_format_group)
 
 
+def helm_list_output_format(result):
+    if isinstance(result, dict):
+        obj_list = []
+        for _, item in result.items():
+            obj_list += item
+        return _output_format(obj_list, _helm_format_group)
+    logger.debug("Unexpected output %s", result)
+    return _output_format(result, _helm_format_group)
+
+
+def helm_show_output_format(result):
+    return _output_format(result, _helm_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -215,6 +229,19 @@ def _run_format_group(item):
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+    ])
+
+
+def _helm_format_group(item):
+    description = _get_value(item, 'description')
+    if len(description) > 57:  # Similar to helm client
+        description = description[:57] + '...'
+
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('CHART VERSION', _get_value(item, 'version')),
+        ('APP VERSION', _get_value(item, 'appVersion')),
+        ('DESCRIPTION', description)
     ])
 
 
