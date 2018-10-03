@@ -68,6 +68,7 @@ from azure.mgmt.containerservice.models import OpenShiftManagedClusterMasterPool
 from azure.mgmt.containerservice.models import OpenShiftContainerServiceVMSize
 from azure.mgmt.containerservice.models import OpenShiftRouterProfile
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
+from azure.mgmt.containerservice.models import NetworkProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -2091,7 +2092,6 @@ def _ensure_osa_aad(cli_ctx,
                     aad_tenant_id=None,
                     identifier=None,
                     name=None):
-    # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not aad_client_app_id:
         if not aad_client_app_secret:
@@ -2223,6 +2223,29 @@ def _remove_nulls(managed_clusters):
                 delattr(managed_cluster.service_principal_profile, attr)
     return managed_clusters
 
+def _remove_osa_nulls(managed_clusters):
+    """
+    Remove some often-empty fields from a list of OpenShift ManagedClusters, so the JSON representation
+    doesn't contain distracting null fields.
+
+    This works around a quirk of the SDK for python behavior. These fields are not sent
+    by the server, but get recreated by the CLI's own "to_dict" serialization.
+    """
+    attrs = ['tags', 'public_hostname', 'plan']
+    ap_master_attrs = ['name', 'os_type']
+    net_attrs = ['peer_vnet_id']
+    for managed_cluster in managed_clusters:
+        for attr in attrs:
+            if getattr(managed_cluster, attr, None) is None:
+                delattr(managed_cluster, attr)
+        for attr in ap_master_attrs:
+            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
+                delattr(managed_cluster.master_pool_profile, attr)
+        for attr in net_attrs:
+            if getattr(managed_cluster.network_profile, attr, None) is None:
+                delattr(managed_cluster.network_profile, attr)
+    return managed_clusters
+
 
 def _validate_aci_location(norm_location):
     """
@@ -2253,7 +2276,9 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      aad_client_app_id=None,
                      aad_client_app_secret=None,
                      aad_tenant_id=None,
-                     vnet_subnet_id=None,
+                     vnet_cidr="10.0.0.0/8",
+                     subnet_cidr="10.0.0.0/24",
+                     vnet_peer_id=None,
                      tags=None,
                      no_wait=False):
 
@@ -2268,7 +2293,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         vm_size=node_vm_size,
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.compute,
-        vnet_subnet_id=vnet_subnet_id
+        subnet_cidr=subnet_cidr
     )
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
@@ -2277,7 +2302,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.infra,
-        vnet_subnet_id=vnet_subnet_id
+        subnet_cidr=subnet_cidr
     )
 
     agent_pool_profiles.append(agent_node_pool_profile)
@@ -2288,7 +2313,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         count=int(3),
         vm_size="Standard_D2s_v3",
         os_type="Linux",
-        vnet_subnet_id=vnet_subnet_id
+        subnet_cidr=subnet_cidr
     )
     identity_providers = []
 
@@ -2307,36 +2332,29 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     default_router_profile = OpenShiftRouterProfile(name='default')
 
+    network_profile = NetworkProfile(vnet_cidr=vnet_cidr, peer_vnet_id=vnet_peer_id)
+
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
         open_shift_version="v3.10",
         fqdn=fqdn,
+        network_profile=network_profile,
         auth_profile=auth_profile,
         agent_pool_profiles=agent_pool_profiles,
         master_pool_profile=agent_master_pool_profile,
         router_profiles=[default_router_profile])
 
-    # We don't creating the AADIdentity for the user right now but maybe later so keeping this
-    # Keeping this Due to SPN replication latency, we do a few retries here
-    max_retry = 30
-    retry_exception = Exception(None)
-    for _ in range(0, max_retry):
-        try:
-            # long_running_operation_timeout=300
-            return sdk_no_wait(no_wait, client.create_or_update,
-                               resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
-        except CloudError as ex:
-            retry_exception = ex
-            if 'not found in Active Directory tenant' in ex.message:
-                time.sleep(3)
-            else:
-                raise ex
-    raise retry_exception
+    try:
+        # long_running_operation_timeout=300
+        return sdk_no_wait(no_wait, client.create_or_update,
+                            resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+    except CloudError as ex:
+        raise ex
 
 
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
-    return [mc][0]
+    return _remove_osa_nulls([mc])
 
 
 def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
@@ -2347,5 +2365,7 @@ def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
+
+    #instance.network_profile.vnet_cidr
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)

@@ -12,8 +12,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (
     ResourceGroupPreparer, ManagedApplicationPreparer, ScenarioTest, live_only)
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.checkers import (
-    StringContainCheck, StringContainCheckIgnoreCase)
+from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIgnoreCase)
 
 # flake8: noqa
 

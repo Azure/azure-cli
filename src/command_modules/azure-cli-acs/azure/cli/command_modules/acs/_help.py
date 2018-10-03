@@ -557,9 +557,15 @@ helps['openshift create'] = """
         - name: --aad-tenant-id
           type: string
           short-summary: The ID of an Azure Active Directory tenant.
-        - name: --vnet-subnet-id
+        - name: --vnet-peer-id
           type: string
-          short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+          short-summary: The ID of a subnet in an existing VNet into which to peer the cluster.
+        - name: --vnet-cidr
+          type: string
+          short-summary: The CIDR used on the VNet into which to deploy the cluster.
+        - name: --subnet-cidr
+          type: string
+          short-summary: The CIDR used on the Subnet into which to deploy the cluster.
         
 
     examples:
@@ -569,7 +575,7 @@ helps['openshift create'] = """
           text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
                 --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID> --node-count 5
         - name: Create an Openshift cluster using a custom vnet
-          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN> --vnet-subnet-id "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-resource-group/providers/Microsoft.Network/virtualNetworks/openshift-vnet/subnets/default"
+          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN> --vnet-peer-id "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
 """
 
 helps['openshift scale'] = """

@@ -142,9 +142,8 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='http://clitest',
-                 skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
-                 dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
+    def __init__(self, name_prefix='http://clitest', skip_assignment=True, parameter_name='sp_name',
+                 parameter_password='sp_password', dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD', key='sp'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
