@@ -566,7 +566,7 @@ helps['openshift create'] = """
         - name: --subnet-cidr
           type: string
           short-summary: The CIDR used on the Subnet into which to deploy the cluster.
-        
+
 
     examples:
         - name: Create an OpenShift cluster and auto create an AAD Client

@@ -2223,6 +2223,7 @@ def _remove_nulls(managed_clusters):
                 delattr(managed_cluster.service_principal_profile, attr)
     return managed_clusters
 
+
 def _remove_osa_nulls(managed_clusters):
     """
     Remove some often-empty fields from a list of OpenShift ManagedClusters, so the JSON representation
@@ -2347,7 +2348,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     try:
         # long_running_operation_timeout=300
         return sdk_no_wait(no_wait, client.create_or_update,
-                            resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+                           resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
     except CloudError as ex:
         raise ex
 
@@ -2365,7 +2366,5 @@ def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
-
-    #instance.network_profile.vnet_cidr
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
