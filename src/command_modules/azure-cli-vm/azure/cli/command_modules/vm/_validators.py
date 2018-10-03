@@ -1309,4 +1309,21 @@ def process_remove_identity_namespace(cmd, namespace):
 def process_msi_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
+
+
+def process_gallery_image_version_namespace(cmd, namespace):
+    TargetRegion = cmd.get_models('TargetRegion')
+    if namespace.target_regions:
+        regions_info = []
+        for t in namespace.target_regions:
+            parts = t.split('=', 1)
+            if len(parts) == 1:
+                regions_info.append(TargetRegion(name=parts[0]))
+            else:
+                try:
+                    replica_count = int(parts[1])
+                except ValueError:
+                    raise CLIError("usage error: {}'s replica count must be an integer".format(parts[0]))
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
+        namespace.target_regions = regions_info
 # endregion
