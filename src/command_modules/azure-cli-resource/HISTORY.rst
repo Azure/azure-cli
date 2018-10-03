@@ -4,8 +4,7 @@ Release History
 ===============
 2.1.5
 +++++
-* update policy to 2018-03-01 python sdk
-* add support for management groups and subscriptions
+* az policy definition/set-definition create/list/delete/show/update: add support for management groups and subscriptions
 
 2.1.4
 +++++
