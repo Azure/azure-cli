@@ -166,7 +166,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
-    sku_tier = sku.split('_', 1)[0]
+    sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
     http_listener_protocol = 'https' if cert_data else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
@@ -235,7 +235,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None):
     if sku is not None:
         instance.sku.name = sku
-        instance.sku.tier = sku.split('_', 1)[0]
+        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
     if capacity is not None:
         instance.sku.capacity = capacity
     if tags is not None:
