@@ -10,6 +10,7 @@ Release History
 * `network vnet create`: Added support for multiple subnet prefixes with `--subnet-prefixes`.
 * `network vnet subnet create/update`: Added support for multiple subnet prefixes with `--address-prefixes`.
 * `network application-gateway create`: Fixed logic that prevented creating gateways with WAF_v2 or Standard_v2 SKU.
+* `network vnet subnet update`: Added `--service-endpoint-policy` convenience argument.
 
 2.2.5
 +++++

@@ -3169,8 +3169,9 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None, delegations=None):
-    NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
+                  route_table=None, service_endpoints=None, delegations=None, service_endpoint_policy=None):
+    NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
+        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
     if address_prefix:
         if cmd.supported_api_version(min_api='2018-08-01'):
@@ -3192,6 +3193,13 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         instance.service_endpoints = []
         for service in service_endpoints:
             instance.service_endpoints.append(ServiceEndpoint(service=service))
+
+    if service_endpoint_policy == '':
+        instance.service_endpoint_policies = None
+    elif service_endpoint_policy:
+        instance.service_endpoint_policies = []
+        for policy in service_endpoint_policy:
+            instance.service_endpoint_policies.append(SubResource(id=policy))
 
     if delegations:
         instance.delegations = delegations
