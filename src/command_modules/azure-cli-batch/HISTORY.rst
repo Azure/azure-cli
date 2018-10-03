@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.4.1
++++++
+* Cleanup returned object when user specifies the --select OData filter to return solely the selected elements.
+
 3.4.0
 +++++
 * Updated to Batch SDK 5.0.0.
