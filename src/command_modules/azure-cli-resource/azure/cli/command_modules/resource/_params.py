@@ -97,32 +97,22 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
+        c.argument('subscription_id', arg_type=subscription_id_type)
+        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         from azure.mgmt.resource.policy.models import PolicyMode
         c.argument('name', options_list=('--name', '-n'), help='Name of the new policy definition.')
         c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=('--mode', '-m'), help='Mode of the new policy definition.', min_api='2016-12-01')
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
-
-    with self.argument_context('policy definition list', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy definition show', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy definition update', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy definition delete', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
@@ -145,30 +135,20 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy set definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
         c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('subscription_id', arg_type=subscription_id_type)
+        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=('--name', '-n'), help='Name of the new policy set definition.')
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
-
-    with self.argument_context('policy set-definition list', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy set-definition show', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy set-definition update', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('policy set-definition delete', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-        c.argument('subscription_id', arg_type=subscription_id_type)
-        c.argument('management_group', arg_type=management_group_name_type)
 
     with self.argument_context('group') as c:
         c.argument('tag', tag_type)
