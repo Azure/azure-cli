@@ -320,7 +320,7 @@ helps['policy definition create'] = """
             examples:
                 - name: Create a read-only policy.
                   text: |
-                    az policy definition create -n readOnlyStorage --rules '{
+                    az policy definition create --name readOnlyStorage --rules '{
                             "if":
                             {
                                 "field": "type",
@@ -333,25 +333,25 @@ helps['policy definition create'] = """
                         }'
                 - name: Create a policy parameter definition with the following example
                   text: |
-                    az policy definition create -n allowedLocations --rules '{
+                    az policy definition create --name allowedLocations --rules '{
                         "if": {
-                        "allOf": [
-                            {
-                            "field": "location",
-                            "notIn": "[parameters('listOfAllowedLocations')]"
-                            },
-                            {
-                            "field": "location",
-                            "notEquals": "global"
-                            },
-                            {
-                            "field": "type",
-                            "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
-                            }
-                        ]
+                            "allOf": [
+                                {
+                                    "field": "location",
+                                    "notIn": "[parameters('listOfAllowedLocations')]"
+                                },
+                                {
+                                    "field": "location",
+                                    "notEquals": "global"
+                                },
+                                {
+                                    "field": "type",
+                                    "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
+                                }
+                            ]
                         },
                         "then": {
-                        "effect": "deny"
+                            "effect": "deny"
                         }
                     }' \\
                     --params '{
