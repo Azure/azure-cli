@@ -2506,23 +2506,14 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         'TargetRegion')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    regions_info = [TargetRegion(name=location)]
-    if target_regions:
-        regions_info = []
-        for t in target_regions:
-            parts = t.split('=', 1)
-            if len(parts) == 1:
-                regions_info.append(TargetRegion(name=parts[0]))
-            else:
-                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=int(parts[1])))
-
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if not is_valid_resource_id(managed_image):
         managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
-                                            target_regions=regions_info, source=source, replica_count=replica_count)
+                                            target_regions=target_regions or [TargetRegion(name=location)],
+                                            source=source, replica_count=replica_count)
     image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
@@ -2538,4 +2529,9 @@ def fix_gallery_image_date_info(date_info):
         date_info += 'T12:59:59Z'
     return date_info
 
+
+def update_image_version(instance, target_regions=None):
+    if target_regions:
+        instance.publishing_profile.target_regions = target_regions
+    return instance
 # endregion

@@ -66,11 +66,11 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_images_list_thru_services(self):
-        result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
-        assert result.index('15.04') >= 0
+        result = self.cmd('vm image list -l westus --publisher Canonical --offer UbuntuServer -o tsv --all').output
+        assert result.index('16.04') >= 0
 
-        result = self.cmd('vm image list -p Canonical -f Ubuntu_Snappy_Core -o tsv --all').output
-        assert result.index('15.04') >= 0
+        result = self.cmd('vm image list -p Canonical -f UbuntuServer -o tsv --all').output
+        assert result.index('16.04') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -854,11 +854,14 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
-        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
-        self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
-            self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
-        ])
+        ]).get_output_in_json()
+        # ensure the minor version is 2+
+        minor_version = int(result['instanceView']['extensions'][0]['typeHandlerVersion'].split('.')[1])
+        self.assertGreater(minor_version, 2)
+
         result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{ext}'),
@@ -894,9 +897,8 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
         ])
 
 
-class VMExtensionImageSearchScenarioTest(ScenarioTest):
+class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
     def test_vm_extension_image_search(self):
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
@@ -908,8 +910,6 @@ class VMExtensionImageSearchScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?name == '{image}']) == length(@)", True)
         ])
-        self.cmd('vm extension image list -l westus -p {pub} --name {image} --latest',
-                 checks=self.check('length(@)', 1))
 
 
 class VMCreateUbuntuScenarioTest(ScenarioTest):
@@ -2153,7 +2153,7 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
-    def test_msi_no_scope(self, resource_group):
+    def test_vm_msi_no_scope(self, resource_group):
 
         self.kwargs.update({
             'vm1': 'vm1',
@@ -2733,7 +2733,7 @@ class VMGenericUpdate(ScenarioTest):
 
 class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
-    def test_gallery_e2e(self, resource_group):
+    def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
             'vm2': 'vmFromImage',
@@ -2742,6 +2742,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'image_id': 'TBD',
+            'location': resource_group_location,
             'location2': 'westus2'
         })
 
@@ -2768,7 +2769,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --add publishingProfile.targetRegions name={location2}',
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=2 {location}',
                  checks=self.check('name', self.kwargs['version']))
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
