@@ -10,7 +10,9 @@
 set -ex
 
 : "${CLI_VERSION:?CLI_VERSION environment variable not set.}"
-: "${OUTPUT_DIR:?OUTPUT_DIR environment variable not set.}"
+: "${CLI_VERSION_REVISION:?CLI_VERSION_REVISION environment variable not set.}"
+
+ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
 PYTHON_VERSION="3.6.5"
@@ -43,7 +45,7 @@ if [ -d $WORKDIR/privates ]; then
 fi
 
 # The product whl are expected to be pre-built
-find $OUTPUT_DIR/pypi -name '*.whl' | xargs pip3 install
+find /mnt/artifacts/pypi -name '*.whl' | xargs pip3 install
 
 pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
@@ -55,4 +57,4 @@ cd $WORKDIR
 dpkg-buildpackage -us -uc
 
 deb_file=$WORKDIR/../azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_all.deb
-cp $deb_file ${OUTPUT_DIR}
+cp $deb_file /mnt/output/
