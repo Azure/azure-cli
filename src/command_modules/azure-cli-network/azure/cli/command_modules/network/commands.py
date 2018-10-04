@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._format import (
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output)
+    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -534,8 +534,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01')
-        g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01')
+        g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
+        g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
         g.generic_update_command('update', custom_func_name='update_nic', supports_no_wait=True)
         g.wait_command('wait')
 
