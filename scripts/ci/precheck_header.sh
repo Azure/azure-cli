@@ -14,7 +14,7 @@ echo "Verify readme history"
 python -m automation.tests.verify_readme_history
 
 # Only verify package version or PRs to Azure/azure-cli (not other forks)
-if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] && [[ $TRAVIS_REPO_SLUG == "Azure/azure-cli" ]]; then
+if [ $TRAVIS_EVENT_TYPE == "pull_request" ] && [ $TRAVIS_REPO_SLUG == "Azure/azure-cli" ]; then
     echo "Verify package versions"
     latestCliReleaseTag=$(git describe --tags `git rev-list --tags='azure-cli-*' --max-count=1`)
     latestCliReleaseDir=$(mktemp -d)
