@@ -10,11 +10,20 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 export PYTHONPATH="${DIR}/src:${PYTHONPATH}"
 
-PYTHON="$(which python)"
-if [[ -z $PYTHON ]]; then
-  PYTHON="$(which python3)"
+function python_check() {
+python - << "EOF"
+import imp
+try:
+  imp.find_module('azure')
+  exit(0)
+except ImportError:
+  exit(1)
+EOF
+}
+
+if python_check
+then
+  python -m azure.cli "$@"
+else
+  python3 -m azure.cli "$@"
 fi
-
-
-$PYTHON -m azure.cli "$@"
-
