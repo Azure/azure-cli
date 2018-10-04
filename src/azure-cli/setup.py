@@ -112,12 +112,8 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    entry_points={
-        'console_scripts': [
-            'az = azure.cli.__main__:main'
-        ]
-    },
     scripts=[
+        'az',
         'az.completion.sh',
         'az.bat',
     ],
