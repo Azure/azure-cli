@@ -11,7 +11,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 export PYTHONPATH="${DIR}/src:${PYTHONPATH}"
 
 function python_check() {
-python - << "EOF"
+python - << 'EOF' 2&> /dev/null
 import imp
 try:
   imp.find_module('azure')
