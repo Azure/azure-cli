@@ -1482,9 +1482,13 @@ helps['sig image-version update'] = """
     type: command
     short-summary: update a share image version
     examples:
-        - name: replicate to a new region
+        - name: replicate to a new set of regions
+          text: |
+            az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --target-regions westcentralus=2 eastus2
+        - name: replicate to one more region
           text: |
             az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+
 """
 
 helps['sig image-version wait'] = """

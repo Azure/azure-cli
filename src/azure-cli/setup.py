@@ -76,8 +76,10 @@ DEPENDENCIES = [
     'azure-cli-find',
     'azure-cli-interactive',
     'azure-cli-iot',
+    'azure-cli-iotcentral',
     'azure-cli-keyvault',
     'azure-cli-lab',
+    'azure-cli-maps',
     'azure-cli-monitor',
     'azure-cli-network',
     'azure-cli-nspkg',
@@ -93,7 +95,8 @@ DEPENDENCIES = [
     'azure-cli-servicefabric',
     'azure-cli-servicebus',
     'azure-cli-eventhubs',
-    'azure-cli-search'
+    'azure-cli-search',
+    'azure-cli-signalr'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
