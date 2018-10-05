@@ -280,7 +280,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     # update trigger
     source_trigger_update_params = None
     base_image_trigger_update_params = None
-    pr_trigger_update = None
     if task.trigger:
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
