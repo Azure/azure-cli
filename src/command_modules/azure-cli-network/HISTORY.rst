@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.7
++++++
+* Minor fixes.
+
 2.2.6
 +++++
 * Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
