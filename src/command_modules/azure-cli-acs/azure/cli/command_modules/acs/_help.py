@@ -207,7 +207,7 @@ helps['aks create'] = """
                         For example, 10.0.0.10.
         - name: --docker-bridge-address
           type: string
-          short-summary: An IP address and netmask assigned to the Docker bridge.
+          short-summary: A specific IP address and netmask for the Docker bridge, using standard CIDR notation.
           long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range.
                         For example, 172.17.0.1/16.
         - name: --enable-addons -a
