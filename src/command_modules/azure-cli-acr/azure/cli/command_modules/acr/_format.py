@@ -199,9 +199,9 @@ def _task_format_group(item):
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
+        ('COMMIT TRIGGER', _get_statuses(item, 'trigger', 'sourceTriggers')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('BRANCH', _get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
+        ('BRANCH', _get_branches(item, 'trigger', 'sourceTriggers')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
         ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
         ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
@@ -214,7 +214,7 @@ def _build_format_group(item):
         ('TASK', _get_value(item, 'buildTask')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
-        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger', 'commitId'), _get_value(item, 'sourceTrigger', 'pullRequestId'))),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
@@ -226,7 +226,7 @@ def _run_format_group(item):
         ('TASK', _get_value(item, 'task')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger', 'commitId'), _get_value(item, 'sourceTrigger', 'pullRequestId'))),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
@@ -256,16 +256,34 @@ def _get_value(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+def _get_statuses(item, *args):
+    """Get status of each source trigger.
+    :param dict item: The dict object
+    """
+    statuses = []
+    for arg in args:
+        item = item[arg]
+    for i in range(len(item)):
+        statuses.append(_get_value(item, i, 'status'))
+    return ','.join(statuses)
 
-def _get_build_trigger(image_update_trigger, git_commit_trigger, git_pull_request_trigger):
-    if git_commit_trigger.strip():
-        return 'Git Commit'
-    if git_pull_request_trigger.strip():
-        return 'Git Pull Request'
+def _get_branches(item, *args):
+    """Get branch of each source trigger.
+    :param dict item: The dict object
+    """
+    branches = []
+    for arg in args:
+        item = item[arg]
+    for i in range(len(item)):
+        branches.append(_get_value(item, i, 'sourceRepository', 'branch'))
+    return ','.join(branches)
+
+def _get_build_trigger(image_update_trigger, git_source_trigger):
+    if git_source_trigger.strip():
+        return git_source_trigger
     if image_update_trigger.strip():
         return 'Image Update'
     return 'Manual'
-
 
 def _format_datetime(date_string):
     from dateutil.parser import parse
