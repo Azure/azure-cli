@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.6
++++++
+* Add '--assign-identity' for adding a MSI identity to a container group
+
 0.3.5
 +++++
 * Minor changes

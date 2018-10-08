@@ -45,6 +45,7 @@ ACR_SERVER_DELIMITER = '.azurecr.io'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
+MSI_LOCAL_ID = '[system]'
 
 
 def list_containers(client, resource_group_name=None):
@@ -102,6 +103,7 @@ def create_container(cmd,
                      secrets=None,
                      secrets_mount_path=None,
                      file=None,
+                     assign_identity=None,
                      no_wait=False):
     """Create a container group. """
 
@@ -177,6 +179,10 @@ def create_container(cmd,
     else:
         environment_variables = environment_variables or secure_environment_variables
 
+    identity = None
+    if assign_identity is not None:
+        identity = _build_identities_info(assign_identity)
+
     # Set up VNET, subnet and network profile if needed
     if subnet and vnet_name and not network_profile:
         network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
@@ -197,6 +203,7 @@ def create_container(cmd,
                           volume_mounts=mounts or None)
 
     cgroup = ContainerGroup(location=location,
+                            identity=identity,
                             containers=[container],
                             os_type=os_type,
                             restart_policy=restart_policy,
@@ -209,6 +216,21 @@ def create_container(cmd,
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
     return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
+
+
+def _build_identities_info(identities):
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ', '.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
+    return info
 
 
 def _get_resource(client, resource_group_name, *subresources):

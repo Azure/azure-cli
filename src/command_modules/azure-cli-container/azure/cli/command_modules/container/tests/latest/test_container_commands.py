@@ -55,7 +55,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --dns-name-label {dns_name_label} --ports {ports} --cpu {cpu} --memory {memory} '
                  '--command-line {command} -e {env} --restart-policy {restart_policy} '
-                 '--secrets {secrets} --secrets-mount-path {secrets_mount_path}',
+                 '--secrets {secrets} --secrets-mount-path {secrets_mount_path} '
+                 '--assign --assign-identity',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
                          self.check('provisioningState', 'Succeeded'),
@@ -64,6 +65,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('ipAddress.dnsNameLabel',
                                     '{container_group_name}'),
                          self.check('ipAddress.fqdn', '{fqdn}'),
+                         self.check('identity.type', 'SystemAssigned'),
                          self.exists('ipAddress.ip'),
                          self.exists('ipAddress.ports'),
                          self.check('ipAddress.ports[0].port', '{port1}'),
@@ -125,7 +127,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = 'EsYA8DyuSaNv+3HyGyHoiIIafktf0kE6'
+        password = 'rylgTHkXbBp6k/F0Gd3lOpVnGU0dVEq4'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
