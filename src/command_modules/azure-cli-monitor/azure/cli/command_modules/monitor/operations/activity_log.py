@@ -9,24 +9,6 @@ from azure.cli.command_modules.monitor.util import validate_time_range_and_add_d
 def list_activity_log(client, filters=None, correlation_id=None, resource_group=None, resource_id=None,
                       resource_provider=None, start_time=None, end_time=None, caller=None, status=None, max_events=50,
                       select=None):
-    """Provides the list of activity log.
-    :param str filters: The OData filter for the list activity logs. If this argument is provided
-                        OData Filter Arguments will be ignored
-    :param str correlation_id: The correlation id of the query
-    :param str resource_group: The resource group
-    :param str resource_id: The identifier of the resource
-    :param str resource_provider: The resource provider
-    :param str start_time: The start time of the query. In ISO format with explicit indication of
-                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
-                           1 Hour prior to the current time.
-    :param str end_time: The end time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
-                         current time.
-    :param str caller: The caller to look for when querying
-    :param str status: The status value to query (ex: Failed)
-    :param str max_events: The maximum number of records to be returned by the command
-    :param str select: The list of event names
-    """
     if filters:
         odata_filters = filters
     else:
