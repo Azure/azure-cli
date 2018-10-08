@@ -6,7 +6,7 @@ Release History
 0.3.6
 +++++
 * Show warning when creating a container group with an image without a long running process
-* Fix table output issues
+* Fix table output issues for 'list' and 'show' commands
 
 0.3.5
 +++++
