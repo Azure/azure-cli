@@ -90,6 +90,7 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+                     vnet_resource_group=None,
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
@@ -178,8 +179,8 @@ def create_container(cmd,
         environment_variables = environment_variables or secure_environment_variables
 
     # Set up VNET, subnet and network profile if needed
-    if subnet and vnet_name and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+    if subnet and not network_profile:
+        network_profile = _get_vnet_network_profile(cmd, location, vnet_resource_group or resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
 
     cg_network_profile = None
     if network_profile:
@@ -247,6 +248,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
     # For an existing subnet, validate and add delegation if needed
     if subnet:
+        logger.info('Using existing subnet "%s"', subnet_name)
         for endpoint in (subnet.service_endpoints or []):
             if endpoint.service != "Microsoft.ContainerInstance":
                 raise CLIError("Can not use subnet with existing service links other than 'Microsoft.ContainerInstance'.")
@@ -260,6 +262,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
         if network_profile:
+            logger.info('Using existing network profile "%s"', default_network_profile_name)
             return network_profile.id
 
     # Create new subnet and Vnet if not exists
@@ -268,6 +271,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
                                                               'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
+            logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
             ncf.virtual_networks.create_or_update(resource_group_name,
                                                   vnet_name,
                                                   VirtualNetwork(name=vnet_name,
@@ -279,6 +283,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
             address_prefix=subnet_address_prefix,
             delegations=[aci_delegation])
 
+        logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
         subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
@@ -299,6 +304,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
         )]
     )
 
+    logger.info('Creating network profile "%s"', default_network_profile_name)
     network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
 
     return network_profile.id
