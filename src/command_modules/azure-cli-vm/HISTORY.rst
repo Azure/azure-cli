@@ -4,6 +4,7 @@ Release History
 ===============
 2.2.5
 ++++++
+* `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
 * `vm create`: update supported size list supporting networking accelerator
 * `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
 
