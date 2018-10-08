@@ -5,7 +5,11 @@
 
 from base64 import b64encode
 from knack.util import CLIError
+from knack.log import get_logger
 
+logger = get_logger(__name__)
+
+short_running_images = ['alpine', 'busybox', 'ubuntu', 'node', 'golang', 'centos', 'python', 'php']
 
 def validate_volume_mount_path(ns):
     if ns.azure_file_volume_mount_path and ':' in ns.azure_file_volume_mount_path:
@@ -35,6 +39,13 @@ def validate_secret(string):
 def validate_gitrepo_directory(ns):
     if ns.gitrepo_dir and '..' in ns.gitrepo_dir:
         raise CLIError("The git repo directory cannot contain '..'")
+
+
+def validate_image(ns):
+    if ns.image.split(':')[0] in short_running_images and not ns.command_line:
+        logger.warning('Image "%s" has no long running process. '
+                       'A command is required for the container to stay running.',
+                       ns.image)
 
 
 def validate_subnet(ns):
