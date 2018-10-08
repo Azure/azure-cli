@@ -11,6 +11,7 @@ logger = get_logger(__name__)
 
 short_running_images = ['alpine', 'busybox', 'ubuntu', 'node', 'golang', 'centos', 'python', 'php']
 
+
 def validate_volume_mount_path(ns):
     if ns.azure_file_volume_mount_path and ':' in ns.azure_file_volume_mount_path:
         raise CLIError("The volume mount path cannot contain ':'")
