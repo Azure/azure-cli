@@ -6,6 +6,8 @@ Release History
 0.3.6
 +++++
 * Allow using only subnet ID to setup a virtual network for the container group
+* Show warning when creating a container group with an image without a long running process
+* Fix table output issues for 'list' and 'show' commands
 
 0.3.5
 +++++

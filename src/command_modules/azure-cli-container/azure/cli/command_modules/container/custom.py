@@ -104,7 +104,6 @@ def create_container(cmd,
                      file=None,
                      no_wait=False):
     """Create a container group. """
-
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
 
