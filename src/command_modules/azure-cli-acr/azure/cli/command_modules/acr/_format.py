@@ -199,9 +199,9 @@ def _task_format_group(item):
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_statuses(item, 'trigger', 'sourceTriggers')),
+        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('BRANCH', _get_branches(item, 'trigger', 'sourceTriggers')),
+        ('BRANCH', _get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
         ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
         ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
@@ -255,28 +255,6 @@ def _get_value(item, *args):
         return str(item) if item else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
-
-def _get_statuses(item, *args):
-    """Get status of each source trigger.
-    :param dict item: The dict object
-    """
-    statuses = []
-    for arg in args:
-        item = item[arg]
-    for i in range(len(item)):
-        statuses.append(_get_value(item, i, 'status'))
-    return ','.join(statuses)
-
-def _get_branches(item, *args):
-    """Get branch of each source trigger.
-    :param dict item: The dict object
-    """
-    branches = []
-    for arg in args:
-        item = item[arg]
-    for i in range(len(item)):
-        branches.append(_get_value(item, i, 'sourceRepository', 'branch'))
-    return ','.join(branches)
 
 def _get_build_trigger(image_update_trigger, git_source_trigger):
     if git_source_trigger.strip():
