@@ -80,7 +80,6 @@ def load_arguments(self, _):
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
         c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
-
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
         c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.')
