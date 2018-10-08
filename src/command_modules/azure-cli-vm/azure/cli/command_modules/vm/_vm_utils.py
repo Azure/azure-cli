@@ -187,7 +187,7 @@ def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_
     if is_lv_size:
         for v in info.values():
             if v.get('caching', 'None').lower() != 'none':
-                raise CLIError('usage error: for Lv/Lv2 series machines, disk caching mode must be set to "None"')
+                raise CLIError('usage error: for Lv series of machines, "None" is the only supported caching mode')
     return info
 
 
