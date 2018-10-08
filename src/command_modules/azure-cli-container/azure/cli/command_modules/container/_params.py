@@ -81,7 +81,6 @@ def load_arguments(self, _):
 
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
-        c.argument('vnet_resource_group', help='The name of the resource group for the vnet and subnet.')
         c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.')
         c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNET in CIDR format.')
         c.argument('subnet', options_list=['--subnet'], validator=validate_subnet, help='The name of the subnet when creating a new VNET or referencing an existing one. Can also reference an existing subnet by ID.')

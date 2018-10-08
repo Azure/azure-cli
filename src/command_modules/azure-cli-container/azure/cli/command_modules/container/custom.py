@@ -90,7 +90,6 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
-                     vnet_resource_group=None,
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
@@ -180,7 +179,7 @@ def create_container(cmd,
 
     # Set up VNET, subnet and network profile if needed
     if subnet and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd, location, vnet_resource_group or resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
 
     cg_network_profile = None
     if network_profile:

@@ -6,7 +6,6 @@ Release History
 0.3.6
 +++++
 * Allow using only subnet ID to setup a virtual network for the container group
-* Add '--vnet-resource-group' to allow creating vnet and subnet in seperate resource group from the container group
 
 0.3.5
 +++++
