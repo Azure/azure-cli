@@ -46,7 +46,8 @@ def validate_image(ns):
     if ns.image.split(':')[0] in short_running_images and not ns.command_line:
         logger.warning('Image "%s" has no long running process. The "--command-line" argument must be used to start a '
                        'long running process inside the container for the container group to stay running. '
-                       'Ex: /bin/bash',
+                       'Ex: "tail -f /dev/null" '
+                       'For more imformation visit https://aka.ms/aci/troubleshoot',
                        ns.image)
 
 
