@@ -199,7 +199,7 @@ def _task_format_group(item):
         ('Name', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('COMMIT TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
+        ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
         ('BRANCH', _get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
