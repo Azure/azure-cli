@@ -291,12 +291,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers is not None:
-            #using a set to prevent duplicate event types per trigger
             source_trigger_events = set()
+            #perform merge with server-side event list
             if source_triggers:
                 source_trigger_events = set(source_triggers[0].source_trigger_events)
-                #if the previous trigger was disabled, clear the event list and
-                #re-add the events that the user wants enabled.
                 if source_triggers[0].status == TriggerStatus.disabled.value:
                     source_trigger_events.clear()
             if commit_trigger_enabled is not None:
