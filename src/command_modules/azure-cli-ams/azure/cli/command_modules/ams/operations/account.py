@@ -6,6 +6,11 @@
 from knack.util import CLIError
 
 
+def get_mediaservice(client, account_name, resource_group_name=None):
+    return client.get(resource_group_name,
+                      account_name) if resource_group_name else client.get_by_subscription(account_name)
+
+
 def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
 
@@ -74,3 +79,13 @@ def update_mediaservice(instance, tags=None):
         instance.tags = tags
 
     return instance
+
+
+def check_name_availability(client, location, account_name):
+    availability = client.check_name_availability(location_name=location, name=account_name,
+                                                  type='MICROSOFT.MEDIA/MEDIASERVICES')
+
+    if availability.name_available:
+        return 'Name available.'
+
+    return availability.message

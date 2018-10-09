@@ -2,9 +2,9 @@
 
 Release History
 ===============
-0.2.4
+2.0.0 (2018-10-03)
 +++++
-* Minor changes
+* GA release.
 
 0.2.3
 +++++
