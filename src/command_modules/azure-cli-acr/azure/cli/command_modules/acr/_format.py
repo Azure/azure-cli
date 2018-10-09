@@ -256,12 +256,14 @@ def _get_value(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+
 def _get_build_trigger(image_update_trigger, git_source_trigger):
     if git_source_trigger.strip():
         return git_source_trigger
     if image_update_trigger.strip():
         return 'Image Update'
     return 'Manual'
+
 
 def _format_datetime(date_string):
     from dateutil.parser import parse
@@ -283,3 +285,4 @@ def _get_duration(start_time, finish_time):
     except ValueError:
         logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '
+
