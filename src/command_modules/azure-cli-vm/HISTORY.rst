@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.2.5
+++++++
+* `vm create`: update supported size list supporting networking accelerator
+* `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
+
 2.2.4
 ++++++
 * `az disk grant-access`: fix the empty "accessSas" field
