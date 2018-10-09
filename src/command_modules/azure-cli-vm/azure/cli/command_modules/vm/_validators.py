@@ -458,7 +458,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    namespace.disk_info = normalize_disk_info(size=(getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)),
+    vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
+    namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks_num=image_data_disks_num,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
