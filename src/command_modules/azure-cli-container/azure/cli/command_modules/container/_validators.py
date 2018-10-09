@@ -53,7 +53,7 @@ def validate_image(ns):
 def validate_subnet(ns):
     from msrestazure.tools import is_valid_resource_id
 
-    if not is_valid_resource_id(ns.subnet) and ((ns.vnet_name and not ns.subnet) or (ns.subnet and not ns.vnet_name)):
+    if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
         raise CLIError('usage error: --vnet-name NAME --subnet NAME | --subnet ID')
 
 
