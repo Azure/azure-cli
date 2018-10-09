@@ -1363,6 +1363,17 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
+    def test_vm_ultra_ssd_disk_update(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'd1'
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
+            self.check('diskIopsReadWrite', 510),
+            self.check('diskMbpsReadWrite', 10)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vmss_ultra_ssd_storage_sku(self, resource_group):
 
         self.kwargs.update({

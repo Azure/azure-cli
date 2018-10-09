@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.5
++++++
+* `monitor diagnostic-settings create`: Improve validation for arguments `--event-hub` and `--event-hub-rule`.
+
 0.2.4
 +++++
 * Minor fixes

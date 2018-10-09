@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.4.1
++++++
+* Updated to Batch SDK 5.1.0.
+
 3.4.0
 +++++
 * Updated to Batch SDK 5.0.0.

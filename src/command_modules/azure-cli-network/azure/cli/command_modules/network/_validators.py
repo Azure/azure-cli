@@ -697,6 +697,7 @@ def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
+    validate_ag_address_pools(cmd, namespace)
     validate_address_pool_id_list(cmd, namespace)
     validate_inbound_nat_rule_id_list(cmd, namespace)
     get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
@@ -1237,3 +1238,28 @@ def process_list_delegations_namespace(cmd, namespace):
 
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_ag_address_pools(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    address_pools = namespace.app_gateway_backend_address_pools
+    gateway_name = namespace.application_gateway_name
+    delattr(namespace, 'application_gateway_name')
+    if not address_pools:
+        return
+    ids = []
+    for item in address_pools:
+        if not is_valid_resource_id(item):
+            if not gateway_name:
+                raise CLIError('usage error: --app-gateway-backend-pools IDS | --gateway-name NAME '
+                               '--app-gateway-backend-pools NAMES')
+            item = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='applicationGateways',
+                name=gateway_name,
+                child_type_1='backendAddressPools',
+                child_name_1=item)
+            ids.append(item)
+    namespace.app_gateway_backend_address_pools = ids
