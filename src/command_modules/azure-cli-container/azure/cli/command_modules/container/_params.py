@@ -78,7 +78,7 @@ def load_arguments(self, _):
         c.argument('secrets', secrets_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
-        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="Space-separated list of assigned identities. Assigned identities are either user assigned identities (resource IDs) and / or the system assigned identity ('[system]'). See examples for more info.")
 
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)

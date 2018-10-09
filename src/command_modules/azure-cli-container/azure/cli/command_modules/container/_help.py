@@ -28,7 +28,7 @@ helps['container create'] = """
         - name: Create a container in a container group that runs a command and stop the container afterwards.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "echo hello" --restart-policy Never
         - name: Create a container in a container group with environment variables.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest -environment-variables key1=value1 key2=value2
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables key1=value1 key2=value2
         - name: Create a container in a container group using container image from Azure Container Registry.
           text: az container create -g MyResourceGroup --name myapp --image myAcrRegistry.azurecr.io/myimage:latest --registry-password password
         - name: Create a container in a container group that mounts an Azure File share as volume.
@@ -42,9 +42,9 @@ helps['container create'] = """
         - name: Create a container group with a system assigned identity.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity
         - name: Create a container group with a user assigned identity.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity  /subscriptions/mySubscrpitionId/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a container group with both system and user assigned identity.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity [system] /subscriptions/mySubscrpitionId/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
           min_profile: latest
 """
 

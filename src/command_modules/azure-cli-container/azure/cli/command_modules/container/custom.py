@@ -33,7 +33,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
-                                                 ContainerGroupIpAddressType)
+                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
 from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
 
@@ -219,17 +219,18 @@ def create_container(cmd,
 
 def _build_identities_info(identities):
     identities = identities or []
-    identity_types = []
+    identity_type = ResourceIdentityType.none
     if not identities or MSI_LOCAL_ID in identities:
-        identity_types.append('SystemAssigned')
+        identity_type = ResourceIdentityType.system_assigned
     external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities and identity_type == ResourceIdentityType.system_assigned:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif external_identities:
+        identity_type = ResourceIdentityType.user_assigned
+    identity = ContainerGroupIdentity(type=identity_type)
     if external_identities:
-        identity_types.append('UserAssigned')
-    identity_types = ', '.join(identity_types)
-    info = {'type': identity_types}
-    if external_identities:
-        info['userAssignedIdentities'] = {e: {} for e in external_identities}
-    return info
+        identity.user_assigned_identities = {e: {} for e in external_identities}
+    return identity
 
 
 def _get_resource(client, resource_group_name, *subresources):
