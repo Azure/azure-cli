@@ -67,7 +67,7 @@ def validate_autoscale_recurrence(namespace):
 
 def validate_autoscale_timegrain(namespace):
     from azure.mgmt.monitor.models import MetricTrigger
-    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.actions import get_period_type
     from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
 
     values = namespace.timegrain
@@ -77,10 +77,10 @@ def validate_autoscale_timegrain(namespace):
         values = values[0].split(' ')
     name_offset = 0
     try:
-        time_grain = period_type(values[1])
+        time_grain = get_period_type()(values[1])
         name_offset += 1
     except ValueError:
-        time_grain = period_type('1m')
+        time_grain = get_period_type()('1m')
     try:
         statistic = get_autoscale_statistic_map()[values[0]]
         name_offset += 1

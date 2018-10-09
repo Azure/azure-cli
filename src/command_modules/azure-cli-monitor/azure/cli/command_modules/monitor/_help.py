@@ -822,37 +822,40 @@ helps['monitor activity-log alert scope remove'] = """
 
 helps['monitor activity-log list'] = """
     type: command
-    short-summary: List events from the activity log.
+    short-summary: List and query activity log events.
     parameters:
-        - name: --filters
-          short-summary: >
-            The OData filter for the list activity logs. If this argument is provided OData Filter
-            Arguments will be ignored.
         - name: --correlation-id
-          short-summary: Correlation ID of the query.
-        - name: --resource-group
-          short-summary: Resource group to query.
+          short-summary: Correlation ID to query.
         - name: --resource-id
-          short-summary: Identifier of the resource.
+          short-summary: ARM ID of a resource.
         - name: --resource-provider
-          short-summary: Resource provider
-        - name: --start-time
-          short-summary: >
-            Start time of the query. ISO format with explicit indication of timezone: 1970-01-01T00:00:00Z,
-            1970-01-01T00:00:00-0500. Defaults to 1 Hour prior to the current time.
-        - name: --end-time
-          short-summary: >
-            End time of the query. ISO format with explicit indication of timezone: 1970-01-01T00:00:00Z,
-            1970-01-01T00:00:00-0500. Defaults to current time.
+          short-summary: Resource provider namespace.
+        - name: --namespace
+          short-summary: Resource provider namespace.
         - name: --caller
-          short-summary: Caller to look for when querying.
+          short-summary: Caller to query for, such as an e-mail address or service principal ID.
         - name: --status
           short-summary: >
-            Status value to query (ex: Failed)
+            Status to query for (ex: Failed)
         - name: --max-events
-          short-summary: Maximum number of records to be returned by the command.
+          short-summary: Maximum number of records to return.
         - name: --select
-          short-summary: Space-separated list of event names to select.
+          short-summary: Space-separated list of properties to return.
+        - name: --offset
+          short-summary: >
+            Time offset of the query range, in ##d##h format.
+          long-summary: >
+            Can be used with either --start-time or --end-time. If used with --start-time, then
+            the end time will be calculated by adding the offset. If used with --end-time (default), then
+            the start time will be calculated by subtracting the offset. If --start-time and --end-time are
+            provided, then --offset will be ignored.
+    examples:
+        - name: List all events from July 1st, looking forward one week.
+          text: az monitor activity-log list --start-date 2018-07-01 --offset 7d
+        - name: List events within the past six hours based on a correlation ID.
+          text: az monitor activity-log list --correlation-id b5eac9d2-e829-4c9a-9efb-586d19417c5f
+        - name: List events within the past hour based on resource group.
+          text: az monitor activity-log list -g {ResourceGroup} --offset 1h
 """
 
 helps['monitor activity-log list-categories'] = """

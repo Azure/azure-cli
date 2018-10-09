@@ -9,7 +9,12 @@ Release History
 
 0.2.4
 +++++
-* Minor fixes
+* `monitor activity-log list`:
+    Allow listing all events at the subscription level.
+    Added `--offset` parameter to more easily create time queries.
+    Improved validation for --start-time and --end-time to use wider range of ISO8601 formats and more user-friendly datetime formats.
+    Added `--namespace` as alias for deprecated option `--resource-provider`.
+    Deprecated `--filters` because no values other than those with strongly-typed options are supported by the service.
 
 0.2.3
 +++++
