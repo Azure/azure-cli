@@ -295,6 +295,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             source_trigger_events = set()
             if source_triggers:
                 source_trigger_events = set(source_triggers[0].source_trigger_events)
+                #if the previous trigger was disabled, clear the event list and
+                #re-add the events that the user wants enabled.
+                if source_triggers[0].status == TriggerStatus.disabled.value:
+                    source_trigger_events.clear()
             if commit_trigger_enabled is not None:
                 if commit_trigger_enabled:
                     source_trigger_events.add(SourceTriggerEvent.commit.value)
