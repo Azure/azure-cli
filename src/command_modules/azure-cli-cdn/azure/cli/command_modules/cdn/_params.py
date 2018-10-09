@@ -81,7 +81,6 @@ def load_arguments(self, _):
         c.argument('content_types_to_compress', nargs='+')
         c.argument('profile_name', help=profile_name_help)
 
-
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 

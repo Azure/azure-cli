@@ -118,8 +118,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin, checks=premium_checks)
 
     def _create_profile(self, resource_group, profile_sku):
-        profile_name = (profile_sku + "_profile").replace("_", "-") #profile names must match ^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$
+        profile_name = (profile_sku + "_profile").replace("_", "-")  # profile names must match ^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$
         check = JMESPathCheck('sku.name', profile_sku)
         self.profile_create_cmd(resource_group, profile_name, sku=profile_sku, checks=check)
         return profile_name
-
