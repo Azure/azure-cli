@@ -124,9 +124,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         image = 'alpine:latest'
         os_type = 'Linux'
         ip_address_type = 'Public'
-        user_assigned_identity_name =  self.create_random_name('cliaciidentity', 20)
+        user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
         system_assigned_identity = '[system]'
-        user_system_assigned = "SystemAssigned, UserAssigned"
 
         self.kwargs.update({
             'user_assigned_identity_name': user_assigned_identity_name
@@ -178,7 +177,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('identity.type', 'SystemAssigned, UserAssigned'),
                          self.exists('ipAddress.ip'),
                          self.check('containers[0].image', '{image}')])
-
 
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
