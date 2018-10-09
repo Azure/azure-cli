@@ -65,8 +65,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     timeout=DEFAULT_TIMEOUT_IN_SEC,
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
-                    commit_trigger_enabled=False,
-                    pull_request_trigger_enabled=False,
+                    commit_trigger_enabled=True,
+                    pull_request_trigger_enabled=True,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -108,9 +108,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     source_triggers = None
     source_trigger_events = []
-    if commit_trigger_enabled is not None:
+    if commit_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.commit.value)
-    if pull_request_trigger_enabled is not None:
+    if pull_request_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
     #If source_trigger_events contains any event types we assume they are enabled.
     if source_trigger_events:
@@ -211,8 +211,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     cpu=None,
                     timeout=None,
                     context_path=None,
-                    commit_trigger_enabled=False,
-                    pull_request_trigger_enabled=False,
+                    commit_trigger_enabled=None,
+                    pull_request_trigger_enabled=None,
                     git_access_token=None,
                     branch=None,
                     image_names=None,
@@ -295,11 +295,18 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             source_trigger_events = set()
             if source_triggers:
                 source_trigger_events = set(source_triggers[0].source_trigger_events)
-            if commit_trigger_enabled:
-                source_trigger_events.add(SourceTriggerEvent.commit.value)
-            if pull_request_trigger_enabled:
-                source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
-            status = TriggerStatus.enabled.value if source_trigger_events else None
+            if commit_trigger_enabled is not None:
+                if commit_trigger_enabled:
+                    source_trigger_events.add(SourceTriggerEvent.commit.value)
+                else:
+                    if SourceTriggerEvent.commit.value in source_trigger_events:
+                        source_trigger_events.remove(SourceTriggerEvent.commit.value)
+            if pull_request_trigger_enabled is not None:
+                if pull_request_trigger_enabled:
+                    source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
+                else:
+                    if SourceTriggerEvent.pullrequest.value in source_trigger_events:
+                        source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -311,8 +318,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                             token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
-                    source_trigger_events=source_trigger_events if (commit_trigger_enabled or pull_request_trigger_enabled) else None,
-                    status=status,
+                    source_trigger_events=source_trigger_events,
+                    status=TriggerStatus.enabled.value if source_trigger_events else TriggerStatus.disabled.value,
                     name=source_triggers[0].name if source_triggers else "defaultSourceTriggerName"
                 )
             ]
