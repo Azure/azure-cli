@@ -253,13 +253,13 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor activity-log list', arg_group='OData Filter') as c:
         c.argument('correlation_id')
+        c.argument('caller')
         c.argument('resource_group')
         c.argument('resource_id')
         c.argument('resource_provider')
+        c.argument('status')
         c.argument('start_time')
         c.argument('end_time')
-        c.argument('caller')
-        c.argument('status')
     # endregion
 
     # region ActionGroup
