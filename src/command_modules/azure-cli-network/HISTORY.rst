@@ -5,7 +5,11 @@ Release History
 
 2.2.7
 +++++
-* Minor fixes.
+* `nic create` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+* `nic ip-config create/update` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+
 
 2.2.6
 +++++
