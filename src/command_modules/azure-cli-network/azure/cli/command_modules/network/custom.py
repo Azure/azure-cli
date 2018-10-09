@@ -2102,12 +2102,13 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
-               application_security_groups=None, no_wait=False):
+               application_security_groups=None, no_wait=False,
+               app_gateway_backend_address_pools=None):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     (NetworkInterface, NetworkInterfaceDnsSettings, NetworkInterfaceIPConfiguration, NetworkSecurityGroup,
-     PublicIPAddress, Subnet) = cmd.get_models(
+     PublicIPAddress, Subnet, SubResource) = cmd.get_models(
          'NetworkInterface', 'NetworkInterfaceDnsSettings', 'NetworkInterfaceIPConfiguration',
-         'NetworkSecurityGroup', 'PublicIPAddress', 'Subnet')
+         'NetworkSecurityGroup', 'PublicIPAddress', 'Subnet', 'SubResource')
 
     dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
                                                dns_servers=dns_servers or [])
@@ -2126,7 +2127,10 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
         'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
         'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic',
         'private_ip_address': private_ip_address,
-        'subnet': Subnet(id=subnet)
+        'subnet': Subnet(id=subnet),
+        'application_gateway_backend_address_pools':
+            [SubResource(id=x) for x in app_gateway_backend_address_pools]
+            if app_gateway_backend_address_pools else None
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
         ip_config_args['private_ip_address_version'] = private_ip_address_version
@@ -2173,9 +2177,10 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
                          private_ip_address=None,
                          private_ip_address_version=None,
                          make_primary=False,
-                         application_security_groups=None):
-    NetworkInterfaceIPConfiguration, PublicIPAddress, Subnet = cmd.get_models(
-        'NetworkInterfaceIPConfiguration', 'PublicIPAddress', 'Subnet')
+                         application_security_groups=None,
+                         app_gateway_backend_address_pools=None):
+    NetworkInterfaceIPConfiguration, PublicIPAddress, Subnet, SubResource = cmd.get_models(
+        'NetworkInterfaceIPConfiguration', 'PublicIPAddress', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
@@ -2203,6 +2208,11 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
         new_config_args['primary'] = make_primary
     if cmd.supported_api_version(min_api='2017-09-01'):
         new_config_args['application_security_groups'] = application_security_groups
+    if cmd.supported_api_version(min_api='2018-08-01'):
+        new_config_args['application_gateway_backend_address_pools'] = \
+            [SubResource(id=x) for x in app_gateway_backend_address_pools] \
+            if app_gateway_backend_address_pools else None
+
     new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
     _upsert(nic, 'ip_configurations', new_config, 'name')
@@ -2217,8 +2227,9 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None,
                       private_ip_address_version=None, make_primary=False,
-                      application_security_groups=None):
-    PublicIPAddress, Subnet = cmd.get_models('PublicIPAddress', 'Subnet')
+                      application_security_groups=None,
+                      app_gateway_backend_address_pools=None):
+    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
 
     if make_primary:
         for config in parent.ip_configurations:
@@ -2262,6 +2273,12 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
         instance.application_security_groups = None
     elif application_security_groups:
         instance.application_security_groups = application_security_groups
+
+    if app_gateway_backend_address_pools == ['']:
+        instance.application_gateway_backend_address_pools = None
+    elif app_gateway_backend_address_pools:
+        instance.application_gateway_backend_address_pools = \
+            [SubResource(id=x) for x in app_gateway_backend_address_pools]
 
     return parent
 
