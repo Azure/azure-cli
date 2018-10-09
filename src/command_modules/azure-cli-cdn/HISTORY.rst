@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.2
++++++
+* `cdn endpoint create`: POSSIBLE BREAKING CHANGE. Default query string caching behaviour no longer defaults to "IgnoreQueryString". It is now set by the service.
+* `cdn endpoint create`: Help text added for `--profile-name` argument.
 
 0.1.1
 +++++
