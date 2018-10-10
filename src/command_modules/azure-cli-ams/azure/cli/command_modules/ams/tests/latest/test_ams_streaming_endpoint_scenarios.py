@@ -7,14 +7,10 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsStreamingEndpointsTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_create_with_akamai_without_ips(self, storage_account_for_create):
@@ -72,8 +68,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'scaleUnits': 4,
             'tags': 'foo=bar',
             'ips': '1.1.1.1 2.2.2.2',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml'),
             'identifier': 'id1',
             'expiration': '2030-12-31T16:00:00-08:00',
             'base64Key': 'dGVzdGlkMQ=='
@@ -125,8 +121,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 5,
             'tags': 'foo=bar',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml'),
             'ip': '4.4.4.4'
         })
 
@@ -156,8 +152,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'description': 'test streaming description2',
             'maxCacheAge': 9,
             'tags': 'foo2=bar2 foo3=bar3',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml'),
             'ips': '1.1.1.1 2.2.2.2 192.168.0.0/28'
         })
 
@@ -202,8 +198,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 6,
             'tags': 'foo=bar',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -241,8 +237,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 7,
             'tags': 'foo=bar',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -282,8 +278,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 8,
             'tags': 'foo=bar',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -319,8 +315,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'scaleUnits': 9,
             'scaleUnits2': 10,
             'tags': 'foo=bar',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')

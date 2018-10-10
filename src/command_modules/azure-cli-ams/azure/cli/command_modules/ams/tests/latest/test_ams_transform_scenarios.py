@@ -7,14 +7,10 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsTransformTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_transform(self, storage_account_for_create):
@@ -36,7 +32,7 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'transformName': transformName,
             'presetName': 'AACGoodQualityAudio',
-            'presetPath': self._get_test_data_file('customPreset.json')
+            'presetPath': _get_test_data_file('customPreset.json')
         })
 
         self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset {presetName}', checks=[
@@ -93,7 +89,7 @@ class AmsTransformTests(ScenarioTest):
 
         self.kwargs.update({
             'transformName': transformName,
-            'invalidPresetPath': self._get_test_data_file('invalidCustomPreset.json')
+            'invalidPresetPath': _get_test_data_file('invalidCustomPreset.json')
         })
 
         with self.assertRaises(CLIError):
@@ -119,7 +115,7 @@ class AmsTransformTests(ScenarioTest):
 
         self.kwargs.update({
             'transformName': transformName,
-            'presetPath': self._get_test_data_file('customPreset.json')
+            'presetPath': _get_test_data_file('customPreset.json')
         })
 
         self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset "{presetPath}"', checks=[
@@ -147,7 +143,7 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'transformName': transformName,
             'presetName': 'AACGoodQualityAudio',
-            'presetPath': self._get_test_data_file('customPreset.json'),
+            'presetPath': _get_test_data_file('customPreset.json'),
             'onError': 'ContinueJob',
             'relativePriority': 'High'
         })

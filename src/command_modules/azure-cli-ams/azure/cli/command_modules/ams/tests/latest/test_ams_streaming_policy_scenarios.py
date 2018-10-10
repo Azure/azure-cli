@@ -6,14 +6,10 @@
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsStreamingPolicyTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_policy(self, resource_group, storage_account_for_create):
@@ -106,8 +102,8 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.kwargs.update({
             'streamingPolicyName': streamingPolicyName,
             'protocols': 'HLS SmoothStreaming',
-            'clearTracks': '@' + self._get_test_data_file('clearTracks.json'),
-            'keyToTrackMappings': '@' + self._get_test_data_file('keyToTrackMappings.json'),
+            'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
+            'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
             'label': 'label',
             'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
             'playReadyAttributes': 'awesomeAttributes',

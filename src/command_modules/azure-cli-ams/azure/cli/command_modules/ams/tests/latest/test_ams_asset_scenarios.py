@@ -8,7 +8,6 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class AmsAssetTests(ScenarioTest):
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @StorageAccountPreparer(parameter_name='storage_account_for_asset')

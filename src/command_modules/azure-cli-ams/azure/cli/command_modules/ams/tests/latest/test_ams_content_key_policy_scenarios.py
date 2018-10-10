@@ -8,14 +8,10 @@ import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.core.util import CLIError
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsContentKeyPolicyTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_playready_fail(self, storage_account_for_create):
@@ -30,7 +26,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
-            'playReadyPath': '@' + self._get_test_data_file('invalidPlayReadyTemplate.json'),
+            'playReadyPath': '@' + _get_test_data_file('invalidPlayReadyTemplate.json'),
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -54,7 +50,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyPlayReadyConfiguration',
             'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction',
-            'playReadyPath': '@' + self._get_test_data_file('validPlayReadyTemplate.json'),
+            'playReadyPath': '@' + _get_test_data_file('validPlayReadyTemplate.json'),
             'responseCustomData': 'custom data',
             'allowTestDevices': True,
             'beginDate': None,
@@ -185,7 +181,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
             'ask': 'testtesttesttest',
-            'fairPlayPfx': self._get_test_data_file('TestCert2.pfx'),
+            'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
             'fairPlayPfxPassword': 'password',
             'rentalAndLeaseKeyType': 'Undefined',
             'rentalDuration': 60,
@@ -217,10 +213,10 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json'),
+            'jsonFile': '@' + _get_test_data_file('widevineTemplate.json'),
             'issuer': 'Issuer',
             'audience': 'Audience',
-            'tokenKey': self._get_test_data_file('rsaToken.pem'),
+            'tokenKey': _get_test_data_file('rsaToken.pem'),
             'tokenType': 'RSA',
             'restrictionTokenType': 'Jwt',
             'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyTokenRestriction',
@@ -256,7 +252,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyWidevineConfiguration',
-            'jsonFile': '@' + self._get_test_data_file('widevineTemplate.json')
+            'jsonFile': '@' + _get_test_data_file('widevineTemplate.json')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -347,7 +343,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'restrictionTokenType': 'Jwt',
             'issuer': 'issuer',
             'audience': 'audience',
-            'tokenKey': self._get_test_data_file('x509Token.pem'),
+            'tokenKey': _get_test_data_file('x509Token.pem'),
             'tokenType': 'X509'
         })
 

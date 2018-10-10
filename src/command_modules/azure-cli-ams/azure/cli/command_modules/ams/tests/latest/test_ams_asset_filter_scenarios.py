@@ -7,14 +7,10 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsAssetFilterTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_asset_filter_create(self, storage_account_for_create):
@@ -53,7 +49,7 @@ class AmsAssetFilterTests(ScenarioTest):
             'presentationWindowDuration': 1200000000,
             'startTimestamp': 40000000,
             'timescale': 10000000,
-            'tracks': '@' + self._get_test_data_file('filterTracks.json'),
+            'tracks': '@' + _get_test_data_file('filterTracks.json'),
         })
 
         self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
@@ -113,7 +109,7 @@ class AmsAssetFilterTests(ScenarioTest):
             'presentationWindowDuration': 1200000000,
             'startTimestamp': 40000000,
             'timescale': 10000000,
-            'tracks': '@' + self._get_test_data_file('filterTracks.json'),
+            'tracks': '@' + _get_test_data_file('filterTracks.json'),
         })
 
         self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
@@ -235,7 +231,7 @@ class AmsAssetFilterTests(ScenarioTest):
             'presentationWindowDuration': 1200000000,
             'startTimestamp': 40000000,
             'timescale': 10000000,
-            'tracks': '@' + self._get_test_data_file('filterTracks.json'),
+            'tracks': '@' + _get_test_data_file('filterTracks.json'),
             'newBitrate': 1000,
             'newStartTimestamp': 40000001,
             'newEndTimestamp': 100000001,

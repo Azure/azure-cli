@@ -7,14 +7,10 @@ import os
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
 class AmsLiveEventTests(ScenarioTest):
-    def _get_test_data_file(self, filename):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
-        return filepath
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_create(self, storage_account_for_create):
@@ -33,8 +29,8 @@ class AmsLiveEventTests(ScenarioTest):
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
@@ -323,8 +319,8 @@ class AmsLiveEventTests(ScenarioTest):
             'tags': 'key=value',
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         live_event_updated = self.cmd('az ams live-event update -a {amsname} -n {liveEventName} -g {rg} --ips 1.2.3.4 5.6.7.8 9.10.11.12 --preview-ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --tags {tags}', checks=[
@@ -356,8 +352,8 @@ class AmsLiveEventTests(ScenarioTest):
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
-            'clientAccessPolicy': self._get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': self._get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
