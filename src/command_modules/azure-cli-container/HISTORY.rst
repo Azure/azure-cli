@@ -5,6 +5,7 @@ Release History
 
 0.3.6
 +++++
+* Add '--assign-identity' for adding a MSI identity to a container group
 * Show warning when creating a container group with an image without a long running process
 * Fix table output issues for 'list' and 'show' commands
 
