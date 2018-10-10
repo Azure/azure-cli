@@ -227,11 +227,12 @@ helps['monitor metrics alert create'] = """
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
             az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90"
+            --description "High CPU"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
             az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
                 --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
-                --action {actionGroupId} apiKey={APIKey} type=HighCPU
+                --action {actionGroupId} apiKey={APIKey} type=HighCPU --description "High CPU"
         - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
           text: |
             az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
@@ -349,10 +350,10 @@ helps['monitor diagnostic-settings create'] = """
                   short-summary: Name or ID of the Log Analytics workspace to send diagnostic logs to.
                 - name: --event-hub
                   type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be
-                                 selected.
+                  short-summary: >
+                    Name or ID an event hub. If none is specified, the default event hub will be selected.
                 - name: --event-hub-rule
-                  short-summary: The resource Id for the event hub authorization rule
+                  short-summary: Name or ID of the event hub authorization rule.
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
@@ -817,6 +818,41 @@ helps['monitor activity-log alert scope remove'] = """
           short-summary: Name of the activity log alerts
         - name: --scope -s
           short-summary: The scopes to remove
+"""
+
+helps['monitor activity-log list'] = """
+    type: command
+    short-summary: List events from the activity log.
+    parameters:
+        - name: --filters
+          short-summary: >
+            The OData filter for the list activity logs. If this argument is provided OData Filter
+            Arguments will be ignored.
+        - name: --correlation-id
+          short-summary: Correlation ID of the query.
+        - name: --resource-group
+          short-summary: Resource group to query.
+        - name: --resource-id
+          short-summary: Identifier of the resource.
+        - name: --resource-provider
+          short-summary: Resource provider
+        - name: --start-time
+          short-summary: >
+            Start time of the query. ISO format with explicit indication of timezone: 1970-01-01T00:00:00Z,
+            1970-01-01T00:00:00-0500. Defaults to 1 Hour prior to the current time.
+        - name: --end-time
+          short-summary: >
+            End time of the query. ISO format with explicit indication of timezone: 1970-01-01T00:00:00Z,
+            1970-01-01T00:00:00-0500. Defaults to current time.
+        - name: --caller
+          short-summary: Caller to look for when querying.
+        - name: --status
+          short-summary: >
+            Status value to query (ex: Failed)
+        - name: --max-events
+          short-summary: Maximum number of records to be returned by the command.
+        - name: --select
+          short-summary: Space-separated list of event names to select.
 """
 
 helps['monitor activity-log list-categories'] = """

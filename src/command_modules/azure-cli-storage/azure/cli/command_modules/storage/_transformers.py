@@ -31,11 +31,9 @@ def transform_cors_list_output(result):
     from collections import OrderedDict
     new_result = []
     for service in sorted(result.keys()):
-        service_name = service
         for i, rule in enumerate(result[service]):
             new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
+            new_entry['Service'] = service
             new_entry['Rule'] = i + 1
 
             new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))

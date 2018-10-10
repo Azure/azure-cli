@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.48
+++++++
+* Minor fixes
+
 2.0.47
 ++++++
 * Introduces generic behavior to handle "Bad Request" errors.

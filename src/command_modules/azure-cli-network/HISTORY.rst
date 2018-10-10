@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.2.7
++++++
+* `nic create` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+* `nic ip-config create/update` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+
+
 2.2.6
 +++++
 * Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
