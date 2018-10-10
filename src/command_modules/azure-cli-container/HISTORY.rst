@@ -8,6 +8,7 @@ Release History
 * Make 'Private' a valid type to pass to '--ip-address'
 * Allow using only subnet ID to setup a virtual network for the container group
 * Allow using vnet name or resource id to enable using vnets from different resource groups
+* Add '--assign-identity' for adding a MSI identity to a container group
 * Show warning when creating a container group with an image without a long running process
 * Fix table output issues for 'list' and 'show' commands
 

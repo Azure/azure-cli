@@ -115,6 +115,69 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              '[0].containers[0].resources.requests.cpu', cpu),
                          self.check('[0].containers[0].resources.requests.memoryInGb', memory)])
 
+    # Test create container using managed identities.
+    @ResourceGroupPreparer()
+    def test_container_create_with_msi(self, resource_group, resource_group_location):
+        container_group_name1 = self.create_random_name('clicontainer', 16)
+        container_group_name2 = self.create_random_name('clicontainer', 16)
+        container_group_name3 = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
+        system_assigned_identity = '[system]'
+
+        self.kwargs.update({
+            'user_assigned_identity_name': user_assigned_identity_name
+        })
+
+        msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name1,
+            'container_group_name2': container_group_name2,
+            'container_group_name3': container_group_name3,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'user_assigned_identity': msi_identity_result['id'],
+            'system_assigned_identity': system_assigned_identity
+        })
+
+        # Test create system assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
+        # Test create user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name2} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name2}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'UserAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
+        # Test create system user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name3} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity {system_assigned_identity} {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name3}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned, UserAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli
