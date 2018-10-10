@@ -55,7 +55,7 @@ def validate_subnet(ns):
     from msrestazure.tools import is_valid_resource_id
 
     if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
-        raise CLIError('usage error: --vnet-name NAME --subnet NAME | --subnet ID')
+        raise CLIError('usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID')
 
 
 def validate_network_profile(cmd, ns):

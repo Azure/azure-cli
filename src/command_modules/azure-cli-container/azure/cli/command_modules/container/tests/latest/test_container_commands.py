@@ -125,7 +125,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = 'EsYA8DyuSaNv+3HyGyHoiIIafktf0kE6'
+        password = '5+36OCtbIwfy8g5glC4bQQrFsfmMc3iD'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -182,18 +182,18 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
-            'vnet_name': vnet_name,
+            'vnet': vnet_name,
             'subnet_name': subnet_name,
             'network_profile_name': network_profile_name,
             'network_profile_id': network_profile_id
         })
 
         # Vnet name with no subnet
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
-            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet-name {vnet_name}')
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
 
         # Subnet name with no vnet name
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--subnet {subnet_name} ')
 
