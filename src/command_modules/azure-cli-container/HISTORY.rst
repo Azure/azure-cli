@@ -5,6 +5,7 @@ Release History
 
 0.3.6
 +++++
+* Make 'Private' a valid type to pass to '--ip-address'
 * Allow using only subnet ID to setup a virtual network for the container group
 * Allow using vnet name or resource id to enable using vnets from different resource groups
 * Show warning when creating a container group with an image without a long running process
