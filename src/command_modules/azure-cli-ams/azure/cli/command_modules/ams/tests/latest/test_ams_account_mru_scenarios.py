@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
-class AmsMruTests(ScenarioTest):
+class AmsMruTests(LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_mru(self, storage_account_for_create):
