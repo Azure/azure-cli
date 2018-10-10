@@ -245,7 +245,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
-            'vnet': vnet_name,
+            'vnet_name': vnet_name,
             'subnet_name': subnet_name,
             'network_profile_name': network_profile_name,
             'network_profile_id': network_profile_id
