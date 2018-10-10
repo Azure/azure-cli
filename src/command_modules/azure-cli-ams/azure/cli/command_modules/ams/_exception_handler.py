@@ -3,14 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
-
 
 def ams_exception_handler(ex):
-    if sys.version_info.major < 3:
-        from azure.mgmt.media.models.api_error import ApiErrorException
-    else:
-        from azure.mgmt.media.models.api_error_py3 import ApiErrorException
+    from azure.mgmt.media.models import ApiErrorException
     from msrest.exceptions import ValidationError
     from knack.util import CLIError
 

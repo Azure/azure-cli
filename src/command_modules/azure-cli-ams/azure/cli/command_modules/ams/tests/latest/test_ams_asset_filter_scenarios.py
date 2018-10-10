@@ -258,5 +258,5 @@ class AmsAssetFilterTests(ScenarioTest):
             self.check('tracks[1].trackSelections[0].value', '{newTrackValue}'),
             self.check('tracks[1].trackSelections[1].operation', 'Equal'),
             self.check('tracks[1].trackSelections[1].property', 'FourCC'),
-            self.check('tracks[1].trackSelections[1].value', 'MP4A'),
+            self.check('tracks[1].trackSelections[1].value', 'MP4A')
         ])

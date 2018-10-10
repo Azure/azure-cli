@@ -41,16 +41,6 @@ def create_asset_filter(client, account_name, resource_group_name, asset_name, f
     return client.create_or_update(resource_group_name, account_name, asset_name, filter_name, asset_filter)
 
 
-def update_asset_filter_setter(client, resource_group_name, account_name, asset_name, filter_name, parameters):
-    from azure.mgmt.media.models.api_error_py3 import ApiErrorException as ApiErrorExceptionPy3
-    from azure.mgmt.media.models.api_error import ApiErrorException
-
-    try:
-        return client.create_or_update(resource_group_name, account_name, asset_name, filter_name, parameters)
-    except (ApiErrorException, ApiErrorExceptionPy3) as ex:
-        raise CLIError(ex)
-
-
 def update_asset_filter(instance, start_timestamp=None, end_timestamp=None, presentation_window_duration=None,
                         live_backoff_duration=None, timescale=None, bitrate=None,
                         tracks=None, force_end_timestamp=None):
