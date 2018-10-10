@@ -285,4 +285,3 @@ def _get_duration(start_time, finish_time):
     except ValueError:
         logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '
-

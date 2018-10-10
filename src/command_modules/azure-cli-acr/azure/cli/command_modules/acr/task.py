@@ -112,7 +112,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_trigger_events.append(SourceTriggerEvent.commit.value)
     if pull_request_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
-    #If source_trigger_events contains any event types we assume they are enabled.
+    # if source_trigger_events contains any event types we assume they are enabled.
     if source_trigger_events:
         source_triggers = [
             SourceTrigger(
@@ -292,7 +292,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers is not None:
             source_trigger_events = set()
-            #perform merge with server-side event list
+            # perform merge with server-side event list
             if source_triggers:
                 source_trigger_events = set(source_triggers[0].source_trigger_events)
                 if source_triggers[0].status == TriggerStatus.disabled.value:
