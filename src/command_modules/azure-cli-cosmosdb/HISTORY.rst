@@ -5,7 +5,7 @@ Release History
 
 0.2.2
 +++++
-* Introducing multiple write location support for Azure CLI - Cosmos DB
+* `cosmosdb create`: Add `--enable-multiple-write-locations` support.
 
 0.2.1
 +++++

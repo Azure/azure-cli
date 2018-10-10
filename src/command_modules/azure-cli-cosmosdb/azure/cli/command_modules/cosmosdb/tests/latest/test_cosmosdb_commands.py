@@ -166,7 +166,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable_multiple_write_locations --default-consistency-level ConsistentPrefix')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-multiple-write-locations --default-consistency-level ConsistentPrefix')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableMultipleWriteLocations', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
