@@ -140,3 +140,27 @@ class AmsAssetTests(ScenarioTest):
 
         with self.assertRaises(CLIError):
             self.cmd('az ams asset get-encryption-key -a {amsname} -n {assetName} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_asset_get_streaming_locators(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        assetName = self.create_random_name(prefix='asset', length=12)
+        streamingLocatorName = self.create_random_name(prefix='str', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2',
+            'assetName': assetName,
+            'streamingLocatorName': streamingLocatorName,
+            'streamingPolicyName': 'Predefined_ClearStreamingOnly'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
+        self.cmd('az ams streaming-locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName}')
+
+        self.cmd('az ams asset get-streaming-locators -a {amsname} -n {assetName} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
