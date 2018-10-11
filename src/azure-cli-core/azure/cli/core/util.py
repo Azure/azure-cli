@@ -290,7 +290,7 @@ def open_page_in_browser(url):
         return subprocess.Popen(['open', url])
     try:
         return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
-    except TypeError as err:  # See https://bugs.python.org/msg322439
+    except TypeError:  # See https://bugs.python.org/msg322439
         return webbrowser.open(url, new=2)
 
 
