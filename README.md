@@ -188,4 +188,4 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Automation
 
-- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/scenario_base_tests.md)
+- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md)
