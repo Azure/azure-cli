@@ -72,6 +72,7 @@ helps['ams account sp'] = """
 helps['ams account sp create'] = """
     type: command
     short-summary: Create a service principal and configure its access to an Azure Media Services account.
+    long-summary: Service principal propagation throughout Azure Active Directory may take some extra seconds to complete.
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
