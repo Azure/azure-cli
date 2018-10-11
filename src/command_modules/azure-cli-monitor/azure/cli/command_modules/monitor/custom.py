@@ -5,10 +5,12 @@
 
 from knack.log import get_logger
 
+from azure.cli.command_modules.monitor._client_factory import cf_metrics
 
 logger = get_logger(__name__)
 
 
+# region ActivityLog
 def list_activity_log(client, filters=None, correlation_id=None, resource_group=None, resource_id=None,
                       resource_provider=None, start_time=None, end_time=None, caller=None, status=None, max_events=50,
                       select=None, offset='6h'):
@@ -39,7 +41,6 @@ def _build_activity_log_odata_filter(correlation_id=None, resource_group=None, r
     elif not end_time:
         # if no end_time, apply offset fowards from start_time
         end_time = (dateutil.parser.parse(start_time) + offset).isoformat()
-
 
     odata_filters = 'eventTimestamp ge {} and eventTimestamp le {}'.format(start_time, end_time)
 
@@ -93,3 +94,43 @@ def _limit_results(paged, limit):
         else:
             break
     return list(results)
+# endregion
+
+
+# region Metrics
+# pylint:disable=unused-argument
+def list_metrics(cmd, resource,
+                 start_time=None, end_time=None, offset='1h', interval='1m',
+                 metadata=None, dimension=None, aggregation=None, metrics=None,
+                 filters=None, metric_namespace=None, orderby=None, top=10):
+
+    from azure.mgmt.monitor.models import ResultType
+    from datetime import datetime
+    import dateutil.parser
+    from six.moves.urllib.parse import quote_plus
+
+    if not start_time and not end_time:
+        # if neither value provided, end_time is now
+        end_time = datetime.utcnow().isoformat()
+    if not start_time:
+        # if no start_time, apply offset backwards from end_time
+        start_time = (dateutil.parser.parse(end_time) - offset).isoformat()
+    elif not end_time:
+        # if no end_time, apply offset fowards from start_time
+        end_time = (dateutil.parser.parse(start_time) + offset).isoformat()
+
+    timespan = '{}/{}'.format(start_time, end_time)
+
+    client = cf_metrics(cmd.cli_ctx, None)
+    return client.list(
+        resource_uri=resource,
+        timespan=quote_plus(timespan),
+        interval=interval,
+        metricnames=','.join(metrics) if metrics else None,
+        aggregation=','.join(aggregation) if aggregation else None,
+        top=top,
+        orderby=orderby,
+        filter=filters,
+        result_type=ResultType.metadata if metadata else None,
+        metricnamespace=metric_namespace)
+# endregion

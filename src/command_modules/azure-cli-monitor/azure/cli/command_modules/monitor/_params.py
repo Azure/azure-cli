@@ -18,7 +18,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator)
+    get_action_group_id_validator, validate_metric_dimension)
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -92,18 +92,22 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', arg_group='Target Resource')
 
     with self.argument_context('monitor metrics list') as c:
-        from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
-                                 process_metric_dimension, validate_metric_names)
         from azure.mgmt.monitor.models import AggregationType
-        c.resource_parameter('resource_uri', arg_group='Target Resource')
-        c.extra('start_time', options_list=['--start-time'], validator=process_metric_timespan, arg_group='Time')
-        c.extra('end_time', options_list=['--end-time'], arg_group='Time')
-        c.extra('metadata', options_list=['--metadata'], action='store_true', validator=process_metric_result_type)
-        c.extra('dimension', options_list=['--dimension'], nargs='*', validator=process_metric_dimension)
-        c.argument('interval', arg_group='Time')
-        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*', validator=process_metric_aggregation)
-        c.argument('metricnames', options_list=['--metrics'], nargs='+', help='Space-separated list of metric names to retrieve.', validator=validate_metric_names)
-        c.ignore('timespan', 'result_type')
+        c.resource_parameter('resource', arg_group='Target Resource')
+        c.argument('metadata', action='store_true')
+        c.argument('dimension', nargs='*', validator=validate_metric_dimension)
+        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
+        c.argument('metrics', nargs='+', help='Space-separated list of metric names to retrieve.')
+        c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
+        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('filters', options_list='--filter')
+        c.argument('metric_namespace', options_list='--namespace')
+
+    with self.argument_context('monitor metrics list', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+        c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
+        c.argument('offset', type=get_period_type(as_timedelta=True))
+        c.argument('interval', arg_group='Time', type=get_period_type())
     # endregion
 
     # region MetricAlerts
@@ -259,7 +263,7 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'))
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')

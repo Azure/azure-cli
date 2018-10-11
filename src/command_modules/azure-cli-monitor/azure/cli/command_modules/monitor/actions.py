@@ -62,19 +62,19 @@ def get_period_type(as_timedelta=False):
 
         regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
         match = re.match(regex, value.lower())
-        match_len = match.regs[0]
+        match_len = match.span(0)
         if match_len != tuple([0, len(value)]):
             raise ValueError
         # simply return value if a valid ISO8601 string is supplied
-        if match.regs[1] != tuple([-1, -1]) and match.regs[5] != tuple([-1, -1]):
+        if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
             return value
 
         # if shorthand is used, only support days, minutes, hours, seconds
         # ensure M is interpretted as minutes
-        days = _get_substring(match.regs[4])
-        hours = _get_substring(match.regs[6])
-        minutes = _get_substring(match.regs[7]) or _get_substring(match.regs[3])
-        seconds = _get_substring(match.regs[8])
+        days = _get_substring(match.span(4))
+        hours = _get_substring(match.span(6))
+        minutes = _get_substring(match.span(7)) or _get_substring(match.span(3))
+        seconds = _get_substring(match.span(8))
 
         if as_timedelta:
             from datetime import timedelta

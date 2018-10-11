@@ -133,30 +133,27 @@ helps['monitor metrics list'] = """
     short-summary: List the metric values for a resource.
     parameters:
         - name: --aggregation
-          type: string
           short-summary: The list of aggregation types (space-separated) to retrieve.
         - name: --interval
-          type: string
-          short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
-        - name: --start-time
-          type: string
           short-summary: >
-            The start time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
-            Defaults to 1 Hour prior to the current time.
-        - name: --end-time
-          type: string
-          short-summary: >
-             The end time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
-             Defaults to the current time.
+            The interval over which to aggregate metrics, in ##h##m format.
         - name: --filter
-          type: string
           short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
           long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list'
         - name: --metadata
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
-          type: string
           short-summary: The list of dimensions (space-separated) the metrics are queried into.
+        - name: --namespace
+          short-summary: Namespace to query metric definitions for.
+        - name: --offset
+          short-summary: >
+            Time offset of the query range, in ##d##h format.
+          long-summary: >
+            Can be used with either --start-time or --end-time. If used with --start-time, then
+            the end time will be calculated by adding the offset. If used with --end-time (default), then
+            the start time will be calculated by subtracting the offset. If --start-time and --end-time are
+            provided, then --offset will be ignored.
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
@@ -828,8 +825,6 @@ helps['monitor activity-log list'] = """
           short-summary: Correlation ID to query.
         - name: --resource-id
           short-summary: ARM ID of a resource.
-        - name: --resource-provider
-          short-summary: Resource provider namespace.
         - name: --namespace
           short-summary: Resource provider namespace.
         - name: --caller
