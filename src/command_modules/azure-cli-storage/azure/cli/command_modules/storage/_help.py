@@ -745,6 +745,11 @@ helps['storage share'] = """
     short-summary: Manage file shares.
 """
 
+helps['storage share url'] = """
+    type: command
+    short-summary: Create a URI to access a file share.
+"""
+
 helps['storage share exists'] = """
     type: command
     short-summary: Check for the existence of a file share.
