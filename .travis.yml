@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 sudo: off
 language: python
 services:
@@ -18,21 +18,21 @@ jobs:
     - stage: precheck
       env: PURPOSE='PEP8'
       script: ./scripts/ci/precheck_pep8.sh
-      python: 3.6
+      python: 3.7
     - stage: precheck
       env: PURPOSE='Headers'
       script: ./scripts/ci/precheck_header.sh
-      python: 3.6
+      python: 3.7
     - stage: precheck
       env: PURPOSE='Dependency Check'
       script: ./scripts/dependency/check.sh
-      python: 3.6
+      python: 3.7
     - stage: verify
       env: PURPOSE='Lint Command Table and Help'
       script: ./scripts/ci/verify_linter.sh
-      python: 3.6
+      python: 3.7
     - stage: unittest
-      python: 3.6
+      python: 3.7
       env: TOXENV=py36
       script: ./scripts/ci/unittest.sh
     - stage: unittest
@@ -44,7 +44,7 @@ jobs:
       - PURPOSE='Automation'
       - REDUCE_SDK='True'
       script: ./scripts/ci/test_automation.sh
-      python: 3.6
+      python: 3.7
     - stage: verify
       env: PURPOSE='Automation'
       script: ./scripts/ci/test_automation.sh
@@ -55,7 +55,7 @@ jobs:
       - REDUCE_SDK='True'
       - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
       script: ./scripts/ci/test_automation.sh
-      python: 3.6
+      python: 3.7
     - stage: verify
       env:
       - PURPOSE='Automation'
@@ -65,11 +65,11 @@ jobs:
     - stage: verify
       script: ./scripts/ci/test_static.sh
       env: PURPOSE='Static Check'
-      python: 3.6
+      python: 3.7
     - stage: verify
       script: ./scripts/ci/test_integration.sh
       env: PURPOSE='Integration'
-      python: 3.6
+      python: 3.7
     - stage: verify
       script: ./scripts/ci/test_integration.sh
       env: PURPOSE='Integration'
@@ -77,27 +77,27 @@ jobs:
     - stage: verify
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
-      python: 3.6
+      python: 3.7
     - stage: verify
       script: ./scripts/ci/test_perf.sh
       env: PURPOSE='Module Load Performance'
-      python: 3.6
+      python: 3.7
     - stage: verify
       script: ./scripts/ci/test_ref_doc.sh
       env: PURPOSE='RefDocVerify'
-      python: 3.6
+      python: 3.7
     - stage: verify
       env: PURPOSE='Load extension commands'
       script: ./scripts/ci/test_extensions.sh
-      python: 3.6
+      python: 3.7
     - stage: publish
       script: ./scripts/ci/publish.sh
-      python: 3.6
+      python: 3.7
       env: PURPOSE='Nightly Edge Build'
       if: branch = dev and type = push
     - stage: publish
       script: ./scripts/ci/build_droid.sh
-      python: 3.6
+      python: 3.7
       env: PURPOSE='Automation Docker'
       if: repo = Azure/azure-cli and type = push
 stages:
