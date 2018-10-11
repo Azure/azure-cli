@@ -17,6 +17,13 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
+def create_share_url(client, share_name, unc=None, protocol=None):
+    url = client.make_file_url(share_name, None, '', protocol=protocol).rstrip('/')
+    if unc:
+        url = ':'.join(url.split(':')[1:])
+    return url
+
+
 def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
     if cmd.supported_api_version(min_api='2017-04-17'):
         generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
