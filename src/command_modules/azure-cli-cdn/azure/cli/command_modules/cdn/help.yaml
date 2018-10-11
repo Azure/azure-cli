@@ -2,13 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
----
-- version: 0
 
-- anchors: null
+version: 0
 
-
-- content: ## try removing content key
+content: ## try removing content key
 
 - group:
     name: cdn
@@ -43,28 +40,37 @@
             Here is some more unnecessary text explaining more and more about skus.
 
             There are different CDN skus, you know? Standard ones and even a premium one too. Et cetera.
+        value-source:
+          - string:
+               Values range from -5.0 to 5.0
+          - link:
+              - url: https://www.foo.com
+              - text: foo
+          - link:
+              - command: az sku list
+              - text: Get skus
+
     examples:
       - summary: Create a CDN profile using Verizon premium CDN.
         description: much longer description that goes into more depth about the example. spans multiple lines
         command: > # commands? for multiple step. parser should not enforce rules.
               az cdn profile create -g group -n profile --sku Premium_Verizon
-- group:
-    name: cdn endpoint
-    summary: Manage CDN endpoints.
 
 - command:
     name: cdn endpoint create
-    summary: Create a named endpoint to connect to a CDN.
+    summary: NEW AND IMPROVED!!!!! Create a named endpoint to connect to a CDN.
     examples:
-      - summary: Create an endpoint to service content for hostname over HTTP or HTTPS.
+      - summary: FOOO, cause why not. Create an endpoint to service content for hostname over HTTP or HTTPS.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com
-      - summary: Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
+        min_profile: latest
+      - summary: Bar bar. Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com 88 4444
-      - summary: Create an endpoint with a custom domain with compression and only HTTPS.
+        max_profile: 2017-03-09-profile
+      - summary: Baz.... Create an endpoint with a custom domain with compression and only HTTPS.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com --no-http --enable-compression
@@ -158,17 +164,23 @@
 #      - name: --floats
 #        summary: This is a bag argument.
 #        value-source:
-#          - Values range from -5.0 to 5.0
-#          - links:
-#              - name: Float range specs
+#          - string:
+#               Values range from -5.0 to 5.0
+#          - link:
+#              - url / command
+#              - text
+#              - anchor / hypertext / text: Float range specs
 #                url: "https://float-range-specs.com"
 #
 #      - name: --lag
 #        summary: This is a lag argument.
+#        value-source:
+#            command: az foo lag
 #
 #      - name: --date
 #        summary: Date
-#        value-source: Date should be in format DD-MM-YY. E.g. 01-01-01
+#        value-source:
+#            - string: Date should be in format DD-MM-YY. E.g. 01-01-01
 
 
 
@@ -179,3 +191,7 @@
 #  figuring out what to do with value source
 # best way for multi step example / best way for arg group / best way for value source / link specification for parameters. value source could be date time.
 # az parse yaml
+
+# note parameters, we want to merge info from code and yaml, as done before.
+#
+# value-source (replacement or much more), arg_group, examples.
