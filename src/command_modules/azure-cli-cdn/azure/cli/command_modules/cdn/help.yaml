@@ -1,0 +1,181 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+---
+- version: 0
+
+- anchors: null
+
+
+- content: ## try removing content key
+
+- group:
+    name: cdn
+    summary: Manage Azure Content Delivery Networks (CDNs).
+    description: >
+        Dummy long description. This is a long description illustrating the description field in a group type.
+        A description is essentially a long summary. One would expect that it is multiple sentences long.
+    links:
+        - name: Azure cdn docs
+          url: "https://docs.microsoft.com/en-us/azure/cdn/"
+        - name: cli cdn reference
+          url: "https://docs.microsoft.com/en-us/cli/azure/cdn?view=azure-cli-latest"
+
+- group:
+    name: cdn profile
+    summary: Manage CDN profiles to define an edge network.
+
+- command:
+    name: cdn profile create
+    summary: Create a new CDN profile.
+    description: Dummy super long description. As you would expect it is long and has multiple sentences.
+    links:
+      - name: create new cdn profile and endpoint
+        url: "https://docs.microsoft.com/en-us/azure/cdn/cdn-create-new-endpoint"
+    arguments:
+      - name: --sku #use
+        summary: >
+            The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
+            Defaults to Standard_Akamai.
+        description: >
+            Much longer description going into the many intricacies about the different skus.
+            Here is some more unnecessary text explaining more and more about skus.
+
+            There are different CDN skus, you know? Standard ones and even a premium one too. Et cetera.
+    examples:
+      - summary: Create a CDN profile using Verizon premium CDN.
+        description: much longer description that goes into more depth about the example. spans multiple lines
+        command: > # commands? for multiple step. parser should not enforce rules.
+              az cdn profile create -g group -n profile --sku Premium_Verizon
+- group:
+    name: cdn endpoint
+    summary: Manage CDN endpoints.
+
+- command:
+    name: cdn endpoint create
+    summary: Create a named endpoint to connect to a CDN.
+    examples:
+      - summary: Create an endpoint to service content for hostname over HTTP or HTTPS.
+        command: >
+          az cdn endpoint create -g group -n endpoint --profile-name profile \\
+              --origin www.example.com
+      - summary: Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
+        command: >
+          az cdn endpoint create -g group -n endpoint --profile-name profile \\
+              --origin www.example.com 88 4444
+      - summary: Create an endpoint with a custom domain with compression and only HTTPS.
+        command: >
+          az cdn endpoint create -g group -n endpoint --profile-name profile \\
+              --origin www.example.com --no-http --enable-compression
+
+
+## arg group form 1
+#- command:
+#    name: foo create
+#    summary: foo create command
+#
+#    arg-group:
+#        name: bar # bar arguments
+#        arguments: # this is a dummy arg group
+#          - name: --bar-name
+#            summary: This is a bar-name.
+#          - name: --bar-id
+#            summary: This is a bar-id.
+#          - name: --bar-sku
+#            summary: this is a bar-sku
+#
+#    arguments:
+#      - name: --tag
+#        summary: This is a tag argument.
+#      - name: --bag
+#        summary: This is a bag argument.
+#      - name: --lag
+#        summary: This is a lag argument.
+#
+## arg group from 2
+#- command:
+#    name: foo create
+#    summary: foo create command
+#    arguments:
+#      - name: --bar-name
+#        summary: This is a bar-name.
+#        arg-group: bar
+#
+#      - name: --bar-id
+#        summary: This is a bar-id.
+#        arg-group: bar
+#
+#      - name: --bar-sku
+#        summary: this is a bar-sku
+#        arg-group: bar
+#
+#      - name: --tag
+#        summary: This is a tag argument.
+#
+#      - name: --bag
+#        summary: This is a bag argument.
+#
+#      - name: --lag
+#        summary: This is a lag argument.
+#
+## arg group form 2 with anchors and references.
+#- command:
+#    name: foo create
+#    summary: foo create command
+#    arguments:
+#      - name: --bar-name
+#        summary: This is a bar-name.
+#        arg-group: &b bar
+#
+#      - name: --bar-id
+#        summary: This is a bar-id.
+#        arg-group: *b
+#
+#      - name: --bar-sku
+#        summary: this is a bar-sku
+#        arg-group: *b
+#
+#      - name: --tag
+#        summary: This is a tag argument.
+#
+#      - name: --bag
+#        summary: This is a bag argument.
+#
+#      - name: --lag
+#        summary: This is a lag argument.
+#
+#
+## value source for parameters
+#- command:
+#    name: foo create
+#    summary: foo create command
+#    arguments:
+#      - name: --nums
+#        summary: This is a tag argument.
+#        value-source: Nums must range from 1 to 50
+#
+#      - name: --floats
+#        summary: This is a bag argument.
+#        value-source:
+#          - Values range from -5.0 to 5.0
+#          - links:
+#              - name: Float range specs
+#                url: "https://float-range-specs.com"
+#
+#      - name: --lag
+#        summary: This is a lag argument.
+#
+#      - name: --date
+#        summary: Date
+#        value-source: Date should be in format DD-MM-YY. E.g. 01-01-01
+
+
+
+# make this a more concise richer document....
+#
+# value-source should be a string with their type. type can be string, link or command. helps doc team.
+# show different options in powerpoint for arg group and links. we want consistent way to hyperlink ideallly...
+#  figuring out what to do with value source
+# best way for multi step example / best way for arg group / best way for value source / link specification for parameters. value source could be date time.
+# az parse yaml
