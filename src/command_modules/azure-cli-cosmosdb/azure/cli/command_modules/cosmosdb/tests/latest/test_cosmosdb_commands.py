@@ -158,3 +158,16 @@ class CosmosDBTests(ScenarioTest):
         assert account2['writeLocations'][0]['locationName'] == "West US"
         assert account2['readLocations'][0]['locationName'] == "East US" or account2['readLocations'][1]['locationName'] == "East US"
         assert account2['readLocations'][0]['failoverPriority'] == 1 or account2['readLocations'][1]['failoverPriority'] == 1
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_enable_multiple_write_locations(self, resource_group):
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-multiple-write-locations --default-consistency-level ConsistentPrefix')
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('enableMultipleWriteLocations', True),
+            self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
+        ]).get_output_in_json()

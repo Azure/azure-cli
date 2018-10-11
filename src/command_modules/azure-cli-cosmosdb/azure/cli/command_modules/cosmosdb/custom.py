@@ -51,7 +51,8 @@ def cli_cosmosdb_create(cmd, client,
                         enable_automatic_failover=None,
                         capabilities=None,
                         enable_virtual_network=None,
-                        virtual_network_rules=None):
+                        virtual_network_rules=None,
+                        enable_multiple_write_locations=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -78,7 +79,8 @@ def cli_cosmosdb_create(cmd, client,
         is_virtual_network_filter_enabled=enable_virtual_network,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=capabilities,
-        virtual_network_rules=virtual_network_rules)
+        virtual_network_rules=virtual_network_rules,
+        enable_multiple_write_locations=enable_multiple_write_locations)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
