@@ -153,7 +153,7 @@ helps['ams transform output remove'] = """
         - name: Remove the output element at the index specified with --output-index argument.
           text: >
             az ams transform output remove -a myAmsAccount -n transformName -g myResourceGroup --output-index 1
-    """
+"""
 
 helps['ams asset'] = """
     type: group
@@ -500,6 +500,14 @@ helps['ams live-event reset'] = """
 helps['ams live-event update'] = """
     type: command
     short-summary: Update the details of a live event.
+    examples:
+        - name: Set a new allowed IP address and remove an existing IP address at index '0'.
+          text: >
+            az ams live-event update -a amsAccount -g resourceGroup -n liveEventName --remove input.accessControl.ip.allow 0 --add input.accessControl.ip.allow 1.2.3.4/22
+        - name: Clear existing IP addresses and set new ones.
+          text: >
+            az ams live-event update -a amsAccount -g resourceGroup -n liveEventName --ips 1.2.3.4/22 5.6.7.8/30
+
 """
 
 helps['ams live-output'] = """
