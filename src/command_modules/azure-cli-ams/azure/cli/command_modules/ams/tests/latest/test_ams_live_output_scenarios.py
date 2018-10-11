@@ -22,7 +22,7 @@ class AmsLiveOutputTests(ScenarioTest):
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streaming_protocol}')
+        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --ips AllowAll --streaming-protocol {streaming_protocol}')
 
         assetName = self.create_random_name(prefix='asset', length=12)
         live_output_name = self.create_random_name(prefix='lo', length=12)
@@ -70,7 +70,7 @@ class AmsLiveOutputTests(ScenarioTest):
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streaming_protocol}')
+        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --ips AllowAll --streaming-protocol {streaming_protocol}')
 
         assetName = self.create_random_name(prefix='asset', length=12)
         live_output_name = self.create_random_name(prefix='lo', length=12)
@@ -106,7 +106,7 @@ class AmsLiveOutputTests(ScenarioTest):
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol}')
+        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --ips AllowAll --streaming-protocol {streamingProtocol}')
 
         assetName = self.create_random_name(prefix='asset', length=12)
         live_output_name = self.create_random_name(prefix='lo', length=12)
@@ -146,7 +146,7 @@ class AmsLiveOutputTests(ScenarioTest):
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
-        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streaming_protocol}')
+        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --ips AllowAll --streaming-protocol {streaming_protocol}')
 
         assetName = self.create_random_name(prefix='asset', length=12)
         live_output_name1 = self.create_random_name(prefix='lo1', length=12)
