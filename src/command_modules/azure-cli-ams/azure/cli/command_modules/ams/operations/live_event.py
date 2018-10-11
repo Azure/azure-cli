@@ -174,5 +174,5 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
 
 
 def read_xml_policy(xml_policy_path):
-    with open(xml_policy_path, 'r') as file:
+    with open(xml_policy_path) as file:
         return file.read()
