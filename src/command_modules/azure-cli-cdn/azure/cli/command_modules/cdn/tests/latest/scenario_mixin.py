@@ -9,12 +9,14 @@ def add_tags(command, tags):
 
 
 class CdnScenarioMixin(object):
-    def profile_create_cmd(self, group, name, tags=None, checks=None, options=None):
+    def profile_create_cmd(self, group, name, tags=None, checks=None, options=None, sku=None):
         command = 'cdn profile create -g {} -n {}'.format(group, name)
         if tags:
             command = command + ' --tags {}'.format(tags)
         if options:
             command = command + ' ' + options
+        if sku:
+            command = command + ' --sku {}'.format(sku)
         return self.cmd(command, checks)
 
     def profile_update_cmd(self, group, name, tags=None, checks=None):
