@@ -53,7 +53,7 @@ class MediaV2Client():
         from azure.cli.core._profile import Profile
         self.profile = Profile(cli_ctx=cli_ctx)
         self._old_rp_api_version = '2015-10-01'
-        self.v2_media_api_resource = 'https://rest.media.azure.net'
+        self.v2_media_api_resource = cli_ctx.cloud.endpoints.media_resource_id
         self.api_endpoint = self._get_v2_api_endpoint(cli_ctx, resource_group_name, account_name)
         self.access_token = self._get_v2_access_token(cli_ctx)
 

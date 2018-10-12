@@ -61,7 +61,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory_resource_id=None,
                  active_directory_graph_resource_id=None,
                  active_directory_data_lake_resource_id=None,
-                 vm_image_alias_doc=None):
+                 vm_image_alias_doc=None,
+                 media_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -73,6 +74,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
         self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
         self.vm_image_alias_doc = vm_image_alias_doc
+        self.media_resource_id = media_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -159,7 +161,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.windows.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.azure.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -179,7 +182,8 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.chinacloudapi.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -197,7 +201,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.usgovcloudapi.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -215,7 +220,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.cloudapi.de'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
