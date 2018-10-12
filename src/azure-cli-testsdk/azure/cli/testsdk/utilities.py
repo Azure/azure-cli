@@ -65,14 +65,15 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         return request
 
     def process_response(self, response):
-        import json
-        try:
-            body = json.loads(response['body']['string'])
-            keys = body['keys']
-            for key_entry in keys:
-                key_entry['value'] = self._replacement
-            self._activated = False
-        except (KeyError, ValueError, TypeError):
-            return response
-        response['body']['string'] = json.dumps(body)
+        if self._activated:
+            import json
+            try:
+                body = json.loads(response['body']['string'])
+                keys = body['keys']
+                for key_entry in keys:
+                    key_entry['value'] = self._replacement
+                self._activated = False
+            except (KeyError, ValueError, TypeError):
+                return response
+            response['body']['string'] = json.dumps(body)
         return response
