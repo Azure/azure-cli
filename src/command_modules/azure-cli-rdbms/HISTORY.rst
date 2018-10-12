@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.3
++++++
+* Fixed broken mysql db create example
+
 0.3.2
 +++++
 * Add support for MariaDB service
