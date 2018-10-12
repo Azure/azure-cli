@@ -137,7 +137,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('force_end_timestamp', arg_group='Presentation Time Range',
                    arg_type=get_three_state_flag(), help='Indicates whether to force the existance of an end timestamp.')
         c.argument('bitrate', help='The first quality bitrate.')
-        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file.')
+        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/assetfilters/assetfilters_createorupdate#filtertrackselection')
 
     with self.argument_context('ams asset-filter list') as c:
         c.argument('account_name', id_part=None)
@@ -233,7 +233,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="The end time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('streaming_locator_id', help='The identifier of the streaming locator.')
         c.argument('alternative_media_id', help='An alternative media identifier associated with the streaming locator.')
-        c.argument('content_keys', help='JSON string with the content keys to be used by the streaming locator. Use @{file} to load from a file.')
+        c.argument('content_keys', help='JSON string with the content keys to be used by the streaming locator. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streaminglocators/streaminglocators_create#streaminglocatorcontentkey')
 
     with self.argument_context('ams streaming-locator list') as c:
         c.argument('account_name', id_part=None)
@@ -361,7 +361,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('timescale', arg_group='Presentation Time Range', help='The time scale of time stamps.')
         c.argument('force_end_timestamp', arg_type=get_three_state_flag(), arg_group='Presentation Time Range', help='Indicates whether to force the existance of an end timestamp.')
         c.argument('bitrate', help='The first quality bitrate.')
-        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file.')
+        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/accountfilters/accountfilters_createorupdate#filtertrackselection')
 
     with self.argument_context('ams account-filter list') as c:
         c.argument('account_name', id_part=None)
