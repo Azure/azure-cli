@@ -10,9 +10,8 @@ import time
 import tempfile
 import requests
 
-from azure_devtools.scenario_tests import record_only
-from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, 
                                StorageAccountPreparer, JMESPathCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -631,7 +630,7 @@ class AppServiceCors(ScenarioTest):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'function': self.create_random_name(prefix='slot-traffic-web', length=24),
-            'storage': 'functioncorsstorage'
+            'storage': 'funccorsstor123'
         })
         self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
         self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
