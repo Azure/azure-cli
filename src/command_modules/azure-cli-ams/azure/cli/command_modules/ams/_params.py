@@ -284,9 +284,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}.'.format(", ".join(get_cdn_provider_completion_list())))
         c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
         c.argument('client_access_policy', arg_group='Cross Site Access Policies',
-                   help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
+                   help='Filepath to the clientaccesspolicy.xml used by Silverlight. Use @{file} to load from a file.')
         c.argument('cross_domain_policy', arg_group='Cross Site Access Policies',
-                   help='The local full path to the crossdomain.xml used by Silverlight.')
+                   help='Filepath to the crossdomain.xml used by Silverlight. Use @{file} to load from a file.')
         c.argument('auto_start', action='store_true', help='The flag indicates if the resource should be automatically started on creation.')
         c.argument('ips', nargs='+', arg_group='Access Control Support', help='Space-separated IP addresses for access control. Allowed IP addresses can be specified as either a single IP address (e.g. "10.0.0.1") or as an IP range using an IP address and a CIDR subnet mask (e.g. "10.0.0.1/22"). Use "" to clear existing list. If no IP addresses are specified any IP address will be allowed.')
         c.argument('disable_cdn', arg_group='CDN Support', action='store_true', help='Use this flag to disable CDN for the streaming endpoint.')
@@ -325,8 +325,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('streaming_policy_name', arg_group='Preview', help='The name of streaming policy used for the live event preview. This can be specified at creation time but cannot be updated.')
         c.argument('alternative_media_id', arg_group='Preview', help='An Alternative Media Identifier associated with the StreamingLocator created for the preview. This value is specified at creation time and cannot be updated. The identifier can be used in the CustomLicenseAcquisitionUrlTemplate or the CustomKeyAcquisitionUrlTemplate of the StreamingPolicy specified in the StreamingPolicyName field.')
         c.argument('vanity_url', arg_type=get_three_state_flag(), help='Specifies whether to use a vanity url with the Live Event. This value is specified at creation time and cannot be updated.')
-        c.argument('client_access_policy', arg_group='Cross Site Access Policies', help='The local full path to the clientaccesspolicy.xml used by Silverlight.')
-        c.argument('cross_domain_policy', arg_group='Cross Site Access Policies', help='The local full path to the crossdomain.xml used by Silverlight.')
+        c.argument('client_access_policy', arg_group='Cross Site Access Policies', help='Filepath to the clientaccesspolicy.xml used by Silverlight. Use @{file} to load from a file.')
+        c.argument('cross_domain_policy', arg_group='Cross Site Access Policies', help='Filepath to the crossdomain.xml used by Silverlight. Use @{file} to load from a file.')
         c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The options to use for the LiveEvent. This value is specified at creation time and cannot be updated.')
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
 
