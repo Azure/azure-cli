@@ -161,7 +161,7 @@ def list_keyvault(client, resource_group_name=None):
 def _get_current_user_object_id(graph_client):
     from msrestazure.azure_exceptions import CloudError
     try:
-        current_user = graph_client.objects.get_current_user()
+        current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
     except CloudError:

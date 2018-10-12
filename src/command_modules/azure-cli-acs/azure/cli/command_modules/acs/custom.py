@@ -1165,9 +1165,9 @@ def create_application(client, display_name, homepage, identifier_uris,
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                   display_name=display_name,
+                                                   identifier_uris=identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
@@ -1230,7 +1230,7 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     else:
         app_id = identifier
 
-    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None):

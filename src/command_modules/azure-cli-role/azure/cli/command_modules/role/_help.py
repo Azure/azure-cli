@@ -167,6 +167,14 @@ helps['ad app owner list'] = """
     type: command
     short-summary: List application owners.
 """
+helps['ad app owner add'] = """
+    type: command
+    short-summary: add an application owner.
+"""
+helps['ad app owner remove'] = """
+    type: command
+    short-summary: remove an application owner.
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
@@ -299,6 +307,22 @@ helps['ad group member'] = """
 helps['ad group member check'] = """
     type: command
     short-summary: Check if a member is in a group.
+"""
+helps['ad group owner'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group owners.
+"""
+helps['ad group owner list'] = """
+    type: command
+    short-summary: List group owners.
+"""
+helps['ad group owner add'] = """
+    type: command
+    short-summary: add a group owner.
+"""
+helps['ad group owner remove'] = """
+    type: command
+    short-summary: remove a group owner.
 """
 helps['ad sp'] = """
     type: group
