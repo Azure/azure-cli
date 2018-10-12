@@ -54,8 +54,10 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         self._activated = False
 
     def process_request(self, request):  # pylint: disable=no-self-use
+        import re
         try:
-            if request.path.endsWith('/listKeys'):
+            pattern = r"/providers/Microsoft\.Storage/storageAccounts/[^/]+/listKeys$"
+            if re.search(pattern, request.path, re.I):
                 self._activated = True
         except AttributeError:
             pass

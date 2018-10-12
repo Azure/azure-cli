@@ -630,7 +630,7 @@ class AppServiceCors(ScenarioTest):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'function': self.create_random_name(prefix='slot-traffic-web', length=24),
-            'storage': 'funccorsstor123'
+            'storage': 'funccorsstor124'
         })
         self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
         self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
