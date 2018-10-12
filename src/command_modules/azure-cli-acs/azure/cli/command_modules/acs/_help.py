@@ -138,6 +138,10 @@ helps['aks browse'] = """
         - name: --listen-port
           short-summary: The listening port for the dashboard.
           long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
+        - name: --enable-cloud-console-aks-browse
+          type: bool
+          short-summary: Enable browsing when run in the cloud console.
+          long-summary: When run in the Azure cloud console, open a tunnel that allows the users web browser access to the dashboard. Default: enabled.
 """
 
 helps['aks create'] = """
