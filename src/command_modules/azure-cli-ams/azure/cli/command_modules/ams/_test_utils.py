@@ -7,5 +7,5 @@ import os
 
 
 def _get_test_data_file(filename):
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        'tests', 'latest', 'data', filename)
+    root_dir = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+    return os.path.join(root_dir, 'tests', 'latest', 'data', filename)
