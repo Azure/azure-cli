@@ -8,6 +8,7 @@ from contextlib import contextmanager
 
 from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor
 
+
 def create_random_name(prefix='clitest', length=24):
     return create_random_name_base(prefix=prefix, length=length)
 
@@ -62,7 +63,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         except AttributeError:
             pass
         return request
-    
+
     def process_response(self, response):
         import json
         try:
