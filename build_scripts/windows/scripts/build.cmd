@@ -3,7 +3,7 @@ SetLocal EnableDelayedExpansion
 echo build a msi installer using local cli sources and python executables. You need to have curl.exe, unzip.exe and msbuild.exe available under PATH
 echo.
 
-set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;"
+set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin"
 
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/3.6.5/python-3.6.5-embed-win32.zip"
 set GET_PIP_DOWNLOAD_URL="https://bootstrap.pypa.io/get-pip.py"
@@ -196,7 +196,7 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
 if %errorlevel% neq 0 goto ERROR
 
 echo Building MSI...
-"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe" /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+MSBuild.exe /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 
 start %OUTPUT_DIR%
 

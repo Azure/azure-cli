@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.1.5
++++++
+* `policy definition create`: Fixed the incorrect parameter definition example.
+* `policy definition create`: Replaced the the use of `-n` alias with full `--name` parameter in the example.
+
 2.1.4
 +++++
 * `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.

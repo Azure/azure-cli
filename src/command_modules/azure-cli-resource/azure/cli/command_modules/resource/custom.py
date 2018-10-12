@@ -351,17 +351,21 @@ def _get_auth_provider_latest_api_version(cli_ctx):
 
 def _update_provider(cli_ctx, namespace, registering, wait):
     import time
+    target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
     if registering:
-        rcf.providers.register(namespace)
+        r = rcf.providers.register(namespace)
     else:
-        rcf.providers.unregister(namespace)
+        r = rcf.providers.unregister(namespace)
+
+    if r.registration_state == target_state:
+        return
 
     if wait:
         while True:
             time.sleep(10)
             rp_info = rcf.providers.get(namespace)
-            if rp_info.registration_state == ('Registered' if registering else 'Unregistered'):
+            if rp_info.registration_state == target_state:
                 break
     else:
         action = 'Registering' if registering else 'Unregistering'

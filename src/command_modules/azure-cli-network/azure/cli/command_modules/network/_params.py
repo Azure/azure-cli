@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit)
+    validate_er_peer_circuit, validate_ag_address_pools)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -603,10 +603,16 @@ def load_arguments(self, _):
 
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
-            c.extra('load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space-separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
-            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
             c.argument('application_security_groups', min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
+
+        with self.argument_context('network nic {}'.format(item), arg_group='Load Balancer') as c:
+            c.extra('load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
+            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space-separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddressPools'))
+            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
+
+        with self.argument_context('network nic {}'.format(item), arg_group='Application Gateway') as c:
+            c.argument('app_gateway_backend_address_pools', options_list='--app-gateway-address-pools', nargs='+', help='Space-separated list of names or IDs of application gateway backend address pools to associate with the NIC. If names are used, --gateway-name must be specified.', validator=validate_ag_address_pools, completer=get_ag_subresource_completion_list('backendAddressPools'))
+            c.extra('application_gateway_name', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), help='The name of the application gateway to use when adding address pools by name (ignored when IDs are specified).')
 
     with self.argument_context('network nic ip-config') as c:
         c.argument('network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))

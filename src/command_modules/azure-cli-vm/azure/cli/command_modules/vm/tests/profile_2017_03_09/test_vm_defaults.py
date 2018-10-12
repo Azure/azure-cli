@@ -323,6 +323,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.storage_sku = 'Premium_LRS'
         ns.os_caching, ns.data_caching = None, None
         ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk, ns.data_disk_sizes_gb = None, None, None, None, False, None
+        ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 
         self.assertEqual(ns.os_type, 'someOS')

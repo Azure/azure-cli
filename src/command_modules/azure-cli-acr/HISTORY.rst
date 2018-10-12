@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.1.7
++++++
+* Fix an ACR Build encoding issue in Python2.
+* Upgrade pinned dependency azure-storage-blob from 1.1.0 to 1.3.1
+
 2.1.6
 +++++
 * Support similar table format as helm client.

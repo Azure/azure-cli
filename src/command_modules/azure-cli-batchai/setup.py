@@ -13,7 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -33,7 +33,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-storage==2.0.0rc4',
     'azure-mgmt-batchai==2.0.0',
-    'azure-storage-blob==1.1.0',
+    'azure-storage-blob==1.3.1',
     'azure-cli-core',
     'mock>=2.0.0',
     'sshtunnel'

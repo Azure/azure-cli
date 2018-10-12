@@ -141,16 +141,14 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
     from knack.util import CLIError
-    resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
-                           "service bus namespace and rule. "
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource_uri)['resource_group']
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.storage_account = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                                 resource_group=namespace.resource_group_name,
                                                 namespace='microsoft.Storage',
@@ -158,17 +156,36 @@ def validate_diagnostic_settings(cmd, namespace):
                                                 name=namespace.storage_account)
 
     if namespace.workspace and not is_valid_resource_id(namespace.workspace):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                           resource_group=namespace.resource_group_name,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces',
                                           name=namespace.workspace)
 
-    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub:
+    if namespace.event_hub and is_valid_resource_id(namespace.event_hub):
+        namespace.event_hub = parse_resource_id(namespace.event_hub)['name']
+
+    if namespace.event_hub_rule:
+        if not is_valid_resource_id(namespace.event_hub_rule):
+            if not namespace.event_hub:
+                raise CLIError('usage error: --event-hub-rule ID | --event-hub-rule NAME --event-hub NAME')
+            # use value from --event-hub if the rule is a name
+            namespace.event_hub_rule = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.EventHub',
+                type='namespaces',
+                name=namespace.event_hub,
+                child_type_1='AuthorizationRules',
+                child_name_1=namespace.event_hub_rule)
+        elif not namespace.event_hub:
+            # extract the event hub name from `--event-hub-rule` if provided as an ID
+            namespace.event_hub = parse_resource_id(namespace.event_hub_rule)['name']
+
+    if not any([namespace.storage_account, namespace.workspace, namespace.event_hub]):
         raise CLIError(
-            'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
+            'usage error - expected one or more:  --storage-account NAME_OR_ID | --workspace NAME_OR_ID '
+            '| --event-hub NAME_OR_ID | --event-hub-rule ID')
 
     try:
         del namespace.resource_group_name

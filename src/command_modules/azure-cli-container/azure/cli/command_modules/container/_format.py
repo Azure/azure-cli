@@ -51,7 +51,10 @@ def _format_ip_address(container_group):
 
 
 def _format_status(container_group):
-    return container_group['instanceView']['state'] or container_group['provisioningState']
+    if container_group['instanceView'] and container_group['instanceView']['state']:
+        return container_group['instanceView']['state']
+
+    return container_group['provisioningState']
 
 
 def _format_network(container_group):
