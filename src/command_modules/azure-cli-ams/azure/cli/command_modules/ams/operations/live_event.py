@@ -76,10 +76,10 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
     policies = CrossSiteAccessPolicies()
 
     if client_access_policy:
-        policies.client_access_policy = read_xml_policy(client_access_policy)
+        policies.client_access_policy = client_access_policy
 
     if cross_domain_policy:
-        policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+        policies.cross_domain_policy = cross_domain_policy
 
     return policies
 
@@ -162,17 +162,12 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
         if not client_access_policy:
             instance.cross_site_access_policies.client_access_policy = None
         else:
-            instance.cross_site_access_policies.client_access_policy = read_xml_policy(client_access_policy)
+            instance.cross_site_access_policies.client_access_policy = client_access_policy
 
     if cross_domain_policy is not None:
         if not cross_domain_policy:
             instance.cross_site_access_policies.cross_domain_policy = None
         else:
-            instance.cross_site_access_policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+            instance.cross_site_access_policies.cross_domain_policy = cross_domain_policy
 
     return instance
-
-
-def read_xml_policy(xml_policy_path):
-    with open(xml_policy_path) as file:
-        return file.read()

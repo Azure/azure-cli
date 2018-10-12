@@ -123,13 +123,13 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
         if not client_access_policy:
             instance.cross_site_access_policies.client_access_policy = None
         else:
-            instance.cross_site_access_policies.client_access_policy = read_xml_policy(client_access_policy)
+            instance.cross_site_access_policies.client_access_policy = client_access_policy
 
     if cross_domain_policy is not None:
         if not cross_domain_policy:
             instance.cross_site_access_policies.cross_domain_policy = None
         else:
-            instance.cross_site_access_policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+            instance.cross_site_access_policies.cross_domain_policy = cross_domain_policy
 
     if max_cache_age is not None:
         instance.max_cache_age = max_cache_age
@@ -164,17 +164,12 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
     policies = CrossSiteAccessPolicies()
 
     if client_access_policy:
-        policies.client_access_policy = read_xml_policy(client_access_policy)
+        policies.client_access_policy = client_access_policy
 
     if cross_domain_policy:
-        policies.cross_domain_policy = read_xml_policy(cross_domain_policy)
+        policies.cross_domain_policy = cross_domain_policy
 
     return policies
-
-
-def read_xml_policy(xml_policy_path):
-    with open(xml_policy_path, 'r') as file:
-        return file.read()
 
 
 def start(cmd, client, resource_group_name, account_name, streaming_endpoint_name,

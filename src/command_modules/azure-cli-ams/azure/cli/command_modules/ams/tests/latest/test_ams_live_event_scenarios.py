@@ -29,8 +29,8 @@ class AmsLiveEventTests(ScenarioTest):
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
-            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
@@ -319,8 +319,8 @@ class AmsLiveEventTests(ScenarioTest):
             'tags': 'key=value',
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
 
         live_event_updated = self.cmd('az ams live-event update -a {amsname} -n {liveEventName} -g {rg} --ips 1.2.3.4 5.6.7.8 9.10.11.12 --preview-ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --tags {tags}', checks=[
@@ -352,8 +352,8 @@ class AmsLiveEventTests(ScenarioTest):
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
             'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
-            'clientAccessPolicy': _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
+            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
