@@ -120,6 +120,7 @@ class AzCliCommand(CLICommand):
 
     def _resolve_default_value_from_cfg_file(self, arg, overrides):
         from azure.cli.core._config import DEFAULTS_SECTION
+        from azure.cli.core.commands.validators import DefaultStr
 
         if not hasattr(arg.type, 'required_tooling'):
             required = arg.type.settings.get('required', False)
@@ -130,11 +131,10 @@ class AzCliCommand(CLICommand):
             # same blunt mechanism like we handled id-parts, for create command, no name default
             if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
                 return
-            setattr(arg.type, 'configured_default_applied', True)
             config_value = self.cli_ctx.config.get(DEFAULTS_SECTION, def_config, None)
             if config_value:
                 logger.info("Configured default '%s' for arg %s", config_value, arg.name)
-                overrides.settings['default'] = config_value
+                overrides.settings['default'] = DefaultStr(config_value)
                 overrides.settings['required'] = False
 
     def load_arguments(self):
@@ -295,6 +295,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 expanded_arg.cmd = cmd
 
             self.cli_ctx.data['command'] = expanded_arg.command
+
+            if hasattr(expanded_arg, '_subscription'):
+                self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
 
             self._validation(expanded_arg)
 

@@ -25,7 +25,7 @@ class HelpTest(unittest.TestCase):
         logging.shutdown()
 
     def test_help_loads(self):
-        from azure.cli.core.commands.arm import add_id_parameters
+        from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
         import knack.events as events
 
         cli = DummyCli()
@@ -44,7 +44,8 @@ class HelpTest(unittest.TestCase):
                 cmd_tbl[cmd].loader.load_arguments(cmd)
             except KeyError:
                 pass
-        cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
+        cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_global_subscription_argument)
+        cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_ids_argument)
         cli.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, command_table=cmd_tbl)
         cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         _store_parsers(cli.invocation.parser, parser_dict)
