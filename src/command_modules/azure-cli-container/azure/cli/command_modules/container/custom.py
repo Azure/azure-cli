@@ -269,6 +269,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         parsed_vnet_id = parse_resource_id(vnet)
         vnet_name = parsed_vnet_id['resource_name']
         resource_group_name = parsed_vnet_id['resource_group']
+        ncf.virtual_networks.get(resource_group_name, vnet_name)
 
     default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
 
