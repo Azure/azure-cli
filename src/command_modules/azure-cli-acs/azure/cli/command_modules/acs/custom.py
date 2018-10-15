@@ -43,6 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    ApplicationUpdateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
@@ -62,8 +63,8 @@ from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import OSType
 from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProviders
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterServiceAADIdentityProvider
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProvider
+from azure.mgmt.containerservice.models import OpenShiftManagedClusterAADIdentityProvider
 from azure.mgmt.containerservice.models import OpenShiftManagedCluster
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterMasterPoolProfile
 from azure.mgmt.containerservice.models import OpenShiftContainerServiceVMSize
@@ -1195,6 +1196,37 @@ def create_application(client, display_name, homepage, identifier_uris,
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
 
+def update_application(client, object_id, display_name, homepage, identifier_uris,
+                       available_to_other_tenants=False, password=None, reply_urls=None,
+                       key_value=None, key_type=None, key_usage=None, start_date=None,
+                       end_date=None, required_resource_accesses=None):
+    from azure.graphrbac.models import GraphErrorException
+    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                         key_usage, start_date, end_date)
+
+    # app_create_param = ApplicationUpdateParameters(additional_properties=None,
+    #                                                available_to_other_tenants=available_to_other_tenants,
+    #                                                display_name=display_name,
+    #                                                identifier_uris=identifier_uris,
+    #                                                homepage=homepage,
+    #                                                reply_urls=reply_urls,
+    #                                                key_credentials=key_creds,
+    #                                                password_credentials=password_creds,
+    #                                                required_resource_access=required_resource_accesses)
+    try:
+        #return client.patch(app_id, app_create_param)
+        if key_creds:
+            client.update_key_credentials(object_id, key_creds)
+        if password_creds:    
+            client.update_password_credentials(object_id, password_creds)
+        return
+    except GraphErrorException as ex:
+        if 'insufficient privileges' in str(ex).lower():
+            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            raise CLIError("Directory permission is needed for the current user to register the application. "
+                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
+        raise
+
 
 def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
@@ -2093,10 +2125,10 @@ def _ensure_osa_aad(cli_ctx,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
-                    name=None):
+                    name=None, update=False):
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not aad_client_app_id:
-        if not aad_client_app_secret:
+        if not aad_client_app_secret and update:
             aad_client_app_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
         reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
 
@@ -2106,26 +2138,41 @@ def _ensure_osa_aad(cli_ctx,
         required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access], 
                                                          additional_properties=None, 
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
-        result = create_application(client=rbac_client.applications,
-                                    display_name=identifier,
-                                    identifier_uris=[reply_url],
-                                    reply_urls=[reply_url],
-                                    homepage=reply_url,
-                                    password=aad_client_app_secret,
-                                    required_resource_accesses=[required_osa_aad_access])
-        aad_client_app_id = result.app_id
-        logger.info('Created an AAD: %s', aad_client_app_id)
-
+        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')".format(reply_url)))
+        if update:
+            if list_aad_filtered:
+                update_application(client=rbac_client.applications,
+                                   object_id=list_aad_filtered[0].object_id,
+                                   display_name=identifier,
+                                   identifier_uris=[reply_url],
+                                   reply_urls=[reply_url],
+                                   homepage=reply_url,
+                                   password=aad_client_app_secret,
+                                   required_resource_accesses=[required_osa_aad_access])
+                aad_client_app_id = list_aad_filtered[0].app_id
+                logger.info('Updated AAD: %s', aad_client_app_id)
+            else:
+                result = create_application(client=rbac_client.applications,
+                                            display_name=identifier,
+                                            identifier_uris=[reply_url],
+                                            reply_urls=[reply_url],
+                                            homepage=reply_url,
+                                            password=aad_client_app_secret,
+                                            required_resource_accesses=[required_osa_aad_access])
+                aad_client_app_id = result.app_id
+                logger.info('Created an AAD: %s', aad_client_app_id)
+        else:
+            aad_client_app_id = list_aad_filtered[0].app_id
+            aad_client_app_secret = 'whatever'
     # Get the TenantID
     if aad_tenant_id is None:
         profile = Profile(cli_ctx=cli_ctx)
         _, _, aad_tenant_id = profile.get_login_credentials()
-
-    return OpenShiftManagedClusterServiceAADIdentityProvider(
-        client_id=aad_client_app_id,
-        secret=aad_client_app_secret,
-        tenant_id=aad_tenant_id,
-        kind='AADIdentityProvider')
+        return OpenShiftManagedClusterAADIdentityProvider(
+            client_id=aad_client_app_id,
+            secret=aad_client_app_secret,
+            tenant_id=aad_tenant_id,
+            kind='AADIdentityProvider')
 
 
 def _ensure_service_principal(cli_ctx,
@@ -2282,7 +2329,7 @@ def _validate_aci_location(norm_location):
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
                      location=None,
                      node_vm_size="Standard_D4s_v3",
-                     node_count=3,
+                     compute_count=3,
                      fqdn='',
                      aad_client_app_id=None,
                      aad_client_app_secret=None,
@@ -2296,11 +2343,10 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
         location = rg_location
-
     agent_pool_profiles = []
     agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='compute',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(node_count),
+        count=int(compute_count),
         vm_size=node_vm_size,
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.compute,
@@ -2328,13 +2374,20 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     )
     identity_providers = []
 
+    # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
+    update_aad_secret = False
+    try:
+        mc = client.get(resource_group_name, name)
+    except CloudError as ex:
+        if 'InvalidResourceType' in ex.error.error:
+            update_aad_secret = True
+            
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
-                                       aad_client_app_id=aad_client_app_id,
-                                       aad_client_app_secret=aad_client_app_secret,
-                                       identifier=fqdn, name=name)
-
+                                    aad_client_app_id=aad_client_app_id,
+                                    aad_client_app_secret=aad_client_app_secret,
+                                    identifier=fqdn, name=name, update=update_aad_secret)
     identity_providers.append(
-        OpenShiftManagedClusterIdentityProviders(
+        OpenShiftManagedClusterIdentityProvider(
             name='Azure AD',
             provider=osa_aad_identity
         )
@@ -2358,7 +2411,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     try:
         # long_running_operation_timeout=300
         return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+                        resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
     except CloudError as ex:
         raise ex
 
@@ -2368,10 +2421,10 @@ def openshift_show(cmd, client, resource_group_name, name):
     return _remove_osa_nulls([mc])
 
 
-def openshift_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
+def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    instance.agent_pool_profiles[0].count = int(compute_count)  # pylint: disable=no-member
 
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"

@@ -36,7 +36,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--fqdn={fqdn} --node-count=1 ' \
+                     '--fqdn={fqdn} --compute-count=1 ' \
                      '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
@@ -56,7 +56,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         ])
 
         # scale up
-        self.cmd('openshift scale -g {resource_group} -n {name} --node-count 3', checks=[
+        self.cmd('openshift scale -g {resource_group} -n {name} --compute-count 3', checks=[
             self.check('agentPoolProfiles[0].count', 3)
         ])
 
@@ -123,7 +123,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--fqdn={fqdn} --node-count=1 '
+                     '--fqdn={fqdn} --compute-count=1 '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.check('provisioningState', 'Succeeded')
@@ -142,7 +142,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         ])
 
         # scale up
-        self.cmd('openshift scale -g {resource_group} -n {name} --node-count 3', checks=[
+        self.cmd('openshift scale -g {resource_group} -n {name} --compute-count 3', checks=[
             self.check('agentPoolProfiles[0].count', 3)
         ])
 

@@ -242,13 +242,13 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
         c.argument('name', name_type, help='Name of the managed OpenShift cluster.',
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
-        c.argument('node_count', options_list=['--node-count', '-c'], type=int, default=4)
+        c.argument('compute_count', options_list=['--compute-count', '-c'], type=int, default=4)
         c.argument('tags', tags_type)
 
     with self.argument_context('openshift create') as c:
         c.argument('name', validator=validate_linux_host_name)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
-        c.argument('fqdn')
+        c.argument('fqdn', required=True)
         c.argument('aad_client_app_id')
         c.argument('aad_client_app_secret')
         c.argument('aad_tenant_id')
