@@ -565,7 +565,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Delete Namespace - secondary
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary}')
 
-    # Test playback fails and the live-only flag will be removed once it is addressed
+        # Test playback fails and the live-only flag will be removed once it is addressed
+
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_migration')
     def test_sb_migration(self, resource_group):
@@ -669,7 +670,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
         # check for the migration PendingReplicationOperationsCount is 0 or null
-        while getmigration['pendingReplicationOperationsCount'] != 0 and getmigration['pendingReplicationOperationsCount'] is not None:
+        while getmigration['migrationState'] != 'Active':
             time.sleep(30)
             getmigration = self.cmd(
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()

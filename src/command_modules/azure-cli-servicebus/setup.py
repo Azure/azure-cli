@@ -13,7 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 
 # The full list of classifiers is available at
@@ -35,7 +35,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'six',
-    'azure-mgmt-servicebus==0.5.1',
+    'azure-mgmt-servicebus==0.5.2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
