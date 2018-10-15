@@ -11,7 +11,6 @@ from knack.help import REQUIRED_TAG
 from knack.help_files import helps
 from knack.log import get_logger
 from azure.cli.core import MainCommandsLoader
-from azure.cli.core.commands.arm import add_id_parameters
 
 
 logger = get_logger(__name__)
@@ -76,6 +75,8 @@ class FreshTable(object):
 
     def dump_command_table(self, shell_ctx=None):
         """ dumps the command table """
+        from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
+        from knack import events
         import timeit
 
         start_time = timeit.default_timer()
@@ -84,7 +85,9 @@ class FreshTable(object):
 
         main_loader.load_command_table(None)
         main_loader.load_arguments(None)
-        add_id_parameters(None, commands_loader=main_loader)
+        register_global_subscription_argument(shell_ctx.cli_ctx)
+        register_ids_argument(shell_ctx.cli_ctx)
+        shell_ctx.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=main_loader)
         cmd_table = main_loader.command_table
 
         cmd_table_data = {}
