@@ -81,8 +81,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertIn(s2, share_list)
 
         # verify metadata can be set, queried, and cleared
-        self.storage_cmd('storage share metadata update --name {} --metadata a=b c=d', account_info,
-                         s1)
+        self.storage_cmd('storage share metadata update --name {} --metadata a=b c=d', account_info, s1)
         self.storage_cmd('storage share metadata show -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
         self.storage_cmd('storage share metadata update -n {}', account_info, s1)
@@ -92,6 +91,11 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage share update --name {} --quota 3', account_info, s1)
         self.storage_cmd('storage share show --name {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('properties.quota', 3))
+        self.storage_cmd('storage share url --name {}', account_info, s1) \
+            .assert_with_checks(StringContainCheck(s1), StringContainCheck('http'))
+        unc = self.storage_cmd('storage share url --name {} --unc', account_info, s1).output
+        self.assertTrue('http' not in unc and s1 in unc)
+
         sas = self.storage_cmd('storage share generate-sas -n {} --permissions r --expiry '
                                '2046-08-23T10:30Z', account_info, s1).output
         self.assertIn('sig=', sas)

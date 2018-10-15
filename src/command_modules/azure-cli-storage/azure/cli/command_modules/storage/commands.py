@@ -229,7 +229,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE)
 
     with self.command_group('storage share', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('acl', file_data_service_factory)) as g:
+                            custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
         from ._format import (transform_share_list, transform_boolean_for_table)
         g.storage_command('list', 'list_shares', transform=transform_storage_list_output,
                           table_transformer=transform_share_list)
@@ -243,15 +243,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('update', 'set_share_properties')
         g.storage_command('snapshot', 'snapshot_share', min_api='2017-04-17')
         g.storage_command('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command('url', 'create_share_url', transform=transform_url)
 
         g.storage_command('metadata show', 'get_share_metadata', exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_share_metadata')
 
-        g.storage_custom_command('policy create', 'create_acl_policy')
-        g.storage_custom_command('policy delete', 'delete_acl_policy')
-        g.storage_custom_command('policy show', 'get_acl_policy', exception_handler=show_exception_handler)
-        g.storage_custom_command('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
-        g.storage_custom_command('policy update', 'set_acl_policy')
+    with self.command_group('storage share policy', command_type=file_sdk,
+                            custom_command_type=get_custom_sdk('acl', file_data_service_factory)) as g:
+        g.storage_custom_command('create', 'create_acl_policy')
+        g.storage_custom_command('delete', 'delete_acl_policy')
+        g.storage_custom_command('show', 'get_acl_policy', exception_handler=show_exception_handler)
+        g.storage_custom_command('list', 'list_acl_policies', table_transformer=transform_acl_list_output)
+        g.storage_custom_command('update', 'set_acl_policy')
 
     with self.command_group('storage directory', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('directory', file_data_service_factory)) as g:
