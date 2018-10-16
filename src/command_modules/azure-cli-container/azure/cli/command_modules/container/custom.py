@@ -222,13 +222,14 @@ def create_container(cmd,
         return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
                            name, cgroup)
 
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, container_group_client.create_or_update,
-                                                  resource_group_name, name, cgroup))
+    lro = LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, container_group_client.create_or_update,
+                                                        resource_group_name, name, cgroup))
 
-    cg = container_group_client.get(resource_group_name, name)
     if assign_identity is not None and identity_scope:
+        cg = container_group_client.get(resource_group_name, name)
         _create_update_msi_role_assignment(cmd, resource_group_name, name, cg.identity.principal_id,
                                            identity_role_id, identity_scope)
+    return lro
 
 
 def _build_identities_info(identities):
