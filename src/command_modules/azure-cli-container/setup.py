@@ -31,7 +31,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-containerinstance==1.2.0',
+    'azure-mgmt-containerinstance==1.2.1',
     'azure-mgmt-loganalytics==0.2.0',
     'azure-mgmt-resource==2.0.0',
     'azure-mgmt-network==2.2.1',
