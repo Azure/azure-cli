@@ -5,7 +5,7 @@ Release History
 
 0.1.4
 +++++
-* Update ADLS version(0.0.34)
+* Update ADLS version(0.0.34). API version change to 2018-05-01
 
 0.1.3
 +++++
