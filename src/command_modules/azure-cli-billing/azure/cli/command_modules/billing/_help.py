@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -18,4 +19,9 @@ helps['billing invoice'] = """
 helps['billing period'] = """
     type: group
     short-summary: Get billing periods for a subscription.
+"""
+
+helps['billing enrollment-account'] = """
+    type: group
+    short-summary: Get enrollment accounts.
 """

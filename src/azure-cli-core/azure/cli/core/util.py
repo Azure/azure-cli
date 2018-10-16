@@ -8,10 +8,10 @@ import sys
 import json
 import base64
 import binascii
+import six
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-import six
 
 logger = get_logger(__name__)
 
@@ -22,10 +22,28 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
+    from msrest.exceptions import HttpOperationError
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
+        return 1
+    elif isinstance(ex, HttpOperationError):
+        try:
+            response_dict = json.loads(ex.response.text)
+            error = response_dict['error']
+
+            # ARM should use ODATA v4. So should try this first.
+            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+            if isinstance(error, dict):
+                code = "{} - ".format(error.get('code', 'Unknown Code'))
+                message = error.get('message', ex)
+                logger.error("%s%s", code, message)
+            else:
+                logger.error(error)
+
+        except (ValueError, KeyError):
+            logger.error(ex)
         return 1
 
     logger.exception(ex)
@@ -227,3 +245,90 @@ DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 def should_disable_connection_verify():
     import os
     return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
+
+
+def poller_classes():
+    from msrestazure.azure_operation import AzureOperationPoller
+    from msrest.polling.poller import LROPoller
+    return (AzureOperationPoller, LROPoller)
+
+
+def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
+    """ Populates handler_args with the appropriate args for no wait """
+    h_args = get_arg_list(handler)
+    if 'no_wait' in h_args:
+        handler_args['no_wait'] = no_wait_enabled
+    if 'raw' in h_args and no_wait_enabled:
+        # support autorest 2
+        handler_args['raw'] = True
+    if 'polling' in h_args and no_wait_enabled:
+        # support autorest 3
+        handler_args['polling'] = False
+
+
+def sdk_no_wait(no_wait, func, *args, **kwargs):
+    if no_wait:
+        kwargs.update({'raw': True, 'polling': False})
+    return func(*args, **kwargs)
+
+
+def open_page_in_browser(url):
+    import subprocess
+    import webbrowser
+    platform_name, release = _get_platform_info()
+
+    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
+        try:
+            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+        except FileNotFoundError:  # WSL might be too old
+            pass
+    elif platform_name == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        return subprocess.Popen(['open', url])
+    return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+
+
+def _get_platform_info():
+    import platform
+    uname = platform.uname()
+    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
+    platform_name = getattr(uname, 'system', None) or uname[0]
+    release = getattr(uname, 'release', None) or uname[2]
+    return platform_name.lower(), release.lower()
+
+
+def _is_wsl(platform_name, release):
+    platform_name, release = _get_platform_info()
+    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def can_launch_browser():
+    import os
+    import webbrowser
+    platform_name, release = _get_platform_info()
+    if _is_wsl(platform_name, release) or platform_name != 'linux':
+        return True
+    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
+    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
+    # we can check a few env vars
+    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
+    result = True
+    if platform_name == 'linux':
+        if any(os.getenv(v) for v in gui_env_vars):
+            try:
+                default_browser = webbrowser.get()
+                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
+                    result = False
+            except webbrowser.Error:
+                result = False
+        else:
+            result = False
+
+    return result
+
+
+def get_command_type_kwarg(custom_command=False):
+    return 'custom_command_type' if custom_command else 'command_type'

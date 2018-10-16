@@ -28,7 +28,7 @@ class OriginType(argparse._AppendAction):
             msg = '%s takes 1, 2 or 3 values, %d given'
             raise argparse.ArgumentError(self, msg % (option_string, len(values)))
 
-        deep_created_origin = DeepCreatedOrigin('origin', values[0], http_port=80, https_port=443)
+        deep_created_origin = DeepCreatedOrigin(name='origin', host_name=values[0], http_port=80, https_port=443)
         if len(values) > 1:
             deep_created_origin.http_port = int(values[1])
         if len(values) > 2:
@@ -79,6 +79,7 @@ def load_arguments(self, _):
         c.argument('query_string_caching_behavior', options_list='--query-string-caching',
                    arg_type=get_enum_type(caching_behavior))
         c.argument('content_types_to_compress', nargs='+')
+        c.argument('profile_name', help=profile_name_help)
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')

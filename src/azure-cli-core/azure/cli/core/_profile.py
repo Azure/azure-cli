@@ -8,16 +8,18 @@ from __future__ import print_function
 import collections
 import errno
 import json
+import os
 import os.path
 from copy import deepcopy
 from enum import Enum
+from six.moves import BaseHTTPServer
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -32,6 +34,7 @@ _SUBSCRIPTION_NAME = 'name'
 _TENANT_ID = 'tenantId'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
+_CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
 _ENVIRONMENT_NAME = 'environmentName'
@@ -60,14 +63,32 @@ _COMMON_TENANT = 'common'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
+_SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
+_USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 
-def _authentication_context_factory(cli_ctx, tenant, cache):
+
+def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
+    profile = Profile(cli_ctx=cli_ctx)
+    if refresh:
+        profile.refresh_accounts()
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
+    return subscriptions
+
+
+def _get_authority_url(cli_ctx, tenant):
     import re
-    import adal
     authority_url = cli_ctx.cloud.endpoints.active_directory
     is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
-    if not is_adfs:
-        authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
+    if is_adfs:
+        authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
+    else:
+        authority_url = authority_url.rstrip('/') + '/' + (tenant or _COMMON_TENANT)
+    return authority_url, is_adfs
+
+
+def _authentication_context_factory(cli_ctx, tenant, cache):
+    import adal
+    authority_url, is_adfs = _get_authority_url(cli_ctx, tenant)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
 
@@ -103,17 +124,35 @@ def get_credential_types(cli_ctx):
     return CredentialType
 
 
+def _get_cloud_console_token_endpoint():
+    return os.environ.get('MSI_ENDPOINT')
+
+
+# pylint: disable=too-many-lines,too-many-instance-attributes
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, async_persist=True, cli_ctx=None):
+    _global_creds_cache = None
+
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
+        if use_global_creds_cache:
+            # for perf, use global cache
+            if not Profile._global_creds_cache:
+                Profile._global_creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory,
+                                                         async_persist=async_persist)
+            self._creds_cache = Profile._global_creds_cache
+        else:
+            self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._msi_creds = None
 
     def find_subscriptions_on_login(self,
@@ -122,6 +161,7 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant,
+                                    use_device_code=False,
                                     allow_no_subscriptions=False,
                                     subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
@@ -133,8 +173,22 @@ class Profile(object):
                                                      self.auth_ctx_factory,
                                                      self._creds_cache.adal_token_cache)
         if interactive:
-            subscriptions = subscription_finder.find_through_interactive_flow(
-                tenant, self._ad_resource_uri)
+            if not use_device_code and (in_cloud_console() or not can_launch_browser()):
+                logger.info('Detect no GUI is available, so fall back to device code')
+                use_device_code = True
+
+            if not use_device_code:
+                try:
+                    authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
+                    subscriptions = subscription_finder.find_through_authorization_code_flow(
+                        tenant, self._ad_resource_uri, authority_url)
+                except RuntimeError:
+                    use_device_code = True
+                    logger.warning('Not able to launch a browser to log you in, falling back to device code...')
+
+            if use_device_code:
+                subscriptions = subscription_finder.find_through_interactive_flow(
+                    tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
@@ -169,52 +223,6 @@ class Profile(object):
 
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
-        return deepcopy(consolidated)
-
-    def find_subscriptions_in_cloud_console(self, tokens):
-        from datetime import datetime, timedelta
-        import jwt
-        arm_token = tokens[0]  # cloud shell gurantees that the 1st is for ARM
-        arm_token_decoded = jwt.decode(arm_token, verify=False, algorithms=['RS256'])
-        tenant = arm_token_decoded['tid']
-        user_id = arm_token_decoded['unique_name'].split('#')[-1]
-        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
-        subscriptions = subscription_finder.find_from_raw_token(tenant, arm_token)
-        consolidated = self._normalize_properties(user_id, subscriptions, is_service_principal=False)
-        self._set_subscriptions(consolidated)
-
-        # construct token entries to cache
-        decoded_tokens = [arm_token_decoded]
-        for t in tokens[1:]:
-            decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
-        final_tokens = []
-        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
-        # as shell should update us with new ones every 10~15 minutes
-        for t in decoded_tokens:
-            final_tokens.append({
-                '_clientId': _CLIENT_ID,
-                'expiresIn': '2700',
-                'expiresOn': str(datetime.now() + timedelta(seconds=2700)),
-                'userId': t['unique_name'].split('#')[-1],
-                '_authority': self.cli_ctx.cloud.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
-                'resource': t['aud'],
-                'isMRRT': True,
-                'accessToken': tokens[decoded_tokens.index(t)],
-                'tokenType': 'Bearer',
-            })
-
-        # merging with existing cached ones
-        for t in final_tokens:
-            cached_tokens = [entry for _, entry in self._creds_cache.adal_token_cache.read_items()]
-            to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
-                                                      c['resource'].lower() == t['resource'].lower() and
-                                                      c['_authority'].lower() == t['_authority'].lower() and
-                                                      c['userId'].lower() == t['userId'].lower())]
-            if to_delete:
-                self._creds_cache.adal_token_cache.remove(to_delete)
-        self._creds_cache.adal_token_cache.add(final_tokens)
-        self._creds_cache.persist_cached_creds()
-
         return deepcopy(consolidated)
 
     def _normalize_properties(self, user, subscriptions, is_service_principal):
@@ -253,10 +261,33 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def find_subscriptions_in_vm_with_msi(self, msi_port, identity_id=None):
+    def find_subscriptions_in_vm_with_msi(self, identity_id=None):
         import jwt
-        token, identity_id_type = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
-                                                        msi_port, identity_id, for_login=True)
+        from requests import HTTPError
+        from msrestazure.azure_active_directory import MSIAuthentication
+        from msrestazure.tools import is_valid_resource_id
+        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+
+        if identity_id:
+            if is_valid_resource_id(identity_id):
+                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
+                identity_type = MsiAccountTypes.user_assigned_resource_id
+            else:
+                try:
+                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
+                    identity_type = MsiAccountTypes.user_assigned_client_id
+                except HTTPError as ex:
+                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                    else:
+                        raise
+        else:
+            identity_type = MsiAccountTypes.system_assigned
+            msi_creds = MSIAuthentication(resource=resource)
+
+        token_entry = msi_creds.token
+        token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -265,15 +296,42 @@ class Profile(object):
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
-        base_name = '{}-{}'.format(identity_id_type, identity_id) if identity_id else identity_id_type
-        user = 'userAssignedIdentity' if identity_id else 'systemAssignedIdentity'
+        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
+        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
+            s[_SUBSCRIPTION_NAME] = base_name
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
+
+    def find_subscriptions_in_cloud_console(self):
+        import jwt
+
+        _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        tenant = decode['tid']
+
+        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        if not subscriptions:
+            raise CLIError('No subscriptions were found in the cloud shell')
+        user = decode.get('unique_name', 'N/A')
+
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
+        for s in consolidated:
+            s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
+        self._set_subscriptions(consolidated)
+        return deepcopy(consolidated)
+
+    def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
+        from msrestazure.azure_active_directory import MSIAuthentication
+        auth = MSIAuthentication(resource=resource)
+        auth.set_token()
+        token_entry = auth.token
+        return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
@@ -323,7 +381,7 @@ class Profile(object):
     @staticmethod
     def _pick_working_subscription(subscriptions):
         from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
@@ -384,12 +442,18 @@ class Profile(object):
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
             subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
                 _SUBSCRIPTION_NAME].lower()])]
-        if len(result) != 1:
-            raise CLIError("Please run 'az account set' to select active account.")
+        if not result and subscription:
+            raise CLIError("Subscription '{}' not found. "
+                           "Check the spelling and casing and try again.".format(subscription))
+        elif not result and not subscription:
+            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+        elif len(result) > 1:
+            raise CLIError("Multiple subscriptions with the name '{}' found. "
+                           "Specify the subscription ID.".format(subscription))
         return result[0]
 
-    def get_subscription_id(self):
-        return self.get_subscription()[_SUBSCRIPTION_ID]
+    def get_subscription_id(self, subscription=None):  # take id or name
+        return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     def get_access_token_for_resource(self, username, tenant, resource):
         tenant = tenant or 'common'
@@ -398,33 +462,51 @@ class Profile(object):
         return access_token
 
     @staticmethod
-    def _try_parse_for_msi_port(subscription_name):
-        if '@' in subscription_name:
-            try:
-                parts = subscription_name.split('@', 1)
-                return parts[0], int(parts[1])
-            except ValueError:
-                pass
+    def _try_parse_msi_account_name(account):
+        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            parts = subscription_name.split('-', 1)
+            if parts[0] in MsiAccountTypes.valid_msi_account_types():
+                return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None,
-                              subscription_id=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        def _retrieve_token():
-            identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
-            if msi_port is not None:
-                return Profile.get_msi_token(resource, msi_port, identity_id)
-            elif user_type == _USER:
-                return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                 account[_TENANT_ID], resource)
-            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
-        from azure.cli.core.adal_authentication import AdalAuthentication
-        auth_object = AdalAuthentication(_retrieve_token)
+        external_tenants_info = []
+        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
+        for ext_sub in ext_subs:
+            sub = self.get_subscription(ext_sub)
+            if sub[_TENANT_ID] != account[_TENANT_ID]:
+                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+
+        if identity_type is None:
+            def _retrieve_token():
+                if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+                    return self._get_token_from_cloud_shell(resource)
+                if user_type == _USER:
+                    return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                     account[_TENANT_ID], resource)
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+
+            def _retrieve_tokens_from_external_tenants():
+                external_tokens = []
+                for u, t in external_tenants_info:
+                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
+                return external_tokens
+
+            from azure.cli.core.adal_authentication import AdalAuthentication
+            auth_object = AdalAuthentication(_retrieve_token,
+                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
+        else:
+            if self._msi_creds is None:
+                self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
+            auth_object = self._msi_creds
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
@@ -451,9 +533,15 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
-        if msi_port is not None:
-            creds = Profile.get_msi_token(resource, msi_port, identity_id)
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
+        if identity_type:
+            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
+            msi_creds.set_token()
+            token_entry = msi_creds.token
+            creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
+        elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            creds = self._get_token_from_cloud_shell(resource)
+
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
@@ -465,11 +553,8 @@ class Profile(object):
                 str(account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
-        import re
         subscriptions = self.load_cached_subscriptions()
-        # filter away MSI related ones whose name always end with '@<port-number>'
-        to_refresh = [s for s in subscriptions if not re.match('@[0-9]+$', s[_SUBSCRIPTION_NAME])]
-        not_to_refresh = [s for s in subscriptions if s not in to_refresh]
+        to_refresh = subscriptions
 
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
@@ -515,7 +600,6 @@ class Profile(object):
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
 
-        result = result + not_to_refresh
         self._set_subscriptions(result, merge=False)
 
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
@@ -568,71 +652,32 @@ class Profile(object):
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+
+class MsiAccountTypes(object):
+    # pylint: disable=no-method-argument,no-self-argument
+    system_assigned = 'MSI'
+    user_assigned_client_id = 'MSIClient'
+    user_assigned_object_id = 'MSIObject'
+    user_assigned_resource_id = 'MSIResource'
+
     @staticmethod
-    def get_msi_token(resource, port, identity_id=None, for_login=False):
-        import requests
-        import time
-        from msrestazure.tools import is_valid_resource_id
-        _System_Assigned_Id_Type = 'MSI'
-        _User_Assigned_Client_Id_type = 'MSIClient'
-        _User_assigned_Object_Id_Type = 'MSIObject'
-        _User_assigned_Resource_Id_Type = 'MSIResource'
+    def valid_msi_account_types():
+        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
+                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
 
-        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
-        payload = {
-            'resource': resource
-        }
-        identity_id_type = None
-        if for_login:  # we will figure out the right type of id here
-            if not identity_id:
-                identity_id_type = _System_Assigned_Id_Type
-            elif is_valid_resource_id(identity_id):
-                payload['msi_res_id'] = identity_id
-                identity_id_type = _User_assigned_Resource_Id_Type
-            else:  # try to sniff it
-                payload['client_id'] = identity_id
-                identity_id_type = _User_Assigned_Client_Id_type
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
-                if result.status_code != 200:
-                    payload.pop('client_id')
-                    payload['object_id'] = identity_id
-                    identity_id_type = _User_assigned_Object_Id_Type
+    @staticmethod
+    def msi_auth_factory(cli_account_name, identity, resource):
+        from msrestazure.azure_active_directory import MSIAuthentication
+        if cli_account_name == MsiAccountTypes.system_assigned:
+            return MSIAuthentication(resource=resource)
+        elif cli_account_name == MsiAccountTypes.user_assigned_client_id:
+            return MSIAuthentication(resource=resource, client_id=identity)
+        elif cli_account_name == MsiAccountTypes.user_assigned_object_id:
+            return MSIAuthentication(resource=resource, object_id=identity)
+        elif cli_account_name == MsiAccountTypes.user_assigned_resource_id:
+            return MSIAuthentication(resource=resource, msi_res_id=identity)
         else:
-            parts = identity_id.split('-', 1)
-            identity_id_type = parts[0]
-            if parts[0] == _User_assigned_Resource_Id_Type:
-                payload['msi_res_id'] = parts[1]
-            elif parts[0] == _User_Assigned_Client_Id_type:
-                payload['client_id'] = parts[1]
-            elif parts[0] == _User_assigned_Object_Id_Type:
-                payload['object_id'] = parts[1]
-
-        # retry as the token endpoint might not be available yet, one example is you use CLI in a
-        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
-        while True:
-            err = None
-            try:
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
-                logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
-                if result.status_code != 200:
-                    err = result.text
-            except Exception as ex:  # pylint: disable=broad-except
-                err = str(ex)
-
-            if err:
-                # we might need some error code checking to avoid silly waiting. The bottom line is users can
-                # always press ctrl+c to stop it
-                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
-                               "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
-                               request_uri, err)
-                time.sleep(60)
-            else:
-                logger.debug('MSI: token retrieved')
-                break
-        token_entry = json.loads(result.content.decode())
-        if for_login:
-            return token_entry['access_token'], identity_id_type
-        return token_entry['token_type'], token_entry['access_token'], token_entry
+            raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
 class SubscriptionFinder(object):
@@ -666,8 +711,30 @@ class SubscriptionFinder(object):
         else:  # when refresh account, we will leverage local cached tokens
             token_entry = context.acquire_token(resource, username, _CLIENT_ID)
 
+        if not token_entry:
+            return []
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
+        if tenant is None:
+            result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+        else:
+            result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+        return result
+
+    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+
+        # launch browser and get the code
+        results = _get_authorization_code(resource, authority_url)
+
+        if not results.get('code'):
+            raise CLIError('Login failed')  # error detail is already displayed through previous steps
+
+        # exchange the code for the token
+        context = self._create_auth_context(tenant)
+        token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                    resource, _CLIENT_ID, None)
+        self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
+        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
@@ -814,7 +881,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("No matched service principal found")
         cred = matched[0]
-        return cred[_ACCESS_TOKEN]
+        return cred.get(_ACCESS_TOKEN, None)
 
     @property
     def adal_token_cache(self):
@@ -837,10 +904,10 @@ class CredsCache(object):
         state_changed = False
         if matched:
             # pylint: disable=line-too-long
-            if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
+            if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
                 self._service_principal_creds.remove(matched[0])
-                self._service_principal_creds.append(matched[0])
+                self._service_principal_creds.append(sp_entry)
                 state_changed = True
         else:
             self._service_principal_creds.append(sp_entry)
@@ -914,3 +981,105 @@ class ServicePrincipalAuth(object):
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
         return entry
+
+
+class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
+    query_params = {}
+
+
+class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    # pylint: disable=line-too-long
+
+    def do_GET(self):
+        try:
+            from urllib.parse import parse_qs
+        except ImportError:
+            from urlparse import parse_qs  # pylint: disable=import-error
+
+        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+            self.send_response(204)
+            return
+
+        query = self.path.split('?', 1)[-1]
+        query = parse_qs(query, keep_blank_values=True)
+        self.server.query_params = query
+
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                    'ok.html' if 'code' in query else 'fail.html')
+        with open(landing_file, 'rb') as html_file:
+            self.wfile.write(html_file.read())
+
+    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+        return  # this prevent http server from dumping messages to stdout
+
+
+def _get_authorization_code_worker(authority_url, resource, results):
+    import socket
+    reply_url = None
+    for port in range(8400, 9000):
+        try:
+            web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
+            reply_url = "http://localhost:{}".format(port)
+            break
+        except socket.error as ex:
+            logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+
+    if reply_url is None:
+        logger.warning("Error: can't reserve a port for authentication reply url")
+        return
+
+    # launch browser:
+    url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
+           '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
+    url = url.format(authority_url, _CLIENT_ID, reply_url, 'code', resource)
+    logger.info('Open browser with url: %s', url)
+    succ = open_page_in_browser(url)
+    if succ is False:
+        web_server.server_close()
+        results['no_browser'] = True
+        return
+
+    # emit a warning for transitioning to the new experience
+    logger.warning('Note, we have launched a browser for you to login. For old experience'
+                   ' with device code, use "az login --use-device-code"')
+
+    # wait for callback from browser.
+    while True:
+        web_server.handle_request()
+        if 'error' in web_server.query_params or 'code' in web_server.query_params:
+            break
+
+    if 'error' in web_server.query_params:
+        logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
+                       web_server.query_params.get('error_description'))
+        return
+
+    if 'code' in web_server.query_params:
+        code = web_server.query_params['code']
+    else:
+        logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
+                       web_server.query_params)
+        return
+    results['code'] = code[0]
+    results['reply_url'] = reply_url
+
+
+def _get_authorization_code(resource, authority_url):
+    import threading
+    import time
+    results = {}
+    t = threading.Thread(target=_get_authorization_code_worker,
+                         args=(authority_url, resource, results))
+    t.daemon = True
+    t.start()
+    while True:
+        time.sleep(2)  # so that ctrl+c can stop the command
+        if not t.is_alive():
+            break  # done
+    if results.get('no_browser'):
+        raise RuntimeError()
+    return results

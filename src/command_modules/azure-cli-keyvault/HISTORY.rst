@@ -3,6 +3,63 @@
 Release History
 ===============
 
+2.2.4
++++++
+* Restrict keyvault storage commmands to the latest API profile
+
+2.2.3
++++++
+* Fixed Key Vault key import for RSA keys
+
+2.2.2
++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* support KV mgmt multi-api version
+* support KV data plane multi-api version
+
+2.2.1
++++++
+* Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
+
+2.2.0
++++++
+* REVERT: adding commands for managing storage accounts and sas-definitions
+* REVERT: adding commands for network-rules
+* REVERT: adding id parameter to secret, key, and certificate operations
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+
+2.0.24
+++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* Minor fixes
+
+2.0.23
+++++++
+* Minor fixes.
+
+2.0.22
+++++++
+* make keyvault commands work in cloud shell or vms with identity
+
+2.0.21
+++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.20
+++++++
+* Support Autorest 3.0 based SDKs
+
 2.0.19
 ++++++
 * Minor fixes.

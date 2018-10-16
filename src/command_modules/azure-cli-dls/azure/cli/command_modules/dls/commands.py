@@ -8,22 +8,31 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account,
     cf_dls_account_firewall,
+    cf_dls_account_virtual_network,
     cf_dls_account_trusted_provider)
 
 
+# pylint: disable=too-many-statements
 def load_command_table(self, _):
-
+    from ._validators import (
+        validate_subnet
+    )
     adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
 
     dls_account_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('account_operations', 'AccountOperations'),
+        operations_tmpl=adls_format_path.format('accounts_operations', 'AccountsOperations'),
         client_factory=cf_dls_account
     )
 
     dls_firewall_sdk = CliCommandType(
         operations_tmpl=adls_format_path.format('firewall_rules_operations', 'FirewallRulesOperations'),
+        client_factory=cf_dls_account
+    )
+
+    dls_virtual_network_sdk = CliCommandType(
+        operations_tmpl=adls_format_path.format('virtual_network_rules_operations', 'VirtualNetworkRulesOperations'),
         client_factory=cf_dls_account
     )
 
@@ -38,7 +47,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_adls_account')
         g.custom_command('list', 'list_adls_account')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('enable-key-vault', 'enable_key_vault')
 
     # account firewall operations
@@ -46,7 +55,17 @@ def load_command_table(self, _):
         g.custom_command('create', 'add_adls_firewall_rule')
         g.command('update', 'update')
         g.command('list', 'list_by_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+
+    # account virtual network rule operations
+    with self.command_group('dls account network-rule',
+                            dls_virtual_network_sdk,
+                            client_factory=cf_dls_account_virtual_network) as g:
+        g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
+        g.generic_update_command('update')
+        g.command('list', 'list_by_account')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account trusted id provider operations
@@ -54,12 +73,12 @@ def load_command_table(self, _):
         g.command('create', 'create_or_update')
         g.command('update', 'update')
         g.command('list', 'list_by_account')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # filesystem operations
     with self.command_group('dls fs', dls_custom) as g:
-        g.command('show', 'get_adls_item')
+        g.show_command('show', 'get_adls_item')
         g.command('list', 'list_adls_items')
         g.command('create', 'create_adls_item')
         g.command('append', 'append_adls_item')
@@ -78,7 +97,7 @@ def load_command_table(self, _):
     with self.command_group('dls fs access', dls_custom) as g:
         g.command('set-permission', 'set_adls_item_permissions')
         g.command('set-owner', 'set_adls_item_owner')
-        g.command('show', 'get_adls_item_acl')
+        g.show_command('show', 'get_adls_item_acl')
         g.command('set-entry', 'set_adls_item_acl_entry')
         g.command('set', 'set_adls_item_acl')
         g.command('remove-entry', 'remove_adls_item_acl_entry')

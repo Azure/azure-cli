@@ -24,7 +24,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          config_source_control,
                                                          show_webapp,
                                                          get_streaming_log,
-                                                         download_historical_logs)
+                                                         download_historical_logs,
+                                                         validate_container_app_create_options)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -36,23 +37,25 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
-        self.client._client = mock.MagicMock()
-        client_factory_mock.return_value = self.client
-        mock_response = mock.MagicMock()
-        mock_response.status_code = 200
-        self.client._client.send.return_value = mock_response
+        class MockClient:
+            def update_publishing_user(self, user):
+                # Don't do an actual call, just return the incoming user
+                return user
+
+        client_factory_mock.return_value = MockClient()
 
         # action
-        result = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
+        user = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
 
         # assert things get wired up with a result returned
-        self.assertIsNotNone(result)
+        assert user.publishing_user_name == 'admin'
+        assert user.publishing_password == 'verySecret1'
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_source_control_token(self, client_factory_mock):
         client_factory_mock.return_value = self.client
         self.client._client = mock.MagicMock()
-        sc = SourceControl('not-really-needed', source_control_name='GitHub', token='veryNiceToken')
+        sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
         self.client._client.send.return_value = FakedResponse(200)
         self.client._deserialize = mock.MagicMock()
         self.client._deserialize.return_value = sc
@@ -67,13 +70,13 @@ class TestWebappMocked(unittest.TestCase):
     def test_set_domain_name(self, client_factory_mock):
         client_factory_mock.return_value = self.client
         # set up the return value for getting a webapp
-        webapp = Site('westus')
+        webapp = Site(location='westus')
         webapp.name = 'veryNiceWebApp'
         self.client.web_apps.get = lambda _, _1: webapp
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        binding = HostNameBinding(webapp.location,
+        binding = HostNameBinding(location=webapp.location,
                                   domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
@@ -93,13 +96,13 @@ class TestWebappMocked(unittest.TestCase):
         client_factory_mock.return_value = client
         cmd_mock = mock.MagicMock()
         # set up the web inside a ASE, with an ip based ssl binding
-        host_env = HostingEnvironmentProfile('id11')
+        host_env = HostingEnvironmentProfile(id='id11')
         host_env.name = 'ase1'
         host_env.resource_group = 'myRg'
 
         host_ssl_state = HostNameSslState(ssl_state=SslState.ip_based_enabled, virtual_ip='1.2.3.4')
-        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
-                                                host_name_ssl_states=[host_ssl_state])
+        client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state], location='westus')
         client.app_service_environments.list_vips.return_value = AddressResponse()
 
         # action
@@ -110,8 +113,8 @@ class TestWebappMocked(unittest.TestCase):
 
         # tweak to have no ip based ssl binding, but it is in an internal load balancer
         host_ssl_state2 = HostNameSslState(ssl_state=SslState.sni_enabled)
-        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
-                                                host_name_ssl_states=[host_ssl_state2])
+        client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state2], location='westus')
         client.app_service_environments.list_vips.return_value = AddressResponse(internal_ip_address='4.3.2.1')
 
         # action
@@ -122,8 +125,8 @@ class TestWebappMocked(unittest.TestCase):
 
         # tweak to have no ip based ssl binding, and not in internal load balancer
         host_ssl_state2 = HostNameSslState(ssl_state=SslState.sni_enabled)
-        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
-                                                host_name_ssl_states=[host_ssl_state2])
+        client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state2], location='westus')
         client.app_service_environments.list_vips.return_value = AddressResponse(service_ip_address='1.1.1.1')
 
         # action
@@ -139,7 +142,7 @@ class TestWebappMocked(unittest.TestCase):
         client_factory_mock.return_value = client
 
         # set up the web inside a ASE, with an ip based ssl binding
-        site = Site('antarctica')
+        site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
 
@@ -171,7 +174,7 @@ class TestWebappMocked(unittest.TestCase):
         # Mock the client and set the location
         client = mock.Mock()
         client_factory_mock.return_value = client
-        site = Site('antarctica')
+        site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
 
@@ -192,7 +195,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
-        site_config = SiteConfig('antarctica')
+        site_config = SiteConfig(name='antarctica')
         site_op_mock.side_effect = [site_config, None]
         cmd = mock.MagicMock()
         # action
@@ -215,12 +218,12 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._open_page_in_browser', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.open_page_in_browser', autospec=True)
     def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
-        site = Site('antarctica')
+        site = Site(location='westus', name='antarctica')
         site.default_host_name = 'haha.com'
         site.enabled_host_names = [site.default_host_name]
-        site.host_name_ssl_states = [HostNameSslState('does not matter',
+        site.host_name_ssl_states = [HostNameSslState(name='does not matter',
                                                       ssl_state=SslState.ip_based_enabled)]
 
         site_op_mock.return_value = site
@@ -306,6 +309,21 @@ class TestWebappMocked(unittest.TestCase):
         # assert
         site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
         get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
+
+    def test_valid_linux_create_options(self):
+        some_runtime = 'TOMCAT|8.5-jre8'
+        test_docker_image = 'lukasz/great-image:123'
+        test_multi_container_config = 'some_config.yaml'
+        test_multi_container_type = 'COMPOSE'
+
+        self.assertTrue(validate_container_app_create_options(some_runtime, None, None, None))
+        self.assertTrue(validate_container_app_create_options(None, test_docker_image, None, None))
+        self.assertTrue(validate_container_app_create_options(None, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_container_app_create_options(some_runtime, None, test_multi_container_config, test_multi_container_type))
+        self.assertFalse(validate_container_app_create_options(some_runtime, None, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
+        self.assertFalse(validate_container_app_create_options(None, None, None, None))
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import json
 
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+from azure.cli.core.util import get_file_json
 
 
 # TYPES VALIDATORS
@@ -123,7 +123,7 @@ def storage_account_id(cmd, namespace):
 
 def keyvault_id(cmd, namespace):
     """Validate storage account name"""
-    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     if not namespace.keyvault:
         return
@@ -135,7 +135,7 @@ def keyvault_id(cmd, namespace):
         kv_name = namespace.keyvault
         kv_rg = namespace.resource_group_name
     try:
-        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient)
+        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
         vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
             raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
@@ -170,8 +170,7 @@ def validate_json_file(namespace):
     """Validate the give json file existing"""
     if namespace.json_file:
         try:
-            with open(namespace.json_file) as file_handle:
-                json.load(file_handle)
+            get_file_json(namespace.json_file)
         except EnvironmentError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:

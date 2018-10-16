@@ -6,14 +6,14 @@
 
 def _auth_client_factory(cli_ctx, scope=None):
     import re
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.authorization import AuthorizationManagementClient
     subscription_id = None
     if scope:
         matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
-    return get_mgmt_service_client(cli_ctx, AuthorizationManagementClient, subscription_id=subscription_id)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
 def _graph_client_factory(cli_ctx, **_):

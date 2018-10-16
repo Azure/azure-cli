@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
+from azure.cli.core.util import sdk_no_wait
 
 
 def list_recommendations(client, ids=None, resource_group_name=None,
@@ -131,7 +132,7 @@ def _parse_recommendation_uri(recommendation_uri):
 def _generate_recommendations(client):
     from msrestazure.azure_exceptions import CloudError
 
-    response = client.generate(raw=True)
+    response = sdk_no_wait(True, client.generate)
     location = response.headers['Location']
     operation_id = _parse_operation_id(location)
 

@@ -281,27 +281,38 @@ if "%1" == "dummy" (
 if "%1" == "xmlwithlatest" (
 	az cloud update --profile latest
 	%SPHINXBUILD% -E -b xml %ALLSPHINXOPTS% %BUILDDIR%/xml/latest
-	if errorlevel 1 exit /b 1
+	if errorlevel 1 (
+		echo.Build failed.
+		exit /b 1
+	)
 	echo.
 	echo.Build finished. The XML files are in %BUILDDIR%/xml/latest.
-	goto :eof
+	exit /b 0
 )
 
 if "%1" == "xmlwithversion" (
 	call :genxmlwithversion
-	if errorlevel 1 exit /b 1
+	if errorlevel 1 (
+		echo.Build failed.
+		exit /b 1
+	)
 	echo.
 	echo.Build finished. The XML files are in %BUILDDIR%/xml.
-	goto :eof
+	echo.
+	exit /b 0
 )
 
 :genxmlwithversion
 for /f %%i in ('az cloud list-profiles -o tsv') do (
 	az cloud update --profile %%i
 	%SPHINXBUILD% -E -b xml %ALLSPHINXOPTS% %BUILDDIR%/xml/%%i
-	if errorlevel 1 exit /b 1
-	echo.Build of profile %%i finished. The XML files are in %BUILDDIR%/xml/%%i.
+	if errorlevel 1 (
+		echo.Build of profile %%i reported error
+		exit /b 1
+	) else (
+		echo.Build of profile %%i finished. The XML files are in %BUILDDIR%/xml/%%i.
+	)
 )
-goto :eof
+exit /b 0
 
 :end

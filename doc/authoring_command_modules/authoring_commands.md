@@ -14,11 +14,11 @@ The document provides instructions and guidelines on how to author individual co
 
 **ADDITIONAL TOPICS**
 
-[6. Command Naming and Behavior Guidance](#command-naming-and-behavior-guidance)
+[6. Keyword Argument (kwarg) Reference](#keyword-argument-reference)
 
-[7. Keyword Argument (kwarg) Reference](#keyword-argument-reference)
+[7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-[8. Supporting the IDs Parameter](#supporting-the-ids-parameter)
+[8. Supporting Name or ID Parameters](#supporting-name-or-id-parameters)
 
 [9. Generic Update Commands](#generic-update-commands)
 
@@ -32,12 +32,16 @@ The document provides instructions and guidelines on how to author individual co
 
 [14. Registering Enum Arguments](#registering-enums)
 
+[15. Preventing particular extensions from being loading](#extension-suppression)
+
+[16. Deprecating Commands and Arguments](#deprecating-commands-and-arguments)
+
 Authoring Commands
 =============================
 
 ## Write the Command Loader
 
-As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
+As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
 
 ```Python
 class MyCommandsLoader(AzCommandsLoader):
@@ -97,8 +101,9 @@ with self.command_group('mymod', mymod_sdk) as g:
     # (3) Registering different types of commands
     g.command('command1', 'do_something_1')
     g.custom_command('command2', 'do_something_2')
-    g.generic_update('update', custom_function_name='my_custom_update')
-    g.generic_wait('wait')
+    g.generic_update_command('update', custom_function_name='my_custom_update')
+    g.wait_command('wait')
+    g.show_command('show')
 ```
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.  See below for amplifying information.
@@ -127,7 +132,7 @@ command(self, name, method_name=None, command_type=None, **kwargs)
 - `name`: The name of the command within the command group
 - `method_name`: The name of the SDK or custom method, relative to the path specified in `operations_tmpl`.
 - `command_type`: A `CliCommandType` object to apply to this command (optional).
-- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `no_wait_param` and  `transform`.
+- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `supports_no_wait` and  `transform`.
 
 Any kwargs that are not specified will be pulled from the `command_type` kwarg, if present.
 
@@ -139,23 +144,89 @@ The signature for `custom_command` is exactly the same as `command`. The only di
 
 See the section on "Suppporting Generic Update"
 
-***generic_wait_command***
+***wait_command***
 
 The generic wait command provides a templated solution for polling Azure resources until specific conditions are met.
 
 ```Python
-generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs)
+wait_command(self, name, getter_name='get', **kwargs)
 ```
 
 - `name`: The name of the command within the command group. Commonly called 'wait'.
 - `getter_name`: The name of the method for the object getter, relative to the path specified in `operations_tmpl`.
-- `getter_type`: A `CliCommandType` object to apply to this command (optional).
 - `kwargs`: any supported kwarg.
 
 Since most wait commands rely on a simple GET call from the SDK, most of these entries simply look like:
 ```Python
-   g.generic_wait_command('wait')
+   g.wait_command('wait')
 ```
+
+***custom_wait_command***
+
+Similar to `custom_command` and `command`, the signature for `custom_wait_command` is exactly the same as `wait_command` but uses `custom_command_type` as the fallback for missings kwargs.
+
+***show_command***
+
+The generic show command ensures a consistent behavior when encountering a missing Azure resource. 
+With little exception, all `show` commands should be registered using this method or `custom_show_command` to ensure consistency.
+
+```Python
+show_command(self, name, getter_name='get', **kwargs)
+```
+
+- `name`: The name of the command within the command group. Commonly called 'show'.
+- `getter_name`: The name of the method for the object getter, relative to the path specified in `operations_tmpl`.
+- `kwargs`: any supported kwarg.
+
+***custom_show_command***
+
+Similar to `custom_command` and `command`, the signature for `custom_show_command` is exactly the same as `show_command` but uses `custom_command_type` as the fallback for missings kwargs.
+
+**(4) Supporting --no-wait**
+
+When registering a command, the boolean `supports_no_wait` property can be used to specify that the command supports `--no-wait`.
+
+Here are examples:
+
+***command()***
+
+```Python
+with self.command_group('mymod', mymod_sdk) as g:
+    g.command('command1', 'do_something_1', supports_no_wait=True)
+```
+
+***custom_command()***
+
+```Python
+# inside load_command_table(...)
+with self.command_group('mymod', mymod_sdk) as g:
+    g.custom_command('command2', 'do_something_2', supports_no_wait=True)
+
+# inside custom.py
+from azure.cli.core.util import sdk_no_wait
+def do_something_2(cmd, arg1, arg2, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, arg1, arg2)
+```
+
+The signature of `azure.cli.core.util.sdk_no_wait` is:
+
+```Python
+sdk_no_wait(no_wait, func, *args, **kwargs)
+```
+
+
+- `no_wait` - The boolean for no wait. `True` if `--no-wait` specified. `False` otherwise.
+- `func` - The callable to use.
+- `args` - The positional arguments that should be passed to the callable.
+- `kwargs` - The keyword arguments that should be passed to the callable.
+
+***generic_update_command()***
+
+```Python
+with self.command_group('mymod', mymod_sdk) as g:
+    g.generic_update_command('update', supports_no_wait=True)
+```
+
 
 ## Write Help Entry
 
@@ -239,80 +310,11 @@ Often reflected SDK methods have complex parameters that are difficult to expose
 Additional Topics
 =============================
 
-## Command Naming and Behavior Guidance
-
-**General Guidelines and Conventions**
-
-1. multi-word subgroups should be hyphenated (ex: `foo-resource` instead of `fooresource`)
-2. all command names should contain a verb (ex: `storage account get-connection-string` instead of `storage account connection-string`)
-3. avoid hyphenated command names when moving the commands into a subgroup would eliminate the need. (ex: instead of `show-database` and `list-database` use `database show` and `database get`.
-4. If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information. (ex: instead of `database sku-definitions list` use `database list-sku-definitions`).
-5. Avoid command subgroups that have no commands. This often happens at the first level of a command branch. For example, KeyVault has secrets, certificates, etc that exist within a vault. The existing (preferred) CLI structure looks like:
-```
-Group
-    az keyvault: Safeguard and maintain control of keys, secrets, and certificates.
-
-Subgroups:
-    certificate  : Manage certificates.
-    key          : Manage keys.
-    secret       : Manage secrets.
-
-Commands:
-    create       : Create a key vault.
-    delete       : Delete a key vault.
-    delete-policy: Delete security policy settings for a Key Vault.
-    list         : List key vaults.
-    list-deleted : Gets information about the deleted vaults in a subscription.
-    purge        : Permanently deletes the specified vault.
-    recover      : Recover a key vault.
-    set-policy   : Update security policy settings for a Key Vault.
-    show         : Show details of a key vault.
-    update       : Update the properties of a key vault.
-```
-
-To create a vault, you simply use `az keyvault create ...`. An alternative would be to place the vault commands into a separate subgroup, like this:
-```
-Group
-    az keyvault: Safeguard and maintain control of keys, secrets, and certificates.
-
-Subgroups:
-    certificate  : Manage certificates.
-    key          : Manage keys.
-    secret       : Manage secrets.
-    vault        : Manage vaults.
-```
-
-Now, to create a vault, you have to use `az keyvault vault create ...` which is overly verbose adds unnecessary depth to the tree. The preferred style makes the command use more convenient and intuitive.
-
-**Standard Command Types**
-
-The following are standard names and behavioral descriptions for CRUD commands commonly found within the CLI.
-
-1. CREATE - standard command to create a new resource. Usually backed server-side by a PUT request. 'create' commands should be idempotent and should return the resource that was created.
-
-2. UPDATE - command to selectively update properties of a resource and preserve existing values. May be backed server-side by either a PUT or PATCH request, but the behavior of the command should *always* be PATCH-like. All `update` commands should be registerd using the `generic_update_command` helper to expose the three generic update properties. `update` commands MAY also allow for create-like behavior (PUTCH) in cases where a dedicated `create` command is deemed unnecessary. `update` commands should return the updated resource.
-
-3. SET - command to replace all properties of a resource without preserving existing values, typically backed server-side by a PUT request. This is used when PATCH-like behavior is deemed unnecessary and means that any properties not specifies are reset to their default values. `set` commands are more rare compared to `update` commands. `set` commands should return the updated resource.
-
-4. SHOW - command to show the properties of a resource, backed server-side by a GET request.
-
-5. LIST - command to list instances of a resource, backed server-side by a GET request. When there are multiple "list-type" commands within an SDK to list resources at different levels (for example, listing resources in a subscription vice in a resource group) the functionality should be exposed by have a single list command with arguments to control the behavior. For example, if `--resource-group` is provided, the command will call `list_by_resource_group`; otherwise, it will call `list_by_subscription`.
-
-6. DELETE - command to delete a resource, backed server-side by a DELETE request. Delete commands return nothing on success.
-
-**Non-standard Commands**
-
-For commands that don't conform to one of the above-listed standard command patterns, use the following guidance:
-
-1. Don't use single word verbs if they could cause confusion with the standard command types. For example, don't use `get` or `new` as these sound functionally the same as `show` and `create` respectively, leading to confusion as to what the expected behavior should be.
-2. Descriptive, hyphenated command names are often a better option than single verbs (ex: `vm assign-identity`, `vm perform-maintenance`).
-3. If in doubt, ask!
-
 ## Keyword Argument Reference
 
-**Overview of Keyword Arguments in Azure CLI 2.0**
+**Overview of Keyword Arguments in the Azure CLI**
 
-When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
+When writing commands for the Azure CLI, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
 
 ![](/doc/assets/annotated-kwarg-structure.gif)
 
@@ -363,6 +365,7 @@ The follow special kwargs are supported by argument context and its helper metho
 - `validator` - See section on [Validators](#validators)
 - `completer` - See section on [Tab Completion](#tab-completion)
 - `id_part` - See section on [Supporting the IDs Parameter](#supporting-the-ids-parameter).
+- `arg_group` - Groups arguments within this context under a group name or add an argument to the group. This group name is shown in the help for the command. For example if `arg_group` is "Network", all applicable arguments will be grouped under the heading "Network Arguments" in the help text for the command.
 
 Additionally, the following `kwargs`, supported by argparse, are supported as well:
 - `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
@@ -387,7 +390,7 @@ The following kwargs may be inherited from the command loader:
 
 Most ARM resources can be identified by an ID. In many cases, for example `show` and `delete` commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
+Azure CLI supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `AzArgumentContext.argument`.
 
@@ -468,6 +471,54 @@ Any of these keys could be supplied as a value for `id_part`, thought typically 
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
+- `--ids` is intended to be the ID of the resource the command group is about. Thus, it needs to be suppressed on `list` commands for child resources. This simplest way to do this:
+```Python
+with self.argument_context('parent child') as c:
+  c.argument('parent_name', id_part=None)  # This should ALWAYS be the id_part that was 'name'.
+  c.argument('child_name', ...)
+```
+
+## Supporting Name or ID Parameters
+
+Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
+
+DO NOT:
+- Expose an ID parameter like `--storage-account-id`. 
+- Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
+
+DO:
+- Call the parameter `--storage-account` and indicate in the help text that it accepts the "Name or ID of the storage account."
+- Add logic similar to the following to a validator or custom command to process the name or ID logic:
+
+**Custom Command**
+```Python
+def my_command(cmd, resource_group_name, foo_name, storage_account):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(storage_account):
+        storage_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=storage_account
+        )
+```
+
+**Validator**
+```Python
+def validate_storage_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.storage_account:
+        if not is_valid_resource_id(namespace.storage_account):
+            namespace.storage_account = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Storage', type='storageAccounts',
+                name=namespace.storage_account
+            )
+```
+
 
 ## Generic Update Commands
 
@@ -486,6 +537,8 @@ Since most generic update commands can be reflected from the SDK, the simplest f
 with self.command_group('test', test_sdk) as g:
   g.generic_update_command('update')
 ```
+
+However, most commonly, the `custom_func_name` and `custom_func_type` kwargs will be used to expose convenience arguments in addition to the generic arguments.
 
 - `name` - The name of the command. Most commonly 'update'.
 - `getter_name` - The name of the method which will be used to retrieve the object instance. If the method is named `get` (which is the case for most SDKs), this can be omitted.
@@ -522,6 +575,34 @@ if custom_function:
     instance = custom_function(...) # apply custom logic
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
+```
+
+**Generic Update for PATCH-based Services**
+
+`generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
+
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
+```Python
+def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
+   from my_foo_sdk import FooUpdateParameters, ComplexProperty
+
+   # (1) instantiate the update parameters object. Generally, you can pass simple parameters
+   # as-is and the service will correctly interpret this.
+   parameters = FooUpdateParameters(
+     prop1=prop1,
+     prop2=prop2)
+     
+   # (2) complex objects must also have PATCH-like behavior, and often services do not
+   # correctly support this. You may need to fill these objects with the existing
+   # values if they are not being updated
+   parameters.complex_prop = ComplexProperty(
+     complex_prop1=complex_prop1 or instance.complex_prop.complex_prop1,
+     complex_prop2=complex_prop2 or instance.complex_prop.complex_prop2
+   )
+   # (3) instead of returning the instance object as you do with a PUT-based generic update,
+   # return the update parameters object.
+   return parameters
 ```
 
 ## Custom Table Formats
@@ -652,3 +733,75 @@ with self.argument_context('mymod') as c:
 ```
 
 Above are two examples of how this can be used. In the first instance, an Enum model is reflected from the SDK. In the second instance, a custom choice list is provided. This is preferable to using the native `argparse.choices` kwarg because the choice lists generated by `get_enum_type` will be case insensitive.
+
+## Extension Suppression
+
+It is possible for a command module to suppress specific extensions from being loaded.
+
+This is useful for commands that were once extensions that have now moved inside a command module.
+
+Here, we suppress an extension by name and also by version.
+
+This will allow the extension to be published in the future with the same name and a newer version that will not be suppressed.
+
+This is great for experimental extensions that periodically get incorporated into the product.
+
+```Python
+class MyCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core import ModExtensionSuppress
+        # Suppress myextension up to and including version 0.2.0
+        super(MyCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                               suppress_extension=ModExtensionSuppress(__name__, 'myextension', '0.2.0',
+                                                                                       reason='These commands are now in the CLI.',
+                                                                                       recommend_remove=True))
+```
+
+## Deprecating Commands and Arguments
+
+The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arugments are supported when deprecating an item:
+
+- `target`: The thing being deprecated. This is often not needed as in most cases the CLI can figure out what is being deprecated.
+- `redirect`: This is the alternative that should be used in lieu of the deprecated thing. If not provided, the item is expected to be removed in the future with no replacement.
+- `hide`: Hide the deprecated item from the help system, reducing discoverability, but still allow it to be used. Accepts either the boolean `True` to immediately hide the item or a core CLI version. If a version is supplied, the item will appear until the core CLI rolls to the specified value, after which it will be hidden.
+- `expiration`: Accepts a core CLI version at which the deprecated item will no longer function. This version will be communicated in all warning messages. 
+
+Deprecation of different command elements are usually accomplished using the `deprecate_info` kwarg in conjunction with a `deprecate` helper method.
+
+***Deprecate Command Group***
+```Python
+with self.command_group('test', test_sdk, deprecate_info=self.deprecate(redirect='new-test', hide=True)) as g:
+  g.show_command('show', 'get')
+  g.command('list', 'list')
+```
+
+This will deprecate the entire command group `test`. Note that call to `self.deprecate`, calling the deprecate helper method off of the command loader. The warning message for this would read: ```This command group has been deprecated and will be removed in a future release. Use `new-test` instead.```
+
+Additionally, since the command group is deprecated then, by extension, all of the commands within it are deprecated as well. They will not be marked as such, but will display a warning:
+
+```This command has been implicitly deprecated because command group `test` is deprecated and will be removed in a future release. Use `new-test` instead.```
+
+***Deprecate Command***
+```Python
+with self.command_group('test', test_sdk) as g:
+  g.command('show-parameters', 'get_params', deprecate_info=g.deprecate(redirect='test show', expiration='2.1.0'))
+```
+
+This will deprecate the command `test show-parameters`. Note that call to `g.deprecate`, calling the deprecate helper method off of the command group. The warning message for this would read: ```This command has been deprecated and will be removed in version 2.1.0. Use `test show` instead.```
+
+***Deprecate Argument***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('junk_flag', help='Something we no longer want to support.' deprecate_info=c.deprecate(expiration='2.1.0'))
+```
+
+This will deprecate the argument `--junk-flag` on `test show-parameters`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Argument `--junk-flag` has been deprecated and will be removed in version 2.1.0.```
+
+***Deprecate Argument Option***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('resource', options_list=['--resource', c.deprecate(target='--resource-id', redirect='--target')])
+```
+
+This will deprecate the argument `--resource-id` option on `test show-parameters` in favor of `--resource`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Option `--resource-id` has been deprecated and will be removed in a future release. Use `--resource` instead.``` Here you must specify `target` in order to identify the deprecated option. When an option value is deprecated, it appears in help as two separate arguments, with the deprecation warning on the deprecated option. 

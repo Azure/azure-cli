@@ -10,6 +10,7 @@ import time
 import tempfile
 import requests
 
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck)
 
@@ -104,11 +105,11 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.12"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '6.1.0'),
+            JMESPathCheck('[0].value', '6.12.0'),
         ]))
 
     @ResourceGroupPreparer()
@@ -116,7 +117,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
@@ -128,7 +129,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = self.create_random_name(prefix='plan-quick-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(resource_group, webapp_name, plan))
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
@@ -138,16 +139,37 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', 'false'),
         ]))
 
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_create(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
+        plan = self.create_random_name(prefix='plan-linux-multi', length=24)
+        config_file = os.path.join(TEST_DIR, 'sample-compose.yml')
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-linux-cd'
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        self.assertTrue('Hello world' in str(r.content))
+        if 'Hello world' not in str(r.content):
+            # dump out more info for diagnose
+            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -161,15 +183,14 @@ class WebappQuickCreateTest(ScenarioTest):
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
-class AppServiceLogTest(LiveScenarioTest):
+class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_win_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
         # sanity check the traces
@@ -183,11 +204,10 @@ class AppServiceLogTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_download_linux_web_log(self, resource_group):
         import zipfile
-        from pathlib import Path
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(resource_group, webapp_name, plan))
         # load the site to produce a few traces
         requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
 
@@ -247,7 +267,9 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
             JMESPathCheck('pythonVersion', ''),
             JMESPathCheck('use32BitWorkerProcess', True),
-            JMESPathCheck('webSocketsEnabled', False)])
+            JMESPathCheck('webSocketsEnabled', False),
+            JMESPathCheck('minTlsVersion', '1.2'),
+            JMESPathCheck('ftpsState', 'AllAllowed')])
 
         # update and verify
         checks = [
@@ -257,11 +279,14 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
-            JMESPathCheck('webSocketsEnabled', True)
-        ]
+            JMESPathCheck('webSocketsEnabled', True),
+            JMESPathCheck('minTlsVersion', '1.0'),
+            JMESPathCheck('http20Enabled', True),
+            JMESPathCheck('ftpsState', 'Disabled')]
+
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
@@ -294,6 +319,35 @@ class WebappConfigureTest(ScenarioTest):
                  .format(resource_group, webapp_name)).assert_with_checks([
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
+
+        # site azure storage account configurations tests
+        # add
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
+                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, webapp_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+        # update
+        self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
+                 .format(resource_group, webapp_name))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
+        # list
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 1),
+            JMESPathCheck('[0].name', 'Id')])
+        # delete
+        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(@)", 0)])
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
@@ -331,21 +385,24 @@ class WebappScaleTest(ScenarioTest):
             JMESPathCheck('sku.capacity', 0)  # 0 means the default value: 1 instance
         ])
         # scale up
-        self.cmd('appservice plan update -g {} -n {} --sku S2'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --sku S2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S2'),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.size', 'S2'),
             JMESPathCheck('sku.family', 'S')
         ])
         # scale down
-        self.cmd('appservice plan update -g {} -n {} --sku B1'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --sku B1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'B1'),
             JMESPathCheck('sku.tier', 'Basic'),
             JMESPathCheck('sku.size', 'B1'),
             JMESPathCheck('sku.family', 'B')
         ])
         # scale out
-        self.cmd('appservice plan update -g {} -n {} --number-of-workers 2'.format(resource_group, plan), checks=[
+        self.cmd('appservice plan update -g {} -n {} --number-of-workers 2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'B1'),
             JMESPathCheck('sku.tier', 'Basic'),
             JMESPathCheck('sku.size', 'B1'),
@@ -371,7 +428,7 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
-class LinuxWebappSceanrioTest(ScenarioTest):
+class LinuxWebappScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
@@ -384,6 +441,9 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         ])
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheck('name', webapp),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('windowsFxVersion', None)
         ])
         time.sleep(30)  # workaround the fact that a new linux web's "kind" won't be settled instantaneously
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
@@ -420,7 +480,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
-class WebappACRSceanrioTest(ScenarioTest):
+class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
@@ -468,7 +528,7 @@ class WebappSlotScenarioTest(ScenarioTest):
         webapp = self.create_random_name(prefix='slot-test-web', length=24)
 
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         slot2 = 'dev'
@@ -516,6 +576,8 @@ class WebappSlotScenarioTest(ScenarioTest):
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+        # try another way to delete a slot and exercise all options
+        self.cmd('webapp delete -g {} -n {} --slot {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp, slot2))
 
 
 class WebappSlotTrafficRouting(ScenarioTest):
@@ -524,7 +586,7 @@ class WebappSlotTrafficRouting(ScenarioTest):
         plan = self.create_random_name(prefix='slot-traffic-plan', length=24)
         webapp = self.create_random_name(prefix='slot-traffic-web', length=24)
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         # create an empty slot
@@ -540,13 +602,53 @@ class WebappSlotTrafficRouting(ScenarioTest):
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
 
 
+class AppServiceCors(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_cors(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'web': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'slot': 'slot1'
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('webapp create -g {rg} -n {web} --plan {plan}')
+        self.cmd('webapp cors add -g {rg} -n {web} --allowed-origins https://msdn.com https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}',
+                 checks=self.check('allowedOrigins', ['https://msdn.com', 'https://msn.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --allowed-origins https://msn.com')
+        self.cmd('webapp cors show -g {rg} -n {web}', checks=self.check('allowedOrigins', ['https://msdn.com']))
+
+        self.cmd('webapp deployment slot create -g {rg} -n {web} --slot {slot}')
+        self.cmd('webapp cors add -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
+                 checks=self.check('allowedOrigins', ['https://foo.com']))
+        self.cmd('webapp cors remove -g {rg} -n {web} --slot {slot} --allowed-origins https://foo.com')
+        self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}', checks=self.check('allowedOrigins', []))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_cors(self, resource_group, storage_account):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
+            'function': self.create_random_name(prefix='slot-traffic-web', length=24),
+            'storage': storage_account
+        })
+        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
+        self.cmd('functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+        self.cmd('functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
+        result = self.cmd('functionapp cors show -g {rg} -n {function}').get_output_in_json()['allowedOrigins']
+        # functionapp has pre-defined cors. We verify the ones we added are in the list
+        self.assertTrue(set(['https://msdn.com', 'https://msn.com']).issubset(set(result)))
+
+
 class WebappSlotSwapScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_slot_swap(self, resource_group):
         plan = self.create_random_name(prefix='slot-swap-plan', length=24)
         webapp = self.create_random_name(prefix='slot-swap-web', length=24)
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['appServicePlanName']))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=prod'.format(resource_group, webapp))
@@ -574,17 +676,20 @@ class WebappSSLCertTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_ssl(self, resource_group, resource_group_location):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
-        webapp_name = 'webapp-ssl-test123'
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
         # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
-        cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan, resource_group_location))
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), self.check('tags.plan', 'plan1'))
+        self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(resource_group, webapp_name, plan, resource_group_location))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)
@@ -596,115 +701,50 @@ class WebappSSLCertTest(ScenarioTest):
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
 
-class WebappBackupConfigScenarioTest(ScenarioTest):
+class WebappUndeleteTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
-    def test_webapp_backup_config(self, resource_group):
-        webapp_name = self.create_random_name(prefix='azurecli-webapp-backupconfigtest', length=36)
-        plan = self.create_random_name(prefix='webapp-backup-plan', length=24)
-        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
+    def test_webapp_deleted_list(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_name = self.create_random_name(prefix='delete-me-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('[0].deletedSiteName', webapp_name)
+        ])
 
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
-        frequency = '1d'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-        retention_period = 5
-
-        # set without databases
-        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
-                 .format(resource_group, webapp_name, frequency, sas_url, retention_period))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 1),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
-        # update with databases
-        database_name = 'cli-backup'
-        database_type = 'SqlAzure'
-        self.cmd('webapp config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
-                 .format(resource_group, webapp_name, db_conn_str, database_name, database_type))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 1),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
-        # update frequency and retention only
-        frequency = '18h'
-        retention_period = 7
-        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
-                 .format(resource_group, webapp_name, frequency, retention_period))
-
-        checks = [
-            JMESPathCheck('backupSchedule.frequencyInterval', 18),
-            JMESPathCheck('backupSchedule.frequencyUnit', 'Hour'),
-            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', False),
-            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
-
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
-    def test_webapp_backup_restore(self, resource_group):
-        webapp_name = self.create_random_name(prefix='azurecli-webapp-backuptest', length=36)
-        plan = self.create_random_name(prefix='webapp-backup-plan', length=24)
-        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-
-        database_name = 'cli-backup'
-        database_type = 'SqlAzure'
-        backup_name = 'mybackup'
-        create_checks = [
-            JMESPathCheck('backupItemName', backup_name),
-            JMESPathCheck('storageAccountUrl', sas_url),
-            JMESPathCheck('databases[0].connectionString', db_conn_str),
-            JMESPathCheck('databases[0].databaseType', database_type),
-            JMESPathCheck('databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup create -g {} --webapp-name {} --container-url "{}" --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
-                 .format(resource_group, webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
-        list_checks = [
-            JMESPathCheck('[-1].backupItemName', backup_name),
-            JMESPathCheck('[-1].storageAccountUrl', sas_url),
-            JMESPathCheck('[-1].databases[0].connectionString', db_conn_str),
-            JMESPathCheck('[-1].databases[0].databaseType', database_type),
-            JMESPathCheck('[-1].databases[0].name', database_name)
-        ]
-        self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=list_checks)
-        time.sleep(900)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
-        self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url "{}" --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
-                 .format(resource_group, webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', webapp_name))
+    def test_webapp_deleted_restore(self, resource_group):
+        plan = self.create_random_name(prefix='undelete-plan', length=24)
+        webapp_name = self.create_random_name(prefix='undelete-web', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        # A snapshot must be available to restore a deleted app. The app must exist for at least an hour prior to deletion to have a snapshot.
+        # Using a pre-configured deleted app in this test.
+        deleted_app_id = self.cmd('webapp deleted list -g {} -n {}'.format('nicking', 'nickingdeletedwordpress')).get_output_in_json()[0]['id']
+        self.cmd('webapp deleted restore --deleted-id {} -g {} -n {}'.format(deleted_app_id, resource_group, webapp_name))
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_functionapp_e2e(self, resource_group):
-        functionapp_name = self.create_random_name('func-e2e', 24)
+    @ResourceGroupPreparer(parameter_name='resource_group2')
+    def test_functionapp_e2e(self, resource_group, resource_group2):
+        functionapp_name, functionapp_name2 = self.create_random_name('func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
-        storage = 'functionappplanstorage'
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
+        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage2, resource_group2)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
-
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2, functionapp_name2, plan_id, storage_account_id2))
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -728,6 +768,27 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
         ])
+        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name), checks=[
+            self.check('clientAffinityEnabled', True)
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -744,11 +805,11 @@ class FunctionAppOnLinux(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
-        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].name', functionapp),
-            JMESPathCheck('[0].kind', 'functionapp,linux')
-        ])
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
@@ -765,7 +826,6 @@ class WebappAuthenticationTest(ScenarioTest):
             JMESPathCheck('defaultProvider', None),
             JMESPathCheck('enabled', False),
             JMESPathCheck('tokenStoreEnabled', None),
-            JMESPathCheck('runtimeVersion', None),
             JMESPathCheck('allowedExternalRedirectUrls', None),
             JMESPathCheck('tokenRefreshExtensionHours', None),
             JMESPathCheck('clientId', None),
@@ -779,9 +839,9 @@ class WebappAuthenticationTest(ScenarioTest):
 
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
-                          '--token-store false --runtime-version v5.0 --token-refresh-extension-hours 7.2 '
+                          '--token-store false --token-refresh-extension-hours 7.2 '
                           '--aad-client-id aad_client_id --aad-client-secret aad_secret '
-                          '--aad-allowed-token-audiences audience1 --aad-token-issuer-url issuer_url '
+                          '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
                           '--facebook-oauth-scopes public_profile email'
                           .format(resource_group, webapp_name)).assert_with_checks([
@@ -789,15 +849,14 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('defaultProvider', 'Facebook'),
                               JMESPathCheck('enabled', True),
                               JMESPathCheck('tokenStoreEnabled', False),
-                              JMESPathCheck('runtimeVersion', 'v5.0'),
                               JMESPathCheck('tokenRefreshExtensionHours', 7.2),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),
-                              JMESPathCheck('issuer', 'issuer_url'),
+                              JMESPathCheck('issuer', 'https://issuer_url'),
                               JMESPathCheck('facebookAppId', 'facebook_id'),
                               JMESPathCheck('facebookAppSecret', 'facebook_secret')]).get_output_in_json()
 
-        self.assertIn('audience1', result['allowedAudiences'])
+        self.assertIn('https://audience1', result['allowedAudiences'])
         self.assertIn('email', result['facebookOauthScopes'])
         self.assertIn('public_profile', result['facebookOauthScopes'])
 
@@ -807,7 +866,9 @@ class WebappUpdateTest(ScenarioTest):
     def test_webapp_update(self, resource_group):
         webapp_name = self.create_random_name('webapp-update-test', 40)
         plan_name = self.create_random_name('webapp-update-plan', 40)
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
         self.cmd('webapp create -g {} -n {} --plan {}'
                  .format(resource_group, webapp_name, plan_name)).assert_with_checks([
                      JMESPathCheck('clientAffinityEnabled', True)])
@@ -818,8 +879,14 @@ class WebappUpdateTest(ScenarioTest):
                      JMESPathCheck('tags.foo', 'bar'),
                      JMESPathCheck('clientAffinityEnabled', False)])
 
+        # try out on slots
+        self.cmd('webapp deployment slot create -g {} -n {} -s s1'.format(resource_group, webapp_name))
+        self.cmd('webapp update -g {} -n {} -s s1 --client-affinity-enabled true'.format(resource_group, webapp_name), checks=[
+            self.check('clientAffinityEnabled', True)
+        ])
 
-class WebappZipDeployScenarioTest(LiveScenarioTest):
+
+class WebappZipDeployScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy')
     def test_deploy_zip(self, resource_group):
         webapp_name = self.create_random_name('webapp-zipDeploy-test', 40)
@@ -829,27 +896,34 @@ class WebappZipDeployScenarioTest(LiveScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'Zip-Push'),
-            JMESPathCheck('message', 'Created via zip push deployment'),
-            JMESPathCheck('complete', True)])
+            JMESPathCheck('deployer', 'Push-Deployer'),
+            JMESPathCheck('message', 'Created via a push deployment'),
+            JMESPathCheck('complete', True)
+        ])
 
 
 class WebappImplictIdentityTest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_assign_identity(self, resource_group):
+    def test_webapp_assign_system_identity(self, resource_group):
         scope = '/subscriptions/{}/resourcegroups/{}'.format(self.get_subscription_id(), resource_group)
         role = 'Reader'
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46667')]
-        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
-            result = self.cmd('webapp assign-identity -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            result = self.cmd('webapp identity assign -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+            self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+                self.check('principalId', result['principalId'])
+            ])
         self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
             JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].properties.roleDefinitionName', role)
+            JMESPathCheck('[0].roleDefinitionName', role)
         ])
+
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.check('principalId', result['principalId']))
+        self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.is_empty())
 
 
 class WebappListLocationsFreeSKUTest(ScenarioTest):
@@ -858,6 +932,91 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         asp_F1 = self.cmd('appservice list-locations --sku F1').get_output_in_json()
         result = self.cmd('appservice list-locations --sku Free').get_output_in_json()
         self.assertEqual(asp_F1, result)
+
+
+class WebappTriggeredWebJobListTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_triggeredWebjob_list(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-triggered'
+
+        # list test
+        self.cmd('webapp webjob triggered list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/triggeredwebjobs')])
+
+
+class WebappContinuousWebJobE2ETest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_continuousWebjob_e2e(self, resource_group):
+        # testing this using a webjob already created
+        # given there is no create command inorder to re-record please create a webjob before
+        # recording this
+        resource_group_name = 'cliTestApp'
+        webapp_name = 'cliTestApp'
+        webjob_name = 'test-continuous'
+
+        # list test
+        self.cmd('webapp webjob continuous list -g {} -n {}'
+                 .format(resource_group_name, webapp_name)).assert_with_checks([
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', '{}/{}'.format(webapp_name, webjob_name)),
+                     JMESPathCheck('[0].type', 'Microsoft.Web/sites/continuouswebjobs')])
+        # start
+        self.cmd('webapp webjob continuous start -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Running')])
+        # stop
+        self.cmd('webapp webjob continuous stop -g {} -n {} -w {}'
+                 .format(resource_group_name, webapp_name, webjob_name)).assert_with_checks([
+                     JMESPathCheck('status', 'Disabling')])
+
+
+class WebappWindowsContainerBasicE2ETest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_hyperv_e2e(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku PC2'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
+            JMESPathCheck('[0].sku.name', 'PC2')
+        ])
+        self.cmd('appservice plan list', checks=[
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
+        ])
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('name', plan)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|microsoft/iis:nanoserver-sac2016"'.format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis:nanoserver-sac2016"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
+        self.cmd('webapp config set -g {} -n {} --windows-fx-version "DOCKER|microsoft/iis"'.format(resource_group, webapp_name))
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis"),
+            JMESPathCheck('linuxFxVersion', "")
+        ])
 
 
 if __name__ == '__main__':

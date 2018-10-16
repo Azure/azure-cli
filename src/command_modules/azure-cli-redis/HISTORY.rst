@@ -3,6 +3,33 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Minor fixes
+
+0.3.1
++++++
+* Minor fixes
+
+0.3.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.2.14
+++++++
+* Minor fixes.
+
+0.2.13
+++++++
+* Deprecated `redis patch-schedule patch-schedule show` in favor of `redis patch-schedule show`.
+* Deprecated `redis list-all`. This functionality has been folded into `redis list`.
+* Deprecated `redis import-method` in favor of `redis import`.
+* Added support for `--ids` to various commands.
+
+0.2.12
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
 0.2.11
 ++++++
 * Update for CLI core changes.

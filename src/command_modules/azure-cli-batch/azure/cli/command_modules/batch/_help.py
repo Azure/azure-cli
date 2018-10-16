@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -46,6 +47,11 @@ helps['batch account login'] = """
     short-summary: Log in to a Batch account through Azure Active Directory or Shared Key authentication.
 """
 
+helps['batch account show'] = """
+    type: command
+    short-summary: Get a specified Batch account or the currently set account.
+"""
+
 helps['batch application'] = """
     type: group
     short-summary: Manage Batch applications.
@@ -71,6 +77,7 @@ helps['batch application package activate'] = """
     short-summary: Activates a Batch application package.
     long-summary: This step is unnecessary if the package has already been successfully activated by the `create` command.
 """
+
 
 helps['batch application summary'] = """
     type: group
@@ -155,6 +162,11 @@ helps['batch job-schedule'] = """
     short-summary: Manage Batch job schedules.
 """
 
+helps['batch node service-logs'] = """
+    type: group
+    short-summary: Manage the service log files of a Batch compute node.
+"""
+
 helps['batch node user'] = """
     type: group
     short-summary: Manage the user accounts of a Batch compute node.
@@ -219,6 +231,11 @@ helps['batch pool all-statistics show'] = """
 helps['batch pool usage-metrics'] = """
     type: group
     short-summary: View usage metrics of Batch pools.
+"""
+
+helps['batch pool node-counts'] = """
+    type: group
+    short-summary: Get node counts for Batch pools.
 """
 
 helps['batch pool node-agent-skus'] = """

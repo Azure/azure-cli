@@ -18,15 +18,43 @@ def get_resource_group_location(cli_ctx, name):
 
 def get_operator_map():
     from azure.mgmt.monitor.models import ConditionOperator
-    return {'>': ConditionOperator.greater_than.value, '>=': ConditionOperator.greater_than_or_equal.value,
+    return {'>': ConditionOperator.greater_than, '>=': ConditionOperator.greater_than_or_equal,
             '<': ConditionOperator.less_than, '<=': ConditionOperator.less_than_or_equal}
 
 
 def get_aggregation_map():
     from azure.mgmt.monitor.models import TimeAggregationOperator
-    return {'avg': TimeAggregationOperator.average.value, 'min': TimeAggregationOperator.minimum.value,
-            'max': TimeAggregationOperator.maximum.value, 'total': TimeAggregationOperator.total.value,
-            'last': TimeAggregationOperator.last.value}
+    return {'avg': TimeAggregationOperator.average, 'min': TimeAggregationOperator.minimum,
+            'max': TimeAggregationOperator.maximum, 'total': TimeAggregationOperator.total,
+            'last': TimeAggregationOperator.last}
+
+
+# region Autoscale Maps
+def get_autoscale_statistic_map():
+    from azure.mgmt.monitor.models import MetricStatisticType
+    return {'avg': MetricStatisticType.average, 'min': MetricStatisticType.min,
+            'max': MetricStatisticType.max, 'sum': MetricStatisticType.sum}
+
+
+def get_autoscale_operator_map():
+    from azure.mgmt.monitor.models import ComparisonOperationType
+    return {'==': ComparisonOperationType.equals, '!=': ComparisonOperationType.not_equals,
+            '>': ComparisonOperationType.greater_than, '>=': ComparisonOperationType.greater_than_or_equal,
+            '<': ComparisonOperationType.less_than, '<=': ComparisonOperationType.less_than_or_equal}
+
+
+def get_autoscale_aggregation_map():
+    from azure.mgmt.monitor.models import TimeAggregationType
+    return {'avg': TimeAggregationType.average, 'min': TimeAggregationType.minimum,
+            'max': TimeAggregationType.maximum, 'total': TimeAggregationType.total,
+            'count': TimeAggregationType.count}
+
+
+def get_autoscale_scale_direction_map():
+    from azure.mgmt.monitor.models import ScaleDirection
+    return {'to': ScaleDirection.none, 'out': ScaleDirection.increase,
+            'in': ScaleDirection.decrease}
+# endregion
 
 
 def validate_time_range_and_add_defaults(start_time, end_time, formatter='startTime eq {} and endTime eq {}'):

@@ -67,8 +67,8 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
                                                                                                resource_group_name))
 
     # Add alert conditions
-    condition = condition or ActivityLogAlertAllOfCondition(all_of=[ActivityLogAlertLeafCondition('category',
-                                                                                                  'ServiceHealth')])
+    condition = condition or ActivityLogAlertAllOfCondition(
+        all_of=[ActivityLogAlertLeafCondition(field='category', equals='ServiceHealth')])
 
     # Add action groups
     action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
@@ -179,7 +179,7 @@ def _normalize_condition(condition_instance):
     if isinstance(condition_instance, str):
         try:
             field, value = condition_instance.split('=')
-            return '{}={}'.format(field.lower(), value), ActivityLogAlertLeafCondition(field, value)
+            return '{}={}'.format(field.lower(), value), ActivityLogAlertLeafCondition(field=field, equals=value)
         except ValueError:
             # too many values to unpack or not enough values to unpack
             raise ValueError('Condition "{}" does not follow format FIELD=VALUE'.format(condition_instance))
@@ -212,7 +212,7 @@ def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resourc
 
 
 def _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
-    from azure.mgmt.monitor.models.error_response import ErrorResponseException
+    from azure.mgmt.monitor.models import ErrorResponseException
 
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)

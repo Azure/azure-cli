@@ -216,7 +216,7 @@ def _default_rc_file_creation_step():
 
 def _find_line_in_file(file_path, search_pattern):
     try:
-        with open(file_path, 'r') as search_file:
+        with open(file_path, 'r', encoding="utf-8") as search_file:
             for line in search_file:
                 if search_pattern in line:
                     return True
@@ -226,7 +226,7 @@ def _find_line_in_file(file_path, search_pattern):
 
 def _modify_rc(rc_file_path, line_to_add):
     if not _find_line_in_file(rc_file_path, line_to_add):
-        with open(rc_file_path, 'a') as rc_file:
+        with open(rc_file_path, 'a', encoding="utf-8") as rc_file:
             rc_file.write('\n'+line_to_add+'\n')
 
 def create_tab_completion_file(filename):

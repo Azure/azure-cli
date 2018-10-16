@@ -17,12 +17,11 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name)
-
+    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodepool_name)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-0.1.3.tgz'
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -88,7 +87,8 @@ def load_arguments(self, _):
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
                    help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
-        c.argument('master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
+        c.argument('master_vm_size', completer=get_vm_size_completion_list,
+                   help=_get_feature_in_preview_message())
         c.argument('agent_count', type=int)
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
                    help='Generate SSH public and private key files if missing')
@@ -116,8 +116,7 @@ def load_arguments(self, _):
                    help='If true, set the default osType of agent pools to be Windows.')
         c.argument('validate', action='store_true',
                    help='Generate and validate the ARM template without creating any resources')
-        c.argument('orchestrator_version',
-                   help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
+        c.argument('orchestrator_version', help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
 
     with self.argument_context('acs scale') as c:
         c.argument('new_agent_count', type=int)
@@ -155,8 +154,34 @@ def load_arguments(self, _):
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('nodepool_name', type=str, default='nodepool1',
+                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
+        c.argument('aad_client_app_id')
+        c.argument('aad_server_app_id')
+        c.argument('aad_server_app_secret')
+        c.argument('aad_tenant_id')
+        c.argument('dns_service_ip')
+        c.argument('docker_bridge_address')
+        c.argument('enable_addons', options_list=['--enable-addons', '-a'])
+        c.argument('disable_rbac', action='store_true')
+        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
+                   deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
+        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+        c.argument('network_plugin')
+        c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
+        c.argument('pod_cidr')
+        c.argument('service_cidr')
+        c.argument('vnet_subnet_id')
+        c.argument('workspace_resource_id')
+        c.argument('skip_subnet_role_assignment', action='store_true')
+
+    with self.argument_context('aks disable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
+
+    with self.argument_context('aks enable-addons') as c:
+        c.argument('addons', options_list=['--addons', '-a'])
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -171,7 +196,7 @@ def load_arguments(self, _):
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
         c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
         c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
         c.argument('image_tag', help='The image tag of the virtual kubelet')
         c.argument('location', help='The location to create the ACI container groups')
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
@@ -179,22 +204,46 @@ def load_arguments(self, _):
                    help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 
     with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('connector_name', default='aci-connector',
+                   help='The name for the ACI Connector', validator=validate_connector_name)
         c.argument('graceful', action='store_true',
                    help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+        c.argument('os_type', get_enum_type(aci_connector_os_type),
+                   help='The OS type of the connector')
 
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
+
+    with self.argument_context('aks scale') as c:
+        c.argument('nodepool_name', type=str, default='nodepool1',
+                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+
+    with self.argument_context('aks upgrade-connector') as c:
+        c.argument('aci_resource_group')
+        c.argument('chart_url', default=aci_connector_chart_url)
+        c.argument('client_secret')
+        c.argument('connector_name', default='aci-connector', validator=validate_connector_name)
+        c.argument('image_tag')
+        c.argument('location')
+        c.argument('os_type', get_enum_type(aci_connector_os_type))
+        c.argument('service_principal')
+
+    with self.argument_context('aks use-dev-spaces') as c:
+        c.argument('update', options_list=['--update'], action='store_true')
+        c.argument('space_name', options_list=['--space', '-s'])
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation. Requires --space.')
+
+    with self.argument_context('aks remove-dev-spaces') as c:
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
 
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':
-        program_files = os.environ.get('ProgramFiles')
-        if not program_files:
+        home_dir = os.environ.get('USERPROFILE')
+        if not home_dir:
             return None
-        install_location = '{}\\{}.exe'.format(program_files, exe_name)
+        install_location = os.path.join(home_dir, r'.azure-{0}\{0}.exe'.format(exe_name))
     elif system == 'Linux' or system == 'Darwin':
         install_location = '/usr/local/bin/{}'.format(exe_name)
     else:

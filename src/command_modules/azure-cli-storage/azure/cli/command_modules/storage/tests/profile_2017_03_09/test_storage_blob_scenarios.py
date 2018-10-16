@@ -13,32 +13,13 @@ from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='source_account')
     @StorageAccountPreparer(parameter_name='target_account')
-    def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
-        source_file = self.create_temp_file(16)
-        source_account_info = self.get_account_info(resource_group, source_account)
-        source_container = self.create_container(source_account_info)
-        self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
-                         source_container, source_file)
-
-        snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
-                                    source_container).get_output_in_json()['snapshot']
-
-        target_account_info = self.get_account_info(resource_group, target_account)
-        target_container = self.create_container(target_account_info)
-        self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
-                         'src --source-account-name {} --source-account-key {} --source-snapshot '
-                         '{} --destination-container {} --destination-blob backup',
-                         target_account_info, source_container, source_account,
-                         source_account_info[1], snapshot, target_container)
-
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)
         self.cmd('storage blob upload -c foo -n bar -f "' + source_file + '"', expect_failure=CLIError)

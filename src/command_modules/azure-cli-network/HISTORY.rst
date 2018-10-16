@@ -3,6 +3,126 @@
 Release History
 ===============
 
+2.2.7
++++++
+* `nic create` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+* `nic ip-config create/update` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+
+
+2.2.6
++++++
+* Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
+* `network vnet peering create`: Deprecated `--remote-vnet-id`. Added --remote-vnet which accepts a name or ID.
+* `network vnet create`: Added support for multiple subnet prefixes with `--subnet-prefixes`.
+* `network vnet subnet create/update`: Added support for multiple subnet prefixes with `--address-prefixes`.
+* `network application-gateway create`: Fixed logic that prevented creating gateways with WAF_v2 or Standard_v2 SKU.
+* `network vnet subnet update`: Added `--service-endpoint-policy` convenience argument.
+
+2.2.5
++++++
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
+* Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
+* Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
+* Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
+* Add `--disable-outbound-snat` to `network lb rule create/update`.
+* Allow `network watcher flow-log show/configure` to be used with classic NSGs.
+* Add `network watcher run-configuration-diagnostic` command.
+* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.
+* `network express-route create/update`: Add `--allow-global-reach` flag.
+* `network vnet subnet create/update`: Add support for `--delegation`.
+* Added `network vnet subnet list-available-delegations` command.
+* `network traffic-manager profile create/update`: Added support for `--interval`, `--timeout` and `--max-failures` for Monitor configuration.
+  Deprecated options `--monitor-path`, `--monitor-port` and `--monitor-protocol` in favor of `--path`, `--port`, `--protocol`.
+* `network lb frontend-ip create/update`: Fixed the logic for setting private IP allocation method. If a private IP address is provided, the
+  allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
+* `dns record-set * create/update`: Add support for `--target-resource`.
+* Add `network interface-endpoint` commands to query interface endpoint objects.
+* Add `network profile show/list/delete` for partial management of network profiles.
+* Add `network express-route peering connection` commands to manage peering connections between ExpressRoutes.
+
+2.2.4
++++++
+* `network application-gateway ssl-policy predefined show`: exception handling to exit with code 3 upon a missing resource for consistency
+
+2.2.3
++++++
+* Minor fixes
+
+2.2.2
++++++
+* `dns`: Added dns support to 2017-03-09-profile for Azure Stack 
+
+2.2.1
+++++++
+* Minor fixes
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `network nic create/update/delete`: Add `--no-wait` support.
+* Added `network nic wait`.
+* `network vnet subnet list`: Argument `--ids` is deprecated.
+* `network vnet peering list`: Argument `--ids` is deprecated.
+* `network nsg rule list`: Added `--include-default` flag to include default security rules in the output.
+
+2.1.5
+++++++
+* `network dns zone import`: Fix issue where record types were case-sensitive. [#6602](https://github.com/Azure/azure-cli/issues/6602)
+
+2.1.4
+++++++
+* `network lb probe create`: support `Https` protocol [#6571](https://github.com/Azure/azure-cli/issues/6571)
+* `network traffic-manager endpoint create/update`: Fix issue where `--endpoint-status` was case sensitive. [#6502](https://github.com/Azure/azure-cli/issues/6502)
+
+2.1.3
+++++++
+* `network vnet peering`: a few improvements
+
+2.1.2
+++++++
+* `network watcher show-topology`: Fix issue where command would not work with vnet and/or subnet name. [#6326](https://github.com/Azure/azure-cli/issues/6326)
+
+2.1.1
+++++++
+* `network watcher`: Fix issue where certain commands would claim Network Watcher is not enabled for regions when it actually is. [#6264](https://github.com/Azure/azure-cli/issues/6264)
+
+2.1.0
+++++++
+* BREAKING CHANGE: `express-route auth list`, `express-route peering list`, `nic ip-config list`
+                   `nsg rule list`, `route-filter rule list`, `route-table route list`,
+                   `traffic-manager endpoint list`: Removed the `--ids` parameter.
+
+2.0.28
+++++++
+* `application-gateway create`: Fix issue where tags could not be set. [#5936](https://github.com/Azure/azure-cli/issues/5936)
+* `application-gateway http-settings create/update`: Add convenience argument `--auth-certs` to attach authentication certificates. [#4910](https://github.com/Azure/azure-cli/issues/4910)
+* `ddos-protection`: Added new commands to create DDoS protection plans .
+* `vnet create/update`: Added support for `--ddos-protection-plan` to associate a VNet to a DDoS protection plan.
+* `network route-table create/update`: Fix issue with `--disable-bgp-route-propagation` flag.
+* `network lb create/update`: Removed dummy arguments `--public-ip-address-type` and `--subnet-type`.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.27
+++++++
+* `network dns zone import`: Support for importing of TXT records with RFC 1035 escape sequences.
+* `network dns zone export`: Support for exporting of TXT records with RFC 1035 escape sequences.
+* `network dns record-set txt add-record`: Support for TXT records with RFC 1035 escape sequences.
+
+2.0.26
+++++++
+* `network dns zone create/update`: Adding support for Private DNS zones.
+
+2.0.25
+++++++
+* BREAKING CHANGE: `route-filter rule create`: The `--tags` parameter is no longer supported.
+* Support Autorest 3.0 based SDKs
+* Fix issues with update commands in `express-route`, `nsg rule`, `public-ip`, `traffic manager profile` and `vnet-gateway` where some parameters erroneously had default values.
+* `network watcher`: Added `connection-monitor` commands.
+* `network watcher show-topology`: Added support to target `--vnet` and `--subnet`.
+
 2.0.24
 ++++++
 * `network vnet-gateway vpn-client generate`: Fix missing client issue.
@@ -166,7 +286,7 @@ Release History
 
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
-* BC: Fix bug in the output of `vpn-connection create` 
+* BC: Fix bug in the output of `vpn-connection create`
 * Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 * Fix bug in `dns zone import` where records were not imported correctly.
 * Fix bug where `traffic-manager endpoint update` did not work.

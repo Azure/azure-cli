@@ -29,8 +29,8 @@ def get_config_dir():
 
 
 def get_command_modules_paths(include_prefix=False):
-    for path in glob.glob(get_repo_root() + '/src/command_modules/{}*/setup.py'.format(
-            COMMAND_MODULE_PREFIX)):
+    glob_pattern = os.path.normcase('/src/command_modules/{}*/setup.py'.format(COMMAND_MODULE_PREFIX))
+    for path in glob.glob(get_repo_root() + glob_pattern):
         folder = os.path.dirname(path)
         name = os.path.basename(folder)
         if not include_prefix:
@@ -53,7 +53,7 @@ def get_core_modules_paths_with_tests(profile):
 
 
 def get_core_modules_paths():
-    for path in glob.glob(get_repo_root() + '/src/*/setup.py'):
+    for path in glob.glob(get_repo_root() + os.path.normcase('/src/*/setup.py')):
         yield os.path.basename(os.path.dirname(path)), os.path.dirname(path)
 
 
@@ -139,6 +139,8 @@ def filter_user_selected_modules_with_tests(user_input_modules=None, profile=Non
     if user_input_modules is not None:
         selected_modules = set(user_input_modules)
         extra = selected_modules - set([name for name, _, _ in existing_modules])
+        # don't count extensions as extras
+        extra = [x for x in extra if not x.startswith('azext_')]
         if any(extra):
             print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
             return None

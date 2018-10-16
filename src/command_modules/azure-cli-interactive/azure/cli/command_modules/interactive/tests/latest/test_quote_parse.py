@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import six
-from azclishell.util import parse_quotes
+from azure.cli.command_modules.interactive.azclishell.util import parse_quotes
 import unittest
 
 

@@ -22,6 +22,7 @@ AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
+EXT_METADATA_ISPREVIEW = 'azext.isPreview'
 
 logger = get_logger(__name__)
 
@@ -42,6 +43,7 @@ class Extension(object):
         self.ext_type = ext_type
         self._version = None
         self._metadata = None
+        self._preview = None
 
     @property
     def version(self):
@@ -66,6 +68,19 @@ class Extension(object):
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension metadata: %s", traceback.format_exc())
         return self._metadata
+
+    @property
+    def preview(self):
+        """
+        Lazy load preview status.
+        Returns the preview status of the extension.
+        """
+        try:
+            if not isinstance(self._preview, bool):
+                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW))
+        except Exception:  # pylint: disable=broad-except
+            logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
+        return self._preview
 
     def get_version(self):
         raise NotImplementedError()
@@ -145,8 +160,6 @@ def ext_compat_with_cli(azext_metadata):
             is_compatible = False
         elif max_required and parsed_cli_version > parse_version(max_required):
             is_compatible = False
-        else:
-            is_compatible = True
     return is_compatible, core_version, min_required, max_required
 
 

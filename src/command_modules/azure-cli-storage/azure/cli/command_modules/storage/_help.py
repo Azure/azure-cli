@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -16,7 +17,7 @@ helps['storage entity insert'] = """
           short-summary: The name of the table to insert the entity into.
         - name: --entity -e
           type: list
-          short-summary: A space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
+          short-summary: Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
           long-summary: The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key,
                         convert it to a fixed-width string which can be canonically sorted.
                         For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
@@ -290,6 +291,9 @@ helps['storage blob upload-batch'] = """
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
           short-summary: Required if the blob has an active lease
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
 """
 
 helps['storage blob download-batch'] = """
@@ -310,6 +314,9 @@ helps['storage blob download-batch'] = """
         - name: --dryrun
           type: bool
           short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
+    examples:
+        - name: Download all blobs that end with .py
+          text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
 """
 
 helps['storage blob delete-batch'] = """
@@ -336,7 +343,11 @@ helps['storage blob delete-batch'] = """
           short-summary: An ETag value, or the wildcard character (*).
           long-summary: Specify this header to perform the operation only if the resource's ETag does not match the value specified.
                         Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
-
+    examples:
+        - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
+          text: |
+            date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 """
 
 helps['storage blob copy start-batch'] = """
@@ -403,6 +414,21 @@ helps['storage container policy'] = """
     short-summary: Manage container stored access policies.
 """
 
+helps['storage container immutability-policy'] = """
+    type: group
+    short-summary: Manage container immutability policies.
+"""
+
+helps['storage container legal-hold'] = """
+    type: group
+    short-summary: Manage container legal holds.
+"""
+
+helps['storage container legal-hold show'] = """
+    type: command
+    short-summary: Get the legal hold properties of a container.
+"""
+
 helps['storage cors'] = """
     type: group
     short-summary: Manage storage service Cross-Origin Resource Sharing (CORS).
@@ -419,13 +445,14 @@ helps['storage cors add'] = """
         - name: --max-age
           short-summary: The maximum number of seconds the client/browser should cache a preflight response.
         - name: --origins
-          short-summary: List of origin domains that will be allowed via CORS, or '*' to allow all domains.
+          short-summary: Space-separated list of origin domains that will be allowed via CORS, or '*' to allow all
+                         domains.
         - name: --methods
-          short-summary: List of HTTP methods allowed to be executed by the origin.
+          short-summary: Space-separated list of HTTP methods allowed to be executed by the origin.
         - name: --allowed-headers
-          short-summary: List of response headers allowed to be part of the cross-origin request.
+          short-summary: Space-separated list of response headers allowed to be part of the cross-origin request.
         - name: --exposed-headers
-          short-summary: List of response headers to expose to CORS clients.
+          short-summary: Space-separated list of response headers to expose to CORS clients.
 """
 
 helps['storage cors clear'] = """
@@ -476,6 +503,15 @@ helps['storage entity'] = """
 helps['storage entity query'] = """
     type: command
     short-summary: List entities which satisfy a query.
+    parameters:
+        - name: --marker
+          type: list
+          short-summary: Space-separated list of key=value pairs. Must contain a nextpartitionkey and a nextrowkey.
+          long-summary: This value can be retrieved from the
+                        next_marker field of a previous generator object if max_results was
+                        specified and that generator has finished enumerating results. If
+                        specified, this generator will begin returning results from the
+                        point where the previous generator stopped.
 """
 
 helps['storage file'] = """
@@ -518,6 +554,9 @@ helps['storage file upload-batch'] = """
           type: string
           short-summary: The destination of the upload operation.
           long-summary: The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+        - name: --destination-path
+          type: string
+          short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
@@ -706,6 +745,11 @@ helps['storage share'] = """
     short-summary: Manage file shares.
 """
 
+helps['storage share url'] = """
+    type: command
+    short-summary: Create a URI to access a file share.
+"""
+
 helps['storage share exists'] = """
     type: command
     short-summary: Check for the existence of a file share.
@@ -785,4 +829,47 @@ helps['storage account generate-sas'] = """
         - name: --account-name
           short-summary: 'Storage account name. Must be used in conjunction with either storage account key or a SAS
                          token. Environment Variable: AZURE_STORAGE_ACCOUNT'
+    examples:
+        - name: Generate a sas token for the account that is valid for queue and table services.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+"""
+
+helps['storage container generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for blob container and use it to upload a blob.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+"""
+
+helps['storage blob generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a blob with read-only permissions.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob generate-sas --account-name MyStorageAccount -c MyContainer -n MyBlob --permissions r --expiry $end --https-only
+"""
+
+helps['storage share generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a fileshare and use it to upload a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage share generate-sas -n MyShare --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage file upload -s MyShare --account-name MyStorageAccount --source file.txt  --sas-token $sas
+"""
+
+helps['storage file generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
 """

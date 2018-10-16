@@ -1,0 +1,1131 @@
+{
+    "storage account create": {
+        "parameters": {
+            "--cmd": {
+                "name": [
+                    "--cmd"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--resource-group": {
+                "name": [
+                    "--resource-group",
+                    "-g"
+                ],
+                "required": "[REQUIRED]",
+                "help": "Name of resource group. You can configure the default group using `az configure --defaults group=<name>`"
+            },
+            "--name": {
+                "name": [
+                    "--name",
+                    "-n"
+                ],
+                "required": "[REQUIRED]",
+                "help": "The storage account name."
+            },
+            "--sku": {
+                "name": [
+                    "--sku"
+                ],
+                "required": "",
+                "help": "The storage account SKU."
+            },
+            "--location": {
+                "name": [
+                    "--location",
+                    "-l"
+                ],
+                "required": "",
+                "help": "Location. You can configure the default location using `az configure --defaults location=<location>`"
+            },
+            "--kind": {
+                "name": [
+                    "--kind"
+                ],
+                "required": "",
+                "help": "Indicates the type of storage account."
+            },
+            "--tags": {
+                "name": [
+                    "--tags"
+                ],
+                "required": "",
+                "help": "space-separated tags in 'key[=value]' format. Use \"\" to clear existing tags."
+            },
+            "--custom-domain": {
+                "name": [
+                    "--custom-domain"
+                ],
+                "required": "",
+                "help": "User domain assigned to the storage account. Name is the CNAME source."
+            },
+            "--encryption-services": {
+                "name": [
+                    "--encryption-services"
+                ],
+                "required": "",
+                "help": "Specifies which service(s) to encrypt."
+            },
+            "--access-tier": {
+                "name": [
+                    "--access-tier"
+                ],
+                "required": "",
+                "help": "The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. It is required for StandardBlob accounts during creation"
+            },
+            "--https-only": {
+                "name": [
+                    "--https-only"
+                ],
+                "required": "",
+                "help": "Allows https traffic only to storage service."
+            },
+            "--bypass": {
+                "name": [
+                    "--bypass"
+                ],
+                "required": "",
+                "help": "Bypass traffic for space-separated uses."
+            },
+            "--default-action": {
+                "name": [
+                    "--default-action"
+                ],
+                "required": "",
+                "help": "Default action to apply when no rule matches."
+            },
+            "--assign-identity": {
+                "name": [
+                    "--assign-identity"
+                ],
+                "required": "",
+                "help": "Generate and assign a new Storage Account Identity for this storage account for use with key management services like Azure KeyVault."
+            }
+        },
+        "help": "Create a storage account.",
+        "examples": [
+            [
+                "Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.",
+                "az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS"
+            ],
+            [
+                "Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.",
+                "az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS"
+            ]
+        ]
+    },
+    "storage account check-name": {
+        "parameters": {
+            "--name": {
+                "name": [
+                    "--name",
+                    "-n"
+                ],
+                "required": "[REQUIRED]",
+                "help": "The storage account name."
+            }
+        },
+        "help": "Checks that the storage account name is valid and is not already in use.",
+        "examples": ""
+    },
+    "vm create": {
+        "parameters": {
+            "--cmd": {
+                "name": [
+                    "--cmd"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--name": {
+                "name": [
+                    "--name",
+                    "-n"
+                ],
+                "required": "[REQUIRED]",
+                "help": "Name of the virtual machine."
+            },
+            "--resource-group": {
+                "name": [
+                    "--resource-group",
+                    "-g"
+                ],
+                "required": "[REQUIRED]",
+                "help": "Name of resource group. You can configure the default group using `az configure --defaults group=<name>`"
+            },
+            "--image": {
+                "name": [
+                    "--image"
+                ],
+                "required": "",
+                "help": "The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. This parameter is required unless using `--attach-os-disk.`\n"
+            },
+            "--size": {
+                "name": [
+                    "--size"
+                ],
+                "required": "",
+                "help": "The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
+            },
+            "--location": {
+                "name": [
+                    "--location",
+                    "-l"
+                ],
+                "required": "",
+                "help": "Location in which to create VM and related resources. If default location is not configured, will default to the resource group's location"
+            },
+            "--tags": {
+                "name": [
+                    "--tags"
+                ],
+                "required": "",
+                "help": "space-separated tags in 'key[=value]' format. Use \"\" to clear existing tags."
+            },
+            "--authentication-type": {
+                "name": [
+                    "--authentication-type"
+                ],
+                "required": "",
+                "help": "Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux."
+            },
+            "--admin-password": {
+                "name": [
+                    "--admin-password"
+                ],
+                "required": "",
+                "help": "Password for the VM if authentication type is 'Password'."
+            },
+            "--admin-username": {
+                "name": [
+                    "--admin-username"
+                ],
+                "required": "",
+                "help": "Username for the VM."
+            },
+            "--ssh-dest-key-path": {
+                "name": [
+                    "--ssh-dest-key-path"
+                ],
+                "required": "",
+                "help": "Destination file path on the VM for the SSH key."
+            },
+            "--ssh-key-value": {
+                "name": [
+                    "--ssh-key-value"
+                ],
+                "required": "",
+                "help": "The SSH public key or public key file path."
+            },
+            "--generate-ssh-keys": {
+                "name": [
+                    "--generate-ssh-keys"
+                ],
+                "required": "",
+                "help": "Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory"
+            },
+            "--availability-set": {
+                "name": [
+                    "--availability-set"
+                ],
+                "required": "",
+                "help": "Name or ID of an existing availability set to add the VM to. None by default."
+            },
+            "--nics": {
+                "name": [
+                    "--nics"
+                ],
+                "required": "",
+                "help": "Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG."
+            },
+            "--nsg": {
+                "name": [
+                    "--nsg"
+                ],
+                "required": "",
+                "help": "The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify \"\" for none."
+            },
+            "--nsg-rule": {
+                "name": [
+                    "--nsg-rule"
+                ],
+                "required": "",
+                "help": "NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux."
+            },
+            "--private-ip-address": {
+                "name": [
+                    "--private-ip-address"
+                ],
+                "required": "",
+                "help": "Static private IP address (e.g. 10.0.0.5)."
+            },
+            "--public-ip-address": {
+                "name": [
+                    "--public-ip-address"
+                ],
+                "required": "",
+                "help": "Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify \"\" for None."
+            },
+            "--public-ip-address-allocation": {
+                "name": [
+                    "--public-ip-address-allocation"
+                ],
+                "required": "",
+                "help": ""
+            },
+            "--public-ip-address-dns-name": {
+                "name": [
+                    "--public-ip-address-dns-name"
+                ],
+                "required": "",
+                "help": "Globally unique DNS name for a newly created public IP."
+            },
+            "--os-disk-name": {
+                "name": [
+                    "--os-disk-name"
+                ],
+                "required": "",
+                "help": "The name of the new VM OS disk."
+            },
+            "--os-type": {
+                "name": [
+                    "--os-type"
+                ],
+                "required": "",
+                "help": "Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias."
+            },
+            "--storage-account": {
+                "name": [
+                    "--storage-account"
+                ],
+                "required": "",
+                "help": "Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created."
+            },
+            "--storage-caching": {
+                "name": [
+                    "--storage-caching",
+                    "--os-disk-caching"
+                ],
+                "required": "",
+                "help": "Storage caching type for the VM OS disk. Default: ReadWrite"
+            },
+            "--data-disk-caching": {
+                "name": [
+                    "--data-disk-caching"
+                ],
+                "required": "",
+                "help": "storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk"
+            },
+            "--storage-container-name": {
+                "name": [
+                    "--storage-container-name"
+                ],
+                "required": "",
+                "help": "Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds"
+            },
+            "--storage-sku": {
+                "name": [
+                    "--storage-sku"
+                ],
+                "required": "",
+                "help": "The SKU of the storage account with which to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. With `--use-unmanaged-disk`, all are available."
+            },
+            "--use-unmanaged-disk": {
+                "name": [
+                    "--use-unmanaged-disk"
+                ],
+                "required": "",
+                "help": "Do not use managed disk to persist VM"
+            },
+            "--attach-os-disk": {
+                "name": [
+                    "--attach-os-disk"
+                ],
+                "required": "",
+                "help": "Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD."
+            },
+            "--os-disk-size-gb": {
+                "name": [
+                    "--os-disk-size-gb"
+                ],
+                "required": "",
+                "help": "the size of the os disk in GB"
+            },
+            "--attach-data-disks": {
+                "name": [
+                    "--attach-data-disks"
+                ],
+                "required": "",
+                "help": "Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD."
+            },
+            "--data-disk-sizes-gb": {
+                "name": [
+                    "--data-disk-sizes-gb"
+                ],
+                "required": "",
+                "help": "space-separated empty managed data disk sizes in GB to create"
+            },
+            "--image-data-disks": {
+                "name": [
+                    "--image-data-disks"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--vnet-name": {
+                "name": [
+                    "--vnet-name"
+                ],
+                "required": "",
+                "help": "Name of the virtual network when creating a new one or referencing an existing one."
+            },
+            "--vnet-address-prefix": {
+                "name": [
+                    "--vnet-address-prefix"
+                ],
+                "required": "",
+                "help": "The IP address prefix to use when creating a new VNet in CIDR format."
+            },
+            "--subnet": {
+                "name": [
+                    "--subnet"
+                ],
+                "required": "",
+                "help": "The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created."
+            },
+            "--subnet-address-prefix": {
+                "name": [
+                    "--subnet-address-prefix"
+                ],
+                "required": "",
+                "help": "The subnet IP address prefix to use when creating a new VNet in CIDR format."
+            },
+            "--storage-profile": {
+                "name": [
+                    "--storage-profile"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-publisher": {
+                "name": [
+                    "--os-publisher"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-offer": {
+                "name": [
+                    "--os-offer"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-sku": {
+                "name": [
+                    "--os-sku"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-version": {
+                "name": [
+                    "--os-version"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--storage-account-type": {
+                "name": [
+                    "--storage-account-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--vnet-type": {
+                "name": [
+                    "--vnet-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--nsg-type": {
+                "name": [
+                    "--nsg-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--public-ip-type": {
+                "name": [
+                    "--public-ip-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--nic-type": {
+                "name": [
+                    "--nic-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--validate": {
+                "name": [
+                    "--validate"
+                ],
+                "required": "",
+                "help": "Generate and validate the ARM template without creating any resources."
+            },
+            "--custom-data": {
+                "name": [
+                    "--custom-data"
+                ],
+                "required": "",
+                "help": "Custom init script file or text (cloud-init, cloud-config, etc..)"
+            },
+            "--secrets": {
+                "name": [
+                    "--secrets"
+                ],
+                "required": "",
+                "help": "One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ \"sourceVault\": { \"id\": \"value\" }, \"vaultCertificates\": [{ \"certificateUrl\": \"value\", \"certificateStore\": \"cert store name (only on windows)\"}] }]`"
+            },
+            "--plan-name": {
+                "name": [
+                    "--plan-name"
+                ],
+                "required": "",
+                "help": "plan name"
+            },
+            "--plan-product": {
+                "name": [
+                    "--plan-product"
+                ],
+                "required": "",
+                "help": "plan product"
+            },
+            "--plan-publisher": {
+                "name": [
+                    "--plan-publisher"
+                ],
+                "required": "",
+                "help": "plan publisher"
+            },
+            "--plan-promotion-code": {
+                "name": [
+                    "--plan-promotion-code"
+                ],
+                "required": "",
+                "help": "plan promotion code"
+            },
+            "--license-type": {
+                "name": [
+                    "--license-type"
+                ],
+                "required": "",
+                "help": "license type if the Windows image or disk used was licensed on-premises"
+            },
+            "--assign-identity": {
+                "name": [
+                    "--assign-identity"
+                ],
+                "required": "",
+                "help": "accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples"
+            },
+            "--scope": {
+                "name": [
+                    "--scope"
+                ],
+                "required": "",
+                "help": "Scope that the system assigned identity can access"
+            },
+            "--role": {
+                "name": [
+                    "--role"
+                ],
+                "required": "",
+                "help": "Role name or id the system assigned identity will have"
+            },
+            "--identity-role-id": {
+                "name": [
+                    "--identity-role-id"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--asgs": {
+                "name": [
+                    "--asgs"
+                ],
+                "required": "",
+                "help": "Space-separated list of existing application security groups to associate with the VM."
+            },
+            "--zone": {
+                "name": [
+                    "--zone",
+                    "-z"
+                ],
+                "required": "",
+                "help": "Availability zone into which to provision the resource."
+            },
+            "--no-wait": {
+                "name": [
+                    "--no-wait"
+                ],
+                "required": "",
+                "help": "Do not wait for the long-running operation to finish."
+            }
+        },
+        "help": "Create an Azure Virtual Machine.",
+        "examples": [
+            [
+                "Create a default Ubuntu VM with automatic SSH authentication.",
+                "az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS\n"
+            ],
+            [
+                "Create a default Windows Server VM with a private IP address.",
+                "az vm create -n MyVm -g MyResourceGroup --public-ip-address \"\" --image Win2012R2Datacenter\n"
+            ]
+        ]
+    },
+    "vmss create": {
+        "parameters": {
+            "--cmd": {
+                "name": [
+                    "--cmd"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--name": {
+                "name": [
+                    "--name",
+                    "-n"
+                ],
+                "required": "[REQUIRED]",
+                "help": "Name of the virtual machine scale set."
+            },
+            "--resource-group": {
+                "name": [
+                    "--resource-group",
+                    "-g"
+                ],
+                "required": "[REQUIRED]",
+                "help": "Name of resource group. You can configure the default group using `az configure --defaults group=<name>`"
+            },
+            "--image": {
+                "name": [
+                    "--image"
+                ],
+                "required": "[REQUIRED]",
+                "help": "The name of the operating system image as a URN alias, URN, or URI."
+            },
+            "--disable-overprovision": {
+                "name": [
+                    "--disable-overprovision"
+                ],
+                "required": "",
+                "help": "Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details)."
+            },
+            "--instance-count": {
+                "name": [
+                    "--instance-count"
+                ],
+                "required": "",
+                "help": "Number of VMs in the scale set."
+            },
+            "--location": {
+                "name": [
+                    "--location",
+                    "-l"
+                ],
+                "required": "",
+                "help": "Location in which to create VM and related resources. If default location is not configured, will default to the resource group's location"
+            },
+            "--tags": {
+                "name": [
+                    "--tags"
+                ],
+                "required": "",
+                "help": "space-separated tags in 'key[=value]' format. Use \"\" to clear existing tags."
+            },
+            "--upgrade-policy-mode": {
+                "name": [
+                    "--upgrade-policy-mode"
+                ],
+                "required": "",
+                "help": ""
+            },
+            "--validate": {
+                "name": [
+                    "--validate"
+                ],
+                "required": "",
+                "help": "Generate and validate the ARM template without creating any resources."
+            },
+            "--admin-username": {
+                "name": [
+                    "--admin-username"
+                ],
+                "required": "",
+                "help": "Username for the VM."
+            },
+            "--admin-password": {
+                "name": [
+                    "--admin-password"
+                ],
+                "required": "",
+                "help": "Password for the VM if authentication type is 'Password'."
+            },
+            "--authentication-type": {
+                "name": [
+                    "--authentication-type"
+                ],
+                "required": "",
+                "help": "Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux."
+            },
+            "--vm-sku": {
+                "name": [
+                    "--vm-sku"
+                ],
+                "required": "",
+                "help": "Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
+            },
+            "--ssh-dest-key-path": {
+                "name": [
+                    "--ssh-dest-key-path"
+                ],
+                "required": "",
+                "help": "Destination file path on the VM for the SSH key."
+            },
+            "--ssh-key-value": {
+                "name": [
+                    "--ssh-key-value"
+                ],
+                "required": "",
+                "help": "SSH public key or public key file path."
+            },
+            "--generate-ssh-keys": {
+                "name": [
+                    "--generate-ssh-keys"
+                ],
+                "required": "",
+                "help": "Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory"
+            },
+            "--load-balancer": {
+                "name": [
+                    "--load-balancer",
+                    "--lb"
+                ],
+                "required": "",
+                "help": "Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify \"\" for none."
+            },
+            "--lb-sku": {
+                "name": [
+                    "--lb-sku"
+                ],
+                "required": "",
+                "help": "SKU when creating a new Load Balancer. Default to 'Basic' for any non-zonal scaleset and 'Standard' otherwise"
+            },
+            "--app-gateway": {
+                "name": [
+                    "--app-gateway"
+                ],
+                "required": "",
+                "help": "Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify \"\" for none."
+            },
+            "--app-gateway-subnet-address-prefix": {
+                "name": [
+                    "--app-gateway-subnet-address-prefix"
+                ],
+                "required": "",
+                "help": "The subnet IP address prefix to use when creating a new application gateway in CIDR format."
+            },
+            "--app-gateway-sku": {
+                "name": [
+                    "--app-gateway-sku"
+                ],
+                "required": "",
+                "help": "SKU when creating a new application gateway."
+            },
+            "--app-gateway-capacity": {
+                "name": [
+                    "--app-gateway-capacity"
+                ],
+                "required": "",
+                "help": "The number of instances to use when creating a new application gateway."
+            },
+            "--backend-pool-name": {
+                "name": [
+                    "--backend-pool-name"
+                ],
+                "required": "",
+                "help": "Name to use for the backend pool when creating a new load balancer or application gateway."
+            },
+            "--lb-nat-pool-name": {
+                "name": [
+                    "--lb-nat-pool-name",
+                    "--nat-pool-name"
+                ],
+                "required": "",
+                "help": "Name to use for the NAT pool when creating a new load balancer."
+            },
+            "--backend-port": {
+                "name": [
+                    "--backend-port"
+                ],
+                "required": "",
+                "help": "When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings."
+            },
+            "--health-probe": {
+                "name": [
+                    "--health-probe"
+                ],
+                "required": "",
+                "help": "(Preview) probe name from the existing load balancer, mainly used for rolling upgrade"
+            },
+            "--public-ip-address": {
+                "name": [
+                    "--public-ip-address"
+                ],
+                "required": "",
+                "help": "Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify \"\" for None."
+            },
+            "--public-ip-address-allocation": {
+                "name": [
+                    "--public-ip-address-allocation"
+                ],
+                "required": "",
+                "help": ""
+            },
+            "--public-ip-address-dns-name": {
+                "name": [
+                    "--public-ip-address-dns-name"
+                ],
+                "required": "",
+                "help": "Globally unique DNS name for a newly created public IP."
+            },
+            "--accelerated-networking": {
+                "name": [
+                    "--accelerated-networking"
+                ],
+                "required": "",
+                "help": "enable accelerated networking"
+            },
+            "--public-ip-per-vm": {
+                "name": [
+                    "--public-ip-per-vm"
+                ],
+                "required": "",
+                "help": "Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules"
+            },
+            "--vm-domain-name": {
+                "name": [
+                    "--vm-domain-name"
+                ],
+                "required": "",
+                "help": "domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'"
+            },
+            "--dns-servers": {
+                "name": [
+                    "--dns-servers"
+                ],
+                "required": "",
+                "help": "space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6"
+            },
+            "--nsg": {
+                "name": [
+                    "--nsg"
+                ],
+                "required": "",
+                "help": "Name or ID of an existing Network Security Group."
+            },
+            "--storage-caching": {
+                "name": [
+                    "--storage-caching",
+                    "--os-disk-caching"
+                ],
+                "required": "",
+                "help": "Storage caching type for the VM OS disk. Default: ReadWrite"
+            },
+            "--data-disk-caching": {
+                "name": [
+                    "--data-disk-caching"
+                ],
+                "required": "",
+                "help": "storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk"
+            },
+            "--storage-container-name": {
+                "name": [
+                    "--storage-container-name"
+                ],
+                "required": "",
+                "help": "Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds"
+            },
+            "--storage-sku": {
+                "name": [
+                    "--storage-sku"
+                ],
+                "required": "",
+                "help": "The SKU of the storage account with which to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. With `--use-unmanaged-disk`, all are available."
+            },
+            "--os-type": {
+                "name": [
+                    "--os-type"
+                ],
+                "required": "",
+                "help": "Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias."
+            },
+            "--os-disk-name": {
+                "name": [
+                    "--os-disk-name"
+                ],
+                "required": "",
+                "help": "The name of the new VM OS disk."
+            },
+            "--use-unmanaged-disk": {
+                "name": [
+                    "--use-unmanaged-disk"
+                ],
+                "required": "",
+                "help": "Do not use managed disk to persist VM"
+            },
+            "--data-disk-sizes-gb": {
+                "name": [
+                    "--data-disk-sizes-gb"
+                ],
+                "required": "",
+                "help": "space-separated empty managed data disk sizes in GB to create"
+            },
+            "--image-data-disks": {
+                "name": [
+                    "--image-data-disks"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--vnet-name": {
+                "name": [
+                    "--vnet-name"
+                ],
+                "required": "",
+                "help": "Name of the virtual network when creating a new one or referencing an existing one."
+            },
+            "--vnet-address-prefix": {
+                "name": [
+                    "--vnet-address-prefix"
+                ],
+                "required": "",
+                "help": "The IP address prefix to use when creating a new VNet in CIDR format."
+            },
+            "--subnet": {
+                "name": [
+                    "--subnet"
+                ],
+                "required": "",
+                "help": "The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created."
+            },
+            "--subnet-address-prefix": {
+                "name": [
+                    "--subnet-address-prefix"
+                ],
+                "required": "",
+                "help": "The subnet IP address prefix to use when creating a new VNet in CIDR format."
+            },
+            "--os-offer": {
+                "name": [
+                    "--os-offer"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-publisher": {
+                "name": [
+                    "--os-publisher"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-sku": {
+                "name": [
+                    "--os-sku"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--os-version": {
+                "name": [
+                    "--os-version"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--load-balancer-type": {
+                "name": [
+                    "--load-balancer-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--app-gateway-type": {
+                "name": [
+                    "--app-gateway-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--vnet-type": {
+                "name": [
+                    "--vnet-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--public-ip-type": {
+                "name": [
+                    "--public-ip-type"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--storage-profile": {
+                "name": [
+                    "--storage-profile"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--single-placement-group": {
+                "name": [
+                    "--single-placement-group"
+                ],
+                "required": "",
+                "help": "Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100."
+            },
+            "--custom-data": {
+                "name": [
+                    "--custom-data"
+                ],
+                "required": "",
+                "help": "Custom init script file or text (cloud-init, cloud-config, etc..)"
+            },
+            "--secrets": {
+                "name": [
+                    "--secrets"
+                ],
+                "required": "",
+                "help": "One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ \"sourceVault\": { \"id\": \"value\" }, \"vaultCertificates\": [{ \"certificateUrl\": \"value\", \"certificateStore\": \"cert store name (only on windows)\"}] }]`"
+            },
+            "--plan-name": {
+                "name": [
+                    "--plan-name"
+                ],
+                "required": "",
+                "help": "plan name"
+            },
+            "--plan-product": {
+                "name": [
+                    "--plan-product"
+                ],
+                "required": "",
+                "help": "plan product"
+            },
+            "--plan-publisher": {
+                "name": [
+                    "--plan-publisher"
+                ],
+                "required": "",
+                "help": "plan publisher"
+            },
+            "--plan-promotion-code": {
+                "name": [
+                    "--plan-promotion-code"
+                ],
+                "required": "",
+                "help": "plan promotion code"
+            },
+            "--license-type": {
+                "name": [
+                    "--license-type"
+                ],
+                "required": "",
+                "help": "license type if the Windows image or disk used was licensed on-premises"
+            },
+            "--assign-identity": {
+                "name": [
+                    "--assign-identity"
+                ],
+                "required": "",
+                "help": "accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples"
+            },
+            "--scope": {
+                "name": [
+                    "--scope"
+                ],
+                "required": "",
+                "help": "Scope that the system assigned identity can access"
+            },
+            "--role": {
+                "name": [
+                    "--role"
+                ],
+                "required": "",
+                "help": "Role name or id the system assigned identity will have"
+            },
+            "--identity-role-id": {
+                "name": [
+                    "--identity-role-id"
+                ],
+                "required": "",
+                "help": "==SUPPRESS=="
+            },
+            "--zones": {
+                "name": [
+                    "--zones",
+                    "-z"
+                ],
+                "required": "",
+                "help": "Space-separated list of availability zones into which to provision the resource."
+            },
+            "--priority": {
+                "name": [
+                    "--priority"
+                ],
+                "required": "",
+                "help": "(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way"
+            },
+            "--no-wait": {
+                "name": [
+                    "--no-wait"
+                ],
+                "required": "",
+                "help": "Do not wait for the long-running operation to finish."
+            }
+        },
+        "help": "Create an Azure Virtual Machine Scale Set.",
+        "examples": [
+            [
+                "Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.",
+                "az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2\n"
+            ],
+            [
+                "Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.",
+                "az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\\n    --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image UbuntuLTS \\\n    --generate-ssh-keys\n"
+            ]
+        ]
+    },
+    "vmss": {
+        "help": "Manage groupings of virtual machines in an Azure Virtual Machine Scale Set (VMSS)."
+    },
+    "vm": {
+        "help": "Provision Linux or Windows virtual machines."
+    },
+    "storage account": {
+        "help": "Manage storage accounts."
+    },
+    "storage": {
+        "help": "Manage Azure Cloud Storage resources."
+    }
+}

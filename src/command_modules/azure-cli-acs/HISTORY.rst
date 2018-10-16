@@ -3,6 +3,120 @@
 Release History
 ===============
 
+2.3.6
++++++
+* `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1 
+
+2.3.5
++++++
+* bugfix: Fall back to 'scp' when Parimiko fails.
+* `az aks create` no longer requires --aad-tenant-id
+* bugfix: improve merging of kubernetes credentials when duplicate entries are present.
+* In Azure Cloud Shell, open a tunnel and report the URL
+
+2.3.4
++++++
+* install-connector: Updates the install-connector command to set the AKS Master FQDN
+
+2.3.3
++++++
+* bugfix: creating role assignment for vnet-subnet-id when not specifying service principal and skip-role-assignemnt
+
+2.3.2
++++++
+* `az aks create` now defaults to Standard_DS2_v2 VMs.
+
+2.3.1
++++++
+* `az aks get-credentials` will now call new apis to get cluster credential.
+
+2.3.0
++++++
+* `az acs/aks install-cli` will install to under %USERPROFILE%\.azure-kubectl on Windows
+* `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
+* Create role assignment to the subnet when it's provided.
+* Add new option "skip role assignment" for subnet when it's provided
+* Skip role assignment to subnet when assignment already exists
+
+2.2.2
++++++
+* Return 0 (success) when ending `az aks browse` by pressing [Ctrl+C]
+* changes for consuming multi api azure.mgmt.authorization package
+
+2.2.1
++++++
+* Depdendency update: paramiko >= 2.0.8
+
+2.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `az aks create` will error out if `--max-pods` is less than 5
+
+2.1.3
++++++
+* Update PyYAML dependency to 4.2b4
+* Handle monitoring solution through its subscription ID
+
+2.1.2
++++++
+* Breaking change: Enable Kubernetes role-based access control by default.
+* Add a `--disable-rbac` argument and deprecate `--enable-rbac` since it's the default now.
+* Updated options for `az aks browse` command. Added `--listen-port` support.
+* Update the default helm chart package for `az aks install-connector` command. Use virtual-kubelet-for-aks-latest.tgz.
+* added `az aks enable-addons` and `disable-addons` commands to update an existing cluster
+
+2.1.1
++++++
+* Updated options of `az aks use-dev-spaces` command. Added `--update` support.
+* `az aks get-credentials --admin` won't replace the user context in $HOME/.kube/config
+* expose read-only "nodeResourceGroup" property on managed clusters
+* fix `az acs browse` command error
+
+2.1.0
++++++
+* `az aks create` understands advanced networking (VNet) options
+* `az aks create` accepts options to enable Log Analytics monitoring and HTTP application routing addons
+* `az aks create --no-ssh-key` creates a cluster without using local SSH keys
+* `az aks create --enable-rbac` creates a cluster with Kubernetes Role-Based Access Control
+* `az aks create` handles Azure Active Directory auth options (PREVIEW)
+
+2.0.34
+++++++
+* `az aks get-credentials` creates the kube config file with more secure filesystem permissions
+* make --connector-name optional for `aks install-connector`, `aks upgrade-connector` and `aks remove-connector`
+* add 2 new Azure Container Instance regions for `aks install-connector`
+* `aks install-connector` add the normalized location into the helm release name and node name
+
+2.0.33
+++++++
+* add new Dev-Spaces commands: `az aks use-dev-spaces` and `az aks remove-dev-spaces`
+* fix typo in help message
+
+2.0.32
+++++++
+* remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
+2.0.31
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.30
+++++++
+* Minor fixes
+* aks created spn will be valid for 5 years
+
+2.0.29
+++++++
+* fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
+
+2.0.28
+++++++
+* Support Autorest 3.0 based SDKs
+* warn the user that `az aks browse` won't work in Azure Cloud Shell
+* add `aks upgrade-connector` command to upgrade an existing connector
+* `kubectl` config files are more readable block-style YAML
+
 2.0.27
 ++++++
 * use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default

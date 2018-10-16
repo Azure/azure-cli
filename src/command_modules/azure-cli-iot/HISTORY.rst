@@ -2,6 +2,53 @@
 
 Release History
 ===============
+0.3.3
++++++
+* Added extension installation comand to first-run banner
+
+0.3.2
++++++
+* Adds support for routing IoT Hubs.
+
+0.3.1
++++++
+* Increment DPS mgmt SDK requirement
+* Fix internal breaking changes for SDK usage patterns
+* Apply work around (back rev API) for assocating a linked-hub due to swagger/sdk mismatch with API.
+* Update tests and DPS recording
+
+0.3.0
++++++
+* BREAKING CHANGE: Removed deprecated commands which have moved to the iot extension
+* Updated elements to not assume azure-devices.net domain
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.22
+++++++
+* Minor fixes.
+
+0.1.21
+++++++
+
+* Adds support for creating Basic Tier IoT Hubs.
+* Updates to Azure SDK 0.5.0
+
+0.1.20
+++++++
+
+* Minor fixes to compat with msrest 0.4.28
+
+0.1.19
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
+0.1.18
+++++++
+* Support Autorest 3.0 based SDKs
 
 0.1.17
 ++++++

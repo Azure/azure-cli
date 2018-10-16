@@ -8,12 +8,12 @@ import re
 import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck, api_version_constraint)
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -46,12 +46,14 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_small_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 1, 'block', 0)
+        for blob_type in ['block', 'page']:
+            self.verify_blob_upload_and_download(resource_group, storage_account, 1, blob_type, 0)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
+        for blob_type in ['block', 'page']:
+            self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
@@ -71,8 +73,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', True))
         self.storage_cmd('storage blob list -c {} -otable --num-results 1', account_info, container)
 
-        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('name', blob_name))
+        show_result = self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name,
+                                       container).get_output_in_json()
+        self.assertEqual(show_result.get('name'), blob_name)
+        if blob_type == 'page':
+            self.assertEqual(type(show_result.get('properties').get('pageRanges')), list)
+        else:
+            self.assertEqual(show_result.get('properties').get('pageRanges'), None)
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
@@ -130,6 +137,38 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(block_count, len(put_blocks),
                          'The expected number of block put requests is {} but the actual '
                          'number is {}.'.format(block_count, len(put_blocks)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_socket_timeout(self, resource_group, storage_account):
+        local_dir = self.create_temp_dir()
+        local_file = self.create_temp_file(1)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        container = self.create_container(account_info)
+
+        from azure.common import AzureException
+        with self.assertRaises(AzureException):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout -11',
+                             account_info, container, local_file, blob_name)
+
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout 10',
+                         account_info, container, local_file, blob_name)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('name', blob_name))
+
+        downloaded = os.path.join(local_dir, 'test.file')
+
+        self.storage_cmd('storage blob download -n {} -c {} --file "{}" --socket-timeout 10',
+                         account_info, blob_name, container, downloaded)
+        self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -313,6 +352,26 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob undelete -c {} -n {}', account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 1)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_append(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info)
+
+        # create an append blob
+        local_file = self.create_temp_file(1)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
+                         container, local_file, blob_name)
+        self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
+                                              account_info, container).get_output_in_json()), 1)
+
+        # append if-none-match should throw exception
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
+                             container, local_file, blob_name)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,71 @@
 
 Release History
 ===============
+2.1.5
++++++
+* `policy definition create`: Fixed the incorrect parameter definition example.
+* `policy definition create`: Replaced the the use of `-n` alias with full `--name` parameter in the example.
+
+2.1.4
++++++
+* `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.
+* Restrict `feature` commands to supported profiles.
+
+2.1.3
++++++
+* `provider operation show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+2.1.2
++++++
+* Minor changes
+
+2.1.1
++++++
+* `group deployment create`: Add `--rollback-on-error` to execute a known-good deployment on error.
+* `group deployment create`: Fix issue where `--parameters {}` resulted in an error.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `group deployment delete`: Add `--no-wait` support.
+* `deployment delete`: Add `--no-wait` support.
+* Added `deployment wait` command.
+* Fix issue where the subscription-level `az deployment` commands erroneously appeared for profile 2017-03-09-profile.
+
+2.0.32
+++++++
+* Support deployment at subscription scope: new operation group `deployment`.
+
+2.0.31
+++++++
+* Minor changes
+
+2.0.30
+++++++
+*  add `account management-group` commands.
+
+2.0.29
+++++++
+* Minor changes
+
+2.0.28
+++++++
+* Minor changes
+
+2.0.27
+++++++
+* `policy definition create`: Add support for `--metadata`.
+* `policy definition update`: Add support for `--metadata`, `--set`, `--add`, `--remove`.
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.26
+++++++
+provider operation list/show: (breaking change)`api-version` is no longer required to run the command
+
+2.0.25
+++++++
+* Support Autorest 3.0 based SDKs
+
 2.0.24
 ++++++
 * `group deployment export`: On failure, command will now output a partial template and any failures.

@@ -5,6 +5,7 @@
 
 import os
 import re
+import argparse
 
 from knack.util import CLIError
 try:
@@ -142,3 +143,14 @@ def validate_resource_lock(namespace):
                       'resource_type']:
             kwargs[param] = getattr(namespace, param, None)
         internal_validate_lock_parameters(namespace, **kwargs)
+
+
+def validate_metadata(namespace):
+    if namespace.metadata:
+        namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+
+
+# pylint: disable=too-few-public-methods
+class RollbackAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, 'rollback_on_error', '' if not values else values)

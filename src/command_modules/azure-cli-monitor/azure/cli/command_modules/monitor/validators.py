@@ -3,8 +3,103 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 
-def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
+
+def process_autoscale_create_namespace(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    validate_tags(namespace)
+    get_target_resource_validator('resource', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource).get('resource_group', None)
+    get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_autoscale_recurrence(namespace):
+    from knack.util import CLIError
+    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
+
+    def _validate_weekly_recurrence(namespace):
+        # Construct days
+        valid_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        days = []
+        for partial in namespace.recurrence[1:]:
+            if len(partial) < 2:
+                raise CLIError('specifying fewer than 2 characters for day is ambiguous.')
+            try:
+                match = next(x for x in valid_days if x.lower().startswith(partial.lower()))
+            except StopIteration:
+                raise CLIError("No match for day '{}'.".format(partial))
+            days.append(match)
+            valid_days.remove(match)
+
+        # validate, but don't process start and end time
+        recurrence_obj = Recurrence(
+            frequency=RecurrenceFrequency.week,
+            schedule=RecurrentSchedule(
+                time_zone=namespace.timezone,
+                days=days,
+                hours=[],  # will be filled in during custom command
+                minutes=[]  # will be filled in during custom command
+            )
+        )
+        return recurrence_obj
+
+    valid_recurrence = {
+        'week': {
+            'usage': '-r week [DAY DAY ...]',
+            'validator': _validate_weekly_recurrence
+        }
+    }
+    if namespace.recurrence:
+        raw_values = namespace.recurrence
+        try:
+            delimiter = raw_values[0].lower()
+            usage = valid_recurrence[delimiter]['usage']
+            try:
+                namespace.recurrence = valid_recurrence[delimiter]['validator'](namespace)
+            except CLIError as ex:
+                raise CLIError('{} invalid usage: {}'.format(ex, usage))
+        except KeyError as ex:
+            raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
+
+
+def validate_autoscale_timegrain(namespace):
+    from azure.mgmt.monitor.models import MetricTrigger
+    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
+
+    values = namespace.timegrain
+    if len(values) == 1:
+        # workaround because CMD.exe eats > character... Allows condition to be
+        # specified as a quoted expression
+        values = values[0].split(' ')
+    name_offset = 0
+    try:
+        time_grain = period_type(values[1])
+        name_offset += 1
+    except ValueError:
+        time_grain = period_type('1m')
+    try:
+        statistic = get_autoscale_statistic_map()[values[0]]
+        name_offset += 1
+    except KeyError:
+        statistic = get_autoscale_statistic_map()['avg']
+    timegrain = MetricTrigger(
+        metric_name=None,
+        metric_resource_uri=None,
+        time_grain=time_grain,
+        statistic=statistic,
+        time_window=None,
+        time_aggregation=None,
+        operator=None,
+        threshold=None
+    )
+    namespace.timegrain = timegrain
+
+
+def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id
         from knack.util import CLIError
@@ -16,7 +111,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                                '--{0}-type TYPE [--{0}-parent PARENT] '
-                               '[--{0}-namespace NAMESPACE]'.format(dest))
+                               '[--{0}-namespace NAMESPACE]'.format(alias))
         if not name_or_id and required:
             raise usage_error
         elif name_or_id:
@@ -46,16 +141,14 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
     from knack.util import CLIError
-    resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
-                           "service bus namespace and rule. "
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource_uri)['resource_group']
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.storage_account = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                                 resource_group=namespace.resource_group_name,
                                                 namespace='microsoft.Storage',
@@ -63,17 +156,36 @@ def validate_diagnostic_settings(cmd, namespace):
                                                 name=namespace.storage_account)
 
     if namespace.workspace and not is_valid_resource_id(namespace.workspace):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                           resource_group=namespace.resource_group_name,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces',
                                           name=namespace.workspace)
 
-    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub_name:
+    if namespace.event_hub and is_valid_resource_id(namespace.event_hub):
+        namespace.event_hub = parse_resource_id(namespace.event_hub)['name']
+
+    if namespace.event_hub_rule:
+        if not is_valid_resource_id(namespace.event_hub_rule):
+            if not namespace.event_hub:
+                raise CLIError('usage error: --event-hub-rule ID | --event-hub-rule NAME --event-hub NAME')
+            # use value from --event-hub if the rule is a name
+            namespace.event_hub_rule = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.EventHub',
+                type='namespaces',
+                name=namespace.event_hub,
+                child_type_1='AuthorizationRules',
+                child_name_1=namespace.event_hub_rule)
+        elif not namespace.event_hub:
+            # extract the event hub name from `--event-hub-rule` if provided as an ID
+            namespace.event_hub = parse_resource_id(namespace.event_hub_rule)['name']
+
+    if not any([namespace.storage_account, namespace.workspace, namespace.event_hub]):
         raise CLIError(
-            'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
+            'usage error - expected one or more:  --storage-account NAME_OR_ID | --workspace NAME_OR_ID '
+            '| --event-hub NAME_OR_ID | --event-hub-rule ID')
 
     try:
         del namespace.resource_group_name
@@ -136,7 +248,7 @@ def process_metric_aggregation(namespace):
 
 
 def process_metric_result_type(namespace):
-    from azure.mgmt.monitor.models.monitor_management_client_enums import ResultType
+    from azure.mgmt.monitor.models import ResultType
 
     ns = vars(namespace)
     metadata_only = ns.pop('metadata', False)
@@ -159,6 +271,11 @@ def process_metric_dimension(namespace):
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
 
 
+def validate_metric_names(namespace):
+    if namespace.metricnames:
+        namespace.metricnames = ','.join(namespace.metricnames)
+
+
 def process_webhook_prop(namespace):
     if not isinstance(namespace.webhook_properties, list):
         return
@@ -173,3 +290,54 @@ def process_webhook_prop(namespace):
             result[key] = value
 
     namespace.webhook_properties = result
+
+
+def get_action_group_validator(dest):
+    def validate_action_groups(cmd, namespace):
+        action_groups = getattr(namespace, dest, None)
+
+        if not action_groups:
+            return
+
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        subscription = get_subscription_id(cmd.cli_ctx)
+        resource_group = namespace.resource_group_name
+        for group in action_groups:
+            if not is_valid_resource_id(group.action_group_id):
+                group.action_group_id = resource_id(
+                    subscription=subscription,
+                    resource_group=resource_group,
+                    namespace='microsoft.insights',
+                    type='actionGroups',
+                    name=group.action_group_id
+                )
+    return validate_action_groups
+
+
+def get_action_group_id_validator(dest):
+    def validate_action_group_ids(cmd, namespace):
+        action_groups = getattr(namespace, dest, None)
+
+        if not action_groups:
+            return
+
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        action_group_ids = []
+        subscription = get_subscription_id(cmd.cli_ctx)
+        resource_group = namespace.resource_group_name
+        for group in action_groups:
+            if not is_valid_resource_id(group):
+                group = resource_id(
+                    subscription=subscription,
+                    resource_group=resource_group,
+                    namespace='microsoft.insights',
+                    type='actionGroups',
+                    name=group
+                )
+            action_group_ids.append(group)
+        setattr(namespace, dest, action_group_ids)
+    return validate_action_group_ids

@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -291,6 +292,16 @@ helps['dla account delete'] = """
 helps['dla account blob-storage'] = """
     type: group
     short-summary: (PREVIEW) Manage links between Data Lake Analytics accounts and Azure Storage.
+"""
+
+helps['dla account blob-storage add'] = """
+    type: command
+    short-summary: Links an Azure Storage account to the specified Data Lake Analytics account.
+"""
+
+helps['dla account blob-storage update'] = """
+    type: command
+    short-summary: Updates an Azure Storage account linked to the specified Data Lake Analytics account.
 """
 
 helps['dla account data-lake-store'] = """

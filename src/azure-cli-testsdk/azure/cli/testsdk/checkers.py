@@ -110,3 +110,17 @@ class StringContainCheck(object):  # pylint: disable=too-few-public-methods
             raise AssertionError(
                 "Actual value '{}' doesn't contain Expected value {}".format(result,
                                                                              self.expected_result))
+
+
+class StringContainCheckIgnoreCase(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, expected_result):
+        self.expected_result = expected_result.lower()
+
+    def __call__(self, execution_result):
+        try:
+            result = execution_result.output.strip('"').lower()
+            assert self.expected_result in result
+        except AssertionError:
+            raise AssertionError(
+                "Actual value '{}' doesn't contain Expected value {}".format(result,
+                                                                             self.expected_result))

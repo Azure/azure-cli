@@ -7,11 +7,16 @@ import os
 import tempfile
 import unittest
 
+from knack.util import CLIError
+
 from azure.cli.testsdk import (
-    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
-from azure.cli.testsdk.checkers import StringContainCheck
+    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest, live_only)
+from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.checkers import (
+    StringContainCheck, StringContainCheckIgnoreCase)
 
 # flake8: noqa
+
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
@@ -32,11 +37,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name}  --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --ssh-key-value={ssh_key_value} ' \
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -57,10 +63,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('type', '{resource_type}'),
             self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
             self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
         ])
@@ -87,30 +94,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 5', checks=[
-            self.check('agentPoolProfiles[0].count', 5)
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 5)
-        ])
-
-        # scale down
-        self.cmd('aks scale -g {resource_group} -n {name} -c 1', checks=[
-            self.check('agentPoolProfiles[0].count', 1)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 1)
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # delete
-        self.cmd('aks delete -g {resource_group} -n {name} -y', checks=[self.is_empty()])
-
-        # show again and expect failure
-        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -123,13 +117,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
             'service_principal': sp_name,
-            'client_secret': sp_password
+            'client_secret': sp_password,
+            'k8s_version': '1.8.11',
+            'vm_size': 'Standard_DS1_v2'
         })
 
         # create --no-wait
         create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
-                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} ' \
-                     '--tags scenario_test --no-wait'
+                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
+                     '--node-vm-size {vm_size} ' \
+                     '--tags scenario_test -c 1 --no-wait'
         self.cmd(create_cmd, checks=[self.is_empty()])
 
         # wait
@@ -139,30 +136,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles', None)
         ])
-
-        # delete
-        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
-
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
-    @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
-        # kwargs for string formatting
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': self.create_random_name('cliakstest', 16),
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
-            'location': resource_group_location,
-            'service_principal': sp_name,
-            'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'k8s_version': '1.7.12'
-        })
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
@@ -172,27 +151,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show k8s versions in table format
         self.cmd('aks get-versions -l {location} -o table', checks=[
             StringContainCheck(self.kwargs['k8s_version'])
-        ])
-
-        # create
-        create_cmd = 'aks create -g {resource_group} -n {name} --dns-name-prefix {dns_name_prefix} ' \
-                     '--ssh-key-value {ssh_key_value} --kubernetes-version {k8s_version} -l {location} ' \
-                     '--service-principal {service_principal} --client-secret {client_secret} -c 1'
-        self.cmd(create_cmd, checks=[
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded')
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('kubernetesVersion', '{k8s_version}')
         ])
 
         # get versions for upgrade
@@ -206,33 +164,290 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = '1.8.7'
+        k8s_upgrade_version = '1.9.6'
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
         ])
 
+        # enable http application routing addon
+        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.httpApplicationRouting.enabled', True)
+        ])
 
-        # upgrade
-        self.kwargs.update({'k8s_version': k8s_upgrade_version})
-        self.cmd('aks upgrade -g {resource_group} -n {name} --kubernetes-version {k8s_version} --yes', checks=[
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
+
+        # show again and expect failure
+        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'k8s_version': '1.8.11',
+            'nodepool_name': self.create_random_name('np', 12)
+        })
+
+        # create
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --nodepool-name {nodepool_name} ' \
+                     '-l {location} --service-principal {service_principal} --client-secret {client_secret} -k {k8s_version} ' \
+                     '--ssh-key-value {ssh_key_value} --tags scenario_test -c 1'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded')
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles', None)
+        ])
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --nodepool-name {nodepool_name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('kubernetesVersion', '{k8s_version}')
-        ])
-
-        # get versions for upgrade in table format
-        self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
-            StringContainCheck('Upgrades'),
-            StringContainCheck('None available')
+            self.check('agentPoolProfiles[0].count', 3)
         ])
 
         # delete
-        self.cmd('aks delete -g {resource_group} -n {name} -y', checks=[self.is_empty()])
+        self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
 
+        # show again and expect failure
+        self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_bad_inputs(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliakstest', 16),
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+        })
+
+        # create with --max-pods set too small
+        create_cmd = 'aks create -g {resource_group} -n {name} -p {dns_name_prefix} --ssh-key-value {ssh_key_value} ' \
+                     '--max-pods 3'
+        with self.assertRaises(CLIError) as err:
+            self.cmd(create_cmd)
+        self.assertIn('--max-pods', str(err.exception))
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_without_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.check('[0].scope', '{vnet_subnet_id}')
+        ])
+
+        # create cluster with same role assignment
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --service-principal={service_principal} ' \
+                     '--client-secret={client_secret} --vnet-subnet-id={vnet_subnet_id} ' \
+                     '--skip-subnet-role-assignment --no-ssh-key'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.is_empty()
+        ])
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --vnet-subnet-id={vnet_subnet_id}  --no-ssh-key'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.check('[0].scope', '{vnet_subnet_id}')
+        ])
+
+    # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_with_monitoring_addon(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create cluster with monitoring-addon
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --enable-addons monitoring'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            StringContainCheckIgnoreCase('Microsoft.OperationalInsights')
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            StringContainCheckIgnoreCase('Microsoft.OperationalInsights'),
+            StringContainCheckIgnoreCase('DefaultResourceGroup'),
+            StringContainCheckIgnoreCase('DefaultWorkspace')
+        ])
+
+        # disable monitoring add-on
+        self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
+            self.check('addonProfiles.omsagent.enabled', False),
+            self.check('addonProfiles.omsagent.config', None)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('addonProfiles.omsagent.enabled', False),
+            self.check('addonProfiles.omsagent.config', None)
+
+        ])
+
+        # enable monitoring add-on
+        self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            StringContainCheckIgnoreCase('Microsoft.OperationalInsights'),
+            StringContainCheckIgnoreCase('DefaultResourceGroup'),
+            StringContainCheckIgnoreCase('DefaultWorkspace')
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            StringContainCheckIgnoreCase('Microsoft.OperationalInsights'),
+            StringContainCheckIgnoreCase('DefaultResourceGroup'),
+            StringContainCheckIgnoreCase('DefaultWorkspace')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @classmethod
     def generate_ssh_keys(cls):
@@ -241,3 +456,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         with open(pathname, 'w') as key_file:
             key_file.write(TEST_SSH_KEY_PUB)
         return pathname
+
+    def generate_vnet_subnet_id(self, resource_group):
+        vnet_name = self.create_random_name('clivnet', 16)
+        subnet_name = self.create_random_name('clisubnet', 16)
+        address_prefix = "192.168.0.0/16"
+        subnet_prefix = "192.168.0.0/24"
+        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+                               .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
+        return vnet_subnet.get("newVNet").get("subnets")[0].get("id")

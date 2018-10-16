@@ -158,9 +158,12 @@ class TestExtensionCommands(unittest.TestCase):
         # Now add using name
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
-            with self.assertRaises(CLIError) as err:
+            with mock.patch('azure.cli.command_modules.extension.custom.logger') as mock_logger:
                 add_extension(extension_name=MY_EXT_NAME)
-            self.assertTrue('The extension {} already exists.'.format(MY_EXT_NAME) in str(err.exception))
+                call_args = mock_logger.warning.call_args
+                self.assertEqual("The extension '%s' already exists.", call_args[0][0])
+                self.assertEqual(MY_EXT_NAME, call_args[0][1])
+                self.assertEqual(mock_logger.warning.call_count, 1)
 
     def test_update_extension(self):
         add_extension(source=MY_EXT_SOURCE)
@@ -250,6 +253,44 @@ class TestExtensionCommands(unittest.TestCase):
             index_url = 'http://contoso.com'
             list_available_extensions(index_url=index_url)
             c.assert_called_once_with(index_url)
+
+    def test_list_available_extensions_show_details(self):
+        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', autospec=True) as c:
+            list_available_extensions(show_details=True)
+            c.assert_called_once_with(None)
+
+    def test_list_available_extensions_no_show_details(self):
+        sample_index_extensions = {
+            'test_sample_extension1': [{
+                'metadata': {
+                    'name': 'test_sample_extension1',
+                    'summary': 'my summary',
+                    'version': '0.1.0'
+                }}]
+        }
+        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', return_value=sample_index_extensions):
+            res = list_available_extensions()
+            self.assertIsInstance(res, list)
+            self.assertEqual(len(res), len(sample_index_extensions))
+            self.assertEqual(res[0]['name'], 'test_sample_extension1')
+            self.assertEqual(res[0]['summary'], 'my summary')
+            self.assertEqual(res[0]['version'], '0.1.0')
+            self.assertEqual(res[0]['preview'], False)
+
+    def test_list_available_extensions_incompatible_cli_version(self):
+        sample_index_extensions = {
+            'test_sample_extension1': [{
+                'metadata': {
+                    "azext.maxCliCoreVersion": "0.0.0",
+                    'name': 'test_sample_extension1',
+                    'summary': 'my summary',
+                    'version': '0.1.0'
+                }}]
+        }
+        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', return_value=sample_index_extensions):
+            res = list_available_extensions()
+            self.assertIsInstance(res, list)
+            self.assertEqual(len(res), 0)
 
     def test_add_list_show_remove_extension_extra_index_url(self):
         """

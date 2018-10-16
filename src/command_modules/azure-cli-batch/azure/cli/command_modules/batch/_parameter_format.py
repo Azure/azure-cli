@@ -51,6 +51,7 @@ IGNORE_OPTIONS = {
     'client_request_id',
     'return_client_request_id',
     'max_results',
+    'additional_properties'
 }
 
 # Parameters that can be completely ignored.
@@ -65,7 +66,6 @@ IGNORE_PARAMETERS = [
     'job_release_task',
     'auto_pool_specification',
     'on_task_failure',
-    'max_tasks_per_node',
     'job.on_all_tasks_complete',
     'job_manager_task.kill_job_on_completion',
     'job_manager_task.run_exclusive',

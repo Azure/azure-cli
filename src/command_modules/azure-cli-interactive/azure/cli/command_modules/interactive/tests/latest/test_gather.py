@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azclishell.gather_commands import add_new_lines as nl
+from azure.cli.command_modules.interactive.azclishell.gather_commands import add_new_lines as nl
 
 
 class GatherTest(unittest.TestCase):

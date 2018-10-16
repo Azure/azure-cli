@@ -41,6 +41,10 @@ def resources_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resources
 
 
+def resource_groups_cf(cli_ctx, *_):
+    return _resource_client_factory(cli_ctx).resource_groups
+
+
 # Internal Deps Client Factories
 def vaults_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).vaults

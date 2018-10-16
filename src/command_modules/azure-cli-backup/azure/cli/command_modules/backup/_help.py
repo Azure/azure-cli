@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -7,7 +8,7 @@ from knack.help_files import helps
 
 helps['backup'] = """
             type: group
-            short-summary: Commands to manage Azure Backups.
+            short-summary: Manage Azure Backups.
             """
 
 helps['backup vault'] = """
@@ -138,6 +139,11 @@ helps['backup recoverypoint show'] = """
 helps['backup protection'] = """
             type: group
             short-summary: Manage protection of your items, enable protection or disable it, or take on-demand backups.
+            """
+
+helps['backup protection check-vm'] = """
+            type: command
+            short-summary: Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
             """
 
 helps['backup protection enable-for-vm'] = """

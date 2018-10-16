@@ -2,9 +2,119 @@
 
 Release History
 ===============
+2.2.5
+++++++
+* `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
+* `vm create`: update supported size list supporting networking accelerator
+* `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
+
+2.2.4
+++++++
+* `az disk grant-access`: fix the empty "accessSas" field
+* `vmss create`: reserve large enough frontend port range to handle overprovisioning
+* `az sig`: fix update commands, support --no-wait on managing image versions
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+* `az vm\vmss disk attach`: default disk's lun to the first available spot
+
+2.2.3
+++++++
+* support shared image gallery through `az sig`.
+
+2.2.2
+++++++
+* `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
+
+2.2.1
+++++++
+* vm list-skus: add a few common filters to make the command easier to use 
+
+2.2.0
+++++++
+* availability set: support list by subscription
+* vm/vmss: support StandardSSD_LRS
+* vm/vmss: support application security group on creating VM scale set
+* BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
+                   in dictionary format
+* Consuming multi api azure.mgmt.authorization package for azure stack support
+
+2.1.0
++++++
+* BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `vm/vmss extension set/delete`: Added `--no-wait` support.
+* Added `vm extension wait`.
+
+2.0.35
+++++++
+* msi: support removing system assigned identity
+
+2.0.34
+++++++
+* vm create: refine vm size check for accelerated networking support
+* vmss create: warn about the default vm size will be switched from "Standard_D1_v2" to "Standard_DS1_v2"
+* vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
+
+2.0.33
+++++++
+* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
+* `vm create`: support `--accelerated-networking`
+* `vm/vmss extension image list`: absorb 404 when an image type is not found
+* `identity create`: support `--tags`
+
+2.0.32
+++++++
+* BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support
+                   can be accessed through `vm update` or `vm disk attach`
+* vm/vmss extension: fix an incorrect extension image matching logic
+* vm create: expose `--boot-diagnostics-storage` to capture boot log
+* vm/vmss update: expose `--license-type`
+* vm/vmss: use PATCH for updating identities
+
+2.0.31
+++++++
+* vm: fix an invalid detection logic on unmanaged blob uri
+* vm: support disk encryption w/o user provided service principals 
+* BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
+* vmss: support eviction policy
+* BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
+* vm: support write accelerator
+* vmss: expose `az vmss perform-maintenance`
+* `vm diagnostics set`: detect VM's OS type reliably
+* `vm resize`: check if the requested size is different than currently set and update only on change
+
+2.0.30
+++++++
+* `vmss create`: support to configure platform fault domain count
+* `vmss create`: default to Standard LB for zonal, large or single-placement-group disabled scale-set
+* BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
+* BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
+* `vm create`: support configure Public-IP sku
+* `vm create`: support configure Public-IP SKU
+* `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
+                      where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
+* `vm/vmss create`: emit out a better error if resource group's location has no zone support
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.29
+++++++
+* `vmss create`: warn on upcoming breaking changes on default balancer for scaleset with 100+ instances
+* vm snapshot/image: support zone resilient
+* vmss: report better encryption status through disk instance view
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
+
+2.0.28
+++++++
+* vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
+* vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
+* vmss create: default priority to None
+* Support Autorest 3.0 based SDKs
+
 2.0.27
 ++++++
 * vmss instance update: support attach/detach disks on an individual instance
+* Support Autorest 3.0 based SDKs
 
 2.0.26
 ++++++

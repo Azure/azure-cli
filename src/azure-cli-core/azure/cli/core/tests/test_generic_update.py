@@ -7,10 +7,10 @@ import logging
 import unittest
 import shlex
 import sys
-
+from msrest.serialization import Model
 from azure.cli.core import AzCommandsLoader
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
 
@@ -33,9 +33,10 @@ class ObjectTestObject(object):
         self.my_string = str(str_val)
         self.my_int = int(int_val)
         self.my_bool = bool(bool_val)
+        self.additional_properties = None
 
 
-class TestObject(object):
+class ComplexTestObject(Model):
 
     def __init__(self):
         self.my_prop = 'my_value'
@@ -63,10 +64,13 @@ class TestObject(object):
         self.empty_dict_of_dicts = {'dict': {'dict2': None}}
         self.empty_dict = {'dict3': None}
 
+        self.additional_properties = {'additional1': 'addition value #1', 'additionalList': []}
+        self.my_test_object = ObjectTestObject('myKeyAA', 1, False)
+
 
 def _prepare_test_loader():
 
-    my_obj = TestObject()
+    my_obj = ComplexTestObject()
 
     class GenericUpdateTestCommandsLoader(AzCommandsLoader):
 
@@ -100,7 +104,7 @@ class GenericUpdateTest(unittest.TestCase):
     def test_generic_update_scenario(self):  # pylint: disable=too-many-statements
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         # Test simplest ways of setting properties
         cli.invoke('genupdate --set myProp=newValue'.split())
@@ -125,6 +129,12 @@ class GenericUpdateTest(unittest.TestCase):
         cli.invoke('genupdate --set myDict.my_snake_key=success'.split())
         self.assertEqual(my_obj.my_dict['my_snake_key'], 'success',
                          'set simple dict element with snake case key')
+
+        cli.invoke('genupdate --set additional1=v1'.split())
+        self.assertEqual(my_obj.additional_properties['additional1'], 'v1')
+
+        cli.invoke('genupdate --set my_test_object.additional1=v1'.split())  # for unknown properties, we also set as additional_proeprties
+        self.assertEqual(my_obj.my_test_object.additional_properties['additional1'], 'v1')
 
         # Test the different ways of indexing into a list of objects or dictionaries by filter
         cli.invoke('genupdate --set myListOfCamelDicts[myKey=value_2].myKey="foo=bar"'.split())
@@ -172,7 +182,14 @@ class GenericUpdateTest(unittest.TestCase):
         self.assertEqual(len(my_obj.my_prop), 1, 'nullify property, add two and remove one')
         self.assertEqual(my_obj.my_prop[0], 'str2', 'nullify property, add two and remove one')
 
+        cli.invoke('genupdate --add additionalList listMember1'.split())
+        self.assertEqual(my_obj.additional_properties['additionalList'][0], 'listMember1',
+                         'add a value to an array inside additional_properties')
         # Test various --add to lists
+        cli.invoke('genupdate --set myList=[]'.split())
+        cli.invoke(shlex.split('genupdate --add myList value1'))
+        self.assertEqual(my_obj.my_list[0], 'value1', 'add a value to an array')
+
         cli.invoke('genupdate --set myList=[]'.split())
         cli.invoke(shlex.split(
             'genupdate --add myList key1=value1 key2=value2 foo "string in quotes" [] {} foo=bar'))
@@ -192,15 +209,18 @@ class GenericUpdateTest(unittest.TestCase):
         cli.invoke('genupdate --remove myList -2'.split())
         self.assertEqual(len(my_obj.my_list), 5, 'verify one item removed')
         self.assertEqual(my_obj.my_list[4]['foo'], 'bar', 'verify correct item removed')
-
         self.assertEqual('key1' in my_obj.my_list[0], True, 'verify dict item exists')
+
         cli.invoke('genupdate --remove myList[0].key1'.split())
         self.assertEqual('key1' not in my_obj.my_list[0], True, 'verify dict entry can be removed')
+
+        cli.invoke('genupdate --remove myList'.split())
+        self.assertEqual(my_obj.my_list, [])
 
     def test_generic_update_errors(self):  # pylint: disable=no-self-use
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         def _execute_with_error(command, error, message):
             try:
@@ -215,7 +235,7 @@ class GenericUpdateTest(unittest.TestCase):
                 raise ex
             raise AssertionError("exception not raised for ''".format(message))
 
-        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp']"
+        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['additional1', 'additionalList', 'emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp', 'myTestObject']"
         _execute_with_error('genupdate --remove doesntExist',
                             missing_remove_message,
                             'remove non-existent property by name')
@@ -277,7 +297,7 @@ class GenericUpdateTest(unittest.TestCase):
     def test_generic_update_empty_nodes(self):
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         # add to prop
         cli.invoke('genupdate --add emptyProp a=b'.split())
