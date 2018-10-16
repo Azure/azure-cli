@@ -16,7 +16,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -38,7 +38,7 @@ DEPENDENCIES = [
     'azure-graphrbac==0.40.0',
     'azure-keyvault==1.1.0',
     'azure-mgmt-network==2.2.1',
-    'azure-mgmt-compute==4.3.0',
+    'azure-mgmt-compute==4.3.1',
     'azure-mgmt-storage==2.0.0rc4',
     'azure-mgmt-servicefabric==0.2.0',
     'azure-mgmt-keyvault==1.1.0',
