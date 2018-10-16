@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.47"
+VERSION = "2.0.48"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -54,26 +54,28 @@ DEPENDENCIES = [
     'azure-cli-advisor',
     'azure-cli-ams',
     'azure-cli-appservice',
+    'azure-cli-backup',
     'azure-cli-batch',
     'azure-cli-batchai',
-    'azure-cli-backup',
     'azure-cli-billing',
     'azure-cli-botservice',
     'azure-cli-cdn',
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
-    'azure-cli-container',
     'azure-cli-configure',
     'azure-cli-consumption',
+    'azure-cli-container',
     'azure-cli-core',
     'azure-cli-cosmosdb',
     'azure-cli-dla',
     'azure-cli-dls',
     'azure-cli-dms',
     'azure-cli-eventgrid',
+    'azure-cli-eventhubs',
     'azure-cli-extension',
     'azure-cli-feedback',
     'azure-cli-find',
+    'azure-cli-hdinsight',
     'azure-cli-interactive',
     'azure-cli-iot',
     'azure-cli-iotcentral',
@@ -83,20 +85,21 @@ DEPENDENCIES = [
     'azure-cli-monitor',
     'azure-cli-network',
     'azure-cli-nspkg',
+    'azure-cli-policyinsights',
     'azure-cli-profile',
     'azure-cli-rdbms',
     'azure-cli-redis',
+    'azure-cli-relay',
     'azure-cli-reservations',
     'azure-cli-resource',
     'azure-cli-role',
+    'azure-cli-search',
+    'azure-cli-servicebus',
+    'azure-cli-servicefabric',
+    'azure-cli-signalr',
     'azure-cli-sql',
     'azure-cli-storage',
-    'azure-cli-vm',
-    'azure-cli-servicefabric',
-    'azure-cli-servicebus',
-    'azure-cli-eventhubs',
-    'azure-cli-search',
-    'azure-cli-signalr'
+    'azure-cli-vm'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

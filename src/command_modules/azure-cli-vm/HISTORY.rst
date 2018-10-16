@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.5
+++++++
+* Fix SDK issue that caused Homebrew instllation to fail.
+
 2.2.4
 ++++++
 * `az disk grant-access`: fix the empty "accessSas" field
