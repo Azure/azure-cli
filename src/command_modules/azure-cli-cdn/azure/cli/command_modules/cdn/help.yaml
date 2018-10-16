@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-version: 0
+version: 1
 
-content: ## try removing content key
+content:
 
 - group:
     name: cdn
@@ -18,59 +18,73 @@ content: ## try removing content key
           url: "https://docs.microsoft.com/en-us/azure/cdn/"
         - name: cli cdn reference
           url: "https://docs.microsoft.com/en-us/cli/azure/cdn?view=azure-cli-latest"
+        - url: "https://aka.ms/just-a-url"
 
 - group:
     name: cdn profile
-    summary: Manage CDN profiles to define an edge network.
+    summary: Manage CDN profiles to define an edge network. Bla bla
+    description: Who is the manager? You are!!!! You manage so hard, the latency on your cdn is very low.
 
-- command:
+    examples:
+      - summary: "New and improved summary: Create a CDN profile using Verizon premium CDN."
+        description: >
+              Much longer description that goes into more depth about the example.
+              This description spans multiple lines for example.
+        command: > # commands? for multiple step. parser should not enforce rules.
+              az cdn profile create -g group -n profile --sku Premium_Verizon
+
+- command: # or group
     name: cdn profile create
-    summary: Create a new CDN profile.
-    description: Dummy super long description. As you would expect it is long and has multiple sentences.
+    summary: NEW! Create a new CDN profile. You ma'am or sir are the creator.
+    description: NEW! Dummy super long description. As you would expect it is long and has multiple sentences.
     links:
-      - name: create new cdn profile and endpoint
+      - name: NEW! create new cdn profile and endpoint
         url: "https://docs.microsoft.com/en-us/azure/cdn/cdn-create-new-endpoint"
     arguments:
-      - name: --sku #use
+      - name: name # or --name ?
+        summary: NEW! Cool Name of the CDN profile.
+
+      - name: sku # or --sku
         summary: >
             The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
             Defaults to Standard_Akamai.
-        description: >
+        description: > # NEW-ish?
             Much longer description going into the many intricacies about the different skus.
             Here is some more unnecessary text explaining more and more about skus.
-
             There are different CDN skus, you know? Standard ones and even a premium one too. Et cetera.
-        value-source:
+        value-source: # NEW - ish
           - string:
                Values range from -5.0 to 5.0
           - link:
-              - url: https://www.foo.com
-              - text: foo
+              url: https://www.foo.com
+              text: foo
           - link:
-              - command: az sku list
-              - text: Get skus
-
-    examples:
-      - summary: Create a CDN profile using Verizon premium CDN.
-        description: much longer description that goes into more depth about the example. spans multiple lines
-        command: > # commands? for multiple step. parser should not enforce rules.
-              az cdn profile create -g group -n profile --sku Premium_Verizon
+              url: https://docs.microsoft.com/en-us/azure/cdn/cdn-features
+              command: az sku list
+              text: Get skus
 
 - command:
     name: cdn endpoint create
     summary: NEW AND IMPROVED!!!!! Create a named endpoint to connect to a CDN.
+    arguments:
+      - name: name
+        summary: Cool Name of the CDN endpoint.
+      - name: profile-name
+        summary: Unique name of cdn profile. Name of the CDN profile which is unique within the resource group.
+
     examples:
-      - summary: FOOO, cause why not. Create an endpoint to service content for hostname over HTTP or HTTPS.
+      - summary: CREATE the coolest endpoint to service content for hostname over HTTP or HTTPS.
+        description: a very very long description of the example.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com
         min_profile: latest
-      - summary: Bar bar. Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
+      - summary: More creation. Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com 88 4444
-        max_profile: 2017-03-09-profile
-      - summary: Baz.... Create an endpoint with a custom domain with compression and only HTTPS.
+        min_profile: 2017-03-09-profile
+      - summary: Even more creation. Create an endpoint with a custom domain with compression and only HTTPS.
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com --no-http --enable-compression
