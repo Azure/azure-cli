@@ -5,7 +5,7 @@ Release History
 
 0.1.4
 +++++
-* Update ADLS version to latest(0.0.33)
+* Update ADLS version to latest(0.0.34)
 
 0.1.3
 +++++
