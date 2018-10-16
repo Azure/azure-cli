@@ -46,11 +46,6 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
             subscription_id = matched.groupdict()['subscription']
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
-def cf_authorization(cli_ctx):
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
-
 
 def cf_network(cli_ctx):
     from azure.mgmt.network import NetworkManagementClient
