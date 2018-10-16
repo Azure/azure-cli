@@ -19,7 +19,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
-def delete_container(cmd, client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
+def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
                      processed_resource_group=None, processed_account_name=None, mgmt_client=None):
     if bypass_immutability_policy:
