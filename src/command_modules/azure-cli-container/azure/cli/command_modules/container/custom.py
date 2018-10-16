@@ -821,6 +821,7 @@ def _move_console_cursor_up(lines):
         # Use stdout.write to support Python 2
         sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))
 
+
 def _gen_guid():
     import uuid
     return uuid.uuid4()
