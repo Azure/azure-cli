@@ -17,18 +17,16 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
-from azure.cli.command_modules.storage._client_factory import cf_blob_container_mgmt
 
 
 def delete_container(cmd, client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
-                     if_unmodified_since=None, timeout=None, bypass_immutability_policy=False, _resource_group=None,
-                     _account_name=None, _mgmt_client=None):
-    mgmt_client = cf_blob_container_mgmt(cmd.cli_ctx, None)
+                     if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
+                     processed_resource_group=None, processed_account_name=None, mgmt_client=None):
     if bypass_immutability_policy:
-        print("______", _resource_group, _account_name)
-        return mgmt_client.delete(_resource_group, _account_name, container_name)
-    return client(container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
-                  if_unmodified_since=if_unmodified_since, timeout=timeout)
+        return mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+    return client.delete_container(
+        container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
+        if_unmodified_since=if_unmodified_since, timeout=timeout)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):

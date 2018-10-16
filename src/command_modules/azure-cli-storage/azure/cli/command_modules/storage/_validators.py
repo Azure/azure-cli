@@ -718,13 +718,13 @@ def process_container_delete_parameters(cmd, namespace):
     # check whether to use mgmt or data-plame
     if namespace.bypass_immutability_policy:
         # use management-plane
-        namespace._account_name = namespace.account_name
-        namespace._resource_group, namespace._mgmt_client = _query_account_rg(cmd.cli_ctx, namespace.account_name)
+        namespace.processed_account_name = namespace.account_name
+        namespace.processed_resource_group, namespace.mgmt_client = _query_account_rg(
+            cmd.cli_ctx, namespace.account_name)
         del namespace.auth_mode
     else:
-        # use data-plane
+        # use data-plane, like before
         validate_client_parameters(cmd, namespace)
-    print(namespace)
 
 
 def process_blob_download_batch_parameters(cmd, namespace):
