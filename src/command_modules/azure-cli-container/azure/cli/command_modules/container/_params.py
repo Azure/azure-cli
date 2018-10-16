@@ -82,7 +82,7 @@ def load_arguments(self, _):
 
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
-        c.argument('vnet', help='The name of the VNET when creating a new one or referencing an existing one. Can also reference an existing subnet by ID. This allows using vnets from other resource groups.')
+        c.argument('vnet', help='The name of the VNET when creating a new one or referencing an existing one. Can also reference an existing vnet by ID. This allows using vnets from other resource groups.')
         c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.',
                    deprecate_info=c.deprecate(redirect="--vnet", hide="0.3.5"))
         c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNET in CIDR format.')

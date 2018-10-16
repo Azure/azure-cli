@@ -57,9 +57,6 @@ def validate_subnet(ns):
     # vnet_name is depricated, using for backwards compatability
     if ns.vnet_name and not ns.vnet:
         ns.vnet = ns.vnet_name
-    print(ns.vnet_name)
-    print(ns.vnet)
-    print(ns)
 
     if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
         raise CLIError('usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID')
