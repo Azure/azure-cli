@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# Test helpfile!
+
 version: 1
 
 content:
@@ -33,7 +35,7 @@ content:
         command: > # commands? for multiple step. parser should not enforce rules.
               az cdn profile create -g group -n profile --sku Premium_Verizon
 
-- command: # or group
+- command:
     name: cdn profile create
     summary: NEW! Create a new CDN profile. You ma'am or sir are the creator.
     description: NEW! Dummy super long description. As you would expect it is long and has multiple sentences.
@@ -41,18 +43,18 @@ content:
       - name: NEW! create new cdn profile and endpoint
         url: "https://docs.microsoft.com/en-us/azure/cdn/cdn-create-new-endpoint"
     arguments:
-      - name: name # or --name ?
+      - name: name
         summary: NEW! Cool Name of the CDN profile.
 
-      - name: sku # or --sku
+      - name: sku
         summary: >
             The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
             Defaults to Standard_Akamai.
-        description: > # NEW-ish?
+        description: >
             Much longer description going into the many intricacies about the different skus.
             Here is some more unnecessary text explaining more and more about skus.
             There are different CDN skus, you know? Standard ones and even a premium one too. Et cetera.
-        value-source: # NEW - ish
+        value-source: # UPDATED
           - string:
                Values range from -5.0 to 5.0
           - link:
@@ -88,124 +90,3 @@ content:
         command: >
           az cdn endpoint create -g group -n endpoint --profile-name profile \\
               --origin www.example.com --no-http --enable-compression
-
-
-## arg group form 1
-#- command:
-#    name: foo create
-#    summary: foo create command
-#
-#    arg-group:
-#        name: bar # bar arguments
-#        arguments: # this is a dummy arg group
-#          - name: --bar-name
-#            summary: This is a bar-name.
-#          - name: --bar-id
-#            summary: This is a bar-id.
-#          - name: --bar-sku
-#            summary: this is a bar-sku
-#
-#    arguments:
-#      - name: --tag
-#        summary: This is a tag argument.
-#      - name: --bag
-#        summary: This is a bag argument.
-#      - name: --lag
-#        summary: This is a lag argument.
-#
-## arg group from 2
-#- command:
-#    name: foo create
-#    summary: foo create command
-#    arguments:
-#      - name: --bar-name
-#        summary: This is a bar-name.
-#        arg-group: bar
-#
-#      - name: --bar-id
-#        summary: This is a bar-id.
-#        arg-group: bar
-#
-#      - name: --bar-sku
-#        summary: this is a bar-sku
-#        arg-group: bar
-#
-#      - name: --tag
-#        summary: This is a tag argument.
-#
-#      - name: --bag
-#        summary: This is a bag argument.
-#
-#      - name: --lag
-#        summary: This is a lag argument.
-#
-## arg group form 2 with anchors and references.
-#- command:
-#    name: foo create
-#    summary: foo create command
-#    arguments:
-#      - name: --bar-name
-#        summary: This is a bar-name.
-#        arg-group: &b bar
-#
-#      - name: --bar-id
-#        summary: This is a bar-id.
-#        arg-group: *b
-#
-#      - name: --bar-sku
-#        summary: this is a bar-sku
-#        arg-group: *b
-#
-#      - name: --tag
-#        summary: This is a tag argument.
-#
-#      - name: --bag
-#        summary: This is a bag argument.
-#
-#      - name: --lag
-#        summary: This is a lag argument.
-#
-#
-## value source for parameters
-#- command:
-#    name: foo create
-#    summary: foo create command
-#    arguments:
-#      - name: --nums
-#        summary: This is a tag argument.
-#        value-source: Nums must range from 1 to 50
-#
-#      - name: --floats
-#        summary: This is a bag argument.
-#        value-source:
-#          - string:
-#               Values range from -5.0 to 5.0
-#          - link:
-#              - url / command
-#              - text
-#              - anchor / hypertext / text: Float range specs
-#                url: "https://float-range-specs.com"
-#
-#      - name: --lag
-#        summary: This is a lag argument.
-#        value-source:
-#            command: az foo lag
-#
-#      - name: --date
-#        summary: Date
-#        value-source:
-#            - string: Date should be in format DD-MM-YY. E.g. 01-01-01
-
-
-
-# make this a more concise richer document....
-#
-# value-source should be a string with their type. type can be string, link or command. helps doc team.
-# show different options in powerpoint for arg group and links. we want consistent way to hyperlink ideallly...
-#  figuring out what to do with value source
-# best way for multi step example / best way for arg group / best way for value source / link specification for parameters. value source could be date time.
-# az parse yaml
-
-# note parameters, we want to merge info from code and yaml, as done before.
-#
-# value-source (replacement or much more), arg_group, examples.

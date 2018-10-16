@@ -91,6 +91,22 @@ class AzCliHelp(CLIHelp):
         import inspect
         import os
 
+        def _parse_yaml_from_string(text, help_file_path):
+            import yaml
+
+            dir = os.path.dirname(help_file_path)
+            base_name = os.path.basename(help_file_path)
+
+            pretty_file_path = os.path.join(os.path.basename(dir), base_name)
+
+            try:
+                data = yaml.load(text)
+                if not data:
+                    raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
+                return data
+            except yaml.YAMLError as e:
+                raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
+
         command_nouns = " ".join(nouns)
         loader = None
         if is_group:
@@ -110,10 +126,9 @@ class AzCliHelp(CLIHelp):
                     help_file_path = os.path.join(dir, file)
                     with open(help_file_path, "r") as f:
                         text = f.read()
-                        data = KnackHelpFile._load_help_file_from_string(text)
-                        if isinstance(data, dict):
-                            parser.help_file_data = data
-                    return
+                        data = _parse_yaml_from_string(text, help_file_path)
+                        parser.help_file_data = data
+                        return
 
     def show_help(self, cli_name, nouns, parser, is_group):
         cmd_loader_map_ref = self.cli_ctx.invocation.commands_loader.cmd_to_loader_map
