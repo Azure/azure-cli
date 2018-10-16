@@ -36,8 +36,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
-
+from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network, get_auth_management_client
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -105,6 +104,9 @@ def create_container(cmd,
                      secrets_mount_path=None,
                      file=None,
                      assign_identity=None,
+                     identity_scope=None,
+                     identity_role='Contributor',
+                     identity_role_id=None,
                      no_wait=False):
     """Create a container group. """
     if file:
@@ -215,11 +217,16 @@ def create_container(cmd,
                             tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
-    print(cg.__dict__)
-    # if assign_identity:
-    #     _create_update_msi_role_assignment(cmd.cli_ctx, resource_group_name, name, cg.id, role_definition_id,
-    #                                    role_assignment_guid, identity_scope, no_wait)
+    if no_wait:
+        return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
+
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, container_group_client.create_or_update, 
+                                                  resource_group_name, name, cgroup))
+
+    cg = container_group_client.get(resource_group_name, name)
+    if assign_identity is not None:
+        _create_update_msi_role_assignment(cmd, resource_group_name, name, cg.identity.principal_id,
+                                           identity_role_id, identity_scope, no_wait)
 
 
 def _build_identities_info(identities):
@@ -237,45 +244,34 @@ def _build_identities_info(identities):
         identity.user_assigned_identities = {e: {} for e in external_identities}
     return identity
 
-def _create_update_msi_role_assignment(cli_ctx, resource_group_name, cg_name, cg_resource_id, role_definition_id,
-                                       role_assignment_guid, identity_scope, no_wait):
+
+def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identity_principle_id, role_definition_id,
+                                       identity_scope, no_wait):
+    
     from msrestazure.tools import parse_resource_id
-    resource_client = cf_resource(cli_ctx)
+    from azure.cli.core.profiles import ResourceType, get_sdk #'RoleAssignmentCreateParameters'
+
+    RoleAssignmentCreateParameters = get_sdk(
+            cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+            'RoleAssignmentCreateParameters',
+            mod='models', operation_group='role_assignments')
+
+    auth_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
+
+    role_assignment_guid = str(_gen_guid())
 
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
-        assignment_type = '{}/{}/providers/roleAssignments'.format(result['namespace'], result['type'])
     else:
         name = role_assignment_guid
-        assignment_type = 'Microsoft.Authorization/roleAssignments'
 
-    # pylint: disable=line-too-long
-    msi_rp_api_version = '2015-08-31-PREVIEW'
-    role_assignment = {
-        'name': name,
-        'type': assignment_type,
-        'apiVersion': '2015-07-01',  # the minimum api-version to create the assignment
-        'dependsOn': [
-            'Microsoft.ContainerInstance/containerGroups/{}'.format(cg_name)
-        ],
-        'properties': {
-            'roleDefinitionId': role_definition_id,
-            'principalId': "[reference('{}/providers/Microsoft.ManagedIdentity/Identities/default', '{}').principalId]".format(
-                cg_resource_id, msi_rp_api_version),
-            'scope': identity_scope
-        }
-    }
-
-    return sdk_no_wait(no_wait,
-                       resource_client.resources.create_or_update,
-                       resource_group_name,
-                       'Microsoft.Authorization',
-                       '',
-                       "roleAssignments",
-                       name,
-                       '2015-07-01',
-                       role_assignment)
+    create_params = RoleAssignmentCreateParameters(
+        role_definition_id=role_definition_id,
+        principal_id=identity_principle_id
+    )
+    auth_client.create(identity_scope, name, create_params, custom_headers=None)
+    #return sdk_no_wait(False, auth_client.create, identity_scope, name, create_params)
 
 
 def _get_resource(client, resource_group_name, *subresources):
@@ -832,3 +828,7 @@ def _move_console_cursor_up(lines):
     if lines > 0:
         # Use stdout.write to support Python 2
         sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
