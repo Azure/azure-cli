@@ -250,11 +250,11 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-    containerInstanceDelegationServiceName = "Microsoft.ContainerInstance/containerGroups"
+    aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
-        name=containerInstanceDelegationServiceName,
-        service_name=containerInstanceDelegationServiceName
+        name=aci_delegation_service_name,
+        service_name=aci_delegation_service_name
     )
 
     ncf = cf_network(cmd.cli_ctx)
@@ -270,7 +270,6 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         parsed_vnet_id = parse_resource_id(vnet)
         vnet_name = parsed_vnet_id['resource_name']
         resource_group_name = parsed_vnet_id['resource_group']
-        ncf.virtual_networks.get(resource_group_name, vnet_name)
 
     default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
 
@@ -279,8 +278,8 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
     if subnet:
         logger.info('Using existing subnet "%s" in resource group "%s"', subnet.name, resource_group_name)
         for sal in (subnet.service_association_links or []):
-            if sal.linked_resource_type != containerInstanceDelegationServiceName:
-                raise CLIError("Can not use subnet with existing service association links other than {}.".format(containerInstanceDelegationServiceName))
+            if sal.linked_resource_type != aci_delegation_service_name:
+                raise CLIError("Can not use subnet with existing service association links other than {}.".format(aci_delegation_service_name))
 
         if not subnet.delegations:
             logger.info('Adding ACI delegation to the existing subnet.')
@@ -288,8 +287,8 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
             subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
-                if delegation.service_name != containerInstanceDelegationServiceName:
-                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationServiceName))
+                if delegation.service_name != aci_delegation_service_name:
+                    raise CLIError("Can not use subnet with existing delegations other than {}".format(aci_delegation_service_name))
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
         if network_profile:
