@@ -118,6 +118,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test create container using managed identities.
     @ResourceGroupPreparer()
     def test_container_create_with_msi(self, resource_group, resource_group_location):
+        from msrestazure.tools import resource_id
+        from knack.util import CLIError
         container_group_name1 = self.create_random_name('clicontainer', 16)
         container_group_name2 = self.create_random_name('clicontainer', 16)
         container_group_name3 = self.create_random_name('clicontainer', 16)
@@ -126,6 +128,10 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         ip_address_type = 'Public'
         user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
         system_assigned_identity = '[system]'
+        msi_scope = resource_id(subscription=self.get_subscription_id(),
+                                resource_group="azure-cli",
+                                namespace='Microsoft.Storage', type='storageAccounts',
+                                name='cliacistorageaccount')
 
         self.kwargs.update({
             'user_assigned_identity_name': user_assigned_identity_name
@@ -142,12 +148,24 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             'os_type': os_type,
             'ip_address_type': ip_address_type,
             'user_assigned_identity': msi_identity_result['id'],
-            'system_assigned_identity': system_assigned_identity
+            'system_assigned_identity': system_assigned_identity,
+            'msi_scope': msi_scope
         })
 
         # Test create system assigned identity
         self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --assign-identity',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+        
+        # Test create system assigned identity with scope
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity --scope {msi_scope}',
                  checks=[self.check('name', '{container_group_name1}'),
                          self.check('location', '{resource_group_location}'),
                          self.check('provisioningState', 'Succeeded'),
