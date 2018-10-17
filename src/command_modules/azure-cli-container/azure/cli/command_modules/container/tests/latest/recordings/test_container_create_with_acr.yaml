@@ -1,0 +1,212 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-10-17T20:15:46Z"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-10-17T20:15:46Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:17:27 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [container create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-10-17T20:15:46Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:17:27 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"location": "westus", "tags": {}, "properties": {"containers": [{"name":
+      "clicontainer000002", "properties": {"image": "clitestregistry1.azurecr.io/nginx:latest",
+      "resources": {"requests": {"memoryInGB": 1.5, "cpu": 1.0}}}}], "imageRegistryCredentials":
+      [{"server": "clitestregistry1.azurecr.io", "username": "clitestregistry1", "password":
+      "5+36OCtbIwfy8g5glC4bQQrFsfmMc3iD"}], "restartPolicy": "Always", "osType": "Linux"}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [container create]
+      Connection: [keep-alive]
+      Content-Length: ['424']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-containerinstance/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body: {string: '{"properties":{"provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"clitestregistry1.azurecr.io/nginx:latest","ports":[],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"imageRegistryCredentials":[{"server":"clitestregistry1.azurecr.io","username":"clitestregistry1"}],"restartPolicy":"Always","osType":"Linux","instanceView":{"state":"Pending"}},"identity":{"type":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/81ddb545-b9d8-47e3-a4b8-3073b3927def?api-version=2018-06-01']
+      cache-control: [no-cache]
+      content-length: ['780']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:17:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt1h: ['84']
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt5m: ['98']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [container create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-containerinstance/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/81ddb545-b9d8-47e3-a4b8-3073b3927def?api-version=2018-06-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2018-10-17T20:17:30.7450547Z","properties":{"events":[{"count":1,"firstTimestamp":"2018-10-17T20:17:39Z","lastTimestamp":"2018-10-17T20:17:39Z","name":"Pulling","message":"pulling
+        image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Pulled","message":"Successfully
+        pulled image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Created","message":"Created
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Started","message":"Started
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1167']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:18:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [container create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-containerinstance/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body: {string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"clitestregistry1.azurecr.io/nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2018-10-17T20:17:45Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2018-10-17T20:17:39Z","lastTimestamp":"2018-10-17T20:17:39Z","name":"Pulling","message":"pulling
+        image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Pulled","message":"Successfully
+        pulled image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Created","message":"Created
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Started","message":"Started
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"imageRegistryCredentials":[{"server":"clitestregistry1.azurecr.io","username":"clitestregistry1"}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"identity":{"type":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1782']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:18:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [container show]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-containerinstance/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body: {string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"clitestregistry1.azurecr.io/nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2018-10-17T20:17:45Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2018-10-17T20:17:39Z","lastTimestamp":"2018-10-17T20:17:39Z","name":"Pulling","message":"pulling
+        image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Pulled","message":"Successfully
+        pulled image \"clitestregistry1.azurecr.io/nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Created","message":"Created
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"},{"count":1,"firstTimestamp":"2018-10-17T20:17:45Z","lastTimestamp":"2018-10-17T20:17:45Z","name":"Started","message":"Started
+        container with id baa521b408701342588fb380b836034c05f5c0cf0d384943ae98a05bb0591d45","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"imageRegistryCredentials":[{"server":"clitestregistry1.azurecr.io","username":"clitestregistry1"}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"identity":{"type":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1782']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 17 Oct 2018 20:18:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 17 Oct 2018 20:18:02 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLWEpFNTdDQU9LUEZHU1lJQUJTSUtQN1pUUEhQSzVPWlZaUXwxOTBBOTlCMzQyMTdGNzI1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+version: 1
