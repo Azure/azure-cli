@@ -50,7 +50,7 @@ def force_progress_logging():
 class StorageAccountKeyReplacer(RecordingProcessor):
     """Replace the access token for service principal authentication in a response body."""
 
-    def __init__(self, replacement='veryFakedStorageAccountKey'):
+    def __init__(self, replacement='veryFakedStorageAccountKey=='):
         self._replacement = replacement
         self._activated = False
 
