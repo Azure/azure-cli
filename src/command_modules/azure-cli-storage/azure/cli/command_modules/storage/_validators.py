@@ -715,7 +715,7 @@ def add_progress_callback(cmd, namespace):
 
 def process_container_delete_parameters(cmd, namespace):
     """Process the parameters for storage container delete command"""
-    # check whether to use mgmt or data-plame
+    # check whether to use mgmt or data-plane
     if namespace.bypass_immutability_policy:
         # use management-plane
         namespace.processed_account_name = namespace.account_name
