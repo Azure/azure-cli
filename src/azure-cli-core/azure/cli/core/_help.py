@@ -153,7 +153,6 @@ class CliHelpFile(KnackHelpFile):
         # if unable to load data from parsed yaml, call superclass' load method
         super(CliHelpFile, self).load(options)
 
-
     def _should_include_example(self, ex):
         min_profile = ex.get('min_profile')
         max_profile = ex.get('max_profile')
@@ -218,9 +217,8 @@ class CliHelpFile(KnackHelpFile):
                 reg_examples.append(ex)
             new_data["examples"] = reg_examples
 
-
         if "links" in info:
-            text = self.get_links_as_text(info["links"])
+            text = self._get_links_as_text(info["links"])
             new_data["links"] = info["links"]
             new_data["long-summary"] = "{}\n{}".format(new_data["long-summary"], text) \
                 if new_data.get("long-summary") else text
@@ -232,7 +230,8 @@ class CliHelpFile(KnackHelpFile):
 
         return new_data
 
-    def get_links_as_text(self, links):
+    @staticmethod
+    def _get_links_as_text(links):
         text = ""
         for link in links:
             if "name" in link and "url" in link:
@@ -241,7 +240,8 @@ class CliHelpFile(KnackHelpFile):
                 text += "- {}.\n".format(link["url"])
         return text
 
-    def _get_parameter_info(self, arg_info):
+    @staticmethod
+    def _get_parameter_info(arg_info):
         params = {}
 
         # only update if new information
@@ -254,7 +254,7 @@ class CliHelpFile(KnackHelpFile):
         if "description" in arg_info:
             params["long-summary"] = arg_info["description"]
 
-        if  "value-source" in arg_info:
+        if "value-source" in arg_info:
             value_source = []
             for item in arg_info["value-source"]:
                 if "string" in item:
@@ -269,7 +269,6 @@ class CliHelpFile(KnackHelpFile):
             params["populator-commands"] = value_source
 
         return params
-
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
@@ -318,8 +317,6 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         def _params_equal(data, param):
             for name in param.name_source:
                 return data.get("name") == name.lstrip("-")
-
-
 
         super(CliCommandHelpFile, self)._load_from_data(data)
 
