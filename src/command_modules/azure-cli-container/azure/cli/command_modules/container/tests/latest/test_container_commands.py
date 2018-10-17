@@ -118,26 +118,24 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test create container using managed identities.
     @ResourceGroupPreparer()
     def test_container_create_with_msi(self, resource_group, resource_group_location):
-        from msrestazure.tools import resource_id
-        from knack.util import CLIError
         container_group_name1 = self.create_random_name('clicontainer', 16)
         container_group_name2 = self.create_random_name('clicontainer', 16)
         container_group_name3 = self.create_random_name('clicontainer', 16)
         image = 'alpine:latest'
         os_type = 'Linux'
         ip_address_type = 'Public'
+        storage_account_name = self.create_random_name('clistorage', 16)
         user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
         system_assigned_identity = '[system]'
-        msi_scope = resource_id(subscription=self.get_subscription_id(),
-                                resource_group="azure-cli",
-                                namespace='Microsoft.Storage', type='storageAccounts',
-                                name='cliacistorageaccount')
 
         self.kwargs.update({
-            'user_assigned_identity_name': user_assigned_identity_name
+            'user_assigned_identity_name': user_assigned_identity_name,
+            'storage_account_name': storage_account_name,
         })
 
         msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
+
+        storage_account_result = self.cmd('az storage account create -n {storage_account_name} -g {rg} ').get_output_in_json()
 
         self.kwargs.update({
             'container_group_name1': container_group_name1,
@@ -149,7 +147,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             'ip_address_type': ip_address_type,
             'user_assigned_identity': msi_identity_result['id'],
             'system_assigned_identity': system_assigned_identity,
-            'msi_scope': msi_scope
+            'msi_scope': storage_account_result['id']
         })
 
         # Test create system assigned identity
