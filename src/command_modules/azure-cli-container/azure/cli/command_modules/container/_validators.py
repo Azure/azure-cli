@@ -43,18 +43,23 @@ def validate_gitrepo_directory(ns):
 
 
 def validate_image(ns):
-    if ns.image.split(':')[0] in short_running_images and not ns.command_line:
+    if ns.image and ns.image.split(':')[0] in short_running_images and not ns.command_line:
         logger.warning('Image "%s" has no long running process. The "--command-line" argument must be used to start a '
                        'long running process inside the container for the container group to stay running. '
-                       'Ex: /bin/bash',
+                       'Ex: "tail -f /dev/null" '
+                       'For more imformation visit https://aka.ms/aci/troubleshoot',
                        ns.image)
 
 
 def validate_subnet(ns):
     from msrestazure.tools import is_valid_resource_id
 
-    if not is_valid_resource_id(ns.subnet) and ((ns.vnet_name and not ns.subnet) or (ns.subnet and not ns.vnet_name)):
-        raise CLIError('usage error: --vnet-name NAME --subnet NAME | --subnet ID')
+    # vnet_name is depricated, using for backwards compatability
+    if ns.vnet_name and not ns.vnet:
+        ns.vnet = ns.vnet_name
+
+    if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
+        raise CLIError('usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID')
 
 
 def validate_network_profile(cmd, ns):
