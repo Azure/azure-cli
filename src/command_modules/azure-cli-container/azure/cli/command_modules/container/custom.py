@@ -91,6 +91,7 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+                     vnet=None,
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
@@ -183,8 +184,8 @@ def create_container(cmd,
         identity = _build_identities_info(assign_identity)
 
     # Set up VNET, subnet and network profile if needed
-    if subnet and vnet_name and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+    if subnet and not network_profile:
+        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
 
     cg_network_profile = None
     if network_profile:
@@ -245,51 +246,63 @@ def _get_resource(client, resource_group_name, *subresources):
             raise
 
 
-def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-    containerInstanceDelegationServiceName = "Microsoft.ContainerInstance/containerGroups"
+    aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
-        name="Microsoft.ContainerInstance.containerGroups",
-        service_name="Microsoft.ContainerInstance/containerGroups"
+        name=aci_delegation_service_name,
+        service_name=aci_delegation_service_name
     )
 
     ncf = cf_network(cmd.cli_ctx)
 
+    vnet_name = vnet
     subnet_name = subnet
     if is_valid_resource_id(subnet):
         parsed_subnet_id = parse_resource_id(subnet)
         subnet_name = parsed_subnet_id['resource_name']
         vnet_name = parsed_subnet_id['name']
+        resource_group_name = parsed_subnet_id['resource_group']
+    elif is_valid_resource_id(vnet):
+        parsed_vnet_id = parse_resource_id(vnet)
+        vnet_name = parsed_vnet_id['resource_name']
+        resource_group_name = parsed_vnet_id['resource_group']
 
     default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
 
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
     # For an existing subnet, validate and add delegation if needed
     if subnet:
-        for endpoint in (subnet.service_endpoints or []):
-            if endpoint.service != "Microsoft.ContainerInstance":
-                raise CLIError("Can not use subnet with existing service links other than 'Microsoft.ContainerInstance'.")
+        logger.info('Using existing subnet "%s" in resource group "%s"', subnet.name, resource_group_name)
+        for sal in (subnet.service_association_links or []):
+            if sal.linked_resource_type != aci_delegation_service_name:
+                raise CLIError("Can not use subnet with existing service association links other than {}.".format(aci_delegation_service_name))
 
         if not subnet.delegations:
+            logger.info('Adding ACI delegation to the existing subnet.')
             subnet.delegations = [aci_delegation]
+            subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
-                if delegation.service_name != containerInstanceDelegationServiceName:
-                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationServiceName))
+                if delegation.service_name != aci_delegation_service_name:
+                    raise CLIError("Can not use subnet with existing delegations other than {}".format(aci_delegation_service_name))
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
         if network_profile:
+            logger.info('Using existing network profile "%s"', default_network_profile_name)
             return network_profile.id
 
     # Create new subnet and Vnet if not exists
     else:
         Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet', 'VirtualNetwork',
                                                               'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
+
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
+            logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
             ncf.virtual_networks.create_or_update(resource_group_name,
                                                   vnet_name,
                                                   VirtualNetwork(name=vnet_name,
@@ -301,13 +314,13 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
             address_prefix=subnet_address_prefix,
             delegations=[aci_delegation])
 
+        logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
         subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
                                                                                                     'ContainerNetworkInterfaceConfiguration',
                                                                                                     'IPConfigurationProfile',
                                                                                                     resource_type=ResourceType.MGMT_NETWORK)
-
     # In all cases, create the network profile with aci NIC
     network_profile = NetworkProfile(
         name=default_network_profile_name,
@@ -321,6 +334,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
         )]
     )
 
+    logger.info('Creating network profile "%s" in resource group "%s"', default_network_profile_name, resource_group_name)
     network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
 
     return network_profile.id
