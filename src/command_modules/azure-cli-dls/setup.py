@@ -16,7 +16,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -35,7 +35,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-datalake-store==0.5.0',
-    'azure-datalake-store==0.0.31',
+    'azure-datalake-store==0.0.34',
     'azure-cli-core',
 ]
 

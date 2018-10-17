@@ -98,9 +98,9 @@ def _update_password_credentials(client, app_object_id, sp_password, years):
 
 
 def _get_displayable_name(graph_object):
-    if graph_object.user_principal_name:
+    if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif graph_object.service_principal_names:
+    elif getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 
@@ -217,7 +217,8 @@ def _create_service_principal(
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
         try:
-            aad_sp = graph_client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+            aad_sp = graph_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id,
+                                                                                             account_enabled=True))
             break
         except Exception as ex:  # pylint: disable=broad-except
             if l < _RETRY_TIMES and (
@@ -237,9 +238,9 @@ def create_application(client, display_name, homepage, years, password, identifi
                        available_to_other_tenants=False, reply_urls=None):
     password_credential = _build_password_credential(password, years)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                   display_name=display_name,
+                                                   identifier_uris=identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    password_credentials=[password_credential])
