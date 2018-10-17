@@ -160,7 +160,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('identity.type', 'SystemAssigned'),
                          self.exists('ipAddress.ip'),
                          self.check('containers[0].image', '{image}')])
-        
+
         # Test create system assigned identity with scope
         self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --assign-identity --scope {msi_scope}',
