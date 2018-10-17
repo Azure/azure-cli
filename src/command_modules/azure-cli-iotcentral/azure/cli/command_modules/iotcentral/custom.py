@@ -14,17 +14,21 @@ from ._client_factory import resource_service_factory
 logger = get_logger(__name__)
 
 
-def iotcentral_app_create(cmd, client, app_name, resource_group_name, subdomain, sku="F1", location=None):
+def iotcentral_app_create(
+        cmd, client, app_name, resource_group_name, subdomain, sku="S1",
+        location=None, template=None, display_name=None
+):
     cli_ctx = cmd.cli_ctx
     _check_name_availability(client, app_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
-
+    display_name = _ensure_display_name(app_name, display_name)
     appSku = AppSkuInfo(name=sku)
 
     app = App(subdomain=subdomain,
               location=location,
-              display_name=app_name,
-              sku=appSku)
+              display_name=display_name,
+              sku=appSku,
+              template=template)
 
     createResult = client.apps.create_or_update(
         resource_group_name, app_name, app)
@@ -72,6 +76,12 @@ def _ensure_location(cli_ctx, resource_group_name, location):
             cli_ctx).resource_groups
         return resource_group_client.get(resource_group_name).location
     return location
+
+
+def _ensure_display_name(app_name, display_name):
+    if not display_name or display_name.isspace():
+        return app_name
+    return display_name
 
 
 def _get_iotcentral_app_by_name(client, app_name):
