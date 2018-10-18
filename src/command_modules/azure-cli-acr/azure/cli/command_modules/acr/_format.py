@@ -215,7 +215,7 @@ def _build_format_group(item):
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
-            _get_value(item, 'sourceTrigger', 'eventType'))),
+                                       _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
@@ -227,8 +227,8 @@ def _run_format_group(item):
         ('TASK', _get_value(item, 'task')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), 
-            _get_value(item, 'sourceTrigger', 'eventType'))),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
+                                       _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
