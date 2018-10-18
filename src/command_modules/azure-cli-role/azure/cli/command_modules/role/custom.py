@@ -711,7 +711,7 @@ def grant_application(cmd, identifier, app_id, expires='1'):
     }
 
     # Grant OAuth2 permissions
-    response = graph_client.oauth2.post(payload)  # pylint: disable=no-member
+    response = graph_client.oauth2.grant(payload)  # pylint: disable=no-member
 
     return response
 
