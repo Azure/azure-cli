@@ -5,7 +5,7 @@
 
 import time
 import unittest
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
@@ -124,18 +124,14 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         image = 'alpine:latest'
         os_type = 'Linux'
         ip_address_type = 'Public'
-        storage_account_name = self.create_random_name('clistorage', 16)
         user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
         system_assigned_identity = '[system]'
 
         self.kwargs.update({
             'user_assigned_identity_name': user_assigned_identity_name,
-            'storage_account_name': storage_account_name,
         })
 
         msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
-
-        storage_account_result = self.cmd('az storage account create -n {storage_account_name} -g {rg} ').get_output_in_json()
 
         self.kwargs.update({
             'container_group_name1': container_group_name1,
@@ -147,23 +143,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             'ip_address_type': ip_address_type,
             'user_assigned_identity': msi_identity_result['id'],
             'system_assigned_identity': system_assigned_identity,
-            'msi_scope': storage_account_result['id']
         })
 
         # Test create system assigned identity
         self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --assign-identity',
-                 checks=[self.check('name', '{container_group_name1}'),
-                         self.check('location', '{resource_group_location}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('osType', '{os_type}'),
-                         self.check('identity.type', 'SystemAssigned'),
-                         self.exists('ipAddress.ip'),
-                         self.check('containers[0].image', '{image}')])
-
-        # Test create system assigned identity with scope
-        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
-                 '--ip-address {ip_address_type} --assign-identity --scope {msi_scope}',
                  checks=[self.check('name', '{container_group_name1}'),
                          self.check('location', '{resource_group_location}'),
                          self.check('provisioningState', 'Succeeded'),
@@ -193,6 +177,43 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('identity.type', 'SystemAssigned, UserAssigned'),
                          self.exists('ipAddress.ip'),
                          self.check('containers[0].image', '{image}')])
+
+    # Test create container using managed identities with scope.
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_container_create_with_msi_scope(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        storage_account_name = self.create_random_name('clistorage', 16)
+
+        self.kwargs.update({
+            'storage_account_name': storage_account_name
+        })
+
+        storage_account_result = self.cmd('az storage account create -n {storage_account_name} -g {rg} ').get_output_in_json()
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'msi_scope': storage_account_result['id']
+        })
+
+        # Test create system assigned identity with scope
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity --scope {msi_scope}',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
 
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
