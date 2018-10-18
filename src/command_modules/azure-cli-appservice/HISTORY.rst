@@ -2,10 +2,6 @@
 
 Release History
 ===============
-0.2.6
-+++++
-* minor changes
-
 0.2.5
 +++++
 * az functionapp create supports creating a linux consumption plan type with a specific runtime
