@@ -12,6 +12,7 @@ Release History
 0.3.6
 +++++
 * Add '--assign-identity' for adding a MSI identity to a container group
+* Add '--scope' to create a role assignment for the system assigned MSI identity
 * Show warning when creating a container group with an image without a long running process
 * Fix table output issues for 'list' and 'show' commands
 

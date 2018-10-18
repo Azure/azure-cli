@@ -35,8 +35,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
-
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource,
+                              cf_network, get_auth_management_client)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -105,6 +105,9 @@ def create_container(cmd,
                      secrets_mount_path=None,
                      file=None,
                      assign_identity=None,
+                     identity_scope=None,
+                     identity_role='Contributor',
+                     identity_role_id=None,
                      no_wait=False):
     """Create a container group. """
     if file:
@@ -215,7 +218,15 @@ def create_container(cmd,
                             tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
+
+    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+                      name, cgroup)
+
+    if assign_identity is not None and identity_scope:
+        cg = container_group_client.get(resource_group_name, name)
+        _create_update_msi_role_assignment(cmd, resource_group_name, name, cg.identity.principal_id,
+                                           identity_role_id, identity_scope)
+    return lro
 
 
 def _build_identities_info(identities):
@@ -232,6 +243,25 @@ def _build_identities_info(identities):
     if external_identities:
         identity.user_assigned_identities = {e: {} for e in external_identities}
     return identity
+
+
+def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identity_principle_id,
+                                       role_definition_id, identity_scope):
+    from azure.cli.core.profiles import ResourceType, get_sdk
+
+    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters',
+                                             mod='models', operation_group='role_assignments')
+
+    assignment_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
+
+    role_assignment_guid = str(_gen_guid())
+
+    create_params = RoleAssignmentCreateParameters(
+        role_definition_id=role_definition_id,
+        principal_id=identity_principle_id
+    )
+    return assignment_client.create(identity_scope, role_assignment_guid, create_params, custom_headers=None)
 
 
 def _get_resource(client, resource_group_name, *subresources):
@@ -801,3 +831,8 @@ def _move_console_cursor_up(lines):
     if lines > 0:
         # Use stdout.write to support Python 2
         sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
