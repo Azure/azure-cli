@@ -1960,7 +1960,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         master_template.add_resource(ag_resource)
 
     # create storage accounts if needed for unmanaged disk storage
-    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+    if storage_profile == StorageProfile.SAPirImage:
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             cmd, 'storageLoop', location, tags, storage_sku))
         master_template.add_variable('storageAccountNames', [
