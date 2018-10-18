@@ -94,10 +94,10 @@ class AzCliHelp(CLIHelp):
         def _parse_yaml_from_string(text, help_file_path):
             import yaml
 
-            dir = os.path.dirname(help_file_path)
+            dir_name = os.path.dirname(help_file_path)
             base_name = os.path.basename(help_file_path)
 
-            pretty_file_path = os.path.join(os.path.basename(dir), base_name)
+            pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
 
             try:
                 data = yaml.load(text)
@@ -119,11 +119,11 @@ class AzCliHelp(CLIHelp):
 
         if loader:
             loader_file_path = inspect.getfile(loader.__class__)
-            dir = os.path.dirname(loader_file_path)
-            files = os.listdir(dir)
+            dir_name = os.path.dirname(loader_file_path)
+            files = os.listdir(dir_name)
             for file in files:
                 if file.endswith(".yaml") or file.endswith(".yml"):
-                    help_file_path = os.path.join(dir, file)
+                    help_file_path = os.path.join(dir_name, file)
                     with open(help_file_path, "r") as f:
                         text = f.read()
                         data = _parse_yaml_from_string(text, help_file_path)
