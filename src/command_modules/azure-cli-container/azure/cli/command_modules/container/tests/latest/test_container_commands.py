@@ -214,7 +214,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('ipAddress.ip'),
                          self.check('containers[0].image', '{image}')])
 
-
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli
