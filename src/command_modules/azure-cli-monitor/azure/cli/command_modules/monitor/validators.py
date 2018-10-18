@@ -67,7 +67,7 @@ def validate_autoscale_recurrence(namespace):
 
 def validate_autoscale_timegrain(namespace):
     from azure.mgmt.monitor.models import MetricTrigger
-    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.actions import get_period_type
     from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
 
     values = namespace.timegrain
@@ -77,10 +77,10 @@ def validate_autoscale_timegrain(namespace):
         values = values[0].split(' ')
     name_offset = 0
     try:
-        time_grain = period_type(values[1])
+        time_grain = get_period_type()(values[1])
         name_offset += 1
     except ValueError:
-        time_grain = period_type('1m')
+        time_grain = get_period_type()('1m')
     try:
         statistic = get_autoscale_statistic_map()[values[0]]
         name_offset += 1
@@ -231,49 +231,16 @@ def process_action_group_detail_for_creation(namespace):
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 
 
-def process_metric_timespan(namespace):
-    from .util import validate_time_range_and_add_defaults
+def validate_metric_dimension(namespace):
 
-    ns = vars(namespace)
-    start_time = ns.pop('start_time', None)
-    end_time = ns.pop('end_time', None)
-    ns['timespan'] = validate_time_range_and_add_defaults(start_time, end_time, formatter='{}/{}')
-
-
-def process_metric_aggregation(namespace):
-    ns = vars(namespace)
-    aggregation = ns.pop('aggregation', None)
-    if aggregation:
-        ns['aggregation'] = ','.join(aggregation)
-
-
-def process_metric_result_type(namespace):
-    from azure.mgmt.monitor.models import ResultType
-
-    ns = vars(namespace)
-    metadata_only = ns.pop('metadata', False)
-    if metadata_only:
-        ns['result_type'] = ResultType.metadata
-
-
-def process_metric_dimension(namespace):
-    ns = vars(namespace)
-
-    dimensions = ns.pop('dimension', None)
-    if not dimensions:
+    if not namespace.dimension:
         return
 
-    param_filter = ns.pop('filter', None)
-    if param_filter:
+    if namespace.filters:
         from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
-    ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
-
-
-def validate_metric_names(namespace):
-    if namespace.metricnames:
-        namespace.metricnames = ','.join(namespace.metricnames)
+    namespace.filters = ' and '.join("{} eq '*'".format(d) for d in namespace.dimension)
 
 
 def process_webhook_prop(namespace):
