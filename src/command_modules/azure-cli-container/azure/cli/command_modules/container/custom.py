@@ -219,12 +219,9 @@ def create_container(cmd,
                             tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
-    if no_wait:
-        return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
-                           name, cgroup)
 
-    lro = LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, container_group_client.create_or_update,
-                                                        resource_group_name, name, cgroup))
+    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+                      name, cgroup)
 
     if assign_identity is not None and identity_scope:
         cg = container_group_client.get(resource_group_name, name)
