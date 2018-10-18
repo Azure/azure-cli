@@ -112,7 +112,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_trigger_events.append(SourceTriggerEvent.commit.value)
     if pull_request_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
-    # if source_trigger_events contains any event types we assume they are enabled.
+    # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
         source_triggers = [
             SourceTrigger(
