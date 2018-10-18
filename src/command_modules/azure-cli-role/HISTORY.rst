@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.9
+++++++
+* support grant permissions to AAD apps
+
 2.1.8
 ++++++
 * support add/remove/list owner on AAD Applciation and Group objects
