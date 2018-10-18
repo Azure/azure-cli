@@ -370,6 +370,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
+        c.argument('bypass_immutability_policy', action='store_true', help='Bypasses upcoming service behavior that '
+                   'will block a container from being deleted if it has a immutability-policy. Specifying this will '
+                   'ignore arguments aside from those used to identify the container ("--name", "--account-name").')
+        c.argument('lease_id', help="If specified, delete_container only succeeds if the container's lease is active "
+                                    "and matches this ID. Required if the container has an active lease.")
+        c.ignore('processed_resource_group')
+        c.ignore('processed_account_name')
+        c.ignore('mgmt_client')
 
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
