@@ -1357,16 +1357,17 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console() and enable_cloud_console_aks_browse:
-        logger.warning('***WARNING***')
-        logger.warning('Browsing the kubernetes dashboard in Cloud Shell is an alpha feature.')
-        logger.warning('The browse URL is currently obfuscated but not authenticated.')
-        logger.warning('Do not share this URL.')
         if not prompt_y_n('Proceed?'):
             raise CLIError("Browse aborted.")
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/8001')
         result = json.loads(response.text)
-        logger.warning('To view the console, please open % in a new tab', result['url'])
+        term_id = os.environ['ACC_TERM_ID']
+        if term_id:
+            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+                                     json={"url": result['url']})
+        else:
+            logger.warning('To view the console, please open % in a new tab', result['url'])
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
