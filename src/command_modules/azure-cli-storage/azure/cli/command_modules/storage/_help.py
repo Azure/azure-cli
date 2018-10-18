@@ -100,6 +100,13 @@ helps['storage container create'] = """
           text: az storage container create -n MyStorageContainer --fail-on-exist
 """
 
+helps['storage container delete'] = """
+    type: command
+    short-summary: Marks the specified container for deletion.
+    long-summary: >
+        The container and any blobs contained within it are later deleted during garbage collection.
+"""
+
 helps['storage account list'] = """
     type: command
     short-summary: List storage accounts.

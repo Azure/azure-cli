@@ -6,6 +6,7 @@ Release History
 2.2.3
 +++++
 * Fix `az storage cors list` output formatting, all items show correct "Service" key
+* `--bypass-immutability-policy` parameter for immutability-policy blocked container deletion
 
 2.2.2
 +++++
