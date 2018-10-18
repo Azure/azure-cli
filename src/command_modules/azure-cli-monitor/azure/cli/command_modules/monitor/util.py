@@ -55,20 +55,3 @@ def get_autoscale_scale_direction_map():
     return {'to': ScaleDirection.none, 'out': ScaleDirection.increase,
             'in': ScaleDirection.decrease}
 # endregion
-
-
-def validate_time_range_and_add_defaults(start_time, end_time, formatter='startTime eq {} and endTime eq {}'):
-    from datetime import datetime, timedelta
-    try:
-        end_time = datetime.strptime(end_time, DATE_TIME_FORMAT) if end_time else datetime.utcnow()
-    except ValueError:
-        raise ValueError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
-
-    try:
-        start_time = datetime.strptime(start_time, DATE_TIME_FORMAT) if start_time else end_time - timedelta(hours=1)
-        if start_time >= end_time:
-            raise ValueError("Start time cannot be later than end time.")
-    except ValueError:
-        raise ValueError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(start_time))
-
-    return formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'), end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
