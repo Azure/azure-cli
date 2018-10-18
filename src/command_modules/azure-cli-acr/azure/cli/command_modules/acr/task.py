@@ -79,8 +79,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
-        raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or [--pull-request-trigger-enabled] "
-                       "--git-access-token must be provided.")
+        raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or 
+                       "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
     if file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = FileTaskStep(
@@ -291,24 +291,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers is not None:
-            source_trigger_events = set()
-            # perform merge with server-side event list
-            if source_triggers:
-                source_trigger_events = set(source_triggers[0].source_trigger_events)
-                if source_triggers[0].status == TriggerStatus.disabled.value:
-                    source_trigger_events.clear()
-            if commit_trigger_enabled is not None:
-                if commit_trigger_enabled:
-                    source_trigger_events.add(SourceTriggerEvent.commit.value)
-                else:
-                    if SourceTriggerEvent.commit.value in source_trigger_events:
-                        source_trigger_events.remove(SourceTriggerEvent.commit.value)
-            if pull_request_trigger_enabled is not None:
-                if pull_request_trigger_enabled:
-                    source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
-                else:
-                    if SourceTriggerEvent.pullrequest.value in source_trigger_events:
-                        source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
+            source_trigger_events = _get_trigger_event_list(source_triggers,
+                                                            commit_trigger_enabled,
+                                                            pull_request_trigger_enabled)
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -512,3 +497,26 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
+
+def _get_trigger_event_list(source_triggers,
+                            commit_trigger_enabled=None,
+                            pull_request_trigger_enabled=None):
+    source_trigger_events = set()
+    # perform merge with server-side event list
+    if source_triggers:
+        source_trigger_events = set(source_triggers[0].source_trigger_events)
+        if source_triggers[0].status == TriggerStatus.disabled.value:
+            source_trigger_events.clear()
+    if commit_trigger_enabled is not None:
+        if commit_trigger_enabled:
+            source_trigger_events.add(SourceTriggerEvent.commit.value)
+        else:
+            if SourceTriggerEvent.commit.value in source_trigger_events:
+                source_trigger_events.remove(SourceTriggerEvent.commit.value)
+    if pull_request_trigger_enabled is not None:
+        if pull_request_trigger_enabled:
+            source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
+        else:
+            if SourceTriggerEvent.pullrequest.value in source_trigger_events:
+                source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
+    return source_trigger_events
