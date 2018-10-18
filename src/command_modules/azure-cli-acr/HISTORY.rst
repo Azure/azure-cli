@@ -3,7 +3,7 @@
 Release History
 ===============
 
-2.1.78
+2.1.8
 +++++
 * Support commit and pull request git events for Task source trigger.
 
