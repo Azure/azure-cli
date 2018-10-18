@@ -31,7 +31,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
