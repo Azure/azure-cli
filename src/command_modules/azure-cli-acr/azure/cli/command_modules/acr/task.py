@@ -290,7 +290,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     if task.trigger:
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
-        if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers is not None:
+        if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
             source_trigger_events = _get_trigger_event_list(source_triggers,
                                                             commit_trigger_enabled,
                                                             pull_request_trigger_enabled)
