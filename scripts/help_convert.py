@@ -42,6 +42,23 @@ def _get_new_yaml_dict(help_dict):
 
         _convert_summaries(old_dict=help_dict, new_dict=elem_content)
 
+        if "parameters" in help_dict:
+            parameters = []
+            for param in help_dict["parameters"]:
+                new_param = dict()
+                if "name" in param:
+                    options = param["name"].split()
+                    option = max(options, key = lambda x: len(x))
+                    new_param["name"] = option.lstrip('-')
+                _convert_summaries(old_dict=param, new_dict=new_param)
+
+                if "populator-commands" in param:
+                    new_param["value-source"] = []
+                    for item in param["populator-commands"]:
+                        new_param["value-source"].append(dict(string=item))
+                parameters.append(new_param)
+            elem_content["arguments"] = parameters
+
         if "examples" in help_dict:
             elem_examples = []
             for ex in help_dict["examples"]:
@@ -56,22 +73,6 @@ def _get_new_yaml_dict(help_dict):
                     new_ex["max_profile"] = ex["max_profile"]
                 elem_examples.append(new_ex)
             elem_content["examples"] = elem_examples
-
-        if "parameters" in help_dict:
-            parameters = []
-            for param in help_dict["parameters"]:
-                new_param = dict()
-                if "name" in param:
-                    options = param["name"].split()
-                    option = max(options, key = lambda x: len(x))
-                    new_param["name"] = option.lstrip('-')
-                if "populator-commands" in param:
-                    new_param["value-source"] = []
-                    for item in param["populator-commands"]:
-                        new_param["value-source"].append(dict(string=item))
-                _convert_summaries(old_dict=param, new_dict=new_param)
-                parameters.append(new_param)
-            help_dict["parameters"] = parameters
 
         content.append(elem)
 
