@@ -107,7 +107,7 @@ def load_arguments(self, _):
         c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
         c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
-        c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to persist VM')
+        c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
