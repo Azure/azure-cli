@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._validators import (
 
 # pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
-    from azure.mgmt.compute.models import CachingTypes, UpgradeMode
+    StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -40,12 +40,9 @@ def load_arguments(self, _):
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
-    if self.supported_api_version(min_api='2018-06-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']))
-    elif self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
-    else:
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+
+    # TODO: should the default be premium or standard?
+    disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes, default=StorageAccountTypes.premium_lrs.value))
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
@@ -110,6 +107,7 @@ def load_arguments(self, _):
         c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
         c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
+        c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to persist VM')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
