@@ -1,6 +1,8 @@
 # Microsoft Azure CLI
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
+[![PyPi Version](https://img.shields.io/pypi/v/azure-cli.svg)](https://pypi.org/project/azure-cli/)
+[![License](https://img.shields.io/pypi/l/azure-cli.svg)](https://github.com/Azure/azure-cli/blob/dev/LICENSE.txt)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
