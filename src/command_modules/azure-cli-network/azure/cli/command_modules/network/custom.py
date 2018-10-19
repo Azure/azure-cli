@@ -1662,9 +1662,9 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # endregion
 
 
-# region InterfaceEndpoints
-def create_interface_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
-                              fqdn=None, endpoint_service=None, nics=None):
+# region PrivateEndpoints
+def create_private_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
+                            fqdn=None, endpoint_service=None, nics=None):
     client = network_client_factory(cmd.cli_ctx).interface_endpoints
     InterfaceEndpoint, SubResource = cmd.get_models(
         'InterfaceEndpoint', 'SubResource')
@@ -1679,7 +1679,7 @@ def create_interface_endpoint(cmd, resource_group_name, interface_endpoint_name,
     return client.create_or_update(resource_group_name, interface_endpoint_name, endpoint)
 
 
-def list_interface_endpoints(cmd, resource_group_name=None):
+def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).interface_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
