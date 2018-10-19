@@ -109,6 +109,12 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.assertEqual(prop.threshold, threshold)
         self.assertEqual(prop.metric_namespace, metric_namespace)
 
+    def check_dimension(self, ns, index, name, operator, values):
+        dim = ns.condition[0].dimensions[index]
+        self.assertEqual(dim.name, name)
+        self.assertEqual(dim.operator, operator)
+        self.assertEqual(dim.values, values)
+
     def test_monitor_metric_alert_condition_action(self):
 
         from knack.util import CLIError
@@ -128,6 +134,11 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         ns = self._build_namespace()
         self.call_condition(ns, 'avg "a.b/c_d" > 90')
         self.check_condition(ns, 'Average', None, 'a.b/c_d', 'GreaterThan', '90')
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', '250')
+        self.check_dimension(ns, 0, 'ApiName', 'includes', ['GetBlob', 'PutBlob'])
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns.foo/bar_doo > 90')

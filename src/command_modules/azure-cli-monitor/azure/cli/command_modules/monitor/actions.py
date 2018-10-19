@@ -94,6 +94,10 @@ class MetricAlertConditionAction(argparse._AppendAction):
         from azure.cli.command_modules.monitor.grammar import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
 
+        usage = 'usage error: --condition {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
+                '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
+                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+
         string_val = ' '.join(values)
 
         lexer = MetricAlertConditionLexer(antlr4.InputStream(string_val))
@@ -106,10 +110,10 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
+            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator']:
+                if not getattr(metric_condition, item, None):
+                    raise CLIError(usage)
         except (AttributeError, TypeError, KeyError):
-            usage = 'usage error: --condition {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
-                    '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
-                    '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
             raise CLIError(usage)
         super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
 
