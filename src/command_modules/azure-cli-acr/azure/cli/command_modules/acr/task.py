@@ -127,7 +127,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     )
                 ),
                 source_trigger_events=source_trigger_events,
-                status=TriggerStatus.enabled.value if source_trigger_events else TriggerStatus.disabled.value,
+                status=TriggerStatus.enabled.value,
                 name=source_trigger_name
             )
         ]

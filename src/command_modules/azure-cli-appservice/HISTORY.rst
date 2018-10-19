@@ -4,7 +4,7 @@ Release History
 ===============
 0.2.6
 +++++
-* support commit and pull request git events for ACR Task source trigger
+* update ACR SDK
 
 0.2.5
 +++++
