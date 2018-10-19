@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-
 import antlr4
+from knack.util import CLIError
 
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_operator_map,
@@ -16,7 +16,6 @@ def timezone_name_type(value):
     from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
     zone = next((x['name'] for x in AUTOSCALE_TIMEZONES if x['name'].lower() == value.lower()), None)
     if not zone:
-        from knack.util import CLIError
         raise CLIError(
             "Invalid time zone: '{}'. Run 'az monitor autoscale profile list-timezones' for values.".format(value))
     return zone
@@ -33,7 +32,6 @@ def timezone_offset_type(value):
     hour = int(hour)
 
     if hour > 14 or hour < -12:
-        from knack.util import CLIError
         raise CLIError('Offset out of range: -12 to +14')
 
     if hour >= 0 and hour < 10:
@@ -103,10 +101,16 @@ class MetricAlertConditionAction(argparse._AppendAction):
         parser = MetricAlertConditionParser(stream)
         tree = parser.expression()
 
-        validator = MetricAlertConditionValidator()
-        walker = antlr4.ParseTreeWalker()
-        walker.walk(validator, tree)
-        metric_condition = validator.result()
+        try:
+            validator = MetricAlertConditionValidator()
+            walker = antlr4.ParseTreeWalker()
+            walker.walk(validator, tree)
+            metric_condition = validator.result()
+        except (AttributeError, TypeError, KeyError):
+            usage = 'usage error: --condition {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
+                    '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
+                    '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+            raise CLIError(usage)
         super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
 
 
@@ -136,7 +140,6 @@ class ConditionAction(argparse.Action):
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) < 5:
-            from knack.util import CLIError
             raise CLIError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
         operator = get_operator_map()[values[-4]]
@@ -157,7 +160,6 @@ class AlertAddAction(argparse._AppendAction):
         super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from knack.util import CLIError
         _type = values[0].lower()
         if _type == 'email':
             from azure.mgmt.monitor.models import RuleEmailAction
@@ -182,7 +184,6 @@ class AlertRemoveAction(argparse._AppendAction):
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
         # but it could be enhanced to do additional validation in the future.
-        from knack.util import CLIError
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
             raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
@@ -196,7 +197,6 @@ class AutoscaleAddAction(argparse._AppendAction):
         super(AutoscaleAddAction, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from knack.util import CLIError
         _type = values[0].lower()
         if _type == 'email':
             from azure.mgmt.monitor.models import EmailNotification
@@ -221,7 +221,6 @@ class AutoscaleRemoveAction(argparse._AppendAction):
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
         # but it could be enhanced to do additional validation in the future.
-        from knack.util import CLIError
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
             raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
@@ -243,7 +242,6 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             aggregation = get_autoscale_aggregation_map()[values[-2].lower()]
             window = get_period_type()(values[-1])
         except (IndexError, KeyError):
-            from knack.util import CLIError
             raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '
                            'THRESHOLD {avg,min,max,total,count} PERIOD')
         condition = MetricTrigger(
@@ -267,7 +265,6 @@ class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) != 2:
-            from knack.util import CLIError
             raise CLIError('usage error: --scale {in,out,to} VALUE[%]')
         dir_val = values[0]
         amt_val = values[1]
@@ -316,7 +313,6 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
-        from knack.util import CLIError
 
         if type_name == 'email':
             try:
