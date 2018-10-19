@@ -498,6 +498,7 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
 
+
 def _get_trigger_event_list(source_triggers,
                             commit_trigger_enabled=None,
                             pull_request_trigger_enabled=None):
