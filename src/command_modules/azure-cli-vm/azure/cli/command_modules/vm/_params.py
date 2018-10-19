@@ -41,8 +41,10 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
-    # TODO: should the default be premium or standard?
-    disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes, default=StorageAccountTypes.premium_lrs.value))
+    if StorageAccountTypes:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
+    else:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
