@@ -590,17 +590,30 @@ def container_export(cmd, resource_group_name, name, file):
                                              name,
                                              container_group_client.api_version,
                                              False).__dict__
-
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
     resource.pop('id', None)
     resource.pop('plan', None)
-    resource.pop('identity', None)
     resource.pop('kind', None)
     resource.pop('managed_by', None)
     resource['properties'].pop('provisioningState', None)
 
+    # Correctly export the identity
+    if 'identity' in resource and resource['identity'].type != ResourceIdentityType.none:
+        resource['identity'] = resource['identity'].__dict__
+        resource['identity'].pop('additional_properties', None)
+        resource['identity'].pop('principal_id', None)
+        resource['identity'].pop('tenant_id', None)
+
+        resource['identity']['type'] = resource['identity']['type'].value
+
+        for key in resource['identity']['user_assigned_identities'] or {}:
+            resource['identity']['user_assigned_identities'][key] = {}
+    else:
+        resource.pop('identity', None)
+
+    # Remove container instance views
     for i in range(len(resource['properties']['containers'])):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
