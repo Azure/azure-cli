@@ -125,20 +125,44 @@ copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 
 : Delete some files we don't need
-::rmdir /s /q %BUILDING_DIR%\Scripts
+rmdir /s /q %BUILDING_DIR%\Scripts
 :: for /f %%a in ('dir %BUILDING_DIR%\Lib\site-packages\*.egg-info /b /s /a:d') do (
 ::    rmdir /s /q %%a
 ::)
-:: for /d /r %BUILDING_DIR%\Lib\site-packages %%d in (__pycache__) do (
-::    if exist %%d rmdir /s /q "%%d"
-:: )
+
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
 for /f %%a in ('dir /b /s *_py3.py') do (
     set PY3_FILE=%%a
     if exist !PY3_FILE! del !PY3_FILE!
 )
+for /f %%a in ('dir /b /s *_py3.*.pyc') do (
+    set PY3_FILE=%%a
+    if exist !PY3_FILE! del !PY3_FILE!
+)
 popd
+
+:: Remove .py and only deploy .pyc files
+pushd %BUILDING_DIR%\Lib\site-packages
+for /f %%f in ('dir /b /s *.pyc') do (
+    set PARENT_DIR=%%~df%%~pf..
+    echo !PARENT_DIR! | findstr /C:"!BUILDING_DIR!\Lib\site-packages\pip" 1>nul
+    if errorlevel 1 (
+        set FILENAME=%%~nf
+        set BASE_FILENAME=!FILENAME:~0,-11!
+        set pyc=!BASE_FILENAME!.pyc
+        del !PARENT_DIR!\!BASE_FILENAME!.py
+        copy %%~f !PARENT_DIR!\!pyc! >nul
+        del %%~f
+    ) ELSE (
+        echo --SKIP !PARENT_DIR! under pip
+    )
+)
+popd
+
+for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
+    if exist %%d rmdir /s /q "%%d"
+)
 
 if %errorlevel% neq 0 goto ERROR
 

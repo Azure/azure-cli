@@ -99,7 +99,9 @@ DEPENDENCIES = [
     'azure-cli-signalr',
     'azure-cli-sql',
     'azure-cli-storage',
-    'azure-cli-vm'
+    'azure-cli-vm',
+    'urllib3==1.23', 
+    'urllib3[secure]==1.23' 
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
