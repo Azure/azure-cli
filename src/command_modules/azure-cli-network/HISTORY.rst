@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.8
++++++
+* `express-route peering connection create`: Fix issue where `--peer-circuit` would not accept an ID.
+
 2.2.7
 +++++
 * `nic create` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application

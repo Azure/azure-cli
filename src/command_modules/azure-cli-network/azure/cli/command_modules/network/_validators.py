@@ -244,6 +244,8 @@ def validate_er_peer_circuit(cmd, namespace):
             name=namespace.peer_circuit,
             child_type_1='peerings',
             child_name_1=namespace.peering_name)
+    else:
+        peer_id = namespace.peer_circuit
 
     # if the circuit ID is provided, we need to append /peerings/{peering_name}
     if namespace.peering_name not in peer_id:
