@@ -117,6 +117,10 @@ echo All modules: %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --no-cache-dir %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
+pushd %BUILDING_DIR%
+%BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+popd
+
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
@@ -125,6 +129,23 @@ copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 
 : Delete some files we don't need
+pushd %BUILDING_DIR% 
+for %%i in (
+    Doc
+	include
+    Scripts
+    Tcl
+	Tools
+	libs
+) do (
+    if exist %%i (
+        echo Deleting %%i...
+        rmdir /s /q %%i
+    )
+)
+popd
+
+rmdir /s /q %BUILDING_DIR%\Scripts
 rmdir /s /q %BUILDING_DIR%\Scripts
 :: for /f %%a in ('dir %BUILDING_DIR%\Lib\site-packages\*.egg-info /b /s /a:d') do (
 ::    rmdir /s /q %%a
