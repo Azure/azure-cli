@@ -310,7 +310,9 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
         def _params_equal(data, param):
             for name in param.name_source:
-                return data.get("name") == name.lstrip("-")
+                if data.get("name") == name.lstrip("-"):
+                    return True
+            return False
 
         # load help object from data. Will call CliHelpFile._load_from_data() or KnackCommandHelpFile._load_from_data()
         # based on data contents / caller of this method.
