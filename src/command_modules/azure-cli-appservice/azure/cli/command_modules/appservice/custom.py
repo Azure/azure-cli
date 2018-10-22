@@ -1163,7 +1163,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
                                                 'get_backup_configuration', slot)
-    except CloudError:
+    except Exception:
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days,
                     keep_at_least_one_backup]):
