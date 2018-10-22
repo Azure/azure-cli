@@ -5,11 +5,8 @@
 
 from __future__ import print_function
 
-from knack.help import (HelpExample,
-                        HelpFile as KnackHelpFile,
-                        CommandHelpFile as KnackCommandHelpFile,
-                        GroupHelpFile as KnackGroupHelpFile,
-                        CLIHelp,
+from knack.help import (HelpExample, HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
+                        GroupHelpFile as KnackGroupHelpFile, CLIHelp, HelpParameter,
                         ArgumentGroupRegistry as KnackArgumentGroupRegistry)
 from knack.log import get_logger
 from knack.util import CLIError
@@ -94,8 +91,7 @@ class AzCliHelp(CLIHelp):
         def _parse_yaml_from_string(text, help_file_path):
             import yaml
 
-            dir_name = os.path.dirname(help_file_path)
-            base_name = os.path.basename(help_file_path)
+            dir_name, base_name = os.path.split(help_file_path)
 
             pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
 
@@ -132,25 +128,24 @@ class AzCliHelp(CLIHelp):
 
     def show_help(self, cli_name, nouns, parser, is_group):
         cmd_loader_map_ref = self.cli_ctx.invocation.commands_loader.cmd_to_loader_map
+        # attempt to add the help.yaml file data to the parser
         self.update_parser_with_help_file(nouns, cmd_loader_map_ref, parser, is_group)
         super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
 
 
 class CliHelpFile(KnackHelpFile):
 
-    GROUP_TYPE = "group"
-    COMMAND_TYPE = "command"
-    CONTENT_TYPES = [COMMAND_TYPE, GROUP_TYPE]
-
     def load(self, options):
-
+        # if we successfully transformed the help.yaml data, call appropriate _load_from_data method.
+        # This is either CliHelpFile._load_from_data() or CliCommandHelpFile._load_from_data() which ultimately
+        # calls CliHelpFile._load_from_data()
         if hasattr(options, "help_file_data"):
             data = self._load_from_parsed_yaml(options.help_file_data)
             if "content" not in data:
                 self._load_from_data(data)
                 return
 
-        # if unable to load data from parsed yaml, call superclass' load method
+        # if unable to transfrom data from parsed yaml, call superclass' (regular) load method
         super(CliHelpFile, self).load(options)
 
     def _should_include_example(self, ex):
@@ -232,13 +227,13 @@ class CliHelpFile(KnackHelpFile):
 
     @staticmethod
     def _get_links_as_text(links):
-        text = ""
+        text = []
         for link in links:
-            if "name" in link and "url" in link:
-                text += "- {}: {}.\n".format(link["name"], link["url"])
-            elif "url" in link:
-                text += "- {}.\n".format(link["url"])
-        return text
+            if "url" in link:
+                text.append(link["url"])
+        msg = "For more information, visit:"
+        links = ", ".join(text)
+        return "{} {}".format(msg, links) if links else ""
 
     @staticmethod
     def _get_parameter_info(arg_info):
@@ -260,11 +255,11 @@ class CliHelpFile(KnackHelpFile):
                 if "string" in item:
                     value_source.append(item["string"])
                 elif "link" in item:
-                    link_text = "{}".format(item["link"].get("text", ""))
-                    if "command" in item["link"]:
-                        link_text = "{} command: {} ".format(link_text, item["link"]["command"])
+                    link_text = ""
                     if "url" in item["link"]:
-                        link_text = "{} info: {} ".format(link_text, item["link"]["url"])
+                        link_text = "url: {} ".format(item["link"]["url"])
+                    if "command" in item["link"]:
+                        link_text = "command: {} ".format(item["link"]["command"])
                     value_source.append(link_text.strip())
             params["populator-commands"] = value_source
 
@@ -311,13 +306,14 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         help_param = next(p for p in self.parameters if p.name == '--help -h')
         help_param.group_name = 'Global Arguments'
 
-    # Todo: is this necessary? This has exactly the same behavior as superclass.
     def _load_from_data(self, data):
 
         def _params_equal(data, param):
             for name in param.name_source:
                 return data.get("name") == name.lstrip("-")
 
+        # load help object from data. Will call CliHelpFile._load_from_data() or KnackCommandHelpFile._load_from_data()
+        # based on data contents / caller of this method.
         super(CliCommandHelpFile, self)._load_from_data(data)
 
         if isinstance(data, str) or not self.parameters or not data.get('parameters'):
