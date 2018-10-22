@@ -320,9 +320,9 @@ helps['policy definition create'] = """
                 - name: --management-group
                   type: string
                   short-summary: Name of the management group the new policy definition can be assigned in.
-                - name: --subscription-id
+                - name: --subscription
                   type: string
-                  short-summary: Id of the subscription the new policy definition can be assigned in.
+                  short-summary: Name or id of the subscription the new policy definition can be assigned in.
             examples:
                 - name: Create a read-only policy.
                   text: |
@@ -414,9 +414,9 @@ helps['policy set-definition create'] = """
                 - name: --management-group
                   type: string
                   short-summary: Name of management group the new policy set definition can be assigned in.
-                - name: --subscription-id
+                - name: --subscription
                   type: string
-                  short-summary: Id of the subscription the new policy set definition can be assigned in.
+                  short-summary: Name or id of the subscription the new policy set definition can be assigned in.
             examples:
                 - name: Create a policy set definition.
                   text: |
@@ -427,7 +427,7 @@ helps['policy set-definition create'] = """
                         ]'
                 - name: Create a policy set definition to be used by a subscription.
                   text: |
-                    az policy set-definition create -n readOnlyStorage --subscription-id '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[
+                    az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[
                             {
                                 "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
                             }

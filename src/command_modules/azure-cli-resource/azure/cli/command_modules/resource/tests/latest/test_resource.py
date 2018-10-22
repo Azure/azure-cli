@@ -503,12 +503,12 @@ class FeatureScenarioTest(ScenarioTest):
 
 class PolicyScenarioTest(ScenarioTest):
 
-    def cmdstring(self, basic, management_group=None, subscription_id=None):
+    def cmdstring(self, basic, management_group=None, subscription=None):
         cmd = basic
         if (management_group):
             cmd = cmd + ' --management-group {mg}'
-        if (subscription_id):
-            cmd = cmd + ' --subscription-id {sub}'
+        if (subscription):
+            cmd = cmd + ' --subscription {sub}'
         return cmd
 
     def applyPolicy(self):
@@ -568,7 +568,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
-    def resource_policy_operations(self, resource_group, management_group=None, subscription_id=None):
+    def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
@@ -584,11 +584,11 @@ class PolicyScenarioTest(ScenarioTest):
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
-        if (subscription_id):
-            self.kwargs.update({'sub': subscription_id})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
@@ -601,7 +601,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
         self.kwargs['pdn'] = self.kwargs['pdn'] + '_new'
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
@@ -609,28 +609,28 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # list and show it
-        cmd = self.cmdstring('policy definition list', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 1))
 
-        cmd = self.cmdstring('policy definition show -n {pn}', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition show -n {pn}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}')
         ])
 
         # apply assignments
-        if not management_group and not subscription_id:
+        if not management_group and not subscription:
             self.applyPolicy()
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
 
-        cmd = self.cmdstring('policy definition list', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
-    def resource_policyset_operations(self, resource_group, management_group=None, subscription_id=None):
+    def resource_policyset_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
@@ -646,11 +646,11 @@ class PolicyScenarioTest(ScenarioTest):
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
-        if (subscription_id):
-            self.kwargs.update({'sub': subscription_id})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
         policy = self.cmd(cmd).get_output_in_json()
 
         # create a policy set
@@ -659,7 +659,7 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
@@ -670,24 +670,24 @@ class PolicyScenarioTest(ScenarioTest):
         self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
         self.kwargs['psdn'] = self.kwargs['psdn'] + '_new'
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc}', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{ps_desc}'),
             self.check('displayName', '{psdn}')
         ])
 
         # list and show it
-        cmd = self.cmdstring('policy set-definition list', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 1))
 
-        cmd = self.cmdstring('policy set-definition show -n {psn}', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition show -n {psn}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}')
         ])
 
         # create a policy assignment on a resource group
-        if not management_group and not subscription_id:
+        if not management_group and not subscription:
             self.kwargs.update({
                 'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
                 'padn': self.create_random_name('test_assignment', 20)
@@ -705,19 +705,19 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
 
-        cmd = self.cmdstring('policy set-definition list', management_group, subscription_id)
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
 
-        cmd = self.cmdstring('policy definition list', management_group, subscription_id)
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy')

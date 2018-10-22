@@ -398,15 +398,16 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
     return policy_id
 
 
-def _get_custom_or_builtin_policy(cmd, client, name, subscription_id=None, management_group=None, for_policy_set=False):
+def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
     from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
     ErrorResponseException = cmd.get_models('ErrorResponseException')
     policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
 
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
-        if subscription_id:
+        enforce_mutually_exclusive(subscription, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             client.config.subscription_id = subscription_id
     try:
         if cmd.supported_api_version(min_api='2018-03-01') and management_group:
@@ -1093,13 +1094,13 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     return result
 
 
-def enforce_mutually_exclusive(subscription_id, management_group):
-    if subscription_id and management_group:
-        raise IncorrectUsageError('cannot provide both --subscription-id and --management-group')
+def enforce_mutually_exclusive(subscription, management_group):
+    if subscription and management_group:
+        raise IncorrectUsageError('cannot provide both --subscription and --management-group')
 
 
 def create_policy_definition(cmd, name, rules=None, params=None, display_name=None, description=None, mode=None,
-                             metadata=None, subscription_id=None, management_group=None):
+                             metadata=None, subscription=None, management_group=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -1112,17 +1113,18 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
         parameters.metadata = metadata
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_definitions.create_or_update_at_management_group(name, parameters, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
 def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
-                                subscription_id=None, management_group=None):
+                                subscription=None, management_group=None):
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -1131,68 +1133,73 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
                                      display_name=display_name)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_set_definitions.create_or_update_at_management_group(name, parameters, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_set_definitions.create_or_update(name, parameters)
 
 
-def get_policy_definition(cmd, policy_definition_name, subscription_id=None, management_group=None):
+def get_policy_definition(cmd, policy_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    return _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription_id, management_group)
+    return _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
 
 
-def get_policy_setdefinition(cmd, policy_set_definition_name, subscription_id=None, management_group=None):
+def get_policy_setdefinition(cmd, policy_set_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription_id, management_group, True)
+    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
 
 
-def list_policy_definition(cmd, subscription_id=None, management_group=None):
+def list_policy_definition(cmd, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_definitions.list_by_management_group(management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_definitions.list()
 
 
-def list_policy_setdefinition(cmd, subscription_id=None, management_group=None):
+def list_policy_setdefinition(cmd, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_set_definitions.list_by_management_group(management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_set_definitions.list()
 
 
-def delete_policy_definition(cmd, policy_definition_name, subscription_id=None, management_group=None):
+def delete_policy_definition(cmd, policy_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_definitions.delete_at_management_group(policy_definition_name, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_definitions.delete(policy_definition_name)
 
 
-def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription_id=None, management_group=None):
+def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_set_definitions.delete_at_management_group(policy_set_definition_name, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_set_definitions.delete(policy_set_definition_name)
@@ -1200,10 +1207,10 @@ def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription_id
 
 def update_policy_definition(cmd, policy_definition_name, rules=None, params=None,
                              display_name=None, description=None, metadata=None, mode=None,
-                             subscription_id=None, management_group=None):
+                             subscription=None, management_group=None):
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription_id, management_group)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
     # pylint: disable=line-too-long,no-member
 
     PolicyDefinition = cmd.get_models('PolicyDefinition')
@@ -1217,10 +1224,11 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
     if cmd.supported_api_version(min_api='2016-12-01'):
         parameters.mode = mode
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_definitions.create_or_update_at_management_group(policy_definition_name, parameters, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
@@ -1228,7 +1236,7 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
                                 display_name=None, description=None,
-                                subscription_id=None, management_group=None):
+                                subscription=None, management_group=None):
 
     if definitions:
         if os.path.exists(definitions):
@@ -1243,7 +1251,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription_id, management_group, True)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(
@@ -1252,10 +1260,11 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         display_name=display_name if display_name is not None else definition.display_name,
         parameters=params if params is not None else definition.parameters)
     if cmd.supported_api_version(min_api='2018-03-01'):
-        enforce_mutually_exclusive(subscription_id, management_group)
+        enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             return policy_client.policy_set_definitions.create_or_update_at_management_group(policy_set_definition_name, parameters, management_group)
-        if subscription_id:
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
 
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
