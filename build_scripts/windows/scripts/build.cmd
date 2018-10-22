@@ -98,7 +98,7 @@ robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 %BUILDING_DIR%\python.exe -m pip install wheel
 echo Building CLI packages...
 set CLI_SRC=%REPO_ROOT%\src
-for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg) do (
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
    popd
@@ -119,8 +119,8 @@ for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
     set ALL_MODULES=!ALL_MODULES! %%i
 )
 echo All modules: %ALL_MODULES%
-%BUILDING_DIR%\python.exe -m pip install --no-cache-dir %ALL_MODULES%
-%BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir %ALL_MODULES%
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
@@ -137,11 +137,11 @@ copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING
 pushd %BUILDING_DIR% 
 for %%i in (
     Doc
-	include
+    include
     Scripts
     Tcl
-	Tools
-	libs
+    Tools
+    libs
 ) do (
     if exist %%i (
         echo Deleting %%i...
@@ -167,7 +167,7 @@ pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
     echo !PARENT_DIR! | findstr /C:\Lib\site-packages\pip\ 1>nul
-     if !errorlevel! neq  0 (
+    if !errorlevel! neq  0 (
         set FILENAME=%%~nf
         set BASE_FILENAME=!FILENAME:~0,-11!
         set pyc=!BASE_FILENAME!.pyc
