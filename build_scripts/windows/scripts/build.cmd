@@ -9,7 +9,7 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.6.1
+set PYTHON_VERSION=3.6.6
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 
@@ -19,12 +19,17 @@ set OUTPUT_DIR=%~dp0..\out
 if exist %OUTPUT_DIR% rmdir /s /q %OUTPUT_DIR%
 mkdir %OUTPUT_DIR%
 
-set TEMP_SCRATCH_FOLDER=%HOMEDRIVE%%HOMEPATH%\zcli_scratch
-set BUILDING_DIR=%HOMEDRIVE%%HOMEPATH%\zcli
-set WIX_DIR=%HOMEDRIVE%%HOMEPATH%\zwix
+set ARTIFACTS_DIR=%~dp0..\artifacts
+mkdir %ARTIFACTS_DIR%
+set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
+set BUILDING_DIR=%ARTIFACTS_DIR%\cli
+set WIX_DIR=%ARTIFACTS_DIR%\wix
+
 set REPO_ROOT=%~dp0..\..\..
 
 :: look for python 3.x so we can build into the installer
+:: To prepare: install 32 bits Python 3.6.6+ at local and supply the folder path. To minimize the size,
+:: turn off the option of "test" and "tcl tools"
 if not "%1"=="" (
    set PYTHON_DIR=%1
    set PYTHON_EXE=%1\python.exe
@@ -39,7 +44,7 @@ FOR /f %%i IN ('where python') DO (
   set PYTHON_DIR=!PY_FILE_DRIVE!!PY_FILE_PATH!
   FOR /F "delims=" %%j IN ('!PYTHON_EXE! --version') DO (
     set PYTHON_VER=%%j
-    echo.!PYTHON_VER!|findstr /C:"%PYTHON_VERSION%" >nul 2>&1
+    echo.!PYTHON_VER!|findstr /C:%PYTHON_VERSION% >nul 2>&1
     if not errorlevel 1 (
        goto PYTHON_FOUND
     )
@@ -145,12 +150,6 @@ for %%i in (
 )
 popd
 
-rmdir /s /q %BUILDING_DIR%\Scripts
-rmdir /s /q %BUILDING_DIR%\Scripts
-:: for /f %%a in ('dir %BUILDING_DIR%\Lib\site-packages\*.egg-info /b /s /a:d') do (
-::    rmdir /s /q %%a
-::)
-
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
 for /f %%a in ('dir /b /s *_py3.py') do (
@@ -167,8 +166,8 @@ popd
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
-    echo !PARENT_DIR! | findstr /C:"!BUILDING_DIR!\Lib\site-packages\pip" 1>nul
-    if errorlevel 1 (
+    echo !PARENT_DIR! | findstr /C:\Lib\site-packages\pip\ 1>nul
+     if !errorlevel! neq  0 (
         set FILENAME=%%~nf
         set BASE_FILENAME=!FILENAME:~0,-11!
         set pyc=!BASE_FILENAME!.pyc
