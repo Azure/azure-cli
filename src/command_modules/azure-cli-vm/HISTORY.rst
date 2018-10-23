@@ -5,6 +5,7 @@ Release History
 
 2.2.7
 ++++++
+* `image create`: expose storage-sku argument for setting the image's default storage account type
 * `vm resize`: fix bug where `--no-wait` option causes command to crash
 
 2.2.6
