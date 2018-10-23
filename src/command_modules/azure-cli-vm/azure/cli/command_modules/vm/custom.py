@@ -883,7 +883,7 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
         return None
 
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(cmd, vm, no_wait)
+    return set_vm(cmd, vm, no_wait=no_wait)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
