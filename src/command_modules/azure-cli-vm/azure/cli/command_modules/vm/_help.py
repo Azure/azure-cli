@@ -1395,8 +1395,7 @@ helps['image create'] = """
         - name: Create an image from an existing disk.
           text: |
             az image create -g MyResourceGroup -n image1 --os-type Linux \\
-                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 \\
-                --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
+                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1
         - name: Create an image by capturing an existing generalized virtual machine in the same resource group.
           text: az image create -g MyResourceGroup -n image1 --source MyVm1
 """
