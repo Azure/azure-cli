@@ -44,6 +44,8 @@ def load_arguments(self, _):
     if StorageAccountTypes:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
     else:
+        # StorageAccountTypes introduced in api version 2016_04_30_preview of Resource.MGMT.Compute package..
+        # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
