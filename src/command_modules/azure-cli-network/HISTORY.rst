@@ -6,6 +6,7 @@ Release History
 2.2.8
 +++++
 * `express-route peering connection create`: Fix issue where `--peer-circuit` would not accept an ID.
+* `public-ip create`: Fix issue where `--ip-tags` did not work correctly.
 
 2.2.7
 +++++
