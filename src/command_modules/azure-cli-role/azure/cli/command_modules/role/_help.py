@@ -12,7 +12,7 @@ helps['ad sp create-for-rbac'] = """
     short-summary: Create a service principal and configure its access to Azure resources.
     parameters:
         - name: --name -n
-          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
+          short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
         - name: --password -p
           short-summary: The password used to log in.
           long-summary: If not present and `--cert` is not specified, a random password will be generated.
