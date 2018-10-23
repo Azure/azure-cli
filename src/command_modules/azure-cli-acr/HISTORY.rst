@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.8
++++++
+* Support commit and pull request git events for Task source trigger.
+
 2.1.7
 +++++
 * Fix an ACR Build encoding issue in Python2.
