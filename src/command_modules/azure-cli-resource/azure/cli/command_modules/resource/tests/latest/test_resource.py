@@ -154,6 +154,7 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {subnet_id}', checks=self.is_empty())
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
+
 class ResourceGenericUpdate(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
     def test_resource_id_scenario(self, resource_group):

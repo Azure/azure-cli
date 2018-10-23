@@ -416,7 +416,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 new_params[key] = copy.deepcopy(value)
         return new_params
 
-
     def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
         """ Rudimentary parsing to get the command """
         nouns = []
