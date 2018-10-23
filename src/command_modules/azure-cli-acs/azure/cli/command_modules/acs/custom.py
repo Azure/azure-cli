@@ -2130,6 +2130,7 @@ def _ensure_aks_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
+  
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     groups = cf_resource_groups(ctx, subscription_id=subscription_id)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
