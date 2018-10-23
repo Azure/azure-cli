@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.49
+++++++
+* Minor fixes
+
 2.0.48
 ++++++
 * Fix Homebrew

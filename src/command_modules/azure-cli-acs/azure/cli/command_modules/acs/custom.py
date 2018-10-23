@@ -31,7 +31,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
@@ -1165,9 +1164,9 @@ def create_application(client, display_name, homepage, identifier_uris,
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                   display_name=display_name,
+                                                   identifier_uris=identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
@@ -1230,7 +1229,7 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     else:
         app_id = identifier
 
-    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None):
@@ -1357,16 +1356,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console() and enable_cloud_console_aks_browse:
-        logger.warning('***WARNING***')
-        logger.warning('Browsing the kubernetes dashboard in Cloud Shell is an alpha feature.')
-        logger.warning('The browse URL is currently obfuscated but not authenticated.')
-        logger.warning('Do not share this URL.')
-        if not prompt_y_n('Proceed?'):
-            raise CLIError("Browse aborted.")
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/8001')
         result = json.loads(response.text)
-        logger.warning('To view the console, please open % in a new tab', result['url'])
+        term_id = os.environ.get('ACC_TERM_ID')
+        if term_id:
+            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+                                     json={"url": result['url']})
+        logger.warning('To view the console, please open %s in a new tab', result['url'])
     else:
         logger.warning('Proxy running on %s', proxy_url)
 

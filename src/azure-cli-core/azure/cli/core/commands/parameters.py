@@ -36,7 +36,7 @@ def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: d
 # pylint: disable=redefined-builtin
 def get_datetime_type(help=None, date=True, time=True, timezone=True):
 
-    help_string = help + ' ' or ''
+    help_string = help + ' ' if help else ''
     accepted_formats = []
     if date:
         accepted_formats.append('date (yyyy-mm-dd)')
@@ -44,7 +44,7 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
         accepted_formats.append('time (hh:mm:ss.xxxxx)')
     if timezone:
         accepted_formats.append('timezone (+/-hh:mm)')
-    help_string = help_string + 'Format: ' + ', '.join(accepted_formats)
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
 
     # pylint: disable=too-few-public-methods
     class DatetimeAction(argparse.Action):
@@ -52,6 +52,7 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
         def __call__(self, parser, namespace, values, option_string=None):
             """ Parse a date value and return the ISO8601 string. """
             import dateutil.parser
+            import dateutil.tz
 
             value_string = ' '.join(values)
             dt_val = None
@@ -62,9 +63,11 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
                 pass
 
             # TODO: custom parsing attempts here
-
             if not dt_val:
                 raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+
+            if not dt_val.tzinfo and timezone:
+                dt_val = dt_val.replace(tzinfo=dateutil.tz.tzlocal())
 
             # Issue warning if any supplied data will be ignored
             if not date and any([dt_val.day, dt_val.month, dt_val.year]):

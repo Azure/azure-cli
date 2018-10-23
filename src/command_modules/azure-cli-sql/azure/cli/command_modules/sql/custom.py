@@ -2155,6 +2155,9 @@ def failover_group_create(
     # Convert grace period from hours to minutes
     grace_period = int(grace_period) * 60
 
+    if failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+
     if add_db is None:
         add_db = []
 
@@ -2196,12 +2199,13 @@ def failover_group_update(
     if failover_policy is not None:
         instance.read_write_endpoint.failover_policy = failover_policy
 
+    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
     if grace_period is not None:
         grace_period = int(grace_period) * 60
         instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
-
-    if instance.read_write_endpoint.failover_policy == 'Manual':
-        grace_period = None
 
     if add_db is None:
         add_db = []

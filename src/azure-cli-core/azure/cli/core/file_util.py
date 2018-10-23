@@ -8,7 +8,6 @@ from knack.util import CLIError
 from knack.help import GroupHelpFile
 
 from azure.cli.core._help import CliCommandHelpFile
-from azure.cli.core.commands.arm import add_id_parameters
 
 
 def get_all_help(cli_ctx):
@@ -40,6 +39,9 @@ def get_all_help(cli_ctx):
 
 
 def create_invoker_and_load_cmds_and_args(cli_ctx):
+    from knack import events
+    from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
+
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
                                      parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
@@ -47,7 +49,10 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     for command in invoker.commands_loader.command_table:
         invoker.commands_loader.load_arguments(command)
     invoker.parser.load_command_table(invoker.commands_loader)
-    add_id_parameters(None, commands_loader=invoker.commands_loader)
+
+    register_global_subscription_argument(cli_ctx)
+    register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
 
 
 def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):

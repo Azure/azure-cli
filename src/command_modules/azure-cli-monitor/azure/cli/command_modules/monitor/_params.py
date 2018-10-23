@@ -8,22 +8,22 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands.parameters import (
-    get_location_type, tags_type, get_three_state_flag, get_enum_type, get_datetime_type)
+    get_location_type, tags_type, get_three_state_flag, get_enum_type, get_datetime_type, resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
-    AutoscaleScaleAction, AutoscaleConditionAction, period_type,
+    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator)
+    get_action_group_id_validator, validate_metric_dimension)
 
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -73,7 +73,7 @@ def load_arguments(self, _):
         c.argument('operator', arg_type=get_enum_type(get_operator_map().keys()))
         c.argument('threshold')
         c.argument('aggregation', arg_type=get_enum_type(get_aggregation_map().keys()))
-        c.argument('period', type=period_type)
+        c.argument('period', type=get_period_type())
 
     for scope in ['monitor alert show-incident', 'monitor alert list-incidents']:
         with self.argument_context(scope) as c:
@@ -92,26 +92,30 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', arg_group='Target Resource')
 
     with self.argument_context('monitor metrics list') as c:
-        from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
-                                 process_metric_dimension, validate_metric_names)
         from azure.mgmt.monitor.models import AggregationType
-        c.resource_parameter('resource_uri', arg_group='Target Resource')
-        c.extra('start_time', options_list=['--start-time'], validator=process_metric_timespan, arg_group='Time')
-        c.extra('end_time', options_list=['--end-time'], arg_group='Time')
-        c.extra('metadata', options_list=['--metadata'], action='store_true', validator=process_metric_result_type)
-        c.extra('dimension', options_list=['--dimension'], nargs='*', validator=process_metric_dimension)
-        c.argument('interval', arg_group='Time')
-        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*', validator=process_metric_aggregation)
-        c.argument('metricnames', options_list=['--metrics'], nargs='+', help='Space-separated list of metric names to retrieve.', validator=validate_metric_names)
-        c.ignore('timespan', 'result_type')
+        c.resource_parameter('resource', arg_group='Target Resource')
+        c.argument('metadata', action='store_true')
+        c.argument('dimension', nargs='*', validator=validate_metric_dimension)
+        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
+        c.argument('metrics', nargs='+', help='Space-separated list of metric names to retrieve.')
+        c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
+        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('filters', options_list='--filter')
+        c.argument('metric_namespace', options_list='--namespace')
+
+    with self.argument_context('monitor metrics list', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+        c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
+        c.argument('offset', type=get_period_type(as_timedelta=True))
+        c.argument('interval', arg_group='Time', type=get_period_type())
     # endregion
 
     # region MetricAlerts
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
         c.argument('severity', type=int, help='Severity of the alert from 0 (low) to 4 (high).')
-        c.argument('window_size', type=period_type, help='Time over which to aggregate metrics in "##h##m##s" format.')
-        c.argument('evaluation_frequency', type=period_type, help='Frequency with which to evaluate the rule in "##h##m##s" format.')
+        c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
+        c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
@@ -249,15 +253,21 @@ def load_arguments(self, _):
 
     # region ActivityLog
     with self.argument_context('monitor activity-log list') as c:
-        c.argument('select', nargs='+')
+        activity_log_props = [x['key'] for x in EventData()._attribute_map.values()]  # pylint: disable=protected-access
+        c.argument('select', nargs='+', arg_type=get_enum_type(activity_log_props))
+        c.argument('max_events', type=int)
 
-    with self.argument_context('monitor activity-log list', arg_group='OData Filter') as c:
+    with self.argument_context('monitor activity-log list', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+        c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
+        c.argument('offset', type=get_period_type(as_timedelta=True))
+
+    with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
-        c.argument('resource_group')
+        c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider')
-        c.argument('start_time')
-        c.argument('end_time')
+        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='2.1.0')])
         c.argument('caller')
         c.argument('status')
     # endregion

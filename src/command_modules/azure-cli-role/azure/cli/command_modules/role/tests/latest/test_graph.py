@@ -5,7 +5,7 @@
 import json
 import mock
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
@@ -225,3 +225,30 @@ class GraphGroupScenarioTest(ScenarioTest):
                 self.cmd('ad group delete -g {group}')
             except Exception:
                 pass
+
+
+class GraphOwnerScenarioTest(ScenarioTest):
+    def test_graph_ownership(self):
+        playback = not (self.is_live or self.in_recording)
+        if playback:
+            owner = MOCKED_USER_NAME
+        else:
+            account_info = self.cmd('account show').get_output_in_json()
+            if account_info['user']['type'] == 'servicePrincipal':
+                return  # this test delete users which are beyond a SP's capacity, so quit...
+            owner = account_info['user']['name']
+
+        self.kwargs = {
+            'owner': owner
+        }
+        self.recording_processors.append(AADGraphUserReplacer(owner, 'example@example.com'))
+        try:
+            self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
+            self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac --skip-assignment').get_output_in_json()['appId']
+            self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')
+            self.cmd('ad app owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
+            self.cmd('ad app owner remove --owner-object-id {owner_object_id} --id {app_id}')
+            self.cmd('ad app owner list --id {app_id}', checks=self.check('length([*])', 0))
+        finally:
+            if self.kwargs['app_id']:
+                self.cmd('ad sp delete --id {app_id}')

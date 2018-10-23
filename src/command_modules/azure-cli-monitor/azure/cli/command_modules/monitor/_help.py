@@ -133,30 +133,27 @@ helps['monitor metrics list'] = """
     short-summary: List the metric values for a resource.
     parameters:
         - name: --aggregation
-          type: string
           short-summary: The list of aggregation types (space-separated) to retrieve.
         - name: --interval
-          type: string
-          short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
-        - name: --start-time
-          type: string
           short-summary: >
-            The start time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
-            Defaults to 1 Hour prior to the current time.
-        - name: --end-time
-          type: string
-          short-summary: >
-             The end time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
-             Defaults to the current time.
+            The interval over which to aggregate metrics, in ##h##m format.
         - name: --filter
-          type: string
           short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
           long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list'
         - name: --metadata
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
-          type: string
           short-summary: The list of dimensions (space-separated) the metrics are queried into.
+        - name: --namespace
+          short-summary: Namespace to query metric definitions for.
+        - name: --offset
+          short-summary: >
+            Time offset of the query range, in ##d##h format.
+          long-summary: >
+            Can be used with either --start-time or --end-time. If used with --start-time, then
+            the end time will be calculated by adding the offset. If used with --end-time (default), then
+            the start time will be calculated by subtracting the offset. If --start-time and --end-time are
+            provided, then --offset will be ignored.
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
@@ -227,11 +224,12 @@ helps['monitor metrics alert create'] = """
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
             az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90"
+            --description "High CPU"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
             az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
                 --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
-                --action {actionGroupId} apiKey={APIKey} type=HighCPU
+                --action {actionGroupId} apiKey={APIKey} type=HighCPU --description "High CPU"
         - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
           text: |
             az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
@@ -349,10 +347,10 @@ helps['monitor diagnostic-settings create'] = """
                   short-summary: Name or ID of the Log Analytics workspace to send diagnostic logs to.
                 - name: --event-hub
                   type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be
-                                 selected.
+                  short-summary: >
+                    Name or ID an event hub. If none is specified, the default event hub will be selected.
                 - name: --event-hub-rule
-                  short-summary: The resource Id for the event hub authorization rule
+                  short-summary: Name or ID of the event hub authorization rule.
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
@@ -817,6 +815,42 @@ helps['monitor activity-log alert scope remove'] = """
           short-summary: Name of the activity log alerts
         - name: --scope -s
           short-summary: The scopes to remove
+"""
+
+helps['monitor activity-log list'] = """
+    type: command
+    short-summary: List and query activity log events.
+    parameters:
+        - name: --correlation-id
+          short-summary: Correlation ID to query.
+        - name: --resource-id
+          short-summary: ARM ID of a resource.
+        - name: --namespace
+          short-summary: Resource provider namespace.
+        - name: --caller
+          short-summary: Caller to query for, such as an e-mail address or service principal ID.
+        - name: --status
+          short-summary: >
+            Status to query for (ex: Failed)
+        - name: --max-events
+          short-summary: Maximum number of records to return.
+        - name: --select
+          short-summary: Space-separated list of properties to return.
+        - name: --offset
+          short-summary: >
+            Time offset of the query range, in ##d##h format.
+          long-summary: >
+            Can be used with either --start-time or --end-time. If used with --start-time, then
+            the end time will be calculated by adding the offset. If used with --end-time (default), then
+            the start time will be calculated by subtracting the offset. If --start-time and --end-time are
+            provided, then --offset will be ignored.
+    examples:
+        - name: List all events from July 1st, looking forward one week.
+          text: az monitor activity-log list --start-date 2018-07-01 --offset 7d
+        - name: List events within the past six hours based on a correlation ID.
+          text: az monitor activity-log list --correlation-id b5eac9d2-e829-4c9a-9efb-586d19417c5f
+        - name: List events within the past hour based on resource group.
+          text: az monitor activity-log list -g {ResourceGroup} --offset 1h
 """
 
 helps['monitor activity-log list-categories'] = """

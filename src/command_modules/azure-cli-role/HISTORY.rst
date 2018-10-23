@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.8
+++++++
+* support add/remove/list owner on AAD Applciation and Group objects
 
 2.1.7
 ++++++

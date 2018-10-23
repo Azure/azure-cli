@@ -5,6 +5,7 @@
 
 import json
 import os
+import re
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -129,7 +130,8 @@ def list_sku_info(cli_ctx, location=None):
 
 
 def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None):
+                        os_disk_caching=None, data_disk_cachings=None, size=''):
+    is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
@@ -179,7 +181,13 @@ def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_
     if os_disk_caching:
         info['os']['caching'] = os_disk_caching
     else:
-        info['os']['caching'] = 'ReadWrite'
+        info['os']['caching'] = 'None' if is_lv_size else 'ReadWrite'
+
+    # error out on invalid vm sizes
+    if is_lv_size:
+        for v in info.values():
+            if v.get('caching', 'None').lower() != 'none':
+                raise CLIError('usage error: for Lv series of machines, "None" is the only supported caching mode')
     return info
 
 

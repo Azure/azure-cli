@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.0.49
+++++++
+* Fix issue with `--ids` where `--subscription` would take precedence over the subscription in `--ids`.
+  Adding explicit warnings when name parameters would be ignored by use of `--ids`.
+
 2.0.48
 ++++++
 * Fix Homebrew.

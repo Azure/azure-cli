@@ -19,7 +19,7 @@ from knack.util import CLIError, todict
 from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType, get_api_version
-from azure.graphrbac.models.graph_error import GraphErrorException
+from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -386,9 +386,9 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
 
 
 def _get_displayable_name(graph_object):
-    if graph_object.user_principal_name:
+    if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif graph_object.service_principal_names:
+    elif getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 
@@ -501,9 +501,19 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
 
 
 def list_application_owners(cmd, identifier):
-    client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_application(client.applications, identifier)
-    return client.applications.list_owners(object_id)
+    client = _graph_client_factory(cmd.cli_ctx).applications
+    return client.list_owners(_resolve_application(client, identifier))
+
+
+def add_application_owner(cmd, owner_object_id, identifier):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    owner_url = _get_owner_url(cmd, owner_object_id)
+    return graph_client.applications.add_owner(_resolve_application(graph_client.applications, identifier), owner_url)
+
+
+def remove_application_owner(cmd, owner_object_id, identifier):
+    client = _graph_client_factory(cmd.cli_ctx).applications
+    return client.remove_owner(_resolve_application(client, identifier), owner_object_id)
 
 
 def list_sps(client, spn=None, display_name=None, query_filter=None):
@@ -579,6 +589,33 @@ def list_groups(client, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
     return client.list(filter=(' and ').join(sub_filters))
+
+
+def list_group_owners(cmd, group_id):
+    client = _graph_client_factory(cmd.cli_ctx).groups
+    return client.list_owners(_resolve_group(client, group_id))
+
+
+def add_group_owner(cmd, owner_object_id, group_id):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    owner_url = _get_owner_url(cmd, owner_object_id)
+    return graph_client.groups.add_owner(_resolve_group(graph_client.groups, group_id), owner_url)
+
+
+def remove_group_owner(cmd, owner_object_id, group_id):
+    client = _graph_client_factory(cmd.cli_ctx).groups
+    return client.remove_owner(_resolve_group(client, group_id), owner_object_id)
+
+
+def _resolve_group(client, identifier):
+    if not _is_guid(identifier):
+        res = list(list_groups(client, display_name=identifier))
+        if not res:
+            raise CLIError('Group {} is not found in Graph '.format(identifier))
+        if len(res) != 1:
+            raise CLIError('More than 1 group objects has the display name of ' + identifier)
+        identifier = res[0].object_id
+    return identifier
 
 
 def create_application(client, display_name, homepage=None, identifier_uris=None,
@@ -757,7 +794,7 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
         except GraphErrorException:
             pass  # fallback to appid (maybe from an external tenant?)
 
-    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+    return client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def show_service_principal(client, identifier):
@@ -1309,6 +1346,16 @@ def _get_object_stubs(graph_client, assignees):
         params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees[i:i + 1000])
         result += list(graph_client.objects.get_objects_by_object_ids(params))
     return result
+
+
+def _get_owner_url(cmd, owner_object_id):
+    if '://' in owner_object_id:
+        return owner_object_id
+    graph_url = cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _2, tenant_id = profile.get_login_credentials()
+    return graph_url + tenant_id + '/directoryObjects/' + owner_object_id
 
 
 # for injecting test seams to produce predicatable role assignment id for playback
