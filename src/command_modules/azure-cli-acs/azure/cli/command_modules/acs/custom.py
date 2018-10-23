@@ -799,7 +799,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
             api_version = "2017-01-31"  # 2017-01-31 applied to other locations
 
     if orchestrator_type.lower() == 'kubernetes':
-        principal_obj = _ensure_service_principal(cmd.cli_ctx, service_principal, client_secret, subscription_id,
+        principal_obj = _ensure_aks_service_principal(cmd.cli_ctx, service_principal, client_secret, subscription_id,
                                                   dns_name_prefix, location, name)
         client_secret = principal_obj.get("client_secret")
         service_principal = principal_obj.get("service_principal")
@@ -2093,7 +2093,7 @@ def _ensure_aks_service_principal(cli_ctx,
             client_secret = principal_obj.get('client_secret')
             try:
                 obj_id = _resolve_service_principal(rbac_client.service_principals, service_principal)
-                user = rbac_client.service_principals.get(obj_id)
+                rbac_client.service_principals.get(obj_id)
             except GraphErrorException as ex:
                 logger.warning(ex)
                 if ex.response.status_code == 404:
@@ -2129,8 +2129,6 @@ def _ensure_aks_service_principal(cli_ctx,
             raise CLIError('--client-secret is required if --service-principal is specified')
     store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
-
-
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     groups = cf_resource_groups(ctx, subscription_id=subscription_id)
