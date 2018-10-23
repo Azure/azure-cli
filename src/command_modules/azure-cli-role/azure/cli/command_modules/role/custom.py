@@ -1028,14 +1028,18 @@ def create_service_principal_for_rbac(
 
     app_display_name = None
     if name and '://' not in name:
+        prefix = "http://"
         app_display_name = name
-        name = "http://" + name  # normalize be a valid graph service principal name
+        logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
+                       ' used for service principal names', name, prefix, name)
+        name = prefix + name  # normalize be a valid graph service principal name
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
+        app_display_name = name.split('://')[-1]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
