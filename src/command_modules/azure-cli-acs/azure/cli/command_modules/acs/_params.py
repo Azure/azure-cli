@@ -176,6 +176,7 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
+        c.argument('purge_sp_cache', required=False, options_list=['--purge-sp-cache'], default=False)
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])

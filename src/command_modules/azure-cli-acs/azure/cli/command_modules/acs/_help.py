@@ -32,7 +32,7 @@ helps['acs create'] = """
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
           long-summary:  If not specified, a new service principal with the contributor role is created and cached at
-                         {sp_cache} to be used by subsequent `az acs` commands.
+                         {sp_cache} to be used by subsequent `az acs` commands. User can also force to create a new service principal cache by using --purge_sp_cache flag.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
@@ -249,6 +249,9 @@ helps['aks create'] = """
         - name: --workspace-resource-id
           type: string
           short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+        - name: --purge-sp-cache
+          type: bool
+          short-summary: force purge service principal cache and create a new one
 
     examples:
         - name: Create a Kubernetes cluster with an existing SSH public key.

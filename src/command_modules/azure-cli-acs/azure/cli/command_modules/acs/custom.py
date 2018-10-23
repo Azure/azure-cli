@@ -36,12 +36,14 @@ import requests
 
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.role.custom import _resolve_service_principal
 from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    GraphErrorException,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
@@ -1426,7 +1428,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
-               no_wait=False):
+               no_wait=False,
+               purge_sp_cache=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = _get_subscription_id(cmd.cli_ctx)
@@ -1459,7 +1462,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                   service_principal=service_principal, client_secret=client_secret,
                                                   subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                  location=location, name=name)
+                                                  location=location, name=name, purge_sp_cache=purge_sp_cache)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
@@ -2071,24 +2074,45 @@ def _ensure_aks_service_principal(cli_ctx,
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
 
-def _ensure_service_principal(cli_ctx,
-                              service_principal=None,
-                              client_secret=None,
-                              subscription_id=None,
-                              dns_name_prefix=None,
-                              location=None,
-                              name=None):
+def _ensure_aks_service_principal(cli_ctx,
+                                  service_principal=None,
+                                  client_secret=None,
+                                  subscription_id=None,
+                                  dns_name_prefix=None,
+                                  location=None,
+                                  name=None,
+                                  purge_sp_cache=False):
+    file_name_aks = 'aksServicePrincipal.json'
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
         # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id)
+        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
         if principal_obj:
             service_principal = principal_obj.get('service_principal')
             client_secret = principal_obj.get('client_secret')
-        else:
+            try:
+                obj_id = _resolve_service_principal(rbac_client.service_principals, service_principal)
+                user = rbac_client.service_principals.get(obj_id)
+            except GraphErrorException as ex:
+                logger.warning(ex)
+                if ex.response.status_code == 404:
+                    logger.warning('Cached service principal doesn\'t exist, creating a new one')
+                    service_principal = None
+                    client_secret = None
+                else:
+                    raise ex
+            except CLIError as ex:
+                if str(ex).index('doesn\'t exist'):
+                    logger.warning('Cached service principal doesn\'t exist, creating a new one')
+                    service_principal = None
+                    client_secret = None
+                else:
+                    raise ex
+
+        if not service_principal or purge_sp_cache:
             # Nothing to load, make one.
-            if not client_secret:
+            if not client_secret or purge_sp_cache:
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
             url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
@@ -2098,16 +2122,14 @@ def _ensure_service_principal(cli_ctx,
                 raise CLIError('Could not create a service principal with the right permissions. '
                                'Are you an Owner on this project?')
             logger.info('Created a service principal: %s', service_principal)
-            # add role first before save it
-            if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
-                logger.warning('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
+            # We don't need to add role assignment for this created SPN
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal)
-    return load_acs_service_principal(subscription_id)
+    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
+    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
+
 
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
