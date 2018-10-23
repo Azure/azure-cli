@@ -320,20 +320,41 @@ helps['policy definition create'] = """
             examples:
                 - name: Create a read-only policy.
                   text: |
-                    az policy definition create -n readOnlyStorage --rules '{
-                            "if":
-                            {
-                                "field": "type",
-                                "equals": "Microsoft.Storage/storageAccounts/write"
-                            },
-                            "then":
-                            {
-                                "effect": "deny"
-                            }
-                        }'
+                    az policy definition create --name readOnlyStorage --rules '{
+                        "if":
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Storage/storageAccounts/write"
+                        },
+                        "then":
+                        {
+                            "effect": "deny"
+                        }
+                    }'
                 - name: Create a policy parameter definition with the following example
                   text: |
-                    az policy definition create -n allowedLocations --rules '{
+                    az policy definition create --name allowedLocations --rules '{
+                        "if": {
+                            "allOf": [
+                                {
+                                    "field": "location",
+                                    "notIn": "[parameters('listOfAllowedLocations')]"
+                                },
+                                {
+                                    "field": "location",
+                                    "notEquals": "global"
+                                },
+                                {
+                                    "field": "type",
+                                    "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
+                                }
+                            ]
+                        },
+                        "then": {
+                            "effect": "deny"
+                        }
+                    }' \\
+                    --params '{
                         "allowedLocations": {
                             "type": "array",
                             "metadata": {

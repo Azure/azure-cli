@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.31
+++++++
+* Ensure global subscription parameter appears in parameters.
+
 0.3.30
 ++++++
 * Fix error found on windows where commands fail to run properly.

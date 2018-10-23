@@ -1,26 +1,26 @@
 interactions:
 - request:
-    body: '{"location": "southcentralus", "tags": {"use": "az-test"}}'
+    body: '{"location": "southcentralus", "tags": {"product": "azurecli", "cause":
+      "automation", "date": "2018-10-18T15:42:17Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['58']
+      Content-Length: ['118']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2018-10-18T15:42:17Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['336']
+      content-length: ['392']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 15 Mar 2018 16:42:39 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -37,8 +37,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2018-03-01-preview
@@ -48,15 +48,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['0']
       content-type: [text/plain; charset=utf-8]
-      date: ['Thu, 15 Mar 2018 16:42:41 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:22 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/dd80b296-ec79-4a83-b078-bf81bba37303?monitor=true&api-version=2017-10-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5f53215c-e1d4-454c-ac0e-ef05d61bf6f2?monitor=true&api-version=2018-03-01-preview']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
           Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -65,19 +65,43 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
-      accept-language: [en-US]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.49]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/dd80b296-ec79-4a83-b078-bf81bba37303?monitor=true&api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5f53215c-e1d4-454c-ac0e-ef05d61bf6f2?monitor=true&api-version=2018-03-01-preview
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-15T16:42:42.1470827Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-15T16:42:42.1470827Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-15T16:42:42.0689571Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
-      content-length: ['1231']
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Thu, 18 Oct 2018 15:42:39 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5f53215c-e1d4-454c-ac0e-ef05d61bf6f2?monitor=true&api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.49]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/5f53215c-e1d4-454c-ac0e-ef05d61bf6f2?monitor=true&api-version=2018-03-01-preview
+  response:
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-10-18T15:42:22.6765282Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-10-18T15:42:22.6765282Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-10-18T15:42:22.5830090Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1169']
       content-type: [application/json]
-      date: ['Thu, 15 Mar 2018 16:42:59 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -96,18 +120,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2018-03-01-preview
   response:
-    body: {string: '{"keys":[{"keyName":"key1","value":"pPlExOgGyyy+tjvI+cyR4QYH3I6CkOKpYdQtqgTS7O72G94s4LGlErxbe73nfsRsey8Qa5ym23pjiEYlbLBRZw==","permissions":"FULL"},{"keyName":"key2","value":"xXNTAuUmCzWoVGtRMWKZ+WDI+9VSvaZ/QmkFer2ksFzasDxYX73ET8GoUbxjYLEeAFZct9G/P/QhuWzjn4MYYg==","permissions":"FULL"}]}'}
+    body: {string: '{"keys": [{"keyName": "key1", "value": "veryFakedStorageAccountKey==",
+        "permissions": "FULL"}, {"keyName": "key2", "value": "veryFakedStorageAccountKey==",
+        "permissions": "FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Thu, 15 Mar 2018 16:43:00 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -126,18 +152,18 @@ interactions:
       CommandName: [storage account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2018-03-01-preview
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-15T16:42:42.1470827Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-15T16:42:42.1470827Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-15T16:42:42.0689571Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-10-18T15:42:22.6765282Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-10-18T15:42:22.6765282Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-10-18T15:42:22.5830090Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1231']
+      content-length: ['1169']
       content-type: [application/json]
-      date: ['Thu, 15 Mar 2018 16:43:00 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -155,29 +181,29 @@ interactions:
       CommandName: [monitor metrics list-definitions]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-monitor/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricDefinitions?api-version=2018-01-01&metricnamespace=Microsoft.Storage%2FstorageAccounts
   response:
     body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/UsedCapacity","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Capacity","name":{"value":"UsedCapacity","localizedValue":"Used
-        capacity"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Average","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Transactions","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Transactions","localizedValue":"Transactions"},"isDimensionRequired":false,"unit":"Count","primaryAggregationType":"Total","supportedAggregationTypes":["Total"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"ResponseType","localizedValue":"Response
+        capacity"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total"],"metricAvailabilities":[{"timeGrain":"PT1H","retention":"P93D"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Transactions","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Transactions","localizedValue":"Transactions"},"isDimensionRequired":false,"unit":"Count","primaryAggregationType":"Total","supportedAggregationTypes":["Total"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"ResponseType","localizedValue":"Response
         type"},{"value":"GeoType","localizedValue":"Geo type"},{"value":"ApiName","localizedValue":"API
-        name"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Ingress","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Ingress","localizedValue":"Ingress"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
-        type"},{"value":"ApiName","localizedValue":"API name"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Egress","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Egress","localizedValue":"Egress"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
-        type"},{"value":"ApiName","localizedValue":"API name"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessServerLatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessServerLatency","localizedValue":"Success
+        name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Ingress","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Ingress","localizedValue":"Ingress"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
+        type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Egress","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Egress","localizedValue":"Egress"},"isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
+        type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessServerLatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessServerLatency","localizedValue":"Success
         Server Latency"},"isDimensionRequired":false,"unit":"MilliSeconds","primaryAggregationType":"Average","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
-        type"},{"value":"ApiName","localizedValue":"API name"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessE2ELatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessE2ELatency","localizedValue":"Success
+        type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessE2ELatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessE2ELatency","localizedValue":"Success
         E2E Latency"},"isDimensionRequired":false,"unit":"MilliSeconds","primaryAggregationType":"Average","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
-        type"},{"value":"ApiName","localizedValue":"API name"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Availability","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Availability","localizedValue":"Availability"},"isDimensionRequired":false,"unit":"Percent","primaryAggregationType":"Average","supportedAggregationTypes":["Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
-        type"},{"value":"ApiName","localizedValue":"API name"}]}]}'}
+        type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Availability","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Availability","localizedValue":"Availability"},"isDimensionRequired":false,"unit":"Percent","primaryAggregationType":"Average","supportedAggregationTypes":["Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
+        type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]}]}'}
     headers:
-      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-black_MetricsMP_IN_6]
+      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-black_MetricsMP_IN_0]
       cache-control: [no-cache]
-      content-length: ['8519']
+      content-length: ['8733']
       content-type: [application/json]
-      date: ['Thu, 15 Mar 2018 16:43:00 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:46 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -194,19 +220,77 @@ interactions:
       CommandName: [monitor metrics list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-monitor/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2018-01-01T00%3A00%3A00Z%2F2999-01-01T00%3A00%3A00Z&metricnames=Ingress%2CEgress&api-version=2018-01-01&metricnamespace=Microsoft.Storage%2FstorageAccounts
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2018-01-01T00%253A00%253A00%252B00%253A00%252F2999-01-01T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01&metricnamespace=Microsoft.Storage%2FstorageAccounts
   response:
     body: {string: '{"cost":0,"timespan":"2998-12-01T00:00:00Z/2999-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'}
     headers:
-      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-red_MetricsMP_IN_6]
+      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-black_MetricsMP_IN_0]
       cache-control: [no-cache]
       content-length: ['938']
       content-type: [application/json]
-      date: ['Thu, 15 Mar 2018 16:43:01 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:46 GMT']
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [monitor metrics list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2018-01-01T00%253A00%253A00%252B00%253A00%252F2031-09-10T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01
+  response:
+    body: {string: '{"cost":0,"timespan":"2031-08-10T00:00:00Z/2031-09-10T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'}
+    headers:
+      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-red_MetricsMP_IN_8]
+      cache-control: [no-cache]
+      content-length: ['938']
+      content-type: [application/json]
+      date: ['Thu, 18 Oct 2018 15:42:48 GMT']
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [monitor metrics list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.49]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2011-04-25T00%253A00%253A00%252B00%253A00%252F2025-01-01T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01
+  response:
+    body: {string: '{"cost":0,"timespan":"2024-12-01T00:00:00Z/2025-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'}
+    headers:
+      __handlingserverid__: [shoeboxproxyustwo_shoeboxproxyustwo-red_MetricsMP_IN_8]
+      cache-control: [no-cache]
+      content-length: ['938']
+      content-type: [application/json]
+      date: ['Thu, 18 Oct 2018 15:42:48 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -224,9 +308,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.49]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
@@ -235,12 +318,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 15 Mar 2018 16:43:02 GMT']
+      date: ['Thu, 18 Oct 2018 15:42:50 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyWlNQM0NKSFRPNEoyRUM3SFhBSE1KRElZQkdYRUVFSUNJQnxCRkExN0JGQTZFNkMwOEQ0LVNPVVRIQ0VOVFJBTFVTIiwiam9iTG9jYXRpb24iOiJzb3V0aGNlbnRyYWx1cyJ9?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDUEdISVJDS0VTQVRHN01WUTQ3NTVIRklaQjNIS0dMVElKN3xGOTFBN0E4ODBGREI3NjUzLVNPVVRIQ0VOVFJBTFVTIiwiam9iTG9jYXRpb24iOiJzb3V0aGNlbnRyYWx1cyJ9?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

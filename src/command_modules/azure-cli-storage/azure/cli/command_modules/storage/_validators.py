@@ -713,6 +713,20 @@ def add_progress_callback(cmd, namespace):
     del namespace.no_progress
 
 
+def process_container_delete_parameters(cmd, namespace):
+    """Process the parameters for storage container delete command"""
+    # check whether to use mgmt or data-plane
+    if namespace.bypass_immutability_policy:
+        # use management-plane
+        namespace.processed_account_name = namespace.account_name
+        namespace.processed_resource_group, namespace.mgmt_client = _query_account_rg(
+            cmd.cli_ctx, namespace.account_name)
+        del namespace.auth_mode
+    else:
+        # use data-plane, like before
+        validate_client_parameters(cmd, namespace)
+
+
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
     import os

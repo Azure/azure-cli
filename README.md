@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
-[![Slack](https://azureclislackin.azurewebsites.net/badge.svg)](https://azurecli.slack.com)
+[![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
 
@@ -103,10 +103,13 @@ jasonsha@MyVM:~$
 
 #### Exit Codes
 For scripting purposes, we output certain exit codes for differing scenarios.
-`0`: Command ran successfully.
-`1`: Generic error; server returned bad status code, CLI validation failed, etc.
-`2`: Parser error; check input to command line.
-`3`: Missing ARM resource; used for existence check from `show` commands.
+
+|Exit Code   |Scenario   |
+|---|---|
+|0  |Command ran successfully.   |
+|1   |Generic error; server returned bad status code, CLI validation failed, etc.   |
+|2   |Parser error; check input to command line.   |
+|3   |Missing ARM resource; used for existence check from `show` commands.   |
 
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
@@ -188,4 +191,4 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Automation
 
-- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/scenario_base_tests.md)
+- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md)

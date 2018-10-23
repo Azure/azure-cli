@@ -297,11 +297,15 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, instance, size_gb=None, sku=None):
+def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_write=None, disk_mbps_read_write=None):
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
         _set_sku(cmd, instance, sku)
+    if disk_iops_read_write is not None:
+        instance.disk_iops_read_write = disk_iops_read_write
+    if disk_mbps_read_write is not None:
+        instance.disk_mbps_read_write = disk_mbps_read_write
     return instance
 # endregion
 
@@ -1956,7 +1960,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         master_template.add_resource(ag_resource)
 
     # create storage accounts if needed for unmanaged disk storage
-    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+    if storage_profile == StorageProfile.SAPirImage:
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             cmd, 'storageLoop', location, tags, storage_sku))
         master_template.add_variable('storageAccountNames', [

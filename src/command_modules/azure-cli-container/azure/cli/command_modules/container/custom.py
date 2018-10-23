@@ -33,10 +33,10 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
-                                                 ContainerGroupIpAddressType)
+                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network
-
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource,
+                              cf_network, get_auth_management_client)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -45,6 +45,7 @@ ACR_SERVER_DELIMITER = '.azurecr.io'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
+MSI_LOCAL_ID = '[system]'
 
 
 def list_containers(client, resource_group_name=None):
@@ -90,6 +91,7 @@ def create_container(cmd,
                      azure_file_volume_mount_path=None,
                      log_analytics_workspace=None,
                      log_analytics_workspace_key=None,
+                     vnet=None,
                      vnet_name=None,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
@@ -102,9 +104,12 @@ def create_container(cmd,
                      secrets=None,
                      secrets_mount_path=None,
                      file=None,
+                     assign_identity=None,
+                     identity_scope=None,
+                     identity_role='Contributor',
+                     identity_role_id=None,
                      no_wait=False):
     """Create a container group. """
-
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
 
@@ -177,9 +182,13 @@ def create_container(cmd,
     else:
         environment_variables = environment_variables or secure_environment_variables
 
+    identity = None
+    if assign_identity is not None:
+        identity = _build_identities_info(assign_identity)
+
     # Set up VNET, subnet and network profile if needed
-    if subnet and vnet_name and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix)
+    if subnet and not network_profile:
+        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
 
     cg_network_profile = None
     if network_profile:
@@ -197,6 +206,7 @@ def create_container(cmd,
                           volume_mounts=mounts or None)
 
     cgroup = ContainerGroup(location=location,
+                            identity=identity,
                             containers=[container],
                             os_type=os_type,
                             restart_policy=restart_policy,
@@ -208,7 +218,50 @@ def create_container(cmd,
                             tags=tags)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name, name, cgroup)
+
+    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+                      name, cgroup)
+
+    if assign_identity is not None and identity_scope:
+        cg = container_group_client.get(resource_group_name, name)
+        _create_update_msi_role_assignment(cmd, resource_group_name, name, cg.identity.principal_id,
+                                           identity_role_id, identity_scope)
+    return lro
+
+
+def _build_identities_info(identities):
+    identities = identities or []
+    identity_type = ResourceIdentityType.none
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_type = ResourceIdentityType.system_assigned
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities and identity_type == ResourceIdentityType.system_assigned:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif external_identities:
+        identity_type = ResourceIdentityType.user_assigned
+    identity = ContainerGroupIdentity(type=identity_type)
+    if external_identities:
+        identity.user_assigned_identities = {e: {} for e in external_identities}
+    return identity
+
+
+def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identity_principle_id,
+                                       role_definition_id, identity_scope):
+    from azure.cli.core.profiles import ResourceType, get_sdk
+
+    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters',
+                                             mod='models', operation_group='role_assignments')
+
+    assignment_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
+
+    role_assignment_guid = str(_gen_guid())
+
+    create_params = RoleAssignmentCreateParameters(
+        role_definition_id=role_definition_id,
+        principal_id=identity_principle_id
+    )
+    return assignment_client.create(identity_scope, role_assignment_guid, create_params, custom_headers=None)
 
 
 def _get_resource(client, resource_group_name, *subresources):
@@ -223,51 +276,63 @@ def _get_resource(client, resource_group_name, *subresources):
             raise
 
 
-def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vnet_address_prefix, subnet, subnet_address_prefix):
+def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-    containerInstanceDelegationServiceName = "Microsoft.ContainerInstance/containerGroups"
+    aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     aci_delegation = Delegation(
-        name="Microsoft.ContainerInstance.containerGroups",
-        service_name="Microsoft.ContainerInstance/containerGroups"
+        name=aci_delegation_service_name,
+        service_name=aci_delegation_service_name
     )
 
     ncf = cf_network(cmd.cli_ctx)
 
+    vnet_name = vnet
     subnet_name = subnet
     if is_valid_resource_id(subnet):
         parsed_subnet_id = parse_resource_id(subnet)
         subnet_name = parsed_subnet_id['resource_name']
         vnet_name = parsed_subnet_id['name']
+        resource_group_name = parsed_subnet_id['resource_group']
+    elif is_valid_resource_id(vnet):
+        parsed_vnet_id = parse_resource_id(vnet)
+        vnet_name = parsed_vnet_id['resource_name']
+        resource_group_name = parsed_vnet_id['resource_group']
 
     default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
 
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
     # For an existing subnet, validate and add delegation if needed
     if subnet:
-        for endpoint in (subnet.service_endpoints or []):
-            if endpoint.service != "Microsoft.ContainerInstance":
-                raise CLIError("Can not use subnet with existing service links other than 'Microsoft.ContainerInstance'.")
+        logger.info('Using existing subnet "%s" in resource group "%s"', subnet.name, resource_group_name)
+        for sal in (subnet.service_association_links or []):
+            if sal.linked_resource_type != aci_delegation_service_name:
+                raise CLIError("Can not use subnet with existing service association links other than {}.".format(aci_delegation_service_name))
 
         if not subnet.delegations:
+            logger.info('Adding ACI delegation to the existing subnet.')
             subnet.delegations = [aci_delegation]
+            subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
-                if delegation.service_name != containerInstanceDelegationServiceName:
-                    raise CLIError("Can not use subnet with existing delegations other than {}".format(containerInstanceDelegationServiceName))
+                if delegation.service_name != aci_delegation_service_name:
+                    raise CLIError("Can not use subnet with existing delegations other than {}".format(aci_delegation_service_name))
 
         network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
         if network_profile:
+            logger.info('Using existing network profile "%s"', default_network_profile_name)
             return network_profile.id
 
     # Create new subnet and Vnet if not exists
     else:
         Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet', 'VirtualNetwork',
                                                               'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
+
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
+            logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
             ncf.virtual_networks.create_or_update(resource_group_name,
                                                   vnet_name,
                                                   VirtualNetwork(name=vnet_name,
@@ -279,13 +344,13 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
             address_prefix=subnet_address_prefix,
             delegations=[aci_delegation])
 
+        logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
         subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
                                                                                                     'ContainerNetworkInterfaceConfiguration',
                                                                                                     'IPConfigurationProfile',
                                                                                                     resource_type=ResourceType.MGMT_NETWORK)
-
     # In all cases, create the network profile with aci NIC
     network_profile = NetworkProfile(
         name=default_network_profile_name,
@@ -299,6 +364,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet_name, vne
         )]
     )
 
+    logger.info('Creating network profile "%s" in resource group "%s"', default_network_profile_name, resource_group_name)
     network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
 
     return network_profile.id
@@ -765,3 +831,8 @@ def _move_console_cursor_up(lines):
     if lines > 0:
         # Use stdout.write to support Python 2
         sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()

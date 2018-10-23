@@ -49,31 +49,44 @@ def timezone_offset_type(value):
     return value
 
 
-def period_type(value):
+def get_period_type(as_timedelta=False):
 
-    import re
+    def period_type(value):
 
-    def _get_substring(indices):
-        if indices == tuple([-1, -1]):
-            return ''
-        return value[indices[0]: indices[1]]
+        import re
 
-    regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
-    match = re.match(regex, value.lower())
-    match_len = match.regs[0]
-    if match_len != tuple([0, len(value)]):
-        raise ValueError
-    # simply return value if a valid ISO8601 string is supplied
-    if match.regs[1] != tuple([-1, -1]) and match.regs[5] != tuple([-1, -1]):
-        return value
+        def _get_substring(indices):
+            if indices == tuple([-1, -1]):
+                return ''
+            return value[indices[0]: indices[1]]
 
-    # if shorthand is used, only support days, minutes, hours, seconds
-    # ensure M is interpretted as minutes
-    days = _get_substring(match.regs[4])
-    minutes = _get_substring(match.regs[6]) or _get_substring(match.regs[3])
-    hours = _get_substring(match.regs[7])
-    seconds = _get_substring(match.regs[8])
-    return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
+        regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
+        match = re.match(regex, value.lower())
+        match_len = match.span(0)
+        if match_len != tuple([0, len(value)]):
+            raise ValueError
+        # simply return value if a valid ISO8601 string is supplied
+        if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
+            return value
+
+        # if shorthand is used, only support days, minutes, hours, seconds
+        # ensure M is interpretted as minutes
+        days = _get_substring(match.span(4))
+        hours = _get_substring(match.span(6))
+        minutes = _get_substring(match.span(7)) or _get_substring(match.span(3))
+        seconds = _get_substring(match.span(8))
+
+        if as_timedelta:
+            from datetime import timedelta
+            return timedelta(
+                days=int(days[:-1]) if days else 0,
+                hours=int(hours[:-1]) if hours else 0,
+                minutes=int(minutes[:-1]) if minutes else 0,
+                seconds=int(seconds[:-1]) if seconds else 0
+            )
+        return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
+
+    return period_type
 
 
 # pylint: disable=protected-access, too-few-public-methods
@@ -129,7 +142,7 @@ class ConditionAction(argparse.Action):
         operator = get_operator_map()[values[-4]]
         threshold = int(values[-3])
         aggregation = get_aggregation_map()[values[-2].lower()]
-        window = period_type(values[-1])
+        window = get_period_type()(values[-1])
         metric = RuleMetricDataSource(resource_uri=None, metric_name=metric_name)  # target URI will be filled in later
         condition = ThresholdRuleCondition(
             operator=operator, threshold=threshold, data_source=metric,
@@ -228,7 +241,7 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             operator = get_autoscale_operator_map()[values[-4]]
             threshold = int(values[-3])
             aggregation = get_autoscale_aggregation_map()[values[-2].lower()]
-            window = period_type(values[-1])
+            window = get_period_type()(values[-1])
         except (IndexError, KeyError):
             from knack.util import CLIError
             raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '

@@ -31,7 +31,6 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
 class CdnCustomDomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         from azure.mgmt.cdn.models import ErrorResponseException
         from knack.util import CLIError
 

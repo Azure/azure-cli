@@ -51,3 +51,6 @@ def load_arguments(self, _):
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL')
+
+    with self.argument_context('cosmosdb create') as c:
+        c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")

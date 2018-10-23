@@ -1294,6 +1294,37 @@ class NetworkNicScenarioTest(ScenarioTest):
         self.cmd('network nic list -g {rg}', checks=self.is_empty())
 
 
+class NetworkNicAppGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
+    def test_network_nic_app_gateway(self, resource_group):
+        from msrestazure.azure_exceptions import CloudError
+
+        self.kwargs.update({
+            'nic': 'nic1',
+            'ag': 'ag1',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'ip': 'ip1',
+            'pool1': 'appGatewayBackendPool',
+            'pool2': 'bepool2',
+            'config1': 'ipconfig1',
+            'config2': 'ipconfig2'
+        })
+
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet {subnet1} --vnet-name {vnet} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
+                 checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
+        with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
+            self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
+                 checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
+
+
 class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_nic_subresource')

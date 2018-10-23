@@ -13,7 +13,6 @@ def create_diagnostics_settings(client, name, resource_uri,
                                 storage_account=None,
                                 workspace=None):
     from azure.mgmt.monitor.models import DiagnosticSettingsResource
-
     parameters = DiagnosticSettingsResource(storage_account_id=storage_account,
                                             workspace_id=workspace,
                                             event_hub_name=event_hub,

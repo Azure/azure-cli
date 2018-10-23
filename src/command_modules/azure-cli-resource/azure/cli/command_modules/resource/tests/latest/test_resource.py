@@ -881,5 +881,17 @@ class InvokeActionTest(ScenarioTest):
         self.cmd('resource invoke-action --action capture --ids {vm_id} --request-body {request_body}')
 
 
+class GlobalIdsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_global_ids')
+    def test_global_ids(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        self.kwargs['vnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet}').get_output_in_json()['newVNet']['id']
+        # command will fail if the other parameters were actually used
+        self.cmd('network vnet show --subscription fakesub --resource-group fakerg -n fakevnet --ids {vnet_id}')
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -382,6 +382,16 @@ class TestActions(unittest.TestCase):
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
         self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
+        # default to "None" across for Lv/Lv2 machines
+        r = normalize_disk_info(data_disk_sizes_gb=[1], size='standard_L8s')
+        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
+        self.assertEqual(r[0].get('caching'), None)
+
+        # error on lv/lv2 machines with caching mode other than "None"
+        with self.assertRaises(CLIError) as err:
+            normalize_disk_info(data_disk_cachings=['ReadWrite'], data_disk_sizes_gb=[1, 2], size='standard_L16s_v2')
+        self.assertTrue('for Lv series of machines, "None" is the only supported caching mode' in str(err.exception))
+
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):
         client_mock, size_mock = mock.MagicMock(), mock.MagicMock()

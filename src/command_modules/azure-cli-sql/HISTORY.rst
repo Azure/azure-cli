@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.5
++++++
+* Fixed az sql failover-group create and az sql failover-group update to work with Manual failover policy.
+
 2.1.4
 +++++
 * Minor fixes
