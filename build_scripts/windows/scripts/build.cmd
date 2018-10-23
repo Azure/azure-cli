@@ -12,6 +12,7 @@ if "%CLI_VERSION%"=="" (
 set PYTHON_VERSION=3.6.6
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
+set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python366-32.zip"
 
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
@@ -24,36 +25,9 @@ mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
+set PYTHON_DIR=%ARTIFACTS_DIR%\Python366-32
 
 set REPO_ROOT=%~dp0..\..\..
-
-:: look for python 3.x so we can build into the installer
-:: To prepare: install 32 bits Python 3.6.6+ at local and supply the folder path. To minimize the size,
-:: turn off the option of "test" and "tcl tools"
-if not "%1"=="" (
-   set PYTHON_DIR=%1
-   set PYTHON_EXE=%1\python.exe
-   goto PYTHON_FOUND
-)
-
-FOR /f %%i IN ('where python') DO (
-  set PY_FILE_DRIVE=%%~di
-  set PY_FILE_PATH=%%~pi
-  set PY_FILE_NAME=%%~ni
-  set PYTHON_EXE=!PY_FILE_DRIVE!!PY_FILE_PATH!!PY_FILE_NAME!.exe
-  set PYTHON_DIR=!PY_FILE_DRIVE!!PY_FILE_PATH!
-  FOR /F "delims=" %%j IN ('!PYTHON_EXE! --version') DO (
-    set PYTHON_VER=%%j
-    echo.!PYTHON_VER!|findstr /C:%PYTHON_VERSION% >nul 2>&1
-    if not errorlevel 1 (
-       goto PYTHON_FOUND
-    )
-  )
-)
-echo python %PYTHON_VERSION% is needed to create installer.
-exit /b 1
-:PYTHON_FOUND
-echo Python Executables: %PYTHON_DIR%, %PYTHON_EXE%
 
 ::reset working folders
 if exist %BUILDING_DIR% rmdir /s /q %BUILDING_DIR%
@@ -90,6 +64,23 @@ if not exist %WIX_DIR% (
     echo Wix downloaded and extracted successfully.
     popd
 )
+
+::ensure Python is available
+if exist %PYTHON_DIR% (
+    echo Using existing Python at %PYTHON_DIR%
+)
+if not exist %PYTHON_DIR% (
+    mkdir %PYTHON_DIR%
+    pushd %PYTHON_DIR%
+    echo Downloading Python.
+    curl -o Python366-32.zip %PYTHON_DOWNLOAD_URL% -k
+    unzip -q Python366-32.zip
+    if %errorlevel% neq 0 goto ERROR
+    del Python366-32.zip
+    echo Python downloaded and extracted successfully.
+    popd
+)
+set PYTHON_EXE=%PYTHON_DIR%\python.exe
 
 :: Use the Python version on the machine that creates the MSI
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
