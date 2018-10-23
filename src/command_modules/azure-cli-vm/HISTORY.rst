@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.7
+++++++
+* `vm resize`: fix bug where `--no-wait` option causes command to crash
+
 2.2.6
 ++++++
 * `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
