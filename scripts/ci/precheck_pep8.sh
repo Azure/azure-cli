@@ -3,7 +3,7 @@
 set -e
 
 # install flake 8
-pip install -qqq flake8
+pip install -qqq flake8==3.5.0
 
 echo "Run flake8."
 flake8 --statistics --config=./.flake8 
