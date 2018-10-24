@@ -1196,6 +1196,7 @@ def create_application(client, display_name, homepage, identifier_uris,
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
 
+
 def update_application(client, object_id, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
@@ -1203,21 +1204,10 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
     from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
-
-    # app_create_param = ApplicationUpdateParameters(additional_properties=None,
-    #                                                available_to_other_tenants=available_to_other_tenants,
-    #                                                display_name=display_name,
-    #                                                identifier_uris=identifier_uris,
-    #                                                homepage=homepage,
-    #                                                reply_urls=reply_urls,
-    #                                                key_credentials=key_creds,
-    #                                                password_credentials=password_creds,
-    #                                                required_resource_access=required_resource_accesses)
     try:
-        #return client.patch(app_id, app_create_param)
         if key_creds:
             client.update_key_credentials(object_id, key_creds)
-        if password_creds:    
+        if password_creds:
             client.update_password_credentials(object_id, password_creds)
         return
     except GraphErrorException as ex:
@@ -2135,8 +2125,8 @@ def _ensure_osa_aad(cli_ctx,
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
         resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
                                          additional_properties=None, type="Scope")
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access], 
-                                                         additional_properties=None, 
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access],
+                                                         additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
         list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')".format(reply_url)))
         if update:
@@ -2168,11 +2158,11 @@ def _ensure_osa_aad(cli_ctx,
     if aad_tenant_id is None:
         profile = Profile(cli_ctx=cli_ctx)
         _, _, aad_tenant_id = profile.get_login_credentials()
-        return OpenShiftManagedClusterAADIdentityProvider(
-            client_id=aad_client_app_id,
-            secret=aad_client_app_secret,
-            tenant_id=aad_tenant_id,
-            kind='AADIdentityProvider')
+    return OpenShiftManagedClusterAADIdentityProvider(
+        client_id=aad_client_app_id,
+        secret=aad_client_app_secret,
+        tenant_id=aad_tenant_id,
+        kind='AADIdentityProvider')
 
 
 def _ensure_service_principal(cli_ctx,
@@ -2377,15 +2367,14 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
     update_aad_secret = False
     try:
-        mc = client.get(resource_group_name, name)
+        client.get(resource_group_name, name)
     except CloudError as ex:
-        if 'InvalidResourceType' in ex.error.error:
-            update_aad_secret = True
-            
+        update_aad_secret = True
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
-                                    aad_client_app_id=aad_client_app_id,
-                                    aad_client_app_secret=aad_client_app_secret,
-                                    identifier=fqdn, name=name, update=update_aad_secret)
+                                       aad_client_app_id=aad_client_app_id,
+                                       aad_client_app_secret=aad_client_app_secret,
+                                       aad_tenant_id=aad_tenant_id, identifier=fqdn, 
+                                       name=name, update=update_aad_secret)
     identity_providers.append(
         OpenShiftManagedClusterIdentityProvider(
             name='Azure AD',
@@ -2411,7 +2400,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     try:
         # long_running_operation_timeout=300
         return sdk_no_wait(no_wait, client.create_or_update,
-                        resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+                           resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
     except CloudError as ex:
         raise ex
 
