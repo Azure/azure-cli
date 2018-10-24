@@ -343,7 +343,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 logger.warning(d.message)
 
             try:
-                result = cmd(self._copy_params(params))
+                result = cmd(params)
                 if cmd.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
                     result = None
                 elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
@@ -401,20 +401,6 @@ class AzCliCommandInvoker(CommandInvoker):
             if ('additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict)):
                 converted_dic.update(converted_dic.pop('additionalProperties'))
         return converted_dic
-
-    @staticmethod
-    # copy params so that original params remain unmodified when.
-    # params need to be unmodified in the event that a command is executed multiple times against different --ids
-    def _copy_params(params):
-        import copy
-        new_params = {}
-        for key, value in params.items():
-            # TODO: is try except more robust here???
-            if isinstance(value, AzCliCommand):
-                new_params[key] = value
-            else:
-                new_params[key] = copy.deepcopy(value)
-        return new_params
 
     def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
         """ Rudimentary parsing to get the command """
