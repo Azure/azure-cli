@@ -123,23 +123,6 @@ if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 
-: Delete some files we don't need
-pushd %BUILDING_DIR% 
-for %%i in (
-    Doc
-    include
-    Scripts
-    Tcl
-    Tools
-    libs
-) do (
-    if exist %%i (
-        echo Deleting %%i...
-        rmdir /s /q %%i
-    )
-)
-popd
-
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
 for /f %%a in ('dir /b /s *_py3.py') do (
