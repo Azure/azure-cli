@@ -1739,7 +1739,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
-        from azure.cli.core.extension import get_extension_path
+        from azure.cli.core.extensions import get_extension_path
         ext_dir = get_extension_path(extension_name)
         sys.path.append(ext_dir)
         # Import the extension module
@@ -1785,18 +1785,18 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
 
 def _install_dev_spaces_extension(extension_name):
     try:
-        from azure.cli.command_modules.extension import custom
-        custom.add_extension(extension_name=extension_name)
+        from azure.cli.core.extensions import operations
+        operations.add_extension(extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
 
 
 def _update_dev_spaces_extension(extension_name, extension_module):
-    from azure.cli.core.extension import ExtensionNotInstalledException
+    from azure.cli.core.extensions import ExtensionNotInstalledException
     try:
-        from azure.cli.command_modules.extension import custom
-        custom.update_extension(extension_name=extension_name)
+        from azure.cli.core.extensions import operations
+        operations.update_extension(extension_name=extension_name)
 
         # reloading the imported module to update
         try:
@@ -1817,7 +1817,7 @@ def _update_dev_spaces_extension(extension_name, extension_module):
 
 
 def _get_or_add_extension(extension_name, extension_module, update=False):
-    from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
+    from azure.cli.core.extensions import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
         if update:

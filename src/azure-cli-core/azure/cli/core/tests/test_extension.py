@@ -10,10 +10,10 @@ import zipfile
 
 import mock
 
-from azure.cli.core.extension import (get_extensions, get_extension_path, extension_exists,
-                                      get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
-                                      ExtensionNotInstalledException, WheelExtension,
-                                      EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
+from azure.cli.core.extensions import (get_extensions, get_extension_path, extension_exists,
+                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
+                                       ExtensionNotInstalledException, WheelExtension,
+                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
 
 
 # The test extension name
@@ -45,7 +45,7 @@ class TestExtensionsBase(unittest.TestCase):
 
     def setUp(self):
         self.ext_dir = tempfile.mkdtemp()
-        self.patcher = mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', self.ext_dir)
+        self.patcher = mock.patch('azure.cli.core.extensions.EXTENSIONS_DIR', self.ext_dir)
         self.patcher.start()
 
     def tearDown(self):
