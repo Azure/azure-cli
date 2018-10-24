@@ -11,9 +11,9 @@ import zipfile
 import mock
 
 from azure.cli.core.extensions import (get_extensions, get_extension_path, extension_exists,
-                                      get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
-                                      ExtensionNotInstalledException, WheelExtension,
-                                      EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
+                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
+                                       ExtensionNotInstalledException, WheelExtension,
+                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
 
 
 # The test extension name

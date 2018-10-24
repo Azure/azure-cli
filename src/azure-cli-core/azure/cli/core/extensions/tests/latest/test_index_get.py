@@ -8,8 +8,8 @@ import unittest
 from requests.exceptions import ConnectionError, HTTPError
 from azure.cli.core.util import CLIError
 from azure.cli.core.extensions._index import (get_index, get_index_extensions, DEFAULT_INDEX_URL,
-                                                        ERR_TMPL_NON_200, ERR_TMPL_NO_NETWORK, ERR_TMPL_BAD_JSON,
-                                                        ERR_UNABLE_TO_GET_EXTENSIONS)
+                                              ERR_TMPL_NON_200, ERR_TMPL_NO_NETWORK, ERR_TMPL_BAD_JSON,
+                                              ERR_UNABLE_TO_GET_EXTENSIONS)
 
 
 class MockResponse(object):
