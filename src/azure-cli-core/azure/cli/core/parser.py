@@ -17,7 +17,7 @@ from knack.parser import CLICommandParser
 from knack.util import CLIError
 
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.extension import get_extension
+from azure.cli.core.extensions import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
 

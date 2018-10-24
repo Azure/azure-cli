@@ -110,7 +110,7 @@ class MainCommandsLoader(CLICommandsLoader):
         import traceback
         from azure.cli.core.commands import (
             _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
-        from azure.cli.core.extension import (
+        from azure.cli.core.extensions import (
             get_extensions, get_extension_path, get_extension_modname)
 
         def _update_command_table_from_modules(args):

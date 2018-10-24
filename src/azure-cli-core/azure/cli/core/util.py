@@ -72,7 +72,7 @@ def get_installed_cli_distributions():
 
 def get_az_version_string():
     import platform
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
+    from azure.cli.core.extensions import get_extensions, EXTENSIONS_DIR
 
     output = six.StringIO()
     installed_dists = get_installed_cli_distributions()
