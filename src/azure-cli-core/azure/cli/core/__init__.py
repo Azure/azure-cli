@@ -36,7 +36,7 @@ class AzCli(CLI):
         from azure.cli.core.commands.arm import (
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
-        from azure.cli.core.commands.transform import register as register_transform
+        from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
         from knack.util import ensure_dir
@@ -55,7 +55,7 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
-        register_transform(self)
+        register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
 
