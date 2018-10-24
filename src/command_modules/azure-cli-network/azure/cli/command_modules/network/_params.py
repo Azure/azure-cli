@@ -469,11 +469,12 @@ def load_arguments(self, _):
     # endregion
 
     # region InterfaceEndpoint
-    interface_endpoint_name = CLIArgumentType(options_list='--endpoint-name', id_part='name', help='Name of the interface endpoint.', completer=get_resource_name_completion_list('Microsoft.Network/interfaceEndpoints'))
+    private_endpoint_name = CLIArgumentType(options_list='--endpoint-name', id_part='name', help='Name of the private endpoint.', completer=get_resource_name_completion_list('Microsoft.Network/interfaceEndpoints'))
 
-    with self.argument_context('network interface-endpoint') as c:
-        c.argument('interface_endpoint_name', interface_endpoint_name, options_list=['--name', '-n'])
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+    for scope in ['interface-endpoint', 'private-endpoint']:
+        with self.argument_context('network {}'.format(scope)) as c:
+            c.argument('interface_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
+            c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 
     # region LoadBalancers
