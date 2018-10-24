@@ -5,6 +5,7 @@ Release History
 
 2.2.8
 +++++
+* Deprecated `network interface-endpoint` command names in favor of `network private-endpoint`.
 * `express-route peering connection create`: Fix issue where `--peer-circuit` would not accept an ID.
 * `public-ip create`: Fix issue where `--ip-tags` did not work correctly.
 
