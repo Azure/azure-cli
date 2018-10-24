@@ -155,6 +155,53 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
+class ResourceGenericUpdate(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
+    def test_resource_id_scenario(self, resource_group):
+        self.kwargs.update({
+            'stor_1': self.create_random_name(prefix='stor1', length=10),
+            'stor_2': self.create_random_name(prefix='stor2', length=10)
+        })
+
+        # create storage accounts
+        self.cmd('az storage account create -g {rg} -n {stor_1}')
+        self.cmd('az storage account create -g {rg} -n {stor_2}')
+
+        # get ids
+        self.kwargs['stor_ids'] = " ".join(self.cmd('az storage account list -g {rg} --query "[].id"').get_output_in_json())
+
+        # update tags
+        self.cmd('az storage account update --ids {stor_ids} --set tags.isTag=True tags.isNotTag=False')
+
+        self.cmd('az storage account show --name {stor_1} -g {rg}', checks=[
+            self.check('tags.isTag', 'True'),
+            self.check('tags.isNotTag', 'False')
+        ])
+        self.cmd('az storage account show --name {stor_2} -g {rg}', checks=[
+            self.check('tags.isTag', 'True'),
+            self.check('tags.isNotTag', 'False')
+        ])
+
+        # delete tags.isTag
+        self.cmd('az storage account update --ids {stor_ids} --remove tags.isTag')
+
+        self.cmd('az storage account show --name {stor_1} -g {rg} --query "tags"', checks=[
+            self.check('isNotTag', 'False'),
+            self.check('isTag', None)
+        ])
+        self.cmd('az storage account show --name {stor_2} -g {rg} --query "tags"', checks=[
+            self.check('isNotTag', 'False'),
+            self.check('isTag', None)
+        ])
+
+        # delete tags.isNotTag
+        self.cmd('az storage account update --ids {stor_ids} --remove tags.isNotTag')
+
+        # check tags is empty.
+        self.cmd('az storage account show --name {stor_1} -g {rg} --query "tags"', checks=self.is_empty())
+        self.cmd('az storage account show --name {stor_2} -g {rg} --query "tags"', checks=self.is_empty())
+
+
 class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_create')

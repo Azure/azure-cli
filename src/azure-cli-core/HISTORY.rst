@@ -5,7 +5,7 @@ Release History
 
 2.0.50
 ++++++
-* Minor fixes.
+* Fix issue where update commands using `--remove` and `--ids` fail after first update is applied to first resource in ids list.
 
 2.0.49
 ++++++
