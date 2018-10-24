@@ -82,7 +82,6 @@ if not exist %PYTHON_DIR% (
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
 
-:: Use the Python version on the machine that creates the MSI
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 :: Build & install all the packages with bdist_wheel
