@@ -10,10 +10,10 @@ import hashlib
 import mock
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.extension.custom import (list_extensions, add_extension, show_extension,
-                                                        remove_extension, update_extension,
-                                                        list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
-from azure.cli.command_modules.extension._resolve import NoExtensionCandidatesError
+from azure.cli.core.extensions.operations import (list_extensions, add_extension, show_extension,
+                                                  remove_extension, update_extension,
+                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
+from azure.cli.core.extensions._resolve import NoExtensionCandidatesError
 
 
 def _get_test_data_file(filename):
@@ -38,7 +38,7 @@ class TestExtensionCommands(unittest.TestCase):
 
     def setUp(self):
         self.ext_dir = tempfile.mkdtemp()
-        self.patcher = mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', self.ext_dir)
+        self.patcher = mock.patch('azure.cli.core.extensions.EXTENSIONS_DIR', self.ext_dir)
         self.patcher.start()
 
     def tearDown(self):
@@ -106,9 +106,9 @@ class TestExtensionCommands(unittest.TestCase):
         proxy_param = '--proxy'
         proxy_endpoint = "https://user:pass@proxy.microsoft.com"
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.shutil'), \
-                mock.patch('azure.cli.command_modules.extension.custom.check_output') as check_output:
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.shutil'), \
+                mock.patch('azure.cli.core.extensions.operations.check_output') as check_output:
             add_extension(extension_name=extension_name, pip_proxy=proxy_endpoint)
             args = check_output.call_args
             pip_cmd = args[0][0]
@@ -118,9 +118,9 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_verify_no_pip_proxy(self):
         extension_name = MY_EXT_NAME
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.shutil'), \
-                mock.patch('azure.cli.command_modules.extension.custom.check_output') as check_output:
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.shutil'), \
+                mock.patch('azure.cli.core.extensions.operations.check_output') as check_output:
             add_extension(extension_name=extension_name)
             args = check_output.call_args
             pip_cmd = args[0][0]
@@ -130,7 +130,7 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_with_name_valid_checksum(self):
         extension_name = MY_EXT_NAME
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
             add_extension(extension_name=extension_name)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
@@ -138,14 +138,14 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_with_name_invalid_checksum(self):
         extension_name = MY_EXT_NAME
         bad_sha256 = 'thishashisclearlywrong'
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, bad_sha256)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, bad_sha256)):
             with self.assertRaises(CLIError) as err:
                 add_extension(extension_name=extension_name)
             self.assertTrue('The checksum of the extension does not match the expected value.' in str(err.exception))
 
     def test_add_extension_with_name_source_not_whl(self):
         extension_name = 'myextension'
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=('{}.notwhl'.format(extension_name), None)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=('{}.notwhl'.format(extension_name), None)):
             with self.assertRaises(ValueError) as err:
                 add_extension(extension_name=extension_name)
             self.assertTrue('Unknown extension type. Only Python wheels are supported.' in str(err.exception))
@@ -157,8 +157,8 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
         # Now add using name
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
-            with mock.patch('azure.cli.command_modules.extension.custom.logger') as mock_logger:
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
+            with mock.patch('azure.cli.core.extensions.operations.logger') as mock_logger:
                 add_extension(extension_name=MY_EXT_NAME)
                 call_args = mock_logger.warning.call_args
                 self.assertEqual("The extension '%s' already exists.", call_args[0][0])
@@ -171,7 +171,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
         computed_extension_sha256 = _compute_file_hash(newer_extension)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
             update_extension(MY_EXT_NAME)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
@@ -185,11 +185,11 @@ class TestExtensionCommands(unittest.TestCase):
 
         proxy_param = '--proxy'
         proxy_endpoint = "https://user:pass@proxy.microsoft.com"
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.shutil'), \
-                mock.patch('azure.cli.command_modules.extension.custom.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.extension_exists', return_value=None), \
-                mock.patch('azure.cli.command_modules.extension.custom.check_output') as check_output:
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.shutil'), \
+                mock.patch('azure.cli.core.extensions.operations.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.extension_exists', return_value=None), \
+                mock.patch('azure.cli.core.extensions.operations.check_output') as check_output:
 
             update_extension(MY_EXT_NAME, pip_proxy=proxy_endpoint)
             args = check_output.call_args
@@ -204,11 +204,11 @@ class TestExtensionCommands(unittest.TestCase):
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
         computed_extension_sha256 = _compute_file_hash(newer_extension)
 
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.shutil'), \
-                mock.patch('azure.cli.command_modules.extension.custom.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
-                mock.patch('azure.cli.command_modules.extension.custom.extension_exists', return_value=None), \
-                mock.patch('azure.cli.command_modules.extension.custom.check_output') as check_output:
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.shutil'), \
+                mock.patch('azure.cli.core.extensions.operations.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extensions.operations.extension_exists', return_value=None), \
+                mock.patch('azure.cli.core.extensions.operations.check_output') as check_output:
 
             update_extension(MY_EXT_NAME)
             args = check_output.call_args
@@ -225,7 +225,7 @@ class TestExtensionCommands(unittest.TestCase):
         add_extension(source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', side_effect=NoExtensionCandidatesError()):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', side_effect=NoExtensionCandidatesError()):
             with self.assertRaises(CLIError) as err:
                 update_extension(MY_EXT_NAME)
             self.assertTrue("No updates available for '{}'.".format(MY_EXT_NAME) in str(err.exception))
@@ -236,7 +236,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
         bad_sha256 = 'thishashisclearlywrong'
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(newer_extension, bad_sha256)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(newer_extension, bad_sha256)):
             with self.assertRaises(CLIError) as err:
                 update_extension(MY_EXT_NAME)
             self.assertTrue('Failed to update. Rolled {} back to {}.'.format(ext['name'], ext[OUT_KEY_VERSION]) in str(err.exception))
@@ -244,18 +244,18 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
 
     def test_list_available_extensions_default(self):
-        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', autospec=True) as c:
+        with mock.patch('azure.cli.core.extensions.operations.get_index_extensions', autospec=True) as c:
             list_available_extensions()
             c.assert_called_once_with(None)
 
-    def test_list_available_extensions_custom_index_url(self):
-        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', autospec=True) as c:
+    def test_list_available_extensions_operations_index_url(self):
+        with mock.patch('azure.cli.core.extensions.operations.get_index_extensions', autospec=True) as c:
             index_url = 'http://contoso.com'
             list_available_extensions(index_url=index_url)
             c.assert_called_once_with(index_url)
 
     def test_list_available_extensions_show_details(self):
-        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', autospec=True) as c:
+        with mock.patch('azure.cli.core.extensions.operations.get_index_extensions', autospec=True) as c:
             list_available_extensions(show_details=True)
             c.assert_called_once_with(None)
 
@@ -268,7 +268,7 @@ class TestExtensionCommands(unittest.TestCase):
                     'version': '0.1.0'
                 }}]
         }
-        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', return_value=sample_index_extensions):
+        with mock.patch('azure.cli.core.extensions.operations.get_index_extensions', return_value=sample_index_extensions):
             res = list_available_extensions()
             self.assertIsInstance(res, list)
             self.assertEqual(len(res), len(sample_index_extensions))
@@ -287,7 +287,7 @@ class TestExtensionCommands(unittest.TestCase):
                     'version': '0.1.0'
                 }}]
         }
-        with mock.patch('azure.cli.command_modules.extension.custom.get_index_extensions', return_value=sample_index_extensions):
+        with mock.patch('azure.cli.core.extensions.operations.get_index_extensions', return_value=sample_index_extensions):
             res = list_available_extensions()
             self.assertIsInstance(res, list)
             self.assertEqual(len(res), 0)
@@ -320,7 +320,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
         computed_extension_sha256 = _compute_file_hash(newer_extension)
-        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
+        with mock.patch('azure.cli.core.extensions.operations.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
             update_extension(MY_EXT_NAME, pip_extra_index_urls=extra_index_urls)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')

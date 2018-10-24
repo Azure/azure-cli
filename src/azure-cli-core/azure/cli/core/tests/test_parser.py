@@ -193,8 +193,8 @@ class TestParser(unittest.TestCase):
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
-    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
-    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.extensions.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extensions.get_extensions', _mock_get_extensions)
     def test_parser_error_spellchecker(self):
         cli = DummyCli()
         main_loader = MainCommandsLoader(cli)

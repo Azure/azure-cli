@@ -11,7 +11,7 @@ from collections import namedtuple
 
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
+from azure.cli.core.extensions import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.mock import DummyCli
 
 from knack.arguments import CLICommandArgument, CLIArgumentType
@@ -201,8 +201,8 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
-    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
-    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.extensions.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extensions.get_extensions', _mock_get_extensions)
     def test_register_command_from_extension(self):
 
         from azure.cli.core.commands import _load_command_loader
