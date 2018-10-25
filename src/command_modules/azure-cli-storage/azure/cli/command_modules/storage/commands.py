@@ -165,18 +165,19 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('show', 'get_blob_service_properties', exception_handler=show_exception_handler)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
-                            custom_command_type=get_custom_sdk('acl', blob_data_service_factory)) as g:
+                            custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
         from azure.cli.command_modules.storage._transformers import (transform_storage_list_output,
                                                                      transform_container_permission_output,
                                                                      transform_acl_list_output)
         from azure.cli.command_modules.storage._format import (transform_container_list, transform_boolean_for_table,
                                                                transform_container_show)
+        from ._validators import process_container_delete_parameters
 
         g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output,
                                 table_transformer=transform_container_list)
-        g.storage_command_oauth('delete', 'delete_container',
-                                transform=create_boolean_result_output_transformer('deleted'),
-                                table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('delete', 'delete_container', validator=process_container_delete_parameters,
+                                       transform=create_boolean_result_output_transformer('deleted'),
+                                       table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('show', 'get_container_properties', table_transformer=transform_container_show,
                                 exception_handler=show_exception_handler)
         g.storage_command_oauth('create', 'create_container',
@@ -196,6 +197,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('lease change', 'change_container_lease')
         g.storage_command_oauth('lease break', 'break_container_lease')
 
+    with self.command_group('storage container', command_type=block_blob_sdk,
+                            custom_command_type=get_custom_sdk('acl', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('policy create', 'create_acl_policy')
         g.storage_custom_command_oauth('policy delete', 'delete_acl_policy')
         g.storage_custom_command_oauth('policy update', 'set_acl_policy', min_api='2017-04-17')

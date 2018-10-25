@@ -10,7 +10,7 @@ aggregation         : WORD WHITESPACE ;
 
 namespace           : WORD ;
 
-metric              : (WORD | WHITESPACE)+;
+metric              : (WORD | WHITESPACE | '.' | '/')+;
 
 operator            : OPERATOR WHITESPACE ;
 
@@ -69,3 +69,4 @@ QUOTE               : ('\'' | '"') ;
 WHITESPACE          : (' ' | '\t')+ ;
 NEWLINE             : ('\r'? '\n' | '\r')+ ;
 WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_')+ ;
+

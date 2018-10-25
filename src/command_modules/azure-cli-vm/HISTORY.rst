@@ -2,11 +2,21 @@
 
 Release History
 ===============
-2.2.5
+
+2.2.7
+++++++
+* `image create`: expose storage-sku argument for setting the image's default storage account type
+* `vm resize`: fix bug where `--no-wait` option causes command to crash
+
+2.2.6
 ++++++
 * `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
 * `vm create`: update supported size list supporting networking accelerator
 * `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
+
+2.2.5
+++++++
+* Fix SDK issue that caused Homebrew instllation to fail.
 
 2.2.4
 ++++++

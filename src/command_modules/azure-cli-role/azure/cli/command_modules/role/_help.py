@@ -12,7 +12,7 @@ helps['ad sp create-for-rbac'] = """
     short-summary: Create a service principal and configure its access to Azure resources.
     parameters:
         - name: --name -n
-          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
+          short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
         - name: --password -p
           short-summary: The password used to log in.
           long-summary: If not present and `--cert` is not specified, a random password will be generated.
@@ -167,6 +167,32 @@ helps['ad app owner list'] = """
     type: command
     short-summary: List application owners.
 """
+helps['ad app owner add'] = """
+    type: command
+    short-summary: add an application owner.
+"""
+helps['ad app owner remove'] = """
+    type: command
+    short-summary: remove an application owner.
+"""
+helps['ad app permission'] = """
+    type: group
+    short-summary: manage an application's OAuth2 permissions.
+"""
+helps['ad app permission grant'] = """
+    type: command
+    short-summary: Grant an app permissions from another app
+    examples:
+        - name: Grant a native application with permissions to access an existing API with TTL of 2 years
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+"""
+helps['ad app permission list'] = """
+    type: command
+    short-summary: List the app permissions
+    examples:
+        - name: List the OAuth2 permissions for an existing AAD app
+          text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
@@ -299,6 +325,22 @@ helps['ad group member'] = """
 helps['ad group member check'] = """
     type: command
     short-summary: Check if a member is in a group.
+"""
+helps['ad group owner'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group owners.
+"""
+helps['ad group owner list'] = """
+    type: command
+    short-summary: List group owners.
+"""
+helps['ad group owner add'] = """
+    type: command
+    short-summary: add a group owner.
+"""
+helps['ad group owner remove'] = """
+    type: command
+    short-summary: remove a group owner.
 """
 helps['ad sp'] = """
     type: group

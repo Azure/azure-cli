@@ -10,7 +10,7 @@ import knack.events as events
 from azure.cli.core.util import b64_to_hex
 
 
-def register(cli_ctx):
+def register_global_transforms(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _resource_group_transform)
     cli_ctx.register_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
 

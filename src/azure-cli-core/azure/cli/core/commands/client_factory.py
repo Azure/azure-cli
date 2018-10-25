@@ -10,7 +10,7 @@ from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
+from azure.cli.core.extensions import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 
@@ -171,11 +171,9 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
 
 def get_subscription_id(cli_ctx):
     from azure.cli.core._profile import Profile
-    if 'subscription_id' in cli_ctx.data:
-        subscription_id = cli_ctx.data['subscription_id']
-    else:
-        subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id()
-    return subscription_id
+    if not cli_ctx.data.get('subscription_id'):
+        cli_ctx.data['subscription_id'] = Profile(cli_ctx=cli_ctx).get_subscription_id()
+    return cli_ctx.data['subscription_id']
 
 
 def _get_add_headers_callback(cli_ctx):

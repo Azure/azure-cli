@@ -7,9 +7,8 @@ from pkg_resources import parse_version
 
 from knack.log import get_logger
 
-from azure.cli.core.extension import ext_compat_with_cli
-
-from azure.cli.command_modules.extension._index import get_index_extensions
+from azure.cli.core.extensions import ext_compat_with_cli
+from azure.cli.core.extensions._index import get_index_extensions
 
 
 logger = get_logger(__name__)

@@ -5,7 +5,7 @@ Release History
 
 0.3.3
 +++++
-* Fixed broken mysql db create example
+* Minor fixes
 
 0.3.2
 +++++

@@ -54,3 +54,5 @@ class StorageImmutabilityPolicy(ScenarioTest):
                  '--account-name {} -c {} -g {} --if-match {}'.format(
                      storage_account, container_name, resource_group, repr(policy_etag)), checks=[
                          JMESPathCheck('immutabilityPeriodSinceCreationInDays', 2)])
+
+        self.cmd('az storage container delete --account-name {} -n {}'.format(storage_account, container_name))
