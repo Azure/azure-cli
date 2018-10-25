@@ -5,11 +5,13 @@
 
 from __future__ import print_function
 
-from knack.help import (HelpExample, HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
-                        GroupHelpFile as KnackGroupHelpFile, CLIHelp, HelpParameter,
+from knack.help import (HelpExample,
+                        HelpFile as KnackHelpFile,
+                        CommandHelpFile as KnackCommandHelpFile,
+                        CLIHelp,
+                        HelpParameter,
                         ArgumentGroupRegistry as KnackArgumentGroupRegistry)
 from knack.log import get_logger
-from knack.util import CLIError
 
 from azure.cli.core.commands import ExtensionCommandSource
 
@@ -51,7 +53,6 @@ class AzCliHelp(CLIHelp):
                                         privacy_statement=PRIVACY_STATEMENT,
                                         welcome_message=WELCOME_MESSAGE,
                                         command_help_cls=CliCommandHelpFile,
-                                        group_help_cls=CliGroupHelpFile,
                                         help_cls=CliHelpFile)
         from knack.help import HelpObject
 
@@ -83,70 +84,8 @@ class AzCliHelp(CLIHelp):
         AzCliHelp._print_extensions_msg(help_file)
         super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
 
-    @staticmethod
-    def update_parser_with_help_file(nouns, cmd_loader_map, parser, is_group):
-        import inspect
-        import os
-
-        def _parse_yaml_from_string(text, help_file_path):
-            import yaml
-
-            dir_name, base_name = os.path.split(help_file_path)
-
-            pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
-
-            try:
-                data = yaml.load(text)
-                if not data:
-                    raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
-                return data
-            except yaml.YAMLError as e:
-                raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
-
-        command_nouns = " ".join(nouns)
-        loader = None
-        if is_group:
-            for k, v in cmd_loader_map.items():
-                if k.startswith(command_nouns):
-                    loader = v[0]
-                    break
-        else:
-            loader = cmd_loader_map.get(command_nouns, [None])[0]
-
-        if loader:
-            loader_file_path = inspect.getfile(loader.__class__)
-            dir_name = os.path.dirname(loader_file_path)
-            files = os.listdir(dir_name)
-            for file in files:
-                if file.endswith(".yaml") or file.endswith(".yml"):
-                    help_file_path = os.path.join(dir_name, file)
-                    with open(help_file_path, "r") as f:
-                        text = f.read()
-                        data = _parse_yaml_from_string(text, help_file_path)
-                        parser.help_file_data = data
-                        return
-
-    def show_help(self, cli_name, nouns, parser, is_group):
-        cmd_loader_map_ref = self.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-        # attempt to add the help.yaml file data to the parser
-        self.update_parser_with_help_file(nouns, cmd_loader_map_ref, parser, is_group)
-        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
-
 
 class CliHelpFile(KnackHelpFile):
-
-    def load(self, options):
-        # if we successfully transformed the help.yaml data, call appropriate _load_from_data method.
-        # This is either CliHelpFile._load_from_data() or CliCommandHelpFile._load_from_data() which ultimately
-        # calls CliHelpFile._load_from_data()
-        if hasattr(options, "help_file_data"):
-            data = self._load_from_parsed_yaml(options.help_file_data)
-            if "content" not in data:
-                self._load_from_data(data)
-                return
-
-        # if unable to transfrom data from parsed yaml, call superclass' (regular) load method
-        super(CliHelpFile, self).load(options)
 
     def _should_include_example(self, ex):
         min_profile = ex.get('min_profile')
@@ -169,116 +108,6 @@ class CliHelpFile(KnackHelpFile):
             for d in data['examples']:
                 if self._should_include_example(d):
                     self.examples.append(HelpExample(d))
-
-    # get data object from parsed yaml
-    def _load_from_parsed_yaml(self, data):
-        content = data.get("content")
-        info_type = None
-        info = None
-        new_data = {}
-
-        for elem in content:
-            for key, value in elem.items():
-                # find the command / group's help text
-                if value.get("name") and value.get("name") == self.command:
-                    info_type = key
-                    info = value
-                    break
-            if info:
-                break
-
-        # if a new command not found return old data object
-        if not info:
-            return data
-
-        new_data["type"] = info_type
-
-        if "summary" in info:
-            new_data["short-summary"] = info["summary"]
-
-        if "description" in info:
-            new_data["long-summary"] = info["description"]
-
-        if "examples" in info:
-            new_data["detailed_examples"] = info["examples"]
-            reg_examples = []
-            for item in new_data["detailed_examples"]:
-                ex = {}
-                ex["name"] = item.get("summary", "")
-                ex["text"] = item.get("description", "")
-                ex["text"] = "{}\n{}".format(ex["text"], item.get("command", "")) if ex["text"] else item.get("command", "")
-                ex["min_profile"] = item.get('min_profile')
-                ex["max_profile"] = item.get('max_profile')
-                reg_examples.append(ex)
-            new_data["examples"] = reg_examples
-
-        if "links" in info:
-            text = self._get_links_as_text(info["links"])
-            new_data["links"] = info["links"]
-            new_data["long-summary"] = "{}\n{}".format(new_data["long-summary"], text) \
-                if new_data.get("long-summary") else text
-
-        if "arguments" in info:
-            new_data["parameters"] = []
-            for arg_info in info["arguments"]:
-                new_data["parameters"].append(self._get_parameter_info(arg_info))
-
-        return new_data
-
-    @staticmethod
-    def _get_links_as_text(links):
-        text = []
-        for link in links:
-            if "url" in link:
-                text.append(link["url"])
-        msg = "For more information, visit:"
-        links = ", ".join(text)
-        return "{} {}".format(msg, links) if links else ""
-
-    @staticmethod
-    def _get_parameter_info(arg_info):
-        params = {}
-
-        # only update if new information
-        if "name" in arg_info:
-            params["name"] = arg_info["name"]
-
-        if "summary" in arg_info:
-            params["short-summary"] = arg_info["summary"]
-
-        if "description" in arg_info:
-            params["long-summary"] = arg_info["description"]
-
-        if "value-source" in arg_info:
-            value_source = []
-            for item in arg_info["value-source"]:
-                if "string" in item:
-                    value_source.append(item["string"])
-                elif "link" in item:
-                    link_text = ""
-                    if "url" in item["link"]:
-                        link_text = "url: {} ".format(item["link"]["url"])
-                    if "command" in item["link"]:
-                        link_text = "command: {} ".format(item["link"]["command"])
-                    value_source.append(link_text.strip())
-            params["populator-commands"] = value_source
-
-        return params
-
-
-class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
-
-    def __init__(self, help_ctx, delimiters, parser):
-
-        # try to update internal parsers' help_file_data
-        try:
-            if parser.choices and parser.help_file_data:
-                for options in parser.choices.values():
-                    options.help_file_data = parser.help_file_data
-        except AttributeError:
-            pass
-
-        super(CliGroupHelpFile, self).__init__(help_ctx, delimiters, parser)
 
 
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
@@ -307,15 +136,6 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         help_param.group_name = 'Global Arguments'
 
     def _load_from_data(self, data):
-
-        def _params_equal(data, param):
-            for name in param.name_source:
-                if data.get("name") == name.lstrip("-"):
-                    return True
-            return False
-
-        # load help object from data. Will call CliHelpFile._load_from_data() or KnackCommandHelpFile._load_from_data()
-        # based on data contents / caller of this method.
         super(CliCommandHelpFile, self)._load_from_data(data)
 
         if isinstance(data, str) or not self.parameters or not data.get('parameters'):
@@ -324,9 +144,8 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         loaded_params = []
         loaded_param = {}
         for param in self.parameters:
-            loaded_param = next((n for n in data['parameters'] if _params_equal(n, param)), None)
+            loaded_param = next((n for n in data['parameters'] if n['name'] == param.name), None)
             if loaded_param:
-                loaded_param["name"] = param.name
                 param.update_from_data(loaded_param)
             loaded_params.append(param)
 
