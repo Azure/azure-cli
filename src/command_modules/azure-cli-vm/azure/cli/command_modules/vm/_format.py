@@ -118,8 +118,7 @@ def get_vmss_table_output_transformer(loader, for_list=True):
 
 def transform_vm_encryption_show_table_output(result):
     from collections import OrderedDict
-    if "status" in result and len(result["status"]) > 0:
+    if "status" in result and result["status"]:
         status_dict = result["status"][0]
         return OrderedDict([("status", status_dict["displayStatus"]), ("message", status_dict["message"])])
-    else:
-        return result
+    return result
