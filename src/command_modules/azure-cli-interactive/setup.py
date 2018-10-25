@@ -55,11 +55,10 @@ setup(
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
     packages=[
-         'azure',
-         'azure.cli',
-         'azure.cli.command_modules',
-         'azure.cli.command_modules.interactive',
-         'azure.cli.command_modules.interactive.azclishell',
+        'azure',
+        'azure.cli',
+        'azure.cli.command_modules',
+        'azure.cli.command_modules.interactive',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
