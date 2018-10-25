@@ -5,3 +5,7 @@
 
 EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE = 'CommandInvoker.OnPreCommandTableTruncate'
 EVENT_INVOKER_ON_TAB_COMPLETION = 'CommandInvoker.OnTabCompletion'
+
+# special events used for Interactive and Alias extension communication
+EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING = 'Interactive.PreCompleterTextParsing'
+EVENT_INTERACTIVE_POST_SUB_TREE_CREATE = 'Interactive.PostSubTreeCreate'

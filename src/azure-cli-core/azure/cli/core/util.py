@@ -72,7 +72,7 @@ def get_installed_cli_distributions():
 
 def get_az_version_string():
     import platform
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
+    from azure.cli.core.extensions import get_extensions, EXTENSIONS_DIR
 
     output = six.StringIO()
     installed_dists = get_installed_cli_distributions()
@@ -288,7 +288,10 @@ def open_page_in_browser(url):
         #    understand the "open location" message"
         # b. Python 2.x can't sniff out the default browser
         return subprocess.Popen(['open', url])
-    return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    try:
+        return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    except TypeError:  # See https://bugs.python.org/msg322439
+        return webbrowser.open(url, new=2)
 
 
 def _get_platform_info():

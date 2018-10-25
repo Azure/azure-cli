@@ -5,13 +5,13 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.extension._resolve import (resolve_from_index, NoExtensionCandidatesError,
-                                                          _is_not_platform_specific, _is_greater_than_cur_version)
+from azure.cli.core.extensions._resolve import (resolve_from_index, NoExtensionCandidatesError,
+                                                _is_not_platform_specific, _is_greater_than_cur_version)
 
 
 class IndexPatch(object):
     def __init__(self, data=None):
-        self.patcher = mock.patch('azure.cli.command_modules.extension._resolve.get_index_extensions', return_value=data)
+        self.patcher = mock.patch('azure.cli.core.extensions._resolve.get_index_extensions', return_value=data)
 
     def __enter__(self):
         self.patcher.start()

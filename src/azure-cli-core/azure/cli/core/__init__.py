@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.48"
+__version__ = "2.0.50"
 
 import os
 import sys
@@ -33,12 +33,12 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
-        from azure.cli.core.commands.arm import add_id_parameters, register_global_subscription_parameter
+        from azure.cli.core.commands.arm import (
+            register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
-        from azure.cli.core.extensions import register_extensions
+        from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
-        import knack.events as events
         from knack.util import ensure_dir
 
         self.data['headers'] = {}
@@ -55,9 +55,9 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
-        register_extensions(self)
-        self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
-        register_global_subscription_parameter(self)
+        register_global_transforms(self)
+        register_global_subscription_argument(self)
+        register_ids_argument(self)  # global subscription must be registered first!
 
         self.progress_controller = None
 
@@ -110,7 +110,7 @@ class MainCommandsLoader(CLICommandsLoader):
         import traceback
         from azure.cli.core.commands import (
             _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
-        from azure.cli.core.extension import (
+        from azure.cli.core.extensions import (
             get_extensions, get_extension_path, get_extension_modname)
 
         def _update_command_table_from_modules(args):

@@ -174,6 +174,29 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
 
+class AADGraphUserReplacer:
+    def __init__(self, test_user, mock_user):
+        self.test_user = test_user
+        self.mock_user = mock_user
+
+    def process_request(self, request):
+        test_user_encoded = self.test_user.replace('@', '%40')
+        if test_user_encoded in request.uri:
+            request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
+
+        if request.body:
+            body = str(request.body)
+            if self.test_user in body:
+                request.body = body.replace(self.test_user, self.mock_user)
+
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            response['body']['string'] = response['body']['string'].replace(self.test_user,
+                                                                            self.mock_user)
+
+        return response
 # Utility
 
 

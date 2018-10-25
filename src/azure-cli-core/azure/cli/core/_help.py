@@ -80,9 +80,9 @@ class AzCliHelp(CLIHelp):
             if help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())
 
-    def print_detailed_help(self, cli_name, help_file):
+    def _print_detailed_help(self, cli_name, help_file):
         AzCliHelp._print_extensions_msg(help_file)
-        self._print_detailed_help(cli_name, help_file)
+        super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
 
 
 class CliHelpFile(KnackHelpFile):

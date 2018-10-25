@@ -148,7 +148,7 @@ def get_test_index(args):
 def get_extension_modules():
     from importlib import import_module
     import pkgutil
-    from azure.cli.core.extension import get_extensions, get_extension_path, get_extension_modname
+    from azure.cli.core.extensions import get_extensions, get_extension_path, get_extension_modname
     extension_whls = get_extensions()
     ext_modules = []
     if extension_whls:

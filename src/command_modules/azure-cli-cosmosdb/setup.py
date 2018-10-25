@@ -16,7 +16,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.2.1"
+VERSION = "0.2.3"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -34,7 +34,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
 
-    'azure-mgmt-cosmosdb==0.4.0',
+    'azure-mgmt-cosmosdb==0.5.1',
     'azure-cli-core',
     'pydocumentdb>=2.0.1'
 ]

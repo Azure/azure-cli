@@ -136,6 +136,7 @@ class TestRoleMocked(unittest.TestCase):
         # assert
         self.assertEqual(result['password'], test_pwd)
         self.assertEqual(result['name'], 'http://' + name)
+        self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
