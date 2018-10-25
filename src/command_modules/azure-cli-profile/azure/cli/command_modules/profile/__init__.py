@@ -24,6 +24,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.command_group('', profile_custom) as g:
             g.command('login', 'login')
             g.command('logout', 'logout')
+            g.command('self-test', 'check_cli', deprecate_info=g.deprecate(hide=True))
 
         with self.command_group('account', profile_custom) as g:
             g.command('list', 'list_subscriptions', table_transformer=transform_account_list)

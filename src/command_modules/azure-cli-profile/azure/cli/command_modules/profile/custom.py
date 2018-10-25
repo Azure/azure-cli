@@ -158,3 +158,33 @@ def logout(cmd, username=None):
 def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations(cmd.cli_ctx)
+
+
+def check_cli(cmd):
+    from azure.cli.core.file_util import (
+        create_invoker_and_load_cmds_and_args, get_all_help)
+
+    exceptions = {}
+
+    print('Running CLI self-test.\n')
+
+    print('Loading all commands and arguments...')
+    try:
+        create_invoker_and_load_cmds_and_args(cmd.cli_ctx)
+        print('Commands loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_commands'] = ex
+        logger.error('Error occurred loading commands!\n')
+
+    print('Retrieving all help...')
+    try:
+        get_all_help(cmd.cli_ctx)
+        print('Help loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_help'] = ex
+        logger.error('Error occurred loading help!\n')
+
+    if not exceptions:
+        print('CLI self-test completed: OK')
+    else:
+        raise CLIError(exceptions)
