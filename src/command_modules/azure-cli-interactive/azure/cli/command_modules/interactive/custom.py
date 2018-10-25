@@ -8,9 +8,9 @@ from azure.cli.core.extensions import ExtensionNotInstalledException, get_extens
 from azure.cli.core.extensions.operations import (reload_extension, update_extension,
                                                   add_extension, add_extension_to_path)
 
-
 logger = get_logger(__name__)
 INTERACTIVE_EXTENSION_NAME = 'interactive'
+
 
 def start_shell(cmd, update=None, style=None):
     from importlib import import_module
