@@ -172,7 +172,7 @@ def check_cli(cmd):
     try:
         create_invoker_and_load_cmds_and_args(cmd.cli_ctx)
         print('Commands loaded OK.\n')
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_commands'] = ex
         logger.error('Error occurred loading commands!\n')
 
@@ -180,7 +180,7 @@ def check_cli(cmd):
     try:
         get_all_help(cmd.cli_ctx)
         print('Help loaded OK.\n')
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_help'] = ex
         logger.error('Error occurred loading help!\n')
 
