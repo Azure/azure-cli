@@ -1797,13 +1797,7 @@ def _update_dev_spaces_extension(extension_name, extension_module):
     try:
         from azure.cli.core.extensions import operations
         operations.update_extension(extension_name=extension_name)
-
-        # reloading the imported module to update
-        try:
-            from importlib import reload
-        except ImportError:
-            pass  # for python 2
-        reload(sys.modules[extension_module])
+        operations.reload_extension(extension_name=extension_name)
     except CLIError as err:
         logger.info(err)
     except ExtensionNotInstalledException as err:
