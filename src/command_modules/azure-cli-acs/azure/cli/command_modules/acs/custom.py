@@ -1740,8 +1740,8 @@ def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
         from azure.cli.core.extensions import get_extension_path
-        ext_dir = get_extension_path(extension_name)
-        sys.path.append(ext_dir)
+        from azure.cli.core.extensions.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
         # Import the extension module
         from importlib import import_module
         azext_custom = import_module(module_name)
