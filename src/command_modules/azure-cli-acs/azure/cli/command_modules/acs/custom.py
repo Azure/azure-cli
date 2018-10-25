@@ -1739,7 +1739,6 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
-        from azure.cli.core.extensions import get_extension_path
         from azure.cli.core.extensions.operations import add_extension_to_path
         add_extension_to_path(extension_name)
         # Import the extension module

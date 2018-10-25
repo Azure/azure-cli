@@ -6,7 +6,6 @@
 from knack.help_files import helps
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.extensions.operations import reload_extension, update_extension, show_extension
 
 
 helps['interactive'] = """
