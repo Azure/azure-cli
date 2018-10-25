@@ -15,5 +15,3 @@ class AzOutputProducer(knack.output.OutputProducer):
     def format_yaml(obj):
         import yaml
         return yaml.safe_dump(obj.result, default_flow_style=False)
-
-    # remember to add new formats to configure/_consts.py
