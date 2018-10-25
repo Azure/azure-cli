@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 import platform
 
-from prompt_toolkit.styles import style_from_dict
-from pygments.token import Token
+from prompt_toolkit.styles import style_from_dict  # pylint: disable=import-error
+from pygments.token import Token  # pylint: disable=import-error
 
 
 def color_mapping(curr_completion, completion, prompt, command, subcommand,
