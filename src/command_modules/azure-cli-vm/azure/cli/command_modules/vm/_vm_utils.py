@@ -274,3 +274,21 @@ def get_storage_blob_uri(cli_ctx, storage):
             raise CLIError('{} does\'t exist.'.format(storage))
         storage_uri = storage_account.primary_endpoints.blob
     return storage_uri
+
+
+def vm_secret_format_output_handler(ctx, **kwargs):
+    args = kwargs.get("args", None)
+    if args and " ".join(args[0:3]) == "vm secret format":
+        allowed_formats = ctx.output_cls._FORMAT_DICT.keys()
+        output_options = ["--output", "-o", "--out"]
+        desired_formats = ["json", "jsonc"] # todo: add yaml?
+
+        was_modified = False
+        for idx, v in enumerate(args):
+            if v in output_options:
+                if idx + 1 < len(args) and args[idx+1] not in desired_formats and args[idx+1] in allowed_formats:
+                    args[idx+1] = desired_formats[0]
+                    was_modified = True
+        if was_modified:
+            msg = "This command does not support output format. Output format should be one of the following: {}."
+            logger.warn(msg.format(", ".join(desired_formats)))

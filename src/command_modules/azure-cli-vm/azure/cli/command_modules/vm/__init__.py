@@ -7,6 +7,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
 
 import azure.cli.command_modules.vm._help  # pylint: disable=unused-import
+from azure.cli.command_modules.vm._vm_utils import vm_secret_format_output_handler
 
 
 class ComputeCommandsLoader(AzCommandsLoader):
@@ -17,6 +18,11 @@ class ComputeCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.vm.custom#{}',
             operation_group='virtual_machines'
         )
+
+        if cli_ctx:
+            from knack.events import EVENT_INVOKER_PRE_PARSE_ARGS
+            cli_ctx.register_event(EVENT_INVOKER_PRE_PARSE_ARGS, vm_secret_format_output_handler)
+
         super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_COMPUTE,
                                                     operation_group='virtual_machines',
