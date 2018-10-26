@@ -17,9 +17,11 @@ def start_shell(cmd, update=None, style=None):
     try:
         get_extension(INTERACTIVE_EXTENSION_NAME)
         if update:
+            logger.warning("Updating the Interactive extension to the latest available..")
             update_extension(INTERACTIVE_EXTENSION_NAME)
             reload_extension(INTERACTIVE_EXTENSION_NAME)
     except ExtensionNotInstalledException:
+        logger.warning("Installing the Interactive extension..")
         add_extension(extension_name=INTERACTIVE_EXTENSION_NAME)
 
     add_extension_to_path(INTERACTIVE_EXTENSION_NAME)
