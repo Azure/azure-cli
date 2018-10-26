@@ -8,10 +8,12 @@ from __future__ import print_function
 from knack.help import (HelpExample,
                         HelpFile as KnackHelpFile,
                         CommandHelpFile as KnackCommandHelpFile,
+                        GroupHelpFile as KnackGroupHelpFile,
                         CLIHelp,
                         HelpParameter,
                         ArgumentGroupRegistry as KnackArgumentGroupRegistry)
 from knack.log import get_logger
+from knack.util import CLIError
 
 from azure.cli.core.commands import ExtensionCommandSource
 
@@ -53,6 +55,7 @@ class AzCliHelp(CLIHelp):
                                         privacy_statement=PRIVACY_STATEMENT,
                                         welcome_message=WELCOME_MESSAGE,
                                         command_help_cls=CliCommandHelpFile,
+                                        group_help_cls=CliGroupHelpFile,
                                         help_cls=CliHelpFile)
         from knack.help import HelpObject
 
@@ -87,6 +90,11 @@ class AzCliHelp(CLIHelp):
 
 class CliHelpFile(KnackHelpFile):
 
+    def __init__(self, help_ctx, delimiters):
+        # Each help file (for a command or group) has a version denoting the source of its data.
+        self.yaml_help_version = 0
+        super(CliHelpFile, self).__init__(help_ctx, delimiters)
+
     def _should_include_example(self, ex):
         min_profile = ex.get('min_profile')
         max_profile = ex.get('max_profile')
@@ -99,7 +107,7 @@ class CliHelpFile(KnackHelpFile):
                                          min_api=min_profile, max_api=max_profile)
         return True
 
-    # Needs to override base implementation
+    # Needs to override base implementation to exclude unsupported examples.
     def _load_from_data(self, data):
         super(CliHelpFile, self)._load_from_data(data)
         self.examples = []  # clear examples set by knack
@@ -108,6 +116,34 @@ class CliHelpFile(KnackHelpFile):
             for d in data['examples']:
                 if self._should_include_example(d):
                     self.examples.append(HelpExample(d))
+
+    def load(self, options):
+        # if the parser's command has an associated yaml help file, load data from it.
+        prog = options.prog if hasattr(options, "prog") else options._prog_prefix
+        command_nouns = prog.split()[1:]
+        cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
+
+        yaml_help = get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+        if yaml_help and "version" in yaml_help:
+            self.yaml_help_version = yaml_help["version"]
+
+        if self.yaml_help_version == 1:
+            from azure.cli.core._help_util import update_help_file
+            update_help_file(self, yaml_help, options)
+            return
+
+        # Previous behavior. "version 0"
+        else:
+            super(CliHelpFile, self).load(options)
+
+
+class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
+    def __init__(self, help_ctx, delimiters, parser):
+        super(CliGroupHelpFile, self).__init__(help_ctx, delimiters, parser)
+
+    def load(self, options):
+        # forces class to use this load method even if KnackGroupHelpFile overrides CliHelpFile's method.
+        CliHelpFile.load(self, options)
 
 
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
@@ -151,6 +187,9 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
         self.parameters = loaded_params
 
+    def load(self, options):
+        # forces class to use this load method even if KnackGroupHelpFile overrides CliHelpFile's method.
+        CliHelpFile.load(self, options)
 
 class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-few-public-methods
 
@@ -169,3 +208,46 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
         for group in other_groups:
             self.priorities[group] = priority
             priority += 1
+
+
+def get_yaml_help_for_nouns(nouns, cmd_loader_map_ref):
+    import inspect
+    import os
+
+    def _parse_yaml_from_string(text, help_file_path):
+        import yaml
+
+        dir_name, base_name = os.path.split(help_file_path)
+
+        pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
+
+        try:
+            data = yaml.load(text)
+            if not data:
+                raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
+            return data
+        except yaml.YAMLError as e:
+            raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
+
+    command_nouns = " ".join(nouns)
+    # if command in map, get the loader. Path of loader is path of helpfile.
+    loader = cmd_loader_map_ref.get(command_nouns, [None])[0]
+
+    if not loader:
+        for k, v in cmd_loader_map_ref.items():
+            # if loader name starts with noun / group, this is a command in the command group
+            if k.startswith(command_nouns):
+                loader = v[0]
+                break
+
+    if loader:
+        loader_file_path = inspect.getfile(loader.__class__)
+        dir_name = os.path.dirname(loader_file_path)
+        files = os.listdir(dir_name)
+        for file in files:
+            if file.endswith(".yaml") or file.endswith(".yml"):
+                help_file_path = os.path.join(dir_name, file)
+                with open(help_file_path, "r") as f:
+                    text = f.read()
+                    return _parse_yaml_from_string(text, help_file_path)
+    return None
