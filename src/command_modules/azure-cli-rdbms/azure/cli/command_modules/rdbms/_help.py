@@ -26,10 +26,10 @@ def add_helps(command_group, server_type):
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
                     - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name GP_Gen5_2
+                            --sku-name GP_Gen4_2
                     - name: Create a {0} server with all paramaters set.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name B_Gen5_2 --ssl-enforcement Disabled \\
+                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
                             --storage-size 51200 --tags "key=value" --version {{server-version}}
                 """.format(server_type, command_group)
     helps['{} server restore'.format(command_group)] = """
@@ -54,7 +54,7 @@ def add_helps(command_group, server_type):
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
-                            -l westus2 --sku-name GP_Gen5_2
+                            -l westus2 --sku-name GP_Gen4_2
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
                 type: command
