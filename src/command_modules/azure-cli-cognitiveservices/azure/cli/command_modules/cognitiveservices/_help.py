@@ -10,6 +10,9 @@ from knack.help_files import helps
 helps['cognitiveservices'] = """
     type: group
     short-summary: Manage Azure Cognitive Services accounts.
+    long-summary:  |
+    This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
+    Manage Azure Cognitive Services accounts.
 """
 
 helps['cognitiveservices list'] = """
@@ -31,6 +34,9 @@ helps['cognitiveservices account list'] = """
 helps['cognitiveservices account'] = """
     type: group
     short-summary: Manage Azure Cognitive Services accounts.
+    long-summary:  |
+    This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
+    Manage Azure Cognitive Services accounts.
 """
 
 helps['cognitiveservices account delete'] = """
