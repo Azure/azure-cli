@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.0
++++++
+* Interactive now installs the 'interactive' extension, which will allow for faster updates and support.
+
 0.3.31
 ++++++
 * Ensure global subscription parameter appears in parameters.
