@@ -267,7 +267,8 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
                                  parser=self.parser)
 
-        if not args:
+        arg_check = [a for a in args if a not in ['--debug', '--verbose']]
+        if not arg_check:
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)

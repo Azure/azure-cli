@@ -19,8 +19,6 @@ from pkg_resources import working_set
 import automation.utilities.path as automation_path
 from automation.utilities.const import COMMAND_MODULE_PREFIX
 
-EXCLUDE_MODULES = set(['azure-cli-taskhelp'])
-
 logger = logging.getLogger('azdev.verify.package')
 
 
@@ -56,7 +54,7 @@ class PackageVerifyTests(unittest.TestCase):
 
         logger.info('Installed command modules %s', installed_command_modules)
 
-        missing_modules = expected_modules - set(installed_command_modules) - EXCLUDE_MODULES
+        missing_modules = expected_modules - set(installed_command_modules)
         self.assertFalse(missing_modules,
                          msg='Following modules are not installed successfully: {}'.format(', '.join(missing_modules)))
 
