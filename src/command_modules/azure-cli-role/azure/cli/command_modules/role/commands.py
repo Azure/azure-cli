@@ -129,11 +129,13 @@ def load_command_table(self, _):
         g.command('list-owned-objects', 'list_owned_objects')
 
     with self.command_group('ad group', role_group_sdk, exception_handler=graph_err_handler) as g:
-        g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('get-member-groups', 'get_member_groups')
         g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
+
+    with self.command_group('ad group', exception_handler=graph_err_handler) as g:
+        g.custom_command('create', 'create_group')
 
     with self.command_group('ad group owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_group_owners')
