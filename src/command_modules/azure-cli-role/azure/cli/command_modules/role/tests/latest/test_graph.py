@@ -228,15 +228,21 @@ class GraphGroupScenarioTest(ScenarioTest):
 
 
 class GraphOwnerScenarioTest(ScenarioTest):
-    def test_graph_ownership(self):
+
+    def _get_owner(self):
         playback = not (self.is_live or self.in_recording)
         if playback:
             owner = MOCKED_USER_NAME
         else:
             account_info = self.cmd('account show').get_output_in_json()
-            if account_info['user']['type'] == 'servicePrincipal':
-                return  # this test delete users which are beyond a SP's capacity, so quit...
-            owner = account_info['user']['name']
+            if account_info['user']['type'] != 'servicePrincipal':
+                return account_info['user']['name']
+        return None
+
+    def test_graph_ownership(self):
+        owner = self._get_owner()
+        if not owner:
+            return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
             'owner': owner
@@ -252,3 +258,31 @@ class GraphOwnerScenarioTest(ScenarioTest):
         finally:
             if self.kwargs['app_id']:
                 self.cmd('ad sp delete --id {app_id}')
+
+
+    def test_set_graph_owner(self):
+        owner = self._get_owner()
+        if not owner:
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'owner': owner,
+            'group': self.create_random_name('cli-grp', 15),
+            'app': self.create_random_name('cli-app-', 15)
+        }
+        group_object_id, app_id, app2_id = None, None, None
+        try:
+            result = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
+            group_object_id = result['objectId']
+
+            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            app2_id = result['appId']
+            
+            result = self.cmd('ad signed-in-user list-owned-objects')
+        finally:
+            if group_object_id:
+                self.cmd('ad group delete -g ' + group_object_id)
+            if app_id:
+                self.cmd('ad app delete --id ' + app_id)
+        
+        

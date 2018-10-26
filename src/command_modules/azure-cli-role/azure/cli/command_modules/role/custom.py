@@ -507,7 +507,7 @@ def list_application_owners(cmd, identifier):
 
 def add_application_owner(cmd, owner_object_id, identifier):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    owner_url = _get_owner_url(cmd, owner_object_id)
+    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
     return graph_client.applications.add_owner(_resolve_application(graph_client.applications, identifier), owner_url)
 
 
@@ -526,6 +526,13 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
     return client.list(filter=(' and '.join(sub_filters)))
+
+
+def list_owned_objects(client, object_type=None):
+    result = client.list_owned_objects()
+    if object_type:
+        result = [r for r in result if r.object_type.lower() == object_type.lower()]
+    return result
 
 
 def list_users(client, upn=None, display_name=None, query_filter=None):
@@ -570,14 +577,14 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname):
+def create_group(cmd, display_name, mail_nickname, not_mine=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
                                                              mail_nickname=mail_nickname))
-    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
-    if signed_in_user_object_id:
-        graph_client.groups.add_owner(group.object_id,
-                                      _get_owner_url(cmd, signed_in_user_object_id))
+    if not not_mine:
+        _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
+
+    return group
 
 
 def check_group_membership(cmd, client, group_id, member_object_id):  # pylint: disable=unused-argument
@@ -604,7 +611,7 @@ def list_group_owners(cmd, group_id):
 
 def add_group_owner(cmd, owner_object_id, group_id):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    owner_url = _get_owner_url(cmd, owner_object_id)
+    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
     return graph_client.groups.add_owner(_resolve_group(graph_client.groups, group_id), owner_url)
 
 
@@ -624,10 +631,11 @@ def _resolve_group(client, identifier):
     return identifier
 
 
-def create_application(client, display_name, homepage=None, identifier_uris=None,
+def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     if native_app:
         if identifier_uris:
@@ -653,7 +661,7 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
                                                   required_resource_access=required_accesses)
 
     try:
-        result = client.create(app_patch_param)
+        result = graph_client.applications.create(app_patch_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -669,8 +677,8 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
             ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
         app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
         setattr(app_patch_param, 'public_client', True)
-        client.patch(result.object_id, app_patch_param)
-        result = client.get(result.object_id)
+        graph_client.applications.patch(result.object_id, app_patch_param)
+        result = graph_client.applications.get(result.object_id)
 
     return result
 
@@ -1019,10 +1027,8 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, password=None, years=None,
-        create_cert=False, cert=None,
-        scopes=None, role='Contributor',
-        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
+        cmd, name=None, password=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        show_auth_for_sdk=None, skip_assignment=False, keyvault=None, not_mine=None):
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
@@ -1062,7 +1068,7 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    aad_application = create_application(graph_client.applications,
+    aad_application = create_application(cmd,
                                          display_name=app_display_name,
                                          homepage='https://' + app_display_name,
                                          identifier_uris=[name],
@@ -1073,10 +1079,7 @@ def create_service_principal_for_rbac(
                                          end_date=app_end_date)
     # pylint: disable=no-member
     app_id = aad_application.app_id
-    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
-    if signed_in_user_object_id:
-        graph_client.applications.add_owner(aad_application.object_id,
-                                            _get_owner_url(cmd, signed_in_user_object_id))
+
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
         try:
@@ -1094,6 +1097,9 @@ def create_service_principal_for_rbac(
                                                          'response') else ex)  # pylint: disable=no-member
                 raise
     sp_oid = aad_sp.object_id
+
+    if not not_mine:
+        _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
 
     # retry while server replication is done
     if not skip_assignment:
@@ -1416,14 +1422,21 @@ def _get_object_stubs(graph_client, assignees):
     return result
 
 
-def _get_owner_url(cmd, owner_object_id):
+def _get_owner_url(cli_ctx, owner_object_id):
     if '://' in owner_object_id:
         return owner_object_id
-    graph_url = cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id
+    graph_url = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
     from azure.cli.core._profile import Profile
-    profile = Profile(cli_ctx=cmd.cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     _, _2, tenant_id = profile.get_login_credentials()
     return graph_url + tenant_id + '/directoryObjects/' + owner_object_id
+
+
+def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
+    # TODO capture exceptions!
+    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
+    if signed_in_user_object_id:
+        setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
 # for injecting test seams to produce predicatable role assignment id for playback

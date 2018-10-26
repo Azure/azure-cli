@@ -21,6 +21,7 @@ def load_arguments(self, _):
     with self.argument_context('ad') as c:
         c.argument('_subscription')  # hide global subscription param
         c.argument('owner_object_id', help="owner's object id")
+        c.argument('not_mine', action='store_true', help='do not set the current user as the owner', arg_group='Ownerships')
 
     with self.argument_context('ad app') as c:
         c.argument('app_id', help='application id')
@@ -104,6 +105,9 @@ def load_arguments(self, _):
         for arg in VARIANT_GROUP_ID_ARGS:
             c.argument(arg, options_list=['--group', '-g'], validator=validate_group, help=group_help_msg)
 
+    with self.argument_context('ad group create') as c:
+        c.argument('mail_nickname', help='Mail nickname')
+
     with self.argument_context('ad group show') as c:
         c.extra('cmd')
 
@@ -121,6 +125,9 @@ def load_arguments(self, _):
 
     with self.argument_context('ad group member') as c:
         c.argument('member_object_id', options_list='--member-id', help=member_id_help_msg)
+
+    with self.argument_context('ad signed-in-user') as c:
+        c.argument('object_type', help='object type filter, e.g. "application", "group", etc')
 
     with self.argument_context('role') as c:
         c.argument('scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
