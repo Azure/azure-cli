@@ -5,7 +5,6 @@
 
 import knack.output
 
-
 class AzOutputProducer(knack.output.OutputProducer):
     def __init__(self, cli_ctx=None):
         super(AzOutputProducer, self).__init__(cli_ctx)
@@ -15,3 +14,12 @@ class AzOutputProducer(knack.output.OutputProducer):
     def format_yaml(obj):
         import yaml
         return yaml.safe_dump(obj.result, default_flow_style=False)
+
+
+def get_output_format(cli_ctx):
+    return cli_ctx.invocation.data.get("output", None)
+
+
+def set_output_format(cli_ctx, desired_format):
+    if desired_format in cli_ctx.output._FORMAT_DICT:
+        cli_ctx.invocation.data["output"] = desired_format

@@ -70,6 +70,7 @@ def validate_keyvault(cmd, namespace):
 
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
+    from azure.cli.core._output import (get_output_format, set_output_format)
 
     keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
     kv = namespace.keyvault
@@ -82,6 +83,15 @@ def process_vm_secret_format(cmd, namespace):
     else:
         if kv and not is_valid_resource_id(kv):
             raise keyvault_usage
+
+    warning_msg = "This command does not support {} output format. Showing JSON format instead."
+    desired_formats = ["json", "jsonc"]
+
+    output_format = get_output_format(cmd.cli_ctx)
+    if output_format not in desired_formats:
+        warning_msg.format(output_format)
+        logger.warning(warning_msg)
+        set_output_format(cmd.cli_ctx, desired_formats[0])
 
 
 def _get_resource_group_from_vault_name(cli_ctx, vault_name):
