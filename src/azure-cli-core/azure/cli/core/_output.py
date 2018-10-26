@@ -5,6 +5,7 @@
 
 import knack.output
 
+
 class AzOutputProducer(knack.output.OutputProducer):
     def __init__(self, cli_ctx=None):
         super(AzOutputProducer, self).__init__(cli_ctx)
