@@ -16,11 +16,14 @@ class AzOutputProducer(knack.output.OutputProducer):
         import yaml
         return yaml.safe_dump(obj.result, default_flow_style=False)
 
+    def check_valid_format_type(self, format_type):
+        return format_type in self._FORMAT_DICT
+
 
 def get_output_format(cli_ctx):
     return cli_ctx.invocation.data.get("output", None)
 
 
 def set_output_format(cli_ctx, desired_format):
-    if desired_format in cli_ctx.output._FORMAT_DICT:
+    if cli_ctx.output.check_valid_format_type(desired_format):
         cli_ctx.invocation.data["output"] = desired_format

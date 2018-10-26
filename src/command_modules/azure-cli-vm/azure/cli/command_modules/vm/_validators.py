@@ -84,12 +84,12 @@ def process_vm_secret_format(cmd, namespace):
         if kv and not is_valid_resource_id(kv):
             raise keyvault_usage
 
-    warning_msg = "This command does not support {} output format. Showing JSON format instead."
+    warning_msg = "This command does not support the {} output format. Showing JSON format instead."
     desired_formats = ["json", "jsonc"]
 
     output_format = get_output_format(cmd.cli_ctx)
     if output_format not in desired_formats:
-        warning_msg.format(output_format)
+        warning_msg = warning_msg.format(output_format)
         logger.warning(warning_msg)
         set_output_format(cmd.cli_ctx, desired_formats[0])
 
