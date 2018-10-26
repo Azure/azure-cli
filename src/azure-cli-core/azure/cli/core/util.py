@@ -335,3 +335,12 @@ def can_launch_browser():
 
 def get_command_type_kwarg(custom_command=False):
     return 'custom_command_type' if custom_command else 'command_type'
+
+
+def reload_module(module):
+    # reloading the imported module to update
+    try:
+        from importlib import reload
+    except ImportError:
+        pass  # for python 2
+    reload(sys.modules[module])

@@ -19,8 +19,8 @@ from pkg_resources import parse_version
 
 from knack.log import get_logger
 
-from azure.cli.core.util import CLIError
-from azure.cli.core.extensions import (extension_exists, get_extension_path, get_extensions,
+from azure.cli.core.util import CLIError, reload_module
+from azure.cli.core.extensions import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                        get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
                                        WheelExtension, ExtensionNotInstalledException)
 from azure.cli.core.telemetry import set_extension_management_detail
@@ -304,6 +304,15 @@ def list_available_extensions(index_url=None, show_details=False):
             'installed': installed
         })
     return results
+
+
+def reload_extension(extension_name, extension_module=None):
+    return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
+
+
+def add_extension_to_path(extension_name):
+    ext_dir = get_extension_path(extension_name)
+    sys.path.append(ext_dir)
 
 
 def get_lsb_release():
