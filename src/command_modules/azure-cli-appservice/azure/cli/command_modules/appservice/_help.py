@@ -121,17 +121,17 @@ examples:
 
 helps['webapp config storage-account'] = """
 type: group
-short-summary: Manage a web app's Azure storage account configurations.
+short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config storage-account list'] = """
 type: command
-short-summary: Get a web app's Azure storage account configurations.
+short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config storage-account add'] = """
 type: command
-short-summary: Add an Azure storage account configuration to a web app.
+short-summary: Add an Azure storage account configuration to a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
     - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
       text: >
@@ -146,7 +146,7 @@ examples:
 
 helps['webapp config storage-account update'] = """
 type: command
-short-summary: Update an existing Azure storage account configuration on a web app.
+short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
     - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
       text: >
@@ -157,7 +157,7 @@ examples:
 
 helps['webapp config storage-account delete'] = """
 type: command
-short-summary: Delete a web app's Azure storage account configuration.
+short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config connection-string'] = """
