@@ -1067,6 +1067,8 @@ def create_service_principal_for_rbac(
                                          end_date=app_end_date)
     # pylint: disable=no-member
     app_id = aad_application.app_id
+    graph_client.applications.add_owner(aad_application.object_id,
+                                        _get_owner_url(cmd, _get_signed_in_user_object_id(graph_client)))
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
         try:
@@ -1128,6 +1130,13 @@ def create_service_principal_for_rbac(
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
+
+
+def _get_signed_in_user_object_id(graph_client):
+    try:
+        return graph_client.signed_in_user.get().object_id
+    except GraphErrorException:  # error could be possible if you logged in as a service principal
+        pass
 
 
 def _get_keyvault_client(cli_ctx):
