@@ -179,11 +179,11 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_auth_cert(namespace):
+def validate_cert(namespace):
     namespace.cert_data = read_base_64_file(namespace.cert_data)
 
 
-def validate_cert(namespace):
+def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
@@ -622,9 +622,11 @@ def process_ag_create_namespace(cmd, namespace):
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
 
-    validate_cert(namespace)
+    validate_ssl_cert(namespace)
 
     validate_tags(namespace)
+
+    # TODO: Resolve capacity/min_capacity discrepancy
 
 
 def process_auth_create_namespace(cmd, namespace):

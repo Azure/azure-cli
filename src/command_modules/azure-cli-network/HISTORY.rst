@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.9
++++++
+* `application-gateway`: Added `root-cert` subcommands to handle trusted root certifcates.
+* `application-gateway create/update`: Added `--min-capacity` for configuring autoscale on v2 app gateways.
+
 2.2.8
 +++++
 * Deprecated `network interface-endpoint` command names in favor of `network private-endpoint`.
