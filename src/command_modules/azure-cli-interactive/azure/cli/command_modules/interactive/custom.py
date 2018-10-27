@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from azure.cli.core.extensions import ExtensionNotInstalledException, get_extension_modname, get_extension
-from azure.cli.core.extensions.operations import (reload_extension, update_extension,
+from azure.cli.core.extension import ExtensionNotInstalledException, get_extension_modname, get_extension
+from azure.cli.core.extension.operations import (reload_extension, update_extension,
                                                   add_extension, add_extension_to_path)
 
 logger = get_logger(__name__)
