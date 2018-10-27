@@ -11,8 +11,8 @@ import mock
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension.operations import (list_extensions, add_extension, show_extension,
-                                                  remove_extension, update_extension,
-                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
+                                                 remove_extension, update_extension,
+                                                 list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
 
 

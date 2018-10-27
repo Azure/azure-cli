@@ -6,7 +6,7 @@ import unittest
 import mock
 
 from azure.cli.core.extension._resolve import (resolve_from_index, NoExtensionCandidatesError,
-                                                _is_not_platform_specific, _is_greater_than_cur_version)
+                                               _is_not_platform_specific, _is_greater_than_cur_version)
 
 
 class IndexPatch(object):
