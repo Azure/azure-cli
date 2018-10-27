@@ -82,6 +82,15 @@ def load_arguments(self, _):
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
 
+    with self.argument_context('ad app credential reset'.format(item)) as c:
+        c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
+        c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
+        c.argument('password', options_list=['--password', '-p'], arg_group='Credential')
+        c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
+        c.argument('create_cert', action='store_true', arg_group='Credential', help='Create a self-signed certificate to use for the credential')
+        c.argument('keyvault', arg_group='Credential', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
+        c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+
     for item in ['delete', 'list']:
         with self.argument_context('ad sp credential {}'.format(item)) as c:
             c.argument('key_id', help='credential key id')

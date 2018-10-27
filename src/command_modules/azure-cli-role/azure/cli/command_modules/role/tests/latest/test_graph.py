@@ -240,18 +240,8 @@ def get_signed_in_user(test_case):
 
 class GraphOwnerScenarioTest(ScenarioTest):
 
-    def _get_owner(self):
-        playback = not (self.is_live or self.in_recording)
-        if playback:
-            owner = MOCKED_USER_NAME
-        else:
-            account_info = self.cmd('account show').get_output_in_json()
-            if account_info['user']['type'] != 'servicePrincipal':
-                return account_info['user']['name']
-        return None
-
     def test_graph_ownership(self):
-        owner = self._get_owner()
+        owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
@@ -272,7 +262,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
 
 
     def test_set_graph_owner(self):
-        owner = self._get_owner()
+        owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
@@ -299,8 +289,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
 
 class GraphAppCredsScenarioTest(ScenarioTest):
     def test_graph_app_cred_e2e(self):
-        owner = get_signed_in_user(self)
-        if not owner:
+        if not get_signed_in_user(self):
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
@@ -314,9 +303,19 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
             self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
-            result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
+            result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
             self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
-            self.cmd('ad sp credential list --id {app}')
+            result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            self.assertTrue(result[0]['keyId']!=key_id)
+
+            # try the same through app commands
+            result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            key_id = result[0]['keyId']
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --append')
+            result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
+            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
+
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
