@@ -8,6 +8,7 @@ Release History
 * `image create`: expose storage-sku argument for setting the image's default storage account type
 * `vm resize`: fix bug where `--no-wait` option causes command to crash
 * `vm encryption show`: table output format shows status
+* `vm secret format`: requires json/jsonc output. Warns user and defaults to json output if an undesired output format is selected.
 
 2.2.6
 ++++++
