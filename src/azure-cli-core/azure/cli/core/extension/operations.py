@@ -20,9 +20,9 @@ from pkg_resources import parse_version
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError, reload_module
-from azure.cli.core.extensions import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
-                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
-                                       WheelExtension, ExtensionNotInstalledException)
+from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
+                                      get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
+                                      WheelExtension, ExtensionNotInstalledException)
 from azure.cli.core.telemetry import set_extension_management_detail
 
 from ._homebrew_patch import HomebrewPipPatch
