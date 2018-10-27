@@ -193,6 +193,20 @@ helps['ad app permission list'] = """
         - name: List the OAuth2 permissions for an existing AAD app
           text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
 """
+helps['ad app permission add'] = """
+    type: command
+    short-summary: add app permissions
+    examples:
+        - name: add an AAD graph permission
+          text: ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --resource-app-id 00000002-0000-0000-c000-000000000000 --resource-access-info a42657d6-7f20-40e3-b6f0-cee03008a62a=Scope
+"""
+helps['ad app permission remove'] = """
+    type: command
+    short-summary: remove app permissions
+    examples:
+        - name: remove an AAD graph permission
+          text: ad app permission remove --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --resource-app-id 00000002-0000-0000-c000-000000000000
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.

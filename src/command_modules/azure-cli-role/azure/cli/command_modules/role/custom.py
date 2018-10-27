@@ -528,10 +528,10 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     return client.list(filter=(' and '.join(sub_filters)))
 
 
-def list_owned_objects(client, object_type=None):
+def list_owned_objects(client, type=None):
     result = client.list_owned_objects()
-    if object_type:
-        result = [r for r in result if r.object_type.lower() == object_type.lower()]
+    if type:
+        result = [r for r in result if r.object_type.lower() == type.lower()]
     return result
 
 
@@ -694,6 +694,39 @@ def list_granted_application(cmd, identifier):
         filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
 
     return permissions.additional_properties['value']
+
+
+def add_permission(cmd, identifier, resource_app_id, resource_access_info):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    patch_application_required_resource_access(application)
+    existing = application.required_resource_access
+    resource_accesses = []
+    for e in resource_access_info:
+        id, type = e.split('=')
+        resource_accesses.append(ResourceAccess(id=id, type=type))
+    required_resource_access = RequiredResourceAccess(resource_app_id=resource_app_id,
+                                                      resource_access=resource_accesses)
+    existing.append(required_resource_access)
+    update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
+    graph_client.applications.patch(application.object_id, update_parameter)
+    logger.warning('Invoking "az ad app permission grant --id {} --app-id {}" is needed to make the '
+                   'change effective'.format(identifier, resource_app_id))
+
+
+def remove_permission(cmd, identifier, resource_app_id):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    patch_application_required_resource_access(application)
+    existing_accesses = application.required_resource_access
+    existing_accesses = [e for e in existing_accesses if e.resource_app_id != resource_app_id]
+    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    return graph_client.applications.patch(application.object_id, update_parameter)
+
+
+def patch_application_required_resource_access(application):
+    access = _build_application_accesses(application.additional_properties.get('requiredResourceAccess', []))
+    setattr(application, 'required_resource_access', access or [])
 
 
 def grant_application(cmd, identifier, app_id, expires='1'):

@@ -42,11 +42,14 @@ def get_graph_client_applications(cli_ctx, _):
 def get_graph_client_service_principals(cli_ctx, _):
     return _graph_client_factory(cli_ctx).service_principals
 
+
 def get_graph_client_users(cli_ctx, _):
     return _graph_client_factory(cli_ctx).users
 
+
 def get_graph_client_signed_in_users(cli_ctx, _):
     return _graph_client_factory(cli_ctx).signed_in_user
+
 
 def get_graph_client_groups(cli_ctx, _):
     return _graph_client_factory(cli_ctx).groups
@@ -91,13 +94,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_application')
         g.custom_command('permission grant', 'grant_application')
         g.custom_command('permission list', 'list_granted_application')
+        g.custom_command('permission add', 'add_permission')
+        g.custom_command('permission remove', 'remove_permission')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
 
     with self.command_group('ad app', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_application')
-
 
     with self.command_group('ad app owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
@@ -150,4 +154,3 @@ def load_command_table(self, _):
         g.command('add', 'add_member')
         g.command('remove', 'remove_member')
         g.custom_command('check', 'check_group_membership', client_factory=get_graph_client_groups)
-

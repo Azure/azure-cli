@@ -51,6 +51,9 @@ def load_arguments(self, _):
         c.argument('app_id', help='clientId of an existing app from which you want to grant permissions to your app')
         c.argument('expires', help='Expiry date for the permissions in years, options include 1, 2 or never.')
 
+    with self.argument_context('ad app permission add') as c:
+        c.argument('resource_access_info', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
@@ -127,7 +130,7 @@ def load_arguments(self, _):
         c.argument('member_object_id', options_list='--member-id', help=member_id_help_msg)
 
     with self.argument_context('ad signed-in-user') as c:
-        c.argument('object_type', help='object type filter, e.g. "application", "group", etc')
+        c.argument('type', help='object type filter, e.g. "application", "group", etc')
 
     with self.argument_context('role') as c:
         c.argument('scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
