@@ -227,6 +227,17 @@ class GraphGroupScenarioTest(ScenarioTest):
                 pass
 
 
+def get_signed_in_user(test_case):
+    playback = not (test_case.is_live or test_case.in_recording)
+    if playback:
+        owner = MOCKED_USER_NAME
+    else:
+        account_info = test_case.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] != 'servicePrincipal':
+            return account_info['user']['name']
+    return None
+
+
 class GraphOwnerScenarioTest(ScenarioTest):
 
     def _get_owner(self):
@@ -284,5 +295,28 @@ class GraphOwnerScenarioTest(ScenarioTest):
                 self.cmd('ad group delete -g ' + group_object_id)
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
-        
-        
+
+
+class GraphAppCredsScenarioTest(ScenarioTest):
+    def test_graph_app_cred_e2e(self):
+        owner = get_signed_in_user(self)
+        if not owner:
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'app': "http://" + self.create_random_name('cli-app-', 15)
+        }
+        app_id = None
+        try:
+            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            app_id = result['appId']
+
+            result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
+            key_id = result[0]['keyId']
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
+            result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
+            self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
+            self.cmd('ad sp credential list --id {app}')
+        finally:
+            if app_id:
+                self.cmd('ad app delete --id ' + app_id)

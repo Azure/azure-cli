@@ -99,6 +99,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
+        g.custom_command('credential reset', 'reset_service_principal_credential')
+        g.custom_command('credential list', 'list_service_principal_credentials')
+        g.custom_command('credential delete', 'delete_service_principal_credential')
 
     with self.command_group('ad app', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_application')

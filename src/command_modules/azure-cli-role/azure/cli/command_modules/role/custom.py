@@ -528,10 +528,10 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     return client.list(filter=(' and '.join(sub_filters)))
 
 
-def list_owned_objects(client, type=None):
+def list_owned_objects(client, object_type=None):
     result = client.list_owned_objects()
-    if type:
-        result = [r for r in result if r.object_type.lower() == type.lower()]
+    if object_type:
+        result = [r for r in result if r.object_type.lower() == object_type.lower()]
     return result
 
 
@@ -703,15 +703,15 @@ def add_permission(cmd, identifier, resource_app_id, resource_access_info):
     existing = application.required_resource_access
     resource_accesses = []
     for e in resource_access_info:
-        id, type = e.split('=')
-        resource_accesses.append(ResourceAccess(id=id, type=type))
+        access_id, access_type = e.split('=')
+        resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
     required_resource_access = RequiredResourceAccess(resource_app_id=resource_app_id,
                                                       resource_access=resource_accesses)
     existing.append(required_resource_access)
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
     graph_client.applications.patch(application.object_id, update_parameter)
-    logger.warning('Invoking "az ad app permission grant --id {} --app-id {}" is needed to make the '
-                   'change effective'.format(identifier, resource_app_id))
+    logger.warning('Invoking "az ad app permission grant --id %s --app-id %s" is needed to make the '
+                   'change effective', identifier, resource_app_id)
 
 
 def remove_permission(cmd, identifier, resource_app_id):
@@ -932,58 +932,54 @@ def list_service_principal_owners(cmd, identifier):
 
 def list_service_principal_credentials(cmd, identifier, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
-    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-    sp_creds, app_creds = [], []
-    if cert:
-        sp_creds = list(client.service_principals.list_key_credentials(sp_object_id))
-        if app_object_id:
-            app_creds = list(client.applications.list_key_credentials(app_object_id))
-    else:
-        sp_creds = list(client.service_principals.list_password_credentials(sp_object_id))
-        if app_object_id:
-            app_creds = list(client.applications.list_password_credentials(app_object_id))
+    return _find_service_principal_credentials(client, identifier, cert)[0]
 
-    for x in sp_creds:
-        setattr(x, 'source', 'ServicePrincipal')
-    for x in app_creds:
-        setattr(x, 'source', 'Application')
-    return app_creds + sp_creds
+
+def _find_service_principal_credentials(graph_client, identifier, cert=False):
+    app_object_id = _resolve_application(graph_client.applications, identifier)
+    if cert:
+        app_creds = list(graph_client.applications.list_key_credentials(app_object_id))
+    else:
+        app_creds = list(graph_client.applications.list_password_credentials(app_object_id))
+
+    return app_creds, app_object_id
 
 
 def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
-    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    if cert:
-        result = list(client.service_principals.list_key_credentials(sp_object_id))
-    else:
-        result = list(client.service_principals.list_password_credentials(sp_object_id))
+    result, app_object_id = _find_service_principal_credentials(client, identifier, cert)
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
-
-    # we will try to delete the creds at service principal level, if not found, we try application level
-
     if to_delete:
         result.remove(to_delete)
         if cert:
-            return client.service_principals.update_key_credentials(sp_object_id, result)
-        return client.service_principals.update_password_credentials(sp_object_id, result)
+            return client.applications.update_key_credentials(app_object_id, result)
+        return client.applications.update_password_credentials(app_object_id, result)
     else:
-        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-        if app_object_id:
-            if cert:
-                result = list(client.applications.list_key_credentials(app_object_id))
-            else:
-                result = list(client.applications.list_password_credentials(app_object_id))
-            to_delete = next((x for x in result if x.key_id == key_id), None)
-            if to_delete:
-                result.remove(to_delete)
-                if cert:
-                    return client.applications.update_key_credentials(app_object_id, result)
-                return client.applications.update_password_credentials(app_object_id, result)
+        raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+            key_id, identifier))
 
-    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
-        key_id, identifier))
+
+#def update_service_principal_credential(cmd, identifier, key_id, start_date=None, end_date=None,
+#                                        cert=None, password=None):
+#    # TODO: add validation for parameter combinations
+#    graph_client = _graph_client_factory(cmd.cli_ctx)
+#    update_cert_cred = bool(cert)
+#    app_creds, app_object_id = _find_service_principal_credentials(graph_client, identifier, update_cert_cred)
+#    cred = next((x for x in app_creds if x.key_id == key_id), None)
+#    if not cred:
+#        raise CLIError('key id of "{}" is not found'.format(key_id))
+#    if start_date:
+#        cred.start_date = dateutil.parser.parse(start_date)
+#    if end_date:
+#        cred.end_date = dateutil.parser.parse(end_date)
+#    if cert or password:
+#        cred.value = cert or password
+#    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+#    if update_cert_cred:
+#        return graph_client.applications.update_key_credentials(app_object_id, app_creds)
+#    return graph_client.applications.update_password_credentials(app_object_id, app_creds)
 
 
 def _resolve_service_principal(client, identifier):
