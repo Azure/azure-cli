@@ -4,6 +4,7 @@ Release History
 ===============
 2.1.9
 ++++++
+* support API permission management, signed-in-user, and application password & certificate credentials 
 * `ad sp create-for-rbac`: clarify the confusion between displayName and service principal name
 * support grant permissions to AAD apps
 
