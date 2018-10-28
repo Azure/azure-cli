@@ -181,28 +181,29 @@ helps['ad app permission'] = """
 """
 helps['ad app permission grant'] = """
     type: command
-    short-summary: Grant an app permissions from another app
+    short-summary: Grant the app an API permission
     examples:
         - name: Grant a native application with permissions to access an existing API with TTL of 2 years
           text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
 """
 helps['ad app permission list'] = """
     type: command
-    short-summary: List granted app permissions
+    short-summary: List granted API permissions
     examples:
         - name: List the OAuth2 permissions for an existing AAD app
           text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
 """
 helps['ad app permission add'] = """
     type: command
-    short-summary: add app permissions
+    short-summary: add an API permission
+    long-summary: invoking "az ad app permission grant" is needed to activate it
     examples:
-        - name: add an AAD graph permission
-          text: ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --resource-app-id 00000002-0000-0000-c000-000000000000 --resource-access-info a42657d6-7f20-40e3-b6f0-cee03008a62a=Scope
+        - name: add a Graph API permission of "Sign in and read user profile"
+          text: ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
 """
-helps['ad app permission remove'] = """
+helps['ad app permission delete'] = """
     type: command
-    short-summary: remove app permissions
+    short-summary: remove an API permission
     examples:
         - name: remove an AAD graph permission
           text: ad app permission remove --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --resource-app-id 00000002-0000-0000-c000-000000000000
@@ -363,4 +364,12 @@ helps['ad sp'] = """
 helps['ad user'] = """
     type: group
     short-summary: Manage Azure Active Directory users and user authentication.
+"""
+helps['ad signed-in-user'] = """
+    type: group
+    short-summary: Show graph information about current signed-in user in CLI
+"""
+helps['ad signed-in-user list-owned-objects'] = """
+    type: command
+    short-summary: Get the list of directory objects that are owned by the user
 """
