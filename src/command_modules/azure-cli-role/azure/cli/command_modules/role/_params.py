@@ -93,8 +93,8 @@ def load_arguments(self, _):
         c.argument('keyvault', arg_group='Credential', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
         c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
 
-    for item in ['delete', 'list']:
-        with self.argument_context('ad sp credential {}'.format(item)) as c:
+    for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
+        with self.argument_context(item) as c:
             c.argument('key_id', help='credential key id')
             c.argument('cert', action='store_true', help='a certificate based credential')
 

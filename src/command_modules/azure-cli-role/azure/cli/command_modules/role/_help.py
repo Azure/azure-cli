@@ -206,21 +206,21 @@ helps['ad app permission delete'] = """
     short-summary: remove an API permission
     examples:
         - name: remove an AAD graph permission
-          text: az ad app permission remove --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
+          text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
 """
-helps['ad app credentials'] = """
+helps['ad app credential'] = """
     type: group
     short-summary: manage an application's password or certificate credentials
 """
-helps['ad app credentials reset'] = """
+helps['ad app credential reset'] = """
     type: command
     short-summary: append or overwrite an application's password or certificate credentials
 """
-helps['ad app credentials list'] = """
+helps['ad app credential list'] = """
     type: command
     short-summary: list an application's password or certificate credentials
 """
-helps['ad app credentials delete'] = """
+helps['ad app credential delete'] = """
     type: command
     short-summary: delete an application's password or certificate credentials
 """

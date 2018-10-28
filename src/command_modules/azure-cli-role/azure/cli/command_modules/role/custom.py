@@ -934,30 +934,39 @@ def list_service_principal_owners(cmd, identifier):
 
 
 def list_service_principal_credentials(cmd, identifier, cert=False):
-    client = _graph_client_factory(cmd.cli_ctx)
-    return _find_service_principal_credentials(client, identifier, cert)[0]
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    if " sp " in cmd.name:
+        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
+    else:
+        app_object_id = _resolve_application(graph_client.applications, identifier)
+    return _get_service_principal_credentials(graph_client, app_object_id, cert)
 
 
-def _find_service_principal_credentials(graph_client, identifier, cert=False):
-    app_object_id = _resolve_application(graph_client.applications, identifier)
+def _get_service_principal_credentials(graph_client, app_object_id, cert=False):
     if cert:
         app_creds = list(graph_client.applications.list_key_credentials(app_object_id))
     else:
         app_creds = list(graph_client.applications.list_password_credentials(app_object_id))
 
-    return app_creds, app_object_id
+    return app_creds
 
 
 def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
-    client = _graph_client_factory(cmd.cli_ctx)
-    result, app_object_id = _find_service_principal_credentials(client, identifier, cert)
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    if " sp " in cmd.name:
+        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
+    else:
+        app_object_id = _resolve_application(graph_client.applications, identifier)
+    result = _get_service_principal_credentials(graph_client, identifier, cert)
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
     if to_delete:
         result.remove(to_delete)
         if cert:
-            return client.applications.update_key_credentials(app_object_id, result)
-        return client.applications.update_password_credentials(app_object_id, result)
+            return graph_client.applications.update_key_credentials(app_object_id, result)
+        return graph_client.applications.update_password_credentials(app_object_id, result)
     else:
         raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
             key_id, identifier))
