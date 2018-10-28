@@ -577,12 +577,12 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname, not_mine=None):
+def create_group(cmd, display_name, mail_nickname):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
                                                              mail_nickname=mail_nickname))
-    if not not_mine:
-        _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
+    # TODO: uncomment once design reviewed with AAD team
+    # _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
 
     return group
 
@@ -696,30 +696,30 @@ def list_granted_application(cmd, identifier):
     return permissions.additional_properties['value']
 
 
-def add_permission(cmd, identifier, resource_app_id, resource_access_info):
+def add_permission(cmd, identifier, api, api_permissions):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     patch_application_required_resource_access(application)
     existing = application.required_resource_access
     resource_accesses = []
-    for e in resource_access_info:
+    for e in api_permissions:
         access_id, access_type = e.split('=')
         resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
-    required_resource_access = RequiredResourceAccess(resource_app_id=resource_app_id,
+    required_resource_access = RequiredResourceAccess(resource_app_id=api,
                                                       resource_access=resource_accesses)
     existing.append(required_resource_access)
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
     graph_client.applications.patch(application.object_id, update_parameter)
-    logger.warning('Invoking "az ad app permission grant --id %s --app-id %s" is needed to make the '
-                   'change effective', identifier, resource_app_id)
+    logger.warning('Invoking "az ad app permission grant --id %s --api %s" is needed to make the '
+                   'change effective', identifier, api)
 
 
-def remove_permission(cmd, identifier, resource_app_id):
+def delete_permission(cmd, identifier, api):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     patch_application_required_resource_access(application)
     existing_accesses = application.required_resource_access
-    existing_accesses = [e for e in existing_accesses if e.resource_app_id != resource_app_id]
+    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
     return graph_client.applications.patch(application.object_id, update_parameter)
 
@@ -729,23 +729,26 @@ def patch_application_required_resource_access(application):
     setattr(application, 'required_resource_access', access or [])
 
 
-def grant_application(cmd, identifier, app_id, expires='1'):
+def grant_application(cmd, identifier, api, expires='1'):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # Get the Service Principal ObjectId for the client app
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
 
     # Get the Service Principal ObjectId for associated app
-    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, app_id)
+    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, api)
 
     # Build payload
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=1)
 
-    if expires == '2':
-        end_date = start_date + relativedelta(years=2)
-    elif expires.lower() == 'never':
+    if expires.lower() == 'never':
         end_date = start_date + relativedelta(years=1000)
+    else:
+        try:
+            end_date = start_date + relativedelta(years=int(expires))
+        except ValueError:
+            raise CLIError('usage error: --expires <INT>|never')
 
     payload = {
         "odata.type": "Microsoft.DirectoryServices.OAuth2PermissionGrant",
@@ -960,7 +963,7 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
             key_id, identifier))
 
 
-#def update_service_principal_credential(cmd, identifier, key_id, start_date=None, end_date=None,
+# def update_service_principal_credential(cmd, identifier, key_id, start_date=None, end_date=None,
 #                                        cert=None, password=None):
 #    # TODO: add validation for parameter combinations
 #    graph_client = _graph_client_factory(cmd.cli_ctx)
@@ -1057,7 +1060,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
         cmd, name=None, password=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
-        show_auth_for_sdk=None, skip_assignment=False, keyvault=None, not_mine=None):
+        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
@@ -1127,8 +1130,8 @@ def create_service_principal_for_rbac(
                 raise
     sp_oid = aad_sp.object_id
 
-    if not not_mine:
-        _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
+    # TODO: uncomment once design reviewed with AAD team
+    # _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
 
     # retry while server replication is done
     if not skip_assignment:

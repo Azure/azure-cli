@@ -188,7 +188,7 @@ helps['ad app permission grant'] = """
 """
 helps['ad app permission list'] = """
     type: command
-    short-summary: List the app permissions
+    short-summary: List granted app permissions
     examples:
         - name: List the OAuth2 permissions for an existing AAD app
           text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234

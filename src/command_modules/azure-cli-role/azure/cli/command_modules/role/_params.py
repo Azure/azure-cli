@@ -48,11 +48,13 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission grant') as c:
-        c.argument('app_id', help='clientId of an existing app from which you want to grant permissions to your app')
+        c.argument('app_id', options_list=['--api', '--app-id'],
+                   help='clientId of an existing app from which you want to grant permissions to your app')
         c.argument('expires', help='Expiry date for the permissions in years, options include 1, 2 or never.')
 
-    with self.argument_context('ad app permission add') as c:
-        c.argument('resource_access_info', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+    with self.argument_context('ad app permission') as c:
+        c.argument('api_permissions', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+        c.argument('api', help='the target API to access')
 
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
@@ -82,7 +84,7 @@ def load_arguments(self, _):
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
 
-    with self.argument_context('ad app credential reset'.format(item)) as c:
+    with self.argument_context('ad app credential reset') as c:
         c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
         c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential')
