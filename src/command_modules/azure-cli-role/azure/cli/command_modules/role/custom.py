@@ -959,7 +959,7 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
     else:
         app_object_id = _resolve_application(graph_client.applications, identifier)
-    result = _get_service_principal_credentials(graph_client, identifier, cert)
+    result = _get_service_principal_credentials(graph_client, app_object_id, cert)
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
     if to_delete:
@@ -970,28 +970,6 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
     else:
         raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
             key_id, identifier))
-
-
-# def update_service_principal_credential(cmd, identifier, key_id, start_date=None, end_date=None,
-#                                        cert=None, password=None):
-#    # TODO: add validation for parameter combinations
-#    graph_client = _graph_client_factory(cmd.cli_ctx)
-#    update_cert_cred = bool(cert)
-#    app_creds, app_object_id = _find_service_principal_credentials(graph_client, identifier, update_cert_cred)
-#    cred = next((x for x in app_creds if x.key_id == key_id), None)
-#    if not cred:
-#        raise CLIError('key id of "{}" is not found'.format(key_id))
-#    if start_date:
-#        cred.start_date = dateutil.parser.parse(start_date)
-#    if end_date:
-#        cred.end_date = dateutil.parser.parse(end_date)
-#    if cert or password:
-#        cred.value = cert or password
-#    graph_client = _graph_client_factory(cmd.cli_ctx)
-
-#    if update_cert_cred:
-#        return graph_client.applications.update_key_credentials(app_object_id, app_creds)
-#    return graph_client.applications.update_password_credentials(app_object_id, app_creds)
 
 
 def _resolve_service_principal(client, identifier):
@@ -1474,7 +1452,6 @@ def _get_owner_url(cli_ctx, owner_object_id):
 
 
 def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
-    # TODO capture exceptions!
     signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
     if signed_in_user_object_id:
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))

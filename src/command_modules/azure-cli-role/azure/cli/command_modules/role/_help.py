@@ -61,6 +61,8 @@ helps['ad sp create-for-rbac'] = """
 helps['ad sp credential'] = """
     type: group
     short-summary: manage a service principal's credentials.
+    long-summary: the credential update will be applied on the Application object the service principal is associated with.
+       In other words, you can accomplish the same thing using "az ad app credential"
 """
 
 helps['ad sp credential list'] = """

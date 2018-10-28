@@ -300,7 +300,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
             self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
-            result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
             self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
             result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             self.assertTrue(result[0]['keyId'] != key_id)
@@ -309,7 +309,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
             self.cmd('ad app credential reset --id {app} --password verySecert123 --append')
-            result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
