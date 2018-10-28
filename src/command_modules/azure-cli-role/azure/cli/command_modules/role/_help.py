@@ -199,14 +199,30 @@ helps['ad app permission add'] = """
     long-summary: invoking "az ad app permission grant" is needed to activate it
     examples:
         - name: add a Graph API permission of "Sign in and read user profile"
-          text: ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
+          text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
 """
 helps['ad app permission delete'] = """
     type: command
     short-summary: remove an API permission
     examples:
         - name: remove an AAD graph permission
-          text: ad app permission remove --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --resource-app-id 00000002-0000-0000-c000-000000000000
+          text: az ad app permission remove --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
+"""
+helps['ad app credentials'] = """
+    type: group
+    short-summary: manage an application's password or certificate credentials
+"""
+helps['ad app credentials reset'] = """
+    type: command
+    short-summary: append or overwrite an application's password or certificate credentials
+"""
+helps['ad app credentials list'] = """
+    type: command
+    short-summary: list an application's password or certificate credentials
+"""
+helps['ad app credentials delete'] = """
+    type: command
+    short-summary: delete an application's password or certificate credentials
 """
 helps['ad user list'] = """
     type: command
