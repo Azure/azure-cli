@@ -262,13 +262,13 @@ def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identi
         role_definition_id=role_definition_id,
         principal_id=identity_principle_id
     )
-    
+
     logger.info("Creating an assignment with a role '%s' on the scope of '%s'", role_definition_id, identity_scope)
     retry_times = 30
     for l in range(0, retry_times):
         try:
             assignments_client.create(scope=identity_scope, role_assignment_name=role_assignment_guid,
-                                        parameters=parameters)
+                                      parameters=parameters)
             break
         except CloudError as ex:
             if 'role assignment already exists' in ex.message:
@@ -276,12 +276,10 @@ def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identi
                 break
             elif l < retry_times and ' does not exist in the directory ' in ex.message:
                 time.sleep(5)
-                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
-                                retry_times)
+                logger.warning('Retrying role assignment creation: %s/%s', l + 1, retry_times)
                 continue
             else:
                 raise
-
 
 
 def _get_resource(client, resource_group_name, *subresources):
