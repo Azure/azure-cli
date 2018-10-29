@@ -319,13 +319,13 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         })
 
         self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
-                checks=[self.check('name', '{container_group_name}'),
-                        self.check('location', '{resource_group_location}'),
-                        self.check('provisioningState', 'Succeeded'),
-                        self.check('osType', 'Linux'),
-                        self.check('containers[0].image', '{image}'),
-                        self.exists('containers[0].resources.requests.cpu'),
-                        self.exists('containers[0].resources.requests.memoryInGb')])
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].resources.requests.cpu'),
+                         self.exists('containers[0].resources.requests.memoryInGb')])
 
         self.cmd('container export -g {rg} -n {container_group_name} -f "{output_file}"')
 
