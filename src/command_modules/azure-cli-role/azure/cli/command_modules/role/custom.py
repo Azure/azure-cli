@@ -683,17 +683,31 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     return result
 
 
-def list_granted_application(cmd, identifier):
+def list_permissions(cmd, identifier):
+    # the important and hard part is to tell users which permissions have been granted.
+    # we will due diligence to dig out what matters
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
-    # Get the Service Principal ObjectId for the client app
+    # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-
-    # Get the OAuth2 permissions client app
-    permissions = graph_client.oauth2.get(
+    grant_info = graph_client.oauth2.get(
         filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
+    grant_histories = grant_info.additional_properties['value']
 
-    return permissions.additional_properties['value']
+    # get original permissions required by the application, we will cross check the history
+    # and mark out granted ones
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    permissions = application.additional_properties['requiredResourceAccess']
+    for p in permissions:
+        result = list(graph_client.service_principals.list(
+            filter="servicePrincipalNames/any(c:c eq '{}')".format(p['resourceAppId'])))
+        granted = False
+        if result:
+            granted = bool(next((x for x in grant_histories if x['resourceId'] == result[0].object_id), None))
+        p['granted'] = granted
+    return permissions
 
 
 def add_permission(cmd, identifier, api, api_permissions):
@@ -729,7 +743,7 @@ def patch_application_required_resource_access(application):
     setattr(application, 'required_resource_access', access or [])
 
 
-def grant_application(cmd, identifier, api, expires='1'):
+def grant_application(cmd, identifier, api, expires='1', scope='user_impersonation'):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # Get the Service Principal ObjectId for the client app
@@ -755,7 +769,7 @@ def grant_application(cmd, identifier, api, expires='1'):
         "clientId": client_sp_object_id,
         "consentType": "AllPrincipals",
         "resourceId": associated_sp_object_id,
-        "scope": "user_impersonation",
+        "scope": scope,
         "startTime": start_date.isoformat(),
         "expiryTime": end_date.isoformat()
     }
