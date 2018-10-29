@@ -644,7 +644,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                         raise
                 else:
                     raise
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 progress_indicator.stop()
                 raise
 

@@ -597,7 +597,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip',
+            'uri': 'https://testclinew.blob.core.windows.net/files/vivekMAD.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None'
         })
@@ -690,7 +690,7 @@ class ManagedAppScenarioTest(LiveScenarioTest):
             'adn': 'testappdefname',
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip',
+            'uri': 'https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None',
             'sub': self.get_subscription_id()
