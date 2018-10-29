@@ -29,7 +29,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-rdbms==1.3.0',
+    'azure-mgmt-rdbms==1.4.1',
     'six'
 ]
 

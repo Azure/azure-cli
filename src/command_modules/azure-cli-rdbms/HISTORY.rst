@@ -5,7 +5,7 @@ Release History
 
 0.3.4
 +++++
-* Minor fixes
+* Add mysql replica commands
 
 0.3.3
 +++++
