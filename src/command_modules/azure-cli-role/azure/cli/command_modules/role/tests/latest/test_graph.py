@@ -5,6 +5,7 @@
 import json
 import mock
 import unittest
+import dateutil.parser
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
@@ -334,15 +335,12 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             self.kwargs['app_id'] = result['appId']
             self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api}=Scope')
             self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
-            self.cmd('ad app permission list --id {app_id}', checks=[
-                self.check('length([*])', 1),
-                self.check('[0].scope', 'user_impersonation')
-            ])
+            permissions = self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 1)
+            ]).get_output_in_json()
+            self.assertTrue(dateutil.parser.parse(permissions[0]['grantedTime']))  # verify it is a time
             self.cmd('ad app permission delete --id {app_id} --api {graph_resource}')
-            self.cmd('ad app permission list --id {app_id}').get_output_in_json()
-            self.cmd('ad app show --id {app_id}', checks=[
-                self.check('length(requiredResourceAccess)', 0)
-            ])
+            self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)

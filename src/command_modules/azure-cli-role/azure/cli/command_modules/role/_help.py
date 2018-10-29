@@ -191,8 +191,6 @@ helps['ad app permission grant'] = """
 helps['ad app permission list'] = """
     type: command
     short-summary: List API permissions the application has requrestes
-    long-summary: the "granted" field in the output communciates whether or not the API permission has ever been granted; however,
-        if you requested more permissions after the initial grant, make sure you run "az ad app permission grant" again
     examples:
         - name: List the OAuth2 permissions for an existing AAD app
           text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234

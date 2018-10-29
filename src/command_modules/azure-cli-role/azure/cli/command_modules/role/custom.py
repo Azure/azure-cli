@@ -703,10 +703,10 @@ def list_permissions(cmd, identifier):
     for p in permissions:
         result = list(graph_client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p['resourceAppId'])))
-        granted = False
+        granted_times = 'N/A'
         if result:
-            granted = bool(next((x for x in grant_histories if x['resourceId'] == result[0].object_id), None))
-        p['granted'] = granted
+            granted_times = ', '.join([x['startTime'] for x in grant_histories if x['resourceId'] == result[0].object_id])
+        p['grantedTime'] = granted_times
     return permissions
 
 
