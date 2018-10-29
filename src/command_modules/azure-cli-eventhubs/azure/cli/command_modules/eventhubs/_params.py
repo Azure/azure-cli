@@ -39,6 +39,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
 
     with self.argument_context('eventhubs namespace update') as c:
         c.argument('tags', arg_type=tags_type)
@@ -46,6 +48,7 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.0
++++++
+* Added property 'enable-kafka' in namespace to support Enabling Kafka
+
 0.3.0
 +++++
 * Fix eventhub update command
