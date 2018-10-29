@@ -75,19 +75,6 @@ DEPENDENCIES = [
     'azure-mgmt-resource==2.0.0'
 ]
 
-if sys.version_info < (3, 4):
-    DEPENDENCIES.append('enum34')
-
-if sys.version_info < (2, 7, 9):
-    DEPENDENCIES.append('pyopenssl')
-    DEPENDENCIES.append('ndg-httpsclient')
-    DEPENDENCIES.append('pyasn1')
-
-if sys.version_info < (3, 0):
-    DEPENDENCIES.append('antlr4-python2-runtime')
-else:
-    DEPENDENCIES.append('antlr4-python3-runtime')
-
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
@@ -113,6 +100,12 @@ setup(
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    extras_require={
+        ":python_version<'3.4'": ['enum34'],
+        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ":python_version<'3.0'": ['antlr4-python2-runtime'],
+        ":python_version>='3.0'": ['antlr4-python3-runtime']
+    },
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )
