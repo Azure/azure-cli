@@ -89,6 +89,7 @@ def load_command_table(self, _):
 
     with self.command_group('ad app', client_factory=get_graph_client_applications, resource_type=PROFILE_TYPE,
                             exception_handler=graph_err_handler) as g:
+        g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
         g.custom_show_command('show', 'show_application')
@@ -102,9 +103,6 @@ def load_command_table(self, _):
         g.custom_command('credential reset', 'reset_service_principal_credential')
         g.custom_command('credential list', 'list_service_principal_credentials')
         g.custom_command('credential delete', 'delete_service_principal_credential')
-
-    with self.command_group('ad app', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
-        g.custom_command('create', 'create_application')
 
     with self.command_group('ad app owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
@@ -143,8 +141,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('get-member-groups', 'get_member_groups')
         g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
-
-    with self.command_group('ad group', exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_group')
 
     with self.command_group('ad group owner', exception_handler=graph_err_handler) as g:
