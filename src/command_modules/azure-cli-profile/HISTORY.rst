@@ -6,10 +6,6 @@ Release History
 ++++++
 * az login: expose --use-cert-sn-issuer flag for service principal login with cert auto-rolls
 
-2.1.2
-++++++
-* Minor fixes
-
 2.1.1
 ++++++
 * Moving _load_subscriptions into the core
