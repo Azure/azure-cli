@@ -69,7 +69,6 @@ class TestGenerateSSHKeys(unittest.TestCase):
             # assert that CLIError raised because of attempt to open public key file.
             mocked_open.assert_called_once_with(public_key_path, 'r')
 
-
     def test_error_raised_when_private_key_file_exists_IOError(self):
         # Create private key file
         private_key_path = self._create_new_temp_key_file(self.private_key)
