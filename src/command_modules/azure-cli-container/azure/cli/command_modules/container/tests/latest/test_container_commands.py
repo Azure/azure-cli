@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+import tempfile
 import unittest
+import yaml
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 
@@ -260,6 +262,44 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'imageRegistryCredentials[0].username', '{registry_username}'),
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
+
+
+    # Test export container.
+    @ResourceGroupPreparer()
+    def test_container_export(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'nginx:latest'
+
+        _, output_file = tempfile.mkstemp()
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'output_file': output_file,
+            'image': image,
+        })
+
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].resources.requests.cpu'),
+                         self.exists('containers[0].resources.requests.memoryInGb')])
+
+        self.cmd('container export -g {rg} -n {container_group_name} -f {output_file}')
+
+        cg_defintion = None
+        with open("test.yaml", 'r') as f:
+            cg_defintion = yaml.load(f)
+
+        self.check(cg_defintion["name"], container_group_name)
+        self.check(cg_defintion['properties']['containers'][0]['properties']['image'], image)
+        self.check(cg_defintion['location'], resource_group_location)
+        self.check(cg_defintion['properties']['containers'][0]['properties']['resources']['requests']['cpu'], 1.0)
+        self.check(cg_defintion['properties']['containers'][0]['properties']['resources']['requests']['memoryInGB'], 1.5)
+        
 
     # Test create container with VNET argument validations.
     @ResourceGroupPreparer()
