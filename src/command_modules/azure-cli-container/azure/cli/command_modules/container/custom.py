@@ -602,14 +602,10 @@ def container_export(cmd, resource_group_name, name, file):
     # Correctly export the identity
     if 'identity' in resource and resource['identity'].type != ResourceIdentityType.none:
         resource['identity'] = resource['identity'].__dict__
-        resource['identity'].pop('additional_properties', None)
-        resource['identity'].pop('principal_id', None)
-        resource['identity'].pop('tenant_id', None)
-
-        resource['identity']['type'] = resource['identity']['type'].value
-
-        for key in resource['identity']['user_assigned_identities'] or {}:
-            resource['identity']['user_assigned_identities'][key] = {}
+        identity_entry = {'type': resource['identity']['type'].value}
+        if resource['identity']['user_assigned_identities']:
+            identity_entry['user_assigned_identities'] = {k:{} for k in  resource['identity']['user_assigned_identities']}
+        resource['identity'] = identity_entry
     else:
         resource.pop('identity', None)
 
