@@ -604,7 +604,7 @@ def container_export(cmd, resource_group_name, name, file):
         resource['identity'] = resource['identity'].__dict__
         identity_entry = {'type': resource['identity']['type'].value}
         if resource['identity']['user_assigned_identities']:
-            identity_entry['user_assigned_identities'] = {k:{} for k in  resource['identity']['user_assigned_identities']}
+            identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
         resource['identity'] = identity_entry
     else:
         resource.pop('identity', None)

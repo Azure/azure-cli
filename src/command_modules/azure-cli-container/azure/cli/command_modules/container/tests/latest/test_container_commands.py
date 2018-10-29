@@ -263,7 +263,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
 
-
     # Test export container.
     @ResourceGroupPreparer()
     def test_container_export(self, resource_group, resource_group_location):
@@ -299,7 +298,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.check(cg_defintion['location'], resource_group_location)
         self.check(cg_defintion['properties']['containers'][0]['properties']['resources']['requests']['cpu'], 1.0)
         self.check(cg_defintion['properties']['containers'][0]['properties']['resources']['requests']['memoryInGB'], 1.5)
-        
 
     # Test create container with VNET argument validations.
     @ResourceGroupPreparer()
