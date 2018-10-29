@@ -248,20 +248,40 @@ def _build_identities_info(identities):
 def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identity_principle_id,
                                        role_definition_id, identity_scope):
     from azure.cli.core.profiles import ResourceType, get_sdk
+    from msrestazure.azure_exceptions import CloudError
 
     RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters',
                                              mod='models', operation_group='role_assignments')
 
-    assignment_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
+    assignments_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
 
     role_assignment_guid = str(_gen_guid())
 
-    create_params = RoleAssignmentCreateParameters(
+    parameters = RoleAssignmentCreateParameters(
         role_definition_id=role_definition_id,
         principal_id=identity_principle_id
     )
-    return assignment_client.create(identity_scope, role_assignment_guid, create_params, custom_headers=None)
+    
+    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", role_definition_id, identity_scope)
+    retry_times = 30
+    for l in range(0, retry_times):
+        try:
+            assignments_client.create(scope=identity_scope, role_assignment_name=role_assignment_guid,
+                                        parameters=parameters)
+            break
+        except CloudError as ex:
+            if 'role assignment already exists' in ex.message:
+                logger.info('Role assignment already exists')
+                break
+            elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                time.sleep(5)
+                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                                retry_times)
+                continue
+            else:
+                raise
+
 
 
 def _get_resource(client, resource_group_name, *subresources):
