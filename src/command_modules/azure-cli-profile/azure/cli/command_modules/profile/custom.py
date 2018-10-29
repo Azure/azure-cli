@@ -99,7 +99,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
-        raise CLIError('usage error: --service-principal --username NAME --password SECRET -t TENANT')
+        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
 
     interactive = False
 
