@@ -83,7 +83,6 @@ def load_arguments(self, _):
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Space-separated list of assigned identities. Assigned identities are either user assigned identities (resource IDs) and / or the system assigned identity ('[system]'). See examples for more info.")
         c.argument('identity_scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
         c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
-        c.ignore('identity_role_id')
 
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
