@@ -699,22 +699,21 @@ def list_permissions(cmd, identifier):
     # and mark out granted ones
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    permissions = application.additional_properties['requiredResourceAccess']
+    permissions = application.required_resource_access
     for p in permissions:
         result = list(graph_client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(p['resourceAppId'])))
+            filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
         granted_times = 'N/A'
         if result:
             granted_times = ', '.join([x['startTime'] for x in grant_histories if
                                        x['resourceId'] == result[0].object_id])
-        p['grantedTime'] = granted_times
+        setattr(p, 'grantedTime', granted_times)
     return permissions
 
 
 def add_permission(cmd, identifier, api, api_permissions):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    patch_application_required_resource_access(application)
     existing = application.required_resource_access
     resource_accesses = []
     for e in api_permissions:
@@ -732,16 +731,10 @@ def add_permission(cmd, identifier, api, api_permissions):
 def delete_permission(cmd, identifier, api):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    patch_application_required_resource_access(application)
     existing_accesses = application.required_resource_access
     existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
     return graph_client.applications.patch(application.object_id, update_parameter)
-
-
-def patch_application_required_resource_access(application):
-    access = _build_application_accesses(application.additional_properties.get('requiredResourceAccess', []))
-    setattr(application, 'required_resource_access', access or [])
 
 
 def grant_application(cmd, identifier, api, expires='1', scope='user_impersonation'):
