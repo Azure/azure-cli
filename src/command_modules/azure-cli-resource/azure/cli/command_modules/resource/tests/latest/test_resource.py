@@ -303,7 +303,7 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class SubscriptionLevelDepolymentTest(ScenarioTest):
+class SubscriptionLevelDeploymentTest(LiveScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
@@ -548,7 +548,7 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
 
 
-class PolicyScenarioTest(ScenarioTest):
+class PolicyScenarioTest(LiveScenarioTest):
 
     def cmdstring(self, basic, management_group=None, subscription=None):
         cmd = basic
