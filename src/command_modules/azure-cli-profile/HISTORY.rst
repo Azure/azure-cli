@@ -2,10 +2,9 @@
 
 Release History
 ===============
-
 2.1.2
 ++++++
-* Minor fixes
+* az login: expose --use-cert-sn-issuer flag for service principal login with cert auto-rolls
 
 2.1.1
 ++++++
