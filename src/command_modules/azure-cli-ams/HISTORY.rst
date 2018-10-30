@@ -30,6 +30,10 @@ Release History
 * BREAKING CHANGE: `--preset-names` argument replaced with `--preset` in `ams transform` command group. Now you can only set 1 output/preset at a time (to add more you have to run `ams transform output add`). Also, you can set custom StandardEncoderPreset by passing the path to your custom JSON.
 * BREAKING CHANGE: `--output-asset-names ` renamed to `--output-assets` in `ams job start` command. Now it accepts a space-separated list of assets in 'assetName=label' format. An asset without label can be sent like this: 'assetName='.
 
+0.2.4
++++++
+* Minor fixes
+
 0.2.3
 +++++
 * Minor fixes
