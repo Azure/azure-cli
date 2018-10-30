@@ -47,14 +47,10 @@ def load_arguments(self, _):
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
-    with self.argument_context('ad app permission grant') as c:
-        c.argument('app_id', options_list=['--api', '--app-id'],
-                   help='clientId of an existing app from which you want to grant permissions to your app')
-        c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
-        c.argument('scope', help='oauth scope')
-
     with self.argument_context('ad app permission') as c:
         c.argument('api_permissions', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+        c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
+        c.argument('scope', help='oauth scope')
         c.argument('api', help='the target API to access')
 
     with self.argument_context('ad app permission list') as c:
