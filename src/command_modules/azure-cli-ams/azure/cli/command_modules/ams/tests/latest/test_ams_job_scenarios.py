@@ -95,7 +95,7 @@ class AmsJobTests(ScenarioTest):
             try:
                 self.cmd('az ams job delete -n {jobName} -a {amsname} -g {rg} -t {transformName}')
                 break
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 if l < _RETRY_TIMES:
                     time.sleep(5)
                 else:
