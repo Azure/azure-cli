@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.1
++++++
+* eventhub namespace create/update: Added --enable-kafka flag to support Kafka.
+
 0.3.0
 +++++
 * Fix eventhub update command
