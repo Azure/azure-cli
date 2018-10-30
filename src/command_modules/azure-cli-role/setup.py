@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-authorization==0.50.0',
     'azure-mgmt-monitor==0.5.2',
-    'azure-graphrbac==0.51.1',
+    'azure-graphrbac==0.52.0',
     'azure-keyvault==1.1.0',
     'pytz'
 ]
