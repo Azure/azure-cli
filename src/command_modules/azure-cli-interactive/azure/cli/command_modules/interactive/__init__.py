@@ -19,7 +19,13 @@ helps['interactive'] = """
 class InteractiveCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(InteractiveCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        from azure.cli.core import ModExtensionSuppress
+        super(InteractiveCommandsLoader, self).__init__(
+            cli_ctx=cli_ctx,
+            suppress_extension=ModExtensionSuppress(
+                __name__, 'alias', '0.5.1',
+                reason='Your version of the extension is not compatible with this version of the CLI.',
+                recommend_update=True))
 
     def load_command_table(self, _):
 
