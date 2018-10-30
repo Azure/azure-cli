@@ -705,7 +705,8 @@ def list_permissions(cmd, identifier):
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p['resourceAppId'])))
         granted_times = 'N/A'
         if result:
-            granted_times = ', '.join([x['startTime'] for x in grant_histories if x['resourceId'] == result[0].object_id])
+            granted_times = ', '.join([x['startTime'] for x in grant_histories if
+                                       x['resourceId'] == result[0].object_id])
         p['grantedTime'] = granted_times
     return permissions
 
