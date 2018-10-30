@@ -13,8 +13,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>--version</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -38,12 +37,19 @@
     <Compile Include="azure-cli-core\azure\cli\core\commands\parameters.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\progress.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\template_create.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\transform.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\validators.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\__init__.py" />
     <Compile Include="azure-cli-core\azure\cli\core\decorators.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\extensions\experimental.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\extensions\transform.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\extensions\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\operations.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\tests\latest\test_extension_commands.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\tests\latest\test_index_get.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\tests\latest\test_resolve.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\tests\latest\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\_homebrew_patch.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\_index.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\_resolve.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extension\__init__.py" />
     <Compile Include="azure-cli-core\azure\cli\core\file_util.py" />
     <Compile Include="azure-cli-core\azure\cli\core\keys.py" />
     <Compile Include="azure-cli-core\azure\cli\core\mock.py" />
@@ -60,6 +66,7 @@
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_extension.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_generic_update.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_help.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_keys.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_output.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_parser.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_profile.py" />
@@ -852,8 +859,11 @@
     <Folder Include="azure-cli-core\azure\" />
     <Folder Include="azure-cli-core\azure\cli\" />
     <Folder Include="azure-cli-core\azure\cli\core\" />
+    <Folder Include="azure-cli-core\azure\cli\core\auth_landing_pages\" />
     <Folder Include="azure-cli-core\azure\cli\core\commands\" />
-    <Folder Include="azure-cli-core\azure\cli\core\extensions\" />
+    <Folder Include="azure-cli-core\azure\cli\core\extension\" />
+    <Folder Include="azure-cli-core\azure\cli\core\extension\tests\" />
+    <Folder Include="azure-cli-core\azure\cli\core\extension\tests\latest\" />
     <Folder Include="azure-cli-core\azure\cli\core\profiles\" />
     <Folder Include="azure-cli-core\azure\cli\core\tests\" />
     <Folder Include="azure-cli-nspkg\" />
@@ -1258,6 +1268,10 @@
   <ItemGroup>
     <Content Include="azure-cli-command_modules-nspkg\HISTORY.rst" />
     <Content Include="azure-cli-command_modules-nspkg\setup.cfg" />
+    <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\fail.html" />
+    <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\fail.html" />
+    <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\ok.html" />
+    <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\ok.html" />
     <Content Include="azure-cli-core\HISTORY.rst" />
     <Content Include="azure-cli-core\setup.cfg" />
     <Content Include="azure-cli-nspkg\HISTORY.rst" />

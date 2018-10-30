@@ -55,11 +55,21 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
+        self._patch_extensions_dir()
+
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
 
         self.progress_controller = None
+
+    def _patch_extensions_dir(self):
+        from importlib import import_module
+        from azure.cli.core._config import GLOBAL_CONFIG_DIR
+        ext_module = import_module('azure.cli.core.extension')
+        custom_ext_dir = self.config.get('extension', 'dir', None)
+        setattr(ext_module, 'EXTENSIONS_DIR', os.path.expanduser(custom_ext_dir)
+                if custom_ext_dir else os.path.join(GLOBAL_CONFIG_DIR, 'cliextensions'))
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
