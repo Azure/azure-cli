@@ -6,6 +6,7 @@ Release History
 2.1.9
 +++++
 * Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
 
 2.1.8
 +++++
