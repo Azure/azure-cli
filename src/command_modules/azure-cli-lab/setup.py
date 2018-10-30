@@ -29,7 +29,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-graphrbac==0.51.1',
+    'azure-graphrbac==0.52.0',
     'azure-mgmt-devtestlabs==2.2.0'
 ]
 
