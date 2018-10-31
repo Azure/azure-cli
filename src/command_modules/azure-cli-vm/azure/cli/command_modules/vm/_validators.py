@@ -234,7 +234,7 @@ def _parse_image_argument(cmd, namespace):
         return 'urn'
 
     # 3 - unmanaged vhd based images?
-    if urlparse(namespace.image).scheme:
+    if urlparse(namespace.image).scheme == "https" and namespace.image.endswith(".vhd"):
         return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
@@ -256,7 +256,8 @@ def _parse_image_argument(cmd, namespace):
                                            'images', 'Microsoft.Compute')
         return 'image_id'
     except CloudError:
-        err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
+        err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, VHD blob URI, or ' \
+              'pick an image from {}.\nSee vm create -h for more information on specifying an image.'
         raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
 
 
