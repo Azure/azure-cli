@@ -51,7 +51,7 @@ def validate_image(ns):
                        ns.image)
 
 
-def validate_msi(cmd, namespace):
+def validate_msi(namespace):
     MSI_LOCAL_ID = '[system]'
     if namespace.assign_identity is not None:
         identities = namespace.assign_identity or []
@@ -62,41 +62,9 @@ def validate_msi(cmd, namespace):
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
                 raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
-            # keep 'identity_role' for output as logical name is more readable
-            setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
-                                                                    namespace.identity_scope))
+
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
-
-
-def _resolve_role_id(cli_ctx, role, scope):
-    import re
-    import uuid
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
-
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_definitions
-    role_id = None
-    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
-                role, re.I):
-        role_id = role
-    else:
-        try:
-            uuid.UUID(role)
-            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                client.config.subscription_id, role)
-        except ValueError:
-            pass
-        if not role_id:  # retrieve role id
-            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
-            if not role_defs:
-                raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
-                ids = [r.id for r in role_defs]
-                err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
-                raise CLIError(err.format(role, ids))
-            role_id = role_defs[0].id
-    return role_id
 
 
 def validate_subnet(ns):
