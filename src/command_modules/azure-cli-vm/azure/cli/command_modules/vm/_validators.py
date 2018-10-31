@@ -234,7 +234,7 @@ def _parse_image_argument(cmd, namespace):
         return 'urn'
 
     # 3 - unmanaged vhd based images?
-    if urlparse(namespace.image).scheme == "https" and namespace.image.endswith(".vhd"):
+    if urlparse(namespace.image).scheme and "://" in namespace.image:
         return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
