@@ -9,6 +9,7 @@ Release History
 * `vm resize`: fix bug where `--no-wait` option causes command to crash
 * `vm encryption show`: table output format shows status
 * `vm secret format`: requires json/jsonc output. Warns user and defaults to json output if an undesired output format is selected.
+* `vm create --image`: improved validation of image argument
 
 2.2.6
 ++++++
