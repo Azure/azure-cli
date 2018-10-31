@@ -1357,7 +1357,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console() and enable_cloud_console_aks_browse:
         # TODO: better error handling here.
-        response = requests.post('http://localhost:8888/openport/8001')
+        response = requests.post('http://localhost:8888/openport/{0}'format(listen_port))
         result = json.loads(response.text)
         term_id = os.environ.get('ACC_TERM_ID')
         if term_id:
