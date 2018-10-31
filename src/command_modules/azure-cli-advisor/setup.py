@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.6.0"
+VERSION = "2.0.0"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -33,7 +33,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-advisor==1.0.1'
+    'azure-mgmt-advisor==2.0.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

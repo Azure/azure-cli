@@ -86,7 +86,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -96,6 +96,10 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if use_cert_sn_issuer and not service_principal:
+        raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
+    if service_principal and not username:
+        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
 
     interactive = False
 
@@ -125,7 +129,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             service_principal,
             tenant,
             use_device_code=use_device_code,
-            allow_no_subscriptions=allow_no_subscriptions)
+            allow_no_subscriptions=allow_no_subscriptions,
+            use_cert_sn_issuer=use_cert_sn_issuer)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:
@@ -158,3 +163,33 @@ def logout(cmd, username=None):
 def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations(cmd.cli_ctx)
+
+
+def check_cli(cmd):
+    from azure.cli.core.file_util import (
+        create_invoker_and_load_cmds_and_args, get_all_help)
+
+    exceptions = {}
+
+    print('Running CLI self-test.\n')
+
+    print('Loading all commands and arguments...')
+    try:
+        create_invoker_and_load_cmds_and_args(cmd.cli_ctx)
+        print('Commands loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_commands'] = ex
+        logger.error('Error occurred loading commands!\n')
+
+    print('Retrieving all help...')
+    try:
+        get_all_help(cmd.cli_ctx)
+        print('Help loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_help'] = ex
+        logger.error('Error occurred loading help!\n')
+
+    if not exceptions:
+        print('CLI self-test completed: OK')
+    else:
+        raise CLIError(exceptions)
