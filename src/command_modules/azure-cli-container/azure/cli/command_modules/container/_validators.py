@@ -51,7 +51,7 @@ def validate_image(ns):
                        ns.image)
 
 
-def validate_msi(cmd, namespace):
+def validate_msi(namespace):
     MSI_LOCAL_ID = '[system]'
     if namespace.assign_identity is not None:
         identities = namespace.assign_identity or []

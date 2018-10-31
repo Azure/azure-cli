@@ -35,8 +35,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource,
-                              cf_network, get_auth_management_client)
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
