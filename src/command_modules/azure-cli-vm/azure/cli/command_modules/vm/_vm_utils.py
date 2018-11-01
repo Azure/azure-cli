@@ -129,10 +129,11 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=None,
+                        data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size=''):
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
-    # we should return a dictionary with info like below and will emoit when see conflictions
+    # we should return a dictionary with info like below and will omit when we see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
     #   0: { caching: 'None', write_accelerator: True},
@@ -150,8 +151,19 @@ def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_
         }
 
     # fill in storage sku for managed data disks
+    sku_dict = get_sku_dict_from_string(storage_sku)
+    if "all" or "os" in sku_dict:
+        info['os']['storageAccountType'] = sku_dict.get('all') or sku_dict.get('os')
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
-        info[i]['managedDisk'] = {'storageAccountType': storage_sku}
+        if "all" in sku_dict:
+            sku_val = sku_dict['all']
+        elif i in sku_dict:
+            sku_val = sku_dict[i]
+        elif i < len(image_data_disks_storage_skus):
+            sku_val = image_data_disks_storage_skus[i]
+        else:
+            sku_val = None
+        info[i]['managedDisk'] = {'storageAccountType': sku_val}
 
     # fill in createOption
     for i in range(image_data_disks_num):
@@ -274,3 +286,41 @@ def get_storage_blob_uri(cli_ctx, storage):
             raise CLIError('{} does\'t exist.'.format(storage))
         storage_uri = storage_account.primary_endpoints.blob
     return storage_uri
+
+
+def get_sku_dict_from_string(sku_string):
+    usage_msg = 'Usage error - wrong sku format:\n\t[--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."]\n' \
+                'where each ID is "os" or a 0-indexed lun.'
+    skus = sku_string.split()
+
+    if not skus:
+        return {}
+
+    # if one storage sku return it. This should be applied to all disks.
+    if len(skus) == 1 and '=' not in sku_string:
+        return dict(all=skus[0])
+
+    result = {}
+    # extract disk id and storage sku. disk id could be all, os or an lun.
+    for sku in skus:
+        if '=' in sku:
+            disk_id, sku = sku.split('=', 1)
+            result[disk_id] = sku
+        else:
+            raise CLIError(usage_msg)
+
+    # otherwise disk_id should be "os" or an int lun.
+    for disk_id, sku in result.copy().items():
+        try:
+            result[int(disk_id)] = sku
+            result.pop(disk_id)
+        except ValueError:
+            temp_sku = result[disk_id]
+            if disk_id.lower() == "os":
+                result.pop(disk_id)
+                result[disk_id.lower()] = temp_sku
+
+            else:
+                raise CLIError(usage_msg)
+
+    return result

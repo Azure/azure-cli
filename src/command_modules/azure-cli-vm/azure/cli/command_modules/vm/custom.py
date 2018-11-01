@@ -518,6 +518,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_msi_role_assignment)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
+    storage_sku = disk_info['os'].get('storageAccountType')
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
@@ -1828,6 +1830,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
+
+    storage_sku = disk_info['os'].get('storageAccountType')
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,

@@ -300,13 +300,6 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
 
 
-def _validate_managed_disk_sku(sku):
-
-    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']
-    if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
-        raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
-
-
 def _validate_location(cmd, namespace, zone_info, size_info):
     from ._vm_utils import list_sku_info
     if not namespace.location:
@@ -366,7 +359,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedCustomImage:
         required = ['image']
@@ -374,13 +366,11 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
         forbidden = ['os_disk_name', 'os_caching', 'storage_account',
                      'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
@@ -413,15 +403,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
-    if namespace.storage_sku == 'UltraSSD_LRS' and namespace.ultra_ssd_enabled is None:
+    if namespace.storage_sku and namespace.storage_sku.lower() == 'UltraSSD_LRS'.lower() and namespace.ultra_ssd_enabled is None: # pylint: disable=line-too-long
         namespace.ultra_ssd_enabled = True
 
-    # Now verify that the status of required and forbidden parameters
+    # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
     image_data_disks_num = 0
+    image_data_disks_storage_skus = []
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
@@ -430,6 +421,11 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.images.get(res['resource_group'], res['name'])
             namespace.os_type = image_info.storage_profile.os_disk.os_type.value
             image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+
+            if image_data_disks_num:
+                for data_disk in image_info.storage_profile.data_disks:
+                    image_data_disks_storage_skus.append(data_disk.storage_account_type)
+
         elif res['type'].lower() == 'galleries':
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
@@ -472,6 +468,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks_num=image_data_disks_num,
+                                              image_data_disks_storage_skus=image_data_disks_storage_skus,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
