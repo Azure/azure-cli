@@ -373,7 +373,6 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
-
     cg_defintion = None
 
     try:
@@ -562,7 +561,6 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_export(cmd, resource_group_name, name, file):
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
-
     resource = resource_client.resources.get(resource_group_name,
                                              "Microsoft.ContainerInstance",
                                              '',
@@ -570,17 +568,26 @@ def container_export(cmd, resource_group_name, name, file):
                                              name,
                                              container_group_client.api_version,
                                              False).__dict__
-
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
     resource.pop('id', None)
     resource.pop('plan', None)
-    resource.pop('identity', None)
     resource.pop('kind', None)
     resource.pop('managed_by', None)
     resource['properties'].pop('provisioningState', None)
 
+    # Correctly export the identity
+    if 'identity' in resource and resource['identity'].type != ResourceIdentityType.none:
+        resource['identity'] = resource['identity'].__dict__
+        identity_entry = {'type': resource['identity']['type'].value}
+        if resource['identity']['user_assigned_identities']:
+            identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
+        resource['identity'] = identity_entry
+    else:
+        resource.pop('identity', None)
+
+    # Remove container instance views
     for i in range(len(resource['properties']['containers'])):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
