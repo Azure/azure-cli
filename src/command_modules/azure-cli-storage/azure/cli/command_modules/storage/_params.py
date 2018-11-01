@@ -140,6 +140,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account show-connection-string') as c:
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
+        c.argument('sas_token', help='The SAS token to be used in the connection-string.')
         c.argument('key_name', options_list=['--key'], help='The key to use.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
