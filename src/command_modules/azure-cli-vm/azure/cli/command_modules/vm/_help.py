@@ -133,7 +133,7 @@ helps['vmss create'] = """
           type: string
           short-summary: >
             The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
-            This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
+            Valid URN format: "Publisher:Offer:Sku:Version".
           populator-commands:
           - az vm image list
           - az vm image show
