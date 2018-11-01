@@ -376,7 +376,7 @@ def _check_encrypt_is_supported(image_reference, volume_type):
     sku = getattr(image_reference, 'sku', None)
 
     # custom image?
-    if not offer or not publisher or not sku:
+    if not any([offer, publisher, sku]):
         return (True, None)
     publisher, sku, offer = publisher.lower(), sku.lower(), offer.lower()
     supported = [

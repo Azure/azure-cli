@@ -155,7 +155,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
     def _load_from_data(self, data):
         super(CliCommandHelpFile, self)._load_from_data(data)
 
-        if isinstance(data, str) or not self.parameters or not data.get('parameters'):
+        if isinstance(data, str) or not any([self.parameters, data.get('parameters')]):
             return
 
         loaded_params = []

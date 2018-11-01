@@ -16,7 +16,7 @@ def get_blob_info(blob_sas_url):
     blob_name = match.group('blob_name')
     sas_token = match.group('sas_token')
 
-    if not account_name or not container_name or not blob_name or not sas_token:
+    if not any([account_name, container_name, blob_name, sas_token]):
         raise CLIError("Failed to parse the SAS URL: '{!s}'.".format(blob_sas_url))
 
     return account_name, endpoint_suffix, container_name, blob_name, sas_token

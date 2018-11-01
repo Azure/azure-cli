@@ -60,7 +60,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
         identity = EncryptionIdentity()
         config = EncryptionConfig(type=encryption_type)
         if encryption_type == EncryptionConfigType.user_managed:
-            if not key_name or not key_vault_id or not key_version:
+            if not any([key_name, key_vault_id, key_version]):
                 # pylint: disable=line-too-long
                 raise CLIError('For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
             config.key_vault_meta_info = KeyVaultMetaInfo(key_vault_id, key_name, key_version)

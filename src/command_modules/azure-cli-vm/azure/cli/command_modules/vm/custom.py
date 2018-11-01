@@ -1329,7 +1329,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
         publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
-    elif not publisher or not offer or not sku or not version:
+    elif not any([publisher, offer, sku, version]):
         raise CLIError(usage_err)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machine_images.get(location, publisher, offer, sku, version)
@@ -1349,7 +1349,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
             return
         plan = image.plan.name
     else:
-        if not publisher or not offer or not plan:
+        if not any([publisher, offer, plan]):
             raise CLIError(usage_err)
 
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
