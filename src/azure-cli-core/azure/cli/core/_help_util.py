@@ -2,6 +2,7 @@ from knack.help import (HelpParameter as KnackHelpParameter, HelpExample as Knac
 from knack.help import HelpAuthoringException
 from knack.util import CLIError
 
+
 class CliHelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
     def __init__(self, _data):
@@ -35,8 +36,8 @@ class CliHelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance
         if data.get('description'):
             self.long_summary = data.get('description')
 
-        if data.get('value-source'): # todo: change to value-sources
-            self.raw_value_sources = data.get('value-source')
+        if data.get('value-sources'):
+            self.raw_value_sources = data.get('value-sources')
             for value_source in self.raw_value_sources:
                 val_str = self._raw_value_source_to_string(value_source)
                 if val_str:
@@ -168,12 +169,3 @@ def update_help_file(self, data, parser):
             loaded_params.append(param)
 
         self.parameters = loaded_params
-
-
-
-
-# new_data["long-summary"] = "{}\n{}".format(new_data["long-summary"], text) \
-#     if new_data.get("long-summary") else text
-
-# ex["text"] = "{}\n{}".format(ex["description"], ex["command"]) if ex["description"] else  ex["command"]
-

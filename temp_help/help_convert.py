@@ -29,7 +29,7 @@ def convert(target_mod):
 
 def _get_new_yaml_dict(help_dict):
 
-    result = dict(version=0, content=[])
+    result = dict(version=1, content=[])
     content = result['content']
 
     for command_or_group, yaml_text in help_dict.items():
@@ -53,9 +53,9 @@ def _get_new_yaml_dict(help_dict):
                 _convert_summaries(old_dict=param, new_dict=new_param)
 
                 if "populator-commands" in param:
-                    new_param["value-source"] = []
+                    new_param["value-sources"] = []
                     for item in param["populator-commands"]:
-                        new_param["value-source"].append(dict(string=item))
+                        new_param["value-sources"].append(dict(string=item))
                 parameters.append(new_param)
             elem_content["arguments"] = parameters
 

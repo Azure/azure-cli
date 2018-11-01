@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-import
-import azure.cli.command_modules.cdn._help
+#import azure.cli.command_modules.cdn._help
 
 from azure.cli.core import AzCommandsLoader
 
