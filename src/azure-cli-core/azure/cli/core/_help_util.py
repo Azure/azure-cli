@@ -90,7 +90,7 @@ def get_yaml_help_for_nouns(nouns, cmd_loader_map_ref, is_group):
         dir_name = os.path.dirname(loader_file_path)
         files = os.listdir(dir_name)
         for file in files:
-            if file.endswith(".yaml") or file.endswith(".yml"):
+            if file.endswith((".yaml", ".yml")):
                 help_file_path = os.path.join(dir_name, file)
                 with open(help_file_path, "r") as f:
                     text = f.read()
@@ -114,7 +114,7 @@ def update_help_file(self, data, parser):
     for elem in content:
         for key, value in elem.items():
             # find the command / group's help text
-            if value.get("name") and value.get("name") == self.command:
+            if value.get("name") == self.command:
                 info_type = key
                 info = value
                 break
