@@ -867,7 +867,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSI')
+        self.assertEqual(s['user']['assignedIdentityId'], 'MSI')
+        self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -904,7 +905,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSIClient-{}'.format(test_client_id))
+        self.assertEqual(s['name'], self.display_name1)
+        self.assertEqual(s['user']['assignedIdentityId'], 'MSIClient-{}'.format(test_client_id))
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -954,7 +956,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_object_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIObject-{}'.format(test_object_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityId'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
@@ -987,7 +989,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_res_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIResource-{}'.format(test_res_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityId'], 'MSIResource-{}'.format(test_res_id))
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
