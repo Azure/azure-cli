@@ -66,6 +66,11 @@ def load_command_table(self, _):
         client_factory=cf_postgres_firewall_rules
     )
 
+    mariadb_vnet_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mariadb.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        client_factory=cf_mariadb_virtual_network_rules_operations
+    )
+
     mysql_vnet_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
         client_factory=cf_mysql_virtual_network_rules_operations
@@ -196,6 +201,13 @@ def load_command_table(self, _):
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
                                  setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_firewall_rule_update_custom_func')
+
+    with self.command_group('mariadb server vnet-rule', mariadb_vnet_sdk) as g:
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.generic_update_command('update')
 
     with self.command_group('mysql server vnet-rule', mysql_vnet_sdk) as g:
         g.command('create', 'create_or_update')
