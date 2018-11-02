@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-from importlib import  import_module
+from importlib import import_module
 import os
 import subprocess
 import difflib
@@ -30,7 +30,7 @@ def convert(target_mod, mod_name, test=False):
     help_dict = target_mod.helps
     loader_file_path = os.path.abspath(target_mod.__file__)
 
-    out_file = os.path.join(os.path.dirname(loader_file_path),"help.yaml")
+    out_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
     if test and os.path.exists(out_file):
         print("{}/help.yaml already exists.\nPlease remove: {}\nand re-run this command.\n".format(mod_name, out_file))
         exit(1)
@@ -38,6 +38,7 @@ def convert(target_mod, mod_name, test=False):
     result = _get_new_yaml_dict(help_dict)
 
     return out_file, result
+
 
 def _get_new_yaml_dict(help_dict):
 
@@ -60,7 +61,7 @@ def _get_new_yaml_dict(help_dict):
                 new_param = dict()
                 if "name" in param:
                     options = param["name"].split()
-                    option = max(options, key = lambda x: len(x))
+                    option = max(options, key=lambda x: len(x))
                     new_param["name"] = option.lstrip('-')
                 _convert_summaries(old_dict=param, new_dict=new_param)
 
@@ -90,6 +91,7 @@ def _get_new_yaml_dict(help_dict):
 
     return result
 
+
 def _convert_summaries(old_dict, new_dict):
     if "short-summary" in old_dict:
         new_dict["summary"] = old_dict["short-summary"]
@@ -97,21 +99,21 @@ def _convert_summaries(old_dict, new_dict):
         new_dict["description"] = old_dict["long-summary"]
 
 def assert_help_objs_equal(old_help, new_help):
-    assert_true_or_warn (old_help.name, new_help.name)
-    assert_true_or_warn (old_help.type, new_help.type)
-    assert_true_or_warn (old_help.short_summary, new_help.short_summary)
-    assert_true_or_warn (old_help.long_summary, new_help.long_summary)
-    assert_true_or_warn (old_help.command, new_help.command)
+    assert_true_or_warn(old_help.name, new_help.name)
+    assert_true_or_warn(old_help.type, new_help.type)
+    assert_true_or_warn(old_help.short_summary, new_help.short_summary)
+    assert_true_or_warn(old_help.long_summary, new_help.long_summary)
+    assert_true_or_warn(old_help.command, new_help.command)
 
     old_examples = sorted(old_help.examples, key=lambda x: x.name)
     new_examples = sorted(new_help.examples, key=lambda x: x.name)
-    assert_true_or_warn (len(old_examples), len(new_examples))
+    assert_true_or_warn(len(old_examples), len(new_examples))
     # note: this cannot test if min / max version were added as these fields weren't stored in helpfile objects previously.
     for old_ex, new_ex in zip(old_examples, new_examples):
         assert_true_or_warn (old_ex.text, new_ex.text)
 
     assert_true_or_warn(old_help.deprecate_info, new_help.deprecate_info)
-    assert_true_or_warn (old_help.preview_info, new_help.preview_info)
+    assert_true_or_warn(old_help.preview_info, new_help.preview_info)
 
     # group and not command, we are done checking.
     if old_help.type == "group":
@@ -168,6 +170,7 @@ def assert_true_or_warn(x, y):
             if failed > 15:
                 print("More than 15 assertions failed. Exiting tests.\n")
                 exit(1)
+
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
