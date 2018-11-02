@@ -67,7 +67,7 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
-_ASSIGNED_IDENTITY_INFO = 'assignedIdentityId'
+_ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
