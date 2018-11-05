@@ -306,7 +306,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm generalize -g {rg} -n {vm1}')
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1 --admin-username sdk-test-admin --admin-password testPassword0')
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1 1 --admin-username sdk-test-admin --admin-password testPassword0')
         self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm2}')
@@ -327,18 +327,25 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
-            self.check("length(storageProfile.dataDisks)", 1),
+            self.check("length(storageProfile.dataDisks)", 2),
             self.check("storageProfile.dataDisks[0].createOption", 'FromImage'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS')
+        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku "os=Premium_LRS 2=StandardSSD_LRS" --data-disk-sizes-gb 1')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
-            self.check("length(storageProfile.dataDisks)", 1),
+            self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+
+            self.check("length(storageProfile.dataDisks)", 3),
             self.check("storageProfile.dataDisks[0].createOption", 'FromImage'),
-            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+            self.check("storageProfile.dataDisks[1].createOption", 'FromImage'),
+            self.check("storageProfile.dataDisks[2].createOption", 'Empty'),
+
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'StandardSSD_LRS')
         ])
 
         self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
