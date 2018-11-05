@@ -94,11 +94,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(
             [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
-        
+
         # check that blob properties can be set back to null
         self.storage_cmd('storage blob update -n {} -c {} --content-type ""',
                          account_info, blob_name, container)
-        
+
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', None))
 
