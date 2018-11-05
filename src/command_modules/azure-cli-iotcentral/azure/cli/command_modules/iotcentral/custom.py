@@ -66,6 +66,7 @@ def _check_name_availability(client, app_name):
     if name_availability is not None and not name_availability.name_available:
         raise CLIError(name_availability.message)
 
+
 def _check_subdomain_availability(client, app_subdomain):
     """Search the current subscription for an app with the given subdomain.
     :param object client: IoTCentralClient
