@@ -63,7 +63,7 @@ def _check_name_availability(client, app_name):
     :param str app_name: App name to search for
     """
     name_availability = client.apps.check_name_availability(app_name)
-    if name_availability is not None and not name_availability.name_available:
+    if not name_availability.name_available:
         raise CLIError(name_availability.message)
 
 
@@ -73,7 +73,7 @@ def _check_subdomain_availability(client, app_subdomain):
     :param str app_subdomain: App subdomain to search for
     """
     subdomain_availability = client.apps.check_subdomain_availability(app_subdomain)
-    if subdomain_availability is not None and not subdomain_availability.name_available:
+    if not subdomain_availability.name_available:
         raise CLIError(subdomain_availability.message)
 
 
