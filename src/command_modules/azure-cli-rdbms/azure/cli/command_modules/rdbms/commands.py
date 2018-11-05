@@ -9,6 +9,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mariadb_servers,
     cf_mariadb_db,
     cf_mariadb_firewall_rules,
+    cf_mariadb_virtual_network_rules_operations,
     cf_mariadb_config,
     cf_mariadb_log,
     cf_mysql_servers,
