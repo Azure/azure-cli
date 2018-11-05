@@ -153,7 +153,16 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     # fill in storage sku for managed data disks
     sku_dict = get_sku_dict_from_string(storage_sku)
     if "all" or "os" in sku_dict:
-        info['os']['storageAccountType'] = sku_dict.get('all') or sku_dict.get('os')
+        os_sku = sku_dict.get('all') or sku_dict.get('os')
+        try:
+            if os_sku.lower() == 'ultrassd_lrs':
+                os_sku = None
+                logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
+        except AttributeError:
+            pass
+
+        info['os']['storageAccountType'] = os_sku
+
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
         if "all" in sku_dict:
             sku_val = sku_dict['all']

@@ -251,8 +251,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
     os_caching = disk_info['os'].get('caching')
     os_storage_sku = disk_info['os'].get('storageAccountType')
-    if os_storage_sku and os_storage_sku.lower() == 'UltraSSD_LRS'.lower():
-        os_storage_sku = None
 
     def _build_os_profile():
 
@@ -663,8 +661,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     os_caching = disk_info['os'].get('caching')
 
     os_storage_sku = disk_info['os'].get('storageAccountType')
-    if os_storage_sku and os_storage_sku.lower() == 'UltraSSD_LRS'.lower():
-        os_storage_sku = None
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {

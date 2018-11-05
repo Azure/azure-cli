@@ -403,7 +403,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
-    if namespace.storage_sku and namespace.storage_sku.lower() == 'UltraSSD_LRS'.lower() and namespace.ultra_ssd_enabled is None: # pylint: disable=line-too-long
+    if namespace.storage_sku and 'ultrassd_lrs' in namespace.storage_sku.lower() and namespace.ultra_ssd_enabled is None: # pylint: disable=line-too-long
         namespace.ultra_ssd_enabled = True
 
     # Now verify the presence of required and absence of forbidden parameters
