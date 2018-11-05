@@ -291,10 +291,11 @@ def get_storage_blob_uri(cli_ctx, storage):
 def get_sku_dict_from_string(sku_string):
     usage_msg = 'Usage error - wrong sku format:\n\t[--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."]\n' \
                 'where each ID is "os" or a 0-indexed lun.'
-    skus = sku_string.split()
 
-    if not skus:
+    if not sku_string:
         return {}
+
+    skus = sku_string.split()
 
     # if one storage sku return it. This should be applied to all disks.
     if len(skus) == 1 and '=' not in sku_string:
