@@ -70,6 +70,7 @@ def validate_keyvault(cmd, namespace):
 
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
+    from azure.cli.core._output import (get_output_format, set_output_format)
 
     keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
     kv = namespace.keyvault
@@ -82,6 +83,15 @@ def process_vm_secret_format(cmd, namespace):
     else:
         if kv and not is_valid_resource_id(kv):
             raise keyvault_usage
+
+    warning_msg = "This command does not support the {} output format. Showing JSON format instead."
+    desired_formats = ["json", "jsonc"]
+
+    output_format = get_output_format(cmd.cli_ctx)
+    if output_format not in desired_formats:
+        warning_msg = warning_msg.format(output_format)
+        logger.warning(warning_msg)
+        set_output_format(cmd.cli_ctx, desired_formats[0])
 
 
 def _get_resource_group_from_vault_name(cli_ctx, vault_name):
@@ -224,7 +234,7 @@ def _parse_image_argument(cmd, namespace):
         return 'urn'
 
     # 3 - unmanaged vhd based images?
-    if urlparse(namespace.image).scheme:
+    if urlparse(namespace.image).scheme and "://" in namespace.image:
         return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
@@ -246,7 +256,8 @@ def _parse_image_argument(cmd, namespace):
                                            'images', 'Microsoft.Compute')
         return 'image_id'
     except CloudError:
-        err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
+        err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, VHD blob URI, or ' \
+              'pick an image from {}.\nSee vm create -h for more information on specifying an image.'
         raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
 
 

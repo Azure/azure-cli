@@ -313,7 +313,7 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_wr
 # region Images (Managed)
 def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
-                 source_virtual_machine=None,
+                 source_virtual_machine=None, storage_sku=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, data_disks=None, tags=None, zone_resilient=None):
@@ -330,7 +330,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                               os_state=OperatingSystemStateTypes.generalized,
                               snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
                               managed_disk=SubResource(id=os_disk) if os_disk else None,
-                              blob_uri=os_blob_uri)
+                              blob_uri=os_blob_uri,
+                              storage_account_type=storage_sku)
         all_data_disks = []
         lun = 0
         if data_blob_uris:
@@ -882,7 +883,7 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
         return None
 
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(cmd, vm, no_wait)
+    return set_vm(cmd, vm, no_wait=no_wait)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):

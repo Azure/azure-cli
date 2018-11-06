@@ -549,7 +549,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk2': 'd2',
             'snapshot1': 's1',
             'snapshot2': 's2',
-            'image': 'i1'
+            'image': 'i1',
+            'image_2': 'i2',
+            'image_3': 'i3'
         })
 
         # create a disk and update
@@ -600,6 +602,23 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].lun', 1),
             self.check('tags.tag1', 'i1')
         ])
+
+        # test that images can be created with different storage skus
+        self.cmd('image create -g {rg} -n {image_2} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id}'
+                 ' --os-type Linux --tags tag1=i1 --storage-sku Premium_LRS',
+                 checks=[
+                     self.check('storageProfile.osDisk.storageAccountType', 'Premium_LRS'),
+                     self.check('storageProfile.osDisk.osType', 'Linux'),
+                     self.check('storageProfile.osDisk.snapshot.id', '{snapshot1_id}'),
+                     self.check('length(storageProfile.dataDisks)', 3),
+                     self.check('storageProfile.dataDisks[0].lun', 0),
+                     self.check('storageProfile.dataDisks[1].lun', 1),
+                     self.check('tags.tag1', 'i1')
+                 ])
+
+        self.cmd('image create -g {rg} -n {image_3} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id}'
+                 ' --os-type Linux --tags tag1=i1 --storage-sku Standard_LRS',
+                 checks=self.check('storageProfile.osDisk.storageAccountType', 'Standard_LRS'))
 
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):

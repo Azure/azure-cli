@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.3.11
+++++++
+* BREAKING CHANGE: Remove enable_cloud_console_aks_browse to enable 'az aks browse' by default
+
+2.3.10
+++++++
+* Minor fixes
+
 2.3.9
 +++++
 * Minor fixes

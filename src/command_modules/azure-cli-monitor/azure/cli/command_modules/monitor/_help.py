@@ -326,6 +326,8 @@ helps['monitor diagnostic-settings categories'] = """
 helps['monitor diagnostic-settings create'] = """
             type: command
             short-summary: Create diagnostic settings for the specified resource.
+            long-summary: >
+                For more information, visit: https://docs.microsoft.com/en-us/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings
             parameters:
                 - name: --name -n
                   short-summary: The name of the diagnostic settings.
@@ -351,6 +353,31 @@ helps['monitor diagnostic-settings create'] = """
                     Name or ID an event hub. If none is specified, the default event hub will be selected.
                 - name: --event-hub-rule
                   short-summary: Name or ID of the event hub authorization rule.
+            examples:
+                - name: Create diagnostic settings with EventHub.
+                  text: |
+                    az monitor diagnostic-settings create --resource {ID} -n {name}
+                       --event-hub-rule {eventHubRuleID} --storage-account {storageAccount}
+                       --logs '[
+                         {
+                           "category": "WorkflowRuntime",
+                           "enabled": true,
+                           "retentionPolicy": {
+                             "enabled": false,
+                             "days": 0
+                           }
+                         }
+                       ]'
+                       --metrics '[
+                         {
+                           "category": "WorkflowRuntime",
+                           "enabled": true,
+                           "retentionPolicy": {
+                             "enabled": false,
+                             "days": 0
+                           }
+                         }
+                       ]'
             """
 helps['monitor diagnostic-settings update'] = """
             type: command

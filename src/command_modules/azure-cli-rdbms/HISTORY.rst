@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.3.4
++++++
+* Add mysql replica commands
+
+0.3.3
++++++
+* Minor fixes
+
 0.3.2
 +++++
 * Add support for MariaDB service

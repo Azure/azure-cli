@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Minor fixes
+
 0.3.1
 +++++
 * Added Read-Only migration_state to MigrationConfigProperties to show current Service Bus Standard to Premium namespace migration state.
