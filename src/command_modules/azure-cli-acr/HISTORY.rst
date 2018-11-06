@@ -7,6 +7,7 @@ Release History
 +++++
 * Support commit and pull request git events for Task source trigger.
 * Use default Dockerfile if it's not specified in build command.
+* Add context token to task step.
 
 2.1.7
 +++++
