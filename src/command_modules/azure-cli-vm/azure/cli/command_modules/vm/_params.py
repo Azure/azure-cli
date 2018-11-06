@@ -418,12 +418,13 @@ def load_arguments(self, _):
 
             usage = 'Usage: [--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."], where each ID is "os" or a 0-indexed lun.'
             allowed_values = 'Allowed values: {}.'.format(allowed_values)
-            storage_sku_help = '{} The SKU of the storage account with which to persist VM. {}'.format(usage, allowed_values)
+            storage_sku_help = 'The SKU of the storage account with which to persist VM. Use a singular sku that would be applied across all disks, ' \
+                               'or specify individual disks. {} {}'.format(usage, allowed_values)
 
             c.argument('os_disk_name', help='The name of the new VM OS disk.')
             c.argument('os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(['windows', 'linux']))
             c.argument('storage_account', help="Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.")
-            c.argument('storage_sku', help=storage_sku_help)
+            c.argument('storage_sku', nargs='+', help=storage_sku_help)
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')

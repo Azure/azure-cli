@@ -145,34 +145,21 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     data_disk_sizes_gb = data_disk_sizes_gb or []
     info['os'] = {}
 
-    for i in range(image_data_disks_num + len(data_disk_sizes_gb) + len(attach_data_disks)):
+    # add unmanaged data disk luns.
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
         info[i] = {
-            'lun': i
+            'lun': i,
+            'managedDisk': {'storageAccountType': None}
         }
 
-    # fill in storage sku for managed data disks
-    sku_dict = get_sku_dict_from_string(storage_sku)
-    if "all" or "os" in sku_dict:
-        os_sku = sku_dict.get('all') or sku_dict.get('os')
-        try:
-            if os_sku.lower() == 'ultrassd_lrs':
-                os_sku = None
-                logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
-        except AttributeError:
-            pass
+    # update storage skus for managed data disks
+    if storage_sku is not None:
+        update_disk_sku_info(info, storage_sku)
 
-        info['os']['storageAccountType'] = os_sku
-
-    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
-        if "all" in sku_dict:
-            sku_val = sku_dict['all']
-        elif i in sku_dict:
-            sku_val = sku_dict[i]
-        elif i < len(image_data_disks_storage_skus):
-            sku_val = image_data_disks_storage_skus[i]
-        else:
-            sku_val = None
-        info[i]['managedDisk'] = {'storageAccountType': sku_val}
+    # check that os storage account type is not UltraSSD_LRS
+    if info['os'].get('storageAccountType', "").lower() == 'ultrassd_lrs':
+        logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
+        info['os']['storageAccountType'] = None
 
     # fill in createOption
     for i in range(image_data_disks_num):
@@ -180,10 +167,15 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
-        info[i]['diskSizeGB'] = data_disk_sizes_gb[i-base]
+        info[i]['diskSizeGB'] = data_disk_sizes_gb[i - base]
     base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'attach'
+
+    # add managed data disk luns.
+    base = image_data_disks_num + len(data_disk_sizes_gb)
+    for i in range(base, base + len(attach_data_disks)):
+        info[i] = {'lun': i}
 
     # fill in attached data disks details
     base = image_data_disks_num + len(data_disk_sizes_gb)
@@ -297,40 +289,31 @@ def get_storage_blob_uri(cli_ctx, storage):
     return storage_uri
 
 
-def get_sku_dict_from_string(sku_string):
-    usage_msg = 'Usage error - wrong sku format:\n\t[--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."]\n' \
+def update_disk_sku_info(info_dict, skus):
+    usage_msg = 'Usage:\n\t[--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."]\n' \
                 'where each ID is "os" or a 0-indexed lun.'
 
-    if not sku_string:
-        return {}
-
-    skus = sku_string.split()
-
-    # if one storage sku return it. This should be applied to all disks.
-    if len(skus) == 1 and '=' not in sku_string:
-        return dict(all=skus[0])
-
-    result = {}
-    # extract disk id and storage sku. disk id could be all, os or an lun.
-    for sku in skus:
-        if '=' in sku:
-            disk_id, sku = sku.split('=', 1)
-            result[disk_id] = sku
+    def _update(info, lun, value):
+        luns = info.keys()
+        if lun not in luns:
+            raise CLIError("Data disk with lun of {} doesn't exists".format(lun))
+        if lun == 'os':
+            info[lun]['storageAccountType'] = value
         else:
-            raise CLIError(usage_msg)
+            info[lun]['managedDisk']['storageAccountType'] = value
 
-    # otherwise disk_id should be "os" or an int lun.
-    for disk_id, sku in result.copy().items():
-        try:
-            result[int(disk_id)] = sku
-            result.pop(disk_id)
-        except ValueError:
-            temp_sku = result[disk_id]
-            if disk_id.lower() == "os":
-                result.pop(disk_id)
-                result[disk_id.lower()] = temp_sku
+    if len(skus) == 1 and '=' not in skus[0]:
+        for lun in info_dict.keys():
+            _update(info_dict, lun, skus[0])
+    else:
+        for sku in skus:
+            if '=' not in sku:
+                raise CLIError("A sku's format is incorrect.\n{}".format(usage_msg))
 
-            else:
-                raise CLIError(usage_msg)
-
-    return result
+            lun, value = sku.split('=', 1)
+            lun = lun.lower()
+            try:
+                lun = int(lun) if lun != "os" else lun
+            except ValueError:
+                raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
+            _update(info_dict, lun, value)

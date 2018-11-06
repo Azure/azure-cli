@@ -401,10 +401,12 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     # set default storage SKU if not provided and using an image based OS
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
-        namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
+        namespace.storage_sku = ['Standard_LRS'] if for_scale_set else ['Premium_LRS']
 
-    if namespace.storage_sku and 'ultrassd_lrs' in namespace.storage_sku.lower() and namespace.ultra_ssd_enabled is None:  # pylint: disable=line-too-long
-        namespace.ultra_ssd_enabled = True
+    if namespace.ultra_ssd_enabled is None and namespace.storage_sku:
+        storage_skus = [sku.lower() for sku in namespace.storage_sku]
+        if 'ultrassd_lrs' in storage_skus:
+            namespace.ultra_ssd_enabled = True
 
     # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
