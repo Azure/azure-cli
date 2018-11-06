@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.2.6
++++++
+* update ACR SDK
+* webapp: fix a bug in `az webapp config backup update` that prevents setting a backup schedule if one is not already set
+
 0.2.5
 +++++
 * az functionapp create supports creating a linux consumption plan type with a specific runtime

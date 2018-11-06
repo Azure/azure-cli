@@ -644,7 +644,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                         raise
                 else:
                     raise
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 progress_indicator.stop()
                 raise
 
@@ -794,6 +794,7 @@ def set_properties(instance, expression, force_string):
 
 def add_properties(instance, argument_values, force_string):
     # The first argument indicates the path to the collection to add to.
+    argument_values = list(argument_values)
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
 
@@ -833,8 +834,8 @@ def add_properties(instance, argument_values, force_string):
 
 
 def remove_properties(instance, argument_values):
-    # The first argument indicates the path to the collection to add to.
-    argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
+    # The first argument indicates the path to the collection to remove from.
+    argument_values = list(argument_values) if isinstance(argument_values, list) else [argument_values]
 
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_index = None

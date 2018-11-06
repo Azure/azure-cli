@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.50
+++++++
+* auth: support service principal sn+issuer auth
 
 2.0.49
 ++++++

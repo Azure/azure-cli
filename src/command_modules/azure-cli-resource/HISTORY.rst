@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.1.6
++++++
+* `policy definition/set-definition create/list/delete/show/update`: add support for management groups and subscriptions
+
 2.1.5
 +++++
-* `policy definition create`: Fixed the incorrect parameter definition example.
-* `policy definition create`: Replaced the the use of `-n` alias with full `--name` parameter in the example.
+* az policy definition/set-definition create/list/delete/show/update: add support for management groups and subscriptions
 
 2.1.4
 +++++

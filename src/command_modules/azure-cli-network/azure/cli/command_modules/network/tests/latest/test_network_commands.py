@@ -70,18 +70,18 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-class NetworkInterfaceEndpoints(ScenarioTest):
+class NetworkPrivateEndpoints(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_network_interface_endpoints')
-    def test_network_interface_endpoints(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
+    def test_network_private_endpoints(self, resource_group):
 
         # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
-        self.cmd('network interface-endpoint list')
-        self.cmd('network interface-endpoint list -g {rg}')
+        self.cmd('network private-endpoint list')
+        self.cmd('network private-endpoint list -g {rg}')
 
         # system code 3 for 'not found'
         with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('network interface-endpoint show -g {rg} -n dummy')
+            self.cmd('network private-endpoint show -g {rg} -n dummy')
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):

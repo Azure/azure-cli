@@ -129,7 +129,7 @@ def load_command_table(self, _):
         client_factory=cf_express_route_circuit_peerings
     )
 
-    network_interface_endpoint_sdk = CliCommandType(
+    network_private_endpoint_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.interface_endpoints_operations#InterfaceEndpointsOperations.{}',
         client_factory=cf_interface_endpoints,
         min_api='2018-08-01'
@@ -446,14 +446,15 @@ def load_command_table(self, _):
         g.show_command('show')
     # endregion
 
-    # region InterfaceEndpoint
-    with self.command_group('network interface-endpoint', network_interface_endpoint_sdk) as g:
-        # TODO: Re-enable when service team asks. See issue #7271
-        # g.custom_command('create', 'create_interface_endpoint')
-        # g.command('delete', 'delete')
-        g.custom_command('list', 'list_interface_endpoints')
+    # region PrivateEndpoint
+    with self.command_group('network interface-endpoint', network_private_endpoint_sdk, deprecate_info=self.deprecate(redirect='network private-endpoint', hide=True)) as g:
+        g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
-        # g.generic_update_command('update', custom_func_name='update_interface_endpoint')
+
+    with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
+        # TODO: Re-enable when service team asks. See issue #7271
+        g.custom_command('list', 'list_private_endpoints')
+        g.show_command('show')
     # endregion
 
     # region LoadBalancers

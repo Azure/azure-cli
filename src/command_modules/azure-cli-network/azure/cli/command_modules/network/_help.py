@@ -1977,16 +1977,6 @@ helps['network interface-endpoint'] = """
     short-summary: Manage interface endpoints.
 """
 
-# helps['network interface-endpoint create'] = """
-#    type: command
-#    short-summary: Create an interface endpoint.
-# """
-
-# helps['network interface-endpoint delete'] = """
-#    type: command
-#    short-summary: Delete an interface endpoint.
-# """
-
 helps['network interface-endpoint list'] = """
     type: command
     short-summary: List interface endpoints.
@@ -1996,12 +1986,26 @@ helps['network interface-endpoint show'] = """
     type: command
     short-summary: Get the details of an interface endpoint.
 """
-
-# helps['network interface-endpoint update'] = """
-#    type: command
-#    short-summary: Update an interface endpoint.
-# """
 # endregion
+
+# region Private Endpoint
+helps['network private-endpoint'] = """
+    type: group
+    short-summary: Manage private endpoints.
+"""
+
+
+helps['network private-endpoint list'] = """
+    type: command
+    short-summary: List private endpoints.
+"""
+
+helps['network private-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an private endpoint.
+"""
+# endregion
+
 
 # region Load Balancer
 helps['network lb'] = """

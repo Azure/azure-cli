@@ -59,6 +59,7 @@ def acr_build(cmd,
         # Otherwise, it's based on current working directory.
         if not docker_file_path:
             docker_file_path = os.path.join(source_location, "Dockerfile")
+            logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
 
         _check_local_docker_file(docker_file_path)
 
@@ -88,6 +89,11 @@ def acr_build(cmd,
             except OSError:
                 pass
     else:
+        # NOTE: If docker_file_path is not specified, the default is Dockerfile. It's the same as docker build command.
+        if not docker_file_path:
+            docker_file_path = "Dockerfile"
+            logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
+
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 

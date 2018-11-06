@@ -47,6 +47,10 @@ def get_graph_client_users(cli_ctx, _):
     return _graph_client_factory(cli_ctx).users
 
 
+def get_graph_client_signed_in_users(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).signed_in_user
+
+
 def get_graph_client_groups(cli_ctx, _):
     return _graph_client_factory(cli_ctx).groups
 
@@ -62,6 +66,11 @@ def load_command_table(self, _):
     role_group_sdk = CliCommandType(
         operations_tmpl='azure.graphrbac.operations.groups_operations#GroupsOperations.{}',
         client_factory=get_graph_client_groups
+    )
+
+    signed_in_users_sdk = CliCommandType(
+        operations_tmpl='azure.graphrbac.operations.signed_in_user_operations#SignedInUserOperations.{}',
+        client_factory=get_graph_client_signed_in_users
     )
 
     role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
@@ -84,9 +93,16 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
         g.custom_show_command('show', 'show_application')
+        g.custom_command('permission grant', 'grant_application')
+        g.custom_command('permission list', 'list_permissions')
+        g.custom_command('permission add', 'add_permission')
+        g.custom_command('permission delete', 'delete_permission')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
+        g.custom_command('credential reset', 'reset_service_principal_credential')
+        g.custom_command('credential list', 'list_service_principal_credentials')
+        g.custom_command('credential delete', 'delete_service_principal_credential')
 
     with self.command_group('ad app owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
@@ -116,12 +132,16 @@ def load_command_table(self, _):
         g.custom_command('get-member-groups', 'get_user_member_groups')
         g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
+    with self.command_group('ad signed-in-user', signed_in_users_sdk, exception_handler=graph_err_handler) as g:
+        g.command('show', 'get')
+        g.custom_command('list-owned-objects', 'list_owned_objects', client_factory=get_graph_client_signed_in_users)
+
     with self.command_group('ad group', role_group_sdk, exception_handler=graph_err_handler) as g:
-        g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('get-member-groups', 'get_member_groups')
         g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
+        g.custom_command('create', 'create_group')
 
     with self.command_group('ad group owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_group_owners')

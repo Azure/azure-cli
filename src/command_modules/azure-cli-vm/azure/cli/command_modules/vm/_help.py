@@ -65,7 +65,7 @@ helps['vm create'] = """
           type: string
           short-summary: >
             The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
-            This parameter is required unless using `--attach-os-disk.`
+            This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
           populator-commands:
           - az vm image list
           - az vm image show
@@ -131,7 +131,12 @@ helps['vmss create'] = """
     parameters:
         - name: --image
           type: string
-          short-summary: The name of the operating system image as a URN alias, URN, or URI.
+          short-summary: >
+            The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+            Valid URN format: "Publisher:Offer:Sku:Version".
+          populator-commands:
+          - az vm image list
+          - az vm image show
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
@@ -1395,8 +1400,7 @@ helps['image create'] = """
         - name: Create an image from an existing disk.
           text: |
             az image create -g MyResourceGroup -n image1 --os-type Linux \\
-                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 \\
-                --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
+                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1
         - name: Create an image by capturing an existing generalized virtual machine in the same resource group.
           text: az image create -g MyResourceGroup -n image1 --source MyVm1
 """

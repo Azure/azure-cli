@@ -16,7 +16,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
@@ -225,7 +225,7 @@ def load_command_table(self, _):
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vm')
-        g.custom_show_command('show', 'show_vm_encryption_status')
+        g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.command('delete', 'delete', supports_no_wait=True)
