@@ -180,7 +180,7 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
-        info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
+        info[i]['diskSizeGB'] = data_disk_sizes_gb[i-base]
     base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'attach'

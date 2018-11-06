@@ -351,9 +351,11 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
-            self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
+            self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage'),
-            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS'),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].createOption", 'FromImage'),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
 
