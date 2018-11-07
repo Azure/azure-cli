@@ -253,6 +253,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='mariadb')
     def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
