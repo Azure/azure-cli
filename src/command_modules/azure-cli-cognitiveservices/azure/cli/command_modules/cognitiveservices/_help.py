@@ -9,12 +9,12 @@ from knack.help_files import helps
 
 helps['cognitiveservices'] = """
     type: group
-    short-summary: Manage Azure Cognitive Services accounts. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Manage Azure Cognitive Services accounts. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices list'] = """
     type: command
-    short-summary: List available Azure Cognitive Services accounts. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: List available Azure Cognitive Services accounts. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: List all the Cognitive Services accounts in a resource group.
           text: az cognitiveservices list -g MyResourceGroup
@@ -22,7 +22,7 @@ helps['cognitiveservices list'] = """
 
 helps['cognitiveservices account list'] = """
     type: command
-    short-summary: List available Azure Cognitive Services accounts. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: List available Azure Cognitive Services accounts. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: List all the Cognitive Services accounts in a resource group.
           text: az cognitiveservices account list -g MyResourceGroup
@@ -30,12 +30,12 @@ helps['cognitiveservices account list'] = """
 
 helps['cognitiveservices account'] = """
     type: group
-    short-summary: Manage Azure Cognitive Services accounts. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Manage Azure Cognitive Services accounts. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices account delete'] = """
     type: command
-    short-summary: Delete an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Delete an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: Delete account.
           text: az cognitiveservices account delete --name myresource-luis -g cognitive-services-resource-group
@@ -43,7 +43,7 @@ helps['cognitiveservices account delete'] = """
 
 helps['cognitiveservices account create'] = """
     type: command
-    short-summary: Create an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Create an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     parameters:
         - name: --kind
           populator-commands:
@@ -58,7 +58,7 @@ helps['cognitiveservices account create'] = """
 
 helps['cognitiveservices account show'] = """
     type: command
-    short-summary: Get the details of an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Get the details of an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: Show account information.
           text: az cognitiveservices account show --name myresource --resource-group cognitive-services-resource-group
@@ -66,7 +66,7 @@ helps['cognitiveservices account show'] = """
 
 helps['cognitiveservices account update'] = """
     type: command
-    short-summary: Update the properties of an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Update the properties of an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     parameters:
         - name: --sku
           populator-commands:
@@ -78,7 +78,7 @@ helps['cognitiveservices account update'] = """
 
 helps['cognitiveservices account list-skus'] = """
     type: command
-    short-summary: List the SKUs avaiable for an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: List the SKUs avaiable for an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     parameters:
         - name: --name -n
           long-summary: |
@@ -98,12 +98,12 @@ helps['cognitiveservices account list-skus'] = """
 
 helps['cognitiveservices account keys'] = """
     type: group
-    short-summary: Manage the keys of an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Manage the keys of an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices account keys regenerate'] = """
     type: command
-    short-summary: Regenerate the keys of an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: Regenerate the keys of an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: Get new keys for resource.
           text: az cognitiveservices account keys regenerate --name myresource -g cognitive-services-resource-group --key-name key1
@@ -111,7 +111,7 @@ helps['cognitiveservices account keys regenerate'] = """
 
 helps['cognitiveservices account keys list'] = """
     type: command
-    short-summary: List the keys of an Azure Cognitive Services account. For individual service authoring and management, see Cognitive Services documentation: https://docs.microsoft.com/azure/cognitive-services/.
+    short-summary: List the keys of an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the [documentation](https://docs.microsoft.com/azure/cognitive-services/) for individual services to learn how to use the APIs and supported SDKs.
     examples:
         - name: Get current resource keys.
           text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group
