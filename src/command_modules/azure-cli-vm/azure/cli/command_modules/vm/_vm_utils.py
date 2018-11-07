@@ -129,7 +129,8 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=None,
+                        data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size=''):
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below and will omit when we see conflictions
