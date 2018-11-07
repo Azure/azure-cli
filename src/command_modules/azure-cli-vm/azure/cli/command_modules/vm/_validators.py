@@ -501,6 +501,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
         for sku in namespace.storage_sku:
             if 'Premium' in sku:
                 sku_tier = 'Premium'
+                break
 
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)

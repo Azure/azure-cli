@@ -488,7 +488,7 @@ class TestActions(unittest.TestCase):
                     if lun == "os":
                         self.assertEqual(info_dict[lun]['storageAccountType'], expected[lun])
                     else:
-                        self.assertEqual(info_dict[lun]['managedDisk']['storageAccountType'], expected[lun] )
+                        self.assertEqual(info_dict[lun]['managedDisk']['storageAccountType'], expected[lun])
             elif expected is None:
                 dummy_expected = ["os", 1, 2]
                 info_dict = {lun: dict(managedDisk={'storageAccountType': None}) for lun in dummy_expected if lun != "os"}

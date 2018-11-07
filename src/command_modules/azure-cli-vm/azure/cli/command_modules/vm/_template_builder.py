@@ -250,7 +250,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None):
 
     os_caching = disk_info['os'].get('caching')
-    os_storage_sku = disk_info['os'].get('storageAccountType')
 
     def _build_os_profile():
 
@@ -323,7 +322,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': os_storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -337,7 +336,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': os_storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 "imageReference": {
                     'id': image_reference
@@ -660,8 +659,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     storage_properties = {}
     os_caching = disk_info['os'].get('caching')
 
-    os_storage_sku = disk_info['os'].get('storageAccountType')
-
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
             'name': os_disk_name,
@@ -682,7 +679,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,
-            'managedDisk': {'storageAccountType': os_storage_sku}
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:

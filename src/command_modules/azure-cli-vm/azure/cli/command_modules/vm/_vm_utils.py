@@ -290,13 +290,13 @@ def get_storage_blob_uri(cli_ctx, storage):
 
 
 def update_disk_sku_info(info_dict, skus):
-    usage_msg = 'Usage:\n\t[--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."]\n' \
+    usage_msg = 'Usage:\n\t[--storage-sku SKU | --storage-sku ID=SKU ID=SKU ID=SKU...]\n' \
                 'where each ID is "os" or a 0-indexed lun.'
 
     def _update(info, lun, value):
         luns = info.keys()
         if lun not in luns:
-            raise CLIError("Data disk with lun of {} doesn't exists".format(lun))
+            raise CLIError("Data disk with lun of {} doesn't exist".format(lun))
         if lun == 'os':
             info[lun]['storageAccountType'] = value
         else:

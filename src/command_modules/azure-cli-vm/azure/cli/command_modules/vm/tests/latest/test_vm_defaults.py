@@ -351,7 +351,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.ultra_ssd_enabled = None
         ns.data_disk_sizes_gb = [5]
         ns.os_type, ns.attach_os_disk, ns.os_caching, ns.data_caching = None, None, None, None
-        ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk  = None, None, False
+        ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, False
         ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.8
+++++++
+* `vm create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
+
 2.2.7
 ++++++
 * `image create`: expose storage-sku argument for setting the image's default storage account type
@@ -10,7 +14,6 @@ Release History
 * `vm encryption show`: table output format shows status
 * `vm secret format`: requires json/jsonc output. Warns user and defaults to json output if an undesired output format is selected.
 * `vm create --image`: improved validation of image argument
-* `vm create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
 
 2.2.6
 ++++++

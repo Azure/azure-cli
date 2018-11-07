@@ -416,7 +416,7 @@ def load_arguments(self, _):
             else:
                 allowed_values = ", ".join(['Premium_LRS', 'Standard_LRS'])
 
-            usage = 'Usage: [--storage-sku SKU | --storage-sku "ID=SKU ID=SKU ID=SKU..."], where each ID is "os" or a 0-indexed lun.'
+            usage = 'Usage: [--storage-sku SKU | --storage-sku ID=SKU ID=SKU ID=SKU...], where each ID is "os" or a 0-indexed lun.'
             allowed_values = 'Allowed values: {}.'.format(allowed_values)
             storage_sku_help = 'The SKU of the storage account with which to persist VM. Use a singular sku that would be applied across all disks, ' \
                                'or specify individual disks. {} {}'.format(usage, allowed_values)
