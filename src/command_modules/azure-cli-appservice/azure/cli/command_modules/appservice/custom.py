@@ -1078,14 +1078,6 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def _linux_sku_check(sku):
-    tier = get_sku_name(sku)
-    if tier in ['BASIC', 'STANDARD', 'PREMIUMV2']:
-        return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
-    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3, P1V2, P2V2, P3V2'))
-
-
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
                             location=None, tags=None):
     if is_linux and hyper_v:
@@ -1094,8 +1086,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    if is_linux:
-        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
