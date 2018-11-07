@@ -78,7 +78,7 @@ helps['cognitiveservices account update'] = """
 
 helps['cognitiveservices account list-skus'] = """
     type: command
-    short-summary: List the SKUs avaiable for an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+    short-summary: List the SKUs available for an Azure Cognitive Services account. This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
     parameters:
         - name: --name -n
           long-summary: |
