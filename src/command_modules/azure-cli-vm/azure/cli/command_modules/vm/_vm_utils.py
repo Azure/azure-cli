@@ -161,21 +161,23 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
         logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
         info['os']['storageAccountType'] = None
 
-    # fill in createOption
+    # fill in createOption for image and new data disks
     for i in range(image_data_disks_num):
         info[i]['createOption'] = 'fromImage'
     base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
         info[i]['diskSizeGB'] = data_disk_sizes_gb[i - base]
-    base = image_data_disks_num + len(data_disk_sizes_gb)
-    for i in range(base, base + len(attach_data_disks)):
-        info[i]['createOption'] = 'attach'
 
     # add managed data disk luns.
     base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i] = {'lun': i}
+
+    # fill in createOption for attached data disks
+    base = image_data_disks_num + len(data_disk_sizes_gb)
+    for i in range(base, base + len(attach_data_disks)):
+        info[i]['createOption'] = 'attach'
 
     # fill in attached data disks details
     base = image_data_disks_num + len(data_disk_sizes_gb)
