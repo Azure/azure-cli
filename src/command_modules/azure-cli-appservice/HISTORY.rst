@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.2.7
++++++
+* remove client side sku check for linux app service plan create
+
 0.2.6
 +++++
 * update ACR SDK
