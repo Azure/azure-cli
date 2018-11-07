@@ -404,9 +404,9 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.storage_sku = ['Standard_LRS'] if for_scale_set else ['Premium_LRS']
 
     if namespace.ultra_ssd_enabled is None and namespace.storage_sku:
-        storage_skus = [sku.lower() for sku in namespace.storage_sku]
-        if 'ultrassd_lrs' in storage_skus:
-            namespace.ultra_ssd_enabled = True
+        for sku in namespace.storage_sku:
+            if 'ultrassd_lrs' in sku.lower():
+                namespace.ultra_ssd_enabled = True
 
     # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
@@ -497,7 +497,11 @@ def _validate_vm_create_storage_account(cmd, namespace):
         storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
-        sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
+        sku_tier = 'Standard'
+        for sku in namespace.storage_sku:
+            if 'Premium' in sku:
+                sku_tier = 'Premium'
+
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
              if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
