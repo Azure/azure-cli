@@ -2373,7 +2373,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
-                                       aad_tenant_id=aad_tenant_id, identifier=fqdn, 
+                                       aad_tenant_id=aad_tenant_id, identifier=fqdn,
                                        name=name, update=update_aad_secret)
     identity_providers.append(
         OpenShiftManagedClusterIdentityProvider(
