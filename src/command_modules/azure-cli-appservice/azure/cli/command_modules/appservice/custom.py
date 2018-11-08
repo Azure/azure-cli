@@ -31,7 +31,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   DeletedAppRestoreRequest)
+                                   DeletedAppRestoreRequest, DefaultErrorResponseException)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -576,7 +576,7 @@ def _delete_linux_fx_version(cmd, resource_group_name, name, slot=None):
 
 def _get_fx_version(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
-    return site_config.linux_fx_version or site_config.windows_fx_version
+    return site_config.linux_fx_version or site_config.windows_fx_version or ''
 
 
 def url_validator(url):
@@ -1078,14 +1078,6 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def _linux_sku_check(sku):
-    tier = get_sku_name(sku)
-    if tier in ['BASIC', 'STANDARD', 'PREMIUMV2']:
-        return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
-    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3, P1V2, P2V2, P3V2'))
-
-
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
                             location=None, tags=None):
     if is_linux and hyper_v:
@@ -1094,8 +1086,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    if is_linux:
-        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -1163,7 +1153,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
                                                 'get_backup_configuration', slot)
-    except CloudError:
+    except DefaultErrorResponseException:
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days,
                     keep_at_least_one_backup]):

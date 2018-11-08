@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.0.51
+++++++
+* Minor fixes
 
 2.0.50
 ++++++
-* Fix issue where update commands using `--remove` and `--ids` fail after first update is applied to first resource in ids list.
+* auth: support service principal sn+issuer auth
 
 2.0.49
 ++++++

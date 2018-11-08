@@ -26,10 +26,10 @@ def add_helps(command_group, server_type):
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
                     - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name GP_Gen5_2
+                            --sku-name GP_Gen4_2
                     - name: Create a {0} server with all paramaters set.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name B_Gen5_2 --ssl-enforcement Disabled \\
+                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
                             --storage-size 51200 --tags "key=value" --version {{server-version}}
                 """.format(server_type, command_group)
     helps['{} server restore'.format(command_group)] = """
@@ -54,7 +54,7 @@ def add_helps(command_group, server_type):
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
-                            -l westus2 --sku-name GP_Gen5_2
+                            -l westus2 --sku-name GP_Gen4_2
                 """.format(command_group, server_type)
     helps['mysql server replica'] = """
                 type: group
@@ -144,24 +144,24 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: List all firewall rules for a server.
                 """
-    if server_type != "MariaDB":
-        helps['{} server vnet-rule'.format(command_group)] = """
-                    type: group
-                    short-summary: Manage a server's virtual network rules.
-                    """
-        helps['{} server vnet-rule update'.format(command_group)] = """
-                    type: command
-                    short-summary: Update a virtual network rule.
-                    """
-        helps['{} server vnet-rule create'.format(command_group)] = """
-                    type: command
-                    short-summary: Create a virtual network rule to allows access to a {} server.
-                    examples:
-                        - name: Create a virtual network rule by providing the subnet id.
-                          text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-                        - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-                          text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-                    """.format(server_type, command_group, command_group)
+
+    helps['{} server vnet-rule'.format(command_group)] = """
+                type: group
+                short-summary: Manage a server's virtual network rules.
+                """
+    helps['{} server vnet-rule update'.format(command_group)] = """
+                type: command
+                short-summary: Update a virtual network rule.
+                """
+    helps['{} server vnet-rule create'.format(command_group)] = """
+                type: command
+                short-summary: Create a virtual network rule to allows access to a {} server.
+                examples:
+                    - name: Create a virtual network rule by providing the subnet id.
+                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
+                    - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
+                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
+                """.format(server_type, command_group, command_group)
 
     helps['{} server configuration'.format(command_group)] = """
                 type: group

@@ -217,6 +217,22 @@ helps['storage blob incremental-copy'] = """
     short-summary: Manage blob incremental copy operations.
 """
 
+helps['storage blob incremental-copy start'] = """
+    type: command
+    short-summary: Copies an incremental copy of a blob asynchronously.
+    long-summary: This operation returns a copy operation
+        properties object, including a copy ID you can use to check or abort the
+        copy operation. The Blob service copies blobs on a best-effort basis.
+        The source blob for an incremental copy operation must be a page blob.
+        Call get_blob_properties on the destination blob to check the status of the copy operation.
+        The final blob will be committed when the copy completes.
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob incremental-copy start --source-container MySourceContainer --source-blob MyBlob
+                --source-account-name MySourceAccount --source-account-key MySourceKey --source-snapshot MySnapshot
+                --destination-container MyDestinationContainer --destination-blob MyDestinationBlob
+"""
+
 helps['storage blob lease'] = """
     type: group
     short-summary: Manage storage blob leases.

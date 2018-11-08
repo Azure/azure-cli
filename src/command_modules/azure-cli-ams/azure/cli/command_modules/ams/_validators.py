@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.validators import validate_tag
+
 
 def validate_storage_account_id(cmd, namespace):
     """Validate storage account name"""
@@ -30,3 +32,35 @@ def datetime_format(value):
         message = "Argument {} is not a valid ISO-8601 datetime format"
         raise ValueError(message.format(value))
     return datetime_obj
+
+
+def validate_correlation_data(ns):
+    """ Extracts multiple space-separated correlation data in key[=value] format """
+    if isinstance(ns.correlation_data, list):
+        correlation_data_dict = {}
+        for item in ns.correlation_data:
+            correlation_data_dict.update(validate_tag(item))
+        ns.correlation_data = correlation_data_dict
+
+
+def validate_token_claim(ns):
+    """ Extracts multiple space-separated token claims in key[=value] format """
+    if isinstance(ns.token_claims, list):
+        token_claims_dict = {}
+        for item in ns.token_claims:
+            token_claims_dict.update(validate_tag(item))
+        ns.token_claims = token_claims_dict
+
+
+def validate_output_assets(ns):
+    """ Extracts multiple space-separated output assets in key[=value] format """
+    def _get_asset(asset_string):
+        from azure.mgmt.media.models import JobOutputAsset
+
+        name_and_label = asset_string.split('=')
+        name = name_and_label[0]
+        label = name_and_label[1]
+        return JobOutputAsset(asset_name=name, label=label)
+
+    if isinstance(ns.output_assets, list):
+        ns.output_assets = list(map(_get_asset, ns.output_assets))

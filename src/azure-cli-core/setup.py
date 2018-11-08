@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.50"
+VERSION = "2.0.51"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=1.0.2',
+    'adal>=1.2.0',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
@@ -74,19 +74,6 @@ DEPENDENCIES = [
     'wheel==0.30.0',
     'azure-mgmt-resource==2.0.0'
 ]
-
-if sys.version_info < (3, 4):
-    DEPENDENCIES.append('enum34')
-
-if sys.version_info < (2, 7, 9):
-    DEPENDENCIES.append('pyopenssl')
-    DEPENDENCIES.append('ndg-httpsclient')
-    DEPENDENCIES.append('pyasn1')
-
-if sys.version_info < (3, 0):
-    DEPENDENCIES.append('antlr4-python2-runtime')
-else:
-    DEPENDENCIES.append('antlr4-python3-runtime')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -109,10 +96,16 @@ setup(
         'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
-        'azure.cli.core.extensions',
+        'azure.cli.core.extension',
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    extras_require={
+        ":python_version<'3.4'": ['enum34'],
+        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ":python_version<'3.0'": ['antlr4-python2-runtime'],
+        ":python_version>='3.0'": ['antlr4-python3-runtime']
+    },
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )

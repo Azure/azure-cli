@@ -2,9 +2,15 @@
 
 Release History
 ===============
+
+0.2.7
++++++
+* remove client side sku check for linux app service plan create
+
 0.2.6
 +++++
 * update ACR SDK
+* webapp: fix a bug in `az webapp config backup update` that prevents setting a backup schedule if one is not already set
 
 0.2.5
 +++++

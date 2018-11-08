@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.8
++++++
+* Show identity when exporting a container group to yaml
+
 0.3.7
 +++++
 * Make 'Private' a valid type to pass to '--ip-address'

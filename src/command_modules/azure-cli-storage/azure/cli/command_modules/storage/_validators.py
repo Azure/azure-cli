@@ -119,7 +119,8 @@ def validate_client_parameters(cmd, namespace):
         conn_dict = validate_key_value_pairs(n.connection_string)
         n.account_name = conn_dict.get('AccountName')
         n.account_key = conn_dict.get('AccountKey')
-        if not n.account_name or not n.account_key:
+        n.sas_token = conn_dict.get('SharedAccessSignature')
+        if not n.sas_token and (not n.account_name or not n.account_key):
             from knack.util import CLIError
             raise CLIError('Connection-string: %s, is malformed. Some shell environments require the '
                            'connection string to be surrounded by quotes.' % n.connection_string)
@@ -379,12 +380,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
 
         # if update, fill in any None values with existing
         if update:
-            new_props.content_type = new_props.content_type or props.content_type
-            new_props.content_disposition = new_props.content_disposition or props.content_disposition
-            new_props.content_encoding = new_props.content_encoding or props.content_encoding
-            new_props.content_language = new_props.content_language or props.content_language
-            new_props.content_md5 = new_props.content_md5 or props.content_md5
-            new_props.cache_control = new_props.cache_control or props.cache_control
+            for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language', 'content_md5',
+                         'cache_control']:
+                if getattr(new_props, attr) is None:
+                    setattr(new_props, attr, getattr(props, attr))
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)

@@ -65,7 +65,7 @@ helps['vm create'] = """
           type: string
           short-summary: >
             The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
-            This parameter is required unless using `--attach-os-disk.`
+            This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
           populator-commands:
           - az vm image list
           - az vm image show
@@ -131,7 +131,12 @@ helps['vmss create'] = """
     parameters:
         - name: --image
           type: string
-          short-summary: The name of the operating system image as a URN alias, URN, or URI.
+          short-summary: >
+            The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+            Valid URN format: "Publisher:Offer:Sku:Version".
+          populator-commands:
+          - az vm image list
+          - az vm image show
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
@@ -806,9 +811,13 @@ helps['vm image list'] = """
 helps['vm image list-offers'] = """
     type: command
     short-summary: List the VM image offers available in the Azure Marketplace.
+    parameters:
+        - name: --publisher -p
+          populator-commands:
+          - az vm list-publishers
     examples:
         - name: List all offers from Microsoft in the West US region.
-          text: az vm image list-offers -l westus -p Microsoft
+          text: az vm image list-offers -l westus -p MicrosoftWindowsServer
         - name: List all offers from OpenLocic in the West US region.
           text: az vm image list-offers -l westus -p OpenLogic
 """
@@ -826,6 +835,10 @@ helps['vm image list-publishers'] = """
 helps['vm image list-skus'] = """
     type: command
     short-summary: List the VM image SKUs available in the Azure Marketplace.
+    parameters:
+        - name: --publisher -p
+          populator-commands:
+          - az vm list-publishers
     examples:
         - name: List all skus available for CentOS published by OpenLogic in the West US region.
           text: az vm image list-skus -l westus -f CentOS -p OpenLogic

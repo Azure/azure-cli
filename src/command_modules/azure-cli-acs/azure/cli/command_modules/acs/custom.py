@@ -1329,13 +1329,9 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001',
-               enable_cloud_console_aks_browse=False):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
-
-    if in_cloud_console() and not enable_cloud_console_aks_browse:
-        raise CLIError('Browse is disabled in cloud shell by default.')
 
     proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
@@ -1355,7 +1351,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console() and enable_cloud_console_aks_browse:
+    if in_cloud_console():
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/8001')
         result = json.loads(response.text)
@@ -1739,9 +1735,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
-        from azure.cli.core.extensions import get_extension_path
-        ext_dir = get_extension_path(extension_name)
-        sys.path.append(ext_dir)
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
         # Import the extension module
         from importlib import import_module
         azext_custom = import_module(module_name)
@@ -1785,7 +1780,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
 
 def _install_dev_spaces_extension(extension_name):
     try:
-        from azure.cli.core.extensions import operations
+        from azure.cli.core.extension import operations
         operations.add_extension(extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
@@ -1793,17 +1788,11 @@ def _install_dev_spaces_extension(extension_name):
 
 
 def _update_dev_spaces_extension(extension_name, extension_module):
-    from azure.cli.core.extensions import ExtensionNotInstalledException
+    from azure.cli.core.extension import ExtensionNotInstalledException
     try:
-        from azure.cli.core.extensions import operations
+        from azure.cli.core.extension import operations
         operations.update_extension(extension_name=extension_name)
-
-        # reloading the imported module to update
-        try:
-            from importlib import reload
-        except ImportError:
-            pass  # for python 2
-        reload(sys.modules[extension_module])
+        operations.reload_extension(extension_name=extension_name)
     except CLIError as err:
         logger.info(err)
     except ExtensionNotInstalledException as err:
@@ -1817,7 +1806,7 @@ def _update_dev_spaces_extension(extension_name, extension_module):
 
 
 def _get_or_add_extension(extension_name, extension_module, update=False):
-    from azure.cli.core.extensions import (ExtensionNotInstalledException, get_extension)
+    from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
         if update:

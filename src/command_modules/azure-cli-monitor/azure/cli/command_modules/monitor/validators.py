@@ -61,7 +61,7 @@ def validate_autoscale_recurrence(namespace):
                 namespace.recurrence = valid_recurrence[delimiter]['validator'](namespace)
             except CLIError as ex:
                 raise CLIError('{} invalid usage: {}'.format(ex, usage))
-        except KeyError as ex:
+        except KeyError:
             raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
 
 
