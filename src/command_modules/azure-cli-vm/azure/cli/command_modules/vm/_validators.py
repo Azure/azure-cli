@@ -414,7 +414,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
     image_data_disks_num = 0
-    image_data_disks_storage_skus = []
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
@@ -423,10 +422,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.images.get(res['resource_group'], res['name'])
             namespace.os_type = image_info.storage_profile.os_disk.os_type.value
             image_data_disks_num = len(image_info.storage_profile.data_disks or [])
-
-            if image_data_disks_num:
-                for data_disk in image_info.storage_profile.data_disks:
-                    image_data_disks_storage_skus.append(data_disk.storage_account_type)
 
         elif res['type'].lower() == 'galleries':
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
@@ -470,7 +465,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks_num=image_data_disks_num,
-                                              image_data_disks_storage_skus=image_data_disks_storage_skus,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
