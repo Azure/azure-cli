@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.10
+++++++
+* graph: output warnings to communicate breaking changes in the near future for "ad app/sp list"
+
 2.1.9
 ++++++
 * support API permission management, signed-in-user, and application password & certificate credential management
