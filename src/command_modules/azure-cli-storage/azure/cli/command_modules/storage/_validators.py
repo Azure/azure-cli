@@ -258,6 +258,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         if source_sas:
             source_sas = source_sas.lstrip('?')
             uri = '{}{}{}'.format(uri, '?', source_sas)
+            namespace.copy_source = uri
         return
 
     # ensure either a file or blob source is specified

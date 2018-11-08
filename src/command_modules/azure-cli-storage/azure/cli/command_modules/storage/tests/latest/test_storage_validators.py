@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            ipv4_range_type, resource_type_type, services_type,
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client,
-                                                           validate_encryption_source,
+                                                           validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services)
 from azure.cli.testsdk import api_version_constraint
 
@@ -155,6 +155,12 @@ class TestStorageValidators(unittest.TestCase):
         result = getattr(ns, 'services')
         self.assertIs(type(result), set)
         self.assertEqual(result, set('ab'))
+
+    def test_validate_source_uri(self):
+        ns = Namespace(copy_source='https://other_name.file.core.windows.net/share2',
+                       source_sas='some_sas_token')
+        validate_source_uri(MockCmd(self.cli), ns)
+        self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
 
 
 @api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
