@@ -5,7 +5,7 @@ Release History
 
 2.2.5
 +++++
-* Minor fixes.
+* Improvements and fixes for storage copy commands.
 
 2.2.4
 +++++
