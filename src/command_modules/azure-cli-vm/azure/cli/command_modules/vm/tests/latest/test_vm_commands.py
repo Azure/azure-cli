@@ -1654,13 +1654,17 @@ class VMSSCreateOptions(ScenarioTest):
         })
 
         # check that we can create a vmss with local / ephemeral os disk.
-        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --use-local-os-disk --disable-overprovision --instance-count {count}')
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --use-local-os-disk --disable-overprovision '
+                 '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
             self.check('sku.capacity', '{count}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
-            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
 
