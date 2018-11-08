@@ -971,6 +971,43 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
 
 
+class VMCreateEphemeralOsDisk(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk')
+    def test_vm_create_local_os_disk(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'vm': 'cli-test-vm-local-1',
+            'vm_2': 'cli-test-vm-local-2',
+            'image': 'UbuntuLTS',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'loc': resource_group_location
+        })
+
+        # check that we can create a vm with local / ephemeral os disk.
+        self.cmd('vm create --resource-group {rg} --name {vm} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --use-local-os-disk')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('osProfile.computerName', '{vm}'),
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+        ])
+
+        # explicitly specify os-disk-caching
+        self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --use-local-os-disk --os-disk-caching ReadOnly')
+        self.cmd('vm show -g {rg} -n {vm_2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('osProfile.computerName', '{vm_2}'),
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+        ])
+
+
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_multi_nic_vm')
@@ -1605,6 +1642,39 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
+    def test_vmss_create_local_os_disk(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'cli-test-vmss-local-1',
+            'vmss_2': 'cli-test-vmss-local-2',
+            'image': 'UbuntuLTS',
+            'count': 2,
+            'caching': 'ReadOnly',
+        })
+
+        # check that we can create a vmss with local / ephemeral os disk.
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --use-local-os-disk --disable-overprovision --instance-count {count}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('name', '{vmss}'),
+            self.check('sku.capacity', '{count}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
+        ])
+
+
+        # explicitly specify os-disk-caching
+        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --use-local-os-disk --os-disk-caching {caching} --disable-overprovision --instance-count {count}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('name', '{vmss}'),
+            self.check('sku.capacity', '{count}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_update_instance_disks(self, resource_group):
 
@@ -1632,6 +1702,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 0)
         ])
+
+
 
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes

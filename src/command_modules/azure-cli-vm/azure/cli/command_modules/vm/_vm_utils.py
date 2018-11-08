@@ -140,12 +140,19 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     #   1: { caching: 'None', write_accelerator: True},
     # }
     from msrestazure.tools import is_valid_resource_id
+    info = {}
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
+    info['os'] = {}
 
-    info = {
-        'os': {'diffDiskSettings': {'option': 'Local'} if use_local_disk else None }
-    }
+    # update os diff disk settings
+    if use_local_disk:
+        info['os']['diffDiskSettings'] = {'option': 'Local'}
+        # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
+        if not os_disk_caching:
+            os_disk_caching = 'ReadOnly'
+    else:
+        info['os']['diffDiskSettings'] = None
 
     # add unmanaged data disk luns.
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
