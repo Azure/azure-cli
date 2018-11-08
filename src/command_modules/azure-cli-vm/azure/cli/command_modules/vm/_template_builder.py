@@ -245,13 +245,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None):
 
     os_caching = disk_info['os'].get('caching')
-    # TODO: split out the storage_sku for os disk(can't be ultra-ssd) and individual data disks
-    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_sku
 
     def _build_os_profile():
 
@@ -324,7 +322,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': os_storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -338,7 +336,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 "imageReference": {
                     'id': image_reference
@@ -614,8 +612,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
-                        storage_sku, os_type, image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-                        os_publisher=None, os_offer=None, os_sku=None, os_version=None,
+                        os_type, image=None, admin_password=None, ssh_key_value=None,
+                        ssh_key_path=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
@@ -660,8 +658,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     # Build storage profile
     storage_properties = {}
     os_caching = disk_info['os'].get('caching')
-    # TODO: split out the storage_sku for os disk(can't be ultra-ssd) and individual data disks
-    os_storage_sku = None if storage_sku == 'UltraSSD_LRS' else storage_sku
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
@@ -683,7 +679,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,
-            'managedDisk': {'storageAccountType': os_storage_sku}
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:

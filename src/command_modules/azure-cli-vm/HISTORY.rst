@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.8
+++++++
+* `vm create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
+
 2.2.7
 ++++++
 * `image create`: expose storage-sku argument for setting the image's default storage account type
