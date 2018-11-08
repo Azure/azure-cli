@@ -599,6 +599,7 @@ def validate_select(namespace):
         namespace.select = ','.join(namespace.select)
 
 
+# pylint: disable=too-many-statements
 def get_source_file_or_blob_service_client(cmd, namespace):
     """
     Create the second file service or blob service client for batch copy command, which is used to
@@ -625,7 +626,7 @@ def get_source_file_or_blob_service_client(cmd, namespace):
 
     if source_uri and source_account:
         raise ValueError(usage_string)
-    if not source_uri and not (bool(source_container) ^ bool(source_share)):
+    if not source_uri and not bool(source_container) ^ bool(source_share):
         raise ValueError(usage_string)
 
     if (not source_account) and (not source_uri):
