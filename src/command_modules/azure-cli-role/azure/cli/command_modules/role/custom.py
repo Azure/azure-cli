@@ -499,8 +499,8 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
 
     if not sub_filters:
         logger.warning('In a future relase, if no filter arguments are provided, CLI will only output the first'
-        ' 100 objects to avoid long waiting. You can still use "--all" for old behavior, though it is much'
-        ' recommended to avoid it')
+                       ' 100 objects to avoid long waiting. You can still use "--all" for old behavior, though'
+                       ' it is much recommended to avoid it')
 
     return client.list(filter=(' and '.join(sub_filters)))
 
