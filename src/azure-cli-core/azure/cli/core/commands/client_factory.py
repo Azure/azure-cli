@@ -102,6 +102,8 @@ def configure_common_settings(cli_ctx, client):
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
     client._client.add_header('CommandName',  # pylint: disable=protected-access
                               "{}{}".format(cli_ctx.data['command'], command_name_suffix))
+    client._client.add_header('ParameterSetName',  # pylint: disable=protected-access
+                              "{}".format(cli_ctx.data['safe_params']))
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
