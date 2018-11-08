@@ -131,7 +131,7 @@ def list_sku_info(cli_ctx, location=None):
 
 def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size=''):
+                        os_disk_caching=None, data_disk_cachings=None, size='', use_local_disk=False):
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below and will omit when we see conflictions
     # {
@@ -140,10 +140,12 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
     #   1: { caching: 'None', write_accelerator: True},
     # }
     from msrestazure.tools import is_valid_resource_id
-    info = {}
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
-    info['os'] = {}
+
+    info = {
+        'os': {'diffDiskSettings': {'option': 'Local'} if use_local_disk else None }
+    }
 
     # add unmanaged data disk luns.
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):

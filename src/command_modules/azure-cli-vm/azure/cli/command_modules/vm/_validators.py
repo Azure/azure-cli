@@ -369,20 +369,20 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'storage_account', 'use_local_os_disk'
                      'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
-        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb', 'use_local_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SACustomImage:
         required = ['image', 'os_type', 'use_unmanaged_disk']
-        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb', 'use_local_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account', 'use_local_os_disk',
                      'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
@@ -407,6 +407,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         for sku in namespace.storage_sku:
             if 'ultrassd_lrs' in sku.lower():
                 namespace.ultra_ssd_enabled = True
+
+    # When creating a VM, cannot use attach_os_disk with use_local_os_disk
+    if getattr(namespace, 'attach_os_disk', None) and namespace.use_local_os_disk:
+        raise CLIError('Usage error: cannot use "--attach-os-disk" with "--use-local-os-disk".')
 
     # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
@@ -469,7 +473,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
                                               os_disk_caching=namespace.os_caching,
-                                              data_disk_cachings=namespace.data_caching)
+                                              data_disk_cachings=namespace.data_caching,
+                                              use_local_disk=namespace.use_local_os_disk)
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
