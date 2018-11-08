@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.9
++++++
+* Add support for setting secrets in acr run to mirror acr task.
+
 2.1.8
 +++++
 * Support commit and pull request git events for Task source trigger.
