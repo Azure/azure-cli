@@ -322,7 +322,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
                     'diffDiskSettings': disk_info['os']['diffDiskSettings']
                 },
                 'imageReference': {
@@ -337,7 +337,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
                     'diffDiskSettings': disk_info['os']['diffDiskSettings']
                 },
                 "imageReference": {
@@ -681,7 +681,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,
-            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
             'diffDiskSettings': disk_info['os']['diffDiskSettings']
         }
 
