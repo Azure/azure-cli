@@ -984,10 +984,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             'python_framework': python_framework,
             'python_version': python_version
         }
-        status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
-                                                         branch, git_token, slot_swap, cd_app_type_details,
-                                                         cd_project_url, cd_account_create, location, test,
-                                                         private_repo_username, private_repo_password, webapp_list)
+        try:
+            status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
+                                                             branch, git_token, slot_swap, cd_app_type_details,
+                                                             cd_project_url, cd_account_create, location, test,
+                                                             private_repo_username, private_repo_password, webapp_list)
+        except RuntimeError as ex:
+            raise CLIError(ex)
         logger.warning(status.status_message)
         return status
     else:
