@@ -209,7 +209,7 @@ helps['storage blob list'] = """
 
 helps['storage blob copy'] = """
     type: group
-    short-summary: Manage blob copy operations.
+    short-summary: Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob incremental-copy'] = """
