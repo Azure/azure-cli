@@ -627,13 +627,13 @@ def get_source_file_or_blob_service_client(cmd, namespace):
 
     if source_uri and source_account:
         raise ValueError(usage_string)
-    if not source_uri and not bool(source_container) ^ bool(source_share):
+    if not source_uri and bool(source_container) == bool(source_share):  # must be container or share
         raise ValueError(usage_string)
 
     if (not source_account) and (not source_uri):
         # Set the source_client to None if neither source_account or source_uri is given. This
         # indicates the command that the source files share or blob container is in the same storage
-        # account as the destination file share.
+        # account as the destination file share or blob container.
         #
         # The command itself should create the source service client since the validator can't
         # access the destination client through the namespace.
