@@ -793,6 +793,11 @@ helps['storage share policy'] = """
     short-summary: Manage shared access policies of a storage file share.
 """
 
+helps['storage share create'] = """
+    type: command
+    short-summary: Creates a new share under the specified account.
+"""
+
 helps['storage table'] = """
     type: group
     short-summary: Manage NoSQL key-value storage.

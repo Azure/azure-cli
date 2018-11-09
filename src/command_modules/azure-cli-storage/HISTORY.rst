@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.5
++++++
+* Minor fixes.
+
 2.2.4
 +++++
 * Allow connection to storage services only with SAS and endpoints (without an account name or a key) as described in
