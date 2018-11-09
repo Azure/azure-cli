@@ -377,7 +377,7 @@ helps['storage blob copy start-batch'] = """
     type: command
     short-summary: Copy multiple blobs or files to a blob container.
     parameters:
-        - name: --destination-container
+        - name: --destination-container -c
           type: string
           short-summary: The blob container where the selected source files or blobs will be copied to.
         - name: --pattern
