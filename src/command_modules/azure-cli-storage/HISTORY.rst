@@ -5,7 +5,8 @@ Release History
 
 2.2.5
 +++++
-* Minor fixes.
+* Improve handling of corner cases for storage copy commands.
+* Fix issue with `storage blob copy start-batch` not using login credentials when the destination and source accounts are the same.
 
 2.2.4
 +++++
