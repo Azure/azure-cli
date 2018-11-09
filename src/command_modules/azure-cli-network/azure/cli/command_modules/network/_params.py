@@ -11,7 +11,7 @@ import six
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
-                                                tags_type, zone_type,
+                                                tags_type, zone_type, zones_type,
                                                 file_type, get_resource_group_completion_list,
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -95,6 +95,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
+        c.argument('zones', zones_type)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)

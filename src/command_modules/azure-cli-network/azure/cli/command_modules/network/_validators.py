@@ -180,7 +180,8 @@ def read_base_64_file(filename):
 
 
 def validate_cert(namespace):
-    namespace.cert_data = read_base_64_file(namespace.cert_data)
+    if namespace.cert_data:
+        namespace.cert_data = read_base_64_file(namespace.cert_data)
 
 
 def validate_ssl_cert(namespace):
@@ -625,8 +626,6 @@ def process_ag_create_namespace(cmd, namespace):
     validate_ssl_cert(namespace)
 
     validate_tags(namespace)
-
-    # TODO: Resolve capacity/min_capacity discrepancy
 
 
 def process_auth_create_namespace(cmd, namespace):

@@ -702,7 +702,7 @@ helps['network application-gateway root-cert delete'] = """
     type: command
     short-summary: Delete a trusted root certificate.
     examples:
-        - name: Delete an trusted root certificate.
+        - name: Delete a trusted root certificate.
           text: az network application-gateway root-cert delete -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
 """
 

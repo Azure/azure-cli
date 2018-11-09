@@ -7,6 +7,7 @@ Release History
 +++++
 * `application-gateway`: Added `root-cert` subcommands to handle trusted root certifcates.
 * `application-gateway create/update`: Added `--min-capacity` for configuring autoscale on v2 app gateways.
+* `application-gateway create`: Added `--zones` for availability zone support.
 
 2.2.8
 +++++

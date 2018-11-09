@@ -156,7 +156,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
-                               connection_draining_timeout=0, enable_http2=None, min_capacity=2):
+                               connection_draining_timeout=0, enable_http2=None, min_capacity=2, zones=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -207,7 +207,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-        connection_draining_timeout, enable_http2, min_capacity)
+        connection_draining_timeout, enable_http2, min_capacity, zones)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
