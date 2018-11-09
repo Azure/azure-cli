@@ -974,7 +974,7 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
 class VMCreateEphemeralOsDisk(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk')
-    def test_vm_create_local_os_disk(self, resource_group, resource_group_location):
+    def test_vm_create_ephemeral_os_disk(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'vm': 'cli-test-vm-local-1',
@@ -985,7 +985,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         })
 
         # check that we can create a vm with local / ephemeral os disk.
-        self.cmd('vm create --resource-group {rg} --name {vm} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --use-local-os-disk')
+        self.cmd('vm create --resource-group {rg} --name {vm} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -997,7 +997,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         ])
 
         # explicitly specify os-disk-caching
-        self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --use-local-os-disk --os-disk-caching ReadOnly')
+        self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --os-disk-caching ReadOnly')
         self.cmd('vm show -g {rg} -n {vm_2}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('osProfile.computerName', '{vm_2}'),
@@ -1643,7 +1643,7 @@ class VMSSCreateOptions(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
-    def test_vmss_create_local_os_disk(self, resource_group):
+    def test_vmss_create_ephemeral_os_disk(self, resource_group):
 
         self.kwargs.update({
             'vmss': 'cli-test-vmss-local-1',
@@ -1654,7 +1654,7 @@ class VMSSCreateOptions(ScenarioTest):
         })
 
         # check that we can create a vmss with local / ephemeral os disk.
-        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --use-local-os-disk --disable-overprovision '
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision '
                  '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
@@ -1669,7 +1669,7 @@ class VMSSCreateOptions(ScenarioTest):
 
 
         # explicitly specify os-disk-caching
-        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --use-local-os-disk --os-disk-caching {caching} --disable-overprovision --instance-count {count}')
+        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --os-disk-caching {caching} --disable-overprovision --instance-count {count}')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
             self.check('sku.capacity', '{count}'),

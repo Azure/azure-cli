@@ -322,8 +322,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
-                    'diffDiskSettings': disk_info['os']['diffDiskSettings']
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -337,8 +336,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
-                    'diffDiskSettings': disk_info['os']['diffDiskSettings']
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 "imageReference": {
                     'id': image_reference
@@ -362,6 +360,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disks:
             profile['dataDisks'] = data_disks
+
+        if disk_info['os'].get('diffDiskSettings'):
+            profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
         return profile
 
@@ -681,9 +682,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,
-            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
-            'diffDiskSettings': disk_info['os']['diffDiskSettings']
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
+        if disk_info['os'].get('diffDiskSettings'):
+            storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {

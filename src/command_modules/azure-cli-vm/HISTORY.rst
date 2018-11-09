@@ -5,8 +5,9 @@ Release History
 
 2.2.8
 ++++++
-* `vm create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
+* `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
 * `sig image-version`: Version names now consistently specified by  `--image-version -e`. `--image-version-name` deprecated.
+* `vm/vmss create --ephemeral-os-disk`: exposed parameter to create a vm with a local disk
 
 2.2.7
 ++++++

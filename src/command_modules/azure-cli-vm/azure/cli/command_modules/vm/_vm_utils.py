@@ -151,8 +151,6 @@ def normalize_disk_info(image_data_disks_num=0, image_data_disks_storage_skus=No
         # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
-    else:
-        info['os']['diffDiskSettings'] = None
 
     # add unmanaged data disk luns.
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
