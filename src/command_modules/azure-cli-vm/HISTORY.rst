@@ -10,6 +10,7 @@ Release History
 * `vm/vmss create --ephemeral-os-disk`: exposed parameter to create a vm/vmss with a local os disk.
 * `snapshot create/update`: Added support for `--no-wait`.
 * `snapshot`: Added `wait` command.
+* `vm/vmss extension set --extension-instance-name`: can now specify the instance name of an extension.
 
 2.2.7
 ++++++
