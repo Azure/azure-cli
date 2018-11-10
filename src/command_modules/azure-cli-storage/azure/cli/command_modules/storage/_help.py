@@ -209,7 +209,7 @@ helps['storage blob list'] = """
 
 helps['storage blob copy'] = """
     type: group
-    short-summary: Manage blob copy operations.
+    short-summary: Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob incremental-copy'] = """
@@ -373,9 +373,14 @@ helps['storage blob delete-batch'] = """
             az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 """
 
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
+"""
+
 helps['storage blob copy start-batch'] = """
     type: command
-    short-summary: Copy multiple blobs or files to a blob container.
+    short-summary: Copy multiple blobs or files to a blob container. Use `az storage blob show` to check the status of the blobs.
     parameters:
         - name: --destination-container -c
           type: string
