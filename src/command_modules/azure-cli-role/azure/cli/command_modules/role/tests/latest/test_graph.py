@@ -316,7 +316,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
 
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
-
+            self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
