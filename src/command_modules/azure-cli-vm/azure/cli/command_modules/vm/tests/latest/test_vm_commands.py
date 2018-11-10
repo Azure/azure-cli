@@ -989,9 +989,6 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.computerName', '{vm}'),
-            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
-            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
         ])
@@ -1000,9 +997,6 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --os-disk-caching ReadOnly')
         self.cmd('vm show -g {rg} -n {vm_2}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.computerName', '{vm_2}'),
-            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
-            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
         ])
@@ -1669,8 +1663,8 @@ class VMSSCreateOptions(ScenarioTest):
 
         # explicitly specify os-disk-caching
         self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --os-disk-caching {caching} --disable-overprovision --instance-count {count}')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('name', '{vmss}'),
+        self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
+            self.check('name', '{vmss_2}'),
             self.check('sku.capacity', '{count}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),

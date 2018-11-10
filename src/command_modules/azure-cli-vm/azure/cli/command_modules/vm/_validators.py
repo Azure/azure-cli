@@ -369,7 +369,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'storage_account', 'ephemeral_os_disk'
+        forbidden = ['os_disk_name', 'os_caching', 'storage_account', 'ephemeral_os_disk',
                      'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
@@ -474,7 +474,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               storage_sku=namespace.storage_sku,
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
-                                              use_local_disk=namespace.ephemeral_os_disk)
+                                              ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None))
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
