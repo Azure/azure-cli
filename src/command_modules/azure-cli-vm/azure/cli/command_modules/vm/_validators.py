@@ -408,10 +408,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             if 'ultrassd_lrs' in sku.lower():
                 namespace.ultra_ssd_enabled = True
 
-    # When creating a VM, cannot use attach_os_disk with ephemeral_os_disk
-    if getattr(namespace, 'attach_os_disk', None) and namespace.ephemeral_os_disk:
-        raise CLIError('Usage error: cannot use "--attach-os-disk" with "--ephemeral-os-disk".')
-
     # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
         namespace, required, forbidden,
