@@ -101,7 +101,7 @@ def configure_common_settings(cli_ctx, client):
 
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
     # pylint: disable=protected-access
-    client._client.add_header('CommandName',  
+    client._client.add_header('CommandName',
                               "{}{}".format(cli_ctx.data['command'], command_name_suffix))
     if cli_ctx.data.get('safe_params'):
         client._client.add_header('ParameterSetName',
