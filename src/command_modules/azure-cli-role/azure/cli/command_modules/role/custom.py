@@ -497,6 +497,11 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
+
     return client.list(filter=(' and '.join(sub_filters)))
 
 
@@ -525,6 +530,10 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
     return client.list(filter=(' and '.join(sub_filters)))
 
 
