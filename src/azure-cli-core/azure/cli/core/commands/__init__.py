@@ -296,6 +296,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 expanded_arg.cmd = cmd
 
             self.cli_ctx.data['command'] = expanded_arg.command
+            self.cli_ctx.data['safe_params'] = [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                                                (p.startswith('-') and len(p) > 1)]
 
             if hasattr(expanded_arg, '_subscription'):
                 self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
@@ -316,8 +318,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 pass
 
             telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
-                                          [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
-                                           (p.startswith('-') and len(p) > 1)],
+                                          self.cli_ctx.data['safe_params'],
                                           extension_name=extension_name, extension_version=extension_version)
             if extension_name:
                 self.data['command_extension_name'] = extension_name
