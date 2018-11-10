@@ -120,10 +120,6 @@ def validate_client_parameters(cmd, namespace):
         n.account_name = conn_dict.get('AccountName')
         n.account_key = conn_dict.get('AccountKey')
         n.sas_token = conn_dict.get('SharedAccessSignature')
-        if not n.sas_token and (not n.account_name or not n.account_key):
-            from knack.util import CLIError
-            raise CLIError('Connection-string: %s, is malformed. Some shell environments require the '
-                           'connection string to be surrounded by quotes.' % n.connection_string)
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
