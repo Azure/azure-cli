@@ -67,7 +67,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
-    node_default_version = "6.9.1"
+    node_default_version = '8.11.1'
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -1876,7 +1876,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='6.5.0'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
     if consumption_plan_location is None:
         site_config.always_on = True
