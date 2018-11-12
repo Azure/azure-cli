@@ -2761,17 +2761,19 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
                                          direction=None, protocol=None, source=None, destination=None,
                                          destination_port=None, queries=None,
                                          resource_group_name=None, resource_type=None, parent=None):
-    TrafficQuery = cmd.get_models('TrafficQuery')
+    NetworkConfigurationDiagnosticParameters, NetworkConfigurationDiagnosticProfile = \
+        cmd.get_models('NetworkConfigurationDiagnosticParameters', 'NetworkConfigurationDiagnosticProfile')
+
     if not queries:
-        queries = [TrafficQuery(
+        queries = [NetworkConfigurationDiagnosticProfile(
             direction=direction,
             protocol=protocol,
             source=source,
             destination=destination,
             destination_port=destination_port
         )]
-    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, resource, queries)
-
+    params = NetworkConfigurationDiagnosticParameters(target_resource_id=resource, profiles=queries)
+    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, params)
 # endregion
 
 
