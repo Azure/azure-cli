@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.9
++++++
+* Fix 'acr helm push' not allowing helm packages with build metadata
+
 2.1.8
 +++++
 * Support commit and pull request git events for Task source trigger.
