@@ -1448,12 +1448,8 @@ def list_slots(cmd, resource_group_name, webapp):
 def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     if action == 'swap':
-        if target_slot is None:
-            poller = client.web_apps.swap_slot_with_production(resource_group_name,
-                                                               webapp, slot, True)
-        else:
-            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                    slot, target_slot, True)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                slot, (target_slot or 'production'), True)
         return poller
     elif action == 'preview':
         if target_slot is None:
@@ -1461,7 +1457,7 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
                                                                      webapp, slot, True)
         else:
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, target_slot, True)
+                                                                   slot, (target_slot or 'production'), True)
         return result
     else:  # reset
         # we will reset both source slot and target slot
@@ -1469,8 +1465,6 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             client.web_apps.reset_production_slot_config(resource_group_name, webapp)
         else:
             client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
         return None
 
 

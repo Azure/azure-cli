@@ -668,7 +668,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         # reset
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheck("[?name=='s1']|[0]", None)
+            JMESPathCheck("[?name=='s1']|[0].value", 'slot')
         ])
 
 

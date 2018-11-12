@@ -5,6 +5,7 @@ Release History
 
 0.2.7
 +++++
+* webapp, functionapp: Default Node_version updated. Resetting slot swap action, during a two phase swap preserves all the appsettings & connection strings
 * remove client side sku check for linux app service plan create
 
 0.2.6
