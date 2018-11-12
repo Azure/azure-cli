@@ -486,7 +486,11 @@ def load_arguments(self, _):
             c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
             c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
             c.argument('version', help='The version of the extension')
-            c.argument('extension_instance_name', help='Instance name of the extension. Default: name of the extension.')
+
+            if scope == 'vm extension':
+                c.argument('extension_instance_name', help='Instance name of the extension. Default: name of the extension.', arg_group='Resource Id')
+            else:
+                c.argument('extension_instance_name', help='Instance name of the extension. Default: name of the extension.')
 
     with self.argument_context('vm extension set') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
