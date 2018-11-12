@@ -1219,7 +1219,8 @@ def list_extensions(cmd, resource_group_name, vm_name):
 
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
-                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False, extension_instance_name=None):
+                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
+                  extension_instance_name=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -1227,9 +1228,11 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
         extension_instance_name = vm_extension_name
 
     VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name, suggested_name=extension_instance_name)
+    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
+                                                 suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
-        logger.warning("A %s extension with name %s already exists. Updating it with your settings...", vm_extension_name, instance_name)
+        msg = "A %s extension with name %s already exists. Updating it with your settings..."
+        logger.warning(msg, vm_extension_name, instance_name)
 
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
