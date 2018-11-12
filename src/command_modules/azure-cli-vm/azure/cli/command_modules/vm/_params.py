@@ -547,7 +547,7 @@ def load_arguments(self, _):
         c.ignore('gallery_image')
 
     with self.argument_context('sig image-version') as c:
-        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True)
+        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="2.1.0")
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option], )
 
     with self.argument_context('sig image-version create') as c:
