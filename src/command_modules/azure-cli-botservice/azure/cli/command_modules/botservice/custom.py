@@ -6,8 +6,9 @@
 import json
 import os
 import shutil
-import adal  # pylint: disable=import-error
-from knack.prompting import prompt_y_n  # pylint: disable=unused-import
+
+from .auth.converged_app import ConvergedApp
+
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core._profile import Profile
@@ -20,7 +21,6 @@ from azure.cli.command_modules.botservice._webutils import (
 from azure.mgmt.botservice.models import Bot, BotProperties, Sku
 
 logger = get_logger(__name__)
-
 
 def get_bot_site_name(endpoint):
     try:
@@ -67,62 +67,47 @@ def _get_app_insights_location(key):
     return region_map[key]
 
 
-def provisionConvergedApp(bot_name):
-    botfirstpartyid = 'f3723d34-6ff5-4ceb-a148-d99dcd2511fc'
-    aadclientid = '1950a258-227b-4e31-a9cf-717495945fc2'
-    tenantid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
-
-    authority = 'https://login.windows.net/{0}'.format(tenantid)
-    context = adal.AuthenticationContext(
-        authority=authority,
-        validate_authority=True,
-        api_version=None
-    )
-
-    code = context.acquire_user_code(
-        resource=botfirstpartyid,
-        client_id=aadclientid,
-    )
-
-    logger.warning(code['message'])
-
-    token = context.acquire_token_with_device_code(
-        resource=botfirstpartyid,
-        user_code_info=code,
-        client_id=aadclientid
-    )
-    access_token = token['accessToken']
-
-    import requests
-    headers = {'Authorization': 'Bearer {0}'.format(access_token)}
-    response = requests.post(
-        'https://dev.botframework.com/api/botApp/provisionConvergedApp?name={0}'.format(bot_name),
-        headers=headers
-    )
-    if response.status_code not in [201]:
-        raise CLIError('Unable to provision MSA id automatically. Please pass them in as parameters and try again.')
-    response_content = json.loads(response.content.decode('utf-8'))
-    msa_app_id = response_content['AppId']
-    password = response_content['Password']
-
-    return msa_app_id, password
-
-
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
            language='Csharp', version='v3'):
+
+    # If display name was not provided, just use the resource name
     display_name = display_name or resource_name
+
+    # Kind parameter validation
     kind = kind.lower()
 
-    if not msa_app_id:
-        msa_app_id, password = provisionConvergedApp(resource_name)
-        logger.warning('obtained msa app id and password. Provisioning bot now.')
+    registration_kind = 'registration'
+    bot_kind = 'bot'
+    webapp_kind = 'webapp'
+    function_kind = 'function'
 
-    if kind == 'registration':
-        kind = 'bot'
-        if not endpoint or not msa_app_id:
-            raise CLIError('Endpoint and msa app id are required for creating a registration bot')
+    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
+    if kind == registration_kind:
+        kind = bot_kind
+
+    if kind not in (bot_kind, webapp_kind, function_kind):
+        raise CLIError('Invalid Bot Parameter : kind')
+
+    # TODO validate common parameters
+
+    # If a Microsoft application id was not provided, provision one for the user
+    if not msa_app_id:
+        msa_app_id, password = ConvergedApp.provision(resource_name)
+        logger.warning('Microsoft application provisioning successful.')
+
+    logger.warning('Provisioning bot...')
+
+    # Registration bots: simply call ARM and create the bot
+    if kind == bot_kind:
+
+        # Registration bot specific validation
+        if not endpoint:
+            raise CLIError('Endpoint is required for creating a registration bot.')
+        if not msa_app_id:
+            raise CLIError('Microsoft application id is required for creating a registration bot.')
+
         parameters = Bot(
             location='global',
             sku=Sku(name=sku_name),
@@ -140,11 +125,108 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             resource_name=resource_name,
             parameters=parameters
         )
-    if kind in ('webapp', 'function'):
+    # Web app and function bots require deploying custom ARM templates, we do that in a separate method
+    else:
         return create_app(cmd, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
                           storageAccountName, location, sku_name, appInsightsLocation, language, version)
-    else:
-        raise CLIError('Invalid Bot Parameter : Kind')
+
+
+def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password, storageAccountName,
+               location, sku_name, appInsightsLocation, language, version):
+
+    # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
+    if version == 'v3':
+        if kind == 'function':
+            template_name = 'functionapp.template.json'
+            if language == 'Csharp':
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'
+            else:
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'  # pylint: disable=line-too-long
+
+        else:
+            kind = 'sdk'
+            template_name = 'webapp.template.json'
+            if language == 'Csharp':
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'  # pylint: disable=line-too-long
+            else:
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'  # pylint: disable=line-too-long
+    elif version == 'v4':
+        if kind == 'function':
+            raise CLIError('Function bot creation is not supported for v4 bot sdk.')
+
+        else:
+            kind = 'sdk'
+            template_name = 'webappv4.template.json'
+            if language == 'Csharp':
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
+            else:
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
+
+    # Storage prep
+    create_new_storage = False
+    if not storageAccountName:
+        import re
+        import string
+        import random
+        create_new_storage = True
+        storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
+                                    ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
+        site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
+                           ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
+
+    # Application insights prep
+    appInsightsLocation = _get_app_insights_location(location.lower().replace(' ', ''))
+
+    # ARM Template parameters
+    paramsdict = {
+        "location": location,
+        "kind": kind,
+        "sku": sku_name,
+        "siteName": site_name,
+        "appId": appid,
+        "appSecret": password,
+        "storageAccountResourceId": "",
+        "serverFarmId": "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/serverfarms/{2}".format(
+            client.config.subscription_id, resource_group_name, resource_name),
+        "zipUrl": zip_url,
+        "createNewStorage": create_new_storage,
+        "storageAccountName": storageAccountName,
+        "botEnv": "prod",
+        "useAppInsights": True,
+        "appInsightsLocation": appInsightsLocation,
+        "createServerFarm": True,
+        "serverFarmLocation": location.lower().replace(' ', ''),
+        "azureWebJobsBotFrameworkDirectLineSecret": "",
+        "botId": resource_name
+    }
+    if description:
+        paramsdict['description'] = description
+    if template_name == 'webappv4.template.json':
+
+        response = requests.get('https://dev.botframework.com/api/misc/botFileEncryptionKey')
+        if response.status_code not in [200]:
+            raise CLIError('Unable to provision a bot file encryption key. Please try again.')
+        bot_encrpytion_key = response.text[1:-1]
+        paramsdict['botFileEncryptionKey'] = bot_encrpytion_key
+    params = {k: {'value': v} for k, v in paramsdict.items()}
+
+    # TODO concate 'templates' to file path
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # Deploy ARM template
+    deploy_result = deploy_arm_template(
+        cli_ctx=cmd.cli_ctx,
+        resource_group_name=resource_group_name,
+        template_file=os.path.join(dir_path, template_name),
+        parameters=[[json.dumps(params)]],
+        deployment_name=resource_name,
+        mode='Incremental'
+    )
+
+    deploy_result.wait()
+    return create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
+
+
 
 
 def update(client, parameters, resource_group_name):
@@ -234,94 +316,6 @@ def get_service_providers(client, name=None):
         except StopIteration:
             raise CLIError('A service provider with the name {0} was not found'.format(name))
     return service_provider_response
-
-
-def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password, storageAccountName,  # pylint: disable=too-many-locals
-               location, sku_name, appInsightsLocation, language, version):  # pylint: disable=too-many-locals
-    if version == 'v3':
-        if kind == 'function':
-            template_name = 'functionapp.template.json'
-            if language == 'Csharp':
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'
-            else:
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'  # pylint: disable=line-too-long
-
-        else:
-            kind = 'sdk'
-            template_name = 'webapp.template.json'
-            if language == 'Csharp':
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'  # pylint: disable=line-too-long
-            else:
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'  # pylint: disable=line-too-long
-    elif version == 'v4':
-        if kind == 'function':
-            raise CLIError('Function bot creation is not supported for v4 bot sdk.')
-
-        else:
-            kind = 'sdk'
-            template_name = 'webappv4.template.json'
-            if language == 'Csharp':
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
-            else:
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
-
-    create_new_storage = False
-    if not storageAccountName:
-        import re
-        import string
-        import random
-        create_new_storage = True
-        storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
-                                    ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
-        site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
-                           ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
-
-    appInsightsLocation = _get_app_insights_location(location.lower().replace(' ', ''))
-    paramsdict = {
-        "location": location,
-        "kind": kind,
-        "sku": sku_name,
-        "siteName": site_name,
-        "appId": appid,
-        "appSecret": password,
-        "storageAccountResourceId": "",
-        "serverFarmId": "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/serverfarms/{2}".format(
-            client.config.subscription_id, resource_group_name, resource_name),
-        "zipUrl": zip_url,
-        "createNewStorage": create_new_storage,
-        "storageAccountName": storageAccountName,
-        "botEnv": "prod",
-        "useAppInsights": True,
-        "appInsightsLocation": appInsightsLocation,
-        "createServerFarm": True,
-        "serverFarmLocation": location.lower().replace(' ', ''),
-        "azureWebJobsBotFrameworkDirectLineSecret": "",
-        "botId": resource_name
-    }
-    if description:
-        paramsdict['description'] = description
-    if template_name == 'webappv4.template.json':
-        import requests
-        response = requests.get('https://scratch.botframework.com/api/misc/botFileEncryptionKey')
-        if response.status_code not in [200]:
-            raise CLIError('Unable to provision a bot file encryption key. Please try again.')
-        bot_encrpytion_key = response.text[1:-1]
-        paramsdict['botFileEncryptionKey'] = bot_encrpytion_key
-    params = {k: {'value': v} for k, v in paramsdict.items()}
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    deploy_result = deploy_arm_template(
-        cli_ctx=cmd.cli_ctx,
-        resource_group_name=resource_group_name,
-        template_file=os.path.join(dir_path, template_name),
-        parameters=[[json.dumps(params)]],
-        deployment_name=resource_name,
-        mode='Incremental'
-    )
-
-    deploy_result.wait()
-    return create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
-
 
 def create_upload_zip(code_dir, include_node_modules=True):
     import zipfile
