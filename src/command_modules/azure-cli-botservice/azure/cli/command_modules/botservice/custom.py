@@ -31,6 +31,42 @@ def get_bot_site_name(endpoint):
     return str(split_parts.netloc.split('.', 1)[0])
 
 
+def _get_app_insights_location(key):
+    region_map = {
+        'australiaeast': 'southeastasia',
+        'australiacentral': 'southeastasia',
+        'australiacentral2': 'southeastasia',
+        'australiasoutheast': 'southeastasia',
+        'eastasia': 'southeastasia',
+        'southeastasia': 'westus',
+        'eastus': 'eastus',
+        'eastus2': 'eastus',
+        'southcentralus': 'southcentralus',
+        'westcentralus': 'westus2',
+        'westus': 'westus2',
+        'westus2': 'westus2',
+        'brazilsouth': 'southcentralus',
+        'centralus': 'southcentralus',
+        'northcentralus': 'southcentralus',
+        'japanwest': 'southeastasia',
+        'japaneast': 'southeastasia',
+        'southindia': 'southeastasia',
+        'centralindia': 'southeastasia',
+        'westindia': 'southeastasia',
+        'canadacentral': 'southcentralus',
+        'canadaeast': 'eastus',
+        'koreacentral': 'southeastasia',
+        'koreasouth': 'southeastasia',
+        'northeurope': 'northeurope',
+        'westeurope': 'westeurope',
+        'uksouth': 'westeurope',
+        'ukwest': 'westeurope',
+        'francecentral': 'westeurope',
+        'francesouth': 'westeurope'
+    }
+    return region_map[key]
+
+
 def provisionConvergedApp(bot_name):
     botfirstpartyid = 'f3723d34-6ff5-4ceb-a148-d99dcd2511fc'
     aadclientid = '1950a258-227b-4e31-a9cf-717495945fc2'
@@ -147,7 +183,8 @@ def create_bot_json(cmd, client, resource_group_name, resource_name, app_passwor
         'endpoint': raw_bot_properties.properties.endpoint,
         'resourceGroup': str(resource_group_name),
         'tenantId': profile.get_subscription(subscription=client.config.subscription_id)['tenantId'],
-        'subscriptionId': client.config.subscription_id
+        'subscriptionId': client.config.subscription_id,
+        'serviceName': resource_name
     }
 
 
@@ -199,8 +236,8 @@ def get_service_providers(client, name=None):
     return service_provider_response
 
 
-def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password, storageAccountName,
-               location, sku_name, appInsightsLocation, language, version):
+def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password, storageAccountName,  # pylint: disable=too-many-locals
+               location, sku_name, appInsightsLocation, language, version):  # pylint: disable=too-many-locals
     if version == 'v3':
         if kind == 'function':
             template_name = 'functionapp.template.json'
@@ -222,11 +259,11 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
 
         else:
             kind = 'sdk'
-            template_name = 'webapp.template.json'
+            template_name = 'webappv4.template.json'
             if language == 'Csharp':
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot-aspnetcore_precompiled.zip'  # pylint: disable=line-too-long
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
             else:
-                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_hello-chatconnector.zip'  # pylint: disable=line-too-long
+                zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     create_new_storage = False
     if not storageAccountName:
@@ -239,6 +276,7 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
         site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
                            ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
 
+    appInsightsLocation = _get_app_insights_location(location.lower().replace(' ', ''))
     paramsdict = {
         "location": location,
         "kind": kind,
@@ -262,6 +300,13 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
     }
     if description:
         paramsdict['description'] = description
+    if template_name == 'webappv4.template.json':
+        import requests
+        response = requests.get('https://scratch.botframework.com/api/misc/botFileEncryptionKey')
+        if response.status_code not in [200]:
+            raise CLIError('Unable to provision a bot file encryption key. Please try again.')
+        bot_encrpytion_key = response.text[1:-1]
+        paramsdict['botFileEncryptionKey'] = bot_encrpytion_key
     params = {k: {'value': v} for k, v in paramsdict.items()}
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -278,10 +323,12 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
     return create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
 
 
-def create_upload_zip(code_dir):
+def create_upload_zip(code_dir, include_node_modules=True):
     import zipfile
-    file_excludes = ['upload.zip', 'db.lock']
-    folder_excludes = ['node_modules', 'packages', 'bin', 'obj']
+    file_excludes = ['upload.zip', 'db.lock', '.env']
+    folder_excludes = ['packages', 'bin', 'obj']
+    if not include_node_modules:
+        folder_excludes.append('node_modules')
     zip_filepath = os.path.abspath('upload.zip')
     save_cwd = os.getcwd()
     os.chdir(code_dir)
@@ -314,7 +361,71 @@ def check_response_status(response, expected_code=None):
             response.status_code, response.text))
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None):
+def find_proj(proj_file):
+    for root, _, files in os.walk(os.curdir):
+        for file_name in files:
+            if proj_file == file_name.lower():
+                return os.path.relpath(os.path.join(root, file_name))
+    raise CLIError('project file not found. Please pass a valid --proj-file.')
+
+
+def _prepare_publish_v4(code_dir, proj_file):
+    save_cwd = os.getcwd()
+    os.chdir(code_dir)
+    try:
+        if not os.path.exists(os.path.join('.', 'package.json')):
+            if proj_file is None:
+                raise CLIError('expected --proj-file parameter for csharp v4 project.')
+            with open('.deployment', 'w') as f:
+                f.write('[config]\n')
+                proj_file = proj_file.lower()
+                proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+                f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(find_proj(proj_file)))
+
+        else:
+            # put iisnode.yml and web.config
+            import requests
+            response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
+            with open('temp.zip', 'wb') as f:
+                f.write(response.content)
+            import zipfile
+            zip_ref = zipfile.ZipFile('temp.zip')
+            zip_ref.extractall()
+            zip_ref.close()
+            os.remove('temp.zip')
+    finally:
+        os.chdir(save_cwd)
+
+
+def _prepare_publish_v4(code_dir, proj_file):
+    save_cwd = os.getcwd()
+    os.chdir(code_dir)
+    try:
+        if not os.path.exists(os.path.join('.', 'package.json')):
+            if proj_file is None:
+                raise CLIError('expected --proj-file parameter for csharp v4 project.')
+            with open('.deployment', 'w') as f:
+                f.write('[config]\n')
+                proj_file = proj_file.lower()
+                proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+                f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(find_proj(proj_file)))
+
+        else:
+            # put iisnode.yml and web.config
+            import requests
+            response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
+            with open('temp.zip', 'wb') as f:
+                f.write(response.content)
+            import zipfile
+            zip_ref = zipfile.ZipFile('temp.zip')
+            zip_ref.extractall()
+            zip_ref.close()
+            os.remove('temp.zip')
+    finally:
+        os.chdir(save_cwd)
+
+
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file=None, sdk_version='v3'):
     # get the bot and ensure it's not a registration only bot
     raw_bot_properties = client.bots.get(
         resource_group_name=resource_group_name,
@@ -330,9 +441,13 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None):
         raise CLIError('Please supply a valid directory path containing your source code')
     # ensure that the directory contains appropriate post deploy scripts folder
     if 'PostDeployScripts' not in os.listdir(code_dir):
-        raise CLIError('Not a valid azure publish directory. missing post deploy scripts')
+        if sdk_version == 'v4':
+            # automatically run prepare-publish in case of v4.
+            _prepare_publish_v4(code_dir, proj_file)
+        else:
+            raise CLIError('Not a valid azure publish directory. Please run prepare-publish.')
 
-    zip_filepath = create_upload_zip(code_dir)
+    zip_filepath = create_upload_zip(code_dir, include_node_modules=False)
     site_name = get_bot_site_name(raw_bot_properties.properties.endpoint)
     # first try to put the zip in clirepo
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, site_name, None)
@@ -349,7 +464,6 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None):
     }
     headers['content-type'] = 'application/json'
     response = requests.post(scm_url + '/api/command', data=json.dumps(payload), headers=headers)
-    check_response_status(response)
     response = requests.put(scm_url + '/api/vfs/site/clirepo/', headers=headers)
     check_response_status(response, 201)
     headers['content-type'] = 'application/octet-stream'
@@ -359,10 +473,17 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None):
 
     output = enable_zip_deploy(cmd, resource_group_name, site_name, 'upload.zip')
     os.remove('upload.zip')
+    if os.path.exists(os.path.join('.', 'package.json')):
+        payload = {
+            'command': 'npm install',
+            'dir': r'site\wwwroot'
+        }
+        response = requests.post(scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+
     return output
 
 
-def download_app(cmd, client, resource_group_name, resource_name, file_save_path=None):
+def download_app(cmd, client, resource_group_name, resource_name, file_save_path=None):  # pylint: disable=too-many-statements, too-many-locals
     # get the bot and ensure it's not a registration only bot
     raw_bot_properties = client.bots.get(
         resource_group_name=resource_group_name,
@@ -376,7 +497,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
         raise CLIError('Path name not valid')
     folder_path = os.path.join(file_save_path, resource_name)
     if os.path.exists(folder_path):
-        raise CLIError('The path {0} already exists. Please delete it or specify an alternate path'.format(folder_path))
+        raise CLIError('The path {0} already exists. Please delete this folder or specify an alternate path'.format(folder_path))  # pylint: disable=line-too-long
     os.mkdir(folder_path)
 
     site_name = get_bot_site_name(raw_bot_properties.properties.endpoint)
@@ -391,7 +512,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
 
     # if repository folder exists, then get those contents for download
     import requests
-    response = requests.get(scm_url + '/api/zip/site/clirepo/', headers=authorization, )
+    response = requests.get(scm_url + '/api/zip/site/clirepo/', headers=authorization)
     if response.status_code != 200:
         # try getting the bot from wwwroot instead
         payload = {
@@ -411,10 +532,46 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     zip_ref.extractall(folder_path)
     zip_ref.close()
     os.remove(download_path)
-    if not (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
+    if (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
             os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))
+    # if the bot contains a bot
+    bot_file_path = os.path.join(folder_path, '{0}.bot'.format(resource_name))
+    if os.path.exists(bot_file_path):
+        app_settings = get_app_settings(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=site_name
+        )
+        bot_secret = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
+        # write a .env file #todo: write an appsettings.json file
+        bot_env = {
+            'botFileSecret': bot_secret[0],
+            'botFilePath': '{0}.bot'.format(resource_name),
+            'NODE_ENV': 'development'
+        }
+        if os.path.exists(os.path.join(folder_path, 'package.json')):
+            with open(os.path.join(folder_path, '.env'), 'w') as f:
+                for key, value in bot_env.items():
+                    f.write('{0}={1}\n'.format(key, value))
+        else:
+            app_settings_path = os.path.join(folder_path, 'appsettings.json')
+            existing = None
+            if not os.path.exists(app_settings_path):
+                existing = '{}'
+            else:
+                with open(app_settings_path, 'r') as f:
+                    existing = json.load(f)
+            with open(os.path.join(app_settings_path), 'w+') as f:
+                for key, value in bot_env.items():
+                    existing[key] = value
+                f.write(json.dumps(existing))
+
+        if not bot_secret:
+            bot_env['downloadPath'] = folder_path
+            return bot_env
+
     return {'downloadPath': folder_path}
 
 
