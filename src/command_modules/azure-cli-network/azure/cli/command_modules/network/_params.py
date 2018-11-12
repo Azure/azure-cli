@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools)
+    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -96,6 +96,7 @@ def load_arguments(self, _):
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
         c.argument('zones', zones_type)
+        c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -270,6 +271,11 @@ def load_arguments(self, _):
         c.argument('disabled_rules', nargs='+')
         c.argument('enabled', help='Specify whether the application firewall is enabled.', arg_type=get_enum_type(['true', 'false']))
         c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(ApplicationGatewayFirewallMode, default='detection'))
+
+    with self.argument_context('network application-gateway waf-config', min_api='2018-08-01') as c:
+        c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)
+        c.argument('max_request_body_size', help='Max request body size in KB.', type=int)
+        c.argument('request_body_check', arg_type=get_three_state_flag(), help='Allow WAF to check the request body.')
 
     for item in ['ssl-policy', 'waf-config']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:

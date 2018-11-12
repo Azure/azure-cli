@@ -610,22 +610,18 @@ def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: di
 
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-
     get_servers_validator(camel_case=True)(namespace)
 
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(cmd, namespace)
-
     validate_address_prefixes(namespace)
-
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
-
     validate_ssl_cert(namespace)
-
     validate_tags(namespace)
+    validate_custom_error_pages(namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -1267,3 +1263,18 @@ def validate_ag_address_pools(cmd, namespace):
                 child_name_1=item)
             ids.append(item)
     namespace.app_gateway_backend_address_pools = ids
+
+
+def validate_custom_error_pages(namespace):
+
+    if not namespace.custom_error_pages:
+        return
+
+    values = []
+    for item in namespace.custom_error_pages:
+        try:
+            (code, url) = item.split('=')
+            values.append({'statusCode': code, 'customErrorPageUrl': url})
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
+    namespace.custom_error_pages = values
