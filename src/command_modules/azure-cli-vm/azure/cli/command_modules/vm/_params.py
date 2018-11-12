@@ -511,12 +511,10 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig show', 'image gallery delete', 'sig image-definition show', 'sig image-definition delete', 'sig image-definition show']:
+    for scope in ['sig show', 'sig image-definition show', 'sig image-definition delete']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
-            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
-            c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
 
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
@@ -547,6 +545,11 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
         c.ignore('gallery_image')
+
+    with self.argument_context('sig image-version') as c:
+        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="2.1.0")
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option], )
+
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
@@ -556,8 +559,7 @@ def load_arguments(self, _):
         c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
-    with self.argument_context('sig image-version update') as c:
-        c.ignore('gallery_image_version')
+
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     for scope in ['sig image-version create', 'sig image-version update']:
