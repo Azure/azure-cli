@@ -258,7 +258,7 @@ argument_context(self, scope, **kwargs):
 - `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`.
 
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to BOTH command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to BOTH command1 and command2
 ```
 But
 ```Python
@@ -266,7 +266,7 @@ with self.argument_context('mypackage command1', ...) as c:  # applies to comman
 ```
 Like CSS rules, modifications are applied in order from generic to specific.
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to both command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to both command1 and command2
   c.argument('my_param', ...)
 with self.argument_context('mypackage command1', ...) as c:  # applies to command1 but not command2
   c.argument('my_param', ...)
