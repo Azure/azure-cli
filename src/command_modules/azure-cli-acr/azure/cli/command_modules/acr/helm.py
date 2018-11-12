@@ -16,8 +16,8 @@ from ._docker_utils import get_access_credentials, request_data_from_registry
 logger = get_logger(__name__)
 
 
-# https://github.com/kubernetes/helm/blob/b6660cd5c9a9ee35ff24034fcc223b7eaeed3ee2/pkg/tiller/release_server.go#L80
-VALID_NAME = '^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+(.tgz)(.prov)?$'
+# Based on the semver regex here: https://github.com/Masterminds/semver/blob/e71d0f94bb19d376417da48392b212ac41be4991/version.go
+VALID_NAME = '^[a-zA-Z0-9]+-v?([0-9]+)(\.[0-9]+)?(\.[0-9]+)?(-([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?(\+([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?\.tgz(\.prov)?$'
 
 
 def acr_helm_list(cmd,
