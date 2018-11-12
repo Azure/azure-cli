@@ -4,6 +4,7 @@ Release History
 ===============
 2.1.10
 ++++++
+* `ad app update`: address a failure caused by updating immutable credentials
 * graph: output warnings to communicate breaking changes in the near future for "ad app/sp list"
 
 2.1.9

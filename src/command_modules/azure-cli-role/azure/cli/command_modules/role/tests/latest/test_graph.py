@@ -314,6 +314,9 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
+            # ensure we can update other properties #7728
+            self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
+            self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)

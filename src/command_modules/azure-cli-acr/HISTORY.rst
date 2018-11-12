@@ -5,6 +5,7 @@ Release History
 
 2.1.9
 +++++
+* Add support for setting secrets in acr run to mirror acr task.
 * Fix 'acr helm push' not allowing helm packages with build metadata
 
 2.1.8
