@@ -13,11 +13,10 @@ from sphinx.util.nodes import nested_parse_with_titles
 
 from knack.help_files import helps
 
-from knack.help import GroupHelpFile
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry
+from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry, CliGroupHelpFile
 
 USER_HOME = expanduser('~')
 
@@ -44,7 +43,7 @@ def get_help_files(cli_ctx):
     help_files = []
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
-            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) else CliCommandHelpFile(help_ctx, cmd, parser)
+            help_file = CliGroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
         except Exception as ex:
