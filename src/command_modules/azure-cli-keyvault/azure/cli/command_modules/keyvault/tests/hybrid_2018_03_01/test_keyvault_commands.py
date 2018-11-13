@@ -357,7 +357,7 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
-    def test_keyvault_certificate_issuers(self, resource_group):
+    def test_keyvault_certificate_issuers (self, resource_group):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
@@ -398,7 +398,6 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
             self.check('lastName', 'Admin'),
             self.check('phone', '123-456-7890'),
         ])
-        self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test@test.com')
         self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test2@test.com', checks=[
             self.check('emailAddress', 'test2@test.com'),
             self.check('firstName', None),
