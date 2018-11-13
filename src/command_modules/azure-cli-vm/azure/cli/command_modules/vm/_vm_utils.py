@@ -129,8 +129,9 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size=''):
+def normalize_disk_info(image_data_disks_num=0,
+                        data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below and will omit when we see conflictions
     # {
@@ -143,6 +144,13 @@ def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     info['os'] = {}
+
+    # update os diff disk settings
+    if ephemeral_os_disk:
+        info['os']['diffDiskSettings'] = {'option': 'Local'}
+        # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
+        if not os_disk_caching:
+            os_disk_caching = 'ReadOnly'
 
     # add unmanaged data disk luns.
     for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
