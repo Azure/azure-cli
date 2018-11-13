@@ -51,7 +51,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'sqlvm_list')
         g.command('delete', 'delete', confirmation=True)
         g.command('update', 'update')
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'sqlvm_create')
 
     ###############################################
     #      sql virtual machine groups             #

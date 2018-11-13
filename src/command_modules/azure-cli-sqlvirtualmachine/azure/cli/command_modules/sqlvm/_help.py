@@ -47,4 +47,13 @@ helps['sqlvm aglistener create'] = """
         - name: --port
           short-summary: Listener port.
     """
+helps['sqlvm create']="""
+    type: command
+    short-summary: Creates or Updates a SQL virtual machine.
+    parameters:
+        - name: --name -n
+          short-summary: Name of the SQL virtual machine. Name must match the SQL marketplace image name.
+        - name: --virtual-machine-resource-id
+          short-summary: ARM Resource id of underlying virtual machine created from SQL marketplace image.
+    """
 
