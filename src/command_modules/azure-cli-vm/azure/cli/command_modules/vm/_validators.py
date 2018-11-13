@@ -542,7 +542,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     nics = getattr(namespace, 'nics', None)
 
     if vnet and '/' in vnet:
-        raise CLIError("incorrect usage: --subnet SUBNET_ID | --subnet SUBNET_NAME --vnet-name VNET_NAME")
+        raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
     if not vnet and not subnet and not nics:
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
@@ -577,8 +577,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     if subnet:
         subnet_is_id = is_valid_resource_id(subnet)
         if (subnet_is_id and vnet) or (not subnet_is_id and not vnet):
-            raise CLIError("incorrect usage: --subnet SUBNET_ID | "
-                           "--subnet SUBNET_NAME --vnet-name VNET_NAME")
+            raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
             check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')
