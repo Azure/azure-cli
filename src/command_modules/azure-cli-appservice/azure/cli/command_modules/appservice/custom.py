@@ -1457,7 +1457,7 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
                                                                      webapp, slot, True)
         else:
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, (target_slot or 'production'), True)
+                                                                   slot, target_slot, True)
         return result
     else:  # reset
         # we will reset both source slot and target slot
