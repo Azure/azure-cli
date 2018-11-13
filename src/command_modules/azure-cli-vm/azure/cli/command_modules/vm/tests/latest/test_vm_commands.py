@@ -913,16 +913,13 @@ class VMExtensionScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0')
-        self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
-                 checks=self.check('length([])', 0))
         self.cmd('vm extension set -n {ext_type} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} '
-                 '--protected-settings "{config}" --force-update --extension-instance-name {ext_name}')
+                 '--protected-settings "{config}" --extension-instance-name {ext_name}')
 
-        result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext_name}', checks=[
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
             self.check('virtualMachineExtensionType', '{ext_type}')
         ]).get_output_in_json()
-        uuid.UUID(result['forceUpdateTag'])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
 
