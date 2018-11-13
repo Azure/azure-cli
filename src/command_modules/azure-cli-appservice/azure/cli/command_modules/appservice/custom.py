@@ -67,7 +67,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
-    node_default_version = "6.9.1"
+    node_default_version = '8.11.1'
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -1448,12 +1448,8 @@ def list_slots(cmd, resource_group_name, webapp):
 def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     if action == 'swap':
-        if target_slot is None:
-            poller = client.web_apps.swap_slot_with_production(resource_group_name,
-                                                               webapp, slot, True)
-        else:
-            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                    slot, target_slot, True)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                slot, (target_slot or 'production'), True)
         return poller
     elif action == 'preview':
         if target_slot is None:
@@ -1469,8 +1465,6 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             client.web_apps.reset_production_slot_config(resource_group_name, webapp)
         else:
             client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
         return None
 
 
@@ -1876,7 +1870,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='6.5.0'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
     if consumption_plan_location is None:
         site_config.always_on = True
