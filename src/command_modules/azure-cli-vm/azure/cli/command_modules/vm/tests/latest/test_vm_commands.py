@@ -2503,7 +2503,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {rule} --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {probe}')
         self.cmd('network nsg rule create -g {rg} --nsg-name {nsg} -n allowhttp --priority 4096 --destination-port-ranges 80 --protocol Tcp')
 
-        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n customScript --publisher Microsoft.Azure.Extensions --settings "{{\\"commandToExecute\\": \\"sudo apt-get install -y nginx\\"}}" --version 2.0')
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n customScript --publisher Microsoft.Azure.Extensions --settings "{{\\"commandToExecute\\": \\"apt-get update && sudo apt-get install -y nginx\\"}}" --version 2.0')
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids "*"')
 
         # verify the server works
@@ -2649,7 +2649,7 @@ class VMSSRollingUpgrade(ScenarioTest):
         _, settings_file = tempfile.mkstemp()
         with open(settings_file, 'w') as outfile:
             json.dump({
-                "commandToExecute": "sudo apt-get install -y nginx",
+                "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx",
             }, outfile)
         settings_file = settings_file.replace('\\', '\\\\')
         self.kwargs['settings'] = settings_file
@@ -2733,8 +2733,8 @@ class VMLBIntegrationTesting(ScenarioTest):
         self.cmd('network nic ip-config inbound-nat-rule add -g {rg} --lb-name {lb} --nic-name {vm2}VMNic --ip-config-name ipconfig{vm2} --inbound-nat-rule inbound-nat-rule2')
 
         # install nginx web servers
-        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"')
-        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"')
 
         # ensure all pieces are working together
         result = self.cmd('network public-ip show -g {rg} -n PublicIP{lb}').get_output_in_json()
