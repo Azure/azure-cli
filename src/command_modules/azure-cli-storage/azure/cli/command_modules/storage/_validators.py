@@ -106,9 +106,6 @@ def validate_client_parameters(cmd, namespace):
             account_key_args = [arg for arg in account_key_args if arg]
 
             if account_key_args:
-                from knack.log import get_logger
-
-                logger = get_logger(__name__)
                 logger.warning('In "login" auth mode, the following arguments are ignored: %s',
                                ' ,'.join(account_key_args))
             return
