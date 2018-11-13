@@ -112,6 +112,8 @@ class KeyVaultCommandGroup(AzCommandGroup):
                         # See https://github.com/Azure/autorest/issues/1309
                         return []
                 return _encode_hex(result)
+            except CLIError:  # CLI command errors should surface
+                raise
             except Exception as ex:  # pylint: disable=broad-except
                 if name == 'show':
                     # show_exception_handler needs to be called before the keyvault_exception_handler
