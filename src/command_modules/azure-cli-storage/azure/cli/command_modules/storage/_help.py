@@ -906,3 +906,13 @@ helps['storage file generate-sas'] = """
             end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
             az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
 """
+
+helps['storage blob url'] = """
+    type: command
+    short-summary: Create the url to access a blob.
+"""
+
+helps['storage file url'] = """
+    type: command
+    short-summary: Create the url to access a file.
+"""
