@@ -541,6 +541,9 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
+    if vnet and '/' in vnet:
+        raise CLIError("incorrect '--vnet-name' usage: '--vnet-name' must be a name, not an ID.")
+
     if not vnet and not subnet and not nics:
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
