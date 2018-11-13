@@ -240,7 +240,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
@@ -253,16 +253,13 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
 
     import requests
     import os
+    import time
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
-    response = requests.get(deployment_status_url, headers=authorization)
-    response = response.json()
-    if response.get('status', 0) != 4:
-        logger.warning(response.get('progress', ''))
-        response = _check_zip_deployment_status(deployment_status_url, authorization)
+    response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
     return response
 
 
@@ -1961,15 +1958,14 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def _check_zip_deployment_status(deployment_status_url, authorization):
+def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     import time
-    num_trials = 1
-    while num_trials < 10:
-        time.sleep(15)
+    total_trials = (int(timeout) // 30) if timeout else 10
+    for num_trials in range(total_trials):
+        time.sleep(30)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
-        num_trials = num_trials + 1
         if res_dict.get('status', 0) == 5:
             logger.warning("Zip deployment failed status %s", res_dict['status_text'])
             break
