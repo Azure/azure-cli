@@ -836,7 +836,7 @@ class ComputeListSkusScenarioTest(LiveScenarioTest):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Tier', 'Size', 'Restrictions'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Restrictions'])
         # spot check the first 4 entries
         fd_found, ud_found, size_found, zone_found = False, False, False, False
         for l in lines[2:]:
