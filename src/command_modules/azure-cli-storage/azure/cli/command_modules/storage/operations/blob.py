@@ -352,6 +352,11 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
+def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
+    return client.make_blob_url(
+        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
+
+
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_sas, source_blob_name):
     from azure.common import AzureException
