@@ -11,14 +11,14 @@ import six
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
-                                                tags_type, zone_type,
+                                                tags_type, zone_type, zones_type,
                                                 file_type, get_resource_group_completion_list,
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._validators import (
     dns_zone_name_type,
-    validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools)
+    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -93,7 +93,10 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway') as c:
         c.argument('application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
+        c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
+        c.argument('zones', zones_type)
+        c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -104,7 +107,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway', arg_group='Gateway') as c:
         c.argument('servers', ag_servers_type)
-        c.argument('capacity', help='The number of instances to use with the application gateway.')
+        c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
         c.argument('http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.')
         c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
@@ -128,7 +131,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway update', arg_group=None) as c:
         c.argument('sku', default=None)
         c.argument('enable_http2')
-        c.argument('capacity', help='The number of instances to use with the application gateway.')
+        c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
         {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
@@ -143,6 +146,8 @@ def load_arguments(self, _):
         {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
         {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
     ]
+    if self.supported_api_version(min_api='2018-08-01'):
+        ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
@@ -165,8 +170,12 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway address-pool') as c:
         c.argument('servers', ag_servers_type, arg_group=None)
 
-    with self.argument_context('network application-gateway auth-cert') as c:
-        c.argument('cert_data', options_list=['--cert-file'], help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
+    for scope in ['auth-cert', 'root-cert']:
+        with self.argument_context('network application-gateway {}'.format(scope)) as c:
+            c.argument('cert_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_cert)
+
+    with self.argument_context('network application-gateway root-cert') as c:
+        c.argument('keyvault_secret', help='KeyVault secret ID.')
 
     with self.argument_context('network application-gateway frontend-ip') as c:
         c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
@@ -225,7 +234,7 @@ def load_arguments(self, _):
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
 
     with self.argument_context('network application-gateway ssl-cert') as c:
-        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
+        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
         c.argument('cert_password', help='Certificate password.')
 
     with self.argument_context('network application-gateway ssl-policy') as c:
@@ -262,6 +271,11 @@ def load_arguments(self, _):
         c.argument('disabled_rules', nargs='+')
         c.argument('enabled', help='Specify whether the application firewall is enabled.', arg_type=get_enum_type(['true', 'false']))
         c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(ApplicationGatewayFirewallMode, default='detection'))
+
+    with self.argument_context('network application-gateway waf-config', min_api='2018-08-01') as c:
+        c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)
+        c.argument('max_request_body_size', help='Max request body size in KB.', type=int)
+        c.argument('request_body_check', arg_type=get_three_state_flag(), help='Allow WAF to check the request body.')
 
     for item in ['ssl-policy', 'waf-config']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:

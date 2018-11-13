@@ -36,7 +36,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        private_ip_address, private_ip_allocation, cert_data, cert_password,
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-                                       connection_draining_timeout, enable_http2):
+                                       connection_draining_timeout, enable_http2, min_capacity, zones,
+                                       custom_error_pages):
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -142,6 +143,11 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'sslCertificates': [ssl_cert]})
     if enable_http2 and cmd.supported_api_version(min_api='2017-10-01'):
         ag_properties.update({'enableHttp2': enable_http2})
+    if min_capacity and cmd.supported_api_version(min_api='2018-07-01'):
+        ag_properties.update({'autoscaleConfiguration': {'minCapacity': min_capacity}})
+        del ag_properties['sku']['capacity']
+    if custom_error_pages and cmd.supported_api_version(min_api='2018-08-01'):
+        ag_properties.update({'customErrorConfigurations': custom_error_pages})
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',
@@ -152,6 +158,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         'dependsOn': [],
         'properties': ag_properties
     }
+    if cmd.supported_api_version(min_api='2018-08-01'):
+        ag.update({'zones': zones})
     return ag
 
 
