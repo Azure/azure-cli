@@ -1,7 +1,11 @@
-import json
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
+import json
 import requests
-from azure.cli.command_modules.botservice.auth.adal_authenticator import AdalAuthenticator
+from .adal_authenticator import AdalAuthenticator
 from knack.util import CLIError
 
 

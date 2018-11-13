@@ -35,9 +35,11 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'adal',
     'azure-cli-core',
     'azure-mgmt-web==0.40.0',
-    'azure-mgmt-botservice'
+    'azure-mgmt-botservice',
+    'requests'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
