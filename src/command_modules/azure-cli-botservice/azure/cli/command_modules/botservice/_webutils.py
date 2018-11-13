@@ -27,6 +27,7 @@ def _process_parameters(parameter_lists):
     return parameters
 
 
+# TODO: Tear this out into separate class that deploys bots
 def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                         template_file=None, deployment_name=None,
                         parameters=None, mode=None):

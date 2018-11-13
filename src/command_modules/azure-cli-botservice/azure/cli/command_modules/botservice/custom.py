@@ -5,7 +5,14 @@
 
 import json
 import os
+import requests
+import re
 import shutil
+import string
+# TODO: Evalulate the use of requests and urllib3, where urllib3 is a dependency of requests
+import urllib3
+import random
+import zipfile
 
 from .auth.converged_app import ConvergedApp
 
@@ -18,15 +25,25 @@ from azure.cli.command_modules.botservice._webutils import (
     get_app_settings,
     _get_site_credential,
     _get_scm_url)
-from azure.mgmt.botservice.models import Bot, BotProperties, Sku
+from azure.mgmt.botservice.models import (
+    Bot,
+    BotProperties,
+    ConnectionSetting,
+    ConnectionSettingProperties,
+    ConnectionSettingParameter,
+    Sku)
+
+try:
+    # Try importing Python 3 urllib.parse
+    from urllib.parse import urlsplit
+except ImportError:
+    # If urllib.parse was not imported, use Python 2 module urlparse
+    from urlparse import urlsplit  # pylint: disable=import-error
 
 logger = get_logger(__name__)
 
+
 def get_bot_site_name(endpoint):
-    try:
-        from urllib.parse import urlsplit
-    except ImportError:
-        from urlparse import urlsplit  # pylint: disable=import-error
     split_parts = urlsplit(endpoint)
     return str(split_parts.netloc.split('.', 1)[0])
 
@@ -165,9 +182,6 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
     # Storage prep
     create_new_storage = False
     if not storageAccountName:
-        import re
-        import string
-        import random
         create_new_storage = True
         storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
                                     ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
@@ -202,12 +216,8 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
     if description:
         paramsdict['description'] = description
     if template_name == 'webappv4.template.json':
-
-        response = requests.get('https://dev.botframework.com/api/misc/botFileEncryptionKey')
-        if response.status_code not in [200]:
-            raise CLIError('Unable to provision a bot file encryption key. Please try again.')
-        bot_encrpytion_key = response.text[1:-1]
-        paramsdict['botFileEncryptionKey'] = bot_encrpytion_key
+        bot_encryption_key = get_bot_file_encryption_key()
+        paramsdict['botFileEncryptionKey'] = bot_encryption_key
     params = {k: {'value': v} for k, v in paramsdict.items()}
 
     # TODO concate 'templates' to file path
@@ -227,6 +237,21 @@ def create_app(cmd, client, resource_group_name, resource_name, description, kin
     return create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
 
 
+def get_bot_file_encryption_key():
+    """
+
+    :return:
+    """
+    
+    # Pulled out of create_app, which is the only place that performs this call
+    # TODO: Move to class for dev.botframework.com calls?
+    response = requests.get('https://dev.botframework.com/api/misc/botFileEncryptionKey')
+
+    # TODO: Tear this out? This method should probably fail gracefully, is a secret needed when the bot is provisioned?
+    # Can't a user create a new secret and then re-encrypt the bot file?
+    if response.status_code not in [200]:
+        raise CLIError('Unable to provision a bot file encryption key. Please try again.')
+    return response.text[1:-1]
 
 
 def update(client, parameters, resource_group_name):
@@ -283,7 +308,6 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
 
 def create_connection(client, resource_group_name, resource_name, connection_name, client_id,
                       client_secret, scopes, service_provider_name, parameters=None):
-    from azure.mgmt.botservice.models import ConnectionSetting, ConnectionSettingProperties, ConnectionSettingParameter
     service_provider = get_service_providers(client, name=service_provider_name)
     if not service_provider:
         raise CLIError('Invalid Service Provider Name passed. Use listprovider command to see all available providers')
@@ -317,8 +341,8 @@ def get_service_providers(client, name=None):
             raise CLIError('A service provider with the name {0} was not found'.format(name))
     return service_provider_response
 
+
 def create_upload_zip(code_dir, include_node_modules=True):
-    import zipfile
     file_excludes = ['upload.zip', 'db.lock', '.env']
     folder_excludes = ['packages', 'bin', 'obj']
     if not include_node_modules:
@@ -378,11 +402,10 @@ def _prepare_publish_v4(code_dir, proj_file):
 
         else:
             # put iisnode.yml and web.config
-            import requests
             response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
             with open('temp.zip', 'wb') as f:
                 f.write(response.content)
-            import zipfile
+
             zip_ref = zipfile.ZipFile('temp.zip')
             zip_ref.extractall()
             zip_ref.close()
@@ -406,11 +429,9 @@ def _prepare_publish_v4(code_dir, proj_file):
 
         else:
             # put iisnode.yml and web.config
-            import requests
             response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
             with open('temp.zip', 'wb') as f:
                 f.write(response.content)
-            import zipfile
             zip_ref = zipfile.ZipFile('temp.zip')
             zip_ref.extractall()
             zip_ref.close()
@@ -447,11 +468,9 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, site_name, None)
     scm_url = _get_scm_url(cmd, resource_group_name, site_name, None)
 
-    import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
 
-    import requests
     payload = {
         'command': 'rm -rf clirepo',
         'dir': r'site'
@@ -499,13 +518,11 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, site_name, None)
     scm_url = _get_scm_url(cmd, resource_group_name, site_name, None)
 
-    import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
     headers['content-type'] = 'application/json'
 
     # if repository folder exists, then get those contents for download
-    import requests
     response = requests.get(scm_url + '/api/zip/site/clirepo/', headers=authorization)
     if response.status_code != 200:
         # try getting the bot from wwwroot instead
@@ -521,7 +538,6 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     download_path = os.path.join(file_save_path, 'download.zip')
     with open(os.path.join(file_save_path, 'download.zip'), 'wb') as f:
         f.write(response.content)
-    import zipfile
     zip_ref = zipfile.ZipFile(download_path)
     zip_ref.extractall(folder_path)
     zip_ref.close()

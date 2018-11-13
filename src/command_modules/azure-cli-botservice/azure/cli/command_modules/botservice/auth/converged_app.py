@@ -14,7 +14,7 @@ class ConvergedApp:
     app_provision_api_url = 'https://dev.botframework.com/api/botApp/provisionConvergedApp?name={0}'
 
     @staticmethod
-    def provision(bot_name):
+    def provision(bot_name, verbose=False):
 
         # Use our authenticator to acquire a user token with a custom audience
         token = AdalAuthenticator.acquire_token()
@@ -30,12 +30,18 @@ class ConvergedApp:
         )
 
         # TODO: Verbose logging
+        # TODO: Fix this status_code check. If any status code below 400 is acceptable, check for response.ok instead of
+        # a specific status code. See http://docs.python-requests.org/en/master/api/#requests.Response.ok
         if response.status_code not in [201]:
-            raise CLIError(
-                "Unable to provision Microsoft Application automatically. "
-                "To manually provision a Microsoft Application, go to the Application Registration Portal at "
-                "https://apps.dev.microsoft.com/. Once you manually create you application, "
-                "pass the application Id and password as parameters for bot creation.")
+            if not verbose:
+                raise CLIError(
+                    "Unable to provision Microsoft Application automatically. "
+                    "To manually provision a Microsoft Application, go to the Application Registration Portal at "
+                    "https://apps.dev.microsoft.com/. Once you manually create you application, "
+                    "pass the application Id and password as parameters for bot creation.")
+            # Stub of logged error if verbose is True:
+            else:
+                raise CLIError("{0): {1}".format(response.status_code, response.text))
 
         response_content = json.loads(response.content.decode('utf-8'))
         msa_app_id = response_content['AppId']
