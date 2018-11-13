@@ -361,6 +361,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         if data_disks:
             profile['dataDisks'] = data_disks
 
+        if disk_info['os'].get('diffDiskSettings'):
+            profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
+
         return profile
 
     vm_properties = {
@@ -681,6 +684,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'caching': os_caching,
             'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
+        if disk_info['os'].get('diffDiskSettings'):
+            storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
