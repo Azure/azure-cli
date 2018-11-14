@@ -166,19 +166,6 @@ class AzCliCommand(CLICommand):
             arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
-        if isinstance(self.command_source, ExtensionCommandSource) and self.command_source.overrides_command:
-            logger.warning(self.command_source.get_command_warn_msg())
-
-        cmd_args = args[0]
-
-        confirm = self.confirmation and not cmd_args.pop('yes', None) \
-            and not self.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
-
-        if confirm and not self._user_confirmed(self.confirmation, cmd_args):
-            from knack.events import EVENT_COMMAND_CANCELLED
-            self.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=self.name, command_args=cmd_args)
-            raise CLIError('Operation cancelled.')
-
         return self.handler(*args, **kwargs)
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):
@@ -289,15 +276,37 @@ class AzCliCommandInvoker(CommandInvoker):
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
+
+        expanded_args = list(_explode_list_args(parsed_args))
+        cmd = parsed_args.func
+        self.cli_ctx.data['command'] = parsed_args.command
+        self.cli_ctx.data['safe_params'] = [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                                            (p.startswith('-') and len(p) > 1)]
+
+        command_source = self.commands_loader.command_table[command].command_source
+
+        extension_version = None
+        extension_name = None
+        try:
+            if isinstance(command_source, ExtensionCommandSource):
+                extension_name = command_source.extension_name
+                extension_version = get_extension(command_source.extension_name).version
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
+                                      self.cli_ctx.data['safe_params'],
+                                      extension_name=extension_name, extension_version=extension_version)
+        if extension_name:
+            self.data['command_extension_name'] = extension_name
+
+        self.resolve_warnings(cmd, parsed_args)
+        self.resolve_confirmation(cmd, parsed_args)
+
         results = []
-        for expanded_arg in _explode_list_args(parsed_args):
-            cmd = expanded_arg.func
+        for expanded_arg in expanded_args:
             if hasattr(expanded_arg, 'cmd'):
                 expanded_arg.cmd = cmd
-
-            self.cli_ctx.data['command'] = expanded_arg.command
-            self.cli_ctx.data['safe_params'] = [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
-                                                (p.startswith('-') and len(p) > 1)]
 
             if hasattr(expanded_arg, '_subscription'):
                 self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
@@ -305,44 +314,6 @@ class AzCliCommandInvoker(CommandInvoker):
             self._validation(expanded_arg)
 
             params = self._filter_params(expanded_arg)
-
-            command_source = self.commands_loader.command_table[command].command_source
-
-            extension_version = None
-            extension_name = None
-            try:
-                if isinstance(command_source, ExtensionCommandSource):
-                    extension_name = command_source.extension_name
-                    extension_version = get_extension(command_source.extension_name).version
-            except Exception:  # pylint: disable=broad-except
-                pass
-
-            telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
-                                          self.cli_ctx.data['safe_params'],
-                                          extension_name=extension_name, extension_version=extension_version)
-            if extension_name:
-                self.data['command_extension_name'] = extension_name
-
-            deprecations = [] + getattr(expanded_arg, '_argument_deprecations', [])
-            if cmd.deprecate_info:
-                deprecations.append(cmd.deprecate_info)
-
-            # search for implicit deprecation
-            path_comps = cmd.name.split()[:-1]
-            implicit_deprecate_info = None
-            while path_comps and not implicit_deprecate_info:
-                implicit_deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
-                del path_comps[-1]
-
-            if implicit_deprecate_info:
-                deprecate_kwargs = implicit_deprecate_info.__dict__.copy()
-                deprecate_kwargs['object_type'] = 'command'
-                del deprecate_kwargs['_get_tag']
-                del deprecate_kwargs['_get_message']
-                deprecations.append(ImplicitDeprecated(**deprecate_kwargs))
-
-            for d in deprecations:
-                logger.warning(d.message)
 
             try:
                 result = cmd(params)
@@ -383,6 +354,46 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    def resolve_warnings(self, cmd, parsed_args):
+        self._resolve_deprecation_warnings(cmd, parsed_args)
+        self._resolve_extension_override_warning(cmd)
+
+    def _resolve_deprecation_warnings(self, cmd, parsed_args):
+        deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
+        if cmd.deprecate_info:
+            deprecations.append(cmd.deprecate_info)
+
+        # search for implicit deprecation
+        path_comps = cmd.name.split()[:-1]
+        implicit_deprecate_info = None
+        while path_comps and not implicit_deprecate_info:
+            implicit_deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
+            del path_comps[-1]
+
+        if implicit_deprecate_info:
+            deprecate_kwargs = implicit_deprecate_info.__dict__.copy()
+            deprecate_kwargs['object_type'] = 'command'
+            del deprecate_kwargs['_get_tag']
+            del deprecate_kwargs['_get_message']
+            deprecations.append(ImplicitDeprecated(**deprecate_kwargs))
+
+        for d in deprecations:
+            logger.warning(d.message)
+
+    def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
+        if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
+            logger.warning(cmd.command_source.get_command_warn_msg())
+
+    def resolve_confirmation(self, cmd, parsed_args):
+        confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
+            and not cmd.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
+
+        parsed_args = self._filter_params(parsed_args)
+        if confirm and not cmd._user_confirmed(cmd.confirmation, parsed_args):  # pylint: disable=protected-access
+            from knack.events import EVENT_COMMAND_CANCELLED
+            cmd.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=cmd.name, command_args=parsed_args)
+            raise CLIError('Operation cancelled.')
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
         arg_list = get_arg_list(func)
