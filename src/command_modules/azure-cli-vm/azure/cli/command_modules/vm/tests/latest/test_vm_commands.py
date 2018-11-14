@@ -919,7 +919,7 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
             self.check('virtualMachineExtensionType', '{ext_type}')
-        ]).get_output_in_json()
+        ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
 
@@ -1180,7 +1180,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
             self.check('type', '{ext_type}')
-        ]).get_output_in_json()
+        ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
 
