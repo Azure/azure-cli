@@ -30,7 +30,6 @@ TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r
 
 
 def _write_config_file(user_name):
-    from datetime import datetime
 
     public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
                   'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
@@ -898,6 +897,31 @@ class VMExtensionScenarioTest(ScenarioTest):
         uuid.UUID(result['forceUpdateTag'])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
+    def test_vm_extension_instance_name(self, resource_group):
+
+        user_name = 'foouser1'
+        config_file = _write_config_file(user_name)
+
+        self.kwargs.update({
+            'vm': 'myvm',
+            'pub': 'Microsoft.OSTCExtensions',
+            'ext_type': 'VMAccessForLinux',
+            'config': config_file,
+            'user': user_name,
+            'ext_name': 'MyAccessExt'
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0')
+        self.cmd('vm extension set -n {ext_type} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} '
+                 '--protected-settings "{config}" --extension-instance-name {ext_name}')
+
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext_name}', checks=[
+            self.check('name', '{ext_name}'),
+            self.check('virtualMachineExtensionType', '{ext_type}')
+        ])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
+
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
@@ -1134,6 +1158,30 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('publisher', '{pub}'),
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
+    def test_vmss_extension_instance_name(self):
+        username = 'myadmin'
+        config_file = _write_config_file(username)
+
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'pub': 'Microsoft.Azure.NetworkWatcher',
+            'ext_type': 'NetworkWatcherAgentLinux',
+            'username': username,
+            'config_file': config_file,
+            'ext_name': 'MyNetworkWatcher'
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
+        self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
+                 '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
+        self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
+            self.check('name', '{ext_name}'),
+            self.check('type', '{ext_type}')
+        ])
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
