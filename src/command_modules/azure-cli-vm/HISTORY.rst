@@ -8,7 +8,8 @@ Release History
 * `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
 * `sig image-version`: Version names now consistently specified by  `--image-version -e`. `--image-version-name` deprecated.
 * `vm/vmss create --ephemeral-os-disk`: exposed parameter to create a vm/vmss with a local os disk.
-* `vm/vmss create --vnet-name`: validate that `--vnet-name` is a name and not an id.
+* `snapshot create/update`: Added support for `--no-wait`.
+* `snapshot`: Added `wait` command.
 
 2.2.7
 ++++++
