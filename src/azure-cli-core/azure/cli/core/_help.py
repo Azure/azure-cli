@@ -11,7 +11,6 @@ from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackComma
                         HelpAuthoringException, CLIHelp)
 
 from knack.log import get_logger
-from knack.util import CLIError
 
 from azure.cli.core.commands import ExtensionCommandSource
 
@@ -224,7 +223,8 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         self.min_profile = _data.get('min_profile', '')
         self.max_profile = _data.get('max_profile', '')
 
-        self.text = "{}\n{}".format(self.description, self.command) if self.description else self.command
+        if not self.text:
+            self.text = "{}\n{}".format(self.description, self.command) if self.description else self.command
 
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
@@ -235,9 +235,7 @@ class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-at
 
     def update_from_data(self, data):
         if self.name != data.get('name'):
-            raise HelpAuthoringException(u"mismatched name {} vs. {}"
-                                         .format(self.name,
-                                                 data.get('name')))
+            raise HelpAuthoringException(u"mismatched name {} vs. {}".format(self.name, data.get('name')))
 
         if data.get('summary'):
             self.short_summary = data.get('summary')
@@ -246,8 +244,22 @@ class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-at
             self.long_summary = data.get('description')
 
         if data.get('value-sources'):
+            self.value_sources = []
             self.raw_value_sources = data.get('value-sources')
             for value_source in self.raw_value_sources:
                 val_str = self._raw_value_source_to_string(value_source)
                 if val_str:
                     self.value_sources.append(val_str)
+
+    @staticmethod
+    def _raw_value_source_to_string(value_source):
+        if "string" in value_source:
+            return value_source["string"]
+        elif "link" in value_source:
+            link_text = ""
+            if "url" in value_source["link"]:
+                link_text = "url: {} ".format(value_source["link"]["url"])
+            if "command" in value_source["link"]:
+                link_text = "command: {} ".format(value_source["link"]["command"])
+            return link_text
+        return ""

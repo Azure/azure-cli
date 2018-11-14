@@ -8,7 +8,6 @@ from knack.help import HelpParameter as KnackHelpParameter
 from azure.cli.core._help import (HelpExample, HelpParameter, CliHelpFile)
 
 
-
 class BaseHelpLoader(object):
     VERSION = 0
 
@@ -44,23 +43,19 @@ class HelpLoaderV1(BaseHelpLoader):
                     info_type = key
                     info = value
                     break
+
+            # found the right entry in content, update help_obj
             if info:
-                break
-
-        help_obj.type = info_type
-        if "summary" in info:
-            help_obj.short_summary = info["summary"]
-        if "description" in info:
-            help_obj.long_summary = info["description"]
-        if "links" in info:
-            help_obj.links = info["links"]
-
-        if help_obj.type == "command":
-            self._load_command_data(help_obj, info)
-
-        return
-
-
+                help_obj.type = info_type
+                if "summary" in info:
+                    help_obj.short_summary = info["summary"]
+                if "description" in info:
+                    help_obj.long_summary = info["description"]
+                if "links" in info:
+                    help_obj.links = info["links"]
+                if help_obj.type == "command":
+                    self._load_command_data(help_obj, info)
+                return
 
     @staticmethod
     def _load_command_data(help_obj, info):
