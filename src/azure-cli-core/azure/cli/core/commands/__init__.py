@@ -383,11 +383,10 @@ class AzCliCommandInvoker(CommandInvoker):
             logger.warning(cmd.command_source.get_command_warn_msg())
 
     def resolve_confirmation(self, cmd, parsed_args):
-        parsed_args = self._filter_params(parsed_args)
-
-        confirm = cmd.confirmation and not parsed_args.pop('yes', None) \
+        confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
             and not cmd.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
 
+        parsed_args = self._filter_params(parsed_args)
         if confirm and not cmd._user_confirmed(cmd.confirmation, parsed_args):  # pylint: disable=protected-access
             from knack.events import EVENT_COMMAND_CANCELLED
             cmd.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=cmd.name, command_args=parsed_args)
