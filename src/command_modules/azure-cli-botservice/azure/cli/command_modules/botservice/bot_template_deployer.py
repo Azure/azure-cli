@@ -15,62 +15,37 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from .bot_json_formatter import BotJsonFormatter
+from .azure import azure_region_mapper
 
 
 class BotTemplateDeployer:
     # Function App
     function_template_name = 'functionapp.template.json'
+    csharp_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'
+    node_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'
+    v3_webapp_template_name = 'webapp.template.json'
+    v3_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'
+    v3_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'
 
-    # TODO: Move into Azure-specific folder
-    @staticmethod
-    def _get_app_insights_location(key):
-        region_map = {
-            'australiaeast': 'southeastasia',
-            'australiacentral': 'southeastasia',
-            'australiacentral2': 'southeastasia',
-            'australiasoutheast': 'southeastasia',
-            'eastasia': 'southeastasia',
-            'southeastasia': 'westus',
-            'eastus': 'eastus',
-            'eastus2': 'eastus',
-            'southcentralus': 'southcentralus',
-            'westcentralus': 'westus2',
-            'westus': 'westus2',
-            'westus2': 'westus2',
-            'brazilsouth': 'southcentralus',
-            'centralus': 'southcentralus',
-            'northcentralus': 'southcentralus',
-            'japanwest': 'southeastasia',
-            'japaneast': 'southeastasia',
-            'southindia': 'southeastasia',
-            'centralindia': 'southeastasia',
-            'westindia': 'southeastasia',
-            'canadacentral': 'southcentralus',
-            'canadaeast': 'eastus',
-            'koreacentral': 'southeastasia',
-            'koreasouth': 'southeastasia',
-            'northeurope': 'northeurope',
-            'westeurope': 'westeurope',
-            'uksouth': 'westeurope',
-            'ukwest': 'westeurope',
-            'francecentral': 'westeurope',
-            'francesouth': 'westeurope'
-        }
-        return region_map[key]
+    v4_webapp_template_name = 'webappv4.template.json'
+    v4_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'
+    v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'
 
-    # TODO: Tear this out into separate class that deploys bots
     @staticmethod
     def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
         DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                           'DeploymentProperties', 'TemplateLink', mod='models')
+
+        # TODO: Template is None, but then later reassigned without evaluation
         template = None
+        # TODO: get_file_json() can return None if specified, otherwise it will can throw an error.
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
         template_obj['resources'] = template_obj.get('resources', [])
-        parameters = BotTemplateDeployer._process_parameters(parameters) or {}
+        parameters = BotTemplateDeployer.__process_parameters(parameters) or {}
 
         import json
         template = json.loads(json.dumps(template))
@@ -90,30 +65,30 @@ class BotTemplateDeployer:
         # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
         if version == 'v3':
             if kind == 'function':
-                template_name = 'functionapp.template.json'
+                template_name = BotTemplateDeployer.function_template_name
                 if language == 'Csharp':
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'
+                    zip_url = BotTemplateDeployer.csharp_function_zip_url
                 else:
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'  # pylint: disable=line-too-long
+                    zip_url = BotTemplateDeployer.node_function_zip_url
 
             else:
                 kind = 'sdk'
-                template_name = 'webapp.template.json'
+                template_name = BotTemplateDeployer.v3_webapp_template_name
                 if language == 'Csharp':
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'  # pylint: disable=line-too-long
+                    zip_url = BotTemplateDeployer.v3_webapp_csharp_zip_url
                 else:
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'  # pylint: disable=line-too-long
+                    zip_url = BotTemplateDeployer.v3_webapp_node_zip_url
         elif version == 'v4':
             if kind == 'function':
                 raise CLIError('Function bot creation is not supported for v4 bot sdk.')
 
             else:
                 kind = 'sdk'
-                template_name = 'webappv4.template.json'
+                template_name = BotTemplateDeployer.v4_webapp_template_name
                 if language == 'Csharp':
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
+                    zip_url = BotTemplateDeployer.v4_webapp_csharp_zip_url
                 else:
-                    zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
+                    zip_url = BotTemplateDeployer.v4_webapp_node_zip_url
 
         # Storage prep
         create_new_storage = False
@@ -126,7 +101,7 @@ class BotTemplateDeployer:
                                ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
 
         # Application insights prep
-        appInsightsLocation = BotTemplateDeployer._get_app_insights_location(location.lower().replace(' ', ''))
+        appInsightsLocation = azure_region_mapper.AzureRegionMapper.get_app_insights_location(location.lower().replace(' ', ''))
 
         # ARM Template parameters
         paramsdict = {
@@ -157,9 +132,7 @@ class BotTemplateDeployer:
             paramsdict['botFileEncryptionKey'] = bot_encryption_key
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
-        # TODO concate 'templates' to file path
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = dir_path + '/templates/'
+        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/templates/'
         # Deploy ARM template
         deploy_result = BotTemplateDeployer.deploy_arm_template(
             cli_ctx=cmd.cli_ctx,
@@ -202,7 +175,7 @@ class BotTemplateDeployer:
             return None
 
     @staticmethod
-    def _process_parameters(parameter_lists):
+    def __process_parameters(parameter_lists):
         def _try_parse_json_object(value):
             try:
                 parsed = shell_safe_json_parse(value)

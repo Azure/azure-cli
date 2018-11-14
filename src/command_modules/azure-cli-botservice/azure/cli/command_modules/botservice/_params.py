@@ -13,6 +13,8 @@ from azure.cli.core.commands.parameters import (
 
 name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id_part='Name')
 
+supported_languages = ['Csharp', 'Node']
+
 
 # pylint: disable=line-too-long,too-many-statements
 def load_arguments(self, _):
@@ -30,7 +32,7 @@ def load_arguments(self, _):
         c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot.')
         c.argument('storageAccountName', options_list=['-s', '--storage'], help='Storage account name to be used with the bot. If not provided, a new account will be created.', arg_group='Web/Function bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(['Csharp', 'Node']), arg_group='Web/Function bot Specific')
+        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(supported_languages), arg_group='Web/Function bot Specific')
         c.argument('appInsightsLocation', help='The location for the app insights to be used with the bot.', options_list=['--insights-location'], arg_group='Web/Function bot Specific',
                    arg_type=get_enum_type(['South Central US', 'East US', 'West US 2', 'North Europe', 'West Europe', 'Southeast Asia']))
         c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')

@@ -18,6 +18,7 @@ from .bot_json_formatter import BotJsonFormatter
 
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.command_modules.botservice._params import supported_languages
 from azure.cli.command_modules.botservice._webutils import enable_zip_deploy
 from azure.mgmt.botservice.models import (
     Bot,
@@ -29,7 +30,7 @@ from azure.mgmt.botservice.models import (
 
 logger = get_logger(__name__)
 
-
+# TODO: Default version to v4 instead of v3?
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
@@ -45,6 +46,12 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+
+    # Normalize language input and check if language is supported.
+    language = language.capitalize()
+    if language not in supported_languages:
+        raise CLIError('Not supported language specified, please choose one of the following languages: "Csharp" or '
+                       '"Node"')
 
     # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
     if kind == registration_kind:
