@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import adal
-from azure.cli.command_modules.botservice.custom import logger
+# TODO: Rename import/change import to get new location of logger
+import azure.cli.command_modules.botservice.custom as custom
 
 
 class AdalAuthenticator:
@@ -30,7 +31,7 @@ class AdalAuthenticator:
         )
 
         # Request the user to perform device login
-        logger.warning(code['message'])
+        custom.logger.warning(code['message'])
 
         # Use the device code to retrieve a token
         token = context.acquire_token_with_device_code(

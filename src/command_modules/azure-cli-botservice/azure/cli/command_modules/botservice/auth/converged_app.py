@@ -5,7 +5,7 @@
 
 import json
 import requests
-from .adal_authenticator import AdalAuthenticator
+from . import adal_authenticator
 from knack.util import CLIError
 
 
@@ -17,7 +17,7 @@ class ConvergedApp:
     def provision(bot_name, verbose=False):
 
         # Use our authenticator to acquire a user token with a custom audience
-        token = AdalAuthenticator.acquire_token()
+        token = adal_authenticator.AdalAuthenticator.acquire_token()
         access_token = token['accessToken']
 
         # Prepare headers to call dev portal converged app provisioning API

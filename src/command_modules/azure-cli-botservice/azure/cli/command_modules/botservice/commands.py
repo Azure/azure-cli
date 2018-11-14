@@ -44,7 +44,7 @@ def load_command_table(self, _):
     )
 
     updateBotService_commandType = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.botservice.custom#{}',
+        operations_tmpl='azure.cli.command_modules.botservice.bot_template_deployer#BotTemplateDeployer.{}',
         client_factory=get_botservice_management_client,
         exception_handler=bot_exception_handler
     )
