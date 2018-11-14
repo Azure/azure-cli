@@ -381,7 +381,7 @@ class AzCliCommandInvoker(CommandInvoker):
         for d in deprecations:
             logger.warning(d.message)
 
-    def _resolve_extension_override_warning(self, cmd):
+    def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
             logger.warning(cmd.command_source.get_command_warn_msg())
 
