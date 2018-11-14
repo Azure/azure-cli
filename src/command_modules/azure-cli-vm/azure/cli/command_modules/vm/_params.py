@@ -147,7 +147,7 @@ def load_arguments(self, _):
         c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm update') as c:
-        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
