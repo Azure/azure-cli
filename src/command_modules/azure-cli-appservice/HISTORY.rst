@@ -7,6 +7,7 @@ Release History
 +++++
 * webapp, functionapp: Default Node_version updated. Resetting slot swap action, during a two phase swap preserves all the appsettings & connection strings
 * remove client side sku check for linux app service plan create
+* minor fix to avoid key errors when trying to get zipdeploy status
 
 0.2.6
 +++++
