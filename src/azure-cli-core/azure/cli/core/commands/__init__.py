@@ -356,7 +356,10 @@ class AzCliCommandInvoker(CommandInvoker):
             is_query_active=self.data['query_active'])
 
     def resolve_warnings(self, cmd, parsed_args):
-        # LOG DEPRECATION WARNINGS
+        self._resolve_deprecation_warnings(cmd, parsed_args)
+        self._resolve_extension_override_warning(cmd)
+
+    def _resolve_deprecation_warnings(self, cmd, parsed_args):
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
@@ -378,7 +381,7 @@ class AzCliCommandInvoker(CommandInvoker):
         for d in deprecations:
             logger.warning(d.message)
 
-        # LOG EXTENSION WARNINGS
+    def _resolve_extension_override_warning(self, cmd):
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
             logger.warning(cmd.command_source.get_command_warn_msg())
 
