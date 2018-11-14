@@ -5,6 +5,7 @@
 
 # pylint: disable=protected-access
 
+from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -16,6 +17,7 @@ from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+logger = get_logger(__name__)
 
 
 # Utilities
@@ -104,9 +106,6 @@ def validate_client_parameters(cmd, namespace):
             account_key_args = [arg for arg in account_key_args if arg]
 
             if account_key_args:
-                from knack.log import get_logger
-
-                logger = get_logger(__name__)
                 logger.warning('In "login" auth mode, the following arguments are ignored: %s',
                                ' ,'.join(account_key_args))
             return
@@ -322,6 +321,13 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 def validate_blob_type(namespace):
     if not namespace.blob_type:
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+
+
+def validate_storage_data_plane_list(namespace):
+    if namespace.num_results is None:
+        logger.warning('In a future release, if --num-results is not provided, the CLI will output only the first '
+                       '5000 results to minimize wait times. Users will be able to use a --all flag for the old '
+                       'behavior.')
 
 
 def get_content_setting_validator(settings_class, update, guess_from_file=None):
