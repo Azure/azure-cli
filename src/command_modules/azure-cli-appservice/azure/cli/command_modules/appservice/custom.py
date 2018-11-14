@@ -253,7 +253,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     import requests
     import os
-    import time
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
@@ -1962,7 +1961,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization, timeout=N
     import requests
     import time
     total_trials = (int(timeout) // 30) if timeout else 10
-    for num_trials in range(total_trials):
+    for _num_trials in range(total_trials):
         time.sleep(30)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
