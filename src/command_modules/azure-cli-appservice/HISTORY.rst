@@ -6,6 +6,7 @@ Release History
 0.2.7
 +++++
 * remove client side sku check for linux app service plan create
+* minor fix to avoid key errors when trying to get zipdeploy status
 
 0.2.6
 +++++
