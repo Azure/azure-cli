@@ -5,13 +5,11 @@
 
 from __future__ import print_function
 
-from knack.help import (HelpExample,
-                        HelpFile as KnackHelpFile,
-                        CommandHelpFile as KnackCommandHelpFile,
-                        GroupHelpFile as KnackGroupHelpFile,
-                        CLIHelp,
-                        HelpParameter,
-                        ArgumentGroupRegistry as KnackArgumentGroupRegistry)
+from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
+                        GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
+                        HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
+                        HelpAuthoringException, CLIHelp)
+
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -74,6 +72,9 @@ class AzCliHelp(CLIHelp):
 
         HelpObject._normalize_text = new_normalize_text  # pylint: disable=protected-access
 
+        self._register_help_loaders()
+
+
     @staticmethod
     def _print_extensions_msg(help_file):
         if help_file.type != 'command':
@@ -87,6 +88,19 @@ class AzCliHelp(CLIHelp):
         AzCliHelp._print_extensions_msg(help_file)
         super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
 
+    def _register_help_loaders(self):
+        import azure.cli.core._help_loaders as help_loaders
+        import inspect
+
+        def is_loader_cls(cls):
+            return inspect.isclass(cls) and issubclass(cls, help_loaders.BaseHelpLoader)
+
+        versioned_loaders = {}
+        for cls_name, loader_cls in inspect.getmembers(help_loaders, is_loader_cls):
+            loader = loader_cls(self)
+            versioned_loaders[cls_name] = loader
+
+        self.versioned_loaders = versioned_loaders
 
 class CliHelpFile(KnackHelpFile):
 
@@ -94,6 +108,7 @@ class CliHelpFile(KnackHelpFile):
         # Each help file (for a command or group) has a version denoting the source of its data.
         self.yaml_help_version = 0
         super(CliHelpFile, self).__init__(help_ctx, delimiters)
+        self.links = []
 
     def _should_include_example(self, ex):
         min_profile = ex.get('min_profile')
@@ -118,23 +133,9 @@ class CliHelpFile(KnackHelpFile):
                     self.examples.append(HelpExample(d))
 
     def load(self, options):
-        # if the parser's command has an associated yaml help file, load data from it.
-        prog = options.prog if hasattr(options, "prog") else options._prog_prefix
-        command_nouns = prog.split()[1:]
-        cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-
-        yaml_help = get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
-        if yaml_help and "version" in yaml_help:
-            self.yaml_help_version = yaml_help["version"]
-
-        if self.yaml_help_version == 1:
-            from azure.cli.core._help_util import update_help_file
-            update_help_file(self, yaml_help, options)
-            return
-
-        # Previous behavior. "version 0"
-        else:
-            super(CliHelpFile, self).load(options)
+        ordered_loaders = sorted(self.help_ctx.versioned_loaders.values(), key=lambda ldr: ldr.VERSION)
+        for loader in ordered_loaders:
+            loader.load(self, options)
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
@@ -210,44 +211,43 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
             priority += 1
 
 
-def get_yaml_help_for_nouns(nouns, cmd_loader_map_ref):
-    import inspect
-    import os
+class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
-    def _parse_yaml_from_string(text, help_file_path):
-        import yaml
+    def __init__(self, _data):
+        _data['name'] = _data.get('name', '')
+        _data['text'] = _data.get('text', '')
+        super(HelpExample, self).__init__(_data)
 
-        dir_name, base_name = os.path.split(help_file_path)
+        self.command = _data.get('command', '')
+        self.description = _data.get('description', '')
 
-        pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
+        self.min_profile = _data.get('min_profile', '')
+        self.max_profile = _data.get('max_profile', '')
 
-        try:
-            data = yaml.load(text)
-            if not data:
-                raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
-            return data
-        except yaml.YAMLError as e:
-            raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
+        self.text = "{}\n{}".format(self.description, self.command) if self.description else self.command
 
-    command_nouns = " ".join(nouns)
-    # if command in map, get the loader. Path of loader is path of helpfile.
-    loader = cmd_loader_map_ref.get(command_nouns, [None])[0]
 
-    if not loader:
-        for k, v in cmd_loader_map_ref.items():
-            # if loader name starts with noun / group, this is a command in the command group
-            if k.startswith(command_nouns):
-                loader = v[0]
-                break
+class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
 
-    if loader:
-        loader_file_path = inspect.getfile(loader.__class__)
-        dir_name = os.path.dirname(loader_file_path)
-        files = os.listdir(dir_name)
-        for file in files:
-            if file.endswith(".yaml") or file.endswith(".yml"):
-                help_file_path = os.path.join(dir_name, file)
-                with open(help_file_path, "r") as f:
-                    text = f.read()
-                    return _parse_yaml_from_string(text, help_file_path)
-    return None
+    def __init__(self, **kwargs):
+        super(HelpParameter, self).__init__(**kwargs)
+        self.raw_value_sources = []
+
+    def update_from_data(self, data):
+        if self.name != data.get('name'):
+            raise HelpAuthoringException(u"mismatched name {} vs. {}"
+                                         .format(self.name,
+                                                 data.get('name')))
+
+        if data.get('summary'):
+            self.short_summary = data.get('summary')
+
+        if data.get('description'):
+            self.long_summary = data.get('description')
+
+        if data.get('value-sources'):
+            self.raw_value_sources = data.get('value-sources')
+            for value_source in self.raw_value_sources:
+                val_str = self._raw_value_source_to_string(value_source)
+                if val_str:
+                    self.value_sources.append(val_str)
