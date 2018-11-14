@@ -41,6 +41,8 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
+    extension_instance_name_type = CLIArgumentType(help='Instance name of the extension. Default: name of the extension.')
+
     if StorageAccountTypes:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
     else:
@@ -489,9 +491,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm extension set') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:
