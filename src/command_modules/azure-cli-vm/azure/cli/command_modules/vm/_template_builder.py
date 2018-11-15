@@ -244,7 +244,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-        image_reference=None, os_disk_name=None, custom_image_os_type=None,
+        image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None):
@@ -266,7 +266,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
         if ssh_key_value and ssh_key_path:
             os_profile['linuxConfiguration'] = {
-                'disablePasswordAuthentication': True,
+                'disablePasswordAuthentication': authentication_type != 'all',
                 'ssh': {
                     'publicKeys': [
                         {
@@ -366,12 +366,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
         return profile
 
-    vm_properties = {
-        'hardwareProfile': {'vmSize': size},
-        'networkProfile': {'networkInterfaces': nics}
-    }
-
-    vm_properties['storageProfile'] = _build_storage_profile()
+    vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
+                     'storageProfile': _build_storage_profile()}
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
@@ -707,11 +703,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password' and admin_password:
+
+    if admin_password:
         os_profile['adminPassword'] = "[parameters('adminPassword')]"
-    else:
+
+    if ssh_key_value and ssh_key_path:
         os_profile['linuxConfiguration'] = {
-            'disablePasswordAuthentication': True,
+            'disablePasswordAuthentication': authentication_type != 'all',
             'ssh': {
                 'publicKeys': [
                     {
