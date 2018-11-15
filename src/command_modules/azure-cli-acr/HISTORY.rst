@@ -7,6 +7,7 @@ Release History
 +++++
 * Add context token to task step.
 * Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
 
 2.1.8
 +++++
