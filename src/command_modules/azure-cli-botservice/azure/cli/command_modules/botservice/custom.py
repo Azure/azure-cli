@@ -12,9 +12,11 @@ import urllib3
 import zipfile
 
 from .auth import converged_app
-from .bot_template_deployer import BotTemplateDeployer
-from .web_app_operations import WebAppOperations
 from .bot_json_formatter import BotJsonFormatter
+from .bot_publish_helper import BotPublishHelper
+from .bot_template_deployer import BotTemplateDeployer
+from .service_provider_manager import ServiceProviderManager
+from .web_app_operations import WebAppOperations
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -29,6 +31,7 @@ from azure.mgmt.botservice.models import (
     Sku)
 
 logger = get_logger(__name__)
+
 
 # TODO: Default version to v4 instead of v3?
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
@@ -101,6 +104,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
                           storageAccountName, location, sku_name, appInsightsLocation, language, version)
 
 
+# TODO: Unused function
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
     raw_bot_properties = client.bots.get(
         resource_group_name=resource_group_name,
@@ -114,7 +118,7 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
 
 def create_connection(client, resource_group_name, resource_name, connection_name, client_id,
                       client_secret, scopes, service_provider_name, parameters=None):
-    service_provider = get_service_providers(client, name=service_provider_name)
+    service_provider = ServiceProviderManager.get_service_providers(client, name=service_provider_name)
     if not service_provider:
         raise CLIError('Invalid Service Provider Name passed. Use listprovider command to see all available providers')
     connection_parameters = []
@@ -185,41 +189,6 @@ def check_response_status(response, expected_code=None):
             response.status_code, response.text))
 
 
-def find_proj(proj_file):
-    for root, _, files in os.walk(os.curdir):
-        for file_name in files:
-            if proj_file == file_name.lower():
-                return os.path.relpath(os.path.join(root, file_name))
-    raise CLIError('project file not found. Please pass a valid --proj-file.')
-
-
-def _prepare_publish_v4(code_dir, proj_file):
-    save_cwd = os.getcwd()
-    os.chdir(code_dir)
-    try:
-        if not os.path.exists(os.path.join('.', 'package.json')):
-            if proj_file is None:
-                raise CLIError('expected --proj-file parameter for csharp v4 project.')
-            with open('.deployment', 'w') as f:
-                f.write('[config]\n')
-                proj_file = proj_file.lower()
-                proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
-                f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(find_proj(proj_file)))
-
-        else:
-            # put iisnode.yml and web.config
-            response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
-            with open('temp.zip', 'wb') as f:
-                f.write(response.content)
-
-            zip_ref = zipfile.ZipFile('temp.zip')
-            zip_ref.extractall()
-            zip_ref.close()
-            os.remove('temp.zip')
-    finally:
-        os.chdir(save_cwd)
-
-
 def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file=None, sdk_version='v3'):
     # get the bot and ensure it's not a registration only bot
     raw_bot_properties = client.bots.get(
@@ -239,11 +208,11 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if sdk_version == 'v4':
             # automatically run prepare-publish in case of v4.
-            _prepare_publish_v4(code_dir, proj_file)
+            BotPublishHelper.prepare_publish_v4(code_dir, proj_file)
         else:
             raise CLIError('Not a valid azure publish directory. Please run prepare-publish.')
 
-    zip_filepath = create_upload_zip(code_dir, include_node_modules=False)
+    zip_filepath = BotPublishHelper.create_upload_zip(code_dir, include_node_modules=False)
     site_name = WebAppOperations.get_bot_site_name(raw_bot_properties.properties.endpoint)
     # first try to put the zip in clirepo
     user_name, password = WebAppOperations.get_site_credential(cmd.cli_ctx, resource_group_name, site_name, None)

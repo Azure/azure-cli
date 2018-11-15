@@ -127,6 +127,9 @@ class BotTemplateDeployer:
         }
         if description:
             paramsdict['description'] = description
+
+        # TODO: Do we still encrypt this file? Should it be on a user-specified basis?
+        # If the bot is a v4 bot, generate an encryption key for the .bot file
         if template_name == 'webappv4.template.json':
             bot_encryption_key = BotTemplateDeployer.get_bot_file_encryption_key()
             paramsdict['botFileEncryptionKey'] = bot_encryption_key
@@ -137,7 +140,7 @@ class BotTemplateDeployer:
         deploy_result = BotTemplateDeployer.deploy_arm_template(
             cli_ctx=cmd.cli_ctx,
             resource_group_name=resource_group_name,
-            template_file=os.path.join(dir_path, template_name), # This path is incorrect.
+            template_file=os.path.join(dir_path, template_name),
             parameters=[[json.dumps(params)]],
             deployment_name=resource_name,
             mode='Incremental'
@@ -148,7 +151,7 @@ class BotTemplateDeployer:
 
     @staticmethod
     def get_bot_file_encryption_key():
-        """
+        """Perform call to https://dev.botframework.com to get a .bot file encryption key.
 
         :return:
         """
