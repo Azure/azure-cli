@@ -8,7 +8,7 @@ from __future__ import print_function
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
-                        HelpAuthoringException, CLIHelp)
+                        CLIHelp)
 
 from knack.log import get_logger
 
@@ -92,7 +92,7 @@ class AzCliHelp(CLIHelp):
         import inspect
 
         def is_loader_cls(cls):
-            return inspect.isclass(cls) and issubclass(cls, help_loaders.BaseHelpLoader)
+            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader'and issubclass(cls, help_loaders.BaseHelpLoader) # pylint: disable=line-too-long
 
         versioned_loaders = {}
         for cls_name, loader_cls in inspect.getmembers(help_loaders, is_loader_cls):
@@ -100,6 +100,7 @@ class AzCliHelp(CLIHelp):
             versioned_loaders[cls_name] = loader
 
         self.versioned_loaders = versioned_loaders
+
 
 class CliHelpFile(KnackHelpFile):
 
@@ -129,12 +130,12 @@ class CliHelpFile(KnackHelpFile):
             self.examples = []
             for d in data['examples']:
                 if self._should_include_example(d):
-                    self.examples.append(HelpExample(d))
+                    self.examples.append(HelpExample(**d))
 
     def load(self, options):
         ordered_loaders = sorted(self.help_ctx.versioned_loaders.values(), key=lambda ldr: ldr.VERSION)
         for loader in ordered_loaders:
-            loader.load(self, options)
+            loader.versioned_load(self, options)
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
@@ -188,8 +189,9 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         self.parameters = loaded_params
 
     def load(self, options):
-        # forces class to use this load method even if KnackGroupHelpFile overrides CliHelpFile's method.
+        # forces class to use this load method even if KnackCommandHelpFile overrides CliHelpFile's method.
         CliHelpFile.load(self, options)
+
 
 class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-few-public-methods
 
@@ -212,54 +214,22 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
 
 class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, _data):
+    def __init__(self, **_data):
         _data['name'] = _data.get('name', '')
         _data['text'] = _data.get('text', '')
         super(HelpExample, self).__init__(_data)
 
-        self.command = _data.get('command', '')
-        self.description = _data.get('description', '')
-
         self.min_profile = _data.get('min_profile', '')
         self.max_profile = _data.get('max_profile', '')
 
-        if not self.text:
-            self.text = "{}\n{}".format(self.description, self.command) if self.description else self.command
+        self.summary = _data.get('summary', '')
+        self.command = _data.get('command', '')
+        self.description = _data.get('description', '')
 
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, **kwargs):
         super(HelpParameter, self).__init__(**kwargs)
+        # new field
         self.raw_value_sources = []
-
-    def update_from_data(self, data):
-        if self.name != data.get('name'):
-            raise HelpAuthoringException(u"mismatched name {} vs. {}".format(self.name, data.get('name')))
-
-        if data.get('summary'):
-            self.short_summary = data.get('summary')
-
-        if data.get('description'):
-            self.long_summary = data.get('description')
-
-        if data.get('value-sources'):
-            self.value_sources = []
-            self.raw_value_sources = data.get('value-sources')
-            for value_source in self.raw_value_sources:
-                val_str = self._raw_value_source_to_string(value_source)
-                if val_str:
-                    self.value_sources.append(val_str)
-
-    @staticmethod
-    def _raw_value_source_to_string(value_source):
-        if "string" in value_source:
-            return value_source["string"]
-        elif "link" in value_source:
-            link_text = ""
-            if "url" in value_source["link"]:
-                link_text = "url: {} ".format(value_source["link"]["url"])
-            if "command" in value_source["link"]:
-                link_text = "command: {} ".format(value_source["link"]["command"])
-            return link_text
-        return ""
