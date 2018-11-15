@@ -97,7 +97,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '6.9.1'),
+            JMESPathCheck('[0].value', '8.11.1'),
         ]))
 
     @ResourceGroupPreparer()
@@ -668,7 +668,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         # reset
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheck("[?name=='s1']|[0]", None)
+            JMESPathCheck("[?name=='s1']|[0].value", 'slot')
         ])
 
 

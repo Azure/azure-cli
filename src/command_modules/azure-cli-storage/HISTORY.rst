@@ -7,6 +7,8 @@ Release History
 +++++
 * Improve handling of corner cases for storage copy commands.
 * Fix issue with `storage blob copy start-batch` not using login credentials when the destination and source accounts are the same.
+* `storage blob/file url`- fix bug with sas_token not being incorporated into url.
+* Warn users about future breaking change: `blob/container list` will output first 5000 results by default.
 
 2.2.4
 +++++
