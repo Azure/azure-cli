@@ -6,6 +6,7 @@ Release History
 2.1.9
 +++++
 * Add context token to task step.
+* Add support for setting secrets in acr run to mirror acr task.
 
 2.1.8
 +++++

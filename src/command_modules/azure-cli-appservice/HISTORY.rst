@@ -5,8 +5,10 @@ Release History
 
 0.2.7
 +++++
+* webapp, functionapp: Zip deployment default timeout to poll for the status increased to 5 mins, also adding a timeout property to customize this value
+* webapp, functionapp: Default Node_version updated. Resetting slot swap action, during a two phase swap preserves all the appsettings & connection strings
 * remove client side sku check for linux app service plan create
-* update ACR SDK
+* minor fix to avoid key errors when trying to get zipdeploy status
 
 0.2.6
 +++++

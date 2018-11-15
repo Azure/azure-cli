@@ -56,7 +56,7 @@ def set_delete_policy(client, enable=None, days_retained=None):
     return client.get_blob_service_properties().delete_retention_policy
 
 
-def storage_blob_copy_batch(cmd, client, source_client, destination_container=None,
+def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
@@ -65,7 +65,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
         logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
-        logger.warning('  container %s', destination_container)
+        logger.warning('  container %s', container_name)
         logger.warning('     source %s', source_container or source_share)
         logger.warning('source type %s', 'blob' if source_container else 'file')
         logger.warning('    pattern %s', pattern)
@@ -76,7 +76,6 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
 
         # if the source client is None, recreate one from the destination client.
         source_client = source_client or create_blob_service_from_storage_client(cmd, client)
-
         if not source_sas:
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
                                                           source_container)
@@ -86,7 +85,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                return _copy_blob_to_blob_container(client, source_client, destination_container, destination_path,
+                return _copy_blob_to_blob_container(client, source_client, container_name, destination_path,
                                                     source_container, source_sas, blob_name)
 
         return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
@@ -109,7 +108,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _copy_file_to_blob_container(client, source_client, destination_container, destination_path,
+                return _copy_file_to_blob_container(client, source_client, container_name, destination_path,
                                                     source_share, source_sas, dir_name, file_name)
 
         return list(filter_none(action_file_copy(file) for file in collect_files(cmd,
@@ -351,6 +350,11 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
+
+
+def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
+    return client.make_blob_url(
+        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,

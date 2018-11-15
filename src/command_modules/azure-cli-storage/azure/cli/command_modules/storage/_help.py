@@ -209,7 +209,7 @@ helps['storage blob list'] = """
 
 helps['storage blob copy'] = """
     type: group
-    short-summary: Manage blob copy operations.
+    short-summary: Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob incremental-copy'] = """
@@ -373,11 +373,16 @@ helps['storage blob delete-batch'] = """
             az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 """
 
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
+"""
+
 helps['storage blob copy start-batch'] = """
     type: command
-    short-summary: Copy multiple blobs or files to a blob container.
+    short-summary: Copy multiple blobs or files to a blob container. Use `az storage blob show` to check the status of the blobs.
     parameters:
-        - name: --destination-container
+        - name: --destination-container -c
           type: string
           short-summary: The blob container where the selected source files or blobs will be copied to.
         - name: --pattern
@@ -793,6 +798,11 @@ helps['storage share policy'] = """
     short-summary: Manage shared access policies of a storage file share.
 """
 
+helps['storage share create'] = """
+    type: command
+    short-summary: Creates a new share under the specified account.
+"""
+
 helps['storage table'] = """
     type: group
     short-summary: Manage NoSQL key-value storage.
@@ -895,4 +905,14 @@ helps['storage file generate-sas'] = """
           text: |
             end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
             az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
+"""
+
+helps['storage blob url'] = """
+    type: command
+    short-summary: Create the url to access a blob.
+"""
+
+helps['storage file url'] = """
+    type: command
+    short-summary: Create the url to access a file.
 """

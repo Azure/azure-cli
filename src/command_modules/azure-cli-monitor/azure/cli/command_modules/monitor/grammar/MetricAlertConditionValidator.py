@@ -23,6 +23,11 @@ agg_conversion = {
     'total': 'Total'
 }
 
+dim_op_conversion = {
+    'includes': 'Include',
+    'excludes': 'Exclude'
+}
+
 # This class defines a complete listener for a parse tree produced by MetricAlertConditionParser.
 class MetricAlertConditionValidator(MetricAlertConditionListener):
 
@@ -72,7 +77,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
     # Exit a parse tree produced by MetricAlertConditionParser#dop.
     def exitDim_operator(self, ctx):
         op_text = ctx.getText().strip()
-        self.parameters['dimensions'][self._dimension_index]['operator'] = op_text.lower()
+        self.parameters['dimensions'][self._dimension_index]['operator'] = dim_op_conversion[op_text.lower()]
 
     # Exit a parse tree produced by MetricAlertConditionParser#dvalues.
     def exitDim_values(self, ctx):

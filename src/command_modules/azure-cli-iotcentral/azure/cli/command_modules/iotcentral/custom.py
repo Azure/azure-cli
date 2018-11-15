@@ -20,6 +20,7 @@ def iotcentral_app_create(
 ):
     cli_ctx = cmd.cli_ctx
     _check_name_availability(client, app_name)
+    _check_subdomain_availability(client, subdomain)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     display_name = _ensure_display_name(app_name, display_name)
     appSku = AppSkuInfo(name=sku)
@@ -62,8 +63,18 @@ def _check_name_availability(client, app_name):
     :param str app_name: App name to search for
     """
     name_availability = client.apps.check_name_availability(app_name)
-    if name_availability is not None and not name_availability.name_available:
+    if not name_availability.name_available:
         raise CLIError(name_availability.message)
+
+
+def _check_subdomain_availability(client, app_subdomain):
+    """Search the current subscription for an app with the given subdomain.
+    :param object client: IoTCentralClient
+    :param str app_subdomain: App subdomain to search for
+    """
+    subdomain_availability = client.apps.check_subdomain_availability(app_subdomain)
+    if not subdomain_availability.name_available:
+        raise CLIError(subdomain_availability.message)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):

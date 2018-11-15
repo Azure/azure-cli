@@ -13,7 +13,8 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>--version</CommandLineArguments>
+    <CommandLineArguments>
+    </CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -257,6 +258,9 @@
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_completers.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_help.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_params.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_validators.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\__init__.py" />
     <Compile Include="command_modules\azure-cli-appservice\setup.py" />
     <Compile Include="command_modules\azure-cli-backup\azure\cli\command_modules\backup\commands.py" />
