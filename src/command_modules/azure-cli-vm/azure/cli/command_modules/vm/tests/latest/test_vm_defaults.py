@@ -258,6 +258,10 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
 class TestVMDefaultAuthType(unittest.TestCase):
 
     @staticmethod
+    def _get_test_ssh_key():
+        return 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n'
+
+    @staticmethod
     def _set_ns():
         ns = argparse.Namespace()
         ns.storage_profile = None
@@ -275,6 +279,17 @@ class TestVMDefaultAuthType(unittest.TestCase):
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'password')
 
+    def test_windows_password_and_ssh_fails(self):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "WindowS"
+        ns.authentication_type = 'all'
+        ns.admin_username = 'user12345'
+        ns.admin_password = 'verySecret123'
+
+        with self.assertRaises(CLIError) as context:
+            _validate_vm_vmss_create_auth(ns)
+            self.assertTrue("SSH not supported for Windows VMs. Use password authentication." in str(context.exception))
+
     def test_default_linux(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "LINux"
@@ -282,7 +297,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         test_user = 'user12345'
         ns.admin_username = test_user
         ns.admin_password = None
-        ns.ssh_key_value = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n'
+        ns.ssh_key_value = self._get_test_ssh_key()
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'ssh')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(test_user))
@@ -299,9 +314,21 @@ class TestVMDefaultAuthType(unittest.TestCase):
 
         # throw when conflict with ssh key value
         ns.ssh_key_value = 'junk but does not matter'
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(CLIError) as context:
             _validate_vm_vmss_create_auth(ns)
-        self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
+            self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
+
+    def test_linux_with_password_and_ssh(self):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "LINux"
+        ns.authentication_type = 'all'
+        ns.admin_username = 'user12345'
+        ns.admin_password = 'verySecret!!!'
+        ns.ssh_key_value = self._get_test_ssh_key()
+
+        _validate_vm_vmss_create_auth(ns)
+        self.assertEqual(ns.authentication_type, 'all')
+        self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
 
 
 class TestVMImageDefaults(unittest.TestCase):
