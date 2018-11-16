@@ -102,7 +102,10 @@ def load_arguments(self, _):
 
         for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                try:
+                    c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                except ValueError:
+                    pass
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
                 c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
                 c.argument(item + '_version', required=False)

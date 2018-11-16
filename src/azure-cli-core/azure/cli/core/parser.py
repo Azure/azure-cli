@@ -11,7 +11,6 @@ import difflib
 import argparse
 import argcomplete
 
-from knack.deprecation import Deprecated
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
@@ -186,36 +185,3 @@ class AzCliCommandParser(CLICommandParser):
                 print(suggestion_msg, file=sys.stderr)
 
             self.exit(2)
-
-    @staticmethod
-    def _add_argument(obj, arg):
-        """ Only pass valid argparse kwargs to argparse.ArgumentParser.add_argument """
-        from knack.parser import ARGPARSE_SUPPORTED_KWARGS
-
-        argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
-        if arg.options_list:
-
-            scrubbed_options_list = []
-            for item in arg.options_list:
-
-                if isinstance(item, Deprecated):
-                    # don't add expired options to the parser
-                    if item.expired():
-                        continue
-
-                    class _DeprecatedOption(str):
-                        def __new__(cls, *args, **kwargs):
-                            instance = str.__new__(cls, *args, **kwargs)
-                            return instance
-
-                    option = _DeprecatedOption(item.target)
-                    setattr(option, 'deprecate_info', item)
-                    item = option
-                scrubbed_options_list.append(item)
-            return obj.add_argument(*scrubbed_options_list, **argparse_options)
-        else:
-            if 'required' in argparse_options:
-                del argparse_options['required']
-            if 'metavar' not in argparse_options:
-                argparse_options['metavar'] = '<{}>'.format(argparse_options['dest'].upper())
-            return obj.add_argument(**argparse_options)
