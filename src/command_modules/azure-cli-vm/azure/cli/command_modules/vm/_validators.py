@@ -837,9 +837,7 @@ def _validate_vm_vmss_create_auth(namespace):
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
         if namespace.ssh_key_value or namespace.ssh_dest_key_path:
-            raise ValueError(
-                "incorrect usage for authentication-type 'password': "
-                "[--admin-username USERNAME] --admin-password PASSWORD")
+            raise CLIError('SSH key cannot be used with password authentication type.')
 
         # if password not given, attempt to prompt user for password.
         if not namespace.admin_password:
@@ -852,7 +850,7 @@ def _validate_vm_vmss_create_auth(namespace):
     elif namespace.authentication_type == 'ssh':
 
         if namespace.admin_password:
-            raise ValueError('Admin password cannot be used with SSH authentication type')
+            raise CLIError('Admin password cannot be used with SSH authentication type.')
 
         validate_ssh_key(namespace)
 
