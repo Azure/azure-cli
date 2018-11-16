@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.9
+++++++
+* `vm/vmss create`: `--authentication-type` now accepts "all" to create a VM with password and ssh authentication.
+
 2.2.8
 ++++++
 * `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
