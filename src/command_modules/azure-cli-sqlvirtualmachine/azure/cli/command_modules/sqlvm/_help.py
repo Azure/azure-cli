@@ -25,18 +25,14 @@ helps['sqlvm op'] = """
     """
 helps['sqlvm group create'] = """
     type: command
-    short-summary: Creates or Updates a SQL virtual machine group.
+    short-summary: Creates or updates a SQL virtual machine group.
     parameters:
         - name: --name -n
           short-summary: Name of the SQL virtual machine group.
-        - name: --sql-image-offer
-          short-summary: SQL image offer.
-        - name: --sql-image-sku
-          short-summary: SQL image sku.
     """
 helps['sqlvm aglistener create'] = """
     type: command
-    short-summary: Creates or Updates an availability group listener.
+    short-summary: Creates or updates an availability group listener.
     parameters:
         - name: --name -n
           short-summary: Name of the availability group listener.
@@ -44,16 +40,18 @@ helps['sqlvm aglistener create'] = """
           short-summary: Name of the SQL virtual machine group.
         - name: --availability-group-name
           short-summary: Name of the availability group.
-        - name: --port
-          short-summary: Listener port.
     """
 helps['sqlvm create']="""
     type: command
-    short-summary: Creates or Updates a SQL virtual machine.
+    short-summary: Creates or updates a SQL virtual machine.
     parameters:
         - name: --name -n
-          short-summary: Name of the SQL virtual machine. Name must match the SQL marketplace image name.
+          short-summary: Name of the SQL virtual machine. The name of the new SQL virtual machine must be equal to the underlying virtual machine created from SQL marketplace image.
         - name: --virtual-machine-resource-id
           short-summary: ARM Resource id of underlying virtual machine created from SQL marketplace image.
+    examples:
+        - name: Create a SQL virtual machine with AHUB billing tag.
+          text: >
+            az sqlvm create -n SqlVm -g MyResourceGroup -l eastus -sql_server_license_type AHUB
     """
 
