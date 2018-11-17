@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.9
+++++++
+* `vm extension show / wait`: deprecated --expand parameter
+
 2.2.8
 ++++++
 * `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
