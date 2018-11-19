@@ -4,6 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import timeit
+
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 from automation.utilities.path import get_repo_root
@@ -25,6 +29,7 @@ def persist_command_table(cmd_to_loader_map):
 
 # TODO: this needs to handle extensions as well....
 def load_command_table(main_loader, args):
+    start_time = timeit.default_timer()
     from azure.cli.core.commands import _load_module_command_loader
 
     cmd_to_mod_name = {}
@@ -49,6 +54,9 @@ def load_command_table(main_loader, args):
 
     main_loader.command_table.update(module_command_table)
     main_loader.command_group_table.update(module_group_table)
+
+    elapsed_time = timeit.default_timer() - start_time
+    logger.debug("Loaded relevant modules' in %.3f seconds.", elapsed_time)
 
     return main_loader.command_table
 
