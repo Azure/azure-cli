@@ -199,12 +199,24 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from knack.util import CommandResultItem, todict
         from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+        from azure.cli.core.commands import cache
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
-        self.commands_loader.load_command_table(args)
+        success = False
+        if cache.cache_exists():
+            print("attempting to use cache")
+            success = cache.load_command_table(self.commands_loader, args) is not None
+
+        if not success or not cache.cache_exists():
+            print("not using cache")
+            self.commands_loader.load_command_table(args)
+            if os.getenv('AZ_USE_CACHE', 'False').lower() == 'true':
+                print("persisting cache")
+                cache.persist_command_table(self.commands_loader.cmd_to_loader_map)
+
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)

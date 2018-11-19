@@ -1,0 +1,7 @@
+# https://serverfault.com/questions/273238/how-to-run-a-command-multiple-times-using-bash-shell
+echo "Use cache is $AZ_USE_CACHE"
+number=$1
+for i in `seq $number`; do
+    az account show #>/dev/null 2>&1
+done
+
