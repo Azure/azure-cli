@@ -9,8 +9,10 @@ from ._validators import validate_component_version
 
 # Cluster types may be added in the future. Therefore, this list can be used for completion, but not input validation.
 known_cluster_types = ["hadoop", "interactivehive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]
+known_role_types = ["headnode", "workernode", "zookeepernode", "edgenode"]
 
 
+# pylint: disable=too-many-statements
 def load_arguments(self, _):
     from ._completers import storage_account_completion_list, storage_account_key_completion_list
     from knack.arguments import CLIArgumentType
@@ -18,6 +20,7 @@ def load_arguments(self, _):
                                      help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/'
                                           'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
+    # cluster
     with self.argument_context('hdinsight') as c:
         c.argument('cluster_name', arg_type=name_type,
                    completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
@@ -79,3 +82,41 @@ def load_arguments(self, _):
                    help='The virtual network resource ID of an existing virtual network.')
         c.argument('subnet_name', arg_group='Network',
                    help='The name of the subnet in the specified virtual network.')
+        c.argument('script_action_name', arg_group='Script Action', help='The name of the script action.')
+        c.argument('script_uri', arg_group='Script Action', help='The URI to the script.')
+        c.argument('script_parameters', arg_group='Script Action', help='The parameters for the script.')
+
+    # application
+    with self.argument_context('hdinsight application') as c:
+        c.argument('application_name', arg_group='Application', help='The constant value for the application name.')
+        c.argument('application_type', arg_group='Application', help='The application type.')
+        c.argument('marketplace_identifier', arg_group='Application', help='The marketplace identifier.')
+        c.argument('https_endpoint_access_mode', arg_group='HTTPS Endpoint',
+                   help='The access mode for the application.')
+        c.argument('https_endpoint_destination_port', arg_group='HTTPS Endpoint',
+                   help='The destination port to connect to.')
+        c.argument('https_endpoint_location', arg_group='HTTPS Endpoint', help='The location of the endpoint.')
+        c.argument('https_endpoint_public_port', arg_group='HTTPS Endpoint', help='The public port to connect to.')
+        c.argument('ssh_endpoint_destination_port', arg_group='SSH Endpoint',
+                   help='The destination port to connect to.')
+        c.argument('ssh_endpoint_location', arg_group='SSH Endpoint', help='The location of the endpoint.')
+        c.argument('ssh_endpoint_public_port', arg_group='SSH Endpoint', help='The public port to connect to.')
+        c.argument('tags', tags_type)
+        c.argument('ssh_password', options_list=['--ssh-password', '-P'], arg_group='SSH',
+                   help='SSH password for the cluster nodes.')
+
+    # script action
+    with self.argument_context('hdinsight script-action') as c:
+        c.argument('roles', arg_group='Script Action',
+                   completer=get_generic_completion_list(known_role_types),
+                   help='A comma-delimited list of roles (nodes) where the script will be executed. '
+                        'Valid roles are {}.'.format(', '.join(known_role_types)))
+        c.argument('persist_on_success', arg_group='Script Action', help='If the scripts needs to be persisted.')
+        c.argument('persisted', arg_group='Script Action', help='If only list persisted script actions.')
+        c.argument('script_name', options_list='--script-action-name', arg_group='Script Action',
+                   help='The name of the script action.')
+
+    # OMS
+    with self.argument_context('hdinsight oms') as c:
+        c.argument('workspace_id', arg_group='OMS', help='The Operations Management Suite (OMS) workspace ID.')
+        c.argument('primary_key', arg_group='OMS', help='The Operations Management Suite (OMS) workspace key.')

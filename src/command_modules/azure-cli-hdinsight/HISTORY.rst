@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.0
++++++
+
+* Add commands for managing applications
+* Add commands for managing script actions
+* Add commands for managing Operations Management Suite (OMS)
+* `hdinsight usage`: support to list regional usages
+
 0.1.0
 +++++
 
