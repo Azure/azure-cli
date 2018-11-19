@@ -936,10 +936,11 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-triggered'
@@ -954,10 +955,11 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-continuous'

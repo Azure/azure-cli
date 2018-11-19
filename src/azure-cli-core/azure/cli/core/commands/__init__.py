@@ -208,6 +208,7 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)
+        self.cli_ctx.invocation.data['command_string'] = command
         telemetry.set_raw_command_name(command)
 
         try:
@@ -263,7 +264,7 @@ class AzCliCommandInvoker(CommandInvoker):
             # TODO: No event in base with which to target
             telemetry.set_command_details('az')
             telemetry.set_success(summary='welcome')
-            return None
+            return CommandResultItem(None, exit_code=0)
 
         if args[0].lower() == 'help':
             args[0] = '--help'
@@ -340,7 +341,7 @@ class AzCliCommandInvoker(CommandInvoker):
             except Exception as ex:  # pylint: disable=broad-except
                 if cmd.exception_handler:
                     cmd.exception_handler(ex)
-                    return None
+                    return CommandResultItem(None, exit_code=1, error=ex)
                 else:
                     six.reraise(*sys.exc_info())
 
@@ -414,25 +415,6 @@ class AzCliCommandInvoker(CommandInvoker):
             if ('additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict)):
                 converted_dic.update(converted_dic.pop('additionalProperties'))
         return converted_dic
-
-    def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
-        """ Rudimentary parsing to get the command """
-        nouns = []
-        command_names = self.commands_loader.command_table.keys()
-        for arg in args:
-            if arg and arg[0] != '-':
-                nouns.append(arg)
-            else:
-                break
-
-        def _find_args(args):
-            search = ' '.join(args)
-            return next((x for x in command_names if x.startswith(search)), False)
-
-        # since the command name may be immediately followed by a positional arg, strip those off
-        while nouns and not _find_args(nouns):
-            del nouns[-1]
-        return ' '.join(nouns)
 
     def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
         if cmd_validator:

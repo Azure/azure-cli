@@ -6,6 +6,7 @@ Release History
 2.2.9
 ++++++
 * `vm/vmss create`: `--authentication-type` now accepts/infers "all" to create a VM with both password and ssh authentication.
+* `vm extension show / wait`: deprecated --expand parameter
 
 2.2.8
 ++++++
