@@ -174,7 +174,7 @@ helps['eventhubs eventhub create'] = """
     short-summary: Creates the Event Hubs Eventhub
     examples:
         - name: Create a new Eventhub.
-          text: az eventhubs eventhub create --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 4 ---partition-count 15
+          text: az eventhubs eventhub create --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 4 --partition-count 15
 """
 
 helps['eventhubs eventhub update'] = """
@@ -182,7 +182,7 @@ helps['eventhubs eventhub update'] = """
     short-summary: Updates the Event Hubs Eventhub
     examples:
         - name: Updates a new Eventhub.
-          text: az eventhubs eventhub update --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 3 ---partition-count 12
+          text: az eventhubs eventhub update --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 3 --partition-count 12
 """
 
 helps['eventhubs eventhub show'] = """
