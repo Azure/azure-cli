@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import adal
-# TODO: Rename import/change import to get new location of logger
-import azure.cli.command_modules.botservice.custom as custom
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class AdalAuthenticator:
@@ -31,7 +32,7 @@ class AdalAuthenticator:
         )
 
         # Request the user to perform device login
-        custom.logger.warning(code['message'])
+        logger.warning(code['message'])
 
         # Use the device code to retrieve a token
         token = context.acquire_token_with_device_code(

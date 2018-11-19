@@ -14,22 +14,23 @@ from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
-from .bot_json_formatter import BotJsonFormatter
-from .azure import azure_region_mapper
+from azure.cli.command_modules.botservice._params import supported_languages
+from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
+from azure.cli.command_modules.botservice.azure import azure_region_mapper
 
 
 class BotTemplateDeployer:
     # Function App
     function_template_name = 'functionapp.template.json'
-    csharp_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'
-    node_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'
+    csharp_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'  # pylint: disable=line-too-long
+    node_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'  # pylint: disable=line-too-long
     v3_webapp_template_name = 'webapp.template.json'
-    v3_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'
-    v3_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'
+    v3_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'  # pylint: disable=line-too-long
+    v3_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'  # pylint: disable=line-too-long
 
     v4_webapp_template_name = 'webappv4.template.json'
-    v4_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'
-    v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'
+    v4_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
+    v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     @staticmethod
     def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
@@ -59,8 +60,14 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password,
-                   storageAccountName,
-                   location, sku_name, appInsightsLocation, language, version):
+                   storageAccountName, location, sku_name, appInsightsLocation, language, version):
+
+        # Normalize language input and check if language is supported.
+        language = language.capitalize()
+        if language not in supported_languages:
+            raise CLIError(
+                'Not supported language specified, please choose one of the following languages: "Csharp" or '
+                '"Node"')
 
         # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
         if version == 'v3':
@@ -135,8 +142,8 @@ class BotTemplateDeployer:
             paramsdict['botFileEncryptionKey'] = bot_encryption_key
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
+        # Get and deploy ARM template
         dir_path = os.path.dirname(os.path.realpath(__file__)) + '/templates/'
-        # Deploy ARM template
         deploy_result = BotTemplateDeployer.deploy_arm_template(
             cli_ctx=cmd.cli_ctx,
             resource_group_name=resource_group_name,
@@ -153,7 +160,7 @@ class BotTemplateDeployer:
     def get_bot_file_encryption_key():
         """Perform call to https://dev.botframework.com to get a .bot file encryption key.
 
-        :return:
+        :return: string
         """
 
         # Pulled out of create_app, which is the only place that performs this call

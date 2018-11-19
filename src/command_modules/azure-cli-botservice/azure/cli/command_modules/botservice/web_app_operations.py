@@ -46,14 +46,13 @@ class WebAppOperations:
     @staticmethod
     def get_site_credential(cli_ctx, resource_group_name, name, slot=None):
         creds = WebAppOperations.__generic_site_operation(cli_ctx, resource_group_name, name,
-                                                         'list_publishing_credentials', slot)
+                                                          'list_publishing_credentials', slot)
         creds = creds.result()
         return creds.publishing_user_name, creds.publishing_password
 
     @staticmethod
     def __web_client_factory(cli_ctx, **_):
-        mgmt_client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
-        return mgmt_client
+        return get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
 
     @staticmethod
     def __build_app_settings_output(app_settings, slot_cfg_names):

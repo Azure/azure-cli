@@ -61,7 +61,7 @@ class BotPublishHelper:
                     f.write('[config]\n')
                     proj_file = proj_file.lower()
                     proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
-                    f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(BotPublisher.find_proj(proj_file)))
+                    f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(BotPublishHelper.find_proj(proj_file)))
 
             else:
                 # put iisnode.yml and web.config

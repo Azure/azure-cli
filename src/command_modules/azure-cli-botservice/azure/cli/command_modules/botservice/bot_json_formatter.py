@@ -8,9 +8,20 @@ from .web_app_operations import WebAppOperations
 
 
 class BotJsonFormatter:
+
     @staticmethod
-    # TODO: this will fail if the bot is a registration bot via the if not app_pw check
     def create_bot_json(cmd, client, resource_group_name, resource_name, app_password=None, raw_bot_properties=None):
+        """
+
+        :param cmd:
+        :param client:
+        :param resource_group_name:
+        :param resource_name:
+        :param app_password:
+        :param raw_bot_properties:
+        :return: Dictionary
+
+        """
         if not raw_bot_properties:
             raw_bot_properties = client.bots.get(
                 resource_group_name=resource_group_name,
