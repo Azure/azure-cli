@@ -266,7 +266,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
         if ssh_key_value and ssh_key_path:
             os_profile['linuxConfiguration'] = {
-                'disablePasswordAuthentication': authentication_type != 'all',
+                'disablePasswordAuthentication': authentication_type == 'ssh',
                 'ssh': {
                     'publicKeys': [
                         {
@@ -709,7 +709,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if ssh_key_value and ssh_key_path:
         os_profile['linuxConfiguration'] = {
-            'disablePasswordAuthentication': authentication_type != 'all',
+            'disablePasswordAuthentication': authentication_type == 'ssh',
             'ssh': {
                 'publicKeys': [
                     {

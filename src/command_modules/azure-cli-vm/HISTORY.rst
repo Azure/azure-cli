@@ -5,7 +5,7 @@ Release History
 
 2.2.9
 ++++++
-* `vm/vmss create`: `--authentication-type` now accepts "all" to create a VM with password and ssh authentication.
+* `vm/vmss create`: `--authentication-type` now accepts/infers "all" to create a VM with both password and ssh authentication.
 
 2.2.8
 ++++++

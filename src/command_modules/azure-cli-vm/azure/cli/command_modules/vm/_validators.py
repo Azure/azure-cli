@@ -827,9 +827,13 @@ def _validate_vm_vmss_create_auth(namespace):
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
-        # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        namespace.authentication_type = 'password' \
-            if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
+        # if both ssh key and password, infer that authentication_type is all.
+        if namespace.ssh_key_value and namespace.admin_password:
+            namespace.authentication_type = 'all'
+        else:
+            # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
+            namespace.authentication_type = 'password' \
+                if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')

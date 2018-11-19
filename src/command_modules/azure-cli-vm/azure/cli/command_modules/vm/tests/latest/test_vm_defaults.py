@@ -282,10 +282,18 @@ class TestVMDefaultAuthType(unittest.TestCase):
     def test_windows_password_and_ssh_fails(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "WindowS"
-        ns.authentication_type = 'all'
+        ns.authentication_type = None
         ns.admin_username = 'user12345'
         ns.admin_password = 'verySecret123'
+        ns.ssh_key_value = self._get_test_ssh_key()
 
+        # test fails if authentication_type implicit
+        with self.assertRaises(CLIError) as context:
+            _validate_vm_vmss_create_auth(ns)
+            self.assertTrue("SSH not supported for Windows VMs. Use password authentication." in str(context.exception))
+
+        # test fails if authentication type explicit
+        ns.authentication_type = 'all'
         with self.assertRaises(CLIError) as context:
             _validate_vm_vmss_create_auth(ns)
             self.assertTrue("SSH not supported for Windows VMs. Use password authentication." in str(context.exception))
@@ -318,10 +326,22 @@ class TestVMDefaultAuthType(unittest.TestCase):
             _validate_vm_vmss_create_auth(ns)
             self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
 
-    def test_linux_with_password_and_ssh(self):
+    def test_linux_with_password_and_ssh_explicit(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "LINux"
         ns.authentication_type = 'all'
+        ns.admin_username = 'user12345'
+        ns.admin_password = 'verySecret!!!'
+        ns.ssh_key_value = self._get_test_ssh_key()
+
+        _validate_vm_vmss_create_auth(ns)
+        self.assertEqual(ns.authentication_type, 'all')
+        self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
+
+    def test_linux_with_password_and_ssh_explicit(self):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "LINux"
+        ns.authentication_type = None
         ns.admin_username = 'user12345'
         ns.admin_password = 'verySecret!!!'
         ns.ssh_key_value = self._get_test_ssh_key()
