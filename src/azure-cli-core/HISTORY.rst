@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.52
+++++++
+* Minor fixes
+
 2.0.51
 ++++++
 * msi login: do not reuse subscription name for identity info
