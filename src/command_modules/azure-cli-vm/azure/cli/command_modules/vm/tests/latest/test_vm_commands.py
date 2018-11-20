@@ -733,6 +733,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self._check_vm_power_state('PowerState/running')
         self.cmd('vm restart --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/running')
+        self.cmd('vm restart --resource-group {rg} --name {vm} --force')
+        self._check_vm_power_state('PowerState/running')
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
