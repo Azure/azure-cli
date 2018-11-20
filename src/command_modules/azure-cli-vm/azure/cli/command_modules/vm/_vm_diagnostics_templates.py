@@ -262,7 +262,7 @@ def get_default_diag_config(is_windows):
                         ]
                     },
                     "Metrics": {
-                        "resourceId": "[variables('wadmetricsresourceid')]",
+                        "resourceId": "__VM_OR_VMSS_RESOURCE_ID__",
                         "MetricAggregation": [
                             {
                                 "scheduledTransferPeriod": "PT1H"

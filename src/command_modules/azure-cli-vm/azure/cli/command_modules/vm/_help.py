@@ -560,6 +560,30 @@ helps['vm diagnostics set'] = """
             az vm diagnostics set --settings "{default_config}" \\
                 --protected-settings "{protected_settings}" \\
                 --resource-group $my_resource_group --vm-name $my_linux_vm
+        - name: Set up default diagnostics on a Windows VM for Azure Portal VM metrics graphs and syslog collection.
+          text: >
+            # Set the following 3 parameters first.\n
+            my_resource_group=<Resource group name containing your Windows VM and the storage account>\n
+            my_windows_vm=<Your Azure Windows VM name>\n
+            my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>\n
+
+            my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_windows_vm --query "id" -o tsv)\n
+
+            default_config=$(az vm diagnostics get-default-config \\
+                | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
+                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
+
+            storage_sastoken=$(az storage account generate-sas \\
+                --account-name $my_diagnostic_storage_account  --start 2017-12-31T23:59:00Z \\
+                --expiry 2037-12-31T23:59:00Z --permissions wlacu --resource-types co \\
+                --services bt -o tsv)
+
+            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
+                'storageAccountSasToken': '{storage_sastoken}'}"
+
+            az vm diagnostics set --settings "{default_config}" \\
+                --protected-settings "{protected_settings}" \\
+                --resource-group $my_resource_group --vm-name $my_windows_vm
 """
 
 disk_long_summary = """
