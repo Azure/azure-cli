@@ -538,7 +538,7 @@ helps['openshift create'] = """
     type: command
     short-summary: (PREVIEW) Create a new managed OpenShift cluster.
     parameters:
-        - name: --node-vm-size -s
+        - name: --compute-vm-size -s
           type: string
           short-summary: Size of Virtual Machines to create as OpenShift nodes.
         - name: --compute-count -c
