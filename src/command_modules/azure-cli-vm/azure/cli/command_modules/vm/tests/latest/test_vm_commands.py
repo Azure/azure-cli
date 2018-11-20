@@ -733,6 +733,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self._check_vm_power_state('PowerState/running')
         self.cmd('vm restart --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/running')
+        self.cmd('vm restart --resource-group {rg} --name {vm} --force')
+        self._check_vm_power_state('PowerState/running')
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
@@ -2774,8 +2776,8 @@ class VMSSRollingUpgrade(ScenarioTest):
 
 
 class VMSSPriorityTesting(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='vmss_low_pri', location='CentralUSEUAP')
-    def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='vmss_low_pri')
+    def test_vmss_create_with_low_priority(self, resource_group):
         self.kwargs.update({
             'priority': 'Low',
             'vmss': 'vmss1',
