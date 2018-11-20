@@ -2730,8 +2730,8 @@ class VMSSRollingUpgrade(ScenarioTest):
 
 
 class VMSSPriorityTesting(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='vmss_low_pri', location='CentralUSEUAP')
-    def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='vmss_low_pri')
+    def test_vmss_create_with_low_priority(self, resource_group):
         self.kwargs.update({
             'priority': 'Low',
             'vmss': 'vmss1',
