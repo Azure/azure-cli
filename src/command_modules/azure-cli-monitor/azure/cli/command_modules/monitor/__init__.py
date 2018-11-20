@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import AzArgumentContext
+from azure.cli.core.commands import AzArgumentContext, CliCommandType
 
 from azure.cli.command_modules.monitor._help import helps  # pylint: disable=unused-import
 
@@ -32,9 +32,14 @@ class MonitorArgumentContext(AzArgumentContext):
 class MonitorCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
+        monitor_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
+            exception_handler=monitor_exception_handler)
         super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     min_profile='2017-03-10-profile',
-                                                    argument_context_cls=MonitorArgumentContext)
+                                                    argument_context_cls=MonitorArgumentContext,
+                                                    custom_command_type=monitor_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.monitor.commands import load_command_table

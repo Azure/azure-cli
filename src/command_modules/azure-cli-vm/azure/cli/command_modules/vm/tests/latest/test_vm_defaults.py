@@ -230,7 +230,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         ns = argparse.Namespace()
         ns.resource_group_name = rg
         ns.location = location
-        ns.storage_sku = tier
+        ns.storage_sku = [tier]
         ns.storage_account = None
         ns.storage_account_type = None
         self.ns = ns
@@ -310,23 +310,52 @@ class TestVMImageDefaults(unittest.TestCase):
         ns = argparse.Namespace()
         cmd = mock.MagicMock()
 
+        data_disk = mock.MagicMock()
+        data_disk.storage_account_type = 'Standard_LRS'
         image_info = mock.MagicMock()
         client_mock = mock.MagicMock()
         image_info.storage_profile.os_disk.os_type.value = 'someOS'
-        image_info.storage_profile.data_disks = ['does not matter']
+        image_info.storage_profile.data_disks = [data_disk]
         client_mock.images.get.return_value = image_info
         factory_mock.return_value = client_mock
 
         ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
         ns.admin_username = 'admin123'
         ns.admin_password = 'verySecret!'
-        ns.storage_sku = 'Premium_LRS'
+        ns.storage_sku = ['Premium_LRS']
+        ns.ultra_ssd_enabled = None
         ns.os_caching, ns.data_caching = None, None
         ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk, ns.data_disk_sizes_gb = None, None, None, None, False, None
+        ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 
         self.assertEqual(ns.os_type, 'someOS')
         self.assertTrue(0 in ns.disk_info)
+
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_vm_validator_enables_ultrassd_lrs(self, factory_mock):
+        ns = argparse.Namespace()
+        cmd = mock.MagicMock()
+
+        image_info = mock.MagicMock()
+        client_mock = mock.MagicMock()
+        image_info.storage_profile.os_disk.os_type.value = 'someOS'
+        image_info.storage_profile.data_disks = []
+        client_mock.images.get.return_value = image_info
+        factory_mock.return_value = client_mock
+
+        ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
+        ns.admin_username = 'admin123'
+        ns.admin_password = 'verySecret!'
+        ns.storage_sku = ['os=Premium_LRS', '0=UltraSSD_LRS']
+        ns.ultra_ssd_enabled = None
+        ns.data_disk_sizes_gb = [5]
+        ns.os_type, ns.attach_os_disk, ns.os_caching, ns.data_caching = None, None, None, None
+        ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, False
+        ns.size = 'Standard_DS1_v2'
+        _validate_vm_create_storage_profile(cmd, ns, False)
+
+        self.assertEqual(ns.ultra_ssd_enabled, True)
 
 
 class TestBigVMSSDefaults(unittest.TestCase):

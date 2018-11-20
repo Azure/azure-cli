@@ -8,6 +8,8 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_T
 
 from .exceptions import CliExecutionError
 
+MOCKED_USER_NAME = 'example@example.com'
+
 
 def patch_progress_controller(unit_test):
     def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
@@ -41,7 +43,7 @@ def patch_load_cached_subscriptions(unit_test):
         return [{
             "id": MOCKED_SUBSCRIPTION_ID,
             "user": {
-                "name": "example@example.com",
+                "name": MOCKED_USER_NAME,
                 "type": "user"
             },
             "state": "Enabled",

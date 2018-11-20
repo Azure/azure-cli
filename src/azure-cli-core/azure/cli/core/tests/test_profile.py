@@ -867,7 +867,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSI')
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSI')
+        self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -904,7 +905,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSIClient-{}'.format(test_client_id))
+        self.assertEqual(s['name'], self.display_name1)
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(test_client_id))
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -954,7 +956,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_object_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIObject-{}'.format(test_object_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
@@ -987,7 +989,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_res_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIResource-{}'.format(test_res_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(test_res_id))
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
@@ -1165,7 +1167,34 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.tenants.list.assert_not_called()
         mock_auth_context.acquire_token.assert_not_called()
         mock_auth_context.acquire_token_with_client_certificate.assert_called_once_with(
-            mgmt_resource, 'my app', mock.ANY, mock.ANY)
+            mgmt_resource, 'my app', mock.ANY, mock.ANY, None)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_from_service_principal_using_cert_sn_issuer(self, mock_auth_context):
+        cli = DummyCli()
+        mock_auth_context.acquire_token_with_client_certificate.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+        with open(test_cert_file) as cert_file:
+            cert_file_string = cert_file.read()
+        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                          cert_file_string, re.I)
+        public_certificate = match.group('public').strip()
+        # action
+        subs = finder.find_from_service_principal_id('my app', ServicePrincipalAuth(test_cert_file, use_cert_sn_issuer=True),
+                                                     self.tenant_id, mgmt_resource)
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        mock_arm_client.tenants.list.assert_not_called()
+        mock_auth_context.acquire_token.assert_not_called()
+        mock_auth_context.acquire_token_with_client_certificate.assert_called_once_with(
+            mgmt_resource, 'my app', mock.ANY, mock.ANY, public_certificate)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_refresh_accounts_one_user_account(self, mock_auth_context):

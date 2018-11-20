@@ -209,17 +209,16 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
         # from blob container to container with a sas in same account
         dst_container = self.create_container(src_account_info)
-        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
-                                     '--expiry {}', src_account_info, src_container, expiry).output
 
         self.storage_cmd('storage blob copy start-batch --source-container {} '
-                         '--destination-container {} --source-sas {}', src_account_info, src_container, dst_container,
-                         sas_token)
+                         '--destination-container {}', src_account_info, src_container, dst_container)
         self.storage_cmd('storage blob list -c {}',
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from blob container to container with a sas between different accounts with pattern
         dst_container = self.create_container(dst_account_info)
+        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
+                                     '--expiry {}', src_account_info, src_container, expiry).output
         self.storage_cmd('storage blob copy start-batch --source-container {} '
                          '--destination-container {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_container, dst_container, sas_token,
@@ -238,16 +237,16 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
         # from file share to blob container with a sas in same account
         dst_container = self.create_container(src_account_info)
-        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
-                                     src_account_info, src_share, expiry).output.strip()
 
-        self.storage_cmd('storage blob copy start-batch --source-share {} --destination-container {} --source-sas {}',
-                         src_account_info, src_share, dst_container, sas_token)
+        self.storage_cmd('storage blob copy start-batch --source-share {} --destination-container {}',
+                         src_account_info, src_share, dst_container)
         self.storage_cmd('storage blob list -c {}',
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from file share to blob container with a sas between different accounts with pattern
         dst_container = self.create_container(dst_account_info)
+        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
+                                     src_account_info, src_share, expiry).output.strip()
         self.storage_cmd('storage blob copy start-batch --source-share {} '
                          '--destination-container {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_share, dst_container, sas_token,
@@ -289,16 +288,15 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
         # from blob container to file share with a sas in same account
         dst_share = self.create_share(src_account_info)
-        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
-                                     '--expiry {}', src_account_info, src_container, expiry).output
 
         self.storage_cmd('storage file copy start-batch --source-container {} '
-                         '--destination-share {} --source-sas {}', src_account_info, src_container, dst_share,
-                         sas_token)
+                         '--destination-share {}', src_account_info, src_container, dst_share)
         self.assert_share_file_count(src_account_info, dst_share, 41)
 
         # from blob container to file share with a sas between different accounts with pattern
         dst_share = self.create_share(dst_account_info)
+        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
+                                     '--expiry {}', src_account_info, src_container, expiry).output
         self.storage_cmd('storage file copy start-batch --source-container {} '
                          '--destination-share {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_container, dst_share, sas_token,
@@ -315,15 +313,15 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
         # from file share to file share with a sas in same account
         dst_share = self.create_share(src_account_info)
-        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
-                                     src_account_info, src_share, expiry).output.strip()
 
-        self.storage_cmd('storage file copy start-batch --source-share {} --destination-share {} --source-sas {}',
-                         src_account_info, src_share, dst_share, sas_token)
+        self.storage_cmd('storage file copy start-batch --source-share {} --destination-share {}',
+                         src_account_info, src_share, dst_share)
         self.assert_share_file_count(src_account_info, dst_share, 41)
 
         # from file share to file share with a sas between different accounts with pattern
         dst_share = self.create_share(dst_account_info)
+        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
+                                     src_account_info, src_share, expiry).output.strip()
         self.storage_cmd('storage file copy start-batch --source-share {} '
                          '--destination-share {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_share, dst_share, sas_token,

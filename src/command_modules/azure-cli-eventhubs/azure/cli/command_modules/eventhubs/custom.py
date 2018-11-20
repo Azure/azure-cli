@@ -9,7 +9,7 @@
 
 
 # Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None):
+def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None):
     from azure.mgmt.eventhub.models import EHNamespace, Sku
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -19,10 +19,11 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
             tags=tags,
             sku=Sku(name=sku, tier=sku, capacity=capacity),
             is_auto_inflate_enabled=is_auto_inflate_enabled,
-            maximum_throughput_units=maximum_throughput_units))
+            maximum_throughput_units=maximum_throughput_units,
+            kafka_enabled=is_kafka_enabled))
 
 
-def cli_namespace_update(instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None):
+def cli_namespace_update(instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None):
 
     if tags:
         instance.tags = tags
@@ -39,6 +40,9 @@ def cli_namespace_update(instance, tags=None, sku=None, capacity=None, is_auto_i
 
     if maximum_throughput_units:
         instance.maximum_throughput_units = maximum_throughput_units
+
+    if is_kafka_enabled:
+        instance.kafka_enabled = is_kafka_enabled
 
     return instance
 

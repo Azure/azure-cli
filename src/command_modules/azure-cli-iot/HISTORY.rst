@@ -2,9 +2,13 @@
 
 Release History
 ===============
+0.3.4
++++++
+* Minor fixes
+
 0.3.3
 +++++
-* Added extension installation comand to first-run banner
+* Added extension installation command to first-run banner
 
 0.3.2
 +++++

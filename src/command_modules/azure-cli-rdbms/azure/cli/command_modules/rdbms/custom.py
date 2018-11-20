@@ -5,9 +5,10 @@
 
 # pylint: disable=unused-argument, line-too-long
 
+from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mariadb.operations.servers_operations import ServersOperations as MariaDBServersOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, get_postgresql_management_client
@@ -198,6 +199,56 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+# Custom functions for server replica, will add PostgreSQL part after backend ready in future
+def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, **kwargs):
+    provider = 'Microsoft.DBForMySQL' if isinstance(client, MySqlServersOperations) else 'Microsoft.DBforPostgreSQL'
+    # set source server id
+    if not is_valid_resource_id(source_server):
+        if len(source_server.split('/')) == 1:
+            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                        resource_group=resource_group_name,
+                                        namespace=provider,
+                                        type='servers',
+                                        name=source_server)
+        else:
+            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+
+    source_server_id_parts = parse_resource_id(source_server)
+    try:
+        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+    except CloudError as e:
+        raise CLIError('Unable to get source server: {}.'.format(str(e)))
+
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=source_server_object.sku.name),
+            properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=source_server_object.location)
+
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+def _replica_stop(client, resource_group_name, server_name):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise CLIError('Unable to get server: {}.'.format(str(e)))
+
+    if server_object.replication_role.lower() != "replica":
+        raise CLIError('Server {} is not a replica server.'.format(server_name))
+
+    from importlib import import_module
+    server_module_path = server_object.__module__
+    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
+
+    params = ServerUpdateParameters(replication_role='None')
+
+    return client.update(resource_group_name, server_name, params)
 
 
 def _server_update_custom_func(instance,

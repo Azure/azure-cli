@@ -54,14 +54,40 @@ def add_helps(command_group, server_type):
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
-                            -l westus2 --sku-name GP_Gen5_2
+                            -l westus2 --sku-name GP_Gen4_2
                 """.format(command_group, server_type)
+    helps['mysql server replica'] = """
+                type: group
+                short-summary: Manage cloud replication.
+                """
+    helps['mysql server replica create'] = """
+                type: command
+                short-summary: Create a cloud replica for a server.
+                examples:
+                    - name: Create replica for server testsvr.
+                      text: az mysql server replica create -n testreplsvr -g testgroup -s testsvr
+                    - name: Create replica testreplsvr for server testsvr2, where 'testreplsvr' is in a different resource group.
+                      text: |
+                        az mysql server replica create -n testreplsvr -g testgroup \\
+                            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testsvr2"
+                """
+    helps['mysql server replica stop'] = """
+                type: command
+                short-summary: Stop replica to make it an individual server.
+                examples:
+                    - name: Stop server testsvr as replica and make it an individual server.
+                      text: az mysql server replica stop -g testgroup -n testsvr
+                """
+    helps['mysql server replica list'] = """
+                type: command
+                short-summary: List all replicas for a given server.
+                """
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.
                 examples:
                     - name: Update a server's sku.
-                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen4_4
+                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen5_4
                     - name: Update a server's tags.
                       text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
                 """.format(command_group)
@@ -118,24 +144,24 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: List all firewall rules for a server.
                 """
-    if server_type != "MariaDB":
-        helps['{} server vnet-rule'.format(command_group)] = """
-                    type: group
-                    short-summary: Manage a server's virtual network rules.
-                    """
-        helps['{} server vnet-rule update'.format(command_group)] = """
-                    type: command
-                    short-summary: Update a virtual network rule.
-                    """
-        helps['{} server vnet-rule create'.format(command_group)] = """
-                    type: command
-                    short-summary: Create a virtual network rule to allows access to a {} server.
-                    examples:
-                        - name: Create a virtual network rule by providing the subnet id.
-                          text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-                        - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-                          text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-                    """.format(server_type, command_group, command_group)
+
+    helps['{} server vnet-rule'.format(command_group)] = """
+                type: group
+                short-summary: Manage a server's virtual network rules.
+                """
+    helps['{} server vnet-rule update'.format(command_group)] = """
+                type: command
+                short-summary: Update a virtual network rule.
+                """
+    helps['{} server vnet-rule create'.format(command_group)] = """
+                type: command
+                short-summary: Create a virtual network rule to allows access to a {} server.
+                examples:
+                    - name: Create a virtual network rule by providing the subnet id.
+                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
+                    - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
+                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
+                """.format(server_type, command_group, command_group)
 
     helps['{} server configuration'.format(command_group)] = """
                 type: group
@@ -189,9 +215,9 @@ def add_helps(command_group, server_type):
                 short-summary: Create a {0} database.
                 examples:
                     - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb
+                      text: az {1} db create -g testgroup -s testsvr -n testdb --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
                     - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}}
+                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}} --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
                 """.format(server_type, command_group)
     helps['{} db delete'.format(command_group)] = """
                 type: command

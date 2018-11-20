@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.1.6
++++++
+* `policy definition/set-definition create/list/delete/show/update`: add support for management groups and subscriptions
+
+2.1.5
++++++
+* az policy definition/set-definition create/list/delete/show/update: add support for management groups and subscriptions
+
 2.1.4
 +++++
 * `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.

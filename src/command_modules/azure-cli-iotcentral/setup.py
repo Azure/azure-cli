@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.2"
+VERSION = "0.1.4"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -33,7 +33,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-iotcentral==0.2.0'
+    'azure-mgmt-iotcentral==1.0.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

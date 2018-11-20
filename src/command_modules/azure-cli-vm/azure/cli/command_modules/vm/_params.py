@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._validators import (
 
 # pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
-    from azure.mgmt.compute.models import CachingTypes, UpgradeMode
+    StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -40,11 +40,14 @@ def load_arguments(self, _):
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
-    if self.supported_api_version(min_api='2018-06-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']))
-    elif self.supported_api_version(min_api='2018-04-01', operation_group='disks') or self.supported_api_version(min_api='2018-06-01', operation_group='virtual_machines'):
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS']))
+
+    extension_instance_name_type = CLIArgumentType(help='Instance name of the extension. Default: name of the extension.')
+
+    if StorageAccountTypes:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
     else:
+        # StorageAccountTypes introduced in api version 2016_04_30_preview of Resource.MGMT.Compute package..
+        # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
@@ -110,6 +113,7 @@ def load_arguments(self, _):
         c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
         c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
+        c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
@@ -119,7 +123,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm availability-set create') as c:
         c.argument('availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
-        c.argument('platform_update_domain_count', type=int, help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
+        c.argument('platform_update_domain_count', type=int, help='Update Domain count. If unspecified, the server will pick the most optimal number like 5.')
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
@@ -145,7 +149,7 @@ def load_arguments(self, _):
         c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm update') as c:
-        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
@@ -202,6 +206,7 @@ def load_arguments(self, _):
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='extension name', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
+        c.argument('expand', deprecate_info=c.deprecate(expiration='2.1.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
@@ -271,9 +276,12 @@ def load_arguments(self, _):
 
     with self.argument_context('vm list-skus') as c:
         c.argument('size', options_list=['--size', '-s'], help="size name, partial name is accepted")
-        c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availabilityt zones")
+        c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
         c.argument('show_all', options_list=['--all'], help="show all information including vm sizes not available under the current subscription")
         c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
+
+    with self.argument_context('vm restart') as c:
+        c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
     # endregion
 
     # region VMSS
@@ -309,9 +317,9 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
-                   help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+                   help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                   help="(PREVIEW) the eviction policy for virtual machines in a low priority scale set.")
+                   help="(PREVIEW) The eviction policy for virtual machines in a low priority scale set.")
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -409,10 +417,20 @@ def load_arguments(self, _):
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_type=get_enum_type(['ssh', 'password']))
 
         with self.argument_context(scope, arg_group='Storage') as c:
+            if StorageAccountTypes:
+                allowed_values = ", ".join([sku.value for sku in StorageAccountTypes])
+            else:
+                allowed_values = ", ".join(['Premium_LRS', 'Standard_LRS'])
+
+            usage = 'Usage: [--storage-sku SKU | --storage-sku ID=SKU ID=SKU ID=SKU...], where each ID is "os" or a 0-indexed lun.'
+            allowed_values = 'Allowed values: {}.'.format(allowed_values)
+            storage_sku_help = 'The SKU of the storage account with which to persist VM. Use a singular sku that would be applied across all disks, ' \
+                               'or specify individual disks. {} {}'.format(usage, allowed_values)
+
             c.argument('os_disk_name', help='The name of the new VM OS disk.')
             c.argument('os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(['windows', 'linux']))
             c.argument('storage_account', help="Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.")
-            c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to persist VM')
+            c.argument('storage_sku', nargs='+', help=storage_sku_help)
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
@@ -422,7 +440,9 @@ def load_arguments(self, _):
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
             c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='(PREVIEW)Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+                       help='(PREVIEW) Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+            c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                       help='(Preview) Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -475,9 +495,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm extension set') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:
@@ -499,12 +521,10 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig show', 'image gallery delete', 'sig image-definition show', 'sig image-definition delete', 'sig image-definition show']:
+    for scope in ['sig show', 'sig image-definition show', 'sig image-definition delete']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
-            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
-            c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], id_part='child_name_2', help='gallery image version')
 
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
@@ -535,6 +555,11 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
         c.ignore('gallery_image')
+
+    with self.argument_context('sig image-version') as c:
+        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="2.1.0")
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option], )
+
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
@@ -544,8 +569,7 @@ def load_arguments(self, _):
         c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
-    with self.argument_context('sig image-version update') as c:
-        c.ignore('gallery_image_version')
+
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
     for scope in ['sig image-version create', 'sig image-version update']:

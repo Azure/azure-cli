@@ -11,6 +11,7 @@ import io
 import os
 import shutil
 from knack.util import CLIError
+import mock
 
 from azure.cli.core.keys import generate_ssh_keys
 
@@ -52,31 +53,45 @@ class TestGenerateSSHKeys(unittest.TestCase):
             new_private_key = f.read()
             self.assertEqual(self.private_key, new_private_key)
 
-    def test_error_raised_when_public_key_file_exists_no_permissions(self):
-        # Create public key file with no read or write access
+    def test_error_raised_when_public_key_file_exists_IOError(self):
+        # Create public key file
         public_key_path = self._create_new_temp_key_file(self.public_key)
-        os.chmod(public_key_path, 0o000)
 
-        # Check that CLIError exception is raised when generate_ssh_keys is called.
-        with self.assertRaises(CLIError):
-            generate_ssh_keys("", public_key_path)
+        with mock.patch('azure.cli.core.keys.open') as mocked_open:
+            # mock failed call to read
+            mocked_f = mocked_open.return_value.__enter__.return_value
+            mocked_f.read = mock.MagicMock(side_effect=IOError("Mocked IOError"))
 
-    def test_error_raised_when_private_key_file_exists_no_permissions(self):
-        # Create private key file with no read or write access
+            # assert that CLIError raised when generate_ssh_keys is called
+            with self.assertRaises(CLIError):
+                generate_ssh_keys("", public_key_path)
+
+            # assert that CLIError raised because of attempt to read public key file.
+            mocked_open.assert_called_once_with(public_key_path, 'r')
+            mocked_f.read.assert_called_once()
+
+    def test_error_raised_when_private_key_file_exists_IOError(self):
+        # Create private key file
         private_key_path = self._create_new_temp_key_file(self.private_key)
-        os.chmod(private_key_path, 0o000)
 
-        # Check that CLIError exception is raised when generate_ssh_keys is called.
-        with self.assertRaises(CLIError):
-            public_key_path = private_key_path + ".pub"
-            generate_ssh_keys(private_key_path, public_key_path)
+        with mock.patch('paramiko.RSAKey') as mocked_RSAKey:
+            # mock failed RSAKey generation
+            mocked_RSAKey.side_effect = IOError("Mocked IOError")
+
+            # assert that CLIError raised when generate_ssh_keys is called
+            with self.assertRaises(CLIError):
+                public_key_path = private_key_path + ".pub"
+                generate_ssh_keys(private_key_path, public_key_path)
+
+            # assert that CLIError raised because of attempt to generate key from private key file.
+            mocked_RSAKey.assert_called_once_with(filename=private_key_path)
 
     def test_error_raised_when_private_key_file_exists_encrypted(self):
         # Create empty private key file
         private_key_path = self._create_new_temp_key_file("")
 
-        # Write encrypted key into file
-        self.key.write_private_key_file(private_key_path, "test")
+        # Write encrypted / passworded key into file
+        self.key.write_private_key_file(private_key_path, password="test")
 
         # Check that CLIError exception is raised when generate_ssh_keys is called.
         with self.assertRaises(CLIError):

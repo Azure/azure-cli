@@ -20,7 +20,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
                                                       _validate_vm_vmss_accelerated_networking)
-from azure.cli.command_modules.vm._vm_utils import normalize_disk_info
+from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
 from azure.cli.core.mock import DummyCli
 from azure.mgmt.compute.models import CachingTypes
 from knack.util import CLIError
@@ -382,6 +382,16 @@ class TestActions(unittest.TestCase):
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
         self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
+        # default to "None" across for Lv/Lv2 machines
+        r = normalize_disk_info(data_disk_sizes_gb=[1], size='standard_L8s')
+        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
+        self.assertEqual(r[0].get('caching'), None)
+
+        # error on lv/lv2 machines with caching mode other than "None"
+        with self.assertRaises(CLIError) as err:
+            normalize_disk_info(data_disk_cachings=['ReadWrite'], data_disk_sizes_gb=[1, 2], size='standard_L16s_v2')
+        self.assertTrue('for Lv series of machines, "None" is the only supported caching mode' in str(err.exception))
+
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):
         client_mock, size_mock = mock.MagicMock(), mock.MagicMock()
@@ -451,6 +461,44 @@ class TestActions(unittest.TestCase):
         np.os_publisher, np.os_offer, np.os_sku = 'oracle', 'oracle-linux', '7.3'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertIsNone(np.accelerated_networking)
+
+    def test_update_sku_from_dict(self):
+        sku_tests = {"test_empty": ([""], {}),
+                     "test_all": (["sku"], {"os": "sku", 1: "sku", 3: "sku"}),
+                     "test_os": (["os=sku"], {"os": "sku"}),
+                     "test_lun": (["1=sku"], {1: "sku"}),
+                     "test_os_lun": (["os=sku", "1=sku_1"], {"os": "sku", 1: "sku_1"}),
+                     "test_os_mult_lun": (["1=sku_1", "os=sku_os", "2=sku_2"],
+                                          {1: "sku_1", "os": "sku_os", 2: "sku_2"}),
+                     "test_double_equ": (["os==foo"], {"os": "=foo"}),
+                     "test_err_no_eq": (["os=sku_1", "foo"], None),
+                     "test_err_lone_eq": (["foo ="], None),
+                     "test_err_float": (["2.7=foo"], None),
+                     "test_err_bad_key": (["bad=foo"], None)}
+
+        for test_sku, expected in sku_tests.values():
+            if isinstance(expected, dict):
+                # build info dict from expected values.
+                info_dict = {lun: dict(managedDisk={'storageAccountType': None}) for lun in expected if lun != "os"}
+                if "os" in expected:
+                    info_dict["os"] = {}
+
+                update_disk_sku_info(info_dict, test_sku)
+                for lun in info_dict:
+                    if lun == "os":
+                        self.assertEqual(info_dict[lun]['storageAccountType'], expected[lun])
+                    else:
+                        self.assertEqual(info_dict[lun]['managedDisk']['storageAccountType'], expected[lun])
+            elif expected is None:
+                dummy_expected = ["os", 1, 2]
+                info_dict = {lun: dict(managedDisk={'storageAccountType': None}) for lun in dummy_expected if lun != "os"}
+                if "os" in dummy_expected:
+                    info_dict["os"] = {}
+
+                with self.assertRaises(CLIError):
+                    update_disk_sku_info(info_dict, dummy_expected)
+            else:
+                self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
 
 if __name__ == '__main__':

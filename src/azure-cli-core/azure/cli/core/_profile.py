@@ -10,6 +10,7 @@ import errno
 import json
 import os
 import os.path
+import re
 from copy import deepcopy
 from enum import Enum
 from six.moves import BaseHTTPServer
@@ -46,6 +47,7 @@ _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
 _SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
 _SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
+_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH = 'useCertSNIssuerAuth'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 # This could mean either real access token, or client secret of a service principal
@@ -65,6 +67,7 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+_ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -76,7 +79,6 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
 
 
 def _get_authority_url(cli_ctx, tenant):
-    import re
     authority_url = cli_ctx.cloud.endpoints.active_directory
     is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
     if is_adfs:
@@ -163,7 +165,8 @@ class Profile(object):
                                     tenant,
                                     use_device_code=False,
                                     allow_no_subscriptions=False,
-                                    subscription_finder=None):
+                                    subscription_finder=None,
+                                    use_cert_sn_issuer=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
         subscriptions = []
@@ -193,9 +196,10 @@ class Profile(object):
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
-                sp_auth = ServicePrincipalAuth(password)
+                sp_auth = ServicePrincipalAuth(password, use_cert_sn_issuer)
                 subscriptions = subscription_finder.find_from_service_principal_id(
                     username, sp_auth, tenant, self._ad_resource_uri)
+
             else:
                 subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
@@ -219,13 +223,15 @@ class Profile(object):
             if not subscriptions:
                 return []
 
-        consolidated = self._normalize_properties(subscription_finder.user_id, subscriptions, is_service_principal)
+        consolidated = self._normalize_properties(subscription_finder.user_id, subscriptions,
+                                                  is_service_principal, bool(use_cert_sn_issuer))
 
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def _normalize_properties(self, user, subscriptions, is_service_principal):
+    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
+                              user_assigned_identity_id=None):
         consolidated = []
         for s in subscriptions:
             consolidated.append({
@@ -240,6 +246,10 @@ class Profile(object):
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             })
+            if cert_sn_issuer_auth:
+                consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+            if user_assigned_identity_id:
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
         return consolidated
 
     def _build_tenant_level_accounts(self, tenants):
@@ -299,9 +309,9 @@ class Profile(object):
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
         user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
-        for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = base_name
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
+                                                  user_assigned_identity_id=base_name)
+
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
@@ -463,9 +473,12 @@ class Profile(object):
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
+
         if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            parts = subscription_name.split('-', 1)
+            if not msi_info:
+                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
+            parts = msi_info.split('-', 1)
             if parts[0] in MsiAccountTypes.valid_msi_account_types():
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
@@ -492,7 +505,9 @@ class Profile(object):
                 if user_type == _USER:
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                      account[_TENANT_ID], resource)
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+                use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                                                                              use_cert_sn_issuer)
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
@@ -863,7 +878,7 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
-    def retrieve_token_for_service_principal(self, sp_id, resource):
+    def retrieve_token_for_service_principal(self, sp_id, resource, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
@@ -871,7 +886,8 @@ class CredsCache(object):
         cred = matched[0]
         context = self._auth_ctx_factory(self._ctx, cred[_SERVICE_PRINCIPAL_TENANT], None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
-                                       cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None))
+                                       cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None),
+                                       use_cert_sn_issuer)
         token_entry = sp_auth.acquire_token(context, resource, sp_id)
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
@@ -948,7 +964,7 @@ class CredsCache(object):
 
 class ServicePrincipalAuth(object):
 
-    def __init__(self, password_arg_value):
+    def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
                            'authnenticate through a service principal')
@@ -956,10 +972,17 @@ class ServicePrincipalAuth(object):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
+            self.public_certificate = None
             with open(certificate_file, 'r') as file_reader:
                 self.cert_file_string = file_reader.read()
                 cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
                 self.thumbprint = cert.digest("sha1").decode()
+                if use_cert_sn_issuer:
+                    # low-tech but safe parsing based on
+                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                      self.cert_file_string, re.I)
+                    self.public_certificate = match.group('public').strip()
         else:
             self.secret = password_arg_value
 
@@ -967,7 +990,7 @@ class ServicePrincipalAuth(object):
         if hasattr(self, 'secret'):
             return authentication_context.acquire_token_with_client_credentials(resource, client_id, self.secret)
         return authentication_context.acquire_token_with_client_certificate(resource, client_id, self.cert_file_string,
-                                                                            self.thumbprint)
+                                                                            self.thumbprint, self.public_certificate)
 
     def get_entry_to_persist(self, sp_id, tenant):
         entry = {

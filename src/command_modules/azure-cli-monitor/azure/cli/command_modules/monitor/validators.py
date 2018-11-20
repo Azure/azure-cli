@@ -61,13 +61,13 @@ def validate_autoscale_recurrence(namespace):
                 namespace.recurrence = valid_recurrence[delimiter]['validator'](namespace)
             except CLIError as ex:
                 raise CLIError('{} invalid usage: {}'.format(ex, usage))
-        except KeyError as ex:
+        except KeyError:
             raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
 
 
 def validate_autoscale_timegrain(namespace):
     from azure.mgmt.monitor.models import MetricTrigger
-    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.actions import get_period_type
     from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
 
     values = namespace.timegrain
@@ -77,10 +77,10 @@ def validate_autoscale_timegrain(namespace):
         values = values[0].split(' ')
     name_offset = 0
     try:
-        time_grain = period_type(values[1])
+        time_grain = get_period_type()(values[1])
         name_offset += 1
     except ValueError:
-        time_grain = period_type('1m')
+        time_grain = get_period_type()('1m')
     try:
         statistic = get_autoscale_statistic_map()[values[0]]
         name_offset += 1
@@ -141,16 +141,14 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
     from knack.util import CLIError
-    resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
-                           "service bus namespace and rule. "
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource_uri)['resource_group']
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.storage_account = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                                 resource_group=namespace.resource_group_name,
                                                 namespace='microsoft.Storage',
@@ -158,17 +156,36 @@ def validate_diagnostic_settings(cmd, namespace):
                                                 name=namespace.storage_account)
 
     if namespace.workspace and not is_valid_resource_id(namespace.workspace):
-        if namespace.resource_group_name is None:
-            raise CLIError(resource_group_error)
         namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                           resource_group=namespace.resource_group_name,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces',
                                           name=namespace.workspace)
 
-    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub:
+    if namespace.event_hub and is_valid_resource_id(namespace.event_hub):
+        namespace.event_hub = parse_resource_id(namespace.event_hub)['name']
+
+    if namespace.event_hub_rule:
+        if not is_valid_resource_id(namespace.event_hub_rule):
+            if not namespace.event_hub:
+                raise CLIError('usage error: --event-hub-rule ID | --event-hub-rule NAME --event-hub NAME')
+            # use value from --event-hub if the rule is a name
+            namespace.event_hub_rule = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.EventHub',
+                type='namespaces',
+                name=namespace.event_hub,
+                child_type_1='AuthorizationRules',
+                child_name_1=namespace.event_hub_rule)
+        elif not namespace.event_hub:
+            # extract the event hub name from `--event-hub-rule` if provided as an ID
+            namespace.event_hub = parse_resource_id(namespace.event_hub_rule)['name']
+
+    if not any([namespace.storage_account, namespace.workspace, namespace.event_hub]):
         raise CLIError(
-            'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
+            'usage error - expected one or more:  --storage-account NAME_OR_ID | --workspace NAME_OR_ID '
+            '| --event-hub NAME_OR_ID | --event-hub-rule ID')
 
     try:
         del namespace.resource_group_name
@@ -214,49 +231,16 @@ def process_action_group_detail_for_creation(namespace):
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 
 
-def process_metric_timespan(namespace):
-    from .util import validate_time_range_and_add_defaults
+def validate_metric_dimension(namespace):
 
-    ns = vars(namespace)
-    start_time = ns.pop('start_time', None)
-    end_time = ns.pop('end_time', None)
-    ns['timespan'] = validate_time_range_and_add_defaults(start_time, end_time, formatter='{}/{}')
-
-
-def process_metric_aggregation(namespace):
-    ns = vars(namespace)
-    aggregation = ns.pop('aggregation', None)
-    if aggregation:
-        ns['aggregation'] = ','.join(aggregation)
-
-
-def process_metric_result_type(namespace):
-    from azure.mgmt.monitor.models import ResultType
-
-    ns = vars(namespace)
-    metadata_only = ns.pop('metadata', False)
-    if metadata_only:
-        ns['result_type'] = ResultType.metadata
-
-
-def process_metric_dimension(namespace):
-    ns = vars(namespace)
-
-    dimensions = ns.pop('dimension', None)
-    if not dimensions:
+    if not namespace.dimension:
         return
 
-    param_filter = ns.pop('filter', None)
-    if param_filter:
+    if namespace.filters:
         from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
-    ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
-
-
-def validate_metric_names(namespace):
-    if namespace.metricnames:
-        namespace.metricnames = ','.join(namespace.metricnames)
+    namespace.filters = ' and '.join("{} eq '*'".format(d) for d in namespace.dimension)
 
 
 def process_webhook_prop(namespace):

@@ -10,8 +10,7 @@ import time
 import tempfile
 import requests
 
-from azure_devtools.scenario_tests import record_only
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck)
 
@@ -98,7 +97,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '6.9.1'),
+            JMESPathCheck('[0].value', '8.11.1'),
         ]))
 
     @ResourceGroupPreparer()
@@ -627,11 +626,12 @@ class AppServiceCors(ScenarioTest):
         self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}', checks=self.check('allowedOrigins', []))
 
     @ResourceGroupPreparer()
-    def test_functionapp_cors(self, resource_group):
+    @StorageAccountPreparer()
+    def test_functionapp_cors(self, resource_group, storage_account):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'function': self.create_random_name(prefix='slot-traffic-web', length=24),
-            'storage': 'functioncorsstorage'
+            'storage': storage_account
         })
         self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
         self.cmd('storage account create --name {storage} -g {rg} --sku Standard_LRS')
@@ -668,7 +668,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         # reset
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheck("[?name=='s1']|[0]", None)
+            JMESPathCheck("[?name=='s1']|[0].value", 'slot')
         ])
 
 
@@ -936,10 +936,11 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-triggered'
@@ -954,10 +955,11 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-continuous'

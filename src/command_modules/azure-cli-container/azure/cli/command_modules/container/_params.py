@@ -11,12 +11,12 @@ from azure.cli.core.commands.parameters import (get_enum_type,
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (
     ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol)
-from ._validators import (validate_volume_mount_path, validate_secrets, validate_subnet,
-                          validate_gitrepo_directory, validate_network_profile)
+from ._validators import (validate_volume_mount_path, validate_secrets, validate_subnet, validate_msi,
+                          validate_gitrepo_directory, validate_network_profile, validate_image)
 
 # pylint: disable=line-too-long
 
-IP_ADDRESS_TYPES = ['Public']
+IP_ADDRESS_TYPES = ['Public', 'Private']
 
 
 def _environment_variables_type(value):
@@ -63,7 +63,7 @@ def load_arguments(self, _):
 
     with self.argument_context('container create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('image', help='The container image name')
+        c.argument('image', validator=validate_image, help='The container image name')
         c.argument('cpu', type=int, help='The required number of CPU cores of the containers, accurate to one decimal place')
         c.argument('memory', type=float, help='The required memory of the containers in GB, accurate to one decimal place')
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
@@ -79,9 +79,16 @@ def load_arguments(self, _):
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
 
+    with self.argument_context('container create', arg_group='Managed Service Identity') as c:
+        c.argument('assign_identity', nargs='*', validator=validate_msi, help="Space-separated list of assigned identities. Assigned identities are either user assigned identities (resource IDs) and / or the system assigned identity ('[system]'). See examples for more info.")
+        c.argument('identity_scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
+        c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
+
     with self.argument_context('container create', arg_group='Network') as c:
         c.argument('network_profile', network_profile_type)
-        c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.')
+        c.argument('vnet', help='The name of the VNET when creating a new one or referencing an existing one. Can also reference an existing vnet by ID. This allows using vnets from other resource groups.')
+        c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.',
+                   deprecate_info=c.deprecate(redirect="--vnet", hide="0.3.5"))
         c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNET in CIDR format.')
         c.argument('subnet', options_list=['--subnet'], validator=validate_subnet, help='The name of the subnet when creating a new VNET or referencing an existing one. Can also reference an existing subnet by ID.')
         c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNET in CIDR format.')

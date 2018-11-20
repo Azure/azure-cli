@@ -179,11 +179,12 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_auth_cert(namespace):
-    namespace.cert_data = read_base_64_file(namespace.cert_data)
-
-
 def validate_cert(namespace):
+    if namespace.cert_data:
+        namespace.cert_data = read_base_64_file(namespace.cert_data)
+
+
+def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
@@ -244,6 +245,8 @@ def validate_er_peer_circuit(cmd, namespace):
             name=namespace.peer_circuit,
             child_type_1='peerings',
             child_name_1=namespace.peering_name)
+    else:
+        peer_id = namespace.peer_circuit
 
     # if the circuit ID is provided, we need to append /peerings/{peering_name}
     if namespace.peering_name not in peer_id:
@@ -607,22 +610,18 @@ def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: di
 
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-
     get_servers_validator(camel_case=True)(namespace)
 
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(cmd, namespace)
-
     validate_address_prefixes(namespace)
-
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
-
-    validate_cert(namespace)
-
+    validate_ssl_cert(namespace)
     validate_tags(namespace)
+    validate_custom_error_pages(namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -697,6 +696,7 @@ def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
+    validate_ag_address_pools(cmd, namespace)
     validate_address_pool_id_list(cmd, namespace)
     validate_inbound_nat_rule_id_list(cmd, namespace)
     get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
@@ -710,6 +710,7 @@ def process_nic_create_namespace(cmd, namespace):
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_public_ip_prefix(cmd, namespace)
+    validate_ip_tags(cmd, namespace)
     validate_tags(namespace)
 
 
@@ -1237,3 +1238,43 @@ def process_list_delegations_namespace(cmd, namespace):
 
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_ag_address_pools(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    address_pools = namespace.app_gateway_backend_address_pools
+    gateway_name = namespace.application_gateway_name
+    delattr(namespace, 'application_gateway_name')
+    if not address_pools:
+        return
+    ids = []
+    for item in address_pools:
+        if not is_valid_resource_id(item):
+            if not gateway_name:
+                raise CLIError('usage error: --app-gateway-backend-pools IDS | --gateway-name NAME '
+                               '--app-gateway-backend-pools NAMES')
+            item = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='applicationGateways',
+                name=gateway_name,
+                child_type_1='backendAddressPools',
+                child_name_1=item)
+            ids.append(item)
+    namespace.app_gateway_backend_address_pools = ids
+
+
+def validate_custom_error_pages(namespace):
+
+    if not namespace.custom_error_pages:
+        return
+
+    values = []
+    for item in namespace.custom_error_pages:
+        try:
+            (code, url) = item.split('=')
+            values.append({'statusCode': code, 'customErrorPageUrl': url})
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
+    namespace.custom_error_pages = values

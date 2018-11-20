@@ -172,128 +172,128 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
     return existing
 
 
-def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
+def register_ids_argument(cli_ctx):
 
-    command_table = kwargs.get('commands_loader').command_table
+    from knack import events
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    import os
 
-    if not command_table:
-        return
+    ids_metadata = {}
 
-    def split_action(arguments, deprecate_info):
-        class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
-            def __call__(self, parser, namespace, values, option_string=None):
-                ''' The SplitAction will take the given ID parameter and spread the parsed
-                parts of the id into the individual backing fields.
+    def add_ids_arguments(_, **kwargs):  # pylint: disable=unused-argument
 
-                Since the id value is expected to be of type `IterateValue`, all the backing
-                (dest) fields will also be of type `IterateValue`
-                '''
-                from msrestazure.tools import parse_resource_id
-                import os
+        command_table = kwargs.get('commands_loader').command_table
 
-                if isinstance(values, str):
-                    values = [values]
-                expanded_values = []
-                for val in values:
-                    try:
-                        # support piping values from JSON. Does not require use of --query
-                        json_vals = json.loads(val)
-                        if not isinstance(json_vals, list):
-                            json_vals = [json_vals]
-                        for json_val in json_vals:
-                            if 'id' in json_val:
-                                expanded_values += [json_val['id']]
-                    except ValueError:
-                        # supports piping of --ids to the command when using TSV. Requires use of --query
-                        expanded_values = expanded_values + val.split(os.linesep)
-                try:
-                    for value in expanded_values:
-                        parts = parse_resource_id(value)
-                        for arg in [arg for arg in arguments.values() if arg.type.settings.get('id_part')]:
-                            self.set_argument_value(namespace, arg, parts)
-                except Exception as ex:
-                    raise ValueError(ex)
+        if not command_table:
+            return
 
-                if deprecate_info:
-                    if not hasattr(namespace, '_argument_deprecations'):
-                        setattr(namespace, '_argument_deprecations', [deprecate_info])
-                    else:
-                        namespace._argument_deprecations.append(deprecate_info)  # pylint: disable=protected-access
+        for command in command_table.values():
 
-            @staticmethod
-            def set_argument_value(namespace, arg, parts):
+            # Somewhat blunt hammer, but any create commands will not have an automatic id parameter
+            if command.name.split()[-1] == 'create':
+                continue
 
-                existing_values = getattr(namespace, arg.name, None)
-                if existing_values is None:
-                    existing_values = IterateValue()
-                    existing_values.append(parts.get(arg.type.settings['id_part'], None))
-                else:
-                    if isinstance(existing_values, str):
-                        if not getattr(arg.type, 'configured_default_applied', None):
-                            logger.warning(
-                                "Property '%s=%s' being overriden by value '%s' from IDs parameter.",
-                                arg.name, existing_values, parts[arg.type.settings['id_part']]
-                            )
-                        existing_values = IterateValue()
-                    existing_values.append(parts.get(arg.type.settings['id_part']))
-                setattr(namespace, arg.name, existing_values)
-
-        return SplitAction
-
-    def command_loaded_handler(command):
-        id_parts = [arg.type.settings['id_part'] for arg in command.arguments.values()
-                    if arg.type.settings.get('id_part')]
-        if 'name' not in id_parts and 'resource_name' not in id_parts:
             # Only commands with a resource name are candidates for an id parameter
+            id_parts = [a.type.settings.get('id_part') for a in command.arguments.values()]
+            if 'name' not in id_parts and 'resource_name' not in id_parts:
+                continue
+
+            group_name = 'Resource Id'
+
+            # determine which arguments are required and optional and store in ids_metadata
+            ids_metadata[command.name] = {'required': [], 'optional': []}
+            for arg in [a for a in command.arguments.values() if a.type.settings.get('id_part')]:
+                if arg.options.get('required', False):
+                    ids_metadata[command.name]['required'].append(arg.name)
+                else:
+                    ids_metadata[command.name]['optional'].append(arg.name)
+                arg.required = False
+                arg.arg_group = group_name
+
+            # retrieve existing `ids` arg if it exists
+            id_arg = command.loader.argument_registry.arguments[command.name].get('ids', None)
+            deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
+            id_kwargs = {
+                'metavar': 'ID',
+                'help': "One or more resource IDs (space-delimited). If provided, "
+                        "no other 'Resource Id' arguments should be specified.",
+                'dest': 'ids' if id_arg else '_ids',
+                'deprecate_info': deprecate_info,
+                'nargs': '+',
+                'arg_group': group_name
+            }
+            command.add_argument('ids', '--ids', **id_kwargs)
+
+    def parse_ids_arguments(_, command, args):
+
+        namespace = args
+        cmd = namespace._cmd  # pylint: disable=protected-access
+
+        # some commands have custom IDs and parsing. This will not work for that.
+        if not ids_metadata.get(command, None):
             return
-        if command.name.split()[-1] == 'create':
-            # Somewhat blunt hammer, but any create commands will not have an automatic id
-            # parameter
-            return
 
-        required_arguments = []
-        optional_arguments = []
-        for arg in [argument for argument in command.arguments.values() if argument.type.settings.get('id_part')]:
-            if arg.options.get('required', False):
-                required_arguments.append(arg)
-            else:
-                optional_arguments.append(arg)
-            arg.required = False
+        ids = getattr(namespace, 'ids', getattr(namespace, '_ids', None))
+        required_args = [cmd.arguments[x] for x in ids_metadata[command]['required']]
+        optional_args = [cmd.arguments[x] for x in ids_metadata[command]['optional']]
+        combined_args = required_args + optional_args
 
-        def required_values_validator(namespace):
-
-            errors = [arg for arg in required_arguments
-                      if getattr(namespace, arg.name, None) is None]
-
+        if not ids:
+            # ensure the required parameters are provided if --ids is not
+            errors = [arg for arg in required_args if getattr(namespace, arg.name, None) is None]
             if errors:
                 missing_required = ' '.join((arg.options_list[0] for arg in errors))
                 raise ValueError('({} | {}) are required'.format(missing_required, '--ids'))
+            return
 
-        group_name = 'Resource Id'
-        for key, arg in command.arguments.items():
-            if command.arguments[key].type.settings.get('id_part'):
-                command.arguments[key].arg_group = group_name
+        # show warning if names are used in conjunction with --ids
+        other_values = {arg.name: {'arg': arg, 'value': getattr(namespace, arg.name, None)}
+                        for arg in combined_args}
+        for _, data in other_values.items():
+            if data['value'] and not getattr(data['value'], 'is_default', None):
+                logger.warning("option '%s' will be ignored due to use of '--ids'.",
+                               data['arg'].type.settings['options_list'][0])
 
-        id_arg = command.loader.argument_registry.arguments[command.name].get('ids', None)
-        deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
-        id_kwargs = {
-            'metavar': 'RESOURCE_ID',
-            'help': "One or more resource IDs (space-delimited). If provided, "
-                    "no other 'Resource Id' arguments should be specified.",
-            'dest': argparse.SUPPRESS,
-            'action': split_action(command.arguments, deprecate_info),
-            'deprecate_info': deprecate_info,
-            'nargs': '+',
-            'validator': required_values_validator,
-            'arg_group': group_name
-        }
-        command.add_argument('ids', '--ids', **id_kwargs)
+        # create the empty lists, overwriting any values that may already be there
+        for arg in combined_args:
+            setattr(namespace, arg.name, IterateValue())
 
-    for command in command_table.values():
-        command_loaded_handler(command)
+        # expand the IDs into the relevant fields
+        full_id_list = []
+        for val in ids:
+            try:
+                # support piping values from JSON. Does not require use of --query
+                json_vals = json.loads(val)
+                if not isinstance(json_vals, list):
+                    json_vals = [json_vals]
+                for json_val in json_vals:
+                    if 'id' in json_val:
+                        full_id_list += [json_val['id']]
+            except ValueError:
+                # supports piping of --ids to the command when using TSV. Requires use of --query
+                full_id_list = full_id_list + val.split(os.linesep)
+
+        for val in full_id_list:
+            if not is_valid_resource_id(val):
+                raise CLIError('invalid resource ID: {}'.format(val))
+            # place the ID parts into the correct property lists
+            parts = parse_resource_id(val)
+            for arg in combined_args:
+                getattr(namespace, arg.name).append(parts[arg.type.settings['id_part']])
+
+        # support deprecating --ids
+        deprecate_info = cmd.arguments['ids'].type.settings.get('deprecate_info')
+        if deprecate_info:
+            if not hasattr(namespace, '_argument_deprecations'):
+                setattr(namespace, '_argument_deprecations', [deprecate_info])
+            else:
+                namespace._argument_deprecations.append(deprecate_info)  # pylint: disable=protected-access
+
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_ids_arguments)
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_ids_arguments)
 
 
-def register_global_subscription_parameter(cli_ctx):
+def register_global_subscription_argument(cli_ctx):
 
     import knack.events as events
 
@@ -307,21 +307,14 @@ def register_global_subscription_parameter(cli_ctx):
                     'using `az account set -s NAME_OR_ID`',
             'completer': get_subscription_id_list,
             'arg_group': 'Global',
-            'configured_default': 'subscription'
+            'configured_default': 'subscription',
+            'id_part': 'subscription'
         }
         for _, cmd in cmd_tbl.items():
             if 'subscription' not in cmd.arguments:
                 cmd.add_argument('_subscription', '--subscription', **subscription_kwargs)
 
-    def parse_subscription_parameter(cli_ctx, args, **kwargs):  # pylint: disable=unused-argument
-        subscription = getattr(args, '_subscription', None)
-        if subscription:
-            from azure.cli.core._profile import Profile
-            subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id(subscription)
-            cli_ctx.data['subscription_id'] = subscription_id
-
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
-    cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_subscription_parameter)
 
 
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
@@ -330,14 +323,13 @@ remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRem
 
 
 def _get_child(parent, collection_name, item_name, collection_key):
+    if not item_name:
+        raise CLIError("Name property for collection '{}' not provided. Check your input.".format(collection_name))
     items = getattr(parent, collection_name)
-    result = next((x for x in items if getattr(x, collection_key, '').lower() ==
-                   item_name.lower()), None)
+    result = next((x for x in items if getattr(x, collection_key, '').lower() == item_name.lower()), None)
     if not result:
-        raise CLIError("Property '{}' does not exist for key '{}'.".format(
-            item_name, collection_key))
-    else:
-        return result
+        raise CLIError("Property '{}' does not exist for key '{}'.".format(item_name, collection_key))
+    return result
 
 
 def _get_operations_tmpl(cmd, custom_command=False):
@@ -652,7 +644,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                         raise
                 else:
                     raise
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 progress_indicator.stop()
                 raise
 
@@ -802,6 +794,7 @@ def set_properties(instance, expression, force_string):
 
 def add_properties(instance, argument_values, force_string):
     # The first argument indicates the path to the collection to add to.
+    argument_values = list(argument_values)
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
 
@@ -841,8 +834,8 @@ def add_properties(instance, argument_values, force_string):
 
 
 def remove_properties(instance, argument_values):
-    # The first argument indicates the path to the collection to add to.
-    argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
+    # The first argument indicates the path to the collection to remove from.
+    argument_values = list(argument_values) if isinstance(argument_values, list) else [argument_values]
 
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_index = None

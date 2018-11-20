@@ -20,6 +20,8 @@ name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 def load_arguments(self, _):
     with self.argument_context('ad') as c:
         c.argument('_subscription')  # hide global subscription param
+        c.argument('owner_object_id', help="owner's object id")
+        c.argument('not_mine', action='store_true', help='do not set the current user as the owner', arg_group='Ownerships')
 
     with self.argument_context('ad app') as c:
         c.argument('app_id', help='application id')
@@ -44,6 +46,15 @@ def load_arguments(self, _):
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
+
+    with self.argument_context('ad app permission') as c:
+        c.argument('api_permissions', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+        c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
+        c.argument('scope', help='oauth scope')
+        c.argument('api', help='the target API to access')
+
+    with self.argument_context('ad app permission list') as c:
+        c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
@@ -70,8 +81,17 @@ def load_arguments(self, _):
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
 
-    for item in ['delete', 'list']:
-        with self.argument_context('ad sp credential {}'.format(item)) as c:
+    with self.argument_context('ad app credential reset') as c:
+        c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
+        c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
+        c.argument('password', options_list=['--password', '-p'], arg_group='Credential')
+        c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
+        c.argument('create_cert', action='store_true', arg_group='Credential', help='Create a self-signed certificate to use for the credential')
+        c.argument('keyvault', arg_group='Credential', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
+        c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+
+    for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
+        with self.argument_context(item) as c:
             c.argument('key_id', help='credential key id')
             c.argument('cert', action='store_true', help='a certificate based credential')
 
@@ -96,6 +116,9 @@ def load_arguments(self, _):
         for arg in VARIANT_GROUP_ID_ARGS:
             c.argument(arg, options_list=['--group', '-g'], validator=validate_group, help=group_help_msg)
 
+    with self.argument_context('ad group create') as c:
+        c.argument('mail_nickname', help='Mail nickname')
+
     with self.argument_context('ad group show') as c:
         c.extra('cmd')
 
@@ -113,6 +136,9 @@ def load_arguments(self, _):
 
     with self.argument_context('ad group member') as c:
         c.argument('member_object_id', options_list='--member-id', help=member_id_help_msg)
+
+    with self.argument_context('ad signed-in-user') as c:
+        c.argument('object_type', options_list=['--type', '-t'], help='object type filter, e.g. "application", "servicePrincipal"  "group", etc')
 
     with self.argument_context('role') as c:
         c.argument('scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')

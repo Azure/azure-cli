@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+import tempfile
 import unittest
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+import yaml
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
@@ -115,6 +117,105 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              '[0].containers[0].resources.requests.cpu', cpu),
                          self.check('[0].containers[0].resources.requests.memoryInGb', memory)])
 
+    # Test create container using managed identities.
+    @ResourceGroupPreparer()
+    def test_container_create_with_msi(self, resource_group, resource_group_location):
+        container_group_name1 = self.create_random_name('clicontainer', 16)
+        container_group_name2 = self.create_random_name('clicontainer', 16)
+        container_group_name3 = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
+        system_assigned_identity = '[system]'
+
+        self.kwargs.update({
+            'user_assigned_identity_name': user_assigned_identity_name,
+        })
+
+        msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name1,
+            'container_group_name2': container_group_name2,
+            'container_group_name3': container_group_name3,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'user_assigned_identity': msi_identity_result['id'],
+            'system_assigned_identity': system_assigned_identity,
+        })
+
+        # Test create system assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
+        # Test create user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name2} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name2}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'UserAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
+        # Test create system user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name3} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity {system_assigned_identity} {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name3}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned, UserAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
+    # Test create container using managed identities with scope.
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_container_create_with_msi_scope(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        storage_account_name = self.create_random_name('clistorage', 16)
+
+        self.kwargs.update({
+            'storage_account_name': storage_account_name
+        })
+
+        storage_account_result = self.cmd('az storage account create -n {storage_account_name} -g {rg} ').get_output_in_json()
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'msi_scope': storage_account_result['id']
+        })
+
+        # Test create system assigned identity with scope
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --assign-identity --scope {msi_scope}',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli
@@ -125,7 +226,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = 'EsYA8DyuSaNv+3HyGyHoiIIafktf0kE6'
+        password = '5+36OCtbIwfy8g5glC4bQQrFsfmMc3iD'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -189,11 +290,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         })
 
         # Vnet name with no subnet
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
-            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet-name {vnet_name}')
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
 
         # Subnet name with no vnet name
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet-name NAME --subnet NAME | --subnet ID"):
+        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--subnet {subnet_name} ')
 
@@ -201,6 +302,42 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, "Azure Error: NetworkProfileNotFound"):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--network-profile {network_profile_name} ')
+
+    # Test export container.
+    @ResourceGroupPreparer()
+    def test_container_export(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'nginx:latest'
+
+        _, output_file = tempfile.mkstemp()
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'output_file': output_file,
+            'image': image,
+        })
+
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].resources.requests.cpu'),
+                         self.exists('containers[0].resources.requests.memoryInGb')])
+
+        self.cmd('container export -g {rg} -n {container_group_name} -f "{output_file}"')
+
+        cg_definition = None
+        with open(output_file, 'r') as f:
+            cg_definition = yaml.load(f)
+
+        self.check(cg_definition["name"], container_group_name)
+        self.check(cg_definition['properties']['containers'][0]['properties']['image'], image)
+        self.check(cg_definition['location'], resource_group_location)
+        self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['cpu'], 1.0)
+        self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['memoryInGB'], 1.5)
 
     # Test create container with azure file volume
     @ResourceGroupPreparer()

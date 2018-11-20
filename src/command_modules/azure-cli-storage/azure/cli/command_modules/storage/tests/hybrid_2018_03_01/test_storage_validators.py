@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+import mock
 from argparse import Namespace
 from six import StringIO
 
@@ -168,7 +169,8 @@ class TestGetSourceClientValidator(unittest.TestCase):
         # source given in form of uri, source_container parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
                                     destination_container='container1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
+            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
         self.assertIsNone(ns.source_client)
 
@@ -191,7 +193,8 @@ class TestGetSourceClientValidator(unittest.TestCase):
         # source given in form of uri, source_share parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
                                     destination_share='share1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
+            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNone(ns.source_client)
 

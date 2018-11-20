@@ -6,7 +6,7 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import create_random_name as create_random_name_base
+from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -45,3 +45,35 @@ def force_progress_logging():
     cmd_logger.removeHandler(test_handler)
     cmd_logger.setLevel(old_cmd_level)
     az_logger.handlers[0].level = old_az_level
+
+
+class StorageAccountKeyReplacer(RecordingProcessor):
+    """Replace the access token for service principal authentication in a response body."""
+
+    def __init__(self, replacement='veryFakedStorageAccountKey=='):
+        self._replacement = replacement
+        self._activated = False
+
+    def process_request(self, request):  # pylint: disable=no-self-use
+        import re
+        try:
+            pattern = r"/providers/Microsoft\.Storage/storageAccounts/[^/]+/listKeys$"
+            if re.search(pattern, request.path, re.I):
+                self._activated = True
+        except AttributeError:
+            pass
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            import json
+            try:
+                body = json.loads(response['body']['string'])
+                keys = body['keys']
+                for key_entry in keys:
+                    key_entry['value'] = self._replacement
+                self._activated = False
+            except (KeyError, ValueError, TypeError):
+                return response
+            response['body']['string'] = json.dumps(body)
+        return response

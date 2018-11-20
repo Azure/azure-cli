@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.47"
+__version__ = "2.0.51"
 
 import os
 import sys
@@ -12,7 +12,6 @@ import timeit
 
 import six
 
-from knack.arguments import ArgumentsContext
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
@@ -33,12 +32,12 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
-        from azure.cli.core.commands.arm import add_id_parameters, register_global_subscription_parameter
+        from azure.cli.core.commands.arm import (
+            register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
-        from azure.cli.core.extensions import register_extensions
+        from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
-        import knack.events as events
         from knack.util import ensure_dir
 
         self.data['headers'] = {}
@@ -55,9 +54,9 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
-        register_extensions(self)
-        self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
-        register_global_subscription_parameter(self)
+        register_global_transforms(self)
+        register_global_subscription_argument(self)
+        register_ids_argument(self)  # global subscription must be registered first!
 
         self.progress_controller = None
 
@@ -242,13 +241,14 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            with ArgumentsContext(self, '') as c:
-                c.argument('resource_group_name', resource_group_name_type)
-                c.argument('location', get_location_type(self.cli_ctx))
-                c.argument('deployment_name', deployment_name_type)
-                c.argument('cmd', ignore_type)
-
             for loader in command_loaders:
+                # register global args
+                with loader.argument_context('') as c:
+                    c.argument('resource_group_name', resource_group_name_type)
+                    c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('deployment_name', deployment_name_type)
+                    c.argument('cmd', ignore_type)
+
                 loader.command_name = command
                 self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 loader.load_arguments(command)  # this adds entries to the argument registries
@@ -259,12 +259,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False):
+    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
+                 recommend_update=False):
         self.mod_name = mod_name
         self.suppress_extension_name = suppress_extension_name
         self.suppress_up_to_version = suppress_up_to_version
         self.reason = reason
         self.recommend_remove = recommend_remove
+        self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
         from pkg_resources import parse_version
@@ -278,6 +280,8 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
                          "to %s", ext.name, ext.version, self.mod_name)
             if self.recommend_remove:
                 logger.warning("Remove this extension with 'az extension remove --name %s'", ext.name)
+            if self.recommend_update:
+                logger.warning("Update this extension with 'az extension update --name %s'", ext.name)
         return should_suppress
 
 

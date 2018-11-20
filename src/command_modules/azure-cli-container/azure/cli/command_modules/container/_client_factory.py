@@ -34,6 +34,19 @@ def cf_resource(cli_ctx):
     return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
 
 
+def get_auth_management_client(cli_ctx, scope=None, **_):
+    import re
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    subscription_id = None
+    if scope:
+        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
+        if matched:
+            subscription_id = matched.groupdict()['subscription']
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
+
+
 def cf_network(cli_ctx):
     from azure.mgmt.network import NetworkManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client

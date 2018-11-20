@@ -297,11 +297,15 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, instance, size_gb=None, sku=None):
+def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_write=None, disk_mbps_read_write=None):
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
         _set_sku(cmd, instance, sku)
+    if disk_iops_read_write is not None:
+        instance.disk_iops_read_write = disk_iops_read_write
+    if disk_mbps_read_write is not None:
+        instance.disk_mbps_read_write = disk_mbps_read_write
     return instance
 # endregion
 
@@ -309,7 +313,7 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None):
 # region Images (Managed)
 def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
-                 source_virtual_machine=None,
+                 source_virtual_machine=None, storage_sku=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, data_disks=None, tags=None, zone_resilient=None):
@@ -326,7 +330,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                               os_state=OperatingSystemStateTypes.generalized,
                               snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
                               managed_disk=SubResource(id=os_disk) if os_disk else None,
-                              blob_uri=os_blob_uri)
+                              blob_uri=os_blob_uri,
+                              storage_account_type=storage_sku)
         all_data_disks = []
         lun = 0
         if data_blob_uris:
@@ -366,7 +371,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
-                    tags=None):
+                    tags=None, no_wait=False):
     Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -388,7 +393,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
+    return sdk_no_wait(no_wait, client.snapshots.create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
 def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds):
@@ -502,7 +507,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None):
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -512,6 +517,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment)
     from msrestazure.tools import resource_id, is_valid_resource_id
+
+    storage_sku = disk_info['os'].get('storageAccountType')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
@@ -615,7 +622,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
         ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
-        os_disk_name=os_disk_name, custom_image_os_type=os_type, storage_sku=storage_sku,
+        os_disk_name=os_disk_name, custom_image_os_type=os_type,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
@@ -878,7 +885,14 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
         return None
 
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(cmd, vm, no_wait)
+    return set_vm(cmd, vm, no_wait=no_wait)
+
+
+def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if force:
+        return sdk_no_wait(no_wait, client.virtual_machines.redeploy, resource_group_name, vm_name)
+    return sdk_no_wait(no_wait, client.virtual_machines.restart, resource_group_name, vm_name)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
@@ -1212,12 +1226,21 @@ def list_extensions(cmd, resource_group_name, vm_name):
 
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
-                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False):
+                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
+                  extension_instance_name=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
+    if not extension_instance_name:
+        extension_instance_name = vm_extension_name
+
     VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
+    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
+                                                 suggested_name=extension_instance_name)
+    if instance_name != extension_instance_name:
+        msg = "A %s extension with name %s already exists. Updating it with your settings..."
+        logger.warning(msg, vm_extension_name, instance_name)
+
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
                                   publisher=publisher,
@@ -1812,7 +1835,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None):
+                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1823,6 +1846,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
+
+    storage_sku = disk_info['os'].get('storageAccountType')
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
@@ -1956,7 +1982,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         master_template.add_resource(ag_resource)
 
     # create storage accounts if needed for unmanaged disk storage
-    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+    if storage_profile == StorageProfile.SAPirImage:
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             cmd, 'storageLoop', location, tags, storage_sku))
         master_template.add_variable('storageAccountNames', [
@@ -2006,7 +2032,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
         accelerated_networking=accelerated_networking, admin_username=admin_username,
         authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
-        disk_info=disk_info, storage_sku=storage_sku, os_type=os_type, image=image, admin_password=admin_password,
+        disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
         ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
         os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
@@ -2388,7 +2414,10 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False):
+                       no_wait=False, extension_instance_name=None):
+    if not extension_instance_name:
+        extension_instance_name = extension_name
+
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -2403,7 +2432,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile.extensions = [x for x in extensions if
                                             x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    ext = VirtualMachineScaleSetExtension(name=extension_name,
+    ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
                                           type=extension_name,
                                           protected_settings=protected_settings,

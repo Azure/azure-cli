@@ -12,7 +12,7 @@ helps['ad sp create-for-rbac'] = """
     short-summary: Create a service principal and configure its access to Azure resources.
     parameters:
         - name: --name -n
-          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
+          short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
         - name: --password -p
           short-summary: The password used to log in.
           long-summary: If not present and `--cert` is not specified, a random password will be generated.
@@ -61,6 +61,8 @@ helps['ad sp create-for-rbac'] = """
 helps['ad sp credential'] = """
     type: group
     short-summary: manage a service principal's credentials.
+    long-summary: the credential update will be applied on the Application object the service principal is associated with.
+       In other words, you can accomplish the same thing using "az ad app credential"
 """
 
 helps['ad sp credential list'] = """
@@ -166,6 +168,63 @@ helps['ad app owner'] = """
 helps['ad app owner list'] = """
     type: command
     short-summary: List application owners.
+"""
+helps['ad app owner add'] = """
+    type: command
+    short-summary: add an application owner.
+"""
+helps['ad app owner remove'] = """
+    type: command
+    short-summary: remove an application owner.
+"""
+helps['ad app permission'] = """
+    type: group
+    short-summary: manage an application's OAuth2 permissions.
+"""
+helps['ad app permission grant'] = """
+    type: command
+    short-summary: Grant the app an API permission
+    examples:
+        - name: Grant a native application with permissions to access an existing API with TTL of 2 years
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+"""
+helps['ad app permission list'] = """
+    type: command
+    short-summary: List API permissions the application has requested
+    examples:
+        - name: List the OAuth2 permissions for an existing AAD app
+          text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
+"""
+helps['ad app permission add'] = """
+    type: command
+    short-summary: add an API permission
+    long-summary: invoking "az ad app permission grant" is needed to activate it
+    examples:
+        - name: add a Graph API permission of "Sign in and read user profile"
+          text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
+"""
+helps['ad app permission delete'] = """
+    type: command
+    short-summary: remove an API permission
+    examples:
+        - name: remove an AAD graph permission
+          text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
+"""
+helps['ad app credential'] = """
+    type: group
+    short-summary: manage an application's password or certificate credentials
+"""
+helps['ad app credential reset'] = """
+    type: command
+    short-summary: append or overwrite an application's password or certificate credentials
+"""
+helps['ad app credential list'] = """
+    type: command
+    short-summary: list an application's password or certificate credentials
+"""
+helps['ad app credential delete'] = """
+    type: command
+    short-summary: delete an application's password or certificate credentials
 """
 helps['ad user list'] = """
     type: command
@@ -300,6 +359,22 @@ helps['ad group member check'] = """
     type: command
     short-summary: Check if a member is in a group.
 """
+helps['ad group owner'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group owners.
+"""
+helps['ad group owner list'] = """
+    type: command
+    short-summary: List group owners.
+"""
+helps['ad group owner add'] = """
+    type: command
+    short-summary: add a group owner.
+"""
+helps['ad group owner remove'] = """
+    type: command
+    short-summary: remove a group owner.
+"""
 helps['ad sp'] = """
     type: group
     short-summary: Manage Azure Active Directory service principals for automation authentication.
@@ -307,4 +382,12 @@ helps['ad sp'] = """
 helps['ad user'] = """
     type: group
     short-summary: Manage Azure Active Directory users and user authentication.
+"""
+helps['ad signed-in-user'] = """
+    type: group
+    short-summary: Show graph information about current signed-in user in CLI
+"""
+helps['ad signed-in-user list-owned-objects'] = """
+    type: command
+    short-summary: Get the list of directory objects that are owned by the user
 """

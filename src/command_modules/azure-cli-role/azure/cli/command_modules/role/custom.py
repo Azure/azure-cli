@@ -19,7 +19,7 @@ from knack.util import CLIError, todict
 from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType, get_api_version
-from azure.graphrbac.models.graph_error import GraphErrorException
+from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -386,9 +386,9 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
 
 
 def _get_displayable_name(graph_object):
-    if graph_object.user_principal_name:
+    if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif graph_object.service_principal_names:
+    elif getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 
@@ -497,13 +497,28 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
+
     return client.list(filter=(' and '.join(sub_filters)))
 
 
 def list_application_owners(cmd, identifier):
-    client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_application(client.applications, identifier)
-    return client.applications.list_owners(object_id)
+    client = _graph_client_factory(cmd.cli_ctx).applications
+    return client.list_owners(_resolve_application(client, identifier))
+
+
+def add_application_owner(cmd, owner_object_id, identifier):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+    return graph_client.applications.add_owner(_resolve_application(graph_client.applications, identifier), owner_url)
+
+
+def remove_application_owner(cmd, owner_object_id, identifier):
+    client = _graph_client_factory(cmd.cli_ctx).applications
+    return client.remove_owner(_resolve_application(client, identifier), owner_object_id)
 
 
 def list_sps(client, spn=None, display_name=None, query_filter=None):
@@ -515,7 +530,18 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
     return client.list(filter=(' and '.join(sub_filters)))
+
+
+def list_owned_objects(client, object_type=None):
+    result = client.list_owned_objects()
+    if object_type:
+        result = [r for r in result if r.object_type.lower() == object_type.lower()]
+    return result
 
 
 def list_users(client, upn=None, display_name=None, query_filter=None):
@@ -560,8 +586,14 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(client, display_name, mail_nickname):
-    return client.create(GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname))
+def create_group(cmd, display_name, mail_nickname):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
+                                                             mail_nickname=mail_nickname))
+    # TODO: uncomment once design reviewed with AAD team
+    # _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
+
+    return group
 
 
 def check_group_membership(cmd, client, group_id, member_object_id):  # pylint: disable=unused-argument
@@ -581,10 +613,38 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage=None, identifier_uris=None,
+def list_group_owners(cmd, group_id):
+    client = _graph_client_factory(cmd.cli_ctx).groups
+    return client.list_owners(_resolve_group(client, group_id))
+
+
+def add_group_owner(cmd, owner_object_id, group_id):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+    return graph_client.groups.add_owner(_resolve_group(graph_client.groups, group_id), owner_url)
+
+
+def remove_group_owner(cmd, owner_object_id, group_id):
+    client = _graph_client_factory(cmd.cli_ctx).groups
+    return client.remove_owner(_resolve_group(client, group_id), owner_object_id)
+
+
+def _resolve_group(client, identifier):
+    if not _is_guid(identifier):
+        res = list(list_groups(client, display_name=identifier))
+        if not res:
+            raise CLIError('Group {} is not found in Graph '.format(identifier))
+        if len(res) != 1:
+            raise CLIError('More than 1 group objects has the display name of ' + identifier)
+        identifier = res[0].object_id
+    return identifier
+
+
+def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     if native_app:
         if identifier_uris:
@@ -610,7 +670,7 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
                                                   required_resource_access=required_accesses)
 
     try:
-        result = client.create(app_patch_param)
+        result = graph_client.applications.create(app_patch_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -626,10 +686,101 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
             ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
         app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
         setattr(app_patch_param, 'public_client', True)
-        client.patch(result.object_id, app_patch_param)
-        result = client.get(result.object_id)
+        graph_client.applications.patch(result.object_id, app_patch_param)
+        result = graph_client.applications.get(result.object_id)
 
     return result
+
+
+def list_permissions(cmd, identifier):
+    # the important and hard part is to tell users which permissions have been granted.
+    # we will due diligence to dig out what matters
+
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    # first get the permission grant history
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+    grant_info = graph_client.oauth2.get(
+        filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
+    grant_histories = grant_info.additional_properties['value']
+
+    # get original permissions required by the application, we will cross check the history
+    # and mark out granted ones
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    permissions = application.required_resource_access
+    for p in permissions:
+        result = list(graph_client.service_principals.list(
+            filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
+        granted_times = 'N/A'
+        if result:
+            granted_times = ', '.join([x['startTime'] for x in grant_histories if
+                                       x['resourceId'] == result[0].object_id])
+        setattr(p, 'grantedTime', granted_times)
+    return permissions
+
+
+def add_permission(cmd, identifier, api, api_permissions):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    existing = application.required_resource_access
+    resource_accesses = []
+    for e in api_permissions:
+        access_id, access_type = e.split('=')
+        resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
+    required_resource_access = RequiredResourceAccess(resource_app_id=api,
+                                                      resource_access=resource_accesses)
+    existing.append(required_resource_access)
+    update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
+    graph_client.applications.patch(application.object_id, update_parameter)
+    logger.warning('Invoking "az ad app permission grant --id %s --api %s" is needed to make the '
+                   'change effective', identifier, api)
+
+
+def delete_permission(cmd, identifier, api):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    existing_accesses = application.required_resource_access
+    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
+    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    return graph_client.applications.patch(application.object_id, update_parameter)
+
+
+def grant_application(cmd, identifier, api, expires='1', scope='user_impersonation'):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    # Get the Service Principal ObjectId for the client app
+    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+
+    # Get the Service Principal ObjectId for associated app
+    associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, api)
+
+    # Build payload
+    start_date = datetime.datetime.utcnow()
+    end_date = start_date + relativedelta(years=1)
+
+    if expires.lower() == 'never':
+        end_date = start_date + relativedelta(years=1000)
+    else:
+        try:
+            end_date = start_date + relativedelta(years=int(expires))
+        except ValueError:
+            raise CLIError('usage error: --expires <INT>|never')
+
+    payload = {
+        "odata.type": "Microsoft.DirectoryServices.OAuth2PermissionGrant",
+        "clientId": client_sp_object_id,
+        "consentType": "AllPrincipals",
+        "resourceId": associated_sp_object_id,
+        "scope": scope,
+        "startTime": start_date.isoformat(),
+        "expiryTime": end_date.isoformat()
+    }
+
+    # Grant OAuth2 permissions
+    response = graph_client.oauth2.grant(payload)  # pylint: disable=no-member
+
+    return response
 
 
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
@@ -638,7 +789,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
-    if any([key_value, key_type, key_usage, start_date, end_date]):
+    if any([password, key_value]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
 
@@ -657,8 +808,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         homepage=homepage or _get_property('homepage'),
         identifier_uris=identifier_uris or _get_property('identifier_uris'),
         reply_urls=reply_urls or _get_property('reply_urls'),
-        key_credentials=key_creds or _get_property('key_credentials'),
-        password_credentials=password_creds or _get_property('password_credentials'),
+        key_credentials=key_creds or None,
+        password_credentials=password_creds or None,
         available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
         required_resource_access=required_accesses or _get_property('required_resource_access'),
         oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
@@ -757,7 +908,7 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
         except GraphErrorException:
             pass  # fallback to appid (maybe from an external tenant?)
 
-    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+    return client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def show_service_principal(client, identifier):
@@ -800,59 +951,42 @@ def list_service_principal_owners(cmd, identifier):
 
 
 def list_service_principal_credentials(cmd, identifier, cert=False):
-    client = _graph_client_factory(cmd.cli_ctx)
-    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-    sp_creds, app_creds = [], []
-    if cert:
-        sp_creds = list(client.service_principals.list_key_credentials(sp_object_id))
-        if app_object_id:
-            app_creds = list(client.applications.list_key_credentials(app_object_id))
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    if " sp " in cmd.name:
+        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
     else:
-        sp_creds = list(client.service_principals.list_password_credentials(sp_object_id))
-        if app_object_id:
-            app_creds = list(client.applications.list_password_credentials(app_object_id))
+        app_object_id = _resolve_application(graph_client.applications, identifier)
+    return _get_service_principal_credentials(graph_client, app_object_id, cert)
 
-    for x in sp_creds:
-        setattr(x, 'source', 'ServicePrincipal')
-    for x in app_creds:
-        setattr(x, 'source', 'Application')
-    return app_creds + sp_creds
+
+def _get_service_principal_credentials(graph_client, app_object_id, cert=False):
+    if cert:
+        app_creds = list(graph_client.applications.list_key_credentials(app_object_id))
+    else:
+        app_creds = list(graph_client.applications.list_password_credentials(app_object_id))
+
+    return app_creds
 
 
 def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
-    client = _graph_client_factory(cmd.cli_ctx)
-    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    if cert:
-        result = list(client.service_principals.list_key_credentials(sp_object_id))
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    if " sp " in cmd.name:
+        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
     else:
-        result = list(client.service_principals.list_password_credentials(sp_object_id))
+        app_object_id = _resolve_application(graph_client.applications, identifier)
+    result = _get_service_principal_credentials(graph_client, app_object_id, cert)
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
-
-    # we will try to delete the creds at service principal level, if not found, we try application level
-
     if to_delete:
         result.remove(to_delete)
         if cert:
-            return client.service_principals.update_key_credentials(sp_object_id, result)
-        return client.service_principals.update_password_credentials(sp_object_id, result)
+            return graph_client.applications.update_key_credentials(app_object_id, result)
+        return graph_client.applications.update_password_credentials(app_object_id, result)
     else:
-        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-        if app_object_id:
-            if cert:
-                result = list(client.applications.list_key_credentials(app_object_id))
-            else:
-                result = list(client.applications.list_password_credentials(app_object_id))
-            to_delete = next((x for x in result if x.key_id == key_id), None)
-            if to_delete:
-                result.remove(to_delete)
-                if cert:
-                    return client.applications.update_key_credentials(app_object_id, result)
-                return client.applications.update_password_credentials(app_object_id, result)
-
-    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
-        key_id, identifier))
+        raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+            key_id, identifier))
 
 
 def _resolve_service_principal(client, identifier):
@@ -929,9 +1063,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, password=None, years=None,
-        create_cert=False, cert=None,
-        scopes=None, role='Contributor',
+        cmd, name=None, password=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -944,14 +1076,18 @@ def create_service_principal_for_rbac(
 
     app_display_name = None
     if name and '://' not in name:
+        prefix = "http://"
         app_display_name = name
-        name = "http://" + name  # normalize be a valid graph service principal name
+        logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
+                       ' used for service principal names', name, prefix, name)
+        name = prefix + name  # normalize be a valid graph service principal name
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
+        app_display_name = name.split('://')[-1]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -968,7 +1104,7 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    aad_application = create_application(graph_client.applications,
+    aad_application = create_application(cmd,
                                          display_name=app_display_name,
                                          homepage='https://' + app_display_name,
                                          identifier_uris=[name],
@@ -979,6 +1115,7 @@ def create_service_principal_for_rbac(
                                          end_date=app_end_date)
     # pylint: disable=no-member
     app_id = aad_application.app_id
+
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
         try:
@@ -996,6 +1133,9 @@ def create_service_principal_for_rbac(
                                                          'response') else ex)  # pylint: disable=no-member
                 raise
     sp_oid = aad_sp.object_id
+
+    # TODO: uncomment once design reviewed with AAD team
+    # _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
 
     # retry while server replication is done
     if not skip_assignment:
@@ -1040,6 +1180,13 @@ def create_service_principal_for_rbac(
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
+
+
+def _get_signed_in_user_object_id(graph_client):
+    try:
+        return graph_client.signed_in_user.get().object_id
+    except GraphErrorException:  # error could be possible if you logged in as a service principal
+        pass
 
 
 def _get_keyvault_client(cli_ctx):
@@ -1309,6 +1456,22 @@ def _get_object_stubs(graph_client, assignees):
         params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees[i:i + 1000])
         result += list(graph_client.objects.get_objects_by_object_ids(params))
     return result
+
+
+def _get_owner_url(cli_ctx, owner_object_id):
+    if '://' in owner_object_id:
+        return owner_object_id
+    graph_url = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    _, _2, tenant_id = profile.get_login_credentials()
+    return graph_url + tenant_id + '/directoryObjects/' + owner_object_id
+
+
+def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
+    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
+    if signed_in_user_object_id:
+        setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
 # for injecting test seams to produce predicatable role assignment id for playback

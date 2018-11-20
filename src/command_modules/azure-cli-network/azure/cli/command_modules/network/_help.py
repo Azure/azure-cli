@@ -686,8 +686,46 @@ helps['network application-gateway ssl-policy predefined show'] = """
         - name: Gets SSL predefined policy with the specified policy name.
           text: az network application-gateway ssl-policy predefined show -n AppGwSslPolicy20170401
 """
+# endregion
 
+# region Application Gateway Trusted Root Certs
+helps['network application-gateway root-cert'] = """
+    type: group
+    short-summary: Manage trusted root certificates of an application gateway.
+"""
+helps['network application-gateway root-cert create'] = """
+    type: command
+    short-summary: Upload a trusted root certificate.
+"""
 
+helps['network application-gateway root-cert delete'] = """
+    type: command
+    short-summary: Delete a trusted root certificate.
+    examples:
+        - name: Delete a trusted root certificate.
+          text: az network application-gateway root-cert delete -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
+
+helps['network application-gateway root-cert list'] = """
+    type: command
+    short-summary: List trusted root certificates.
+    examples:
+        - name: List trusted root certificates.
+          text: az network application-gateway root-cert list -g MyResourceGroup --gateway-name MyAppGateway
+"""
+
+helps['network application-gateway root-cert show'] = """
+    type: command
+    short-summary: Get the details of a trusted root certificate.
+    examples:
+        - name: Get the details of a trusted root certificate.
+          text: az network application-gateway root-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
+
+helps['network application-gateway root-cert update'] = """
+    type: command
+    short-summary: Update a trusted root certificate.
+"""
 # endregion
 
 # region Application Gateway URL path map
@@ -1977,16 +2015,6 @@ helps['network interface-endpoint'] = """
     short-summary: Manage interface endpoints.
 """
 
-# helps['network interface-endpoint create'] = """
-#    type: command
-#    short-summary: Create an interface endpoint.
-# """
-
-# helps['network interface-endpoint delete'] = """
-#    type: command
-#    short-summary: Delete an interface endpoint.
-# """
-
 helps['network interface-endpoint list'] = """
     type: command
     short-summary: List interface endpoints.
@@ -1996,12 +2024,26 @@ helps['network interface-endpoint show'] = """
     type: command
     short-summary: Get the details of an interface endpoint.
 """
-
-# helps['network interface-endpoint update'] = """
-#    type: command
-#    short-summary: Update an interface endpoint.
-# """
 # endregion
+
+# region Private Endpoint
+helps['network private-endpoint'] = """
+    type: group
+    short-summary: Manage private endpoints.
+"""
+
+
+helps['network private-endpoint list'] = """
+    type: command
+    short-summary: List private endpoints.
+"""
+
+helps['network private-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an private endpoint.
+"""
+# endregion
+
 
 # region Load Balancer
 helps['network lb'] = """
