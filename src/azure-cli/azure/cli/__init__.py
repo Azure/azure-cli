@@ -11,8 +11,4 @@ import pkg_resources
 pkg_resources.declare_namespace(__name__)
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-<<<<<<< dev
-__version__ = "2.0.48"
-=======
 __version__ = "2.0.51"
->>>>>>> dev
