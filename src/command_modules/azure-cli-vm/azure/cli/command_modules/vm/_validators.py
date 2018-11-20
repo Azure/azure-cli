@@ -848,8 +848,7 @@ def _validate_vm_vmss_create_auth(namespace):
             _prompt_for_password(namespace)
 
         # validate password
-        _validate_admin_password(namespace.admin_password,
-                                 namespace.os_type)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
 
     elif namespace.authentication_type == 'ssh':
 
@@ -859,8 +858,7 @@ def _validate_vm_vmss_create_auth(namespace):
         validate_ssh_key(namespace)
 
         if not namespace.ssh_dest_key_path:
-            namespace.ssh_dest_key_path = \
-                '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
     elif namespace.authentication_type == 'all':
         if namespace.os_type.lower() == 'windows':
@@ -868,13 +866,11 @@ def _validate_vm_vmss_create_auth(namespace):
 
         if not namespace.admin_password:
             _prompt_for_password(namespace)
-        _validate_admin_password(namespace.admin_password,
-                                 namespace.os_type)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
 
         validate_ssh_key(namespace)
         if not namespace.ssh_dest_key_path:
-            namespace.ssh_dest_key_path = \
-                '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
 
 def _prompt_for_password(namespace):

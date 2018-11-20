@@ -270,6 +270,18 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.admin_password = None
         return ns
 
+    @staticmethod
+    def _new_linux_ns(authentication_type=None):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "LINux"
+        if authentication_type in ("password", "all"):
+            ns.admin_username = 'user12345'
+            ns.admin_password = 'verySecret!!!'
+        if authentication_type in ("ssh", "all"):
+            ns.ssh_key_value = TestVMDefaultAuthType._get_test_ssh_key()
+        ns.authentication_type = authentication_type
+        return ns
+
     def test_default_windows(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "WindowS"
@@ -327,25 +339,14 @@ class TestVMDefaultAuthType(unittest.TestCase):
             self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
 
     def test_linux_with_password_and_ssh_explicit(self):
-        ns = TestVMDefaultAuthType._set_ns()
-        ns.os_type = "LINux"
-        ns.authentication_type = 'all'
-        ns.admin_username = 'user12345'
-        ns.admin_password = 'verySecret!!!'
-        ns.ssh_key_value = self._get_test_ssh_key()
-
+        ns = TestVMDefaultAuthType._new_linux_ns(authentication_type="all")
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'all')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
 
-    def test_linux_with_password_and_ssh_explicit(self):
-        ns = TestVMDefaultAuthType._set_ns()
-        ns.os_type = "LINux"
+    def test_linux_with_password_and_ssh_implicit(self):
+        ns = TestVMDefaultAuthType._new_linux_ns(authentication_type="all")
         ns.authentication_type = None
-        ns.admin_username = 'user12345'
-        ns.admin_password = 'verySecret!!!'
-        ns.ssh_key_value = self._get_test_ssh_key()
-
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'all')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
