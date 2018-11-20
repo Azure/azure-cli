@@ -171,65 +171,44 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     :return:
     """
     # get the bot and ensure it's not a registration only bot
-    raw_bot_properties = client.bots.get(
+    bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
     )
-    if raw_bot_properties.kind == 'bot':
+    if bot.kind == 'bot':
         raise CLIError('Source download is not supported for registration only bots')
 
+    # TODO: Informational logging, how to do it? Once we know, do it all over the place :)
+    # TODO: warning when defaulting!
     file_save_path = file_save_path or os.getcwd()
     if not os.path.isdir(file_save_path):
         raise CLIError('Path name not valid')
+
+    # TODO: Verify that the behavior for download and publish is the same in regards to where the files are downloaded
+    # TODO: to and uploaded from.
     folder_path = os.path.join(file_save_path, resource_name)
     if os.path.exists(folder_path):
         raise CLIError('The path {0} already exists. Please delete this folder or specify an alternate path'.format(folder_path))  # pylint: disable=line-too-long
     os.mkdir(folder_path)
 
-    site_name = WebAppOperations.get_bot_site_name(raw_bot_properties.properties.endpoint)
+    kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
+    kudu_client.download_bot_zip(file_save_path, folder_path)
 
-    user_name, password = WebAppOperations.get_site_credential(cmd.cli_ctx, resource_group_name, site_name, None)
-    scm_url = WebAppOperations.get_scm_url(cmd, resource_group_name, site_name, None)
-
-    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = authorization
-    headers['content-type'] = 'application/json'
-
-    # TODO: Move to Kudu
-    # if repository folder exists, then get those contents for download
-    response = requests.get(scm_url + '/api/zip/site/clirepo/', headers=authorization)
-    if response.status_code != 200:
-        # try getting the bot from wwwroot instead
-        payload = {
-            'command': 'PostDeployScripts\\prepareSrc.cmd {0}'.format(password),
-            'dir': r'site\wwwroot'
-        }
-        response = requests.post(scm_url + '/api/command', data=json.dumps(payload), headers=headers)
-        HttpResponseValidator.check_response_status(response)
-        response = requests.get(scm_url + '/api/vfs/site/bot-src.zip', headers=authorization)
-        HttpResponseValidator.check_response_status(response)
-
-    download_path = os.path.join(file_save_path, 'download.zip')
-    with open(os.path.join(file_save_path, 'download.zip'), 'wb') as f:
-        f.write(response.content)
-    zip_ref = zipfile.ZipFile(download_path)
-    zip_ref.extractall(folder_path)
-    zip_ref.close()
-    os.remove(download_path)
     # TODO: Examine cases where PostDeployScripts, deploy.cmd, etc. do not exist.
     if (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
             os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))
-    # if the bot contains a bot
+
+    # If the bot source contains a .bot file
     # TODO: If there is only one bot file, that is the bot file.
-    # TODO: If there are more than one bot file, the user must disambiguate before continuing
+    # TODO: If there are more than one bot file, the user must disambiguate before continuing. Show error and suggest passsing --bot-file-name
     bot_file_path = os.path.join(folder_path, '{0}.bot'.format(resource_name))
     if os.path.exists(bot_file_path):
         app_settings = WebAppOperations.get_app_settings(
             cmd=cmd,
             resource_group_name=resource_group_name,
-            name=site_name
+            name=kudu_client.get_bot_site_name()
         )
         bot_secret = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
         # write a .env file #todo: write an appsettings.json file
@@ -238,10 +217,12 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
             'botFilePath': '{0}.bot'.format(resource_name),
             'NODE_ENV': 'development'
         }
+        # If javascript, write .env file content to .env file
         if os.path.exists(os.path.join(folder_path, 'package.json')):
             with open(os.path.join(folder_path, '.env'), 'w') as f:
                 for key, value in bot_env.items():
                     f.write('{0}={1}\n'.format(key, value))
+        # If C#, write .env file content to appsettings.json
         else:
             app_settings_path = os.path.join(folder_path, 'appsettings.json')
             existing = None
@@ -255,6 +236,9 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
                     existing[key] = value
                 f.write(json.dumps(existing))
 
+        # TODO: understand this. If there is not bot secret,  add bot_env info
+        # TODO: Consider just returning downloadPAth as a string rather than this object. There seem to be no
+        # usages of the other properties such as botFileSecret
         if not bot_secret:
             bot_env['downloadPath'] = folder_path
             return bot_env
@@ -316,22 +300,34 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     )
     if raw_bot_properties.kind == 'bot':
         raise CLIError('Prepare Publish is not supported for registration only bots')
+    # TODO: If we grab os.getcwd, show message to the user, 'defaulting to local directory, pass --code-dir to override'
     code_dir = code_dir or os.getcwd()
     if not os.path.isdir(code_dir):
+        # TODO: Why not say 'you are all set, be happy :)' instead of displaying an error?
         raise CLIError('Please supply a valid directory path containing your source code')
 
+    # TODO: Can we avoid?
     os.chdir(code_dir)
-    # ensure that the directory does not contain appropriate post deploy scripts folder
+
+    # Ensure that the directory does not contain appropriate post deploy scripts folder
     if 'PostDeployScripts' in os.listdir(code_dir):
         raise CLIError('Post deploy azure scripts are already in Place.')
+
+    # Download bot source
+    # TODO: Why not return a string rather than force callers to dereference a dictionary?
     download_path = download_app(cmd, client, resource_group_name, resource_name)
 
+    # TODO: If I create a node bot, and then publish a c# bot does this work
+    # TODO: Can't we just have a constant PostDeployScripts folder somewhere?
     shutil.copytree(os.path.join(download_path['downloadPath'], 'PostDeployScripts'), 'PostDeployScripts')
 
+    # If javascript, we need these files there for Azure WebApps to start
     if os.path.exists(os.path.join('PostDeployScripts', 'publish.js.template')):
         shutil.copy(os.path.join(download_path['downloadPath'], 'iisnode.yml'), 'iisnode.yml')
         shutil.copy(os.path.join(download_path['downloadPath'], 'publish.js'), 'publish.js')
         shutil.copy(os.path.join(download_path['downloadPath'], 'web.config'), 'web.config')
+
+    # If C#, we need other set of files for the WebApp to start including build.cmd
     else:
         solution_path = None
         csproj_path = None
@@ -341,7 +337,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         shutil.copy(os.path.join(download_path['downloadPath'], '.deployment'), '.deployment')
         shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
                         'deploy.cmd')
-        # find solution and project name
+        # Find solution and project name
+        # TODO: Maybe we don't want to get into this business. Allow users to specify csproj / sln?
         for root, _, files in os.walk(os.curdir):
             if solution_path and csproj_path:
                 break
@@ -353,9 +350,12 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
                 if fileName == proj_name:
                     csproj_path = os.path.relpath(os.path.join(root, fileName))
 
+        # Read deploy script contents
         with open('deploy.cmd') as f:
             content = f.read()
 
+        # Using the deploy.cmd as a template, adapt it to use our solution and csproj
+        # TODO: Create template deploy.cmd
         with open('deploy.cmd', 'w') as f:
             content = content.replace(old_namev3 + '.sln', solution_path)
             content = content.replace(old_namev3 + '.csproj', csproj_path)
@@ -389,6 +389,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
     # If the user does not pass in a path to the local bot project, get the current working directory.
     if not code_dir:
+        # TODO: If we grab os.getcwd, show message to the user, 'defaulting to local directory, pass --code-dir to override'
         code_dir = os.getcwd()
 
     if not os.path.isdir(code_dir):
