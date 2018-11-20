@@ -5,7 +5,8 @@ Release History
 
 2.2.9
 ++++++
-* `vm extension show / wait`: deprecated --expand parameter
+* `vm extension show / wait`: deprecated --expand parameter.
+* `vm restart`: Added `--force` which redeploys unresponsive VMs.
 
 2.2.8
 ++++++

@@ -194,7 +194,7 @@ def load_command_table(self, _):
         g.command('perform-maintenance', 'perform_maintenance', min_api='2017-03-30')
         g.command('redeploy', 'redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
-        g.command('restart', 'restart', supports_no_wait=True)
+        g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('start', 'start', supports_no_wait=True)
         g.command('stop', 'power_off', supports_no_wait=True)

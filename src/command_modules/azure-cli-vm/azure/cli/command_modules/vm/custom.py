@@ -888,6 +888,13 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
     return set_vm(cmd, vm, no_wait=no_wait)
 
 
+def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if force:
+        return sdk_no_wait(no_wait, client.virtual_machines.redeploy, resource_group_name, vm_name)
+    return sdk_no_wait(no_wait, client.virtual_machines.restart, resource_group_name, vm_name)
+
+
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(cmd.cli_ctx)
