@@ -156,7 +156,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
-                               connection_draining_timeout=0, enable_http2=None):
+                               connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
+                               custom_error_pages=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -207,7 +208,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-        connection_draining_timeout, enable_http2)
+        connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -232,7 +233,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None):
+def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
+                               custom_error_pages=None):
     if sku is not None:
         instance.sku.name = sku
         instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
@@ -242,6 +244,10 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None, ena
         instance.tags = tags
     if enable_http2 is not None:
         instance.enable_http2 = enable_http2
+    if min_capacity is not None:
+        instance.autoscale_configuration.min_capacity = min_capacity
+    if custom_error_pages is not None:
+        instance.custom_error_configurations = custom_error_pages
     return instance
 
 
@@ -637,6 +643,26 @@ def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
         resource_group_name, application_gateway_name).ssl_policy
 
 
+def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False,
+                                       cert_data=None, keyvault_secret=None):
+    ApplicationGatewayTrustedRootCertificate = cmd.get_models('ApplicationGatewayTrustedRootCertificate')
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
+                                                         keyvault_secret_id=keyvault_secret)
+    _upsert(ag, 'trusted_root_certificates', root_cert, 'name')
+    return sdk_no_wait(no_wait, ncf.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=None, keyvault_secret=None):
+    if cert_data is not None:
+        instance.data = cert_data
+    if keyvault_secret is not None:
+        instance.keyvault_secret_id = keyvault_secret
+    return parent
+
+
 def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
                            address_pool=None, http_settings=None, redirect_config=None,
                            default_address_pool=None, default_http_settings=None, default_redirect_config=None,
@@ -756,7 +782,8 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                                  firewall_mode=None,
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
-                                 disabled_rules=None, no_wait=False):
+                                 disabled_rules=None, no_wait=False,
+                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None):
     ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
         'ApplicationGatewayWebApplicationFirewallConfiguration')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
@@ -792,6 +819,11 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                 if disabled_group.rules:
                     disabled_groups.append(disabled_group)
         ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
+
+    if cmd.supported_api_version(min_api='2018-08-01'):
+        ag.web_application_firewall_configuration.request_body_check = request_body_check
+        ag.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
+        ag.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
@@ -2739,17 +2771,19 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
                                          direction=None, protocol=None, source=None, destination=None,
                                          destination_port=None, queries=None,
                                          resource_group_name=None, resource_type=None, parent=None):
-    TrafficQuery = cmd.get_models('TrafficQuery')
+    NetworkConfigurationDiagnosticParameters, NetworkConfigurationDiagnosticProfile = \
+        cmd.get_models('NetworkConfigurationDiagnosticParameters', 'NetworkConfigurationDiagnosticProfile')
+
     if not queries:
-        queries = [TrafficQuery(
+        queries = [NetworkConfigurationDiagnosticProfile(
             direction=direction,
             protocol=protocol,
             source=source,
             destination=destination,
             destination_port=destination_port
         )]
-    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, resource, queries)
-
+    params = NetworkConfigurationDiagnosticParameters(target_resource_id=resource, profiles=queries)
+    return client.get_network_configuration_diagnostic(watcher_rg, watcher_name, params)
 # endregion
 
 

@@ -209,12 +209,28 @@ helps['storage blob list'] = """
 
 helps['storage blob copy'] = """
     type: group
-    short-summary: Manage blob copy operations.
+    short-summary: Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob incremental-copy'] = """
     type: group
     short-summary: Manage blob incremental copy operations.
+"""
+
+helps['storage blob incremental-copy start'] = """
+    type: command
+    short-summary: Copies an incremental copy of a blob asynchronously.
+    long-summary: This operation returns a copy operation
+        properties object, including a copy ID you can use to check or abort the
+        copy operation. The Blob service copies blobs on a best-effort basis.
+        The source blob for an incremental copy operation must be a page blob.
+        Call get_blob_properties on the destination blob to check the status of the copy operation.
+        The final blob will be committed when the copy completes.
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob incremental-copy start --source-container MySourceContainer --source-blob MyBlob
+                --source-account-name MySourceAccount --source-account-key MySourceKey --source-snapshot MySnapshot
+                --destination-container MyDestinationContainer --destination-blob MyDestinationBlob
 """
 
 helps['storage blob lease'] = """
@@ -357,11 +373,16 @@ helps['storage blob delete-batch'] = """
             az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 """
 
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
+"""
+
 helps['storage blob copy start-batch'] = """
     type: command
-    short-summary: Copy multiple blobs or files to a blob container.
+    short-summary: Copy multiple blobs or files to a blob container. Use `az storage blob show` to check the status of the blobs.
     parameters:
-        - name: --destination-container
+        - name: --destination-container -c
           type: string
           short-summary: The blob container where the selected source files or blobs will be copied to.
         - name: --pattern
@@ -777,6 +798,11 @@ helps['storage share policy'] = """
     short-summary: Manage shared access policies of a storage file share.
 """
 
+helps['storage share create'] = """
+    type: command
+    short-summary: Creates a new share under the specified account.
+"""
+
 helps['storage table'] = """
     type: group
     short-summary: Manage NoSQL key-value storage.
@@ -879,4 +905,14 @@ helps['storage file generate-sas'] = """
           text: |
             end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
             az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
+"""
+
+helps['storage blob url'] = """
+    type: command
+    short-summary: Create the url to access a blob.
+"""
+
+helps['storage file url'] = """
+    type: command
+    short-summary: Create the url to access a file.
 """

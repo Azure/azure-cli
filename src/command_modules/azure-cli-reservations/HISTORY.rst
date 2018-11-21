@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.4.1
++++++
+* Add RedHat in the reserved resource enum type
+
 0.4.0
 +++++
 * Add CosmosDb in the reserved resource enum type

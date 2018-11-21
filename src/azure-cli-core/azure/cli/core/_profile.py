@@ -67,6 +67,7 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+_ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -229,7 +230,8 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None):
+    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
+                              user_assigned_identity_id=None):
         consolidated = []
         for s in subscriptions:
             consolidated.append({
@@ -246,6 +248,8 @@ class Profile(object):
             })
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+            if user_assigned_identity_id:
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
         return consolidated
 
     def _build_tenant_level_accounts(self, tenants):
@@ -305,9 +309,9 @@ class Profile(object):
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
         user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
-        for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = base_name
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
+                                                  user_assigned_identity_id=base_name)
+
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
@@ -469,9 +473,12 @@ class Profile(object):
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
+
         if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            parts = subscription_name.split('-', 1)
+            if not msi_info:
+                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
+            parts = msi_info.split('-', 1)
             if parts[0] in MsiAccountTypes.valid_msi_account_types():
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None

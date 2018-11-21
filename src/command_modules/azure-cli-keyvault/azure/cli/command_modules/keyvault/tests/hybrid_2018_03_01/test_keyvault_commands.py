@@ -398,7 +398,6 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
             self.check('lastName', 'Admin'),
             self.check('phone', '123-456-7890'),
         ])
-        self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test@test.com')
         self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test2@test.com', checks=[
             self.check('emailAddress', 'test2@test.com'),
             self.check('firstName', None),

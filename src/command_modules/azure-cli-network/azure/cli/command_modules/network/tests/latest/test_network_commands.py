@@ -217,6 +217,23 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
 
+class NetworkAppGatewayZoneScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_zone', location='westus2')
+    def test_network_ag_zone(self, resource_group):
+        self.kwargs.update({
+            'gateway': 'ag1',
+            'ip': 'pubip1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --zones 1 3 --public-ip-address {ip} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}', checks=[
+            self.check('zones[0]', 1),
+            self.check('zones[1]', 3)
+        ])
+
+
 class NetworkAppGatewayAuthCertScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')

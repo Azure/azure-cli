@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.5
++++++
+* Add mariadb vnet commands
+
 0.3.4
 +++++
 * Add mysql replica commands

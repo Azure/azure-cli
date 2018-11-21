@@ -87,6 +87,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             task_file_path=file,
             values_file_path=values,
             context_path=context_path,
+            context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     else:
@@ -96,7 +97,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            context_path=context_path
+            context_path=context_path,
+            context_access_token=git_access_token
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -247,6 +249,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             task_file_path=file,
             values_file_path=values,
             context_path=context_path,
+            context_access_token=git_access_token,
             values=set_values
         )
     elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -256,7 +259,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=file,
             arguments=arguments,
-            context_path=context_path
+            context_path=context_path,
+            context_access_token=git_access_token
         )
     elif step:
         if isinstance(step, DockerBuildStep):
@@ -266,7 +270,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 no_cache=no_cache,
                 docker_file_path=file,
                 arguments=arguments,
-                context_path=context_path
+                context_path=context_path,
+                context_access_token=git_access_token
             )
 
         elif isinstance(step, FileTaskStep):
@@ -274,6 +279,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 task_file_path=file,
                 values_file_path=values,
                 context_path=context_path,
+                context_access_token=git_access_token,
                 values=set_values
             )
 
