@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.52
 ++++++
-* Minor fixes
+* Fix bug where ids piped from a command with tsv output is improperly parsed.
 
 2.0.51
 ++++++

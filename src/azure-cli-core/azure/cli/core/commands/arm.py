@@ -271,7 +271,7 @@ def register_ids_argument(cli_ctx):
                         full_id_list += [json_val['id']]
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
-                full_id_list = full_id_list + val.split(os.linesep)
+                full_id_list = full_id_list + val.splitlines()
 
         for val in full_id_list:
             if not is_valid_resource_id(val):
