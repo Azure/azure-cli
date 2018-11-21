@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.5
++++++
+* Minor fixes
+
 0.4.4
 +++++
 * Upgrade pinned dependency azure-storage-blob from 1.1.0 to 1.3.1
