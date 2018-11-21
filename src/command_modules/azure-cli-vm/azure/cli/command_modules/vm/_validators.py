@@ -827,9 +827,13 @@ def _validate_vm_vmss_create_auth(namespace):
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
-        # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        namespace.authentication_type = 'password' \
-            if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
+        # if both ssh key and password, infer that authentication_type is all.
+        if namespace.ssh_key_value and namespace.admin_password:
+            namespace.authentication_type = 'all'
+        else:
+            # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
+            namespace.authentication_type = 'password' \
+                if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
@@ -837,31 +841,44 @@ def _validate_vm_vmss_create_auth(namespace):
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
         if namespace.ssh_key_value or namespace.ssh_dest_key_path:
-            raise ValueError(
-                "incorrect usage for authentication-type 'password': "
-                "[--admin-username USERNAME] --admin-password PASSWORD")
+            raise CLIError('SSH key cannot be used with password authentication type.')
 
-        from knack.prompting import prompt_pass, NoTTYException
-        try:
-            if not namespace.admin_password:
-                namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
-        except NoTTYException:
-            raise CLIError('Please specify password in non-interactive mode.')
+        # if password not given, attempt to prompt user for password.
+        if not namespace.admin_password:
+            _prompt_for_password(namespace)
 
         # validate password
-        _validate_admin_password(namespace.admin_password,
-                                 namespace.os_type)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
 
     elif namespace.authentication_type == 'ssh':
 
         if namespace.admin_password:
-            raise ValueError('Admin password cannot be used with SSH authentication type')
+            raise CLIError('Admin password cannot be used with SSH authentication type.')
 
         validate_ssh_key(namespace)
 
         if not namespace.ssh_dest_key_path:
-            namespace.ssh_dest_key_path = \
-                '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+
+    elif namespace.authentication_type == 'all':
+        if namespace.os_type.lower() == 'windows':
+            raise CLIError('SSH not supported for Windows VMs. Use password authentication.')
+
+        if not namespace.admin_password:
+            _prompt_for_password(namespace)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
+
+        validate_ssh_key(namespace)
+        if not namespace.ssh_dest_key_path:
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+
+
+def _prompt_for_password(namespace):
+    from knack.prompting import prompt_pass, NoTTYException
+    try:
+        namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
+    except NoTTYException:
+        raise CLIError('Please specify password in non-interactive mode.')
 
 
 def _validate_admin_username(username, os_type):
