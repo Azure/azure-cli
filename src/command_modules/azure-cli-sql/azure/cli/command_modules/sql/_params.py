@@ -1074,7 +1074,6 @@ def load_arguments(self, _):
                    help='The capacity of the managed instance in vcores.')
 
         c.argument('collation',
-                   options_list=['--collation'],
                    help='The collation of the managed instance.')
 
     with self.argument_context('sql mi create') as c:
