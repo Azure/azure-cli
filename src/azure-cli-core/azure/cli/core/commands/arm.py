@@ -176,7 +176,6 @@ def register_ids_argument(cli_ctx):
 
     from knack import events
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
-    import os
 
     ids_metadata = {}
 
