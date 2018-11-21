@@ -30,6 +30,7 @@ from azure.mgmt.botservice.models import (
     Sku)
 
 logger = get_logger(__name__)
+# TODO: Investigate if verbose flag is set to true on the logger, or experimenting with it individually to have verbose logging
 
 
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
@@ -39,6 +40,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
+
     :param cmd:
     :param client:
     :param resource_group_name:
@@ -124,6 +126,7 @@ def create_connection(client, resource_group_name, resource_name, connection_nam
     """Create a custom OAuth service provider.
 
     This method is directly called via "bot authsetting create"
+
     :param client:
     :param resource_group_name:
     :param resource_name:
@@ -163,6 +166,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     """Download the bot's source code.
 
     This method is directly called via "bot download"
+
     :param cmd:
     :param client:
     :param resource_group_name:
@@ -246,24 +250,13 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     return {'downloadPath': folder_path}
 
 
-# TODO: Unused function
-def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
-    raw_bot_properties = client.bots.get(
-        resource_group_name=resource_group_name,
-        resource_name=resource_name
-    )
-    if bot_json:
-        return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name,
-                                                raw_bot_properties=raw_bot_properties)
-
-    return raw_bot_properties
-
 
 # TODO: Split into separate commands, one that returns all supported providers, and one that gets a singular provider.
 def get_service_providers(client, name=None):
     """Gets supported OAuth Service providers.
 
     This method is directly called via "bot authsetting list-providers"
+
     :param client:
     :param name:
     :return:
@@ -284,6 +277,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     """
 
     This method is directly called via "bot prepare-publish"
+
     :param cmd:
     :param client:
     :param resource_group_name:
@@ -306,7 +300,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         # TODO: Why not say 'you are all set, be happy :)' instead of displaying an error?
         raise CLIError('Please supply a valid directory path containing your source code')
 
-    # TODO: Can we avoid?
+    # TODO: Can we avoid? Changing the current working directory.
     os.chdir(code_dir)
 
     # Ensure that the directory does not contain appropriate post deploy scripts folder
@@ -315,6 +309,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
 
     # Download bot source
     # TODO: Why not return a string rather than force callers to dereference a dictionary?
+    # TODO: Rename name, this is a dictionary
     download_path = download_app(cmd, client, resource_group_name, resource_name)
 
     # TODO: If I create a node bot, and then publish a c# bot does this work
@@ -370,6 +365,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
+
     :param cmd:
     :param client:
     :param resource_group_name:
@@ -395,7 +391,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     if not os.path.isdir(code_dir):
         raise CLIError('Please supply a valid directory path containing your source code')
     # ensure that the directory contains appropriate post deploy scripts folder
-    # TODO: Find out if PostDeployScripts is language specific
+    # TODO: Find out if PostDeployScripts is language specific -> It is not, but can we streamline this?
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if sdk_version == 'v4':
             # automatically run prepare-publish in case of v4.

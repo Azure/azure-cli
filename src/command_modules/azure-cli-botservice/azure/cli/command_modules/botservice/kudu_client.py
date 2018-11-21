@@ -20,12 +20,24 @@ class KuduClient:
         self.__resource_group_name = resource_group_name
         self.__name = name
         self.__bot = bot
+
+        # Properties set after self.__initialize() is called.
         self.__initialized = False
         self.__password = None
         self.__scm_url = None
         self.__auth_headers = None
+        self.bot_site_name = None
 
     def download_bot_zip(self, file_save_path, folder_path):
+        """Download bot's source code from KUDU.
+
+        This method looks for the zipped source code in the site/clirepo/ folder on KUDU. If the code is not there, the
+        contents of site/wwwroot are zipped and then downloaded.
+
+        :param file_save_path: string
+        :param folder_path: string
+        :return: None
+        """
         if not self.__initialized:
             self.__initialize()
 
@@ -47,7 +59,7 @@ class KuduClient:
 
             # Overwrite previous "response" with bot-src.zip.
             # TODO: Why would we zip the file up to site/bot-src.zip and not site/clirepo?
-            # TODO: Should we delete this code? Should we place it in the right place (site/clirepo) the first time?
+            # TODO: Should we delete this code? Should we place it in the right place (site/clirepo) the first time? ask Swagat
             response = requests.get(self.__scm_url + '/api/vfs/site/bot-src.zip',
                                     headers=headers)
             HttpResponseValidator.check_response_status(response)
@@ -60,36 +72,14 @@ class KuduClient:
         zip_ref.close()
         os.remove(download_path)
 
-    def enable_zip_deploy(self, zip_file_path):
-        if not self.__initialized:
-            self.__initialize()
-
-        zip_url = self.__scm_url + '/api/zipdeploy'
-
-        headers = self.__get_application_octet_stream_headers()
-
-        # Read file content
-        with open(os.path.realpath(os.path.expanduser(zip_file_path)), 'rb') as fs:
-            zip_content = fs.read()
-            r = requests.post(zip_url, data=zip_content, headers=self.__auth_headers)
-            if r.status_code != 200:
-                raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
-                    zip_url, r.status_code, r.text))
-
-        # On successful deployment navigate to the app, display the latest deployment JSON response.
-        response = requests.get(self.__scm_url + '/api/deployments/latest', headers=self.__auth_headers)
-        HttpResponseValidator.check_response_status(response)
-        return response.json()
-
-    # TODO: turn into getter
-    def get_bot_site_name(self):
-        return self.bot_site_name
+        # TODO: Check if this needs to delete the site/bot-src.zip
 
     def install_node_dependencies(self):
-        """Installs Node.js dependencies at site/wwwroot for Node.js bots.
+        """Installs Node.js dependencies at `site/wwwroot/` for Node.js bots.
 
-        Is only called when the detected bot is a Node.js bot.
-        :return:
+        This method is only called when the detected bot is a Node.js bot.
+
+        :return: Dictionary with results of the HTTP KUDU request
         """
         if not self.__initialized:
             self.__initialize()
@@ -103,36 +93,77 @@ class KuduClient:
         return response.json()
 
     def publish(self, zip_file_path):
+        """Publishes zipped bot source code to KUDU.
+
+        Performs the following steps:
+        1. Empties the `site/clirepo/` folder on KUDU
+        2. Pushes the code to `site/clirepo/`
+        3. Deploys the code via the zipdeploy API. (https://github.com/projectkudu/kudu/wiki/REST-API#zip-deployment)
+        4. Gets the results of the latest KUDU deployment
+
+        :param zip_file_path:
+        :return: Dictionary with results of the latest deployment
+        """
         if not self.__initialized:
             self.__initialize()
         self.__empty_source_folder()
 
-        headers = self.__auth_headers
-        headers['content-type'] = 'application/octet-stream'
+        headers = self.__get_application_octet_stream_headers()
         with open(zip_file_path, 'rb') as fs:
             zip_content = fs.read()
             response = requests.put(self.__scm_url + '/api/zip/site/clirepo',
-                                    headers=self.__auth_headers,
+                                    headers=headers,
                                     data=zip_content)
             HttpResponseValidator.check_response_status(response)
 
-        return self.enable_zip_deploy(zip_file_path)
+        return self.__enable_zip_deploy(zip_file_path)
 
     def __empty_source_folder(self):
-        # the `clirepo/` folder contains the zipped up source code
+        """Remove the `clirepo/` folder from KUDU.
+
+        This method is called from KuduClient.publish() in preparation for uploading the user's local source code.
+        After removing the folder from KUDU, the method performs another request to recreate the `clirepo/` folder.
+        :return:
+        """
+        # The `clirepo/` folder contains the zipped up source code
         payload = {
             'command': 'rm -rf clirepo',
             'dir': r'site'
         }
-        headers = self.__auth_headers
-        headers['content-type'] = 'application/json'
+        headers = self.__get_application_json_headers()
         delete_clirepo_response = requests.post(self.__scm_url + '/api/command',
                                                 data=json.dumps(payload),
                                                 headers=headers)
-        # TODO: Verify the necessity of this line
+        # Recreate the clirepo/ folder, otherwise KUDU calls that reference the site/clirepo/ folder will fail.
         response = requests.put(self.__scm_url + '/api/vfs/site/clirepo/', headers=headers)
-        # TODO: Think about using Response.ok
         HttpResponseValidator.check_response_status(response, 201)
+
+    def __enable_zip_deploy(self, zip_file_path):
+        """Pushes local bot's source code in zip format to KUDU for deployment.
+
+        This method deploys the zipped bot source code via KUDU's zipdeploy API. This API does not run any build
+        processes such as `npm install`, `dotnet restore`, `dotnet publish`, etc.
+
+        :param zip_file_path: string
+        :return: Dictionary with results of the latest deployment
+        """
+        if not self.__initialized:
+            self.__initialize()
+
+        zip_url = self.__scm_url + '/api/zipdeploy'
+        headers = self.__get_application_octet_stream_headers()
+
+        with open(os.path.realpath(os.path.expanduser(zip_file_path)), 'rb') as fs:
+            zip_content = fs.read()
+            r = requests.post(zip_url, data=zip_content, headers=headers)
+            if r.status_code != 200:
+                raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
+                    zip_url, r.status_code, r.text))
+
+        # On successful deployment navigate to the app, display the latest deployment JSON response.
+        response = requests.get(self.__scm_url + '/api/deployments/latest', headers=self.__auth_headers)
+        HttpResponseValidator.check_response_status(response)
+        return response.json()
 
     def __get_application_json_headers(self):
         headers = copy.deepcopy(self.__auth_headers)
@@ -145,6 +176,10 @@ class KuduClient:
         return headers
 
     def __initialize(self):
+        """Generates necessary data for performing calls to KUDU based off of data passed in on initialization.
+
+        :return: None
+        """
         self.bot_site_name = WebAppOperations.get_bot_site_name(self.__bot.properties.endpoint)
         user_name, password = WebAppOperations.get_site_credential(self.__cmd.cli_ctx,
                                                                    self.__resource_group_name,

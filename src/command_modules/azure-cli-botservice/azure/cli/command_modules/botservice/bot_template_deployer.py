@@ -39,16 +39,17 @@ class BotTemplateDeployer:
         DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                           'DeploymentProperties', 'TemplateLink', mod='models')
 
-        # TODO: Template is None, but then later reassigned without evaluation
-        template = None
-        # TODO: get_file_json() can return None if specified, otherwise it will can throw an error.
+        template = {}
+        # TODO: get_file_json() can return None if specified, otherwise it can throw an error.
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
+        # So template should always be a dict, otherwise this next line will fail.
         template_obj['resources'] = template_obj.get('resources', [])
+        # template_obj is not used after this point, can remove it.
         parameters = BotTemplateDeployer.__process_parameters(parameters) or {}
 
-        import json
+        # Turn the template into JSON string, then load it back to a dict, list, etc.
         template = json.loads(json.dumps(template))
         parameters = json.loads(json.dumps(parameters))
 
@@ -61,7 +62,24 @@ class BotTemplateDeployer:
     @staticmethod
     def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password,
                    storageAccountName, location, sku_name, appInsightsLocation, language, version):
+        """Create WebApp Bot.
 
+        :param cmd:
+        :param client:
+        :param resource_group_name:
+        :param resource_name:
+        :param description:
+        :param kind:
+        :param appid:
+        :param password:
+        :param storageAccountName:
+        :param location:
+        :param sku_name:
+        :param appInsightsLocation:
+        :param language:
+        :param version:
+        :return:
+        """
         # Normalize language input and check if language is supported.
         language = language.capitalize()
         if language not in supported_languages:

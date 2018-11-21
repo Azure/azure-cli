@@ -54,6 +54,7 @@ class BotPublishHelper:
         save_cwd = os.getcwd()
         os.chdir(code_dir)
         try:
+            # TODO: Improve JS SDK detection logic, instead of only looking for package.json, look for botbuilder in package.json
             if not os.path.exists(os.path.join('.', 'package.json')):
                 if proj_file is None:
                     raise CLIError('expected --proj-file parameter for csharp v4 project.')
