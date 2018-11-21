@@ -12,7 +12,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
                           validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
-                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
+                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
+                          validate_storage_data_plane_list)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -140,6 +141,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account show-connection-string') as c:
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
+        c.argument('sas_token', help='The SAS token to be used in the connection-string.')
         c.argument('key_name', options_list=['--key'], help='The key to use.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
@@ -203,8 +205,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
         c.argument('num_results', type=int,
-                   help='Specifies the maximum number of blobs to return. Must be in range [1,5000]. '
-                        'If this parameter is not provided, all blobs will be returned.')
+                   help='Specifies the maximum number of blobs to return. '
+                        'If this parameter is not provided, all blobs will be returned.',
+                   validator=validate_storage_data_plane_list)
         c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
 
     with self.argument_context('storage blob generate-sas') as c:
@@ -229,6 +232,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob url') as c:
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of'
+                                    'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import blob_tier_validator
@@ -381,6 +386,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
+
+    with self.argument_context('storage container list') as c:
+        c.argument('num_results', type=int, help='Specifies the maximum number of containers to return.',
+                   validator=validate_storage_data_plane_list)
 
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')

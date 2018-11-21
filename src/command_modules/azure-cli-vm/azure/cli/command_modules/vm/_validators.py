@@ -300,13 +300,6 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
 
 
-def _validate_managed_disk_sku(sku):
-
-    allowed_skus = ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS', 'UltraSSD_LRS']
-    if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
-        raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
-
-
 def _validate_location(cmd, namespace, zone_info, size_info):
     from ._vm_utils import list_sku_info
     if not namespace.location:
@@ -366,7 +359,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedCustomImage:
         required = ['image']
@@ -374,25 +366,23 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'storage_account', 'ephemeral_os_disk',
                      'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
-        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb', 'ephemeral_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SACustomImage:
         required = ['image', 'os_type', 'use_unmanaged_disk']
-        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb', 'ephemeral_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account', 'ephemeral_os_disk',
                      'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
@@ -411,12 +401,14 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     # set default storage SKU if not provided and using an image based OS
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
-        namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
+        namespace.storage_sku = ['Standard_LRS'] if for_scale_set else ['Premium_LRS']
 
-    if namespace.storage_sku == 'UltraSSD_LRS' and namespace.ultra_ssd_enabled is None:
-        namespace.ultra_ssd_enabled = True
+    if namespace.ultra_ssd_enabled is None and namespace.storage_sku:
+        for sku in namespace.storage_sku:
+            if 'ultrassd_lrs' in sku.lower():
+                namespace.ultra_ssd_enabled = True
 
-    # Now verify that the status of required and forbidden parameters
+    # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
@@ -430,6 +422,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.images.get(res['resource_group'], res['name'])
             namespace.os_type = image_info.storage_profile.os_disk.os_type.value
             image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+
         elif res['type'].lower() == 'galleries':
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
@@ -476,7 +469,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
                                               os_disk_caching=namespace.os_caching,
-                                              data_disk_cachings=namespace.data_caching)
+                                              data_disk_cachings=namespace.data_caching,
+                                              ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None))
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -498,7 +492,12 @@ def _validate_vm_create_storage_account(cmd, namespace):
         storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
-        sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
+        sku_tier = 'Standard'
+        for sku in namespace.storage_sku:
+            if 'Premium' in sku:
+                sku_tier = 'Premium'
+                break
+
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
              if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
@@ -542,6 +541,9 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
+    if vnet and '/' in vnet:
+        raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
+
     if not vnet and not subnet and not nics:
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
@@ -575,8 +577,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     if subnet:
         subnet_is_id = is_valid_resource_id(subnet)
         if (subnet_is_id and vnet) or (not subnet_is_id and not vnet):
-            raise CLIError("incorrect '--subnet' usage: --subnet SUBNET_ID | "
-                           "--subnet SUBNET_NAME --vnet-name VNET_NAME")
+            raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
             check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')

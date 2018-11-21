@@ -14,6 +14,9 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
+from ._validators import validate_timeout_value
+
+
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
     'LoginWithAzureActiveDirectory': BuiltInAuthenticationProvider.azure_active_directory,
@@ -176,6 +179,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

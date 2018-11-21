@@ -138,7 +138,7 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         ns = self._build_namespace()
         self.call_condition(ns, 'avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob')
         self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', '250')
-        self.check_dimension(ns, 0, 'ApiName', 'includes', ['GetBlob', 'PutBlob'])
+        self.check_dimension(ns, 0, 'ApiName', 'Include', ['GetBlob', 'PutBlob'])
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns.foo/bar_doo > 90')

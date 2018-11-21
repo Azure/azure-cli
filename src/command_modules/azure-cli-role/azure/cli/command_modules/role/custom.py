@@ -497,6 +497,11 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
+
     return client.list(filter=(' and '.join(sub_filters)))
 
 
@@ -525,6 +530,10 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
     return client.list(filter=(' and '.join(sub_filters)))
 
 
@@ -780,7 +789,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
-    if any([key_value, key_type, key_usage, start_date, end_date]):
+    if any([password, key_value]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
 
@@ -799,8 +808,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         homepage=homepage or _get_property('homepage'),
         identifier_uris=identifier_uris or _get_property('identifier_uris'),
         reply_urls=reply_urls or _get_property('reply_urls'),
-        key_credentials=key_creds or _get_property('key_credentials'),
-        password_credentials=password_creds or _get_property('password_credentials'),
+        key_credentials=key_creds or None,
+        password_credentials=password_creds or None,
         available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
         required_resource_access=required_accesses or _get_property('required_resource_access'),
         oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))

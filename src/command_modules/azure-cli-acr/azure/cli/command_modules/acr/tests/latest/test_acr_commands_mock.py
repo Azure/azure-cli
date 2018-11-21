@@ -170,7 +170,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         acr_repository_show_manifests(cmd, 'testregistry', 'testrepository')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/manifests/list',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests',
             headers=get_authorization_header('username', 'password'),
             params={
                 'n': 100,

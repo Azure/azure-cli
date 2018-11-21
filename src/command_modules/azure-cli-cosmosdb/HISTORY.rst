@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.5
++++++
+* Use latest azure-mgmt-cosmosdb pypi package (0.5.2)
+
+0.2.4
++++++
+* Minor fixes.
+
 0.2.3
 +++++
 * Minor fixes.
