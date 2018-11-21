@@ -1285,6 +1285,29 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
+    def test_vm_create_auth(self, resource_group):
+        self.kwargs.update({
+            'vm_1': 'vm1',
+            'vm_2': 'vm2',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_1} --authentication-type all '
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'')
+
+        self.cmd('vm show -n {vm_1} -g {rg}', checks=[
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', False),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB)
+        ])
+
+        self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_2} --authentication-type ssh '
+                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'')
+
+        self.cmd('vm show -n {vm_2} -g {rg}', checks=[
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+        ])
+
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
@@ -1750,6 +1773,27 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 0)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
+    def test_vmss_create_auth(self, resource_group):
+        self.kwargs.update({
+            'vmss_1': 'vmss1',
+            'vmss_2': 'vmss2',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_1} --authentication-type all '
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', False),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB)
+                 ])
+
+        self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_2} --authentication-type ssh '
+                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+                 ])
 
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
