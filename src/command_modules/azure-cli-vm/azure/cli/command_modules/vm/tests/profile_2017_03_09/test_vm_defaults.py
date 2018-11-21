@@ -299,9 +299,9 @@ class TestVMDefaultAuthType(unittest.TestCase):
 
         # throw when conflict with ssh key value
         ns.ssh_key_value = 'junk but does not matter'
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(CLIError) as context:
             _validate_vm_vmss_create_auth(ns)
-        self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
+            self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
 
 
 class TestVMImageDefaults(unittest.TestCase):
