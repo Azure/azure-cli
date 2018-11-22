@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.2.8
++++++
+* webapp: fix a bug on container based windows app due to backend change
 
 0.2.8
 +++++
