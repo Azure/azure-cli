@@ -538,6 +538,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
 
 class FeatureScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     def test_feature_list(self):
         self.cmd('feature list', checks=self.check("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1))
 
