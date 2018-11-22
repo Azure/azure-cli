@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.10
+++++++
+* Minor fixes.
+
 2.1.9
 +++++
 * Add context token to task step.
