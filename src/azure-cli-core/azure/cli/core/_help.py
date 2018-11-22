@@ -8,7 +8,7 @@ from __future__ import print_function
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
-                        CLIHelp)
+                        _print_indent, CLIHelp)
 
 from knack.log import get_logger
 
@@ -73,7 +73,7 @@ class AzCliHelp(CLIHelp):
 
         self._register_help_loaders()
 
-
+    # print methods
     @staticmethod
     def _print_extensions_msg(help_file):
         if help_file.type != 'command':
@@ -86,6 +86,16 @@ class AzCliHelp(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         AzCliHelp._print_extensions_msg(help_file)
         super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
+
+    def _print_header(self, cli_name, help_file):
+        super(AzCliHelp, self)._print_header(cli_name, help_file)
+
+        links = help_file.links
+        if links:
+            link_text = "{} and {}".format(", ".join(links[0:-1]), links[-1]) if len(links) > 1 else links[0]
+            link_text = "For more information, see: {}\n".format(link_text)
+            _print_indent(link_text, 2, width=self.textwrap_width)
+
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders

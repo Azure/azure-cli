@@ -152,9 +152,9 @@ class HelpLoaderV1(BaseHelpLoader):
             elif "link" in value_source:
                 link_text = ""
                 if "url" in value_source["link"]:
-                    link_text = "url: {} ".format(value_source["link"]["url"])
+                    link_text = "{}".format(value_source["link"]["url"])
                 if "command" in value_source["link"]:
-                    link_text = "command: {} ".format(value_source["link"]["command"])
+                    link_text = "{}".format(value_source["link"]["command"])
                 return link_text
             return ""
 
