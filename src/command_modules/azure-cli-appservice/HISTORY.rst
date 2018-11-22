@@ -6,10 +6,6 @@ Release History
 +++++
 * webapp: fix a bug on container based windows app due to backend change
 
-0.2.8
-+++++
-* Minor fixes.
-
 0.2.7
 +++++
 * webapp, functionapp: Zip deployment default timeout to poll for the status increased to 5 mins, also adding a timeout property to customize this value
