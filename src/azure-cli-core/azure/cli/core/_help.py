@@ -124,8 +124,21 @@ class CliHelpFile(KnackHelpFile):
 
     # Needs to override base implementation to exclude unsupported examples.
     def _load_from_data(self, data):
-        super(CliHelpFile, self)._load_from_data(data)
-        self.examples = []  # clear examples set by knack
+        if not data:
+            return
+
+        if isinstance(data, str):
+            self.long_summary = data
+            return
+
+        if 'type' in data:
+            self.type = data['type']
+
+        if 'short-summary' in data:
+            self.short_summary = data['short-summary']
+
+        self.long_summary = data.get('long-summary')
+
         if 'examples' in data:
             self.examples = []
             for d in data['examples']:
@@ -150,7 +163,11 @@ class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
     def __init__(self, help_ctx, delimiters, parser):
+        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
+        import argparse
+        self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
+
         self.parameters = []
 
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:  # pylint: disable=protected-access
