@@ -1088,7 +1088,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
