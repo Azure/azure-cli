@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.botservice.tests.latest.tools.directline_client import DirectLineClient
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
 import uuid
 import os
@@ -165,7 +166,7 @@ class BotTests(ScenarioTest):
         try:
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
-            raise AssertionError('Should have thrown an error.')
+            raise AssertionError('should have thrown an error.')
         except CLIError as cli_error:
             self.cmd('az bot delete -g {rg} -n {botname}')
             pass
@@ -174,6 +175,24 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for registration-type bot.')
         except Exception as error:
             self.cmd('az bot delete -g {rg} -n {botname}')
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_prepare_publish_with_unregistered_bot_name_should_fail(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+        })
+
+        try:
+            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
+                     '--code-dir .')
+            raise AssertionError('should have thrown an error.')
+        except ErrorException as msrest_error:
+            # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
+            pass
+        except AssertionError as assert_error:
+            raise AssertionError('should have thrown an error for an unregistered bot.')
+        except Exception as error:
             raise error
 
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
