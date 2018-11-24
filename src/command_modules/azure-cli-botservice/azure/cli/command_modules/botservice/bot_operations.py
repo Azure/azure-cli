@@ -212,7 +212,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
         app_settings = WebAppOperations.get_app_settings(
             cmd=cmd,
             resource_group_name=resource_group_name,
-            name=kudu_client.get_bot_site_name()
+            name=kudu_client.bot_site_name
         )
         bot_secret = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
         # write a .env file #todo: write an appsettings.json file

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.botservice.tests.latest.tools.directline_client import DirectLineClient
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from knack.util import CLIError
 import uuid
 import os
 import shutil
@@ -134,6 +135,46 @@ class BotTests(ScenarioTest):
 
         # Talk to bot again to check everything went well
         #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_prepare_publish_with_registration_bot_should_raise_error(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+            'description': 'description1',
+            'endpoint': 'https://www.google.com/api/messages',
+            'app_id': str(uuid.uuid4())
+        })
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
+
+        self.cmd('az bot show -g {rg} -n {botname}', checks=[
+            self.check('name', '{botname}')
+        ])
+
+        try:
+            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
+                     '--code-dir .')
+            raise AssertionError('Should have thrown an error.')
+        except CLIError as cli_error:
+            self.cmd('az bot delete -g {rg} -n {botname}')
+            pass
+        except AssertionError as assert_error:
+            self.cmd('az bot delete -g {rg} -n {botname}')
+            raise AssertionError('should have thrown an error for registration-type bot.')
+        except Exception as error:
+            self.cmd('az bot delete -g {rg} -n {botname}')
+            raise error
 
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
         """Enables direct line channel, sends a message to the bot,
