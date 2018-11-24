@@ -2,17 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from azure.cli.command_modules.botservice.tests.latest.tools.directline_client import DirectLineClient
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import uuid
 import os
 import shutil
+import json
 
 
 class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_registration_bot(self, resource_group):
+    def registration_bot_create(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
@@ -43,15 +44,20 @@ class BotTests(ScenarioTest):
     def test_create_v3_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0cc66483-d276-4830-9afd-9fe6b654a255',
-            'password': 'testpassword'
+            'app_id': 'dabb85a0-c38a-491d-ba91-f4ce1ad22923',
+            'password': 'cqeuqQDVTY568;%wmAQ75%_'
         })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
         dir_path = os.path.join('.', self.kwargs.get('botname'))
         if os.path.exists(dir_path):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password}', checks=[
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '--location westus --insights-location "West US 2"', checks=[
             self.check('appId', '{app_id}'),
             self.check('appPassword', '{password}'),
             self.check('resourceGroup', '{rg}'),
@@ -59,26 +65,44 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-        # download the bot
+        # Talk to bot
+        #self.__talk_to_bot('hi', '1: You said "hi"')
+
+        # Download the bot
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
             self.exists('downloadPath')
         ])
+
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
 
-        # publish it back
+        # Modify bot source
+        # TODO implement
+
+        # Publish it back
         self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
             self.check('active', True)
         ])
         # clean up the folder
         shutil.rmtree(dir_path)
 
+        # Talk to bot and verify that change is reflected
+        #self.__talk_to_bot('hi', '1: You said "hi"')
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0cc66483-d276-4830-9afd-9fe6b654a255',
-            'password': 'testpassword'
+            'app_id': 'dabb85a0-c38a-491d-ba91-f4ce1ad22923',
+            'password': 'cqeuqQDVTY568;%wmAQ75%_'
         })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
         dir_path = os.path.join('.', self.kwargs.get('botname'))
         if os.path.exists(dir_path):
             # clean up the folder
@@ -92,15 +116,51 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-        # download the bot
+        # Talk to bot
+        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
+
+        # Download the bot source
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
             self.exists('downloadPath')
         ])
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
 
-        # publish it back
+        # Publish it back
         self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
             self.check('active', True)
         ])
-        # clean up the folder
+        # Clean up the folder
         shutil.rmtree(dir_path)
+
+        # Talk to bot again to check everything went well
+        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
+
+    def __talk_to_bot(self, message_text='Hi', expected_text=None):
+        """Enables direct line channel, sends a message to the bot,
+        and if expected_text is provided, verify that the bot answer matches it."""
+
+        result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+            self.check('properties.properties.sites[0].siteName', 'Default Site')
+        ])
+
+        json_output = json.loads(result.output)
+
+        # TODO: Remove
+        print(result.output)
+
+        directline_key = json_output['properties']['properties']['sites'][0]['key']
+        directline_client = DirectLineClient(directline_key)
+
+        send_result = directline_client.send_message(message_text)
+
+        if send_result.status_code != 200:
+            self.fail("Failed to send message to bot through directline api. Error:" + str(send_result))
+
+        response, text = directline_client.get_message()
+
+        if response.status_code != 200:
+            self.fail("Failed to receive message from bot through directline api. Error:" + str(response))
+
+        if expected_text != None:
+            self.assertEqual(expected_text, text, "Bot response does not match expectation")
+
