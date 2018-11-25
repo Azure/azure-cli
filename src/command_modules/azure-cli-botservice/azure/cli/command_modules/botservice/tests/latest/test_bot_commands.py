@@ -46,8 +46,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': 'dabb85a0-c38a-491d-ba91-f4ce1ad22923',
-            'password': 'cqeuqQDVTY568;%wmAQ75%_'
+            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
+            'password': 'eHFFVE494][pskfuiEI31);'
         })
 
         # Delete the bot if already exists
@@ -68,7 +68,7 @@ class BotTests(ScenarioTest):
         ])
 
         # Talk to bot
-        #self.__talk_to_bot('hi', '1: You said "hi"')
+        self.__talk_to_bot('hi', 'You said hi')
 
         # Download the bot
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
@@ -98,8 +98,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': 'dabb85a0-c38a-491d-ba91-f4ce1ad22923',
-            'password': 'cqeuqQDVTY568;%wmAQ75%_'
+            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
+            'password': 'eHFFVE494][pskfuiEI31);'
         })
 
         # Delete the bot if already exists
@@ -119,7 +119,7 @@ class BotTests(ScenarioTest):
         ])
 
         # Talk to bot
-        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
+        self.__talk_to_bot('hi', 'You sent \'hi\'')
 
         # Download the bot source
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
@@ -214,13 +214,13 @@ class BotTests(ScenarioTest):
         send_result = directline_client.send_message(message_text)
 
         if send_result.status_code != 200:
-            self.fail("Failed to send message to bot through directline api. Error:" + str(send_result))
+            self.fail("Failed to send message to bot through directline api. Response:" + send_result.json())
 
         response, text = directline_client.get_message()
 
         if response.status_code != 200:
-            self.fail("Failed to receive message from bot through directline api. Error:" + str(response))
+            self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
 
         if expected_text != None:
-            self.assertEqual(expected_text, text, "Bot response does not match expectation")
+            self.assertTrue(expected_text in text, "Bot response does not match expectation")
 

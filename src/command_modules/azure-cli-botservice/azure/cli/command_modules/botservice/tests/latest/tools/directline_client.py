@@ -16,7 +16,7 @@ class DirectLineClient(object):
         self.__start_conversation()
         self._watermark = ''
 
-    def send_message(self, text):
+    def send_message(self, text, retry_count = 3):
         """Send raw text to bot framework using direct line api"""
         url = '/'.join([self._base_url, 'conversations', self._conversationid, 'activities'])
         json_payload = {
@@ -25,27 +25,41 @@ class DirectLineClient(object):
             'from': {'id': 'user1'},
             'text': text
         }
-        bot_response = requests.post(url, headers=self._headers, json=json_payload)
+
+        success = False
+        current_retry = 0
+        while not success and current_retry < retry_count:
+            bot_response = requests.post(url, headers=self._headers, json=json_payload)
+            current_retry += 1
+            if bot_response.status_code == 200:
+                sucess = True
+
         return bot_response
 
-    def get_message(self):
+    def get_message(self, retry_count = 3):
         """Get a response message back from the bot framework using direct line api"""
         url = '/'.join([self._base_url, 'conversations', self._conversationid, 'activities'])
         url = url + '?watermark=' + self._watermark
-        bot_response = requests.get(url, headers=self._headers,
-                                   json={'conversationId': self._conversationid})
-        if bot_response.status_code == 200:
-            json_response = bot_response.json()
 
-            if 'watermark' in json_response:
-                self._watermark = json_response['watermark']
+        success = False
+        current_retry = 0
+        while not success and current_retry < retry_count:
+            bot_response = requests.get(url, headers=self._headers,
+                                        json={'conversationId': self._conversationid})
+            current_retry += 1
+            if bot_response.status_code == 200:
+                success = True
+                json_response = bot_response.json()
 
-            if 'activities' in json_response:
-                activities_count = len(json_response['activities'])
-                if activities_count > 0:
-                    return bot_response, json_response['activities'][activities_count - 1]['text']
-                else:
-                    return bot_response, "No new messages"
+                if 'watermark' in json_response:
+                    self._watermark = json_response['watermark']
+
+                if 'activities' in json_response:
+                    activities_count = len(json_response['activities'])
+                    if activities_count > 0:
+                        return bot_response, json_response['activities'][activities_count - 1]['text']
+                    else:
+                        return bot_response, "No new messages"
         return bot_response, "error contacting bot for response"
 
     def __set_headers(self):
