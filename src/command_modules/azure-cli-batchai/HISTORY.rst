@@ -5,7 +5,7 @@ Release History
 
 0.4.5
 +++++
-* Minor fixes
+* Minor fixes.
 
 0.4.4
 +++++
