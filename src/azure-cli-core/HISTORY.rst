@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.53
+++++++
+* core: support cross tenant resource provisioning for multi-tenant service principal
+
 2.0.52
 ++++++
 * Fix bug where ids piped from a command with tsv output is improperly parsed.
