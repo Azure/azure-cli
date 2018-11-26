@@ -81,6 +81,7 @@ def load_arguments(self, _):
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+            c.argument('credential_description', help="the description of the key or password", arg_group='Credential')
 
     with self.argument_context('ad app credential reset') as c:
         c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')

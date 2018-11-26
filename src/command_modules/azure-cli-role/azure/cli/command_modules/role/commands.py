@@ -23,6 +23,41 @@ def transform_assignment_list(result):
                          ('Scope', r['scope'])]) for r in result]
 
 
+def transform_graph_objects_with_cred(result):
+    # here we will convert utf16 encoded custom key id back to the plain text
+    # we will handle single object from "show" cmd, object list from "list" cmd, and cred object itself
+    if not result:
+        return result
+    from msrest.paging import Paged
+    from azure.graphrbac.models import PasswordCredential
+
+    def _patch_creds(creds):
+        for c in creds:
+            custom_key_id = getattr(c, 'custom_key_identifier', None)
+            if custom_key_id:
+                try:
+                    c.custom_key_identifier = custom_key_id.decode('utf-16')
+                except Exception:  # pylint: disable=broad-except
+                    c.custom_key_identifier = None
+        return creds
+
+    singular = False
+    if isinstance(result, Paged):
+        result = list(result)
+
+    if not isinstance(result, list):
+        singular = True
+        result = [result]
+
+    for r in result:
+        if getattr(r, 'password_credentials', None):
+            _patch_creds(r.password_credentials)
+
+        if isinstance(r, PasswordCredential):
+            _patch_creds([r])
+    return result[0] if singular else result
+
+
 def graph_err_handler(ex):
     from azure.graphrbac.models import GraphErrorException
     if isinstance(ex, GraphErrorException):
@@ -88,7 +123,7 @@ def load_command_table(self, _):
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 
     with self.command_group('ad app', client_factory=get_graph_client_applications, resource_type=PROFILE_TYPE,
-                            exception_handler=graph_err_handler) as g:
+                            exception_handler=graph_err_handler, transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
@@ -109,7 +144,8 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_application_owner')
         g.custom_command('remove', 'remove_application_owner')
 
-    with self.command_group('ad sp', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
+    with self.command_group('ad sp', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler,
+                            transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create', 'create_service_principal')
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_sps', client_factory=get_graph_client_service_principals)
@@ -119,7 +155,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_service_principal_owners')
 
     # RBAC related
-    with self.command_group('ad sp', exception_handler=graph_err_handler) as g:
+    with self.command_group('ad sp', exception_handler=graph_err_handler, transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
         g.custom_command('credential reset', 'reset_service_principal_credential')
         g.custom_command('credential list', 'list_service_principal_credentials')

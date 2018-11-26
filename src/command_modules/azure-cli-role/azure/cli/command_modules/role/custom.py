@@ -655,7 +655,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     else:
         if not identifier_uris:
             raise CLIError("'--identifier-uris' is required for creating an application")
-        password_creds, key_creds = _build_application_creds(password, key_value, key_type ,key_usage,
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage,
                                                              start_date, end_date, credential_description)
 
     if required_resource_accesses:
@@ -874,8 +874,8 @@ def _build_application_creds(password=None, key_value=None, key_type=None, key_u
         end_date = dateutil.parser.parse(end_date)
 
     custom_key_id = None
-    if key_description:
-        custom_key_id = key_description.encode('utf8')
+    if key_description and password:
+        custom_key_id = key_description.encode('utf-16')
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -971,17 +971,8 @@ def _get_service_principal_credentials(graph_client, app_object_id, cert=False):
     else:
         app_creds = list(graph_client.applications.list_password_credentials(app_object_id))
 
-    return [_add_credential_description(c) for c in app_creds]
+    return app_creds
 
-
-def _add_credential_description(app_cred):
-    if app_cred.custom_key_identifier:
-        try:
-            setattr(app_cred, 'description', app_cred.custom_key_identifier.decode('utf8'))
-            del app_cred.custom_key_identifier
-        except Exception:
-            pass
-    return app_cred
 
 def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
@@ -1390,8 +1381,9 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     cert_creds = None
 
     custom_key_identifier = None
-    if credential_description:
-        custom_key_identifier = credential_description.encode('utf8')
+    if credential_description and password:
+        # utf16 is used by AAD portal. Don't change it to other random encoding
+        custom_key_identifier = credential_description.encode('utf-16')
 
     if password:
         app_creds = []
