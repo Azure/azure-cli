@@ -16,7 +16,7 @@ class DirectLineClient(object):
         self.__start_conversation()
         self._watermark = ''
 
-    def send_message(self, text, retry_count = 3):
+    def send_message(self, text, retry_count=3):
         """Send raw text to bot framework using direct line api"""
         url = '/'.join([self._base_url, 'conversations', self._conversationid, 'activities'])
         json_payload = {

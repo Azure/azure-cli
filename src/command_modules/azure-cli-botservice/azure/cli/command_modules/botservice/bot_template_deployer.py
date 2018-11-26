@@ -60,7 +60,7 @@ class BotTemplateDeployer:
         return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=False)
 
     @staticmethod
-    def create_app(cmd, client, resource_group_name, resource_name, description, kind, appid, password,
+    def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,
                    storageAccountName, location, sku_name, appInsightsLocation, language, version):
         """Create WebApp Bot.
 
@@ -80,12 +80,13 @@ class BotTemplateDeployer:
         :param version:
         :return:
         """
+
         # Normalize language input and check if language is supported.
         language = language.capitalize()
         if language not in supported_languages:
             raise CLIError(
-                'Not supported language specified, please choose one of the following languages: "Csharp" or '
-                '"Node"')
+                'Invalid language provided for --lang parameter. Please choose one of the following supported '
+                'programming languages for your bot: "Csharp" or "Node"')
 
         # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
         if version == 'v3':
@@ -115,18 +116,30 @@ class BotTemplateDeployer:
                 else:
                     zip_url = BotTemplateDeployer.v4_webapp_node_zip_url
 
+        logger.debug('Detected SDK version %s, kind %s and programming language %s. Using the following template: %s.',
+                     version, kind, language, zip_url)
+
         # Storage prep
+        # TODO: Review logic here. Why are we setting 'create_new_storage' to true when storageAccountname not provided?
         create_new_storage = False
         if not storageAccountName:
             create_new_storage = True
+
             storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
                                         ''.join(
                                             random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
             site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
                                ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
 
+            logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
+                         storageAccountName)
+            logger.debug('Web or Function app name to be used is %s.', site_name)
+
         # Application insights prep
-        appInsightsLocation = azure_region_mapper.AzureRegionMapper.get_app_insights_location(location.lower().replace(' ', ''))
+        appInsightsLocation = azure_region_mapper.AzureRegionMapper\
+            .get_app_insights_location(location.lower().replace(' ', ''))
+
+        logger.debug('Application insights location resolved to %s.', appInsightsLocation)
 
         # ARM Template parameters
         paramsdict = {
@@ -156,12 +169,17 @@ class BotTemplateDeployer:
         # TODO: Do we still encrypt this file? Should it be on a user-specified basis?
         # If the bot is a v4 bot, generate an encryption key for the .bot file
         if template_name == 'webappv4.template.json':
+
+            logger.debug('Detected V4 bot. Adding bot encryption key to Azure parameters.')
+
             bot_encryption_key = BotTemplateDeployer.get_bot_file_encryption_key()
             paramsdict['botFileEncryptionKey'] = bot_encryption_key
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
         dir_path = os.path.dirname(os.path.realpath(__file__)) + '/templates/'
+
+        logger.debug('ARM template creation complete. Deploying ARM template. ')
         deploy_result = BotTemplateDeployer.deploy_arm_template(
             cli_ctx=cmd.cli_ctx,
             resource_group_name=resource_group_name,
@@ -172,6 +190,9 @@ class BotTemplateDeployer:
         )
 
         deploy_result.wait()
+
+        logger.debug('ARM template deployment complete. Result %s ', deploy_result)
+
         return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
 
     @staticmethod

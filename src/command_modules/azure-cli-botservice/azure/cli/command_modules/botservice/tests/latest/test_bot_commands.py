@@ -15,6 +15,31 @@ import json
 class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_create_bot_invalid_kind_fails(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+            'description': 'description1',
+            'endpoint': 'https://www.google.com/api/messages',
+            'app_id': str(uuid.uuid4())
+        })
+
+        try:
+            self.cmd(
+                'az bot create -k invalid -g {rg} -n {botname} -d {description} '
+                '-e {endpoint} --appid {app_id} --tags key1=value1')
+
+            raise AssertionError('should have thrown an error.')
+        except ErrorException as msrest_error:
+            raise msrest_error
+        except AssertionError as assert_error:
+            raise AssertionError('should have thrown an error for an unregistered bot.')
+        except CLIError as error:
+            # We expect a CLIError in this situation
+            pass
+        except Exception as ex:
+            raise ex
+
+    @ResourceGroupPreparer(random_name_length=20)
     def registration_bot_create(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
@@ -140,6 +165,107 @@ class BotTests(ScenarioTest):
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
+    # TODO: Found bug thanks to this test. Bot fails to respond. Re-enabling once bug is fixed
+    '''
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_create_v3_js_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
+            'password': 'eHFFVE494][pskfuiEI31);'
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '--location westus --insights-location "West US 2" --lang Node', checks=[
+            self.check('appId', '{app_id}'),
+            self.check('appPassword', '{password}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('id', '{botname}'),
+            self.check('type', 'abs')
+        ])
+
+        # Talk to bot
+        self.__talk_to_bot('hi', 'You said hi')
+
+        # Download the bot
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
+
+        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
+
+        # Modify bot source
+        # TODO implement
+
+        # Publish it back
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+            self.check('active', True)
+        ])
+        # clean up the folder
+        shutil.rmtree(dir_path)
+
+        # Talk to bot and verify that change is reflected
+        #self.__talk_to_bot('hi', '1: You said "hi"')
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {botname}')
+    '''
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_create_v4_js_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
+            'password': 'eHFFVE494][pskfuiEI31);'
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+                 checks={
+                     self.check('appId', '{app_id}'),
+                     self.check('appPassword', '{password}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs')
+                 })
+
+        # Talk to bot
+        self.__talk_to_bot('hi', 'You sent "hi"')
+
+        # Download the bot source
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
+        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
+
+        # Publish it back
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+            self.check('active', True)
+        ])
+        # Clean up the folder
+        shutil.rmtree(dir_path)
+
+        # Talk to bot again to check everything went well
+        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_prepare_publish_with_registration_bot_should_raise_error(self, resource_group):
         self.kwargs.update({
@@ -199,28 +325,29 @@ class BotTests(ScenarioTest):
         """Enables direct line channel, sends a message to the bot,
         and if expected_text is provided, verify that the bot answer matches it."""
 
-        result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
-            self.check('properties.properties.sites[0].siteName', 'Default Site')
-        ])
+        # It is not possible to talk to the bot in playback mode.
+        if self.is_live:
+            result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+                self.check('properties.properties.sites[0].siteName', 'Default Site')
+            ])
 
-        json_output = json.loads(result.output)
+            json_output = json.loads(result.output)
 
-        # TODO: Remove
-        print(result.output)
+            directline_key = json_output['properties']['properties']['sites'][0]['key']
+            directline_client = DirectLineClient(directline_key)
 
-        directline_key = json_output['properties']['properties']['sites'][0]['key']
-        directline_client = DirectLineClient(directline_key)
+            send_result = directline_client.send_message(message_text)
 
-        send_result = directline_client.send_message(message_text)
+            if send_result.status_code != 200:
+                self.fail("Failed to send message to bot through directline api. Response:" +
+                          json.dumps(send_result.json()))
 
-        if send_result.status_code != 200:
-            self.fail("Failed to send message to bot through directline api. Response:" + send_result.json())
+            response, text = directline_client.get_message()
 
-        response, text = directline_client.get_message()
+            if response.status_code != 200:
+                self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
 
-        if response.status_code != 200:
-            self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
-
-        if expected_text != None:
-            self.assertTrue(expected_text in text, "Bot response does not match expectation")
+            if expected_text != None:
+                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text
+                                + expected_text)
 

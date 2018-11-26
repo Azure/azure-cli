@@ -30,8 +30,6 @@ from azure.mgmt.botservice.models import (
     Sku)
 
 logger = get_logger(__name__)
-# TODO: Investigate if verbose flag is set to true on the logger, or experimenting with it individually to have verbose logging
-
 
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
@@ -77,19 +75,26 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         kind = bot_kind
 
     if kind not in (bot_kind, webapp_kind, function_kind):
-        raise CLIError('Invalid Bot Parameter : kind')
+        raise CLIError('Invalid Bot Parameter : kind. Valid kinds are \'registration\' for registration bots, '
+                       '\'webapp\' for webapp bots and \'function\' for function bots. Run \'az bot create -h\' '
+                       'for more information.')
 
     # TODO validate common parameters
 
     # If a Microsoft application id was not provided, provision one for the user
     if not msa_app_id:
-        msa_app_id, password = converged_app.ConvergedApp.provision(resource_name)
-        logger.warning('Microsoft application provisioning successful.')
 
-    logger.warning('Provisioning bot...')
+        logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
+
+        msa_app_id, password = converged_app.ConvergedApp.provision(resource_name)
+        logger.info('Microsoft application provisioning successful.')
+
+    logger.info('Creating Azure Bot Service.')
 
     # Registration bots: simply call ARM and create the bot
     if kind == bot_kind:
+
+        logger.debug('Detected kind %s, validating parameters for the specified kind.', kind)
 
         # Registration bot specific validation
         if not endpoint:
@@ -109,6 +114,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
                 msa_app_id=msa_app_id
             )
         )
+        logger.debug('Bot parameters client side validation successful.')
+        logger.debug('Creating bot.')
+
         return client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
@@ -116,7 +124,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         )
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
-        return BotTemplateDeployer.create_app(cmd, client, resource_group_name, resource_name, description, kind,
+        logger.debug('Detected kind %s, validating parameters for the specified kind.', kind)
+
+        return BotTemplateDeployer.create_app(cmd, logger, client, resource_group_name, resource_name, description, kind,
                                               msa_app_id, password, storageAccountName, location, sku_name,
                                               appInsightsLocation, language, version)
 
@@ -174,48 +184,76 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     :param file_save_path:
     :return:
     """
-    # get the bot and ensure it's not a registration only bot
+    logger.debug('Retrieving bot information from Azure.')
+
+    # Get the bot and ensure it's not a registration only bot
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
     )
+    logger.debug('Bot information retrieved successfully from Azure.')
+
     if bot.kind == 'bot':
         raise CLIError('Source download is not supported for registration only bots')
 
-    # TODO: Informational logging, how to do it? Once we know, do it all over the place :)
-    # TODO: warning when defaulting!
-    file_save_path = file_save_path or os.getcwd()
+    if not file_save_path:
+        file_save_path = os.getcwd()
+        logger.info('Parameter --file-save-path not provided, defaulting to current working directory, %s. '
+                    'For more information, run \'az bot download -h\'', file_save_path)
+
     if not os.path.isdir(file_save_path):
         raise CLIError('Path name not valid')
 
     # TODO: Verify that the behavior for download and publish is the same in regards to where the files are downloaded
     # TODO: to and uploaded from.
     folder_path = os.path.join(file_save_path, resource_name)
+
+    logger.info('Bot source will be downloaded to %s.', folder_path)
+
     if os.path.exists(folder_path):
-        raise CLIError('The path {0} already exists. Please delete this folder or specify an alternate path'.format(folder_path))  # pylint: disable=line-too-long
+        raise CLIError('The path {0} already exists. '
+                       'Please delete this folder or specify an alternate path'.format(folder_path))
+
+    logger.debug('Attempting to preemptively create directory %s', folder_path)
     os.mkdir(folder_path)
 
+    logger.debug('Creating Kudu client to download bot source.')
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
+
+    logger.info('Downloading bot source. This operation may take seconds or minutes depending on the size of'
+                'your bot source and the download speed of your internet connection.')
     kudu_client.download_bot_zip(file_save_path, folder_path)
+
+    logger.info('Bot source download successful. Preparing bot project.')
 
     # TODO: Examine cases where PostDeployScripts, deploy.cmd, etc. do not exist.
     if (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
             os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
+
+        logger.debug('Post deployment scripts and deploy.cmd found in source under folder %s. Copying deploy.cmd.')
+
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))
 
     # If the bot source contains a .bot file
     # TODO: If there is only one bot file, that is the bot file.
-    # TODO: If there are more than one bot file, the user must disambiguate before continuing. Show error and suggest passsing --bot-file-name
+    # TODO: If there are more than one bot file, the user must disambiguate before continuing.
+    # TODO: Show error and suggest passsing --bot-file-name
+
     bot_file_path = os.path.join(folder_path, '{0}.bot'.format(resource_name))
     if os.path.exists(bot_file_path):
+
+        logger.info('Detected bot file %s.', bot_file_path)
+
         app_settings = WebAppOperations.get_app_settings(
             cmd=cmd,
             resource_group_name=resource_group_name,
             name=kudu_client.bot_site_name
         )
         bot_secret = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
-        # write a .env file #todo: write an appsettings.json file
+
+        # Write a .env file
+        # TODO: write an appsettings.json file
         bot_env = {
             'botFileSecret': bot_secret[0],
             'botFilePath': '{0}.bot'.format(resource_name),
@@ -223,14 +261,24 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
         }
         # If javascript, write .env file content to .env file
         if os.path.exists(os.path.join(folder_path, 'package.json')):
+
+            logger.debug('Detected language as javascript. Package.json present at %s. '
+                         'Creating .env file in that folder.', folder_path)
+
             with open(os.path.join(folder_path, '.env'), 'w') as f:
                 for key, value in bot_env.items():
                     f.write('{0}={1}\n'.format(key, value))
         # If C#, write .env file content to appsettings.json
         else:
+
             app_settings_path = os.path.join(folder_path, 'appsettings.json')
+
+            logger.debug('Detected language as CSharp. Loading app settings from %s.', app_settings_path)
+
             existing = None
             if not os.path.exists(app_settings_path):
+
+                logger.debug('App settings not found at %s, defaulting app settings to {}.', app_settings_path)
                 existing = '{}'
             else:
                 with open(app_settings_path, 'r') as f:
@@ -240,12 +288,17 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
                     existing[key] = value
                 f.write(json.dumps(existing))
 
-        # TODO: understand this. If there is not bot secret,  add bot_env info
+        # TODO: Understand this and document. If there is not bot secret, add bot_env download path. Why?
         # TODO: Consider just returning downloadPAth as a string rather than this object. There seem to be no
-        # usages of the other properties such as botFileSecret
+        # TODO: usages of the other properties such as botFileSecret
         if not bot_secret:
+
+            logger.debug('Bot secret not found. Setting download path to %s', folder_path)
+
             bot_env['downloadPath'] = folder_path
             return bot_env
+
+    logger.info('Bot download completed successfully.')
 
     return {'downloadPath': folder_path}
 
@@ -318,12 +371,16 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
 
     # If javascript, we need these files there for Azure WebApps to start
     if os.path.exists(os.path.join('PostDeployScripts', 'publish.js.template')):
+
+        logger.debug('Detected language javascript.')
+
         shutil.copy(os.path.join(download_path['downloadPath'], 'iisnode.yml'), 'iisnode.yml')
         shutil.copy(os.path.join(download_path['downloadPath'], 'publish.js'), 'publish.js')
         shutil.copy(os.path.join(download_path['downloadPath'], 'web.config'), 'web.config')
 
     # If C#, we need other set of files for the WebApp to start including build.cmd
     else:
+        logger.debug('Detected language CSharp.')
         solution_path = None
         csproj_path = None
         old_namev4 = 'AspNetCore-EchoBot-With-State'
@@ -349,6 +406,9 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         with open('deploy.cmd') as f:
             content = f.read()
 
+        logger.info('Visual studio solution detected: %s.', solution_path)
+        logger.info('Visual studio project detected: %s.', csproj_path)
+
         # Using the deploy.cmd as a template, adapt it to use our solution and csproj
         # TODO: Create template deploy.cmd
         with open('deploy.cmd', 'w') as f:
@@ -359,6 +419,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
             f.write(content)
 
     shutil.rmtree(download_path['downloadPath'])
+
+    logger.info('Bot prepare publish completed successfully.')
 
 
 # TODO: WIP
@@ -472,31 +534,53 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         resource_name=resource_name
     )
     if bot.kind == 'bot':
-        raise CLIError('Source publish is not supported for registration only bots')
+        raise CLIError('Bot kind is \'bot\', meaning it is a registration bot. '
+                       'Source publish is not supported for registration only bots.')
 
     # If the user does not pass in a path to the local bot project, get the current working directory.
     if not code_dir:
-        # TODO: If we grab os.getcwd, show message to the user, 'defaulting to local directory, pass --code-dir to override'
         code_dir = os.getcwd()
 
+        logger.info('Parameter --code-dir not provided, defaulting to current working directory, %s. '
+                    'For more information, run \'az bot publish -h\'', code_dir)
+
     if not os.path.isdir(code_dir):
-        raise CLIError('Please supply a valid directory path containing your source code')
-    # ensure that the directory contains appropriate post deploy scripts folder
+        raise CLIError('The path %s is not a valid directory. '
+                       'Please supply a valid directory path containing your source code.', code_dir)
+
+    # Ensure that the directory contains appropriate post deploy scripts folder
     # TODO: Find out if PostDeployScripts is language specific -> It is not, but can we streamline this?
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if sdk_version == 'v4':
-            # automatically run prepare-publish in case of v4.
+
+            logger.debug('Detected SDK version v4. Running prepare publish in code directory %s and '
+                         'for project file %s', code_dir, proj_file)
+
+            # Automatically run prepare-publish in case of v4.
             BotPublishHelper.prepare_publish_v4(code_dir, proj_file)
         else:
-            raise CLIError('Not a valid azure publish directory. Please run prepare-publish.')
+            logger.debug('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
+                         code_dir)
 
+            raise CLIError('Publish directory provided is uses Bot Builder SDK V3, and as a legacy bot needs to be '
+                           'prepared for deployment. Please run prepare-publish. For more information, run '
+                           '\'az bot prepare-publish -h\'.')
+
+    logger.debug('Creating upload zip file.')
     zip_filepath = BotPublishHelper.create_upload_zip(code_dir, include_node_modules=False)
+    logger.debug('Zip file path created, at %s.', zip_filepath)
+
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
     output = kudu_client.publish(zip_filepath)
+
+    logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
 
     # TODO: Examine improving logic for language of the bot.
     if os.path.exists(os.path.join('.', 'package.json')):
+        logger.debug('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()
+
+    logger.info('Bot publish completed successfully.')
 
     return output
