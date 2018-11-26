@@ -43,7 +43,7 @@ def load_arguments(self, _):
         c.argument('required_resource_accesses', type=validate_file_or_dict,
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
-        c.argument('credential_description', help="the description of the key or password")
+        c.argument('credential_description', help="the description of the password")
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -81,7 +81,7 @@ def load_arguments(self, _):
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
-            c.argument('credential_description', help="the description of the key or password", arg_group='Credential')
+            c.argument('credential_description', help="the description of the password", arg_group='Credential')
 
     with self.argument_context('ad app credential reset') as c:
         c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')

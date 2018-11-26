@@ -875,7 +875,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None, key_u
 
     custom_key_id = None
     if key_description and password:
-        custom_key_id = key_description.encode('utf-16')
+        custom_key_id = _encode_custom_key_description(key_description)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -1382,8 +1382,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
 
     custom_key_identifier = None
     if credential_description and password:
-        # utf16 is used by AAD portal. Don't change it to other random encoding
-        custom_key_identifier = credential_description.encode('utf-16')
+        custom_key_identifier = _encode_custom_key_description(credential_description)
 
     if password:
         app_creds = []
@@ -1424,6 +1423,12 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
+
+
+def _encode_custom_key_description(key_description):
+    # utf16 is used by AAD portal. Do not change it to other random encoding
+    # unless you know what you are doing.
+    return key_description.encode('utf-16')
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
