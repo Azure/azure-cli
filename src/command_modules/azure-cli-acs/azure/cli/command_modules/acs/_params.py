@@ -247,7 +247,7 @@ def load_arguments(self, _):
 
     with self.argument_context('openshift create') as c:
         c.argument('name', validator=validate_linux_host_name)
-        c.argument('compute_vm_size', options_list=['--compute_vm_size', '-s'])
+        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
         c.argument('fqdn', required=True)
         c.argument('aad_client_app_id')
         c.argument('aad_client_app_secret')
