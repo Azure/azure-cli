@@ -1050,7 +1050,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
-        subs = finder.find_from_user_account(self.user1, 'bar', 'NiceTenant', 'http://someresource')
+        subs = finder.find_from_user_account(self.user1, 'bar', self.tenant_id, 'http://someresource')
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -1122,7 +1122,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
-        subs = finder.find_through_interactive_flow('NiceTenant', 'http://someresource')
+        subs = finder.find_through_interactive_flow(self.tenant_id, 'http://someresource')
 
         # assert
         self.assertEqual([self.subscription1], subs)
