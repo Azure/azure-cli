@@ -889,7 +889,7 @@ class CredsCache(object):
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
-                   tenant == tenant[_TENANT_ID]]
+                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
