@@ -43,8 +43,8 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-    check_resource_group_exists, check_resource_group_supports_os, check_if_asp_exists, check_app_exists,
-    get_lang_from_content, web_client_factory)
+                           check_resource_group_exists, check_resource_group_supports_os,
+                           check_if_asp_exists, check_app_exists, get_lang_from_content, web_client_factory)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
 logger = get_logger(__name__)
