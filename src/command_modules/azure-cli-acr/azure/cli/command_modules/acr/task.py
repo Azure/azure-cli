@@ -66,7 +66,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
-                    pull_request_trigger_enabled=True,
+                    pull_request_trigger_enabled=False,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -78,6 +78,11 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
+    # Source control triggers are exclusive
+    if commit_trigger_enabled and pull_request_trigger_enabled:
+        raise CLIError("Only one source control trigger type can be enabled at a time: "
+                       "[--commit-trigger-enabled] or [--pull-request-trigger-enabled]")
+
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
@@ -109,13 +114,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_control_type = SourceControlType.github.value
 
     source_triggers = None
-    source_trigger_events = []
-    if commit_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.commit.value)
-    if pull_request_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
-    # if source_trigger_events contains any event types we assume they are enabled
-    if source_trigger_events:
+    if commit_trigger_enabled or pull_request_trigger_enabled:
+        source_trigger_event = [SourceTriggerEvent.commit.value]
+        if pull_request_trigger_enabled:
+            source_trigger_event = [SourceTriggerEvent.pullrequest.value]
         source_triggers = [
             SourceTrigger(
                 source_repository=SourceProperties(
@@ -128,7 +130,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                         scope='repo'
                     )
                 ),
-                source_trigger_events=source_trigger_events,
+                source_trigger_events=source_trigger_event,
                 status=TriggerStatus.enabled.value,
                 name=source_trigger_name
             )
@@ -231,6 +233,11 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
+    # Source control triggers are exclusive
+    if commit_trigger_enabled and pull_request_trigger_enabled:
+        raise CLIError("Only one source control trigger type can be enabled at a time: "
+                       "[--commit-trigger-enabled] or [--pull-request-trigger-enabled]")
+
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
 
@@ -297,9 +304,18 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            source_trigger_events = _get_trigger_event_list(source_triggers,
-                                                            commit_trigger_enabled,
-                                                            pull_request_trigger_enabled)
+            source_trigger_event = None
+            status = None
+            if commit_trigger_enabled is not None:
+                status = TriggerStatus.disabled.value
+                if commit_trigger_enabled:
+                    status = TriggerStatus.enabled.value
+                    source_trigger_event = [SourceTriggerEvent.commit.value]
+            if pull_request_trigger_enabled is not None:
+                status = TriggerStatus.disabled.value
+                if pull_request_trigger_enabled:
+                    status = TriggerStatus.enabled.value
+                    source_trigger_event = [SourceTriggerEvent.pullrequest.value]
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -311,8 +327,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                             token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
-                    source_trigger_events=source_trigger_events,
-                    status=TriggerStatus.enabled.value if source_trigger_events else TriggerStatus.disabled.value,
+                    source_trigger_events=source_trigger_event,
+                    status=status,
                     name=source_triggers[0].name if source_triggers else "defaultSourceTriggerName"
                 )
             ]
@@ -503,27 +519,3 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
-
-
-def _get_trigger_event_list(source_triggers,
-                            commit_trigger_enabled=None,
-                            pull_request_trigger_enabled=None):
-    source_trigger_events = set()
-    # perform merge with server-side event list
-    if source_triggers:
-        source_trigger_events = set(source_triggers[0].source_trigger_events)
-        if source_triggers[0].status == TriggerStatus.disabled.value:
-            source_trigger_events.clear()
-    if commit_trigger_enabled is not None:
-        if commit_trigger_enabled:
-            source_trigger_events.add(SourceTriggerEvent.commit.value)
-        else:
-            if SourceTriggerEvent.commit.value in source_trigger_events:
-                source_trigger_events.remove(SourceTriggerEvent.commit.value)
-    if pull_request_trigger_enabled is not None:
-        if pull_request_trigger_enabled:
-            source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
-        else:
-            if SourceTriggerEvent.pullrequest.value in source_trigger_events:
-                source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
-    return source_trigger_events

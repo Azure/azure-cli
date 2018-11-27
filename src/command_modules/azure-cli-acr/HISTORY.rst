@@ -6,6 +6,7 @@ Release History
 2.1.10
 ++++++
 * Minor fixes.
+* Support one source control trigger event per task.
 
 2.1.9
 +++++
