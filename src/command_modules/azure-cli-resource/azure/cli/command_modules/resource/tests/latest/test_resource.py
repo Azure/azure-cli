@@ -9,6 +9,7 @@ import time
 import mock
 import unittest
 
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
@@ -792,7 +793,7 @@ class PolicyScenarioTest(ScenarioTest):
         # the same sanitized value in the recording
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value='00000000-0000-0000-0000-000000000000'):
+                            return_value=MOCKED_SUBSCRIPTION_ID):
                 self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
         else:
             self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
@@ -820,7 +821,7 @@ class PolicyScenarioTest(ScenarioTest):
         # the same sanitized value in the recording
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value='00000000-0000-0000-0000-000000000000'):
+                            return_value=MOCKED_SUBSCRIPTION_ID):
                 self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
         else:
             self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
