@@ -788,7 +788,9 @@ class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
     def test_resource_policy_subscription_id(self, resource_group):
-        if not (self.in_recording or self.is_live):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value='00000000-0000-0000-0000-000000000000'):
                 self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
@@ -814,7 +816,9 @@ class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
     @AllowLargeResponse()
     def test_resource_policyset_subscription_id(self, resource_group):
-        if not (self.in_recording or self.is_live):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value='00000000-0000-0000-0000-000000000000'):
                 self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
