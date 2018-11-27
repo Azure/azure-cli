@@ -519,7 +519,7 @@ def _get_trigger_event_list(source_triggers=None,
                             pull_request_trigger_enabled=None):
     status = None
     source_trigger_event = None
-    existing_event = source_triggers[0].source_trigger_events
+    existing_event = source_triggers[0].source_trigger_events if source_triggers else None
     if commit_trigger_enabled is not None:
         if commit_trigger_enabled:
             status = TriggerStatus.enabled.value
