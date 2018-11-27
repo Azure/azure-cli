@@ -21,9 +21,10 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
+            'loc': 'westus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'namespacenamekafka': self.create_random_name(prefix='eventhubs-nscli1', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
@@ -44,9 +45,14 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace exists --name {namespacename}',
                  checks=[self.check('nameAvailable', True)])
 
+        # Create kafka Namespace
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacenamekafka} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --enable-kafka {isautoinflateenabled}',
+                 checks=[self.check('kafkaEnabled', True)])
+
         # Create Namespace
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+        self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
+            checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace
         self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}',

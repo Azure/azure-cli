@@ -35,8 +35,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource,
-                              cf_network, get_auth_management_client)
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -107,7 +106,6 @@ def create_container(cmd,
                      assign_identity=None,
                      identity_scope=None,
                      identity_role='Contributor',
-                     identity_role_id=None,
                      no_wait=False):
     """Create a container group. """
     if file:
@@ -223,9 +221,10 @@ def create_container(cmd,
                       name, cgroup)
 
     if assign_identity is not None and identity_scope:
+        from azure.cli.core.commands.arm import assign_identity
         cg = container_group_client.get(resource_group_name, name)
-        _create_update_msi_role_assignment(cmd, resource_group_name, name, cg.identity.principal_id,
-                                           identity_role_id, identity_scope)
+        assign_identity(cmd.cli_ctx, lambda: cg, lambda cg: cg, identity_role, identity_scope)
+
     return lro
 
 
@@ -243,25 +242,6 @@ def _build_identities_info(identities):
     if external_identities:
         identity.user_assigned_identities = {e: {} for e in external_identities}
     return identity
-
-
-def _create_update_msi_role_assignment(cmd, resource_group_name, cg_name, identity_principle_id,
-                                       role_definition_id, identity_scope):
-    from azure.cli.core.profiles import ResourceType, get_sdk
-
-    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters',
-                                             mod='models', operation_group='role_assignments')
-
-    assignment_client = get_auth_management_client(cmd.cli_ctx, identity_scope).role_assignments
-
-    role_assignment_guid = str(_gen_guid())
-
-    create_params = RoleAssignmentCreateParameters(
-        role_definition_id=role_definition_id,
-        principal_id=identity_principle_id
-    )
-    return assignment_client.create(identity_scope, role_assignment_guid, create_params, custom_headers=None)
 
 
 def _get_resource(client, resource_group_name, *subresources):
@@ -393,7 +373,6 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
-
     cg_defintion = None
 
     try:
@@ -582,7 +561,6 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_export(cmd, resource_group_name, name, file):
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
-
     resource = resource_client.resources.get(resource_group_name,
                                              "Microsoft.ContainerInstance",
                                              '',
@@ -590,17 +568,26 @@ def container_export(cmd, resource_group_name, name, file):
                                              name,
                                              container_group_client.api_version,
                                              False).__dict__
-
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
     resource.pop('id', None)
     resource.pop('plan', None)
-    resource.pop('identity', None)
     resource.pop('kind', None)
     resource.pop('managed_by', None)
     resource['properties'].pop('provisioningState', None)
 
+    # Correctly export the identity
+    if 'identity' in resource and resource['identity'].type != ResourceIdentityType.none:
+        resource['identity'] = resource['identity'].__dict__
+        identity_entry = {'type': resource['identity']['type'].value}
+        if resource['identity']['user_assigned_identities']:
+            identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
+        resource['identity'] = identity_entry
+    else:
+        resource.pop('identity', None)
+
+    # Remove container instance views
     for i in range(len(resource['properties']['containers'])):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 

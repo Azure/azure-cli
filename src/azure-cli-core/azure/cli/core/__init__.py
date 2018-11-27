@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.50"
+__version__ = "2.0.51"
 
 import os
 import sys
@@ -259,12 +259,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False):
+    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
+                 recommend_update=False):
         self.mod_name = mod_name
         self.suppress_extension_name = suppress_extension_name
         self.suppress_up_to_version = suppress_up_to_version
         self.reason = reason
         self.recommend_remove = recommend_remove
+        self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
         from pkg_resources import parse_version
@@ -278,6 +280,8 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
                          "to %s", ext.name, ext.version, self.mod_name)
             if self.recommend_remove:
                 logger.warning("Remove this extension with 'az extension remove --name %s'", ext.name)
+            if self.recommend_update:
+                logger.warning("Update this extension with 'az extension update --name %s'", ext.name)
         return should_suppress
 
 

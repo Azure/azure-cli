@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 import json
 import mock
+import unittest
+import dateutil.parser
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
@@ -227,16 +229,23 @@ class GraphGroupScenarioTest(ScenarioTest):
                 pass
 
 
+def get_signed_in_user(test_case):
+    playback = not (test_case.is_live or test_case.in_recording)
+    if playback:
+        return MOCKED_USER_NAME
+    else:
+        account_info = test_case.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] != 'servicePrincipal':
+            return account_info['user']['name']
+    return None
+
+
 class GraphOwnerScenarioTest(ScenarioTest):
+
     def test_graph_ownership(self):
-        playback = not (self.is_live or self.in_recording)
-        if playback:
-            owner = MOCKED_USER_NAME
-        else:
-            account_info = self.cmd('account show').get_output_in_json()
-            if account_info['user']['type'] == 'servicePrincipal':
-                return  # this test delete users which are beyond a SP's capacity, so quit...
-            owner = account_info['user']['name']
+        owner = get_signed_in_user(self)
+        if not owner:
+            return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
             'owner': owner
@@ -252,3 +261,89 @@ class GraphOwnerScenarioTest(ScenarioTest):
         finally:
             if self.kwargs['app_id']:
                 self.cmd('ad sp delete --id {app_id}')
+
+    @unittest.skip("pending design review")
+    def test_set_graph_owner(self):
+        owner = get_signed_in_user(self)
+        if not owner:
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'owner': owner,
+            'group': self.create_random_name('cli-grp', 15),
+            'app': self.create_random_name('cli-app-', 15)
+        }
+        group_object_id, app_id = None, None
+        try:
+            self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
+            self.cmd('ad sp create-for-rbac --name {app} --skip-assignment')
+            self.cmd('ad signed-in-user list-owned-objects', checks=self.check('length([*])', 2))
+        finally:
+            if group_object_id:
+                self.cmd('ad group delete -g ' + group_object_id)
+            if app_id:
+                self.cmd('ad app delete --id ' + app_id)
+
+
+class GraphAppCredsScenarioTest(ScenarioTest):
+    def test_graph_app_cred_e2e(self):
+        if not get_signed_in_user(self):
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'app': "http://" + self.create_random_name('cli-app-', 15)
+        }
+        app_id = None
+        try:
+            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            app_id = result['appId']
+
+            result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
+            key_id = result[0]['keyId']
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
+            self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
+            result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            self.assertTrue(result[0]['keyId'] != key_id)
+
+            # try the same through app commands
+            result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            key_id = result[0]['keyId']
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --append')
+            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
+            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
+
+            # ensure we can update other properties #7728
+            self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
+            self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
+        finally:
+            if app_id:
+                self.cmd('ad app delete --id ' + app_id)
+
+
+class GraphAppRequiredAccessScenarioTest(ScenarioTest):
+
+    def test_graph_required_access_e2e(self):
+        if not get_signed_in_user(self):
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+        self.kwargs = {
+            'app': "http://" + self.create_random_name('cli-app-', 15),
+            'graph_resource': '00000002-0000-0000-c000-000000000000',
+            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a'
+        }
+        app_id = None
+        try:
+            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api}=Scope')
+            self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
+            permissions = self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 1)
+            ]).get_output_in_json()
+            self.assertTrue(dateutil.parser.parse(permissions[0]['grantedTime']))  # verify it is a time
+            self.cmd('ad app permission delete --id {app_id} --api {graph_resource}')
+            self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
+        finally:
+            if app_id:
+                self.cmd('ad app delete --id ' + app_id)

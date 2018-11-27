@@ -3,9 +3,16 @@
 Release History
 ===============
 
+2.1.9
++++++
+* Add context token to task step.
+* Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
+
 2.1.8
 +++++
 * Support commit and pull request git events for Task source trigger.
+* Use default Dockerfile if it's not specified in build command.
 
 2.1.7
 +++++

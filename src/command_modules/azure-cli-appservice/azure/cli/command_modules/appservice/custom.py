@@ -31,7 +31,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   DeletedAppRestoreRequest)
+                                   DeletedAppRestoreRequest, DefaultErrorResponseException)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -67,7 +67,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
-    node_default_version = "6.9.1"
+    node_default_version = '8.11.1'
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -240,7 +240,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
@@ -258,11 +258,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
         zip_content = fs.read()
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
-    response = requests.get(deployment_status_url, headers=authorization)
-    response = response.json()
-    if response.get('status', 0) != 4:
-        logger.warning(response.get('progress', ''))
-        response = _check_zip_deployment_status(deployment_status_url, authorization)
+    response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
     return response
 
 
@@ -576,7 +572,7 @@ def _delete_linux_fx_version(cmd, resource_group_name, name, slot=None):
 
 def _get_fx_version(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
-    return site_config.linux_fx_version or site_config.windows_fx_version
+    return site_config.linux_fx_version or site_config.windows_fx_version or ''
 
 
 def url_validator(url):
@@ -984,10 +980,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             'python_framework': python_framework,
             'python_version': python_version
         }
-        status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
-                                                         branch, git_token, slot_swap, cd_app_type_details,
-                                                         cd_project_url, cd_account_create, location, test,
-                                                         private_repo_username, private_repo_password, webapp_list)
+        try:
+            status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
+                                                             branch, git_token, slot_swap, cd_app_type_details,
+                                                             cd_project_url, cd_account_create, location, test,
+                                                             private_repo_username, private_repo_password, webapp_list)
+        except RuntimeError as ex:
+            raise CLIError(ex)
         logger.warning(status.status_message)
         return status
     else:
@@ -1078,14 +1077,6 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def _linux_sku_check(sku):
-    tier = get_sku_name(sku)
-    if tier in ['BASIC', 'STANDARD', 'PREMIUMV2']:
-        return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
-    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3, P1V2, P2V2, P3V2'))
-
-
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
                             location=None, tags=None):
     if is_linux and hyper_v:
@@ -1094,8 +1085,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    if is_linux:
-        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -1163,7 +1152,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
                                                 'get_backup_configuration', slot)
-    except CloudError:
+    except DefaultErrorResponseException:
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days,
                     keep_at_least_one_backup]):
@@ -1455,12 +1444,8 @@ def list_slots(cmd, resource_group_name, webapp):
 def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     if action == 'swap':
-        if target_slot is None:
-            poller = client.web_apps.swap_slot_with_production(resource_group_name,
-                                                               webapp, slot, True)
-        else:
-            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                    slot, target_slot, True)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                slot, (target_slot or 'production'), True)
         return poller
     elif action == 'preview':
         if target_slot is None:
@@ -1476,8 +1461,6 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             client.web_apps.reset_production_slot_config(resource_group_name, webapp)
         else:
             client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
         return None
 
 
@@ -1883,7 +1866,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='6.5.0'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
     if consumption_plan_location is None:
         site_config.always_on = True
@@ -1974,23 +1957,23 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def _check_zip_deployment_status(deployment_status_url, authorization):
+def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     import time
-    num_trials = 1
-    while num_trials < 10:
-        time.sleep(15)
+    total_trials = (int(timeout) // 30) if timeout else 10
+    for _num_trials in range(total_trials):
+        time.sleep(30)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
-        num_trials = num_trials + 1
-        if res_dict['status'] == 5:
+        if res_dict.get('status', 0) == 5:
             logger.warning("Zip deployment failed status %s", res_dict['status_text'])
             break
-        elif res_dict['status'] == 4:
+        elif res_dict.get('status', 0) == 4:
             break
-        logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
+        if 'progress' in res_dict:
+            logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
-    if res_dict['status'] != 4:
+    if res_dict.get('status', 0) != 4:
         logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
             beforing launching the app""", deployment_status_url)
     return res_dict

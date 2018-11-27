@@ -240,9 +240,9 @@ def acr_repository_show_manifests(cmd,
     # For backward compatibility, convert the results to the old schema
     if not detail:
         return [{
-            'digest': item['digest'],
-            'tags': item['tags'],
-            'timestamp': item['lastUpdateTime']
+            'digest': item['digest'] if 'digest' in item else '',
+            'tags': item['tags'] if 'tags' in item else [],
+            'timestamp': item['lastUpdateTime'] if 'lastUpdateTime' in item else ''
         } for item in raw_result]
 
     return raw_result
