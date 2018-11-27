@@ -7,7 +7,7 @@ import json
 import os
 import shutil
 
-from azure.cli.command_modules.botservice.auth import converged_app
+from azure.cli.command_modules.botservice.auth.converged_app import ConvergedApp
 from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot.bot_template_deployer import BotTemplateDeployer
@@ -80,7 +80,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
         logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
 
-        msa_app_id, password = converged_app.ConvergedApp.provision(resource_name)
+        msa_app_id, password = ConvergedApp.provision(resource_name)
         logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
 
     logger.info('Creating Azure Bot Service.')
