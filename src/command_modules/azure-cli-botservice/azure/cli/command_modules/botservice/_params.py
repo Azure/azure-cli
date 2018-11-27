@@ -50,6 +50,9 @@ def load_arguments(self, _):
         c.argument('proj_name', help='Name of the start up project file name. Required only for C#.')
         c.argument('sln_name', help='Name of the start up solution file name. Required only for C#.')
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to download deployment scripts to.')
+        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used '
+                                                                     'to create the bot',
+                   arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')
 
     with self.argument_context('bot facebook create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state')

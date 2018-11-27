@@ -220,7 +220,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     logger.debug('Creating Kudu client to download bot source.')
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
 
-    logger.info('Downloading bot source. This operation may take seconds or minutes depending on the size of'
+    logger.info('Downloading bot source. This operation may take seconds or minutes depending on the size of '
                 'your bot source and the download speed of your internet connection.')
     kudu_client.download_bot_zip(file_save_path, folder_path)
 
@@ -253,7 +253,6 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
         bot_secret = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
 
         # Write a .env file
-        # TODO: write an appsettings.json file
         bot_env = {
             'botFileSecret': bot_secret[0],
             'botFilePath': '{0}.bot'.format(resource_name),
@@ -303,7 +302,6 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     return {'downloadPath': folder_path}
 
 
-
 # TODO: Split into separate commands, one that returns all supported providers, and one that gets a singular provider.
 def get_service_providers(client, name=None):
     """Gets supported OAuth Service providers.
@@ -325,9 +323,9 @@ def get_service_providers(client, name=None):
             raise CLIError('A service provider with the name {0} was not found'.format(name))
     return service_provider_response
 
-# TODO: Add deprecated warning
-def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_name, code_dir=None):
-    """
+
+def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_name, code_dir=None, version='v3'):
+    """Adds PostDeployScripts folder with necessary scripts to deploy v3 bot to Azure.
 
     This method is directly called via "bot prepare-publish"
 
@@ -338,17 +336,27 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     :param sln_name:
     :param proj_name:
     :param code_dir:
+    :param version:
     :return:
     """
-    # logger.warning('Warning: "az bot prepare-publish" is deprecated. Please use "az bot add-publish-scripts" instead.')
-    raw_bot_properties = client.bots.get(
+
+    # The prepare-publish process for v3 bots and v4 bots differ, so if the user specifies a v4 version, end the command and inform user of az bot publish.
+    if version == 'v4':
+        raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish to prepare\' and '
+                       'publish a v4 bot.')
+
+    bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
     )
-    if raw_bot_properties.kind == 'bot':
+    if bot.kind == 'bot':
         raise CLIError('Prepare Publish is not supported for registration only bots')
-    # TODO: If we grab os.getcwd, show message to the user, 'defaulting to local directory, pass --code-dir to override'
-    code_dir = code_dir or os.getcwd()
+
+    if not code_dir:
+        code_dir = os.getcwd()
+        logger.warning('Parameter --code-dir not provided, defaulting to current working directory, {0}. For more '
+                       'information, run \'az bot prepare-publish -h\''.format(code_dir))
+
     if not os.path.isdir(code_dir):
         # TODO: Why not say 'you are all set, be happy :)' instead of displaying an error?
         raise CLIError('Please supply a valid directory path containing your source code')
@@ -387,8 +395,16 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         old_namev3 = 'Microsoft.Bot.Sample.SimpleEchoBot'
         shutil.copy(os.path.join(download_path['downloadPath'], 'build.cmd'), 'build.cmd')
         shutil.copy(os.path.join(download_path['downloadPath'], '.deployment'), '.deployment')
-        shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
-                        'deploy.cmd')
+        # "deploy.cmd.template" does not exist for v4 bots. If the next section of code fails due to deploy.cmd.template not being found,
+        # it is most likely due to trying to call prepare-publish on a v4 bot.
+        # Inform the user of the potential problem and raise the error to exit the process.
+        try:
+            shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
+                            'deploy.cmd')
+        except FileNotFoundError as error:
+            logger.error('"deploy.cmd.template" not found. This may be due to calling \'az bot prepare-publish\' on a '
+                         'v4 bot. To prepare and publish a v4 bot, please instead use \'az bot publish\'.')
+            raise CLIError(error)
         # Find solution and project name
         # TODO: Maybe we don't want to get into this business. Allow users to specify csproj / sln?
         for root, _, files in os.walk(os.curdir):
@@ -421,97 +437,6 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     shutil.rmtree(download_path['downloadPath'])
 
     logger.info('Bot prepare publish completed successfully.')
-
-
-# TODO: WIP
-def add_publish_scripts(cmd, client, resource_group_name, resource_name,
-                        language='Csharp', sln_name=None, proj_name=None, code_dir=None):
-    """Add Azure publish scripts to local bot folder.
-
-    Takes an optional --language argument
-
-    :param cmd:
-    :param client:
-    :param resource_group_name:
-    :param resource_name:
-    :param language:
-    :param sln_name:
-    :param proj_name:
-    :param code_dir:
-    :return:
-    """
-    raise NotImplementedError
-    bot = client.bots.get(
-        resource_group_name=resource_group_name,
-        resource_name=resource_name
-    )
-    if bot.kind == 'bot':
-        raise CLIError('Prepare Publish is not supported for registration only bots')
-    # TODO: If we grab os.getcwd, show message to the user, 'defaulting to local directory, pass --code-dir to override'
-    code_dir = code_dir or os.getcwd()
-    if not os.path.isdir(code_dir):
-        # TODO: Why not say 'you are all set, be happy :)' instead of displaying an error?
-        raise CLIError('Please supply a valid directory path containing your source code')
-
-    # TODO: Can we avoid? Changing the current working directory.
-    os.chdir(code_dir)
-
-    # Ensure that the directory does not contain appropriate post deploy scripts folder
-    if 'PostDeployScripts' in os.listdir(code_dir):
-        raise CLIError('Post deploy azure scripts are already in Place.')
-
-    # Download bot source
-    # TODO: Why not return a string rather than force callers to dereference a dictionary?
-    # TODO: Rename name, this is a dictionary
-    download_path = download_app(cmd, client, resource_group_name, resource_name)
-
-    # TODO: If I create a node bot, and then publish a c# bot does this work
-    # TODO: Can't we just have a constant PostDeployScripts folder somewhere?
-    shutil.copytree(os.path.join(download_path['downloadPath'], 'PostDeployScripts'), 'PostDeployScripts')
-
-    # If javascript, we need these files there for Azure WebApps to start
-    if os.path.exists(os.path.join('PostDeployScripts', 'publish.js.template')):
-        shutil.copy(os.path.join(download_path['downloadPath'], 'iisnode.yml'), 'iisnode.yml')
-        shutil.copy(os.path.join(download_path['downloadPath'], 'publish.js'), 'publish.js')
-        shutil.copy(os.path.join(download_path['downloadPath'], 'web.config'), 'web.config')
-
-    # If C#, we need other set of files for the WebApp to start including build.cmd
-    else:
-        solution_path = None
-        csproj_path = None
-        old_namev4 = 'AspNetCore-EchoBot-With-State'
-        old_namev3 = 'Microsoft.Bot.Sample.SimpleEchoBot'
-        shutil.copy(os.path.join(download_path['downloadPath'], 'build.cmd'), 'build.cmd')
-        shutil.copy(os.path.join(download_path['downloadPath'], '.deployment'), '.deployment')
-        shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
-                        'deploy.cmd')
-        # Find solution and project name
-        # TODO: Maybe we don't want to get into this business. Allow users to specify csproj / sln?
-        for root, _, files in os.walk(os.curdir):
-            if solution_path and csproj_path:
-                break
-            for fileName in files:
-                if solution_path and csproj_path:
-                    break
-                if fileName == sln_name:
-                    solution_path = os.path.relpath(os.path.join(root, fileName))
-                if fileName == proj_name:
-                    csproj_path = os.path.relpath(os.path.join(root, fileName))
-
-        # Read deploy script contents
-        with open('deploy.cmd') as f:
-            content = f.read()
-
-        # Using the deploy.cmd as a template, adapt it to use our solution and csproj
-        # TODO: Create template deploy.cmd
-        with open('deploy.cmd', 'w') as f:
-            content = content.replace(old_namev3 + '.sln', solution_path)
-            content = content.replace(old_namev3 + '.csproj', csproj_path)
-            content = content.replace(old_namev4 + '.sln', solution_path)
-            content = content.replace(old_namev4 + '.csproj', csproj_path)
-            f.write(content)
-
-    shutil.rmtree(download_path['downloadPath'])
 
 
 def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file=None, sdk_version='v3'):
