@@ -493,7 +493,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                         code_dir, proj_file)
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishHelper.prepare_publish_v4(code_dir, proj_file)
+            BotPublishHelper.prepare_publish_v4(logger, code_dir, proj_file)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                          code_dir)
@@ -503,7 +503,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                            '\'az bot prepare-publish -h\'.')
 
     logger.info('Creating upload zip file.')
-    zip_filepath = BotPublishHelper.create_upload_zip(code_dir, include_node_modules=False)
+    zip_filepath = BotPublishHelper.create_upload_zip(logger, code_dir, include_node_modules=False)
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
