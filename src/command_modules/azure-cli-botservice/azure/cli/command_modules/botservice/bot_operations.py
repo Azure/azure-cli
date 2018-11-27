@@ -294,8 +294,8 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
                     existing[key] = value
                 f.write(json.dumps(existing))
 
-        # TODO: Understand this and document. If there is not bot secret, add bot_env download path. Why?
-        # TODO: Consider just returning downloadPAth as a string rather than this object. There seem to be no
+        # TODO: Optimize this logic and document. If there is not bot secret, add bot_env download path. Why?
+        # TODO: Consider just returning downloadPath as a string rather than this object. There seem to be no
         # TODO: usages of the other properties such as botFileSecret
         if not bot_secret:
 
@@ -309,7 +309,6 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     return {'downloadPath': folder_path}
 
 
-# TODO: Split into separate commands, one that returns all supported providers, and one that gets a singular provider.
 def get_service_providers(client, name=None):
     """Gets supported OAuth Service providers.
 
@@ -357,7 +356,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         resource_name=resource_name
     )
     if bot.kind == 'bot':
-        raise CLIError('Prepare Publish is not supported for registration only bots')
+        raise CLIError('Prepare Publish is not supported for registration only bots.')
 
     if not code_dir:
         code_dir = os.getcwd()
@@ -365,10 +364,9 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
                        'information, run \'az bot prepare-publish -h\''.format(code_dir))
 
     if not os.path.isdir(code_dir):
-        # TODO: Why not say 'you are all set, be happy :)' instead of displaying an error?
-        raise CLIError('Please supply a valid directory path containing your source code')
+        raise CLIError('Please supply a valid directory path containing your source code. '
+                       'Path {0} does not exist.'.format(code_dir))
 
-    # TODO: Can we avoid? Changing the current working directory.
     os.chdir(code_dir)
 
     # Ensure that the directory does not contain appropriate post deploy scripts folder
@@ -376,12 +374,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         raise CLIError('Post deploy azure scripts are already in Place.')
 
     # Download bot source
-    # TODO: Why not return a string rather than force callers to dereference a dictionary?
-    # TODO: Rename name, this is a dictionary
     download_path = download_app(cmd, client, resource_group_name, resource_name)
 
-    # TODO: If I create a node bot, and then publish a c# bot does this work
-    # TODO: Can't we just have a constant PostDeployScripts folder somewhere?
     shutil.copytree(os.path.join(download_path['downloadPath'], 'PostDeployScripts'), 'PostDeployScripts')
 
     # If javascript, we need these files there for Azure WebApps to start
@@ -402,6 +396,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         old_namev3 = 'Microsoft.Bot.Sample.SimpleEchoBot'
         shutil.copy(os.path.join(download_path['downloadPath'], 'build.cmd'), 'build.cmd')
         shutil.copy(os.path.join(download_path['downloadPath'], '.deployment'), '.deployment')
+
         # "deploy.cmd.template" does not exist for v4 bots. If the next section of code fails due to deploy.cmd.template
         # not being found, it is most likely due to trying to call prepare-publish on a v4 bot.
         # Inform the user of the potential problem and raise the error to exit the process.
@@ -412,8 +407,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
             logger.error('"deploy.cmd.template" not found. This may be due to calling \'az bot prepare-publish\' on a '
                          'v4 bot. To prepare and publish a v4 bot, please instead use \'az bot publish\'.')
             raise CLIError(error)
+
         # Find solution and project name
-        # TODO: Maybe we don't want to get into this business. Allow users to specify csproj / sln?
         for root, _, files in os.walk(os.curdir):
             if solution_path and csproj_path:
                 break
@@ -433,7 +428,6 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         logger.info('Visual studio project detected: %s.', csproj_path)
 
         # Using the deploy.cmd as a template, adapt it to use our solution and csproj
-        # TODO: Create template deploy.cmd
         with open('deploy.cmd', 'w') as f:
             content = content.replace(old_namev3 + '.sln', solution_path)
             content = content.replace(old_namev3 + '.csproj', csproj_path)
@@ -481,7 +475,6 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                        'Please supply a valid directory path containing your source code.', code_dir)
 
     # Ensure that the directory contains appropriate post deploy scripts folder
-    # TODO: Find out if PostDeployScripts is language specific -> It is not, but can we streamline this?
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if sdk_version == 'v4':
 
@@ -508,7 +501,6 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
 
-    # TODO: Examine improving logic for language of the bot.
     if os.path.exists(os.path.join('.', 'package.json')):
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()

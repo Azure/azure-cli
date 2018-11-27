@@ -59,7 +59,6 @@ class BotPublishPrep:
                     code_dir, proj_file or '')
 
         try:
-            # TODO: Improve JS SDK detection logic, instead of only looking for package.json, look for botbuilder in package.json
             if not os.path.exists(os.path.join('.', 'package.json')):
 
                 logger.info('Detected bot language C#, Bot Builder version v4.')

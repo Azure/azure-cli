@@ -204,10 +204,8 @@ class BotTemplateDeployer:
         """
 
         # Pulled out of create_app, which is the only place that performs this call
-        # TODO: Move to class for dev.botframework.com calls?
         response = requests.get('https://dev.botframework.com/api/misc/botFileEncryptionKey')
 
-        # TODO: Tear this out? This method should probably fail gracefully, is a secret needed when the bot is provisioned?
         # Can't a user create a new secret and then re-encrypt the bot file?
         if response.status_code not in [200]:
             raise CLIError('Unable to provision a bot file encryption key. Please try again.')

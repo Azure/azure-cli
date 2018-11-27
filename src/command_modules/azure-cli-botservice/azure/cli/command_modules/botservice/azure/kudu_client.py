@@ -58,8 +58,6 @@ class KuduClient:
             HttpResponseValidator.check_response_status(prepareSrc_response)
 
             # Overwrite previous "response" with bot-src.zip.
-            # TODO: Why would we zip the file up to site/bot-src.zip and not site/clirepo?
-            # TODO: Should we delete this code? Should we place it in the right place (site/clirepo) the first time? ask Swagat
             response = requests.get(self.__scm_url + '/api/vfs/site/bot-src.zip',
                                     headers=headers)
             HttpResponseValidator.check_response_status(response)
@@ -72,7 +70,6 @@ class KuduClient:
         zip_ref.close()
         os.remove(download_path)
 
-        # TODO: Check if this needs to delete the site/bot-src.zip
 
     def install_node_dependencies(self):
         """Installs Node.js dependencies at `site/wwwroot/` for Node.js bots.

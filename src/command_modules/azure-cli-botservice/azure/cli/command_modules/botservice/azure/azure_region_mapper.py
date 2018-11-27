@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 
 
 class AzureRegionMapper:
-    # TODO: Evaluate behavior on this function, if the region isn't found, should it default to southcentralus or should it raise an error?
+
     @staticmethod
     def get_app_insights_location(key):
         region_map = {
