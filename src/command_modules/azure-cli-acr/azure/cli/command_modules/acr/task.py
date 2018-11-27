@@ -304,7 +304,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            trigger_info = _get_trigger_event_list(commit_trigger_enabled, pull_request_trigger_enabled)
+            trigger_info = _get_trigger_event_list(source_triggers,
+                                                   commit_trigger_enabled,
+                                                   pull_request_trigger_enabled)
             status = trigger_info[0]
             source_trigger_event = trigger_info[1]
             source_trigger_update_params = [
@@ -512,18 +514,24 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     return "{}.".format(base_message)
 
 
-def _get_trigger_event_list(commit_trigger_enabled=None,
+def _get_trigger_event_list(source_triggers=None,
+                            commit_trigger_enabled=None,
                             pull_request_trigger_enabled=None):
     status = None
     source_trigger_event = None
+    existing_event = source_triggers[0].source_trigger_events
     if commit_trigger_enabled is not None:
-        status = TriggerStatus.disabled.value
         if commit_trigger_enabled:
             status = TriggerStatus.enabled.value
             source_trigger_event = [SourceTriggerEvent.commit.value]
+        else:
+            if existing_event is SourceTriggerEvent.commit.value:
+                status = TriggerStatus.disabled.value
     if pull_request_trigger_enabled is not None:
-        status = TriggerStatus.disabled.value
         if pull_request_trigger_enabled:
             status = TriggerStatus.enabled.value
             source_trigger_event = [SourceTriggerEvent.pullrequest.value]
+        else:
+            if existing_event is SourceTriggerEvent.pullrequest.value:
+                status = TriggerStatus.disabled.value
     return (status, source_trigger_event)
