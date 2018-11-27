@@ -14,6 +14,7 @@ except ImportError:
     # If urllib.parse was not imported, use Python 2 module urlparse
     from urlparse import urlsplit  # pylint: disable=import-error
 
+
 class WebAppOperations:
     @staticmethod
     def get_bot_site_name(endpoint):

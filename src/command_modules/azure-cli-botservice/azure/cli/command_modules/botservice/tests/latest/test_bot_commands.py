@@ -57,17 +57,19 @@ class BotTests(ScenarioTest):
 
         dir_path = os.path.join('.', self.kwargs.get('botname'))
         if os.path.exists(dir_path):
-            # clean up the folder
+            # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-                 '--insights-location "West US 2"', checks=[
-                    self.check('appId', '{app_id}'),
-                    self.check('appPassword', '{password}'),
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('id', '{botname}'),
-                    self.check('type', 'abs')
-                    ])
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
+            '--insights-location "West US 2"',
+            checks=[
+                self.check('appId', '{app_id}'),
+                self.check('appPassword', '{password}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            ])
 
         # Talk to bot
         self.__talk_to_bot('hi', 'You said hi')
@@ -78,9 +80,6 @@ class BotTests(ScenarioTest):
         ])
 
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
-
-        # Modify bot source
-        # TODO implement
 
         # Publish it back
         self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
@@ -110,13 +109,15 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4', checks=[
-            self.check('appId', '{app_id}'),
-            self.check('appPassword', '{password}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('id', '{botname}'),
-            self.check('type', 'abs')
-        ])
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+            checks=[
+                self.check('appId', '{app_id}'),
+                self.check('appPassword', '{password}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            ])
 
         # Talk to bot
         self.__talk_to_bot('hi', 'You sent \'hi\'')
@@ -153,14 +154,16 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} '
-                 '--location westus --insights-location "West US 2" --lang Node', checks=[
-                    self.check('appId', '{app_id}'),
-                    self.check('appPassword', '{password}'),
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('id', '{botname}'),
-                    self.check('type', 'abs')
-                    ])
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
+            '--insights-location "West US 2" --lang Node',
+            checks=[
+                self.check('appId', '{app_id}'),
+                self.check('appPassword', '{password}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            ])
 
         # We don't talk to the bot in this test because it takes a while for the node app to be responsive
         # Download the bot
@@ -236,14 +239,16 @@ class BotTests(ScenarioTest):
             'app_id': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} '
-                 '--tags key1=value1', checks=[
-                    self.check('name', '{botname}'),
-                    self.check('properties.description', '{description}'),
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('location', 'global'),
-                    self.check('tags.key1', 'value1')
-                    ])
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags '
+            'key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
 
         self.cmd('az bot show -g {rg} -n {botname}', checks=[
             self.check('name', '{botname}')
