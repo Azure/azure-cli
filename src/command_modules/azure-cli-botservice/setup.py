@@ -64,7 +64,8 @@ setup(
         'azure.cli.command_modules.botservice',
         'azure.cli.command_modules.botservice.auth',
         'azure.cli.command_modules.botservice.azure',
-        'azure.cli.command_modules.botservice.bot'
+        'azure.cli.command_modules.botservice.bot',
+        'azure.cli.command_modules.botservice.bot.templates'
     ],
     package_data={'azure.cli.command_modules.botservice': ['*.json']},
     install_requires=DEPENDENCIES,

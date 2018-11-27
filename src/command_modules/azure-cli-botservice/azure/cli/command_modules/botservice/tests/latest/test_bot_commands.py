@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from .tools.directline_client import DirectLineClient
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
@@ -11,6 +10,80 @@ import uuid
 import os
 import shutil
 import json
+import requests
+
+
+class DirectLineClient(object):
+    """Shared methods for the parsed result objects."""
+
+    def __init__(self, direct_line_secret):
+        self._direct_line_secret = direct_line_secret
+        self._base_url = 'https://directline.botframework.com/v3/directline'
+        self.__set_headers()
+        self.__start_conversation()
+        self._watermark = ''
+
+    def send_message(self, text, retry_count=3):
+        """Send raw text to bot framework using direct line api"""
+        url = '/'.join([self._base_url, 'conversations', self._conversationid, 'activities'])
+        json_payload = {
+            'conversationId': self._conversationid,
+            'type': 'message',
+            'from': {'id': 'user1'},
+            'text': text
+        }
+
+        success = False
+        current_retry = 0
+        while not success and current_retry < retry_count:
+            bot_response = requests.post(url, headers=self._headers, json=json_payload)
+            current_retry += 1
+            if bot_response.status_code == 200:
+                sucess = True
+
+        return bot_response
+
+    def get_message(self, retry_count=3):
+        """Get a response message back from the bot framework using direct line api"""
+        url = '/'.join([self._base_url, 'conversations', self._conversationid, 'activities'])
+        url = url + '?watermark=' + self._watermark
+
+        success = False
+        current_retry = 0
+        while not success and current_retry < retry_count:
+            bot_response = requests.get(url, headers=self._headers,
+                                        json={'conversationId': self._conversationid})
+            current_retry += 1
+            if bot_response.status_code == 200:
+                success = True
+                json_response = bot_response.json()
+
+                if 'watermark' in json_response:
+                    self._watermark = json_response['watermark']
+
+                if 'activities' in json_response:
+                    activities_count = len(json_response['activities'])
+                    if activities_count > 0:
+                        return bot_response, json_response['activities'][activities_count - 1]['text']
+                    else:
+                        return bot_response, "No new messages"
+        return bot_response, "error contacting bot for response"
+
+    def __set_headers(self):
+        headers = {'Content-Type': 'application/json'}
+        value = ' '.join(['Bearer', self._direct_line_secret])
+        headers.update({'Authorization': value})
+        self._headers = headers
+
+    def __start_conversation(self):
+
+        # Start conversation and get us a conversationId to use
+        url = '/'.join([self._base_url, 'conversations'])
+        botresponse = requests.post(url, headers=self._headers)
+
+        # Extract the conversationID for sending messages to bot
+        jsonresponse = botresponse.json()
+        self._conversationid = jsonresponse['conversationId']
 
 
 class BotTests(ScenarioTest):
@@ -400,3 +473,4 @@ class BotTests(ScenarioTest):
             if expected_text:
                 self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
+
