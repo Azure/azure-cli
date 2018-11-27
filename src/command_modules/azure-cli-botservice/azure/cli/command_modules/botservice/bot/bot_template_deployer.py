@@ -60,8 +60,8 @@ class BotTemplateDeployer:
         return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=False)
 
     @staticmethod
-    def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,
-                   storageAccountName, location, sku_name, appInsightsLocation, language, version):  # pylint:disable=too-many-statements
+    def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
+                   storageAccountName, location, sku_name, appInsightsLocation, language, version):
         """Create WebApp Bot.
 
         :param cmd:

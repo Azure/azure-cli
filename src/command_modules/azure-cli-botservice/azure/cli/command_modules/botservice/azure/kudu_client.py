@@ -6,9 +6,9 @@
 import copy
 import json
 import os
-import urllib3
 import zipfile
 import requests
+import urllib3
 
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator

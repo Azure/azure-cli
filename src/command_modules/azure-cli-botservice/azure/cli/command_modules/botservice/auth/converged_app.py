@@ -41,7 +41,7 @@ class ConvergedApp:  # pylint:disable=too-few-public-methods
                     "pass the application Id and password as parameters for bot creation.")
             # Stub of logged error if verbose is True:
             else:
-                raise CLIError("%s: %s", response.status_code, response.text)
+                raise CLIError("%s: %s" % (response.status_code, response.text))
 
         response_content = json.loads(response.content.decode('utf-8'))
         msa_app_id = response_content['AppId']
