@@ -7,7 +7,7 @@ import json
 import os
 import shutil
 
-from .auth import converged_app
+from azure.cli.command_modules.botservice.auth import converged_app
 from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot.bot_template_deployer import BotTemplateDeployer
