@@ -289,6 +289,89 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_prepare_publish_should_raise_cli_error_when_version_is_v4(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'sln_name': 'invalid.sln',
+            'proj_name': 'invalid.csproj',
+            'version': 'v4'
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        try:
+            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name {sln_name} --proj-name {proj_name} -v v4')
+            raise Exception("'az bot prepare-publish' should have failed with a --version argument of 'v4'")
+        except CLIError as cli_error:
+            self.cmd('az bot delete -g {rg} -n {botname}')
+            assert cli_error.__str__() == "'az bot prepare-publish' is only for v3 bots. Please use 'az bot publish' to " \
+                                      "prepare and publish a v4 bot."
+        except Exception as error:
+            self.cmd('az bot delete -g {rg} -n {botname}')
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_prepare_publish_should_raise_cli_error_for_v4_bots(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
+            'password': 'bredzfQDQ639=aVPFY88}!@',
+            'sln_name': 'EchoBotWithCounter.sln',
+            'proj_name': 'EchoBotWithCounter.csproj',
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join(os.getcwd(), self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # Clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4', checks=[
+            self.check('appId', '{app_id}'),
+            self.check('appPassword', '{password}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('id', '{botname}'),
+            self.check('type', 'abs')
+        ])
+
+        try:
+            try:
+                # Create the download folder and add folder to the test's kwargs
+                os.mkdir(dir_path)
+                self.kwargs.update({'save_path': dir_path})
+
+                self.cmd(
+                    'az bot prepare-publish -g {rg} -n {botname} --sln-name {sln_name} --proj-name {proj_name}'
+                    ' --code-dir "{save_path}"')
+                raise Exception("'az bot prepare-publish' should have failed when looking for deploy.cmd.template")
+            except CLIError as cli_error:
+                # Delete bot
+                self.cmd('az bot delete -g {rg} -n {botname}')
+                expected_path = os.path.join(dir_path, self.kwargs.get('botname'),
+                                             'PostDeployScripts', 'deploy.cmd.template').replace('\\', '\\\\')
+
+                assert cli_error.__str__() == '[Errno 2] No such file or directory: \'{0}\''.format(expected_path)
+            except Exception as e:
+                raise e
+
+        except Exception as error:
+            # Delete bot
+            self.cmd('az bot delete -g {rg} -n {botname}')
+
+            if os.path.exists(dir_path):
+                # Clean up the folder
+                shutil.rmtree(dir_path)
+            raise error
+
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
         """Enables direct line channel, sends a message to the bot,
         and if expected_text is provided, verify that the bot answer matches it."""

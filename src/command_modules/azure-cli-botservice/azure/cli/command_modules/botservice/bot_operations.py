@@ -342,7 +342,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
 
     # The prepare-publish process for v3 bots and v4 bots differ, so if the user specifies a v4 version, end the command and inform user of az bot publish.
     if version == 'v4':
-        raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish to prepare\' and '
+        raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish\' to prepare and '
                        'publish a v4 bot.')
 
     bot = client.bots.get(
@@ -395,8 +395,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         old_namev3 = 'Microsoft.Bot.Sample.SimpleEchoBot'
         shutil.copy(os.path.join(download_path['downloadPath'], 'build.cmd'), 'build.cmd')
         shutil.copy(os.path.join(download_path['downloadPath'], '.deployment'), '.deployment')
-        # "deploy.cmd.template" does not exist for v4 bots. If the next section of code fails due to deploy.cmd.template not being found,
-        # it is most likely due to trying to call prepare-publish on a v4 bot.
+        # "deploy.cmd.template" does not exist for v4 bots. If the next section of code fails due to deploy.cmd.template
+        # not being found, it is most likely due to trying to call prepare-publish on a v4 bot.
         # Inform the user of the potential problem and raise the error to exit the process.
         try:
             shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
