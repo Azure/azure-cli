@@ -6,7 +6,7 @@
 from knack.util import CLIError
 
 
-class HttpResponseValidator:
+class HttpResponseValidator:  # pylint:disable=too-few-public-methods
 
     @staticmethod
     def check_response_status(response, expected_code=None):

@@ -6,15 +6,16 @@
 import copy
 import json
 import os
-import requests
 import urllib3
 import zipfile
+import requests
+
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
 from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
 
 
-class KuduClient:
+class KuduClient:  # pylint:disable=too-many-instance-attributes
     def __init__(self, cmd, resource_group_name, name, bot):
         self.__cmd = cmd
         self.__resource_group_name = resource_group_name

@@ -7,7 +7,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
 
 
-class BotJsonFormatter:
+class BotJsonFormatter:  # pylint:disable=too-few-public-methods
 
     @staticmethod
     def create_bot_json(cmd, client, resource_group_name, resource_name, app_password=None, raw_bot_properties=None):

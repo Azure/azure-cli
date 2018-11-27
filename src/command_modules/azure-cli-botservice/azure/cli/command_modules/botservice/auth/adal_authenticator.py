@@ -9,7 +9,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class AdalAuthenticator:
+class AdalAuthenticator:  # pylint:disable=too-few-public-methods
 
     bot_first_party_app_id = 'f3723d34-6ff5-4ceb-a148-d99dcd2511fc'
     aad_client_id = '1950a258-227b-4e31-a9cf-717495945fc2'

@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import requests
 import zipfile
+import requests
 
 from knack.util import CLIError
 
@@ -70,7 +70,8 @@ class BotPublishPrep:
                     f.write('[config]\n')
                     proj_file = proj_file.lower()
                     proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
-                    f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'.format(BotPublishPrep.__find_proj(proj_file)))
+                    f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'
+                            .format(BotPublishPrep.__find_proj(proj_file)))
 
             else:
 

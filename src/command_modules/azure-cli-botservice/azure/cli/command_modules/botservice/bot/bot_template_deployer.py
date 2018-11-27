@@ -5,10 +5,10 @@
 
 import json
 import os
-import re
-import requests
-import string
 import random
+import re
+import string
+import requests
 
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -61,7 +61,7 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,
-                   storageAccountName, location, sku_name, appInsightsLocation, language, version):
+                   storageAccountName, location, sku_name, appInsightsLocation, language, version):  # pylint:disable=too-many-statements
         """Create WebApp Bot.
 
         :param cmd:

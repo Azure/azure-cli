@@ -8,7 +8,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class AzureRegionMapper:
+class AzureRegionMapper:  # pylint:disable=too-few-public-methods
 
     @staticmethod
     def get_app_insights_location(key):
@@ -47,8 +47,8 @@ class AzureRegionMapper:
         region = region_map.get(key)
 
         if not region:
-            logger.warning('Warning: provided region ("{}") for Application Insights does not exist. Defaulting to '
-                           '"southcentralus"'.format(key))
+            logger.warning('Warning: provided region ("%s") for Application Insights does not exist. Defaulting to '
+                           '"southcentralus"', key)
             region = 'southcentralus'
 
         return region

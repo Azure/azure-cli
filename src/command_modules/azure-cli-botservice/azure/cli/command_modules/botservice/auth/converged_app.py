@@ -5,11 +5,11 @@
 
 import json
 import requests
-from . import adal_authenticator
 from knack.util import CLIError
+from . import adal_authenticator
 
 
-class ConvergedApp:
+class ConvergedApp:  # pylint:disable=too-few-public-methods
 
     app_provision_api_url = 'https://dev.botframework.com/api/botApp/provisionConvergedApp?name={0}'
 
@@ -41,7 +41,7 @@ class ConvergedApp:
                     "pass the application Id and password as parameters for bot creation.")
             # Stub of logged error if verbose is True:
             else:
-                raise CLIError("{0): {1}".format(response.status_code, response.text))
+                raise CLIError("%s: %s", response.status_code, response.text)
 
         response_content = json.loads(response.content.decode('utf-8'))
         msa_app_id = response_content['AppId']

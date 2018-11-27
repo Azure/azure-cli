@@ -13,9 +13,6 @@ from azure.cli.command_modules.botservice.bot.bot_publish_prep import BotPublish
 from azure.cli.command_modules.botservice.bot.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.azure.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
-
-from knack.util import CLIError
-from knack.log import get_logger
 from azure.mgmt.botservice.models import (
     Bot,
     BotProperties,
@@ -23,6 +20,9 @@ from azure.mgmt.botservice.models import (
     ConnectionSettingProperties,
     ConnectionSettingParameter,
     Sku)
+
+from knack.util import CLIError
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -120,8 +120,8 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
-        return BotTemplateDeployer.create_app(cmd, logger, client, resource_group_name, resource_name, description, kind,
-                                              msa_app_id, password, storageAccountName, location, sku_name,
+        return BotTemplateDeployer.create_app(cmd, logger, client, resource_group_name, resource_name, description,
+                                              kind, msa_app_id, password, storageAccountName, location, sku_name,
                                               appInsightsLocation, language, version)
 
 
@@ -329,7 +329,7 @@ def get_service_providers(client, name=None):
     return service_provider_response
 
 
-def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_name, code_dir=None, version='v3'):
+def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_name, code_dir=None, version='v3'):  # pylint:disable=too-many-statements
     """Adds PostDeployScripts folder with necessary scripts to deploy v3 bot to Azure.
 
     This method is directly called via "bot prepare-publish"
@@ -345,7 +345,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     :return:
     """
 
-    # The prepare-publish process for v3 bots and v4 bots differ, so if the user specifies a v4 version, end the command and inform user of az bot publish.
+    # The prepare-publish process for v3 bots and v4 bots differ, so if the user specifies a v4 version, end the command
+    # and inform user of az bot publish.
     if version == 'v4':
         raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish\' to prepare and '
                        'publish a v4 bot.')
@@ -359,8 +360,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
 
     if not code_dir:
         code_dir = os.getcwd()
-        logger.warning('Parameter --code-dir not provided, defaulting to current working directory, {0}. For more '
-                       'information, run \'az bot prepare-publish -h\''.format(code_dir))
+        logger.warning('Parameter --code-dir not provided, defaulting to current working directory, %s. For more '
+                       'information, run \'az bot prepare-publish -h\'', code_dir)
 
     if not os.path.isdir(code_dir):
         raise CLIError('Please supply a valid directory path containing your source code. '
@@ -439,7 +440,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file=None, sdk_version='v3'):
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_name=None, version='v3'):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -449,8 +450,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param resource_group_name:
     :param resource_name:
     :param code_dir:
-    :param proj_file:
-    :param sdk_version:
+    :param proj_name:
+    :param version:
     :return:
     """
     # Get the bot information and ensure it's not only a registration bot.
@@ -475,13 +476,13 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
     # Ensure that the directory contains appropriate post deploy scripts folder
     if 'PostDeployScripts' not in os.listdir(code_dir):
-        if sdk_version == 'v4':
+        if version == 'v4':
 
             logger.info('Detected SDK version v4. Running prepare publish in code directory %s and for project file %s',
-                        code_dir, proj_file)
+                        code_dir, proj_name)
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file)
+            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_name)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                         code_dir)

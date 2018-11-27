@@ -39,6 +39,9 @@ def load_arguments(self, _):
 
     with self.argument_context('bot publish') as c:
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to upload bot code from.')
+        c.argument('proj_name', help='Name of the start up project file name.')
+        c.argument('version', options_list=['-v', '--version'],
+                   help='The Microsoft Bot Builder SDK version by the bot.')
 
     with self.argument_context('bot download') as c:
         c.argument('file_save_path', options_list=['--save-path'], help='The directory to download bot code to.')
