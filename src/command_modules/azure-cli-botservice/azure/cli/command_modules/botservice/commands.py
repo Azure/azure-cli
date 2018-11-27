@@ -56,7 +56,7 @@ def load_command_table(self, _):
         g.custom_command('prepare-publish', 'prepare_publish')
 
     with self.command_group('bot', botServices_commandType) as g:
-        g.command('show', 'get')
+        g.custom_command('show', 'get_bot')
         g.command('delete', 'delete')
 
     # Begin "bot authsetting" command registration

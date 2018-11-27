@@ -192,6 +192,7 @@ class BotTemplateDeployer:
         deploy_result.wait()
 
         logger.debug('ARM template deployment complete. Result %s ', deploy_result)
+        logger.info('Bot creation completed successfully.')
 
         return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
 

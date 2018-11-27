@@ -27,7 +27,7 @@ class BotJsonFormatter:
                 resource_group_name=resource_group_name,
                 resource_name=resource_name
             )
-            # TODO: Valdiate retrieved bot_properties, if still None or incorrect, raise exception
+            # TODO: Validate retrieved bot_properties, if still None or incorrect, raise exception
 
         if not app_password:
             site_name = WebAppOperations.get_bot_site_name(raw_bot_properties.properties.endpoint)

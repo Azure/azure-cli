@@ -14,30 +14,6 @@ import json
 
 class BotTests(ScenarioTest):
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_create_bot_invalid_kind_fails(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
-            'description': 'description1',
-            'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4())
-        })
-
-        try:
-            self.cmd(
-                'az bot create -k invalid -g {rg} -n {botname} -d {description} '
-                '-e {endpoint} --appid {app_id} --tags key1=value1')
-
-            raise AssertionError('should have thrown an error.')
-        except ErrorException as msrest_error:
-            raise msrest_error
-        except AssertionError as assert_error:
-            raise AssertionError('should have thrown an error for an unregistered bot.')
-        except CLIError as error:
-            # We expect a CLIError in this situation
-            pass
-        except Exception as ex:
-            raise ex
 
     @ResourceGroupPreparer(random_name_length=20)
     def registration_bot_create(self, resource_group):
@@ -71,8 +47,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
-            'password': 'eHFFVE494][pskfuiEI31);'
+            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
+            'password': 'bredzfQDQ639=aVPFY88}!@'
         })
 
         # Delete the bot if already exists
@@ -123,8 +99,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
-            'password': 'eHFFVE494][pskfuiEI31);'
+            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
+            'password': 'bredzfQDQ639=aVPFY88}!@'
         })
 
         # Delete the bot if already exists
@@ -165,14 +141,12 @@ class BotTests(ScenarioTest):
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
-    # TODO: Found bug thanks to this test. Bot fails to respond. Re-enabling once bug is fixed
-    '''
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v3_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
-            'password': 'eHFFVE494][pskfuiEI31);'
+            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
+            'password': 'bredzfQDQ639=aVPFY88}!@'
         })
 
         # Delete the bot if already exists
@@ -192,9 +166,7 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-        # Talk to bot
-        self.__talk_to_bot('hi', 'You said hi')
-
+        # We don't talk to the bot in this test because it takes a while for the node app to be responsive
         # Download the bot
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
             self.exists('downloadPath')
@@ -212,19 +184,15 @@ class BotTests(ScenarioTest):
         # clean up the folder
         shutil.rmtree(dir_path)
 
-        # Talk to bot and verify that change is reflected
-        #self.__talk_to_bot('hi', '1: You said "hi"')
-
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
-    '''
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '5ce1a020-7df1-4651-8276-3c2bb96ba6c7',
-            'password': 'eHFFVE494][pskfuiEI31);'
+            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
+            'password': 'bredzfQDQ639=aVPFY88}!@'
         })
 
         # Delete the bot if already exists
@@ -245,7 +213,7 @@ class BotTests(ScenarioTest):
                  })
 
         # Talk to bot
-        self.__talk_to_bot('hi', 'You sent "hi"')
+        self.__talk_to_bot('hi', 'You said "hi"')
 
         # Download the bot source
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
