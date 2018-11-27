@@ -5,19 +5,15 @@
 
 import json
 import os
-import requests
 import shutil
 # TODO: Evalulate the use of requests and urllib3, where urllib3 is a dependency of requests
-import urllib3
-import zipfile
 
 from .auth import converged_app
-from .bot_json_formatter import BotJsonFormatter
-from .bot_publish_helper import BotPublishHelper
-from .bot_template_deployer import BotTemplateDeployer
-from .http_response_validator import HttpResponseValidator
-from .kudu_client import KuduClient
-from .web_app_operations import WebAppOperations
+from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
+from azure.cli.command_modules.botservice.bot.bot_publish_prep import BotPublishPrep
+from azure.cli.command_modules.botservice.bot.bot_template_deployer import BotTemplateDeployer
+from azure.cli.command_modules.botservice.azure.kudu_client import KuduClient
+from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -493,7 +489,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                         code_dir, proj_file)
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishHelper.prepare_publish_v4(logger, code_dir, proj_file)
+            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                          code_dir)
@@ -503,7 +499,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                            '\'az bot prepare-publish -h\'.')
 
     logger.info('Creating upload zip file.')
-    zip_filepath = BotPublishHelper.create_upload_zip(logger, code_dir, include_node_modules=False)
+    zip_filepath = BotPublishPrep.create_upload_zip(logger, code_dir, include_node_modules=False)
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
