@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.10
+++++++
+* `application-gateway waf-config set`: Added `--exclusion` argument to support WAF exclusions.
+
 2.2.9
 +++++
 * `application-gateway`: Added `root-cert` subcommands to handle trusted root certifcates.

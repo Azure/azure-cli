@@ -27,7 +27,8 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages)
+    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
+    WafConfigExclusionAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -276,6 +277,7 @@ def load_arguments(self, _):
         c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)
         c.argument('max_request_body_size', help='Max request body size in KB.', type=int)
         c.argument('request_body_check', arg_type=get_three_state_flag(), help='Allow WAF to check the request body.')
+        c.argument('exclusions', nargs='+', options_list='--exclusion', action=WafConfigExclusionAction)
 
     for item in ['ssl-policy', 'waf-config']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
