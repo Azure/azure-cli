@@ -304,18 +304,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            source_trigger_event = None
-            status = None
-            if commit_trigger_enabled is not None:
-                status = TriggerStatus.disabled.value
-                if commit_trigger_enabled:
-                    status = TriggerStatus.enabled.value
-                    source_trigger_event = [SourceTriggerEvent.commit.value]
-            if pull_request_trigger_enabled is not None:
-                status = TriggerStatus.disabled.value
-                if pull_request_trigger_enabled:
-                    status = TriggerStatus.enabled.value
-                    source_trigger_event = [SourceTriggerEvent.pullrequest.value]
+            trigger_info = _get_trigger_event_list(commit_trigger_enabled, pull_request_trigger_enabled)
+            status = trigger_info[0]
+            source_trigger_event = trigger_info[1]
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -519,3 +510,20 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
+
+
+def _get_trigger_event_list(commit_trigger_enabled=None,
+                            pull_request_trigger_enabled=None):
+    status = None
+    source_trigger_event = None
+    if commit_trigger_enabled is not None:
+        status = TriggerStatus.disabled.value
+        if commit_trigger_enabled:
+            status = TriggerStatus.enabled.value
+            source_trigger_event = [SourceTriggerEvent.commit.value]
+    if pull_request_trigger_enabled is not None:
+        status = TriggerStatus.disabled.value
+        if pull_request_trigger_enabled:
+            status = TriggerStatus.enabled.value
+            source_trigger_event = [SourceTriggerEvent.pullrequest.value]
+    return (status, source_trigger_event)
