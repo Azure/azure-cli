@@ -70,7 +70,6 @@ class KuduClient:
         zip_ref.close()
         os.remove(download_path)
 
-
     def install_node_dependencies(self):
         """Installs Node.js dependencies at `site/wwwroot/` for Node.js bots.
 
@@ -128,9 +127,8 @@ class KuduClient:
             'dir': r'site'
         }
         headers = self.__get_application_json_headers()
-        delete_clirepo_response = requests.post(self.__scm_url + '/api/command',
-                                                data=json.dumps(payload),
-                                                headers=headers)
+        requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+
         # Recreate the clirepo/ folder, otherwise KUDU calls that reference the site/clirepo/ folder will fail.
         response = requests.put(self.__scm_url + '/api/vfs/site/clirepo/', headers=headers)
         HttpResponseValidator.check_response_status(response, 201)

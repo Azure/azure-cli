@@ -14,7 +14,6 @@ except ImportError:
     # If urllib.parse was not imported, use Python 2 module urlparse
     from urlparse import urlsplit  # pylint: disable=import-error
 
-
 class WebAppOperations:
     @staticmethod
     def get_bot_site_name(endpoint):
@@ -23,11 +22,9 @@ class WebAppOperations:
 
     @staticmethod
     def get_app_settings(cmd, resource_group_name, name, slot=None):
-        result = WebAppOperations.__generic_site_operation(cmd.cli_ctx,
-                                                           resource_group_name,
-                                                           name,
-                                                          'list_application_settings',
-                                                           slot)
+        result = WebAppOperations.__generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                           'list_application_settings', slot)
+
         client = WebAppOperations.__web_client_factory(cmd.cli_ctx)
         slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name,
                                                                                name).app_setting_names
@@ -73,5 +70,4 @@ class WebAppOperations:
                                                               name, extra_parameter))
 
         return (operation(resource_group_name, name, slot)
-                if extra_parameter is None else operation(resource_group_name,
-                                                          name, extra_parameter, slot))
+                if extra_parameter is None else operation(resource_group_name, name, extra_parameter, slot))

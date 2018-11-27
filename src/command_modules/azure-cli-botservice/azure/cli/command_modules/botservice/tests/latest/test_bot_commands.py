@@ -14,7 +14,6 @@ import json
 
 class BotTests(ScenarioTest):
 
-
     @ResourceGroupPreparer(random_name_length=20)
     def registration_bot_create(self, resource_group):
         self.kwargs.update({
@@ -24,13 +23,15 @@ class BotTests(ScenarioTest):
             'app_id': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1', checks=[
-            self.check('name', '{botname}'),
-            self.check('properties.description', '{description}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('location', 'global'),
-            self.check('tags.key1', 'value1')
-        ])
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
 
         self.cmd('az bot show -g {rg} -n {botname}', checks=[
             self.check('name', '{botname}')
@@ -59,14 +60,14 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} '
-                 '--location westus --insights-location "West US 2"', checks=[
-            self.check('appId', '{app_id}'),
-            self.check('appPassword', '{password}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('id', '{botname}'),
-            self.check('type', 'abs')
-        ])
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
+                 '--insights-location "West US 2"', checks=[
+                    self.check('appId', '{app_id}'),
+                    self.check('appPassword', '{password}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('id', '{botname}'),
+                    self.check('type', 'abs')
+                    ])
 
         # Talk to bot
         self.__talk_to_bot('hi', 'You said hi')
@@ -85,15 +86,12 @@ class BotTests(ScenarioTest):
         self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
             self.check('active', True)
         ])
-        # clean up the folder
-        shutil.rmtree(dir_path)
 
-        # Talk to bot and verify that change is reflected
-        #self.__talk_to_bot('hi', '1: You said "hi"')
+        # Clean up the folder
+        shutil.rmtree(dir_path)
 
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
-
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_webapp_bot(self, resource_group):
@@ -107,8 +105,9 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
         dir_path = os.path.join('.', self.kwargs.get('botname'))
+
         if os.path.exists(dir_path):
-            # clean up the folder
+            # Clean up the folder
             shutil.rmtree(dir_path)
 
         self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4', checks=[
@@ -135,9 +134,6 @@ class BotTests(ScenarioTest):
         # Clean up the folder
         shutil.rmtree(dir_path)
 
-        # Talk to bot again to check everything went well
-        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
-
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
@@ -154,17 +150,17 @@ class BotTests(ScenarioTest):
 
         dir_path = os.path.join('.', self.kwargs.get('botname'))
         if os.path.exists(dir_path):
-            # clean up the folder
+            # Clean up the folder
             shutil.rmtree(dir_path)
 
         self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} '
                  '--location westus --insights-location "West US 2" --lang Node', checks=[
-            self.check('appId', '{app_id}'),
-            self.check('appPassword', '{password}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('id', '{botname}'),
-            self.check('type', 'abs')
-        ])
+                    self.check('appId', '{app_id}'),
+                    self.check('appPassword', '{password}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('id', '{botname}'),
+                    self.check('type', 'abs')
+                    ])
 
         # We don't talk to the bot in this test because it takes a while for the node app to be responsive
         # Download the bot
@@ -228,9 +224,6 @@ class BotTests(ScenarioTest):
         # Clean up the folder
         shutil.rmtree(dir_path)
 
-        # Talk to bot again to check everything went well
-        #self.__talk_to_bot('hi', 'Turn 1: You sent \'hi\'\n')
-
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
@@ -243,15 +236,14 @@ class BotTests(ScenarioTest):
             'app_id': str(uuid.uuid4())
         })
 
-        self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1',
-            checks=[
-                self.check('name', '{botname}'),
-                self.check('properties.description', '{description}'),
-                self.check('resourceGroup', '{rg}'),
-                self.check('location', 'global'),
-                self.check('tags.key1', 'value1')
-            ])
+        self.cmd('az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} '
+                 '--tags key1=value1', checks=[
+                    self.check('name', '{botname}'),
+                    self.check('properties.description', '{description}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('location', 'global'),
+                    self.check('tags.key1', 'value1')
+                    ])
 
         self.cmd('az bot show -g {rg} -n {botname}', checks=[
             self.check('name', '{botname}')
@@ -261,10 +253,10 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        except CLIError as cli_error:
+        except CLIError:
             self.cmd('az bot delete -g {rg} -n {botname}')
             pass
-        except AssertionError as assert_error:
+        except AssertionError:
             self.cmd('az bot delete -g {rg} -n {botname}')
             raise AssertionError('should have thrown an error for registration-type bot.')
         except Exception as error:
@@ -281,10 +273,10 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        except ErrorException as msrest_error:
+        except ErrorException:
             # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
             pass
-        except AssertionError as assert_error:
+        except AssertionError:
             raise AssertionError('should have thrown an error for an unregistered bot.')
         except Exception as error:
             raise error
@@ -303,7 +295,7 @@ class BotTests(ScenarioTest):
 
         dir_path = os.path.join('.', self.kwargs.get('botname'))
         if os.path.exists(dir_path):
-            # clean up the folder
+            # Clean up the folder
             shutil.rmtree(dir_path)
 
         try:
@@ -311,8 +303,9 @@ class BotTests(ScenarioTest):
             raise Exception("'az bot prepare-publish' should have failed with a --version argument of 'v4'")
         except CLIError as cli_error:
             self.cmd('az bot delete -g {rg} -n {botname}')
-            assert cli_error.__str__() == "'az bot prepare-publish' is only for v3 bots. Please use 'az bot publish' to " \
-                                      "prepare and publish a v4 bot."
+            assert cli_error.__str__() == "'az bot prepare-publish' is only for v3 bots. Please use 'az bot publish' " \
+                                          "to prepare and publish a v4 bot."
+
         except Exception as error:
             self.cmd('az bot delete -g {rg} -n {botname}')
             raise error
@@ -398,7 +391,6 @@ class BotTests(ScenarioTest):
             if response.status_code != 200:
                 self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
 
-            if expected_text != None:
-                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text
-                                + expected_text)
-
+            if expected_text:
+                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
+                                expected_text)

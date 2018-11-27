@@ -6,7 +6,6 @@
 import json
 import os
 import shutil
-# TODO: Evalulate the use of requests and urllib3, where urllib3 is a dependency of requests
 
 from .auth import converged_app
 from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
@@ -26,6 +25,7 @@ from azure.mgmt.botservice.models import (
     Sku)
 
 logger = get_logger(__name__)
+
 
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
@@ -74,8 +74,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         raise CLIError('Invalid Bot Parameter : kind. Valid kinds are \'registration\' for registration bots, '
                        '\'webapp\' for webapp bots and \'function\' for function bots. Run \'az bot create -h\' '
                        'for more information.')
-
-    # TODO validate common parameters
 
     # If a Microsoft application id was not provided, provision one for the user
     if not msa_app_id:
@@ -137,6 +135,7 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
                                                 raw_bot_properties=raw_bot_properties)
 
     return raw_bot_properties
+
 
 def create_connection(client, resource_group_name, resource_name, connection_name, client_id,
                       client_secret, scopes, service_provider_name, parameters=None):
@@ -268,8 +267,8 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
         # If javascript, write .env file content to .env file
         if os.path.exists(os.path.join(folder_path, 'package.json')):
 
-            logger.info('Detected language as javascript. Package.json present at %s. '
-                         'Creating .env file in that folder.', folder_path)
+            logger.info('Detected language as javascript. Package.json present at %s. Creating .env file in that '
+                        'folder.', folder_path)
 
             with open(os.path.join(folder_path, '.env'), 'w') as f:
                 for key, value in bot_env.items():
@@ -485,11 +484,11 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
             BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
-                         code_dir)
+                        code_dir)
 
             raise CLIError('Publish directory provided is uses Bot Builder SDK V3, and as a legacy bot needs to be '
-                           'prepared for deployment. Please run prepare-publish. For more information, run '
-                           '\'az bot prepare-publish -h\'.')
+                           'prepared for deployment. Please run prepare-publish. For more information, run \'az bot '
+                           'prepare-publish -h\'.')
 
     logger.info('Creating upload zip file.')
     zip_filepath = BotPublishPrep.create_upload_zip(logger, code_dir, include_node_modules=False)
