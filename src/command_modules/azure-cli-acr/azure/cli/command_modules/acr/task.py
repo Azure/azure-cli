@@ -520,6 +520,7 @@ def _get_trigger_event_list(source_triggers=None,
     status = None
     source_trigger_event = None
     existing_event = source_triggers[0].source_trigger_events if source_triggers else None
+    # Only allow status disabled if update event is the same as existing trigger event
     if commit_trigger_enabled is not None:
         if commit_trigger_enabled:
             status = TriggerStatus.enabled.value
