@@ -33,7 +33,7 @@ DEPENDENCIES = [
     'azure-mgmt-authorization==0.50.0',
     'azure-mgmt-compute==4.3.1',
     'azure-mgmt-containerservice==4.2.2',
-    'azure-graphrbac==0.52.0',
+    'azure-graphrbac==0.53.0',
     'azure-cli-core',
     'paramiko>=2.0.8',
     'pyyaml>=3.13',
