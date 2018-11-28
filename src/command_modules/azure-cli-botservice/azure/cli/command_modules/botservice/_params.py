@@ -13,6 +13,8 @@ from azure.cli.core.commands.parameters import (
 
 name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id_part='Name')
 
+supported_languages = ['Csharp', 'Node']
+
 
 # pylint: disable=line-too-long,too-many-statements
 def load_arguments(self, _):
@@ -30,13 +32,16 @@ def load_arguments(self, _):
         c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot.')
         c.argument('storageAccountName', options_list=['-s', '--storage'], help='Storage account name to be used with the bot. If not provided, a new account will be created.', arg_group='Web/Function bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(['Csharp', 'Node']), arg_group='Web/Function bot Specific')
+        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(supported_languages), arg_group='Web/Function bot Specific')
         c.argument('appInsightsLocation', help='The location for the app insights to be used with the bot.', options_list=['--insights-location'], arg_group='Web/Function bot Specific',
                    arg_type=get_enum_type(['South Central US', 'East US', 'West US 2', 'North Europe', 'West Europe', 'Southeast Asia']))
         c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')
 
     with self.argument_context('bot publish') as c:
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to upload bot code from.')
+        c.argument('proj_name', help='Name of the start up project file name.')
+        c.argument('version', options_list=['-v', '--version'],
+                   help='The Microsoft Bot Builder SDK version by the bot.')
 
     with self.argument_context('bot download') as c:
         c.argument('file_save_path', options_list=['--save-path'], help='The directory to download bot code to.')
@@ -48,6 +53,9 @@ def load_arguments(self, _):
         c.argument('proj_name', help='Name of the start up project file name. Required only for C#.')
         c.argument('sln_name', help='Name of the start up solution file name. Required only for C#.')
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to download deployment scripts to.')
+        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used '
+                                                                     'in the bot template that will be created.',
+                   arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')
 
     with self.argument_context('bot facebook create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state')
