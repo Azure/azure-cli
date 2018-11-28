@@ -7,6 +7,7 @@ from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     ImportImageParameters,
+    ImportSourceCredentials,
     ImportSource,
     ImportMode
 )
@@ -31,6 +32,8 @@ def acr_import(cmd,
                registry_name,
                source,
                source_registry=None,
+               source_registry_username=None,
+               source_registry_password=None,
                target_tags=None,
                resource_group_name=None,
                repository=None,
@@ -76,7 +79,8 @@ def acr_import(cmd,
         except NoTTYException:
             raise CLIError(NO_TTY_ERROR)
 
-    image_source = ImportSource(resource_id=source_registry, source_image=source_image)
+    source_credentials = ImportSourceCredentials(username=source_registry_username, password=source_registry_password)
+    image_source = ImportSource(resource_id=source_registry, credentials=source_credentials, source_image=source_image)
 
     if not target_tags and not repository:
         target_tags = [source_image]
