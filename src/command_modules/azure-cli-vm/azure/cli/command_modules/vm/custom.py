@@ -328,7 +328,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
-                              caching=os_disk_caching if os_disk_caching else 'None',
+                              caching=os_disk_caching,
                               snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
                               managed_disk=SubResource(id=os_disk) if os_disk else None,
                               blob_uri=os_blob_uri,
