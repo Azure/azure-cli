@@ -15,8 +15,8 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.botservice._params import supported_languages
-from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
-from azure.cli.command_modules.botservice.azure import azure_region_mapper
+from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
+from azure.cli.command_modules.botservice import azure_region_mapper
 
 
 class BotTemplateDeployer:

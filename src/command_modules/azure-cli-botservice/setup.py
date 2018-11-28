@@ -35,11 +35,8 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal',
     'azure-cli-core',
     'azure-mgmt-web==0.40.0',
-    'azure-mgmt-botservice',
-    'requests'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -62,12 +59,8 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.botservice',
-        'azure.cli.command_modules.botservice.auth',
-        'azure.cli.command_modules.botservice.azure',
-        'azure.cli.command_modules.botservice.bot',
-        'azure.cli.command_modules.botservice.bot.templates'
     ],
-    package_data={'azure.cli.command_modules.botservice.bot.templates': ['*.json']},
+    package_data={'azure.cli.command_modules.botservice': ['*.json']},
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass,
     include_package_data=True

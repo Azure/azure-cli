@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader
+from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
 from azure.cli.command_modules.botservice._help import helps  # pylint: disable=unused-import
 from azure.cli.command_modules.botservice._client_factory import get_botservice_management_client
 
@@ -11,10 +11,10 @@ from azure.cli.command_modules.botservice._client_factory import get_botservice_
 class BotServiceCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core import ModExtensionSuppress
+
         from azure.cli.core.commands import CliCommandType
         custom_type = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.botservice.bot_operations#{}',
+            operations_tmpl='azure.cli.command_modules.botservice.custom#{}',
             client_factory=get_botservice_management_client)
         super(BotServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=custom_type,

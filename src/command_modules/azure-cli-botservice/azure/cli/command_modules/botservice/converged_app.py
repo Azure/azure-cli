@@ -6,7 +6,7 @@
 import json
 import requests
 from knack.util import CLIError
-from . import adal_authenticator
+from azure.cli.command_modules.botservice import adal_authenticator
 
 
 class ConvergedApp:  # pylint:disable=too-few-public-methods

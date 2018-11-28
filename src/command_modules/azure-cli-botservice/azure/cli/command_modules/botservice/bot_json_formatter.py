@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core._profile import Profile
-from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
+from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 
 
 class BotJsonFormatter:  # pylint:disable=too-few-public-methods

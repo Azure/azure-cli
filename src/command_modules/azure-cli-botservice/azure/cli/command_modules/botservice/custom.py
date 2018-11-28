@@ -7,12 +7,12 @@ import json
 import os
 import shutil
 
-from azure.cli.command_modules.botservice.auth.converged_app import ConvergedApp
-from azure.cli.command_modules.botservice.bot.bot_json_formatter import BotJsonFormatter
-from azure.cli.command_modules.botservice.bot.bot_publish_prep import BotPublishPrep
-from azure.cli.command_modules.botservice.bot.bot_template_deployer import BotTemplateDeployer
-from azure.cli.command_modules.botservice.azure.kudu_client import KuduClient
-from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
+from azure.cli.command_modules.botservice.converged_app import ConvergedApp
+from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
+from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
+from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
+from azure.cli.command_modules.botservice.kudu_client import KuduClient
+from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 from azure.mgmt.botservice.models import (
     Bot,
     BotProperties,

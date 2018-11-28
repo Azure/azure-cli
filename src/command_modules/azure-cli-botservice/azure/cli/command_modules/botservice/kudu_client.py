@@ -12,7 +12,7 @@ import urllib3
 
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
-from azure.cli.command_modules.botservice.azure.web_app_operations import WebAppOperations
+from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 
 
 class KuduClient:  # pylint:disable=too-many-instance-attributes
