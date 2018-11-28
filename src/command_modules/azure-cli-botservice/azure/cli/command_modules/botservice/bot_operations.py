@@ -478,7 +478,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if version == 'v4':
 
-            logger.info('Detected SDK version v4. Running prepare publish in code directory %s and for project file %s',
+            logger.info('Detected SDK version v4. Running prepare publish in code directory %s and for project file %s',  # pylint:disable=logging-too-few-args
                         (code_dir, proj_name))
 
             # Automatically run prepare-publish in case of v4.

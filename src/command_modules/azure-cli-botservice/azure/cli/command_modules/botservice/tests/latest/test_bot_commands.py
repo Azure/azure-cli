@@ -122,8 +122,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
-            'password': 'bredzfQDQ639=aVPFY88}!@'
+            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
+            'password': 'jagoK4348(@jyvJVEBBX6?#'
         })
 
         # Delete the bot if already exists
@@ -170,8 +170,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
-            'password': 'bredzfQDQ639=aVPFY88}!@'
+            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
+            'password': 'jagoK4348(@jyvJVEBBX6?#'
         })
 
         # Delete the bot if already exists
@@ -216,8 +216,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
-            'password': 'bredzfQDQ639=aVPFY88}!@'
+            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
+            'password': 'jagoK4348(@jyvJVEBBX6?#'
         })
 
         # Delete the bot if already exists
@@ -264,8 +264,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
-            'password': 'bredzfQDQ639=aVPFY88}!@'
+            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
+            'password': 'jagoK4348(@jyvJVEBBX6?#'
         })
 
         # Delete the bot if already exists
@@ -284,9 +284,6 @@ class BotTests(ScenarioTest):
                      self.check('id', '{botname}'),
                      self.check('type', 'abs')
                  })
-
-        # Talk to bot
-        self.__talk_to_bot('hi', 'You said "hi"')
 
         # Download the bot source
         self.cmd('az bot download -g {rg} -n {botname}', checks=[
@@ -393,8 +390,8 @@ class BotTests(ScenarioTest):
     def test_prepare_publish_should_raise_cli_error_for_v4_bots(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '0e21672d-8ff4-4697-a588-9d2e7371b966',
-            'password': 'bredzfQDQ639=aVPFY88}!@',
+            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
+            'password': 'jagoK4348(@jyvJVEBBX6?#',
             'sln_name': 'EchoBotWithCounter.sln',
             'proj_name': 'EchoBotWithCounter.csproj',
         })
