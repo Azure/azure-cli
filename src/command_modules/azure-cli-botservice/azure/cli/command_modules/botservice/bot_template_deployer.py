@@ -177,7 +177,7 @@ class BotTemplateDeployer:
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
-        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/templates/'
+        dir_path = os.path.dirname(os.path.realpath(__file__))
 
         logger.debug('ARM template creation complete. Deploying ARM template. ')
         deploy_result = BotTemplateDeployer.deploy_arm_template(
