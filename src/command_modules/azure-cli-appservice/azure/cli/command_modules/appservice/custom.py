@@ -43,8 +43,8 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           check_resource_group_exists, check_resource_group_supports_os,
-                           check_if_asp_exists, check_app_exists, get_lang_from_content, web_client_factory)
+                           should_create_new_rg, set_location, check_if_asp_exists, check_app_exists,
+                           get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
 logger = get_logger(__name__)
@@ -1967,7 +1967,7 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     import time
-    total_trials = (int(timeout) // 30) if timeout else 300
+    total_trials = (int(timeout) // 2) if timeout else 450
     for _num_trials in range(total_trials):
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
@@ -1981,8 +1981,8 @@ def _check_zip_deployment_status(deployment_status_url, authorization, timeout=N
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
-            beforing launching the app""", deployment_status_url)
+        raise ValueError("""Deployment is taking longer than expected. Please verify
+                            status at '%s' beforing launching the app""", deployment_status_url)
     return res_dict
 
 
@@ -2042,20 +2042,21 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):
+def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # pylint: disable=too-many-statements
     import os
     client = web_client_factory(cmd.cli_ctx)
     # the code to deploy is expected to be the current directory the command is running from
     src_dir = os.getcwd()
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True
-    create_new_rg = True
-    create_new_asp = True
-    set_build_appSetting = False
+    _create_new_rg = True
+    _create_new_asp = True
+    _create_new_app = True
+    _set_build_appSetting = False
 
     # determine the details for app to be created from src contents
     lang_details = get_lang_from_content(src_dir)
-    # we support E2E create and deploy for Node & dotnetcore, any other stack, set defaults for os & runtime
+    # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
     # and skip deployment
     if lang_details['language'] is None:
         do_deployment = False
@@ -2081,38 +2082,15 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):
             version_used_create != "-" else version_used_create
 
     full_sku = get_sku_name(sku)
-
-    if location is None:
-        locs = client.list_geo_regions(sku, True)
-        available_locs = []
-        for loc in locs:
-            available_locs.append(loc.name)
-        location = available_locs[0]
-    else:
-        location = location
-    # Remove spaces from the location string, incase the GeoRegion string is used
-    loc_name = location.replace(" ", "").lower()
-
+    loc_name = set_location(cmd, sku, location)
     is_linux = True if os_val == 'Linux' else False
-
     asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
     rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
-
-    str_no_contents_warn = ""
-    if not do_deployment:
-        str_no_contents_warn = "[Empty directory, no deployment will be triggered]"
-
     # Resource group: check if default RG is set
     default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
+    _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
 
-    if default_rg and check_resource_group_exists(cmd, default_rg) and check_resource_group_supports_os(cmd, default_rg, is_linux):
-        create_new_rg = False
-    elif check_resource_group_exists(cmd, rg_name) and check_resource_group_supports_os(cmd, rg_name, is_linux):
-        create_new_rg = False
-    else:
-        create_new_rg = True
-
-    src_path = "{} {}".format(src_dir.replace("\\", "\\\\"), str_no_contents_warn)
+    src_path = "{}".format(src_dir.replace("\\", "\\\\"))
     rg_str = "{}".format(rg_name)
     dry_run_str = r""" {
             "name" : "%s",
@@ -2135,69 +2113,54 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):
         return create_json
 
     # create RG if the RG doesn't already exist
-    if create_new_rg:
+    if _create_new_rg:
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, location)
         logger.warning("Resource group creation complete")
+        _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-
-    # create asp ], if are creating a new RG we can skip the checks for if asp exists
-    if create_new_rg:
+        _create_new_asp = check_if_asp_exists(cmd, rg_name, asp, location)
+    # create new ASP if an existing one cannot be used
+    if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
         sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
         plan_def = AppServicePlan(location=loc_name, app_service_plan_name=asp,
                                   sku=sku_def, reserved=(is_linux or None))
         client.app_service_plans.create_or_update(rg_name, asp, plan_def)
         logger.warning("App service plan creation complete")
-        create_new_asp = True
-
-    elif not check_if_asp_exists(cmd, rg_name, asp, location):
-        logger.warning("Creating App service plan '%s' ...", asp)
-        sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
-        plan_def = AppServicePlan(location=loc_name, app_service_plan_name=asp,
-                                  sku=sku_def, reserved=(is_linux or None))
-        client.app_service_plans.create_or_update(rg_name, asp, plan_def)
-        create_new_asp = True
-        logger.warning("App service plan creation complete")
+        _create_new_app = True
     else:
         logger.warning("App service plan '%s' already exists.", asp)
-        create_new_asp = False
-
-    # create the app, skip checks for if app exists if a New RG or New ASP is created
-    if create_new_rg or create_new_asp:
+        _create_new_asp = False
+        _create_new_app = check_app_exists(cmd, rg_name, name)
+    # create the app
+    if _create_new_app:
         logger.warning("Creating app '%s' ....", name)
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
         logger.warning("Webapp creation complete")
-        set_build_appSetting = True
-    elif not check_app_exists(cmd, rg_name, name):
-        logger.warning("Creating app '%s' ....", name)
-        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
-        logger.warning("Webapp creation complete")
-        set_build_appSetting = True
+        _set_build_appSetting = True
     else:
         logger.warning("App '%s' already exists", name)
         if do_deployment:
             # setting the appsettings causes a app restart so we avoid if not needed
-            set_build_appSetting = False
             _app_settings = get_app_settings(cmd, rg_name, name)
             if all(not d for d in _app_settings):
-                set_build_appSetting = True
+                _set_build_appSetting = True
             elif '"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true"' not in json.dumps(_app_settings[0]):
-                set_build_appSetting = True
+                _set_build_appSetting = True
             else:
-                set_build_appSetting = False
+                _set_build_appSetting = False
 
     # update create_json to include the app_url
     url = _get_url(cmd, rg_name, name)
 
-    if do_deployment:
-        if not is_skip_build and set_build_appSetting:
-            # setting to build after deployment
-            logger.warning("Updating app settings to enable build after deployment")
-            update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
-            # work around until the timeout limits issue for linux is investigated & fixed
-            # wakeup kudu, by making an SCM call
+    if do_deployment and not is_skip_build and _set_build_appSetting:
+        # setting to build after deployment
+        logger.warning("Updating app settings to enable build after deployment")
+        update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
+        # work around until the timeout limits issue for linux is investigated & fixed
+        # wakeup kudu, by making an SCM call
         import time
         time.sleep(5)
         _ping_scm_site(cmd, rg_name, name)
@@ -2214,9 +2177,6 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):
             os.remove(zip_file_path)
         except OSError:
             pass
-    else:
-        logger.warning('No known package (Node, ASP.NET, .NETCORE, or Static Html) '
-                       'found skipping zip and deploy process')
     create_json.update({'app_url': url})
     logger.warning("All done.")
     return create_json

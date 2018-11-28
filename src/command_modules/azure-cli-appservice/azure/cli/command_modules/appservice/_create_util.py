@@ -8,19 +8,10 @@ import os
 import zipfile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._constants import (
-    NETCORE_VERSION_DEFAULT,
-    NETCORE_VERSIONS,
-    NODE_VERSION_DEFAULT,
-    NODE_VERSIONS,
-    NETCORE_RUNTIME_NAME,
-    NODE_RUNTIME_NAME,
-    DOTNET_RUNTIME_NAME,
-    DOTNET_VERSION_DEFAULT,
-    DOTNET_VERSIONS,
-    STATIC_RUNTIME_NAME,
-    PYTHON_RUNTIME_NAME,
-    PYTHON_VERSION_DEFAULT)
+from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
+                         NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
+                         DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT)
 
 
 def _resource_client_factory(cli_ctx, **_):
@@ -86,12 +77,12 @@ def create_resource_group(cmd, rg_name, location):
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 
 
-def check_resource_group_exists(cmd, rg_name):
+def _check_resource_group_exists(cmd, rg_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.resource_groups.check_existence(rg_name)
 
 
-def check_resource_group_supports_os(cmd, rg_name, is_linux):
+def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     # get all appservice plans from RG
     client = web_client_factory(cmd.cli_ctx)
     plans = list(client.app_service_plans.list_by_resource_group(rg_name))
@@ -108,8 +99,10 @@ def check_if_asp_exists(cmd, rg_name, asp_name, location):
     # get all appservice plans from RG
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
-        if item.name.lower() == asp_name.lower() and (item.location.replace(" ", "").lower() == location or item.location == location):
-            return True
+        if (item.name.lower() == asp_name.lower() and
+           (item.location.replace(" ", "").lower() == location or
+            item.location == location)):
+                return True
     return False
 
 
@@ -250,3 +243,26 @@ def find_key_in_json(json_data, key):
         elif isinstance(v, dict):
             for id_val in find_key_in_json(v, key):
                 yield id_val
+
+
+def set_location(cmd, sku, location):
+    client = web_client_factory(cmd.cli_ctx)
+    if location is None:
+        locs = client.list_geo_regions(sku, True)
+        available_locs = []
+        for loc in locs:
+            available_locs.append(loc.name)
+        location = available_locs[0]
+    else:
+        location = location
+    return location.replace(" ", "").lower()
+
+
+def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
+    if (default_rg and _check_resource_group_exists(cmd, default_rg) and
+        _check_resource_group_supports_os(cmd, default_rg, is_linux)):
+            return False
+    elif (_check_resource_group_exists(cmd, rg_name) and
+          _check_resource_group_supports_os(cmd, rg_name, is_linux)):
+            return False
+    return True
