@@ -54,7 +54,7 @@ def load_arguments(self, _):
         c.argument('sln_name', help='Name of the start up solution file name. Required only for C#.')
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to download deployment scripts to.')
         c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used '
-                                                                     'to create the bot',
+                                                                     'in the bot template that will be created.',
                    arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')
 
     with self.argument_context('bot facebook create') as c:
