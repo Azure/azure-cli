@@ -37,6 +37,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-web==0.40.0',
+    'azure-mgmt-botservice'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
