@@ -39,7 +39,7 @@ class DirectLineClient(object):
             bot_response = requests.post(url, headers=self._headers, json=json_payload)
             current_retry += 1
             if bot_response.status_code == 200:
-                sucess = True
+                success = True
 
         return bot_response
 
@@ -473,4 +473,3 @@ class BotTests(ScenarioTest):
             if expected_text:
                 self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
-
