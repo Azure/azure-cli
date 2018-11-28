@@ -618,17 +618,41 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
 
-        self.kwargs['ip'] = 'pip1'
-        self.cmd('network application-gateway create -g {rg} -n ag1 --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_Medium', checks=[
-            self.check("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{ip}')", True),
-            self.check('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1'
+        })
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_Medium --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("frontendIpConfigurations[0].publicIpAddress.contains(id, '{ip}')", True),
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
+        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
             self.check('enabled', True),
             self.check('firewallMode', 'Prevention'),
             self.check('length(disabledRuleGroups)', 2),
             self.check('length(disabledRuleGroups[1].rules)', 2)
+        ])
+
+
+class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
+    def test_network_app_gateway_waf_v2_config(self, resource_group):
+
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def --no-wait')
+        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
+            self.check('enabled', True),
+            self.check('length(exclusions)', 2)
         ])
 
 

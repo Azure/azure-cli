@@ -865,6 +865,12 @@ helps['network application-gateway waf-config set'] = """
           short-summary: Space-separated list of rule IDs to disable.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
+        - name: --exclusion
+          short-summary: Add an exclusion expression to the WAF check.
+          long-summary: |
+            Usage:   --exclusion VARIABLE OPERATOR VALUE
+
+            Multiple exclusions can be specified by using more than one `--exclusion` argument.
     examples:
         - name: Configure WAF on an application gateway in detection mode with default values
           text: |
@@ -874,7 +880,14 @@ helps['network application-gateway waf-config set'] = """
           text: |
             az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
                 --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-                --disabled-rules 920130 920140 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI
+                --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
+                --disabled-rules 920130 920140
+        - name: Configure WAF on an application gateway with exclusions.
+          text: |
+            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+                --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
+                --exclusion "RequestHeaderNames StartsWith x-header" \\
+                --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
