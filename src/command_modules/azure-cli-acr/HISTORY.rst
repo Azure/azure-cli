@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.11
+++++++
+* Add VNet support.
+
 2.1.10
 ++++++
 * Minor fixes.
