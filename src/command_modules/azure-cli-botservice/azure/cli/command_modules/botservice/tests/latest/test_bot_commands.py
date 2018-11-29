@@ -122,8 +122,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
-            'password': 'jagoK4348(@jyvJVEBBX6?#'
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
@@ -170,8 +170,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
-            'password': 'jagoK4348(@jyvJVEBBX6?#'
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
@@ -216,8 +216,8 @@ class BotTests(ScenarioTest):
     def test_create_v3_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
-            'password': 'jagoK4348(@jyvJVEBBX6?#'
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
@@ -264,8 +264,8 @@ class BotTests(ScenarioTest):
     def test_create_v4_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': '09434297-902b-407a-ac21-5045ae5b4399',
-            'password': 'jagoK4348(@jyvJVEBBX6?#'
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
@@ -390,8 +390,12 @@ class BotTests(ScenarioTest):
         """Enables direct line channel, sends a message to the bot,
         and if expected_text is provided, verify that the bot answer matches it."""
 
+        # This setting is for local testing, specifying an app id and password. Set it to true to test directline.
+        # For automation, we set it to false by default to avoid handling keys for now.
+        use_directline = False
+
         # It is not possible to talk to the bot in playback mode.
-        if self.is_live:
+        if self.is_live and use_directline:
             result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
                 self.check('properties.properties.sites[0].siteName', 'Default Site')
             ])
