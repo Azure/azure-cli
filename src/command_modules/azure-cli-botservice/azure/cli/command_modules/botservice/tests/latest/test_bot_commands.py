@@ -138,8 +138,6 @@ class BotTests(ScenarioTest):
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
             '--insights-location "West US 2"',
             checks=[
-                self.check('appId', '{app_id}'),
-                self.check('appPassword', '{password}'),
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
                 self.check('type', 'abs')
@@ -186,8 +184,6 @@ class BotTests(ScenarioTest):
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
             checks=[
-                self.check('appId', '{app_id}'),
-                self.check('appPassword', '{password}'),
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
                 self.check('type', 'abs')
@@ -232,8 +228,6 @@ class BotTests(ScenarioTest):
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
             '--insights-location "West US 2" --lang Node',
             checks=[
-                self.check('appId', '{app_id}'),
-                self.check('appPassword', '{password}'),
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
                 self.check('type', 'abs')
@@ -278,8 +272,6 @@ class BotTests(ScenarioTest):
 
         self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
                  checks={
-                     self.check('appId', '{app_id}'),
-                     self.check('appPassword', '{password}'),
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
                      self.check('type', 'abs')
@@ -417,5 +409,5 @@ class BotTests(ScenarioTest):
                 self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
 
             if expected_text:
-                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
+                self.assertTrue(expected_text in text, "Bot response does not match expec\tation: " + text +
                                 expected_text)
