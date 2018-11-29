@@ -29,12 +29,14 @@ class ChannelTests(ScenarioTest):
     def test_webchat_channel(self, resource_group):
         self.create_bot(resource_group)
 
+        # We verify that webchat exists for the bot.
+        # We cannot make guarantees on the number of webchat sites, but yes on it being enabled.
         self.cmd('az bot webchat show -g {rg} -n {botname}', checks=[
-            self.check('properties.properties.sites.length(@)', 0),
+            self.check('properties.channelName', 'WebChatChannel'),
         ])
 
         self.cmd('az bot webchat show -g {rg} -n {botname} --with-secrets', checks=[
-            self.check('properties.properties.sites.length(@)', 0),
+            self.check('properties.channelName', 'WebChatChannel'),
         ])
 
     @ResourceGroupPreparer(random_name_length=20)
@@ -49,13 +51,13 @@ class ChannelTests(ScenarioTest):
         self.cmd('az bot skype show -g {rg} -n {botname}', checks=[
             self.check('properties.properties.enableMessaging', True),
             self.check('properties.properties.enableMediaCards', True),
-            self.check('properties.properties.enableVideo', True)
+            self.check('properties.properties.enableVideo', False)
         ])
 
         self.cmd('az bot skype show -g {rg} -n {botname} --with-secrets', checks=[
             self.check('properties.properties.enableMessaging', True),
             self.check('properties.properties.enableMediaCards', True),
-            self.check('properties.properties.enableVideo', True)
+            self.check('properties.properties.enableVideo', False)
         ])
 
         self.cmd('az bot skype delete -g {rg} -n {botname}')

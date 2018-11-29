@@ -7,6 +7,10 @@ Release History
 * BREAKING CHANGE: updated keyvault create command to fail by default if the vault alread exists.  The previous behavior can still be achieved by adding the --force parameter.  See issue https://github.com/Azure/azure-cli/issues/7608.
 * bug fix: Gixing keyvault recover / purge commands.  See issue https://github.com/Azure/azure-cli/issues/7048.
 
+2.2.8
++++++
+* Minor fixes
+
 2.2.7
 +++++
 * bug fix: do not drop legit exceptions 

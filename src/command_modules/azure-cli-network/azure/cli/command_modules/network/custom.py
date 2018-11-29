@@ -783,7 +783,8 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
                                  disabled_rules=None, no_wait=False,
-                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None):
+                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None,
+                                 exclusions=None):
     ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
         'ApplicationGatewayWebApplicationFirewallConfiguration')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
@@ -824,6 +825,7 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
         ag.web_application_firewall_configuration.request_body_check = request_body_check
         ag.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
         ag.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
+        ag.web_application_firewall_configuration.exclusions = exclusions
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 

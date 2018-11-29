@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 2.0.52
 ++++++
 * core: support cross tenant resource provisioning for multi-tenant service principal

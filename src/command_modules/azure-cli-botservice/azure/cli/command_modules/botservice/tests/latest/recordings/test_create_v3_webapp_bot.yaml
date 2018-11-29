@@ -1,0 +1,2021 @@
+interactions:
+- request:
+    body: '{"tags": {"date": "2018-11-29T08:01:54Z", "product": "azurecli", "cause":
+      "automation"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [--location --name --tag]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"date":"2018-11-29T08:01:54Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['274']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:01:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      date: ['Thu, 29 Nov 2018 08:01:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 204, message: No Content}
+- request:
+    body: 'b''b\''{"properties": {"template": {"contentVersion": "1.0.0.0", "parameters":
+      {"azureWebJobsBotFrameworkDirectLineSecret": {"defaultValue": "", "type": "string"},
+      "description": {"defaultValue": "", "type": "string"}, "location": {"type":
+      "string"}, "appSecret": {"defaultValue": "blank", "type": "string"}, "zipUrl":
+      {"defaultValue": "", "type": "string"}, "useAppInsights": {"type": "bool"},
+      "serverFarmId": {"type": "string"}, "sku": {"type": "string"}, "botId": {"type":
+      "string"}, "appId": {"defaultValue": "1234", "type": "string"}, "endpoint":
+      {"defaultValue": "", "type": "string"}, "createNewStorage": {"type": "bool"},
+      "serverFarmLocation": {"defaultValue": "", "type": "string"}, "storageAccountName":
+      {"type": "string"}, "luisApiLocation": {"defaultValue": "Global", "type": "string"},
+      "serverFarmSku": {"defaultValue": {"family": "S", "tier": "Standard", "name":
+      "S1", "capacity": 1, "size": "S1"}, "type": "object"}, "botEnv": {"defaultValue":
+      "prod", "type": "string"}, "siteName": {"type": "string"}, "createServerFarm":
+      {"type": "bool"}, "appInsightsLocation": {"type": "string"}, "storageAccountResourceId":
+      {"defaultValue": "", "type": "string"}, "proactiveZipUrl": {"defaultValue":
+      "", "type": "string"}, "kind": {"type": "string"}}, "resources": [{"properties":
+      {}, "apiVersion": "2017-04-18", "condition": "[not(equals(variables(\\\''luisApiName\\\''),
+      \\\''\\\''))]", "name": "[if(equals(\\\''\\\'', variables(\\\''luisApiName\\\'')),
+      \\\''nosuch\\\'', variables(\\\''luisApiName\\\''))]", "location": "[parameters(\\\''luisApiLocation\\\'')]",
+      "sku": {"name": "F0"}, "kind": "LUIS", "type": "Microsoft.CognitiveServices/accounts"},
+      {"properties": {"accountType": "[variables(\\\''storageAccountType\\\'')]"},
+      "apiVersion": "2015-05-01-preview", "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters(\\\''location\\\'')]", "condition": "[parameters(\\\''createNewStorage\\\'')]",
+      "name": "[parameters(\\\''storageAccountName\\\'')]"}, {"properties": {"name":
+      "[variables(\\\''serverFarmName\\\'')]"}, "apiVersion": "2016-09-01", "condition":
+      "[parameters(\\\''createServerFarm\\\'')]", "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters(\\\''serverFarmLocation\\\'')]", "sku": "[parameters(\\\''serverFarmSku\\\'')]",
+      "name": "[variables(\\\''serverFarmName\\\'')]"}, {"tags": {"[concat(\\\''hidden-link:\\\'',
+      resourceId(\\\''Microsoft.Web/sites/\\\'', parameters(\\\''siteName\\\'')))]":
+      "Resource", "[concat(\\\''hidden-link:\\\'', resourceId(\\\''Microsoft.BotService/botServices/\\\'',
+      parameters(\\\''botId\\\'')))]": "Resource"}, "properties": {"ApplicationId":
+      "[parameters(\\\''botId\\\'')]"}, "apiVersion": "2014-04-01", "condition": "[parameters(\\\''useAppInsights\\\'')]",
+      "name": "[variables(\\\''insightsName\\\'')]", "location": "[parameters(\\\''appInsightsLocation\\\'')]",
+      "kind": "web", "type": "microsoft.insights/components"}, {"properties": {"serverFarmId":
+      "[parameters(\\\''serverFarmId\\\'')]", "name": "[parameters(\\\''siteName\\\'')]",
+      "siteConfig": {"appSettings": [{"value": "[concat(\\\''DefaultEndpointsProtocol=https;AccountName=\\\'',parameters(\\\''storageAccountName\\\''),\\\'';AccountKey=\\\'',listkeys(variables(\\\''storageAccountId\\\''),
+      \\\''2015-05-01-preview\\\'').key1,\\\'';\\\'')]", "name": "AzureWebJobsStorage"},
+      {"value": "[concat(\\\''DefaultEndpointsProtocol=https;AccountName=\\\'',parameters(\\\''storageAccountName\\\''),\\\'';AccountKey=\\\'',listkeys(variables(\\\''storageAccountId\\\''),
+      \\\''2015-05-01-preview\\\'').key1,\\\'';\\\'')]", "name": "AzureWebJobsDashboard"},
+      {"value": "6.9.1", "name": "WEBSITE_NODE_DEFAULT_VERSION"}, {"value": "[parameters(\\\''botEnv\\\'')]",
+      "name": "BotEnv"}, {"value": "[parameters(\\\''botId\\\'')]", "name": "BotId"},
+      {"value": "[parameters(\\\''appId\\\'')]", "name": "MicrosoftAppId"}, {"value":
+      "[parameters(\\\''appSecret\\\'')]", "name": "MicrosoftAppPassword"}, {"value":
+      "[variables(\\\''currentConfig\\\'').stateEndpoint]", "name": "BotStateEndpoint"},
+      {"value": "[variables(\\\''currentConfig\\\'').openIdMetadata]", "name": "BotOpenIdMetadata"},
+      {"value": "true", "name": "UseTableStorageForConversationState"}, {"value":
+      "[reference(resourceId(\\\''microsoft.insights/components/\\\'', variables(\\\''insightsName\\\'')),
+      \\\''2015-05-01\\\'').InstrumentationKey]", "name": "BotDevAppInsightsKey"},
+      {"value": "[variables(\\\''insightsName\\\'')]", "name": "BotDevAppInsightsName"},
+      {"value": "[reference(resourceId(\\\''microsoft.insights/components/\\\'', variables(\\\''insightsName\\\'')),
+      \\\''2015-05-01\\\'').AppId]", "name": "BotDevAppInsightsAppId"}], "cors": {"allowedOrigins":
+      ["https://localhost:44300", "https://botservice.hosting.portal.azure.net", "https://hosting.onecloud.azure-test.net/"]}}},
+      "apiVersion": "2015-08-01", "condition": "[not(equals(parameters(\\\''zipUrl\\\''),
+      \\\''\\\''))]", "name": "[parameters(\\\''siteName\\\'')]", "location": "[parameters(\\\''location\\\'')]",
+      "dependsOn": ["[resourceId(\\\''Microsoft.Storage/storageAccounts/\\\'', parameters(\\\''storageAccountName\\\''))]",
+      "[parameters(\\\''serverFarmId\\\'')]"], "type": "Microsoft.Web/sites", "kind":
+      "[variables(\\\''botAppKind\\\'')]", "resources": [{"properties": {"dbType":
+      "None", "connectionString": "", "packageUri": "[parameters(\\\''zipUrl\\\'')]",
+      "setParameters": {"IIS Web Application Name": "[parameters(\\\''siteName\\\'')]"}},
+      "apiVersion": "2015-02-01", "name": "MSDeploy", "dependsOn": ["[concat(\\\''Microsoft.Web/Sites/\\\'',
+      parameters(\\\''siteName\\\''))]"], "condition": "[not(equals(parameters(\\\''zipUrl\\\''),
+      \\\''\\\''))]", "type": "Extensions"}, {"type": "config", "properties": {"httpLogs":
+      {"fileSystem": {"enabled": true, "retentionInMb": 35, "retentionInDays": 1},
+      "azureBlobStorage": {"enabled": false}}, "failedRequestsTracing": {"enabled":
+      true}, "detailedErrorMessages": {"enabled": true}, "applicationLogs": {"azureTableStorage":
+      {"level": "Off", "sasUrl": null}, "fileSystem": {"level": "Error"}, "azureBlobStorage":
+      {"level": "Error", "retentionInDays": 1, "sasUrl": null}}}, "apiVersion": "2015-08-01",
+      "name": "logs", "dependsOn": ["[resourceId(\\\''Microsoft.Web/Sites\\\'', parameters(\\\''siteName\\\''))]",
+      "[resourceId(\\\''Microsoft.Web/Sites/extensions\\\'', parameters(\\\''siteName\\\''),
+      \\\''MSDeploy\\\'')]"]}]}, {"properties": {"siteConfig": {"appSettings": [{"value":
+      "[concat(\\\''DefaultEndpointsProtocol=https;AccountName=\\\'',parameters(\\\''storageAccountName\\\''),\\\'';AccountKey=\\\'',listkeys(variables(\\\''storageAccountId\\\''),
+      \\\''2015-05-01-preview\\\'').key1,\\\'';\\\'')]", "name": "AzureWebJobsDashboard"},
+      {"value": "[concat(\\\''DefaultEndpointsProtocol=https;AccountName=\\\'',parameters(\\\''storageAccountName\\\''),\\\'';AccountKey=\\\'',listkeys(variables(\\\''storageAccountId\\\''),
+      \\\''2015-05-01-preview\\\'').key1,\\\'';\\\'')]", "name": "AzureWebJobsStorage"},
+      {"value": "[concat(\\\''DefaultEndpointsProtocol=https;AccountName=\\\'',parameters(\\\''storageAccountName\\\''),\\\'';AccountKey=\\\'',listkeys(variables(\\\''storageAccountId\\\''),
+      \\\''2015-05-01-preview\\\'').key1,\\\'';\\\'')]", "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"},
+      {"value": "[toLower(variables(\\\''proactiveFunctionName\\\''))]", "name": "WEBSITE_CONTENTSHARE"},
+      {"value": "~1", "name": "FUNCTIONS_EXTENSION_VERSION"}, {"value": "[parameters(\\\''azureWebJobsBotFrameworkDirectLineSecret\\\'')]",
+      "name": "AzureWebJobsBotFrameworkDirectLineSecret"}, {"value": "[variables(\\\''currentConfig\\\'').azureWebJobsBotFrameworkDirectLineEndpoint]",
+      "name": "AzureWebJobsBotFrameworkDirectLineEndpoint"}]}}, "apiVersion": "2016-03-01",
+      "condition": "[not(equals(parameters(\\\''proactiveZipUrl\\\''), \\\''\\\''))]",
+      "type": "Microsoft.Web/sites", "location": "[parameters(\\\''location\\\'')]",
+      "dependsOn": ["[resourceId(\\\''Microsoft.Storage/storageAccounts/\\\'', parameters(\\\''storageAccountName\\\''))]",
+      "[parameters(\\\''serverFarmId\\\'')]"], "name": "[variables(\\\''proactiveFunctionName\\\'')]",
+      "kind": "functionapp", "resources": [{"properties": {"packageUri": "[parameters(\\\''proactiveZipUrl\\\'')]"},
+      "apiVersion": "2015-02-01", "name": "MSDeploy", "dependsOn": ["[concat(\\\''Microsoft.Web/Sites/\\\'',
+      variables(\\\''proactiveFunctionName\\\''))]"], "condition": "[not(equals(parameters(\\\''proactiveZipUrl\\\''),
+      \\\''\\\''))]", "type": "Extensions"}]}, {"properties": {"developerAppInsightKey":
+      "[reference(resourceId(\\\''microsoft.insights/components/\\\'', variables(\\\''insightsName\\\'')),
+      \\\''2015-05-01\\\'').InstrumentationKey]", "msaAppId": "[parameters(\\\''appId\\\'')]",
+      "name": "[parameters(\\\''botId\\\'')]", "endpoint": "[variables(\\\''botEndpoint\\\'')]",
+      "developerAppInsightsApplicationId": "[variables(\\\''insightsName\\\'')]",
+      "description": "[parameters(\\\''description\\\'')]", "displayName": "[parameters(\\\''botId\\\'')]"},
+      "apiVersion": "2017-12-01", "kind": "[parameters(\\\''kind\\\'')]", "type":
+      "Microsoft.BotService/botServices", "location": "global", "dependsOn": ["[resourceId(\\\''Microsoft.Storage/storageAccounts/\\\'',
+      parameters(\\\''storageAccountName\\\''))]", "[parameters(\\\''serverFarmId\\\'')]",
+      "[resourceId(\\\''Microsoft.Web/sites/\\\'', parameters(\\\''siteName\\\''))]",
+      "[resourceId(\\\''microsoft.insights/components/\\\'', variables(\\\''insightsName\\\''))]"],
+      "sku": {"name": "[parameters(\\\''sku\\\'')]"}, "name": "[parameters(\\\''botId\\\'')]"}],
+      "variables": {"luisApiResId": "[resourceId(\\\''Microsoft.CognitiveServices/accounts/\\\'',
+      variables(\\\''luisApiName\\\''))]", "currentConfig": "[variables(\\\''config\\\'')[toLower(parameters(\\\''botEnv\\\''))]]",
+      "siteHost": "[concat(parameters(\\\''siteName\\\''), \\\''.azurewebsites.net\\\'')]",
+      "botEndpointConfig": {"bot": "[parameters(\\\''endpoint\\\'')]", "designer":
+      "[concat(\\\''https://\\\'', variables(\\\''siteHost\\\''), \\\''/api/messages\\\'')]",
+      "sdk": "[concat(\\\''https://\\\'', variables(\\\''siteHost\\\''), \\\''/api/messages\\\'')]",
+      "function": "[concat(\\\''https://\\\'', variables(\\\''siteHost\\\''), \\\''/api/messages?code=\\\'',
+      \\\''NYI\\\'')]"}, "botAppKind": "[variables(\\\''botAppKinds\\\'')[parameters(\\\''kind\\\'')]]",
+      "proactiveFunctionName": "[concat(parameters(\\\''siteName\\\''), \\\''-function\\\'')]",
+      "config": {"scratch": {"openIdMetadata": "https://intercom-api-ppe.azurewebsites.net/v1/.well-known/openidconfiguration",
+      "stateEndpoint": "https://intercom-api-scratch.azurewebsites.net", "azureWebJobsBotFrameworkDirectLineEndpoint":
+      "https://directline.scratch.botframework.com/", "blobStoreName": "icscratch"},
+      "prod": {"openIdMetadata": "", "stateEndpoint": "", "azureWebJobsBotFrameworkDirectLineEndpoint":
+      "https://directline.botframework.com/", "blobStoreName": "connectorprod"}, "ppe":
+      {"openIdMetadata": "https://intercom-api-ppe.azurewebsites.net/v1/.well-known/openidconfiguration",
+      "stateEndpoint": "https://intercom-api-ppe.azurewebsites.net", "azureWebJobsBotFrameworkDirectLineEndpoint":
+      "https://directline.ppe.botframework.com/", "blobStoreName": "intercomppe"}},
+      "insightsName": "[concat(parameters(\\\''botId\\\''), substring(uniqueString(resourceGroup().id),
+      0, 6))]", "myWorkerSize": 0, "botAppKinds": {"bot": "", "designer": "app", "function":
+      "functionapp", "sdk": "app"}, "luisApiName": "", "botEndpoint": "[variables(\\\''botEndpointConfig\\\'')[parameters(\\\''kind\\\'')]]",
+      "storageAccountId": "[if(or(parameters(\\\''createNewStorage\\\''), equals(\\\''\\\'',
+      parameters(\\\''storageAccountResourceId\\\''))), resourceId(\\\''Microsoft.Storage/storageAccounts\\\'',
+      parameters(\\\''storageAccountName\\\'')), parameters(\\\''storageAccountResourceId\\\''))]",
+      "serverFarmName": "[last(split(parameters(\\\''serverFarmId\\\''), \\\''/\\\''))]",
+      "storageAccountType": "Standard_LRS"}, "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"},
+      "parameters": {"serverFarmLocation": {"value": "westus"}, "siteName": {"value":
+      "cli000002a7cd"}, "location": {"value": "westus"}, "botEnv": {"value": "prod"},
+      "appSecret": {"value": "418ea28b-1d5d-49ea-8381-611d6f6d6d12"}, "sku": {"value":
+      "F0"}, "useAppInsights": {"value": true}, "azureWebJobsBotFrameworkDirectLineSecret":
+      {"value": ""}, "appInsightsLocation": {"value": "westus2"}, "botId": {"value":
+      "cli000002"}, "zipUrl": {"value": "https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip"},
+      "storageAccountResourceId": {"value": ""}, "appId": {"value": "78192c2d-4566-41a5-8df6-9f218c9c943f"},
+      "createServerFarm": {"value": true}, "serverFarmId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},
+      "createNewStorage": {"value": true}, "kind": {"value": "sdk"}, "storageAccountName":
+      {"value": "cli5bucyfaea5r"}}, "mode": "Incremental"}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      Content-Length: ['11687']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"5373535393270594369","parameters":{"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"appSecret":{"type":"String","value":"418ea28b-1d5d-49ea-8381-611d6f6d6d12"},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip"},"useAppInsights":{"type":"Bool","value":true},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"sku":{"type":"String","value":"F0"},"botId":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"78192c2d-4566-41a5-8df6-9f218c9c943f"},"endpoint":{"type":"String","value":""},"createNewStorage":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"storageAccountName":{"type":"String","value":"cli5bucyfaea5r"},"luisApiLocation":{"type":"String","value":"Global"},"serverFarmSku":{"type":"Object","value":{"family":"S","tier":"Standard","name":"S1","capacity":1,"size":"S1"}},"botEnv":{"type":"String","value":"prod"},"siteName":{"type":"String","value":"cli000002a7cd"},"createServerFarm":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"storageAccountResourceId":{"type":"String","value":""},"proactiveZipUrl":{"type":"String","value":""},"kind":{"type":"String","value":"sdk"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2018-11-29T08:01:58.1116446Z","duration":"PT0.7217171S","correlationId":"fd54f7e1-85a2-48aa-8399-7c2a2f9d14f9","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002a7cd/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002a7cd","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002a7cd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002a7cd/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002a7cd/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002a7cd/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002a7cd-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586581283680877331?api-version=2018-05-01']
+      cache-control: [no-cache]
+      content-length: ['8032']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:01:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586581283680877331?api-version=2018-05-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:02:27 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586581283680877331?api-version=2018-05-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:02:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586581283680877331?api-version=2018-05-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:03:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586581283680877331?api-version=2018-05-01
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:03:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"5373535393270594369","parameters":{"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"appSecret":{"type":"String","value":"418ea28b-1d5d-49ea-8381-611d6f6d6d12"},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip"},"useAppInsights":{"type":"Bool","value":true},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"sku":{"type":"String","value":"F0"},"botId":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"78192c2d-4566-41a5-8df6-9f218c9c943f"},"endpoint":{"type":"String","value":""},"createNewStorage":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"storageAccountName":{"type":"String","value":"cli5bucyfaea5r"},"luisApiLocation":{"type":"String","value":"Global"},"serverFarmSku":{"type":"Object","value":{"family":"S","tier":"Standard","name":"S1","capacity":1,"size":"S1"}},"botEnv":{"type":"String","value":"prod"},"siteName":{"type":"String","value":"cli000002a7cd"},"createServerFarm":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"storageAccountResourceId":{"type":"String","value":""},"proactiveZipUrl":{"type":"String","value":""},"kind":{"type":"String","value":"sdk"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-11-29T08:03:36.2785623Z","duration":"PT1M38.8886348S","correlationId":"fd54f7e1-85a2-48aa-8399-7c2a2f9d14f9","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002a7cd/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002a7cd","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002a7cd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002a7cd/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002a7cd/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002a7cd/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002a7cd-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","resourceType":"Microsoft.Web/sites","resourceName":"cli000002a7cd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx","resourceType":"microsoft.insights/components","resourceName":"cli0000022hrjyx","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/nosuch"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli0000022hrjyx"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli5bucyfaea5r"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/config/logs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/Extensions/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd-function/Extensions/MSDeploy"}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['9632']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot create]
+      Connection: [keep-alive]
+      ParameterSetName: [-k -g -n --appid -p --location --insights-location]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2018-11-29T08%3A02%3A59.0041884Z''\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002a7cd.azurewebsites.net/api/messages","msaAppId":"78192c2d-4566-41a5-8df6-9f218c9c943f","developerAppInsightKey":"a5f09659-79fa-4735-b944-d278b870d90b","developerAppInsightsApplicationId":"cli0000022hrjyx","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":"","storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1048']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:03:59 GMT']
+      etag: [W/"datetime'2018-11-29T08%3A02%3A59.0041884Z'"]
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot download]
+      Connection: [keep-alive]
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2018-11-29T08%3A02%3A59.0041884Z''\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002a7cd.azurewebsites.net/api/messages","msaAppId":"78192c2d-4566-41a5-8df6-9f218c9c943f","developerAppInsightKey":"a5f09659-79fa-4735-b944-d278b870d90b","developerAppInsightsApplicationId":"cli0000022hrjyx","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":"","storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1048']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:00 GMT']
+      etag: [W/"datetime'2018-11-29T08%3A02%3A59.0041884Z'"]
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot download]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/config/publishingcredentials/list?api-version=2018-02-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/publishingcredentials/$cli000002a7cd","name":"cli000002a7cd","type":"Microsoft.Web/sites/publishingcredentials","location":"West
+        US","properties":{"name":null,"publishingUserName":"$cli000002a7cd","publishingPassword":"a3jkLlnmx8G0WjMocv6XktdyzMTNoPtvcoHc1817Aar7jc1xQlut8Y4sDRc1","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002a7cd:a3jkLlnmx8G0WjMocv6XktdyzMTNoPtvcoHc1817Aar7jc1xQlut8Y4sDRc1@cli000002a7cd.scm.azurewebsites.net"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['686']
+      content-type: [application/json]
+      date: ['Thu, 29 Nov 2018 08:04:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot download]
+      Connection: [keep-alive]
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd?api-version=2018-02-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","name":"cli000002a7cd","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"cli000002a7cd","state":"Running","hostNames":["cli000002a7cd.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-113.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002a7cd","repositorySiteName":"cli000002a7cd","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002a7cd.azurewebsites.net","cli000002a7cd.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002a7cd.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002a7cd.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2018-11-29T08:03:30.5066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002a7cd","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.78.48.219,104.40.3.246,104.40.8.50,104.40.4.179,104.40.14.83","possibleOutboundIpAddresses":"40.78.48.219,104.40.3.246,104.40.8.50,104.40.4.179,104.40.14.83,104.40.12.222,104.40.2.67,104.40.9.121","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-113","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002a7cd.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2885']
+      content-type: [application/json]
+      date: ['Thu, 29 Nov 2018 08:04:01 GMT']
+      etag: ['"1D487BA043884AB"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/octet-stream]
+    method: GET
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/zip/site/clirepo/
+  response:
+    body: {string: '{"Message":"''D:\\home\\site\\clirepo\\'' not found."}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['52']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
+- request:
+    body: '{"dir": "site\\wwwroot", "command": "PostDeployScripts\\prepareSrc.cmd
+      a3jkLlnmx8G0WjMocv6XktdyzMTNoPtvcoHc1817Aar7jc1xQlut8Y4sDRc1"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['133']
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/json]
+    method: POST
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/command
+  response:
+    body: {string: '{"Output":"file:///D/home/site/srcRepo\r\nInitialized empty Git
+        repository in D:/home/site/wwwroot/.git/\r\n[master (root-commit) 1c2c693]
+        prepare to download source\r\n 28 files changed, 1159 insertions(+)\r\n create
+        mode 100644 .deployment\r\n create mode 100644 .gitignore\r\n create mode
+        100644 App_Start/WebApiConfig.cs\r\n create mode 100644 Controllers/MessagesController.cs\r\n
+        create mode 100644 Dialogs/EchoDialog.cs\r\n create mode 100644 Global.asax\r\n
+        create mode 100644 Global.asax.cs\r\n create mode 100644 Microsoft.Bot.Sample.SimpleEchoBot.csproj\r\n
+        create mode 100644 Microsoft.Bot.Sample.SimpleEchoBot.sln\r\n create mode
+        100644 PostDeployScripts/IncludeSources.targets\r\n create mode 100644 PostDeployScripts/githubProject.json.template\r\n
+        create mode 100644 PostDeployScripts/prepareSrc.cmd\r\n create mode 100644
+        PostDeployScripts/publish.cmd.template\r\n create mode 100644 PostDeployScripts/publishProfile.xml.template\r\n
+        create mode 100644 PostDeployScripts/publishSettings.xml.template\r\n create
+        mode 100644 PostDeployScripts/runGulp.cmd\r\n create mode 100644 PostDeployScripts/setupGithubRemoteRepo.cmd\r\n
+        create mode 100644 PostDeployScripts/setupVsoRemoteRepo.cmd\r\n create mode
+        100644 PostDeployScripts/vsoProject.json.template\r\n create mode 100644 Properties/AssemblyInfo.cs\r\n
+        create mode 100644 Web.Debug.config\r\n create mode 100644 Web.Release.config\r\n
+        create mode 100644 Web.config\r\n create mode 100644 build.cmd\r\n create
+        mode 100644 default.htm\r\n create mode 100644 deploy.cmd\r\n create mode
+        100644 packages.config\r\n create mode 100644 readme.md\r\nInitialized empty
+        Git repository in D:/home/site/srcRepo/\r\nBranch ''master'' set up to track
+        remote branch ''master'' from ''srcRepo''.\r\n\r\n7-Zip (A) 9.20  Copyright
+        (c) 1999-2010 Igor Pavlov  2010-11-18\r\nScanning\r\n\r\nCreating archive
+        D:\\home\\site\\bot-src.zip\r\n\r\nCompressing  .deployment\r\nCompressing  .gitignore\r\nCompressing  App_Start\\WebApiConfig.cs\r\nCompressing  build.cmd\r\nCompressing  Controllers\\MessagesController.cs\r\nCompressing  default.htm\r\nCompressing  deploy.cmd\r\nCompressing  Dialogs\\EchoDialog.cs\r\nCompressing  Global.asax\r\nCompressing  Global.asax.cs\r\nCompressing  Microsoft.Bot.Sample.SimpleEchoBot.csproj\r\nCompressing  Microsoft.Bot.Sample.SimpleEchoBot.sln\r\nCompressing  packages.config\r\nCompressing  PostDeployScripts\\cli000002a7cd.PublishSettings\r\nCompressing  PostDeployScripts\\githubProject.json.template\r\nCompressing  PostDeployScripts\\IncludeSources.targets\r\nCompressing  PostDeployScripts\\prepareSrc.cmd\r\nCompressing  PostDeployScripts\\publish.cmd.template\r\nCompressing  PostDeployScripts\\publishProfile.xml.template\r\nCompressing  PostDeployScripts\\publishSettings.xml.template\r\nCompressing  PostDeployScripts\\runGulp.cmd\r\nCompressing  PostDeployScripts\\setupGithubRemoteRepo.cmd\r\nCompressing  PostDeployScripts\\setupVsoRemoteRepo.cmd\r\nCompressing  PostDeployScripts\\vsoProject.json.template\r\nCompressing  Properties\\AssemblyInfo.cs\r\nCompressing  Properties\\PublishProfiles\\cli000002a7cd-Web-Deploy.pubxml\r\nCompressing  publish.cmd\r\nCompressing  readme.md\r\nCompressing  Web.config\r\nCompressing  Web.Debug.config\r\nCompressing  Web.Release.config\r\n\r\nEverything
+        is Ok\r\n","Error":"To file:///D/home/site/srcRepo\r\n * [new branch]      master
+        -> master\r\nCloning into ''bot-src''...\r\n","ExitCode":0}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3438']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:20 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/octet-stream]
+    method: GET
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/vfs/site/bot-src.zip
+  response:
+    body:
+      string: !!binary |
+        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
+        AAAACACIQH1NVBnGXkgLAAATQAAAKQAkAAAAAAAAACAAAADjEwAATWljcm9zb2Z0LkJvdC5TYW1w
+        bGUuU2ltcGxlRWNob0JvdC5jc3Byb2oKACAAAAAAAAEAGAADhCMfuofUAQOEIx+6h9QBA4QjH7qH
+        1AFQSwECPwAUAAAACACIQH1NLFaHmn0BAAAHBAAAJgAkAAAAAAAAACAAAAByHwAATWljcm9zb2Z0
+        LkJvdC5TYW1wbGUuU2ltcGxlRWNob0JvdC5zbG4KACAAAAAAAAEAGAADhCMfuofUAQOEIx+6h9QB
+        A4QjH7qH1AFQSwECPwAUAAAACACIQH1N+QNyYw8CAABnCgAADwAkAAAAAAAAACAAAAAzIQAAcGFj
+        a2FnZXMuY29uZmlnCgAgAAAAAAABABgAbw0tH7qH1AFvDS0fuofUAW8NLR+6h9QBUEsBAj8AFAAA
+        AAAAiEB9TQAAAAAAAAAAAAAAABIAJAAAAAAAAAAQAAAAbyMAAFBvc3REZXBsb3lTY3JpcHRzLwoA
+        IAAAAAAAAQAYAOarKh+6h9QB5qsqH7qH1AEDhCMfuofUAVBLAQI/ABQAAAAIAIlAfU0L/pwFTgEA
+        AGoCAAA1ACQAAAAAAAAAIAAAAJ8jAABQb3N0RGVwbG95U2NyaXB0cy9jbGk1YnVjeWZhbGtzbWVh
+        N2NkLlB1Ymxpc2hTZXR0aW5ncwoAIAAAAAAAAQAYAD6fESC6h9QBrUj4H7qH1AGtSPgfuofUAVBL
+        AQI/ABQAAAAIAIhAfU3gz3m4kQAAANwAAAAtACQAAAAAAAAAIAAAAEAlAABQb3N0RGVwbG95U2Ny
+        aXB0cy9naXRodWJQcm9qZWN0Lmpzb24udGVtcGxhdGUKACAAAAAAAAEAGABQ5SUfuofUAQOEIx+6
+        h9QBA4QjH7qH1AFQSwECPwAUAAAACACIQH1N9uWHEtwAAACmAQAAKAAkAAAAAAAAACAAAAAcJgAA
+        UG9zdERlcGxveVNjcmlwdHMvSW5jbHVkZVNvdXJjZXMudGFyZ2V0cwoAIAAAAAAAAQAYAAOEIx+6
+        h9QBA4QjH7qH1AEDhCMfuofUAVBLAQI/ABQAAAAIAIhAfU1kQE21rAIAACEHAAAgACQAAAAAAAAA
+        IAAAAD4nAABQb3N0RGVwbG95U2NyaXB0cy9wcmVwYXJlU3JjLmNtZAoAIAAAAAAAAQAYAFDlJR+6
+        h9QBUOUlH7qH1AFQ5SUfuofUAVBLAQI/ABQAAAAIAIhAfU3va091dgAAAHsAAAAmACQAAAAAAAAA
+        IAAAACgqAABQb3N0RGVwbG95U2NyaXB0cy9wdWJsaXNoLmNtZC50ZW1wbGF0ZQoAIAAAAAAAAQAY
+        AFDlJR+6h9QBUOUlH7qH1AFQ5SUfuofUAVBLAQI/ABQAAAAIAIhAfU02K7FwcgIAAEQFAAAtACQA
+        AAAAAAAAIAAAAOIqAABQb3N0RGVwbG95U2NyaXB0cy9wdWJsaXNoUHJvZmlsZS54bWwudGVtcGxh
+        dGUKACAAAAAAAAEAGABQ5SUfuofUAVDlJR+6h9QBUOUlH7qH1AFQSwECPwAUAAAACACIQH1NyiLg
+        0SQBAAAyAgAALgAkAAAAAAAAACAAAACfLQAAUG9zdERlcGxveVNjcmlwdHMvcHVibGlzaFNldHRp
+        bmdzLnhtbC50ZW1wbGF0ZQoAIAAAAAAAAQAYAMhHKB+6h9QBUOUlH7qH1AFQ5SUfuofUAVBLAQI/
+        ABQAAAAIAIhAfU2i9Ssp1QAAAHsBAAAdACQAAAAAAAAAIAAAAA8vAABQb3N0RGVwbG95U2NyaXB0
+        cy9ydW5HdWxwLmNtZAoAIAAAAAAAAQAYAMhHKB+6h9QByEcoH7qH1AHIRygfuofUAVBLAQI/ABQA
+        AAAIAIhAfU2h6AdDhgIAAEMGAAArACQAAAAAAAAAIAAAAB8wAABQb3N0RGVwbG95U2NyaXB0cy9z
+        ZXR1cEdpdGh1YlJlbW90ZVJlcG8uY21kCgAgAAAAAAABABgAyEcoH7qH1AHIRygfuofUAchHKB+6
+        h9QBUEsBAj8AFAAAAAgAiEB9TefISQX/AgAAMgcAACgAJAAAAAAAAAAgAAAA7jIAAFBvc3REZXBs
+        b3lTY3JpcHRzL3NldHVwVnNvUmVtb3RlUmVwby5jbWQKACAAAAAAAAEAGADIRygfuofUAchHKB+6
+        h9QByEcoH7qH1AFQSwECPwAUAAAACACIQH1NAAXq5r8AAAAcAQAAKgAkAAAAAAAAACAAAAAzNgAA
+        UG9zdERlcGxveVNjcmlwdHMvdnNvUHJvamVjdC5qc29uLnRlbXBsYXRlCgAgAAAAAAABABgA5qsq
+        H7qH1AHmqyofuofUAearKh+6h9QBUEsBAj8AFAAAAAAAiUB9TQAAAAAAAAAAAAAAAAsAJAAAAAAA
+        AAAQAAAAOjcAAFByb3BlcnRpZXMvCgAgAAAAAAABABgAE3yFH7qH1AETfIUfuofUAearKh+6h9QB
+        UEsBAj8AFAAAAAgAiEB9TRJZCmFmAgAAcgUAABoAJAAAAAAAAAAgAAAAYzcAAFByb3BlcnRpZXMv
+        QXNzZW1ibHlJbmZvLmNzCgAgAAAAAAABABgA5qsqH7qH1AHmqyofuofUAearKh+6h9QBUEsBAj8A
+        FAAAAAAAiUB9TQAAAAAAAAAAAAAAABsAJAAAAAAAAAAQAAAAAToAAFByb3BlcnRpZXMvUHVibGlz
+        aFByb2ZpbGVzLwoAIAAAAAAAAQAYAGjehx+6h9QBaN6HH7qH1AETfIUfuofUAVBLAQI/ABQAAAAI
+        AIlAfU28FNk5awIAADwFAABAACQAAAAAAAAAIAAAADo6AABQcm9wZXJ0aWVzL1B1Ymxpc2hQcm9m
+        aWxlcy9jbGk1YnVjeWZhbGtzbWVhN2NkLVdlYi1EZXBsb3kucHVieG1sCgAgAAAAAAABABgAy7Sf
+        H7qH1AFo3ocfuofUAWjehx+6h9QBUEsBAj8AFAAAAAgAiUB9TWQTPbi3AAAA1QAAAAsAJAAAAAAA
+        AAAgAAAAAz0AAHB1Ymxpc2guY21kCgAgAAAAAAABABgAYjvnH7qH1AHNKdQfuofUAc0p1B+6h9QB
+        UEsBAj8AFAAAAAgAiEB9TS/gHEbrAQAAfwMAAAkAJAAAAAAAAAAgAAAA4z0AAHJlYWRtZS5tZAoA
+        IAAAAAAAAQAYAG8NLR+6h9QBbw0tH7qH1AFvDS0fuofUAVBLAQI/ABQAAAAIAIhAfU1K1bvu3wUA
+        AJUZAAAKACQAAAAAAAAAIAAAAPU/AABXZWIuY29uZmlnCgAgAAAAAAABABgA5qsqH7qH1AHmqyof
+        uofUAearKh+6h9QBUEsBAj8AFAAAAAgAiEB9TahlJ+lnAgAAEwUAABAAJAAAAAAAAAAgAAAA/EUA
+        AFdlYi5EZWJ1Zy5jb25maWcKACAAAAAAAAEAGADmqyofuofUAearKh+6h9QB5qsqH7qH1AFQSwEC
+        PwAUAAAACACIQH1NY6Yds30CAABQBQAAEgAkAAAAAAAAACAAAACRSAAAV2ViLlJlbGVhc2UuY29u
+        ZmlnCgAgAAAAAAABABgA5qsqH7qH1AHmqyofuofUAearKh+6h9QBUEsFBgAAAAAlACUAiA8AAD5L
+        AAAAAA==
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23260']
+      content-type: [application/x-zip-compressed]
+      date: ['Thu, 29 Nov 2018 08:04:20 GMT']
+      etag: ['"ba851043d155d608"']
+      expires: ['-1']
+      last-modified: ['Thu, 29 Nov 2018 08:04:18 GMT']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot publish]
+      Connection: [keep-alive]
+      ParameterSetName: [-g -n --code-dir]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2018-11-29T08%3A02%3A59.0041884Z''\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002a7cd.azurewebsites.net/api/messages","msaAppId":"78192c2d-4566-41a5-8df6-9f218c9c943f","developerAppInsightKey":"a5f09659-79fa-4735-b944-d278b870d90b","developerAppInsightsApplicationId":"cli0000022hrjyx","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":"","storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1048']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:22 GMT']
+      etag: [W/"datetime'2018-11-29T08%3A02%3A59.0041884Z'"]
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot publish]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [-g -n --code-dir]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/config/publishingcredentials/list?api-version=2018-02-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd/publishingcredentials/$cli000002a7cd","name":"cli000002a7cd","type":"Microsoft.Web/sites/publishingcredentials","location":"West
+        US","properties":{"name":null,"publishingUserName":"$cli000002a7cd","publishingPassword":"a3jkLlnmx8G0WjMocv6XktdyzMTNoPtvcoHc1817Aar7jc1xQlut8Y4sDRc1","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002a7cd:a3jkLlnmx8G0WjMocv6XktdyzMTNoPtvcoHc1817Aar7jc1xQlut8Y4sDRc1@cli000002a7cd.scm.azurewebsites.net"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['686']
+      content-type: [application/json]
+      date: ['Thu, 29 Nov 2018 08:04:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot publish]
+      Connection: [keep-alive]
+      ParameterSetName: [-g -n --code-dir]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd?api-version=2018-02-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002a7cd","name":"cli000002a7cd","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"cli000002a7cd","state":"Running","hostNames":["cli000002a7cd.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-113.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002a7cd","repositorySiteName":"cli000002a7cd","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002a7cd.azurewebsites.net","cli000002a7cd.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002a7cd.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002a7cd.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2018-11-29T08:03:30.5066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002a7cd","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.78.48.219,104.40.3.246,104.40.8.50,104.40.4.179,104.40.14.83","possibleOutboundIpAddresses":"40.78.48.219,104.40.3.246,104.40.8.50,104.40.4.179,104.40.14.83,104.40.12.222,104.40.2.67,104.40.9.121","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-113","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002a7cd.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2885']
+      content-type: [application/json]
+      date: ['Thu, 29 Nov 2018 08:04:23 GMT']
+      etag: ['"1D487BA043884AB"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"dir": "site", "command": "rm -rf clirepo"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['44']
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/json]
+    method: POST
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/command
+  response:
+    body: {string: '{"Output":"","Error":"","ExitCode":0}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['37']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:04:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/json]
+    method: PUT
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/vfs/site/clirepo/
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 29 Nov 2018 08:04:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      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
+      goRCUVDwaRn/7WGyi80TUEsDBBQAAAAIAIoAfU0L/pwFTwEAAGoCAAA1AAAAUG9zdERlcGxveVNj
+      cmlwdHMvY2xpNWJ1Y3lmYWxrc21lYTdjZC5QdWJsaXNoU2V0dGluZ3N9kl1PwjAUhu/5FUvjLZsL
+      KIQwEnRRLxiZToNedt2BlfVjabvB+PXuSxLj4lXTvuc8ed+es8yLmFGd+tjg1ciylv09VHJPGVh5
+      d24xBw8RRu/iglR7zDLNAc9IMt5BPPYhZ7JCVt1vWT0gAJPKxENBNKR+KDaIszXhNr4UCk4Qa2pA
+      2wLMYjqd9P1cJy0uqrVBArIKDarzezOot5ymKNz5HsKTY7Zhgp/nz7e7YyBJef+ZmaS6BO9bGZqS
+      yBfizt3ZGqvZkbjnV1aY+ddU+2/E7VkJaEMFNlSKdZ630VJj8oXjDCX8k66nRK+bCFQJyn94lEIA
+      aXiRUVQcPPSTvqqr/tFT2Tg51MMraQLqSaqCb6jIrgVECqMkC7EA1gm90xMViTzpzp1NJO8baqNR
+      pQ1wD9WTbn5do1WrLJN6ZWKsQVtOuznO79VZja4v7XJ9A1BLAwQUAAAACACKAH1N4M95uJEAAADc
+      AAAALQAAAFBvc3REZXBsb3lTY3JpcHRzL2dpdGh1YlByb2plY3QuanNvbi50ZW1wbGF0ZW2MMQ+C
+      MBBGdxP+w6WzkZ0NDIODLpg4klpOOBXa9K6YSPjvKulgouv73vumZAWgBt2jykBNp7Koq92xrA/5
+      vpzVelkbZOPJCdnhjwT5M3iEwgpU6EcyCFvbYGw726PT7fLeiTjO0rQl6cJ5Y2wfJedp1PJxLvrO
+      GEvNNTEH5DcXH76w8/aKRn6HB90owmQ1vwBQSwMEFAAAAAgAigB9TfblhxLcAAAApgEAACgAAABQ
+      b3N0RGVwbG95U2NyaXB0cy9JbmNsdWRlU291cmNlcy50YXJnZXRzhZGxTgMxDIb3SrxDFDHQG84V
+      bJDrUiTUBSqVscs1Z7hDSRzFPkTfnhBA5aSqbM5v//bn2GwSvaEV9eFd4Eb3IvEWgG2PvuXaDzYR
+      04vUljx0+I6OIibwvB8H18H1YnGjlxczpUxulDNyeEg0xiJlcUUJV+Tj4PAeI4aOn8Ly8uqUPL9b
+      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
+      Jydwc0dx+5I2EfskBP8AUEsDBBQAAAAIAIoAfU3KIuDRJQEAADICAAAuAAAAUG9zdERlcGxveVNj
+      cmlwdHMvcHVibGlzaFNldHRpbmdzLnhtbC50ZW1wbGF0ZX2SX0vDMBTF3wW/Qwi+rn1wT6MdbLaC
+      sM5qlD6OtL2uweYPSboxxe9uumwdWvEpcM89h1/uvZHqypaZJqGWzq+vEIpOhVzLN9YCUv5dUw4x
+      /izS5YY8vKSb9SJLvyYFlJMEVCsPGPVmhE7uDGwj6xhn5E/5VbejsMBUPKAfnYY9lIZZMIEAO5tO
+      b89mbupjGHHiyI5RZ0B7zJuR5gP6jrxInDdfEFI8PieDVIOxTFDLpFgodeRrrFWzMPyNOUI8R5Cn
+      FQG9A50s76QQUPVhxGomtjEe/nBwbf81NLIH2brx71gN+l7qjq+YeL90VFJYLducCmi9ciLdM1HL
+      vfGEQSX52eFoycFY4DF2G+vHZ/DcS1HtFl9SAwaFfv/hzwNwxaF0PJJvUEsDBBQAAAAIAIoAfU2i
+      9Ssp1AAAAHsBAAAdAAAAUG9zdERlcGxveVNjcmlwdHMvcnVuR3VscC5jbWR9kM9uwjAMxu+R8g4+
+      wmFFPABoE/SAVP4ItsMkpKokLgSSOkqCur39mmxaOQC+xLJ//vzFryhOBFTXnHkMmkSlOUs5zPNN
+      sf5c5qv3crf+2M7yyW99sSo3xdssL3tgMo5Dqgb8Uj5Alu3btnVEYS/RavrOhJEw4AzAXv1J3gCx
+      5tBAt1dDDyeUbPcOo3IkLkpcOqNwuCotYyK8dXSO7fQHh4Kc/NMw2AQIyqAPlbGcySogjAJMp3F3
+      z2SajpxF8HE3qb/cjWcT896IpAaTz0b+X5izH1BLAwQUAAAACACKAH1NoegHQ4oCAABDBgAAKwAA
+      AFBvc3REZXBsb3lTY3JpcHRzL3NldHVwR2l0aHViUmVtb3RlUmVwby5jbWS1VVFP2zAQfq/U/3Cq
+      ZBUekmjbW6VOLVul8QBUtGOTKJqMc6EBJ/ZsRxUC/vvOdkNTQfdGHpzkcvfdd5/vnAmKtQJVFP2e
+      RSeV4LLfM1hB8mFXxKdsjb6y6hIr5fAStYJrE55/WjQ3cK3RWFVzORUCrV2qB6y91aj7c17hk9Ku
+      9J9fbiKeMMgdAq9z0Eo30r9cLS7grnRgPHqhDLg1wvRkAULlCGVtHa8Fxvi47hiMoKEVuBCqqR3U
+      lJNkCggtM/+RqIHz3GL8O6RHh2N8ipweWyNxXTe3cDlbLGE6P4Ujg3+b0qANFViwQmk83mbaChHQ
+      99jRBxTOw241Ocqx4I0Mpl+zk8XpcvYnLOfTs9nxx283bXUrrJHjtXPajrKM6zKNBadCVXteJPyY
+      feqa5pt8zD5HS1v5mH3p98oChqy1sOF4PBzCvtObilkLrFWXD9slZyP2mpZNdiT3fLJdWl9HlJE2
+      FERjZEf97X70e7qx6xzSdLXZbIxSZHGPGmGurPuOWqrHhTCldnYVE85jXHpPfZM6rHRo6WfwLZMg
+      2Gz1RKXtylq9dBhld/AV2HJ2NmfvwPV7NOYyEk1+wOCbqh3WLlkSnxFwrWUpuB+vzHsPIGngkDqQ
+      5DCYHMxEsb9hfkH9/IpgJMv8aGWhp7djV/2PLM1z3u+19zDsYWraTo9ivpU3+pY1nQBhg0LR/jzw
+      ps6rUHVR3oV5T8MkDbrVDg54am7tRpn81dvLccgZK15KGDSulJNb5QpDaSj4wXdVN4bnVMIeRlXR
+      LalgoEkvbtAXHs5OsKoxAn0aZ5TsongpvN6hwRlU3Do0Ox23GkrkNcH4AOsa/wd4K2GApN1JDCQF
+      xD5vYbDOw//iH1BLAwQUAAAACACKAH1N58hJBQgDAAAyBwAAKAAAAFBvc3REZXBsb3lTY3JpcHRz
+      L3NldHVwVnNvUmVtb3RlUmVwby5jbWS1VV1r2zAUfQ/kP1wCIivMzrquMALZ0naB7aFtSNJusJSi
+      yTeJW9kSkpxQuu6370q287G0D3toCIl1pXt07rkf7qNYKFCzWbNh0UkluGw2DGYQvdqnxKfbCn1t
+      1Qgz5XCEWsHPZb28Cc9XFs0Fz6rVEI1VOZcnQqC1E3WPOW1oo+78mUelXeq3n25KfGGQOwSeJ6CV
+      LqRfXI8vYZ46MP62mTLgFggnp2MQKkFIc+t4LrD0L389I0+oC4WRJFPw8DA2Jbw3GM9jWDinbbfT
+      4Su0KsNfysXL1BZcWlckqYqFyuCgglO2DooQ6Qm4EKrIHeRkqvF1FanfpFDB+VjXfJ7Rofuym78l
+      ocfa6LmPBuMJcJ2WkLWCAWOHBm2gcN65EvNNgjNeyGD6Pjgdf5sMbsPPxcn54OD164ZqhnLn83Fl
+      ZI8d7lhIzR57v20arpIeOyotdZQ99qHZSGfQZrWFtXu9dht2D+1Fx0qYpXV2pJTrsTUPVl+plWdV
+      VwPb0GJdtibE+hvP7p+PrHNLBdnZkNlccxY0H5ZJ+G/YKlNCSUnu1BmdW8q47VRJtZ9pFS2pYmir
+      dxS/azbK9FG5gPC1vsl65dJs6MIuEojj6Wq1MiRCs+EeNMJQWfcFtVQPY2FS7ezUV2npFN9RScYO
+      Mx0a8Df4aowQbGf6SBpv9J0+bYnQmcMnYJPB+ZD9i9Vs0ISSJcXoK7TOVO4wd9GEmHSpqLVMBQ/x
+      +tMtgCiBVv95rBZEP2B4Sc0AbE9xyoTJXiQRJphE1GGMHB5TXELliV1PlaAd0Qg6KgofHb6lndQC
+      fTmsUpnAvKCWrCIq0Q6PSWalE5+O8j/MstDBdT+W0u8nozyb5jTgqKYqWD/uvGlrSURn6TyMnzj0
+      e2u7qFovnNTc2pUyyfq0r7qXDmPGUwmtwqWyT/NwZugacr73s3DbhycUwg5GltFflEFLU0Nxgz7w
+      8KoAqwoj0F/jjJLbKF4KYFUDMsi4dWg2OlYaSuQ5wXgHGsz+hbcvYYCktEcGohnEQcYaBvMkvB7/
+      AlBLAwQUAAAACACKAH1NAAXq5r8AAAAcAQAAKgAAAFBvc3REZXBsb3lTY3JpcHRzL3Zzb1Byb2pl
+      Y3QuanNvbi50ZW1wbGF0ZW2OPQvCMBCGd8H/EDJb8CNto1uVIg66WHCUNLlCoDYhiYKW/neTtiKC
+      yx28H89dO50ghBt2A7xBuL3k2+v5UOTXU3bMOzzrXQGWG6mdVM2fEMpedwNoqxw6g3lIDminBIxd
+      zjQrZS2dBOvLbRC9/ABjPY6rxhlVfw1vWXU3HHaDUzx1/9heOjwkutmI0EZxsLaAm66Zgx+GG8VQ
+      P4gASMp0SdZzGkG1IBGJeRVRUtEoTWgZrygRjMSfC2H50b0BUEsDBBQAAAAAAIoAfU0AAAAAAAAA
+      AAAAAAAbAAAAUHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvUEsDBBQAAAAIAIoAfU0SWQphawIA
+      AHIFAAAaAAAAUHJvcGVydGllcy9Bc3NlbWJseUluZm8uY3ONVE1v00AQvVfqfxjl0oBImkAToJxo
+      ClUOBdSUSghxWNvjeNvdHWs/0von8Tf4ZcxunDoRDZAcMp59++ZN5o2Dk2YJi8Z51MMrLBXmXpJ5
+      d3gQdk6C8VLjcEa6lgrtAu1K5uj24ebGo6V6C3Z4cHwMF2jQCgVzU5LVIlYCkVHwIDhwDnWmGpAO
+      cjLeklJYgK8shWXFvwglp+g+1kt0Dj1QCcJ7K7Pg0Q1hVgmzxAh22B3ASqiADjyBpkKWTWKTnYpE
+      xwIol8Jz0Xvpq21Nw8OD75v4FN630bX0Cvu9hdS1wg95RWfke89+PIk9R5dbWcdi/d4+0IxMKZfB
+      in/BdC1Msx/wxVIRcv+f0mZUN1YuK8Y/hvDrJ8DL0Xiy79K1FQVqYe/+IjMoHyy2gPQXL9D7OD7u
+      4EY6mSmMMymF4mlpcRdHxIPxTc2RNPzAXnj0hSEPq/ZWYuOrs8+XbBZdk0Hjef4wL6GhAAajdQhE
+      zvZjjsT5J2VpSa+5mOhFMlQUsCWv8xCzeRsQKJIInxh3fdFd66eWHtu+3vHuxdf5eTQ5uy9V4yd2
+      8aZxJTOQ5VpnbemWFzKC8aEmt+6Jpe6UvQiy6PfEm0yMR9PpYDJ9OxmcFK/HA5FlJ4PpBCdigqP8
+      VXHSDeIGrYvbt7UDSc/2HvISOum826jrOigp2HanTiNdokyfS3HLLC37VlqaLg1d/ixIVcCnoDO0
+      XfYK45jX91P2G080Z2muxjxur1AqKWrXmqmbFlFgKdh26XRDw00VO5XcWkHWwPrlFcFHz4+4c3AV
+      3RvIkBs9fdLUbQ/93ng4it995v/Ir8knsb8BUEsDBBQAAAAIAIoAfU28FNk5bwIAADwFAABAAAAA
+      UHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvY2xpNWJ1Y3lmYWxrc21lYTdjZC1XZWItRGVwbG95
+      LnB1YnhtbH1U227iMBB95yu8aF+J6WW1VRVS0dKuKkE3KtBqnyrHmRAvThz5kjb9+rXj0ArI9gWU
+      OTNn5hyPHV69FRzVIBUT5WR4EoyHCEoqUlZuJkOjs9HF8CoahN9Go8EqZwpljAOy/0ZBipIG6RxQ
+      ZRLOVI4rQrdkY7+loKAUEhlqhJHoGRIX+wtUB+iPMIiSElGjtCjYO7QUCeSkZkK6Gu36dBwD2wJS
+      pu04Pr5YXhvG03aOAN2XSMgUJNICcSCyRIWQgEgijO54bFgBqpliGuVaV+oS440ICkalUCLTARUF
+      zl45K7f4am5/72eT0/HFyelJgAajkdUe+9HRSgiunnZWnTurrHmlmgwdr6VVNIeCqAPuFGrgogKJ
+      C5W42fHpeHw2jAYIOWoL6OaXFKZyERuzbsXe0AXoXKTRYjmDiosmxEeQr+hilqxm1oxo+m4k2Nwl
+      0xDiQ9TXzInSa3uGrZs3oszYxkiirbToEVrPQvxFzj5JzInOhCyiadmgm3j9WfqB+AI30VrylZgT
+      U9J8mmmQ3XxRZyLl7EdiaJMRvlUFkJ80DYgT9AqJPUNQQQk6xF8x7YZzgMvbA1fStNJ6QV95+0a5
+      SWFaVS8zokl0R7iz4zDsk3enswRZMwrrx3nUJ0HR4ljG5fn5WYh7GDy1D98zZVvGROd9xCE+yvLF
+      j1AIDU5hnDeKUcIdiPDuJLasun3TktzZi6R+l665XQ7vzn/AfcH7m/i8WD7dfGrpW9PbkiQcdhnX
+      9rGwO+8b9kK+ym6RfCAFRN971X/APvtlSWqIn2cd78dnh85A2aekXeFVU8HBTTmC3RXFB3e0Dbj3
+      IPoHUEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAAAoAAAAAAAAAAAAQAP9BAAAAAEFwcF9TdGFy
+      dC9QSwECFAAUAAAAAACKAH1NAAAAAAAAAAAAAAAADAAAAAAAAAAAABAA/0EoAAAAQ29udHJvbGxl
+      cnMvUEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAAAgAAAAAAAAAAAAQAP9BUgAAAERpYWxvZ3Mv
+      UEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAABIAAAAAAAAAAAAQAP9BeAAAAFBvc3REZXBsb3lT
+      Y3JpcHRzL1BLAQIUABQAAAAAAIoAfU0AAAAAAAAAAAAAAAALAAAAAAAAAAAAEAD/QagAAABQcm9w
+      ZXJ0aWVzL1BLAQIUABQAAAAIAIoAfU2ZqxjsIAAAAB4AAAALAAAAAAAAAAAAAAC2gdEAAAAuZGVw
+      bG95bWVudFBLAQIUABQAAAAIAIoAfU3cKiruMQAAADsAAAAKAAAAAAAAAAAAAAC2gRoBAAAuZ2l0
+      aWdub3JlUEsBAhQAFAAAAAgAigB9TUWH39V9AAAArgAAAAkAAAAAAAAAAAAAAP+BcwEAAGJ1aWxk
+      LmNtZFBLAQIUABQAAAAIAIoAfU0AHmX3xAEAABEEAAALAAAAAAAAAAAAAAC2gRcCAABkZWZhdWx0
+      Lmh0bVBLAQIUABQAAAAIAIoAfU3N6YHBIwUAADoOAAAKAAAAAAAAAAAAAAD/gQQEAABkZXBsb3ku
+      Y21kUEsBAhQAFAAAAAgAigB9TX66W95iAAAAaQAAAAsAAAAAAAAAAAAAALaBTwkAAEdsb2JhbC5h
+      c2F4UEsBAhQAFAAAAAgAigB9TS3R2BnKAgAAHwcAAA4AAAAAAAAAAAAAALaB2gkAAEdsb2JhbC5h
+      c2F4LmNzUEsBAhQAFAAAAAgAigB9TVQZxl5YCwAAE0AAACkAAAAAAAAAAAAAALaB0AwAAE1pY3Jv
+      c29mdC5Cb3QuU2FtcGxlLlNpbXBsZUVjaG9Cb3QuY3Nwcm9qUEsBAhQAFAAAAAgAigB9TSxWh5p+
+      AQAABwQAACYAAAAAAAAAAAAAALaBbxgAAE1pY3Jvc29mdC5Cb3QuU2FtcGxlLlNpbXBsZUVjaG9C
+      b3Quc2xuUEsBAhQAFAAAAAgAigB9TfkDcmMSAgAAZwoAAA8AAAAAAAAAAAAAALaBMRoAAHBhY2th
+      Z2VzLmNvbmZpZ1BLAQIUABQAAAAIAIoAfU1kEz24twAAANUAAAALAAAAAAAAAAAAAAD/gXAcAABw
+      dWJsaXNoLmNtZFBLAQIUABQAAAAIAIoAfU0v4BxG7gEAAH8DAAAJAAAAAAAAAAAAAAC2gVAdAABy
+      ZWFkbWUubWRQSwECFAAUAAAACACKAH1NStW77t8FAACVGQAACgAAAAAAAAAAAAAAtoFlHwAAV2Vi
+      LmNvbmZpZ1BLAQIUABQAAAAIAIoAfU2oZSfpZwIAABMFAAAQAAAAAAAAAAAAAAC2gWwlAABXZWIu
+      RGVidWcuY29uZmlnUEsBAhQAFAAAAAgAigB9TWOmHbN9AgAAUAUAABIAAAAAAAAAAAAAALaBASgA
+      AFdlYi5SZWxlYXNlLmNvbmZpZ1BLAQIUABQAAAAIAIoAfU0OCK4b1QEAAFMFAAAZAAAAAAAAAAAA
+      AAC2ga4qAABBcHBfU3RhcnQvV2ViQXBpQ29uZmlnLmNzUEsBAhQAFAAAAAgAigB9TZx+gKP0AgAA
+      xggAACEAAAAAAAAAAAAAALaBuiwAAENvbnRyb2xsZXJzL01lc3NhZ2VzQ29udHJvbGxlci5jc1BL
+      AQIUABQAAAAIAIoAfU2Ov/hPCAIAAFkGAAAVAAAAAAAAAAAAAAC2ge0vAABEaWFsb2dzL0VjaG9E
+      aWFsb2cuY3NQSwECFAAUAAAACACKAH1NC/6cBU8BAABqAgAANQAAAAAAAAAAAAAAtoEoMgAAUG9z
+      dERlcGxveVNjcmlwdHMvY2xpNWJ1Y3lmYWxrc21lYTdjZC5QdWJsaXNoU2V0dGluZ3NQSwECFAAU
+      AAAACACKAH1N4M95uJEAAADcAAAALQAAAAAAAAAAAAAAtoHKMwAAUG9zdERlcGxveVNjcmlwdHMv
+      Z2l0aHViUHJvamVjdC5qc29uLnRlbXBsYXRlUEsBAhQAFAAAAAgAigB9TfblhxLcAAAApgEAACgA
+      AAAAAAAAAAAAALaBpjQAAFBvc3REZXBsb3lTY3JpcHRzL0luY2x1ZGVTb3VyY2VzLnRhcmdldHNQ
+      SwECFAAUAAAACACKAH1NZEBNtbACAAAhBwAAIAAAAAAAAAAAAAAA/4HINQAAUG9zdERlcGxveVNj
+      cmlwdHMvcHJlcGFyZVNyYy5jbWRQSwECFAAUAAAACACKAH1N72tPdXMAAAB7AAAAJgAAAAAAAAAA
+      AAAAtoG2OAAAUG9zdERlcGxveVNjcmlwdHMvcHVibGlzaC5jbWQudGVtcGxhdGVQSwECFAAUAAAA
+      CACKAH1NNiuxcHUCAABEBQAALQAAAAAAAAAAAAAAtoFtOQAAUG9zdERlcGxveVNjcmlwdHMvcHVi
+      bGlzaFByb2ZpbGUueG1sLnRlbXBsYXRlUEsBAhQAFAAAAAgAigB9Tcoi4NElAQAAMgIAAC4AAAAA
+      AAAAAAAAALaBLTwAAFBvc3REZXBsb3lTY3JpcHRzL3B1Ymxpc2hTZXR0aW5ncy54bWwudGVtcGxh
+      dGVQSwECFAAUAAAACACKAH1NovUrKdQAAAB7AQAAHQAAAAAAAAAAAAAA/4GePQAAUG9zdERlcGxv
+      eVNjcmlwdHMvcnVuR3VscC5jbWRQSwECFAAUAAAACACKAH1NoegHQ4oCAABDBgAAKwAAAAAAAAAA
+      AAAA/4GtPgAAUG9zdERlcGxveVNjcmlwdHMvc2V0dXBHaXRodWJSZW1vdGVSZXBvLmNtZFBLAQIU
+      ABQAAAAIAIoAfU3nyEkFCAMAADIHAAAoAAAAAAAAAAAAAAD/gYBBAABQb3N0RGVwbG95U2NyaXB0
+      cy9zZXR1cFZzb1JlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAigB9TQAF6ua/AAAAHAEAACoAAAAA
+      AAAAAAAAALaBzkQAAFBvc3REZXBsb3lTY3JpcHRzL3Zzb1Byb2plY3QuanNvbi50ZW1wbGF0ZVBL
+      AQIUABQAAAAAAIoAfU0AAAAAAAAAAAAAAAAbAAAAAAAAAAAAEAD/QdVFAABQcm9wZXJ0aWVzL1B1
+      Ymxpc2hQcm9maWxlcy9QSwECFAAUAAAACACKAH1NElkKYWsCAAByBQAAGgAAAAAAAAAAAAAAtoEO
+      RgAAUHJvcGVydGllcy9Bc3NlbWJseUluZm8uY3NQSwECFAAUAAAACACKAH1NvBTZOW8CAAA8BQAA
+      QAAAAAAAAAAAAAAAtoGxSAAAUHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvY2xpNWJ1Y3lmYWxr
+      c21lYTdjZC1XZWItRGVwbG95LnB1YnhtbFBLBQYAAAAAJQAlAFQKAAB+SwAAAAA=
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['21992']
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/octet-stream]
+    method: PUT
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/zip/site/clirepo
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 29 Nov 2018 08:04:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: !!binary |
+      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
+      goRCUVDwaRn/7WGyi80TUEsDBBQAAAAIAIoAfU0L/pwFTwEAAGoCAAA1AAAAUG9zdERlcGxveVNj
+      cmlwdHMvY2xpNWJ1Y3lmYWxrc21lYTdjZC5QdWJsaXNoU2V0dGluZ3N9kl1PwjAUhu/5FUvjLZsL
+      KIQwEnRRLxiZToNedt2BlfVjabvB+PXuSxLj4lXTvuc8ed+es8yLmFGd+tjg1ciylv09VHJPGVh5
+      d24xBw8RRu/iglR7zDLNAc9IMt5BPPYhZ7JCVt1vWT0gAJPKxENBNKR+KDaIszXhNr4UCk4Qa2pA
+      2wLMYjqd9P1cJy0uqrVBArIKDarzezOot5ymKNz5HsKTY7Zhgp/nz7e7YyBJef+ZmaS6BO9bGZqS
+      yBfizt3ZGqvZkbjnV1aY+ddU+2/E7VkJaEMFNlSKdZ630VJj8oXjDCX8k66nRK+bCFQJyn94lEIA
+      aXiRUVQcPPSTvqqr/tFT2Tg51MMraQLqSaqCb6jIrgVECqMkC7EA1gm90xMViTzpzp1NJO8baqNR
+      pQ1wD9WTbn5do1WrLJN6ZWKsQVtOuznO79VZja4v7XJ9A1BLAwQUAAAACACKAH1N4M95uJEAAADc
+      AAAALQAAAFBvc3REZXBsb3lTY3JpcHRzL2dpdGh1YlByb2plY3QuanNvbi50ZW1wbGF0ZW2MMQ+C
+      MBBGdxP+w6WzkZ0NDIODLpg4klpOOBXa9K6YSPjvKulgouv73vumZAWgBt2jykBNp7Koq92xrA/5
+      vpzVelkbZOPJCdnhjwT5M3iEwgpU6EcyCFvbYGw726PT7fLeiTjO0rQl6cJ5Y2wfJedp1PJxLvrO
+      GEvNNTEH5DcXH76w8/aKRn6HB90owmQ1vwBQSwMEFAAAAAgAigB9TfblhxLcAAAApgEAACgAAABQ
+      b3N0RGVwbG95U2NyaXB0cy9JbmNsdWRlU291cmNlcy50YXJnZXRzhZGxTgMxDIb3SrxDFDHQG84V
+      bJDrUiTUBSqVscs1Z7hDSRzFPkTfnhBA5aSqbM5v//bn2GwSvaEV9eFd4Eb3IvEWgG2PvuXaDzYR
+      04vUljx0+I6OIibwvB8H18H1YnGjlxczpUxulDNyeEg0xiJlcUUJV+Tj4PAeI4aOn8Ly8uqUPL9b
+      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
+      Jydwc0dx+5I2EfskBP8AUEsDBBQAAAAIAIoAfU3KIuDRJQEAADICAAAuAAAAUG9zdERlcGxveVNj
+      cmlwdHMvcHVibGlzaFNldHRpbmdzLnhtbC50ZW1wbGF0ZX2SX0vDMBTF3wW/Qwi+rn1wT6MdbLaC
+      sM5qlD6OtL2uweYPSboxxe9uumwdWvEpcM89h1/uvZHqypaZJqGWzq+vEIpOhVzLN9YCUv5dUw4x
+      /izS5YY8vKSb9SJLvyYFlJMEVCsPGPVmhE7uDGwj6xhn5E/5VbejsMBUPKAfnYY9lIZZMIEAO5tO
+      b89mbupjGHHiyI5RZ0B7zJuR5gP6jrxInDdfEFI8PieDVIOxTFDLpFgodeRrrFWzMPyNOUI8R5Cn
+      FQG9A50s76QQUPVhxGomtjEe/nBwbf81NLIH2brx71gN+l7qjq+YeL90VFJYLducCmi9ciLdM1HL
+      vfGEQSX52eFoycFY4DF2G+vHZ/DcS1HtFl9SAwaFfv/hzwNwxaF0PJJvUEsDBBQAAAAIAIoAfU2i
+      9Ssp1AAAAHsBAAAdAAAAUG9zdERlcGxveVNjcmlwdHMvcnVuR3VscC5jbWR9kM9uwjAMxu+R8g4+
+      wmFFPABoE/SAVP4ItsMkpKokLgSSOkqCur39mmxaOQC+xLJ//vzFryhOBFTXnHkMmkSlOUs5zPNN
+      sf5c5qv3crf+2M7yyW99sSo3xdssL3tgMo5Dqgb8Uj5Alu3btnVEYS/RavrOhJEw4AzAXv1J3gCx
+      5tBAt1dDDyeUbPcOo3IkLkpcOqNwuCotYyK8dXSO7fQHh4Kc/NMw2AQIyqAPlbGcySogjAJMp3F3
+      z2SajpxF8HE3qb/cjWcT896IpAaTz0b+X5izH1BLAwQUAAAACACKAH1NoegHQ4oCAABDBgAAKwAA
+      AFBvc3REZXBsb3lTY3JpcHRzL3NldHVwR2l0aHViUmVtb3RlUmVwby5jbWS1VVFP2zAQfq/U/3Cq
+      ZBUekmjbW6VOLVul8QBUtGOTKJqMc6EBJ/ZsRxUC/vvOdkNTQfdGHpzkcvfdd5/vnAmKtQJVFP2e
+      RSeV4LLfM1hB8mFXxKdsjb6y6hIr5fAStYJrE55/WjQ3cK3RWFVzORUCrV2qB6y91aj7c17hk9Ku
+      9J9fbiKeMMgdAq9z0Eo30r9cLS7grnRgPHqhDLg1wvRkAULlCGVtHa8Fxvi47hiMoKEVuBCqqR3U
+      lJNkCggtM/+RqIHz3GL8O6RHh2N8ipweWyNxXTe3cDlbLGE6P4Ujg3+b0qANFViwQmk83mbaChHQ
+      99jRBxTOw241Ocqx4I0Mpl+zk8XpcvYnLOfTs9nxx283bXUrrJHjtXPajrKM6zKNBadCVXteJPyY
+      feqa5pt8zD5HS1v5mH3p98oChqy1sOF4PBzCvtObilkLrFWXD9slZyP2mpZNdiT3fLJdWl9HlJE2
+      FERjZEf97X70e7qx6xzSdLXZbIxSZHGPGmGurPuOWqrHhTCldnYVE85jXHpPfZM6rHRo6WfwLZMg
+      2Gz1RKXtylq9dBhld/AV2HJ2NmfvwPV7NOYyEk1+wOCbqh3WLlkSnxFwrWUpuB+vzHsPIGngkDqQ
+      5DCYHMxEsb9hfkH9/IpgJMv8aGWhp7djV/2PLM1z3u+19zDsYWraTo9ivpU3+pY1nQBhg0LR/jzw
+      ps6rUHVR3oV5T8MkDbrVDg54am7tRpn81dvLccgZK15KGDSulJNb5QpDaSj4wXdVN4bnVMIeRlXR
+      LalgoEkvbtAXHs5OsKoxAn0aZ5TsongpvN6hwRlU3Do0Ox23GkrkNcH4AOsa/wd4K2GApN1JDCQF
+      xD5vYbDOw//iH1BLAwQUAAAACACKAH1N58hJBQgDAAAyBwAAKAAAAFBvc3REZXBsb3lTY3JpcHRz
+      L3NldHVwVnNvUmVtb3RlUmVwby5jbWS1VV1r2zAUfQ/kP1wCIivMzrquMALZ0naB7aFtSNJusJSi
+      yTeJW9kSkpxQuu6370q287G0D3toCIl1pXt07rkf7qNYKFCzWbNh0UkluGw2DGYQvdqnxKfbCn1t
+      1Qgz5XCEWsHPZb28Cc9XFs0Fz6rVEI1VOZcnQqC1E3WPOW1oo+78mUelXeq3n25KfGGQOwSeJ6CV
+      LqRfXI8vYZ46MP62mTLgFggnp2MQKkFIc+t4LrD0L389I0+oC4WRJFPw8DA2Jbw3GM9jWDinbbfT
+      4Su0KsNfysXL1BZcWlckqYqFyuCgglO2DooQ6Qm4EKrIHeRkqvF1FanfpFDB+VjXfJ7Rofuym78l
+      ocfa6LmPBuMJcJ2WkLWCAWOHBm2gcN65EvNNgjNeyGD6Pjgdf5sMbsPPxcn54OD164ZqhnLn83Fl
+      ZI8d7lhIzR57v20arpIeOyotdZQ99qHZSGfQZrWFtXu9dht2D+1Fx0qYpXV2pJTrsTUPVl+plWdV
+      VwPb0GJdtibE+hvP7p+PrHNLBdnZkNlccxY0H5ZJ+G/YKlNCSUnu1BmdW8q47VRJtZ9pFS2pYmir
+      dxS/azbK9FG5gPC1vsl65dJs6MIuEojj6Wq1MiRCs+EeNMJQWfcFtVQPY2FS7ezUV2npFN9RScYO
+      Mx0a8Df4aowQbGf6SBpv9J0+bYnQmcMnYJPB+ZD9i9Vs0ISSJcXoK7TOVO4wd9GEmHSpqLVMBQ/x
+      +tMtgCiBVv95rBZEP2B4Sc0AbE9xyoTJXiQRJphE1GGMHB5TXELliV1PlaAd0Qg6KgofHb6lndQC
+      fTmsUpnAvKCWrCIq0Q6PSWalE5+O8j/MstDBdT+W0u8nozyb5jTgqKYqWD/uvGlrSURn6TyMnzj0
+      e2u7qFovnNTc2pUyyfq0r7qXDmPGUwmtwqWyT/NwZugacr73s3DbhycUwg5GltFflEFLU0Nxgz7w
+      8KoAqwoj0F/jjJLbKF4KYFUDMsi4dWg2OlYaSuQ5wXgHGsz+hbcvYYCktEcGohnEQcYaBvMkvB7/
+      AlBLAwQUAAAACACKAH1NAAXq5r8AAAAcAQAAKgAAAFBvc3REZXBsb3lTY3JpcHRzL3Zzb1Byb2pl
+      Y3QuanNvbi50ZW1wbGF0ZW2OPQvCMBCGd8H/EDJb8CNto1uVIg66WHCUNLlCoDYhiYKW/neTtiKC
+      yx28H89dO50ghBt2A7xBuL3k2+v5UOTXU3bMOzzrXQGWG6mdVM2fEMpedwNoqxw6g3lIDminBIxd
+      zjQrZS2dBOvLbRC9/ABjPY6rxhlVfw1vWXU3HHaDUzx1/9heOjwkutmI0EZxsLaAm66Zgx+GG8VQ
+      P4gASMp0SdZzGkG1IBGJeRVRUtEoTWgZrygRjMSfC2H50b0BUEsDBBQAAAAAAIoAfU0AAAAAAAAA
+      AAAAAAAbAAAAUHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvUEsDBBQAAAAIAIoAfU0SWQphawIA
+      AHIFAAAaAAAAUHJvcGVydGllcy9Bc3NlbWJseUluZm8uY3ONVE1v00AQvVfqfxjl0oBImkAToJxo
+      ClUOBdSUSghxWNvjeNvdHWs/0von8Tf4ZcxunDoRDZAcMp59++ZN5o2Dk2YJi8Z51MMrLBXmXpJ5
+      d3gQdk6C8VLjcEa6lgrtAu1K5uj24ebGo6V6C3Z4cHwMF2jQCgVzU5LVIlYCkVHwIDhwDnWmGpAO
+      cjLeklJYgK8shWXFvwglp+g+1kt0Dj1QCcJ7K7Pg0Q1hVgmzxAh22B3ASqiADjyBpkKWTWKTnYpE
+      xwIol8Jz0Xvpq21Nw8OD75v4FN630bX0Cvu9hdS1wg95RWfke89+PIk9R5dbWcdi/d4+0IxMKZfB
+      in/BdC1Msx/wxVIRcv+f0mZUN1YuK8Y/hvDrJ8DL0Xiy79K1FQVqYe/+IjMoHyy2gPQXL9D7OD7u
+      4EY6mSmMMymF4mlpcRdHxIPxTc2RNPzAXnj0hSEPq/ZWYuOrs8+XbBZdk0Hjef4wL6GhAAajdQhE
+      zvZjjsT5J2VpSa+5mOhFMlQUsCWv8xCzeRsQKJIInxh3fdFd66eWHtu+3vHuxdf5eTQ5uy9V4yd2
+      8aZxJTOQ5VpnbemWFzKC8aEmt+6Jpe6UvQiy6PfEm0yMR9PpYDJ9OxmcFK/HA5FlJ4PpBCdigqP8
+      VXHSDeIGrYvbt7UDSc/2HvISOum826jrOigp2HanTiNdokyfS3HLLC37VlqaLg1d/ixIVcCnoDO0
+      XfYK45jX91P2G080Z2muxjxur1AqKWrXmqmbFlFgKdh26XRDw00VO5XcWkHWwPrlFcFHz4+4c3AV
+      3RvIkBs9fdLUbQ/93ng4it995v/Ir8knsb8BUEsDBBQAAAAIAIoAfU28FNk5bwIAADwFAABAAAAA
+      UHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvY2xpNWJ1Y3lmYWxrc21lYTdjZC1XZWItRGVwbG95
+      LnB1YnhtbH1U227iMBB95yu8aF+J6WW1VRVS0dKuKkE3KtBqnyrHmRAvThz5kjb9+rXj0ArI9gWU
+      OTNn5hyPHV69FRzVIBUT5WR4EoyHCEoqUlZuJkOjs9HF8CoahN9Go8EqZwpljAOy/0ZBipIG6RxQ
+      ZRLOVI4rQrdkY7+loKAUEhlqhJHoGRIX+wtUB+iPMIiSElGjtCjYO7QUCeSkZkK6Gu36dBwD2wJS
+      pu04Pr5YXhvG03aOAN2XSMgUJNICcSCyRIWQgEgijO54bFgBqpliGuVaV+oS440ICkalUCLTARUF
+      zl45K7f4am5/72eT0/HFyelJgAajkdUe+9HRSgiunnZWnTurrHmlmgwdr6VVNIeCqAPuFGrgogKJ
+      C5W42fHpeHw2jAYIOWoL6OaXFKZyERuzbsXe0AXoXKTRYjmDiosmxEeQr+hilqxm1oxo+m4k2Nwl
+      0xDiQ9TXzInSa3uGrZs3oszYxkiirbToEVrPQvxFzj5JzInOhCyiadmgm3j9WfqB+AI30VrylZgT
+      U9J8mmmQ3XxRZyLl7EdiaJMRvlUFkJ80DYgT9AqJPUNQQQk6xF8x7YZzgMvbA1fStNJ6QV95+0a5
+      SWFaVS8zokl0R7iz4zDsk3enswRZMwrrx3nUJ0HR4ljG5fn5WYh7GDy1D98zZVvGROd9xCE+yvLF
+      j1AIDU5hnDeKUcIdiPDuJLasun3TktzZi6R+l665XQ7vzn/AfcH7m/i8WD7dfGrpW9PbkiQcdhnX
+      9rGwO+8b9kK+ym6RfCAFRN971X/APvtlSWqIn2cd78dnh85A2aekXeFVU8HBTTmC3RXFB3e0Dbj3
+      IPoHUEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAAAoAAAAAAAAAAAAQAP9BAAAAAEFwcF9TdGFy
+      dC9QSwECFAAUAAAAAACKAH1NAAAAAAAAAAAAAAAADAAAAAAAAAAAABAA/0EoAAAAQ29udHJvbGxl
+      cnMvUEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAAAgAAAAAAAAAAAAQAP9BUgAAAERpYWxvZ3Mv
+      UEsBAhQAFAAAAAAAigB9TQAAAAAAAAAAAAAAABIAAAAAAAAAAAAQAP9BeAAAAFBvc3REZXBsb3lT
+      Y3JpcHRzL1BLAQIUABQAAAAAAIoAfU0AAAAAAAAAAAAAAAALAAAAAAAAAAAAEAD/QagAAABQcm9w
+      ZXJ0aWVzL1BLAQIUABQAAAAIAIoAfU2ZqxjsIAAAAB4AAAALAAAAAAAAAAAAAAC2gdEAAAAuZGVw
+      bG95bWVudFBLAQIUABQAAAAIAIoAfU3cKiruMQAAADsAAAAKAAAAAAAAAAAAAAC2gRoBAAAuZ2l0
+      aWdub3JlUEsBAhQAFAAAAAgAigB9TUWH39V9AAAArgAAAAkAAAAAAAAAAAAAAP+BcwEAAGJ1aWxk
+      LmNtZFBLAQIUABQAAAAIAIoAfU0AHmX3xAEAABEEAAALAAAAAAAAAAAAAAC2gRcCAABkZWZhdWx0
+      Lmh0bVBLAQIUABQAAAAIAIoAfU3N6YHBIwUAADoOAAAKAAAAAAAAAAAAAAD/gQQEAABkZXBsb3ku
+      Y21kUEsBAhQAFAAAAAgAigB9TX66W95iAAAAaQAAAAsAAAAAAAAAAAAAALaBTwkAAEdsb2JhbC5h
+      c2F4UEsBAhQAFAAAAAgAigB9TS3R2BnKAgAAHwcAAA4AAAAAAAAAAAAAALaB2gkAAEdsb2JhbC5h
+      c2F4LmNzUEsBAhQAFAAAAAgAigB9TVQZxl5YCwAAE0AAACkAAAAAAAAAAAAAALaB0AwAAE1pY3Jv
+      c29mdC5Cb3QuU2FtcGxlLlNpbXBsZUVjaG9Cb3QuY3Nwcm9qUEsBAhQAFAAAAAgAigB9TSxWh5p+
+      AQAABwQAACYAAAAAAAAAAAAAALaBbxgAAE1pY3Jvc29mdC5Cb3QuU2FtcGxlLlNpbXBsZUVjaG9C
+      b3Quc2xuUEsBAhQAFAAAAAgAigB9TfkDcmMSAgAAZwoAAA8AAAAAAAAAAAAAALaBMRoAAHBhY2th
+      Z2VzLmNvbmZpZ1BLAQIUABQAAAAIAIoAfU1kEz24twAAANUAAAALAAAAAAAAAAAAAAD/gXAcAABw
+      dWJsaXNoLmNtZFBLAQIUABQAAAAIAIoAfU0v4BxG7gEAAH8DAAAJAAAAAAAAAAAAAAC2gVAdAABy
+      ZWFkbWUubWRQSwECFAAUAAAACACKAH1NStW77t8FAACVGQAACgAAAAAAAAAAAAAAtoFlHwAAV2Vi
+      LmNvbmZpZ1BLAQIUABQAAAAIAIoAfU2oZSfpZwIAABMFAAAQAAAAAAAAAAAAAAC2gWwlAABXZWIu
+      RGVidWcuY29uZmlnUEsBAhQAFAAAAAgAigB9TWOmHbN9AgAAUAUAABIAAAAAAAAAAAAAALaBASgA
+      AFdlYi5SZWxlYXNlLmNvbmZpZ1BLAQIUABQAAAAIAIoAfU0OCK4b1QEAAFMFAAAZAAAAAAAAAAAA
+      AAC2ga4qAABBcHBfU3RhcnQvV2ViQXBpQ29uZmlnLmNzUEsBAhQAFAAAAAgAigB9TZx+gKP0AgAA
+      xggAACEAAAAAAAAAAAAAALaBuiwAAENvbnRyb2xsZXJzL01lc3NhZ2VzQ29udHJvbGxlci5jc1BL
+      AQIUABQAAAAIAIoAfU2Ov/hPCAIAAFkGAAAVAAAAAAAAAAAAAAC2ge0vAABEaWFsb2dzL0VjaG9E
+      aWFsb2cuY3NQSwECFAAUAAAACACKAH1NC/6cBU8BAABqAgAANQAAAAAAAAAAAAAAtoEoMgAAUG9z
+      dERlcGxveVNjcmlwdHMvY2xpNWJ1Y3lmYWxrc21lYTdjZC5QdWJsaXNoU2V0dGluZ3NQSwECFAAU
+      AAAACACKAH1N4M95uJEAAADcAAAALQAAAAAAAAAAAAAAtoHKMwAAUG9zdERlcGxveVNjcmlwdHMv
+      Z2l0aHViUHJvamVjdC5qc29uLnRlbXBsYXRlUEsBAhQAFAAAAAgAigB9TfblhxLcAAAApgEAACgA
+      AAAAAAAAAAAAALaBpjQAAFBvc3REZXBsb3lTY3JpcHRzL0luY2x1ZGVTb3VyY2VzLnRhcmdldHNQ
+      SwECFAAUAAAACACKAH1NZEBNtbACAAAhBwAAIAAAAAAAAAAAAAAA/4HINQAAUG9zdERlcGxveVNj
+      cmlwdHMvcHJlcGFyZVNyYy5jbWRQSwECFAAUAAAACACKAH1N72tPdXMAAAB7AAAAJgAAAAAAAAAA
+      AAAAtoG2OAAAUG9zdERlcGxveVNjcmlwdHMvcHVibGlzaC5jbWQudGVtcGxhdGVQSwECFAAUAAAA
+      CACKAH1NNiuxcHUCAABEBQAALQAAAAAAAAAAAAAAtoFtOQAAUG9zdERlcGxveVNjcmlwdHMvcHVi
+      bGlzaFByb2ZpbGUueG1sLnRlbXBsYXRlUEsBAhQAFAAAAAgAigB9Tcoi4NElAQAAMgIAAC4AAAAA
+      AAAAAAAAALaBLTwAAFBvc3REZXBsb3lTY3JpcHRzL3B1Ymxpc2hTZXR0aW5ncy54bWwudGVtcGxh
+      dGVQSwECFAAUAAAACACKAH1NovUrKdQAAAB7AQAAHQAAAAAAAAAAAAAA/4GePQAAUG9zdERlcGxv
+      eVNjcmlwdHMvcnVuR3VscC5jbWRQSwECFAAUAAAACACKAH1NoegHQ4oCAABDBgAAKwAAAAAAAAAA
+      AAAA/4GtPgAAUG9zdERlcGxveVNjcmlwdHMvc2V0dXBHaXRodWJSZW1vdGVSZXBvLmNtZFBLAQIU
+      ABQAAAAIAIoAfU3nyEkFCAMAADIHAAAoAAAAAAAAAAAAAAD/gYBBAABQb3N0RGVwbG95U2NyaXB0
+      cy9zZXR1cFZzb1JlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAigB9TQAF6ua/AAAAHAEAACoAAAAA
+      AAAAAAAAALaBzkQAAFBvc3REZXBsb3lTY3JpcHRzL3Zzb1Byb2plY3QuanNvbi50ZW1wbGF0ZVBL
+      AQIUABQAAAAAAIoAfU0AAAAAAAAAAAAAAAAbAAAAAAAAAAAAEAD/QdVFAABQcm9wZXJ0aWVzL1B1
+      Ymxpc2hQcm9maWxlcy9QSwECFAAUAAAACACKAH1NElkKYWsCAAByBQAAGgAAAAAAAAAAAAAAtoEO
+      RgAAUHJvcGVydGllcy9Bc3NlbWJseUluZm8uY3NQSwECFAAUAAAACACKAH1NvBTZOW8CAAA8BQAA
+      QAAAAAAAAAAAAAAAtoGxSAAAUHJvcGVydGllcy9QdWJsaXNoUHJvZmlsZXMvY2xpNWJ1Y3lmYWxr
+      c21lYTdjZC1XZWItRGVwbG95LnB1YnhtbFBLBQYAAAAAJQAlAFQKAAB+SwAAAAA=
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['21992']
+      User-Agent: [python-requests/2.20.1]
+      content-type: [application/octet-stream]
+    method: POST
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/zipdeploy
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 29 Nov 2018 08:05:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.20.1]
+    method: GET
+    uri: https://cli000002a7cd.scm.azurewebsites.net/api/deployments/mock-deployment
+  response:
+    body: {string: '{"id":"a10e926de5e34c38b069e01e5b873833","status":4,"status_text":"","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"","received_time":"2018-11-29T08:04:26.1000945Z","start_time":"2018-11-29T08:04:26.1938155Z","end_time":"2018-11-29T08:05:52.7085582Z","last_success_end_time":"2018-11-29T08:05:52.7085582Z","complete":true,"active":true,"is_temp":false,"is_readonly":true,"url":"https://cli000002a7cd.scm.azurewebsites.net/api/deployments/latest","log_url":"https://cli000002a7cd.scm.azurewebsites.net/api/deployments/latest/log","site_name":"cli000002a7cd","provisioningState":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['670']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Nov 2018 08:05:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [ARRAffinity=f1ba48d7b8df661f363518eff27837a5a9ca49d4cfcfa8e02f3b18d8bfc6eb7c;Path=/;HttpOnly;Domain=cli5bucyfalksmea7cd.scm.azurewebsites.net]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [bot delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 29 Nov 2018 08:05:56 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [--name --yes --no-wait]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 29 Nov 2018 08:05:57 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc1UVYyT1paWUxPLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
+    status: {code: 202, message: Accepted}
+version: 1
