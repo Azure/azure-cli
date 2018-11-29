@@ -326,6 +326,11 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
+    with self.argument_context('webapp up') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
+
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
