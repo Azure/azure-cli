@@ -81,7 +81,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     # Source control triggers are exclusive
     if commit_trigger_enabled and pull_request_trigger_enabled:
         raise CLIError("Only one source control trigger type can be enabled at a time: "
-                       "[--commit-trigger-enabled] or [--pull-request-trigger-enabled]")
+                       "[--commit-trigger-enabled] | [--pull-request-trigger-enabled]")
 
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
@@ -236,7 +236,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     # Source control triggers are exclusive
     if commit_trigger_enabled and pull_request_trigger_enabled:
         raise CLIError("Only one source control trigger type can be enabled at a time: "
-                       "[--commit-trigger-enabled] or [--pull-request-trigger-enabled]")
+                       "[--commit-trigger-enabled] | [--pull-request-trigger-enabled]")
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
