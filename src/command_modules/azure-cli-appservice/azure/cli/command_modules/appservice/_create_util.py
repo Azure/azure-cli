@@ -263,6 +263,6 @@ def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
             _check_resource_group_supports_os(cmd, default_rg, is_linux)):
         return False
     elif (_check_resource_group_exists(cmd, rg_name) and
-            _check_resource_group_supports_os(cmd, rg_name, is_linux)):
+          _check_resource_group_supports_os(cmd, rg_name, is_linux)):
         return False
     return True
