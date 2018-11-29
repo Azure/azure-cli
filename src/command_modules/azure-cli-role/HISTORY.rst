@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.11
+++++++
+* support custom identifier for password credential 
+
 2.1.10
 ++++++
 * `ad app update`: address a failure caused by updating immutable credentials
