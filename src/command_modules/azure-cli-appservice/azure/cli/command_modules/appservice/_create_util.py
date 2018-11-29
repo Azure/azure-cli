@@ -100,9 +100,9 @@ def check_if_asp_exists(cmd, rg_name, asp_name, location):
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
         if (item.name.lower() == asp_name.lower() and
-           (item.location.replace(" ", "").lower() == location or
-                item.location == location)):
-                return True
+                item.location.replace(" ", "").lower() == location or
+                item.location == location):
+            return True
     return False
 
 
@@ -261,8 +261,8 @@ def set_location(cmd, sku, location):
 def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
     if (default_rg and _check_resource_group_exists(cmd, default_rg) and
             _check_resource_group_supports_os(cmd, default_rg, is_linux)):
-            return False
+        return False
     elif (_check_resource_group_exists(cmd, rg_name) and
             _check_resource_group_supports_os(cmd, rg_name, is_linux)):
-            return False
+        return False
     return True

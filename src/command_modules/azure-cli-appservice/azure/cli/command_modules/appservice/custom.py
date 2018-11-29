@@ -1982,7 +1982,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization, timeout=N
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
         raise ValueError("""Deployment is taking longer than expected. Please verify
-                            status at '%s' beforing launching the app""", deployment_status_url)
+                            status at '{}' beforing launching the app""".format(deployment_status_url))
     return res_dict
 
 
