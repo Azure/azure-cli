@@ -271,11 +271,23 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
-                    tags=None):
+                    tags=None,
+                    force=None):
 
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
+    from msrestazure.azure_exceptions import CloudError
+
+    # if force was not specified check if the vault exists before creating it, if so raise an error to the user
+    if not force:
+        try:
+            client.get(resource_group_name, vault_name);
+            raise CLIError('The vault, %s, already exits.  To update the vault use the az keyvault update command, '
+                           'or to replace it use the --force argument.' % vault_name)
+        except CloudError as e:
+            if e.error.error != 'ResourceNotFound':
+                raise e
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)

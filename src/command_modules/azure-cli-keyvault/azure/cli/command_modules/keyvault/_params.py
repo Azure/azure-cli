@@ -75,6 +75,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('force', arg_type=get_three_state_flag(), help='Force the replacement of the vault if it exists.  All vault properties will be overwritten, but data protected in the vault will remain intact.')
 
     for item in ['recover', 'purge']:
         with self.argument_context('keyvault ' + item) as c:
