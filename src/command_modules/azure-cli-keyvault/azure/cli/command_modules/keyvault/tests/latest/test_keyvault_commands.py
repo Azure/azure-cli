@@ -34,7 +34,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
 
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
-    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --force --sku premium {add}')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -87,6 +87,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('[0].location', '{loc}'),
             self.check('[0].resourceGroup', '{rg}')
         ])
+
+        # test that create fails for existing vault w/o --force arg
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enabled-for-deployment', expect_failure = True)
+
+        # test that create succeeds for existing vault with --force arg
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enabled-for-deployment --force')
+
         # test updating keyvault sku name
         self.cmd('keyvault update -g {rg} -n {kv} --set properties.sku.name=premium', checks=[
             self.check('name', '{kv}'),
@@ -124,7 +131,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('length(properties.accessPolicies)', 0)
         ])
 
-        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true', checks=[
+        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
+                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true', checks=[
             self.check('properties.enabledForDeployment', True),
             self.check('properties.enabledForDiskEncryption', True),
             self.check('properties.enabledForTemplateDeployment', True)
@@ -746,9 +754,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         # delete restore and purge the vault
         self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault restore -n {kv}')
+        self.cmd('keyvault recover -n {kv}')
         self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault restore -n {kv} -l {loc}')
+        self.cmd('keyvault recover -n {kv} -l {loc}')
+        self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
 
