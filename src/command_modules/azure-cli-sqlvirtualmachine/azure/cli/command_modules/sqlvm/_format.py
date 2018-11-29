@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import LongRunningOperation
-
+# pylint:disable=line-too-long
 
 def transform_sqlvm_group_output(result):
     '''
@@ -16,15 +15,15 @@ def transform_sqlvm_group_output(result):
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         wsfc_object = format_wsfc_domain_profile(result.wsfc_domain_profile)
         #Create a dictionary with the relevant parameters
-        output = OrderedDict   ([('id', result.id),
-                                 ('location', result.location),
-                                 ('name', result.name),
-                                 ('provisioningState', result.provisioning_state),
-                                 ('sqlImageOffer', result.sql_image_offer),
-                                 ('sqlImageSku', result.sql_image_sku),
-                                 ('resourceGroup', resource_group),
-                                 ('wsfcDomainProfile', wsfc_object),
-                                 ('tags', result.tags)])
+        output = OrderedDict([('id', result.id),
+                              ('location', result.location),
+                              ('name', result.name),
+                              ('provisioningState', result.provisioning_state),
+                              ('sqlImageOffer', result.sql_image_offer),
+                              ('sqlImageSku', result.sql_image_sku),
+                              ('resourceGroup', resource_group),
+                              ('wsfcDomainProfile', wsfc_object),
+                              ('tags', result.tags)])
         return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse
@@ -48,16 +47,16 @@ def transform_sqlvm_output(result):
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         #Create a dictionary with the relevant parameters
-        output = OrderedDict   ([('id', result.id),
-                                 ('location', result.location),
-                                 ('name', result.name),
-                                 ('provisioningState', result.provisioning_state),
-                                 ('sqlImageOffer', result.sql_image_offer),
-                                 ('sqlImageSku', result.sql_image_sku),
-                                 ('resourceGroup', resource_group),
-                                 ('sqlServerLicenseType', result.sql_server_license_type),
-                                 ('virtualMachineResourceId', result.virtual_machine_resource_id),
-                                 ('tags', result.tags)])
+        output = OrderedDict([('id', result.id),
+                              ('location', result.location),
+                              ('name', result.name),
+                              ('provisioningState', result.provisioning_state),
+                              ('sqlImageOffer', result.sql_image_offer),
+                              ('sqlImageSku', result.sql_image_sku),
+                              ('resourceGroup', resource_group),
+                              ('sqlServerLicenseType', result.sql_server_license_type),
+                              ('virtualMachineResourceId', result.virtual_machine_resource_id),
+                              ('tags', result.tags)])
 
         #Note, wsfcDomainCredentials will not display
         if result.sql_virtual_machine_group_resource_id is not None:
@@ -86,11 +85,11 @@ def transform_aglistener_output(result):
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         #Create a dictionary with the relevant parameters
-        output = OrderedDict   ([('id', result.id),
-                                 ('name', result.name),
-                                 ('provisioningState', result.provisioning_state),
-                                 ('port', result.port),
-                                 ('resourceGroup', resource_group)])
+        output = OrderedDict([('id', result.id),
+                              ('name', result.name),
+                              ('provisioningState', result.provisioning_state),
+                              ('port', result.port),
+                              ('resourceGroup', resource_group)])
 
         #Note, wsfcDomainCredentials will not display
         if result.load_balancer_configurations is not None:
@@ -265,10 +264,12 @@ def format_server_configuration_management_settings(result):
     Formats the ServerConfigurationsManagementSettings object removing arguments that are empty
     '''
     from collections import OrderedDict
-    order_dict = OrderedDict([('sqlConnectivityUpdateSettings', format_sql_connectivity_update_settings(result.sql_connectivity_update_settings)),
-                                ('sqlWorkloadTypeUpdateSettings', format_sql_workload_type_update_settings(result.sql_workload_type_update_settings)),
-                                ('sqlStorageUpdateSettings', format_sql_storage_update_settings(result.sql_storage_update_settings)),
-                                ('additionalFeaturesServerConfigurations', format_additional_features_server_configurations(result.additional_features_server_configurations))])
+    order_dict = OrderedDict([('sqlConnectivityUpdateSettings',
+                               format_sql_connectivity_update_settings(result.sql_connectivity_update_settings)),
+                              ('sqlWorkloadTypeUpdateSettings', format_sql_workload_type_update_settings(result.sql_workload_type_update_settings)),
+                              ('sqlStorageUpdateSettings', format_sql_storage_update_settings(result.sql_storage_update_settings)),
+                              ('additionalFeaturesServerConfigurations',
+                               format_additional_features_server_configurations(result.additional_features_server_configurations))])
 
     return order_dict
 
@@ -316,5 +317,3 @@ def format_sql_workload_type_update_settings(result):
         order_dict['sqlWorkloadType'] = result.sql_workload_type
 
     return order_dict
-
-

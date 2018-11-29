@@ -6,18 +6,6 @@
 def get_sqlvirtualmachine_management_client(cli_ctx):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.sqlvirtualmachine import SqlVirtualMachineManagementClient
-    from msrest.authentication import Authentication
-    from os import getenv
-
-    # Allow overriding SQL resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    sql_rm_override = getenv('_AZURE_CLI_SQL_RM_URI')
-    if sql_rm_override:
-        return SqlVirtualMachineManagementClient(
-            subscription_id=getenv('_AZURE_CLI_SQL_SUB_ID'),
-            base_url=sql_rm_override,
-            credentials=Authentication())  # No authentication
 
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, SqlVirtualMachineManagementClient)
