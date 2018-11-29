@@ -276,6 +276,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
+    from msrestazure.azure_exceptions import CloudError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
