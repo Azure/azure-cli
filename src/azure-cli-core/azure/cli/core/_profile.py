@@ -569,8 +569,8 @@ class Profile(object):
                                                               account[_TENANT_ID], resource)
         else:
             creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           account[_TENANT_ID],
-                                                                           resource)
+                                                                           resource,
+                                                                           account[_TENANT_ID])
         return (creds,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
