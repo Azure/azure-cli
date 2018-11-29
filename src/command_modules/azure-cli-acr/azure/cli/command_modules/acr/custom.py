@@ -12,7 +12,9 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     Registry,
     RegistryUpdateParameters,
     StorageAccountProperties,
-    Sku
+    Sku,
+    SkuName,
+    NetworkRuleSet
 )
 
 from ._constants import MANAGED_REGISTRY_SKU, CLASSIC_REGISTRY_SKU
@@ -27,6 +29,7 @@ from ._utils import (
     get_resource_id_by_storage_account_name
 )
 from ._docker_utils import get_login_credentials
+from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 
 logger = get_logger(__name__)
 
@@ -49,7 +52,11 @@ def acr_create(cmd,
                location=None,
                storage_account_name=None,
                admin_enabled=False,
+               default_action=None,
                deployment_name=None):
+    if default_action and sku != SkuName.premium.value:
+        raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
+
     if sku in MANAGED_REGISTRY_SKU and storage_account_name:
         raise CLIError("Please specify '--sku {}' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
@@ -100,6 +107,8 @@ def acr_create(cmd,
                 "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
                 registry_name, sku)
         registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled)
+        if default_action:
+            registry.network_rule_set = NetworkRuleSet(default_action=default_action)
         return client.create(resource_group_name, registry_name, registry)
 
 
@@ -118,6 +127,7 @@ def acr_update_custom(cmd,
                       sku=None,
                       storage_account_name=None,
                       admin_enabled=None,
+                      default_action=None,
                       tags=None):
     if sku is not None:
         instance.sku = Sku(name=sku)
@@ -132,6 +142,9 @@ def acr_update_custom(cmd,
     if tags is not None:
         instance.tags = tags
 
+    if default_action is not None:
+        instance.network_rule_set = NetworkRuleSet(default_action=default_action)
+
     return instance
 
 
@@ -145,6 +158,9 @@ def acr_update_set(cmd,
                    resource_group_name=None,
                    parameters=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+
+    if parameters.network_rule_set and registry.sku.name != SkuName.premium.value:
+        raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
     validate_sku_update(registry.sku.name, parameters.sku)
 

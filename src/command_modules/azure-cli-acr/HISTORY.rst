@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.13
+++++++
+* Add support for VNet/IP rules.
+
 2.1.12
 ++++++
 * Allow force push a helm chart that doesn't exist.

@@ -103,6 +103,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         operations_tmpl='azure.cli.command_modules.acr.helm#{}'
     )
 
+    acr_network_rule_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.network_rule#{}',
+        client_factory=cf_acr_registries
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -216,3 +221,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_helm_delete')
         g.command('push', 'acr_helm_push')
         g.command('repo add', 'acr_helm_repo_add')
+
+    with self.command_group('acr network-rule', acr_network_rule_util) as g:
+        g.command('list', 'acr_network_rule_list')
+        g.command('add', 'acr_network_rule_add')
+        g.command('remove', 'acr_network_rule_remove')
