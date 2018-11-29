@@ -71,6 +71,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('length(properties.accessPolicies)', 1),
             self.check('properties.sku.name', 'standard')
         ]).get_output_in_json()
+
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[
             self.check('name', '{kv}'),
@@ -743,8 +744,11 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key purge --vault-name {kv} -n key2')
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
-        # delete and purge the vault
+        # delete restore and purge the vault
         self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault restore -n {kv}')
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault restore -n {kv} -l {loc}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
 
