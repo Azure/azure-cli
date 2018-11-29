@@ -216,7 +216,7 @@ def load_arguments(self, _):
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
     with self.argument_context('aks scale') as c:
-        c.argument('nodepool_name', type=str, default='nodepool1',
+        c.argument('nodepool_name', type=str,
                    help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
 
     with self.argument_context('aks upgrade-connector') as c:
