@@ -4,7 +4,9 @@ Release History
 ===============
 0.2.8
 +++++
+* webapp: adding support for az webapp up command (Preview) that helps in creating & deploying contents to app
 * webapp: fix a bug on container based windows app due to backend change
+
 
 0.2.7
 +++++
