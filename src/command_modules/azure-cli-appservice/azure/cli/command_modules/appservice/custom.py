@@ -1972,7 +1972,7 @@ def _check_zip_deployment_status(deployment_status_url, authorization, timeout=N
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
-        if res_dict.get('status', 0) == 5:
+        if res_dict.get('status', 0) == 3:
             logger.warning("Zip deployment failed status %s", res_dict['status_text'])
             break
         elif res_dict.get('status', 0) == 4:
