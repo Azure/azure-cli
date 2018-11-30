@@ -5,7 +5,6 @@
 from __future__ import print_function
 
 from collections import Counter, OrderedDict
-import mock
 
 from knack.log import get_logger
 
@@ -3503,8 +3502,8 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
 def _legacy_generate_vpn_client_initial(
         self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None,
         raw=False, **operation_config):
+    import uuid
     from msrest.pipeline import ClientRawResponse
-    from msrestazure.azure_exceptions import CloudError
 
     # Construct URL
     url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnclientpackage'
@@ -3553,6 +3552,7 @@ def _legacy_generate_vpn_client_initial(
 
     return deserialized
 
+
 # pylint: disable=line-too-long, protected-access, mixed-line-endings
 def _legacy_generate_vpn_client(
         self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False,
@@ -3570,6 +3570,7 @@ def _legacy_generate_vpn_client(
         raw=True,
         **operation_config
     )
+
     def get_long_running_output(response):
         deserialized = self._deserialize('str', response)
 
@@ -3581,9 +3582,12 @@ def _legacy_generate_vpn_client(
     lro_delay = operation_config.get(
         'long_running_operation_timeout',
         self.config.long_running_operation_timeout)
-    if polling is True: polling_method = ARMPolling(lro_delay, **operation_config)
-    elif polling is False: polling_method = NoPolling()
-    else: polling_method = polling
+    if polling is True:
+        polling_method = ARMPolling(lro_delay, **operation_config)
+    elif polling is False:
+        polling_method = NoPolling()
+    else:
+        polling_method = polling
     return LROPoller(self._client, raw_result, get_long_running_output, polling_method)
 # endregion LegacyVpnClient Workaround
 
