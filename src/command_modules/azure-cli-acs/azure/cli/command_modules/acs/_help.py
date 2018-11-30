@@ -188,18 +188,18 @@ helps['aks create'] = """
           short-summary: User account to create on node VMs for SSH access.
         - name: --aad-client-app-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory client application of type "Native". This
+          short-summary: The ID of an Azure Active Directory client application of type "Native". This
                          application is for user login via kubectl.
         - name: --aad-server-app-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory server application of type "Web app/API". This
+          short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This
                          application represents the managed cluster's apiserver (Server application).
         - name: --aad-server-app-secret
           type: string
-          short-summary: (PREVIEW) The secret of an Azure Active Directory server application.
+          short-summary: The secret of an Azure Active Directory server application.
         - name: --aad-tenant-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory tenant.
+          short-summary: The ID of an Azure Active Directory tenant.
         - name: --dns-service-ip
           type: string
           short-summary: An IP address assigned to the Kubernetes DNS service.
