@@ -34,7 +34,6 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager==0.50.0',
     'azure-mgmt-dns==2.1.0',
     'azure-cli-core',
-    'mock'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
