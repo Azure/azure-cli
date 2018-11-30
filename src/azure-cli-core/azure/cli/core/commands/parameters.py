@@ -249,7 +249,7 @@ def get_location_type(cli_ctx):
         options_list=('--location', '-l'),
         completer=get_location_completion_list,
         type=get_location_name_type(cli_ctx),
-        help="Location. Run `az account list-locations --output table` to get a list of available location names. "
+        help="Location. Values from: `az account list-locations`. "
              "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
         configured_default='location')
