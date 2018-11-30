@@ -409,5 +409,5 @@ class BotTests(ScenarioTest):
                 self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
 
             if expected_text:
-                self.assertTrue(expected_text in text, "Bot response does not match expec\tation: " + text +
+                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
