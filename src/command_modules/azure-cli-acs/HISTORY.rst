@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.3.13
+++++++
+* Remove "(PREVIEW)" from AAD arguments to "az aks create"
+
 2.3.12
 ++++++
 * Minor fixes
