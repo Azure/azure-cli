@@ -4,7 +4,7 @@ Release History
 ===============
 2.2.9
 +++++
-* bug fix: Fixing keyvault recover / purge commands.  See issue https://github.com/Azure/azure-cli/issues/7048.
+* bug fix: Fixing keyvault recover / purge commands.
 
 2.2.8
 +++++

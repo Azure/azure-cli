@@ -126,11 +126,12 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
 
         self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
-                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true', checks=[
-            self.check('properties.enabledForDeployment', True),
-            self.check('properties.enabledForDiskEncryption', True),
-            self.check('properties.enabledForTemplateDeployment', True)
-        ])
+                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
+                 checks=[
+                     self.check('properties.enabledForDeployment', True),
+                     self.check('properties.enabledForDiskEncryption', True),
+                     self.check('properties.enabledForTemplateDeployment', True)
+                 ])
         self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium', checks=[
             self.check('properties.sku.name', 'premium')
         ])
