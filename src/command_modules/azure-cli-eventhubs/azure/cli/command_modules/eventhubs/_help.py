@@ -75,7 +75,7 @@ helps['eventhubs namespace create'] = """
     examples:
         - name: Creates a new namespace.
           text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus
-           --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate-enabled False --maximum-throughput-units 30
+           --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate False --maximum-throughput-units 30
 """
 
 helps['eventhubs namespace update'] = """
@@ -83,7 +83,7 @@ helps['eventhubs namespace update'] = """
     short-summary: Updates the Event Hubs Namespace
     examples:
         - name: Update a new namespace.
-          text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate-enabled True
+          text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
 """
 
 helps['eventhubs namespace show'] = """
