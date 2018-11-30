@@ -85,7 +85,8 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             'command': 'npm install',
             'dir': r'site\wwwroot'
         }
-        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=self.__auth_headers)
+        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
+                                 headers=self.__get_application_json_headers())
         HttpResponseValidator.check_response_status(response)
         return response.json()
 
