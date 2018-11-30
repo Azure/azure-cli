@@ -742,6 +742,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         # delete and purge the vault
         self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv}')
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv} -l {loc}')
+        self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
 
