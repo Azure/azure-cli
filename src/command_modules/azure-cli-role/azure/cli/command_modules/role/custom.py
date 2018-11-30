@@ -11,6 +11,7 @@ import json
 import re
 import os
 import uuid
+import itertools
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
@@ -487,7 +488,10 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
-def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query_filter=None):
+def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None, mine=None):
+    client = _graph_client_factory(cmd.cli_ctx)
+    if mine:
+        return list_owned_objects(client.signed_in_user, 'application')
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
@@ -498,12 +502,15 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
-    if not sub_filters:
-        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
-                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
-                       ' though it is not recommended')
-
-    return client.list(filter=(' and '.join(sub_filters)))
+    result = client.applications.list(filter=(' and '.join(sub_filters)))
+    if sub_filters or include_all:
+        return result
+    else:
+        result = list(itertools.islice(result, 101))
+        if len(result) == 101:
+            logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                           " long latency expected, or provide a filter through command arguments")
+        return result[:100]
 
 
 def list_application_owners(cmd, identifier):
@@ -522,7 +529,11 @@ def remove_application_owner(cmd, owner_object_id, identifier):
     return client.remove_owner(_resolve_application(client, identifier), owner_object_id)
 
 
-def list_sps(client, spn=None, display_name=None, query_filter=None):
+def list_sps(cmd, spn=None, display_name=None, query_filter=None, mine=None, include_all=None):
+    client = _graph_client_factory(cmd.cli_ctx)
+    if mine:
+        return list_owned_objects(client.signed_in_user, 'servicePrincipal')
+
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
@@ -531,17 +542,22 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    if not sub_filters:
-        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
-                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
-                       ' though it is not recommended')
-    return client.list(filter=(' and '.join(sub_filters)))
+    result = client.service_principals.list(filter=(' and '.join(sub_filters)))
+
+    if sub_filters or include_all:
+        return result
+    else:
+        result = list(itertools.islice(result, 101))
+        if len(result) == 101:
+            logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                           " long latency expected, or provide a filter through command arguments")
+        return result[:100]
 
 
 def list_owned_objects(client, object_type=None):
     result = client.list_owned_objects()
     if object_type:
-        result = [r for r in result if r.object_type.lower() == object_type.lower()]
+        result = [r for r in result if r.object_type and r.object_type.lower() == object_type.lower()]
     return result
 
 

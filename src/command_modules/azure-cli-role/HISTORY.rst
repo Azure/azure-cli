@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.12
+++++++
+* perf: improve "ad app/sp list" commands  
+
 2.1.11
 ++++++
 * support custom identifier for password credential 
