@@ -28,8 +28,8 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
 
         # Enable service endpoints
         response = self.cmd('az network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet} --service-endpoints {acr_provider}',
-                 checks=[self.check('name', '{subnet}'),
-                         self.check('serviceEndpoints[0].service', '{acr_provider}')]).get_output_in_json()
+                            checks=[self.check('name', '{subnet}'),
+                                    self.check('serviceEndpoints[0].service', '{acr_provider}')]).get_output_in_json()
 
         subnet_id = response['id']
 
