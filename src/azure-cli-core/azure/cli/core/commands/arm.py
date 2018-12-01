@@ -9,6 +9,7 @@ import argparse
 from collections import OrderedDict
 import json
 import re
+import copy
 from six import string_types
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -423,7 +424,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         )
         return [(k, v) for k, v in arguments.items()]
 
-    def _extract_handler_and_args(args, commmand_kwargs, op):
+    def _extract_handler_and_args(args, commmand_kwargs, op, context):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         factory = _get_client_factory(name, **commmand_kwargs)
         client = None
@@ -443,6 +444,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         cmd = args.get('cmd')
+        context_copy = copy.copy(context)
+        context_copy.cli_ctx = cmd.cli_ctx
         force_string = args.get('force_string', False)
         ordered_arguments = args.pop('ordered_arguments', [])
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
@@ -450,7 +453,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
             del args[item]
 
-        getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op)
+        getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
         if child_collection_prop_name:
             parent = getter(**getterargs)
             instance = _get_child(
@@ -465,14 +468,15 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # pass instance to the custom_function, if provided
         if custom_function_op:
-            custom_function, custom_func_args = _extract_handler_and_args(args, cmd.command_kwargs, custom_function_op)
+            custom_function, custom_func_args = _extract_handler_and_args(
+                args, cmd.command_kwargs, custom_function_op, context_copy)
             if child_collection_prop_name:
                 parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
                 instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op)
+        setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op, context_copy)
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -590,19 +594,21 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
         from msrest.exceptions import ClientException
         import time
 
+        context_copy = copy.copy(context)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        context_copy.cli_ctx = cmd.cli_ctx
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
-            client = factory(context.cli_ctx) if factory else None
+            client = factory(context_copy.cli_ctx) if factory else None
         except TypeError:
-            client = factory(context.cli_ctx, args) if factory else None
+            client = factory(context_copy.cli_ctx, args) if factory else None
         if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
-        getter = context.get_op_handler(getter_op)
+        getter = context_copy.get_op_handler(getter_op)
 
         timeout = args.pop('timeout')
         interval = args.pop('interval')
@@ -616,7 +622,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
             raise CLIError(
                 "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
-        progress_indicator = context.cli_ctx.get_progress_controller()
+        progress_indicator = context_copy.cli_ctx.get_progress_controller()
         progress_indicator.begin()
         for _ in range(0, timeout, interval):
             try:
@@ -669,23 +675,24 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
     def description_loader():
         return extract_full_summary_from_signature(context.get_op_handler(getter_op))
 
-    def handler(args):
+    def handler(args, **handler_kwargs):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-
-        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+        context_copy = copy.copy(context)
+        getter_args = dict(extract_args_from_signature(context_copy.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
+        context_copy.cli_ctx = cmd.cli_ctx
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
         client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
-            client = factory(context.cli_ctx) if factory else None
+            client = factory(context_copy.cli_ctx) if factory else None
         except TypeError:
-            client = factory(context.cli_ctx, args) if factory else None
+            client = factory(context_copy.cli_ctx, args) if factory else None
 
         if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
-        getter = context.get_op_handler(getter_op)
+        getter = context_copy.get_op_handler(getter_op)
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except

@@ -278,7 +278,6 @@ class AzCliCommandInvoker(CommandInvoker):
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
 
-        expanded_args = list(_explode_list_args(parsed_args))
         cmd = parsed_args.func
         self.cli_ctx.data['command'] = parsed_args.command
 
@@ -303,46 +302,68 @@ class AzCliCommandInvoker(CommandInvoker):
         self.resolve_warnings(cmd, parsed_args)
         self.resolve_confirmation(cmd, parsed_args)
 
-        results = []
-        for expanded_arg in expanded_args:
+        jobs = []
+        import copy
+        for expanded_arg in _explode_list_args(parsed_args):
+            cmd_copy = copy.copy(cmd)
+            cmd_copy.cli_ctx = copy.copy(cmd.cli_ctx)
+            cmd_copy.cli_ctx.data = copy.deepcopy(cmd.cli_ctx.data)
             if hasattr(expanded_arg, 'cmd'):
-                expanded_arg.cmd = cmd
+                expanded_arg.cmd = cmd_copy
 
             if hasattr(expanded_arg, '_subscription'):
-                self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
+                cmd_copy.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
 
             self._validation(expanded_arg)
+            jobs.append((expanded_arg, cmd_copy))
 
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        def _run_job(expanded_arg, cmd_copy):
             params = self._filter_params(expanded_arg)
-
             try:
-                result = cmd(params)
-                if cmd.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
+                result = cmd_copy(params, cli_ctx=cmd_copy.cli_ctx)
+                if cmd_copy.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
                     result = None
-                elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
+                elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
                     result = None
 
-                transform_op = cmd.command_kwargs.get('transform', None)
+                transform_op = cmd_copy.command_kwargs.get('transform', None)
                 if transform_op:
                     result = transform_op(result)
 
                 if _is_poller(result):
-                    result = LongRunningOperation(self.cli_ctx, 'Starting {}'.format(cmd.name))(result)
+                    result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name))(result)
                 elif _is_paged(result):
                     result = list(result)
 
                 result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
                 event_data = {'result': result}
-                self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
-                result = event_data['result']
-                results.append(result)
-
+                cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
+                return event_data['result']
             except Exception as ex:  # pylint: disable=broad-except
-                if cmd.exception_handler:
-                    cmd.exception_handler(ex)
+                if cmd_copy.exception_handler:
+                    cmd_copy.exception_handler(ex)
                     return CommandResultItem(None, exit_code=1, error=ex)
                 else:
                     six.reraise(*sys.exc_info())
+
+        tasks, results, exceptions = [], [], []
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            for expanded_arg, cmd_copy in jobs:
+                tasks.append(executor.submit(_run_job, expanded_arg, cmd_copy))
+            for task in as_completed(tasks):
+                try:
+                    results.append(task.result())
+                except Exception as ex:  # pylint: disable=broad-except
+                    exceptions.append(ex)
+
+        # handle exceptions
+        if exceptions:
+            for exception in exceptions:
+                logger.warning(str(exception))
+            if not results:
+                return CommandResultItem(None, exit_code=1, error=CLIError('Encountered more than one exception.'))
 
         if results and len(results) == 1:
             results = results[0]
