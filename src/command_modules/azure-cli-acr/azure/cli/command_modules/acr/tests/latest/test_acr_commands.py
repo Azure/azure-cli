@@ -517,5 +517,5 @@ class AcrCommandsTests(ScenarioTest):
         # Case 7: Import image from a public registry in dockerhub
         self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
 
-        #Case 8: Import image from a private registry in dockerhub
+        # Case 8: Import image from a private registry in dockerhub
         self.cmd('acr import -n {registry_name} --source {source_image_private_registry_dockerhub} -u {source_username} -p {source_password}')
