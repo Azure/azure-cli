@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.10
++++++
+* Add support for image import from outside of ACR
+
 2.1.9
 +++++
 * Add context token to task step.
