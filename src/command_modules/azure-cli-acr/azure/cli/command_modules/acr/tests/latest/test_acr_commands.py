@@ -454,6 +454,8 @@ class AcrCommandsTests(ScenarioTest):
         Case 4: Import image to enable multiple tags in the target registry
         Case 5: Import image within the same registry
         Case 6: Import image by manifest digest
+        Case 7: Import image from a public registry in docker hub
+        Case 8: Import image from a private registry in docker hub
         '''
 
         registry_name = self.create_random_name("targetregsitry", 20)
@@ -478,7 +480,11 @@ class AcrCommandsTests(ScenarioTest):
             'tag_multitag1': 'repository_multi1:tag_multi1',
             'tag_multitag2': 'repository_multi2:tag_multi2',
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
-            'tag_by_digest': 'repository_by_digest:tag_by_digest'
+            'tag_by_digest': 'repository_by_digest:tag_by_digest',
+            'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
+            'source_image_private_registry_dockerhub': 'docker.io/wanderingwithcandles/first:redis',
+            'source_username': 'wanderingwithcandles',
+            'source_password': '201812010646AM'
         })
 
         # create a target registry to hold the imported images
@@ -507,3 +513,9 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 6: Import image by manifest digest
         self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
+
+        # Case 7: Import image from a public registry in dockerhub
+        self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
+
+        #Case 8: Import image from a private registry in dockerhub
+        self.cmd('acr import -n {registry_name} --source {source_image_private_registry_dockerhub} -u {source_username} -p {source_password}')

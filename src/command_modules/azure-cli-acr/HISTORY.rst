@@ -6,6 +6,7 @@ Release History
 2.1.10
 ++++++
 * Minor fixes.
+* Add support for image import from outside of ACR
 
 2.1.9
 +++++
