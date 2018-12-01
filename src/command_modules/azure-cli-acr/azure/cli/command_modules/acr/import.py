@@ -23,6 +23,8 @@ INVALID_SOURCE_IMAGE = "Please specify source image in the format '[registry.azu
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
 REGISTRY_MISMATCH = "Registry mismatch. Please check either source-image or resource ID " \
                     "to make sure that they are referring to the same registry and try again."
+
+
 def acr_import(cmd,
                client,
                registry_name,
@@ -63,9 +65,9 @@ def acr_import(cmd,
         registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
         if registry:
             if source_registry and \
-            source_registry.lower() != registry.id().lower() and \
-            source_registry.lower() != registry.name().lower() and \
-            source_registry.lower() != registry.login_server().lower():
+               source_registry.lower() != registry.id().lower() and \
+               source_registry.lower() != registry.name().lower() and \
+               source_registry.lower() != registry.login_server().lower():
                 raise CLIError(REGISTRY_MISMATCH)
             source = ImportSource(resource_id=registry.id,
                                   source_image=source_image)
