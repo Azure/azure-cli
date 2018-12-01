@@ -6,6 +6,7 @@ Release History
 2.3.13
 ++++++
 * Remove "(PREVIEW)" from AAD arguments to "az aks create"
+* Mark "az acs" commands as deprecated (the ACS service will retire on January 31, 2020)
 
 2.3.12
 ++++++
