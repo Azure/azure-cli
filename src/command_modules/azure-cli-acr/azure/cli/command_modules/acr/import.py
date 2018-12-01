@@ -20,13 +20,9 @@ SOURCE_REGISTRY_MISSING = "Please specify the source container registry name, lo
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 INVALID_SOURCE_IMAGE = "Please specify source image in the format '[registry.azurecr.io/]repository[:tag]' or " \
                        "'[registry.azurecr.io/]repository@digest'"
-SOURCE_REGISTRY_NOT_FOUND = "Source registry could not be found in the current subscription. " \
-                            "Please specify the full resource ID for it: "
 NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
 REGISTRY_MISMATCH = "Registry mismatch. Please check either source-image or resource ID " \
                     "to make sure that they are referring to the same registry and try again."
-
-
 def acr_import(cmd,
                client,
                registry_name,
@@ -58,38 +54,41 @@ def acr_import(cmd,
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
                 source_registry = registry.id
+        source = ImportSource(resource_id=source_registry, source_image=source_image)
     else:
-        source_image = source[slash + 1:]
-        source_registry_login_server = source[:slash]
+        source_registry_login_server = source_image[:slash]
+        source_image = source_image[slash + 1:]
         if not source_image or not source_registry_login_server:
             raise CLIError(INVALID_SOURCE_IMAGE)
         registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
         if registry:
             if source_registry and \
-               source_registry.lower() != registry.id.lower() and \
-               source_registry.lower() != registry.name.lower() and \
-               source_registry.lower() != registry.login_server.lower():
+            source_registry.lower() != registry.id().lower() and \
+            source_registry.lower() != registry.name().lower() and \
+            source_registry.lower() != registry.login_server().lower():
                 raise CLIError(REGISTRY_MISMATCH)
-            source_registry = registry.id
-
-    if not is_valid_resource_id(source_registry):
-        from knack.prompting import prompt, NoTTYException
-        try:
-            source_registry = prompt(SOURCE_REGISTRY_NOT_FOUND)
-        except NoTTYException:
-            raise CLIError(NO_TTY_ERROR)
-
-    source_credentials = ImportSourceCredentials(username=source_registry_username, password=source_registry_password)
-    image_source = ImportSource(resource_id=source_registry, credentials=source_credentials, source_image=source_image)
+            source = ImportSource(resource_id=registry.id,
+                                  source_image=source_image)
+        else:
+            if source_registry_username and source_registry_password:
+                source = ImportSource(registry_uri=source_registry_login_server,
+                                      source_image=source_image,
+                                      credentials=ImportSourceCredentials(password=source_registry_password,
+                                                                          username=source_registry_username))
+            else:
+                source = ImportSource(registry_uri=source_registry_login_server, source_image=source_image)
 
     if not target_tags and not repository:
-        target_tags = [source_image]
+        index = source_image.find("@")
+        if index > 0:
+            target_tags = [source_image[:index]]
+        else:
+            target_tags = [source_image]
 
-    import_parameters = ImportImageParameters(source=image_source,
+    import_parameters = ImportImageParameters(source=source,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-
     return client.import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
