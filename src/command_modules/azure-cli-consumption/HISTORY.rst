@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.1
++++++
+* Fixed bugs for budget API to show notifications.
+
 0.4.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
