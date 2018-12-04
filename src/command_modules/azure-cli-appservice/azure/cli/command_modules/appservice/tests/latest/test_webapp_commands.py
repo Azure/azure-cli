@@ -160,11 +160,11 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-linux-cd'
+        webapp_name = self.create_random_name(prefix='webapp-linux-cd', length=24)
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
-        time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         if 'Hello world' not in str(r.content):
@@ -702,7 +702,7 @@ class WebappSSLCertTest(ScenarioTest):
 
 
 class WebappUndeleteTest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer()
     def test_webapp_deleted_list(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
@@ -713,18 +713,6 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer()
-    def test_webapp_deleted_restore(self, resource_group):
-        plan = self.create_random_name(prefix='undelete-plan', length=24)
-        webapp_name = self.create_random_name(prefix='undelete-web', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
-        # A snapshot must be available to restore a deleted app. The app must exist for at least an hour prior to deletion to have a snapshot.
-        # Using a pre-configured deleted app in this test.
-        deleted_app_id = self.cmd('webapp deleted list -g {} -n {}'.format('nicking', 'nickingdeletedwordpress')).get_output_in_json()[0]['id']
-        self.cmd('webapp deleted restore --deleted-id {} -g {} -n {}'.format(deleted_app_id, resource_group, webapp_name))
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
@@ -935,11 +923,13 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
+
+    @record_only()
     @ResourceGroupPreparer()
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-triggered'
@@ -954,10 +944,11 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-continuous'

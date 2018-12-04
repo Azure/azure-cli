@@ -114,6 +114,7 @@ def load_arguments(self, _):
         c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
+        c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
@@ -206,6 +207,7 @@ def load_arguments(self, _):
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='extension name', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
+        c.argument('expand', deprecate_info=c.deprecate(expiration='2.1.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
@@ -278,6 +280,9 @@ def load_arguments(self, _):
         c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
         c.argument('show_all', options_list=['--all'], help="show all information including vm sizes not available under the current subscription")
         c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
+
+    with self.argument_context('vm restart') as c:
+        c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
     # endregion
 
     # region VMSS
@@ -313,7 +318,7 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
-                   help="(PREVIEW) Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+                   help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                    help="(PREVIEW) The eviction policy for virtual machines in a low priority scale set.")
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
@@ -410,7 +415,7 @@ def load_arguments(self, _):
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
-            c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_type=get_enum_type(['ssh', 'password']))
+            c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
         with self.argument_context(scope, arg_group='Storage') as c:
             if StorageAccountTypes:

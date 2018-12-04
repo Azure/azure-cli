@@ -193,7 +193,7 @@ def validate_ssl_cert(namespace):
     else:
         # cert supplied -- use HTTPS
         if not all(params):
-            raise argparse.ArgumentError(
+            raise CLIError(
                 None, 'To use SSL certificate, you must specify both the filename and password')
 
         # extract the certificate data from the provided file
@@ -1278,3 +1278,23 @@ def validate_custom_error_pages(namespace):
         except (ValueError, TypeError):
             raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
     namespace.custom_error_pages = values
+
+
+# pylint: disable=too-few-public-methods
+class WafConfigExclusionAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        cmd = namespace._cmd  # pylint: disable=protected-access
+        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
+        if not namespace.exclusions:
+            namespace.exclusions = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        try:
+            variable, op, selector = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
+        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
+            match_variable=variable,
+            selector_match_operator=op,
+            selector=selector
+        ))

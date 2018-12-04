@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.51"
+__version__ = "2.0.52"
 
 import os
 import sys
@@ -12,7 +12,6 @@ import timeit
 
 import six
 
-from knack.arguments import ArgumentsContext
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
@@ -242,13 +241,14 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            with ArgumentsContext(self, '') as c:
-                c.argument('resource_group_name', resource_group_name_type)
-                c.argument('location', get_location_type(self.cli_ctx))
-                c.argument('deployment_name', deployment_name_type)
-                c.argument('cmd', ignore_type)
-
             for loader in command_loaders:
+                # register global args
+                with loader.argument_context('') as c:
+                    c.argument('resource_group_name', resource_group_name_type)
+                    c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('deployment_name', deployment_name_type)
+                    c.argument('cmd', ignore_type)
+
                 loader.command_name = command
                 self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 loader.load_arguments(command)  # this adds entries to the argument registries

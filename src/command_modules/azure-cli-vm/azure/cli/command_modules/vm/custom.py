@@ -316,7 +316,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None, storage_sku=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, data_disks=None, tags=None, zone_resilient=None):
+                 os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -328,6 +328,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
+                              caching=os_disk_caching,
                               snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
                               managed_disk=SubResource(id=os_disk) if os_disk else None,
                               blob_uri=os_blob_uri,
@@ -622,7 +623,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
         ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
-        os_disk_name=os_disk_name, custom_image_os_type=os_type,
+        os_disk_name=os_disk_name, custom_image_os_type=os_type, authentication_type=authentication_type,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
@@ -886,6 +887,13 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
 
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
     return set_vm(cmd, vm, no_wait=no_wait)
+
+
+def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if force:
+        return sdk_no_wait(no_wait, client.virtual_machines.redeploy, resource_group_name, vm_name)
+    return sdk_no_wait(no_wait, client.virtual_machines.restart, resource_group_name, vm_name)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):

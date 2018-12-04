@@ -611,9 +611,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('tags.tag1', 'i1')
         ])
 
-        # test that images can be created with different storage skus
+        # test that images can be created with different storage skus and os disk caching settings.
         self.cmd('image create -g {rg} -n {image_2} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id}'
-                 ' --os-type Linux --tags tag1=i1 --storage-sku Premium_LRS',
+                 ' --os-type Linux --tags tag1=i1 --storage-sku Premium_LRS --os-disk-caching None',
                  checks=[
                      self.check('storageProfile.osDisk.storageAccountType', 'Premium_LRS'),
                      self.check('storageProfile.osDisk.osType', 'Linux'),
@@ -621,12 +621,16 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('length(storageProfile.dataDisks)', 3),
                      self.check('storageProfile.dataDisks[0].lun', 0),
                      self.check('storageProfile.dataDisks[1].lun', 1),
+                     self.check('storageProfile.osDisk.caching', 'None'),
                      self.check('tags.tag1', 'i1')
                  ])
 
         self.cmd('image create -g {rg} -n {image_3} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id}'
-                 ' --os-type Linux --tags tag1=i1 --storage-sku Standard_LRS',
-                 checks=self.check('storageProfile.osDisk.storageAccountType', 'Standard_LRS'))
+                 ' --os-type Linux --tags tag1=i1 --storage-sku Standard_LRS --os-disk-caching ReadWrite',
+                 checks=[
+                     self.check('storageProfile.osDisk.storageAccountType', 'Standard_LRS'),
+                     self.check('storageProfile.osDisk.caching', 'ReadWrite')
+                 ])
 
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):
@@ -733,6 +737,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self._check_vm_power_state('PowerState/running')
         self.cmd('vm restart --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/running')
+        self.cmd('vm restart --resource-group {rg} --name {vm} --force')
+        self._check_vm_power_state('PowerState/running')
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
@@ -829,8 +835,9 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
         ])
 
 
-class ComputeListSkusScenarioTest(LiveScenarioTest):
+class ComputeListSkusScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=8144)
     def test_list_compute_skus_table_output(self):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
@@ -854,7 +861,8 @@ class ComputeListSkusScenarioTest(LiveScenarioTest):
         self.assertTrue(size_found)
         self.assertTrue(zone_found)
 
-    def test_list_compute_skus_fiter(self):
+    @AllowLargeResponse(size_kb=8144)
+    def test_list_compute_skus_filter(self):
         result = self.cmd('vm list-skus -l eastus2 --size Standard_DS1_V2 --zone').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['name'] == 'Standard_DS1_v2' and x['locationInfo'][0]['zones']]))
         result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
@@ -1280,6 +1288,29 @@ class VMCreateExistingOptions(ScenarioTest):
                  checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
+    def test_vm_create_auth(self, resource_group):
+        self.kwargs.update({
+            'vm_1': 'vm1',
+            'vm_2': 'vm2',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_1} --authentication-type all '
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'')
+
+        self.cmd('vm show -n {vm_1} -g {rg}', checks=[
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', False),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB)
+        ])
+
+        self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_2} --authentication-type ssh '
+                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'')
+
+        self.cmd('vm show -n {vm_2} -g {rg}', checks=[
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+        ])
 
 
 class VMCreateExistingIdsOptions(ScenarioTest):
@@ -1746,6 +1777,27 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 0)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
+    def test_vmss_create_auth(self, resource_group):
+        self.kwargs.update({
+            'vmss_1': 'vmss1',
+            'vmss_2': 'vmss2',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_1} --authentication-type all '
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', False),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB)
+                 ])
+
+        self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_2} --authentication-type ssh '
+                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+                 ])
 
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -2728,8 +2780,8 @@ class VMSSRollingUpgrade(ScenarioTest):
 
 
 class VMSSPriorityTesting(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='vmss_low_pri', location='CentralUSEUAP')
-    def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='vmss_low_pri')
+    def test_vmss_create_with_low_priority(self, resource_group):
         self.kwargs.update({
             'priority': 'Low',
             'vmss': 'vmss1',
