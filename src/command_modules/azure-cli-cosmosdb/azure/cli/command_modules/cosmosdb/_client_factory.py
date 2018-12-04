@@ -54,6 +54,9 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
             database_account = cf_cosmosdb(cli_ctx).database_accounts.get(resource_group, name)
             url_connection = database_account.document_endpoint
 
+        if name and not url_connection:
+            url_connection = 'https://{}.documents.azure.com:443'.format(name)
+
         if not key and not url_connection:
             raise CLIError(MISSING_CREDENTIALS_ERROR_MESSAGE)
         auth = {'masterKey': key}

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.6 
++++++ 
+* Added support for updating account to multi-master
+
 0.2.5
 +++++
 * Use latest azure-mgmt-cosmosdb pypi package (0.5.2)
