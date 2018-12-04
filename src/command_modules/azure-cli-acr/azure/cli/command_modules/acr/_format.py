@@ -172,7 +172,7 @@ def _replication_format_group(item):
 
 def _build_task_format_group(item):
     return OrderedDict([
-        ('Name', _get_value(item, 'name')),
+        ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
@@ -182,7 +182,7 @@ def _build_task_format_group(item):
 
 def _build_task_detail_format_group(item):
     return OrderedDict([
-        ('Name', _get_value(item, 'name')),
+        ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
@@ -196,15 +196,12 @@ def _build_task_detail_format_group(item):
 
 def _task_format_group(item):
     return OrderedDict([
-        ('Name', _get_value(item, 'name')),
+        ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('BRANCH', _get_value(item, 'trigger', 'sourceTriggers', 0, 'sourceRepository', 'branch')),
-        ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType')),
-        ('IMAGE NAMES', _get_value(item, 'step', 'imageNames')),
-        ('PUSH ENABLED', _get_value(item, 'step', 'isPushEnabled'))
+        ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
+        ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType'))
     ])
 
 
