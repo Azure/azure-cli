@@ -36,7 +36,7 @@ def acr_import(cmd,
                resource_group_name=None,
                repository=None,
                force=False):
- 
+
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
 
