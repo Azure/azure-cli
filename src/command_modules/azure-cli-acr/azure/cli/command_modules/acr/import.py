@@ -72,6 +72,7 @@ def acr_import(cmd,
             source = ImportSource(resource_id=registry.id,
                                   source_image=source_image)
         else:
+<<<<<<< HEAD
             if source_registry_password:
                 if source_registry_username:
                     source = ImportSource(registry_uri=source_registry_login_server,
@@ -82,6 +83,13 @@ def acr_import(cmd,
                     source = ImportSource(registry_uri=source_registry_login_server,
                                           source_image=source_image,
                                           credentials=ImportSourceCredentials(password=source_registry_password))
+=======
+            if source_registry_username and source_registry_password:
+                source = ImportSource(registry_uri=source_registry_login_server,
+                                      source_image=source_image,
+                                      credentials=ImportSourceCredentials(password=source_registry_password,
+                                                                          username=source_registry_username))
+>>>>>>> 419f262079cba68f9d463c0789c4a66004923f88
             else:
                 source = ImportSource(registry_uri=source_registry_login_server, source_image=source_image)
 

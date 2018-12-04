@@ -693,7 +693,11 @@ helps['acr import'] = """
             az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
         - name: Import an image from a public registry in docker hub
           text: >
+<<<<<<< HEAD
             az acr import -n MyRegistry --source docker.io/sourcerepository:sourcetag -t targetrepository:targettag
+=======
+            az acr import -n MyRegistry --source sourceregistry.hub.docker.com/sourcerepository:sourcetag -t targetrepository:targettag
+>>>>>>> 419f262079cba68f9d463c0789c4a66004923f88
 """
 
 helps['acr helm list'] = """
