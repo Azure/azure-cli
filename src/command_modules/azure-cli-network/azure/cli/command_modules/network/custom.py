@@ -1984,7 +1984,7 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
     _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool)
                if backend_address_pool else None)
     _set_param(instance, 'frontend_ip_configurations',
-               [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
+               [SubResource(id=x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
 
     return parent
 
