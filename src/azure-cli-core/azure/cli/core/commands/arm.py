@@ -675,7 +675,7 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
     def description_loader():
         return extract_full_summary_from_signature(context.get_op_handler(getter_op))
 
-    def handler(args, **handler_kwargs):
+    def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         context_copy = copy.copy(context)
         getter_args = dict(extract_args_from_signature(context_copy.get_op_handler(getter_op),

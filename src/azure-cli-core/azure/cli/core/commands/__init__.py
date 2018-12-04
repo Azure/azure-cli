@@ -11,6 +11,7 @@ import logging as logs
 import os
 import sys
 import time
+import copy
 from importlib import import_module
 import six
 
@@ -303,13 +304,11 @@ class AzCliCommandInvoker(CommandInvoker):
         self.resolve_confirmation(cmd, parsed_args)
 
         jobs = []
-        import copy
         for expanded_arg in _explode_list_args(parsed_args):
             cmd_copy = copy.copy(cmd)
             cmd_copy.cli_ctx = copy.copy(cmd.cli_ctx)
             cmd_copy.cli_ctx.data = copy.deepcopy(cmd.cli_ctx.data)
-            if hasattr(expanded_arg, 'cmd'):
-                expanded_arg.cmd = cmd_copy
+            expanded_arg.cmd = cmd_copy
 
             if hasattr(expanded_arg, '_subscription'):
                 cmd_copy.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
@@ -317,12 +316,10 @@ class AzCliCommandInvoker(CommandInvoker):
             self._validation(expanded_arg)
             jobs.append((expanded_arg, cmd_copy))
 
-
-        from concurrent.futures import ThreadPoolExecutor, as_completed
         def _run_job(expanded_arg, cmd_copy):
             params = self._filter_params(expanded_arg)
             try:
-                result = cmd_copy(params, cli_ctx=cmd_copy.cli_ctx)
+                result = cmd_copy(params)
                 if cmd_copy.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
                     result = None
                 elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
@@ -348,6 +345,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 else:
                     six.reraise(*sys.exc_info())
 
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         tasks, results, exceptions = [], [], []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for expanded_arg, cmd_copy in jobs:
@@ -359,11 +357,15 @@ class AzCliCommandInvoker(CommandInvoker):
                     exceptions.append(ex)
 
         # handle exceptions
-        if exceptions:
+        if len(exceptions) == 1 and not results:
+            raise exceptions[0]
+        elif exceptions:
             for exception in exceptions:
                 logger.warning(str(exception))
             if not results:
                 return CommandResultItem(None, exit_code=1, error=CLIError('Encountered more than one exception.'))
+            else:
+                logger.warning('Encountered more than one exception.')
 
         if results and len(results) == 1:
             results = results[0]
