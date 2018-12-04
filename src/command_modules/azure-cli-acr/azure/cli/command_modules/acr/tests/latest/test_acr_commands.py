@@ -459,6 +459,10 @@ class AcrCommandsTests(ScenarioTest):
         '''
 
         registry_name = self.create_random_name("targetregsitry", 20)
+        import json
+        credentials = json.load(open('config.json'))
+        source_registry_username = credentials['source_registry_username']
+        source_registry_password = credentials['source_registry_password']
 
         '''
         To be able to run the tests, we are assuming the following resources before the test:
@@ -483,8 +487,8 @@ class AcrCommandsTests(ScenarioTest):
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
             'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
             'source_image_private_registry_dockerhub': 'docker.io/wanderingwithcandles/first:redis',
-            'source_username': 'wanderingwithcandles',
-            'source_password': '201812010646AM'
+            'source_username': source_registry_username,
+            'source_password': source_registry_password
         })
 
         # create a target registry to hold the imported images
