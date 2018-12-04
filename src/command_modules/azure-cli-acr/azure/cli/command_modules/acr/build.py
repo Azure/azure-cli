@@ -95,7 +95,7 @@ def acr_build(cmd,
             logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
 
         source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to registry: %s...", registry_name)
+        print("Sending context to registry: {}...".format(registry_name))
 
     if no_push:
         is_push_enabled = False
@@ -105,7 +105,7 @@ def acr_build(cmd,
             _warn_unsupported_image_name(image_names)
         else:
             is_push_enabled = False
-            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+            print("'--image or -t' is not provided. Skipping image push after build.")
 
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
@@ -123,8 +123,8 @@ def acr_build(cmd,
         run_request=docker_build_request))
 
     run_id = queued_build.run_id
-    logger.warning("Queued a build with ID: %s", run_id)
-    logger.warning("Waiting for agent...")
+    print("Queued a build with ID: {}".format(run_id))
+    print("Waiting for agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)

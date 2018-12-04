@@ -38,7 +38,7 @@ def upload_source_code(client,
             break
         size = size / 1024.0
 
-    logger.warning("Uploading archived source code from '%s'...", tar_file_path)
+    print("Uploading archived source code from '{}'...".format(tar_file_path))
     upload_url = None
     relative_path = None
     error_message = "Could not get SAS URL to upload."
@@ -62,13 +62,13 @@ def upload_source_code(client,
                          container_name=container_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
-    logger.warning("Sending context ({0:.3f} {1}) to registry: {2}...".format(
+    print("Sending context ({0:.3f} {1}) to registry: {2}...".format(
         size, unit, registry_name))
     return relative_path
 
 
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
-    logger.warning("Packing source code into tar to upload...")
+    print("Packing source code into tar to upload...")
 
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
@@ -76,7 +76,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
         # ignore common vcs dir or file
         if tarinfo.name in common_vcs_ignore_list:
-            logger.warning("Excluding '%s' based on default ignore rules", tarinfo.name)
+            print("Excluding '{}' based on default ignore rules".format(tarinfo.name))
             return True, parent_matching_rule_index
 
         if ignore_list is None:

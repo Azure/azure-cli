@@ -319,8 +319,8 @@ def acr_build_task_run(cmd,
                                       BuildTaskBuildRequest(build_task_name=build_task_name)))
 
     build_id = queued_build.build_id
-    logger.warning("Queued a build with ID: %s", build_id)
-    logger.warning("Waiting for agent...")
+    print("Queued a build with ID: {}".format(build_id))
+    print("Waiting for agent...")
 
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
@@ -400,10 +400,10 @@ def acr_build_task_logs(cmd,
                                                   image=image)
         try:
             build_id = paged_builds.get(0)[0].build_id
-            logger.warning(_get_list_builds_message(base_message="Showing logs of the last created build",
-                                                    build_task_name=build_task_name,
-                                                    image=image))
-            logger.warning("Build ID: %s", build_id)
+            print(_get_list_builds_message(base_message="Showing logs of the last created build",
+                                           build_task_name=build_task_name,
+                                           image=image))
+            print("Build ID: {}".format(build_id))
         except (AttributeError, KeyError, TypeError, IndexError):
             raise CLIError(_get_list_builds_message(base_message="Could not find the last created build",
                                                     build_task_name=build_task_name,

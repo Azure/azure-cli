@@ -68,7 +68,7 @@ def acr_run(cmd,
                 pass
     else:
         source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to registry: %s...", registry_name)
+        print("Sending context to registry: {}...".format(registry_name))
 
     request = FileTaskRunRequest(
         task_file_path=file,
@@ -85,12 +85,12 @@ def acr_run(cmd,
         run_request=request))
 
     run_id = queued.run_id
-    logger.warning("Queued a run with ID: %s", run_id)
+    print("Queued a run with ID: {}".format(run_id))
 
     if no_wait:
         return queued
 
-    logger.warning("Waiting for an agent...")
+    print("Waiting for an agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)

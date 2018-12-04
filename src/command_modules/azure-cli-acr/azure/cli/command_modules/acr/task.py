@@ -390,12 +390,12 @@ def acr_task_run(cmd,
     )
 
     run_id = queued_run.run_id
-    logger.warning("Queued a run with ID: %s", run_id)
+    print("Queued a run with ID: {}".format(run_id))
 
     if no_wait:
         return queued_run
 
-    logger.warning("Waiting for an agent...")
+    print("Waiting for an agent...")
 
     if no_logs:
         return get_run_with_polling(client, run_id, registry_name, resource_group_name)
@@ -485,10 +485,10 @@ def acr_task_logs(cmd,
                                         image=image)
         try:
             run_id = paged_runs.get(0)[0].run_id
-            logger.warning(_get_list_runs_message(base_message="Showing logs of the last created run",
-                                                  task_name=task_name,
-                                                  image=image))
-            logger.warning("Run ID: %s", run_id)
+            print(_get_list_runs_message(base_message="Showing logs of the last created run",
+                                         task_name=task_name,
+                                         image=image))
+            print("Run ID: {}".format(run_id))
         except (AttributeError, KeyError, TypeError, IndexError):
             raise CLIError(_get_list_runs_message(base_message="Could not find the last created run",
                                                   task_name=task_name,
