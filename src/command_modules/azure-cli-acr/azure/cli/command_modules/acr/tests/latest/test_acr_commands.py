@@ -447,10 +447,10 @@ class AcrCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
-        '''There are six test cases in the function.
-        Case 1: Import image from a regsitry in a different subscription from the current one
-        Case 2: Import image from one regsitry to another where both registries belong to the same subscription
-        Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        '''There are eight test cases in the function.
+        Case 1: Import image from a registry in a different subscription from the current one
+        Case 2: Import image from one registry to another where both registries belong to the same subscription
+        Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
         Case 4: Import image to enable multiple tags in the target registry
         Case 5: Import image within the same registry
         Case 6: Import image by manifest digest
@@ -458,11 +458,8 @@ class AcrCommandsTests(ScenarioTest):
         Case 8: Import image from a private registry in docker hub
         '''
 
-        registry_name = self.create_random_name("targetregsitry", 20)
-        import json
-        credentials = json.load(open('config.json'))
-        source_registry_username = credentials['source_registry_username']
-        source_registry_password = credentials['source_registry_password']
+        source_registry_name = self.create_random_name("sourceregistrysamesub",40)
+        registry_name = self.create_random_name("targetregistry", 20)
 
         '''
         To be able to run the tests, we are assuming the following resources before the test:
@@ -471,15 +468,17 @@ class AcrCommandsTests(ScenarioTest):
         Two source images each of which stays in a different source registries mentioned above.
         '''
         self.kwargs.update({
+            'resource_id': '/subscriptions/3fcdeaab-d87f-4a79-a70d-1c8fc67a2436/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'source_registry_rg': 'resourcegroupsamesub',
+            'source_loc': 'westus',
+            'source_registry_name': source_registry_name,
             'registry_name': registry_name,
-            'rg_loc': 'eastus',
             'sku': 'Standard',
-            'resource_id': '/subscriptions/a7ee80a4-3d5e-45c2-9378-36e8d98f4d13/resourceGroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
-            'source_image_diff_sub': 'builder:latest',
-            'source_image_same_sub': 'sourceregistrysamesub.azurecr.io/builder:latest',
-            'source_image_same_registry': '{}.azurecr.io/builder:latest'.format(registry_name),
-            'source_image_by_digest': 'sourceregistrysamesub.azurecr.io/builder@sha256:bc3842ba36fcc182317c07a8643daa4a8e4e7aed45958b1f7e2a2b30c2f5a64f',
-            'tag_diff_sub': 'repository_diff_sub:tag_diff_sub',
+            'rg_loc': 'eastus',
+            'source_image_diff_sub': 'microsoft:azure-cli',
+            'source_image_same_sub': '{}.azurecr.io/microsoft:azure-cli'.format(source_registry_name),
+            'source_image_same_registry': '{}.azurecr.io/microsoft:azure-cli'.format(registry_name),
+            'source_image_by_digest': '{}.azurecr.io/azure-cli@sha256:290dc12cab4d0a10032098d0f917c21cb9d8c8045d2e227d981851174944d118'.format(source_registry_name),
             'tag_same_sub': 'repository_same_sub:tag_same_sub',
             'tag_multitag1': 'repository_multi1:tag_multi1',
             'tag_multitag2': 'repository_multi2:tag_multi2',
@@ -487,9 +486,23 @@ class AcrCommandsTests(ScenarioTest):
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
             'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
             'source_image_private_registry_dockerhub': 'docker.io/wanderingwithcandles/first:redis',
-            'source_username': source_registry_username,
-            'source_password': source_registry_password
+            'source_username': 'wanderingwithcandles',
+            'source_password': '201812010646AM'
         })
+
+        # create a resource group for the source registry
+        self.cmd('group create -n {source_registry_rg} -l {source_loc}')
+
+        # create a source registry which stays in the same subscription as the target registry does
+        self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
+                 checks=[self.check('name', '{source_registry_name}'),
+                         self.check('location', '{source_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+        # Case 1: Import image from a registry in a different subscription from the current one
+        self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image_diff_sub}')
 
         # create a target registry to hold the imported images
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -500,13 +513,10 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('sku.tier', 'Standard'),
                          self.check('provisioningState', 'Succeeded')])
 
-        # Case 1: Import image from a regsitry in a different subscription from the current one
-        self.cmd('acr import -n {registry_name} -r {resource_id} --source {source_image_diff_sub} -t {tag_diff_sub}')
-
-        # Case 2: Import image from one regsitry to another where both registries belong to the same subscription
+        # Case 2: Import image from one registry to another where both registries belong to the same subscription
         self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
 
-        # Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        # Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
         self.cmd('acr import -n {registry_name} --source {source_image_same_sub}')
 
         # Case 4: Import image to enable multiple tags in the target registry
