@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.11
+++++++
+* Add support for image import from external Container Registries.
+
 2.1.10
 ++++++
 * Minor fixes.
