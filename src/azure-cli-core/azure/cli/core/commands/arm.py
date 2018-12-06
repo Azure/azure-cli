@@ -7,9 +7,10 @@
 
 import argparse
 from collections import OrderedDict
+import copy
 import json
 import re
-import copy
+import sys
 from six import string_types
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -18,10 +19,11 @@ from knack.log import get_logger
 from knack.util import todict, CLIError
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
-from azure.cli.core.commands import LongRunningOperation, _is_poller
+from azure.cli.core.commands import LongRunningOperation, _is_poller, AzCommandGroup
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
+from azure.cli.core.util import (
+    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, sdk_no_wait)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)
@@ -1161,3 +1163,237 @@ def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
             api_version = next((x for x in rt.api_versions if not x.endswith('preview')), rt.api_versions[0])
 
     return client.resources.get_by_id(arm_id, api_version)
+
+
+class ArmCommandGroup(AzCommandGroup):
+
+    def list(self, command_name='list', **kwargs):
+        def list_func(client, resource_group_name, **kwargs):
+            if self._child_path:
+                parent = client.get(resource_group_name, self.get_parent_prop_name(kwargs))
+                return self._find_child_collection(parent, kwargs)
+            raise CLIError('list on top-level resource not supported!')
+        scope = '{} {}'.format(self.group_name, command_name)
+        func_name = self._register_func(command_name, list_func)
+        self.command(command_name, func_name, **kwargs)
+        self._add_dests(scope, required=list(self._key_to_dest_map.values())[:-1])
+
+    def show(self, command_name='show', **kwargs):
+        def show_func(client, resource_group_name, **kwargs):
+            parent = client.get(resource_group_name, self.get_parent_prop_name(kwargs))
+            if self._child_path:
+                return self._find_child_item(parent, kwargs)
+            return parent
+        scope = '{} {}'.format(self.group_name, command_name)
+        func_name = self._register_func(command_name, show_func)
+        self.show_command(command_name, getter_name=func_name, **kwargs)
+        self._add_dests(scope)
+
+    def delete(self, command_name='delete', **kwargs):
+        def delete_func(client, resource_group_name, **kwargs):
+            no_wait = kwargs.get('no_wait', None)
+            parent_name = self.get_parent_prop_name(kwargs)
+            child_name = self.get_child_prop_name(kwargs)
+            parent = client.get(resource_group_name, parent_name)
+            collection = self._find_child_collection(parent, kwargs)
+            item = self._find_child_item(parent, kwargs)
+            del collection[collection.index(item)]
+            if no_wait:
+                sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
+            else:
+                result = sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent).result()
+                match = None
+                try: 
+                    match = self._find_child_item(result, kwargs)
+                except CLIError:
+                    pass
+                if match:
+                    raise CLIError("Failed to delete '{}' on '{}'".format(child_name, parent_name))
+        scope = '{} {}'.format(self.group_name, command_name)
+        func_name = self._register_func(command_name, delete_func)
+        self.command(command_name, func_name, **kwargs)
+        self._add_dests(scope, optional=['no_wait'])
+
+    def create(self, command_name='create', **kwargs):
+        def create_func(cmd, client, resource_group_name, **kwargs):
+            no_wait = kwargs.get('no_wait', None)
+            parent_name = self.get_parent_prop_name(kwargs)
+            child_name = self.get_child_prop_name(kwargs)
+            parent = client.get(resource_group_name, parent_name)
+            collection = self._find_child_collection(parent, kwargs)
+            new_item = cmd.get_models(model)(kwargs)
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
+
+        # def _upsert(parent, collection_name, obj_to_add, key_name, warn=True):
+        #     if not getattr(parent, collection_name, None):
+        #         setattr(parent, collection_name, [])
+        #     collection = getattr(parent, collection_name, None)
+
+        #     value = getattr(obj_to_add, key_name)
+        #     if value is None:
+        #         raise CLIError(
+        #             "Unable to resolve a value for key '{}' with which to match.".format(key_name))
+        #     match = next((x for x in collection if getattr(x, key_name, None) == value), None)
+        #     if match:
+        #         if warn:
+        #             logger.warning("Item '%s' already exists. Replacing with new values.", value)
+        #         collection.remove(match)
+
+        #     collection.append(obj_to_add)
+
+        scope = '{} {}'.format(self.group_name, command_name)
+        func_name = self._register_func(command_name, create_func)
+        self.command(command_name, func_name, **kwargs)
+        self._add_dests(scope, optional=['no_wait'])
+
+    def _add_dests(self, scope, required=None, optional=None):
+        from azure.cli.core.commands.parameters import get_resource_name_completion_list
+        required = required or list(self._key_to_dest_map.values())
+        optional = optional or []
+        command = self.command_loader.command_table.get(scope)
+        child_dest = self._key_to_dest_map[self._child_path[-1]]
+        for dest in required + optional:
+            dest_kwargs = {'required': dest in required}
+            # the right-most child received the "--name/-n" alias
+            options_list = ['--name', '-n'] if dest == child_dest else None
+            # suppress id_part on list commands
+            if not scope.endswith('list'):
+                dest_kwargs['id_part'] = self._dest_to_id_part_map.get(dest, None)
+            if options_list:
+                command.add_argument(dest, *options_list, **dest_kwargs)
+            else:
+                command.add_argument(dest, **dest_kwargs)
+
+    def _parse_path(self, path):
+        comps = path.split('/')
+        self._parent_provider = comps[0]
+        self._parent_type = make_snake_case(comps[1])
+        curr_collection = None
+        child_num = 0
+        for comp in comps[2:]:
+            comp = make_snake_case(comp)
+            # key properties
+            if comp.startswith('{') and comp.endswith('}'):
+                comp = comp[1:-1]  # remove the curly braces
+                key = dest = None
+                if not curr_collection:
+                    try:
+                        key, dest = comp.split(':')
+                        self._parent_prop = key
+                        # key property names are often not unique, so combine with collection name
+                        key = '{}.{}'.format(curr_collection, key)
+                        self._key_to_dest_map[key] = dest
+                    except ValueError:
+                        # if key property is unique it can serve as the dest value
+                        self._child_path.append(comp)
+                        self._key_to_dest_map[comp] = comp
+                else:
+                    try:
+                        key, dest = comp.split(':')
+                        # key property names are often not unique, so combine with collection name
+                        key = '{}.{}'.format(curr_collection, key)
+                        self._child_path.append(key)
+                        self._key_to_dest_map[key] = dest
+                    except ValueError:
+                        # if key property is unique it can serve as the dest value
+                        self._child_path.append(comp)
+                        self._key_to_dest_map[comp] = comp
+                self._dest_to_id_part_map[dest] = 'name' if not child_num else 'child_name_{}'.format(child_num)
+                child_num += 1
+            else:  # collection properties
+                self._child_path.append(comp)
+                curr_collection = comp
+
+    def _find_child(self, parent, paths, kwargs):
+        current = parent
+        curr_collection = None
+        for comp in paths:
+            sdk_prop = dest = None
+            try:
+                dest = self._key_to_dest_map[comp]
+            except KeyError:
+                sdk_prop = comp
+            if dest:
+                try:
+                    sdk_prop = comp.split('.')[1]
+                except KeyError:
+                    sdk_prop = comp
+                item_name = kwargs.get(dest)
+                match = next((x for x in current if getattr(x, sdk_prop) == item_name), None)
+                if match is None:
+                    raise CLIError("item '{}' not found in {}".format(item_name, curr_collection))
+                current = match
+            else:
+                match = getattr(current, sdk_prop, None)
+                if match is None:
+                    raise CLIError("collection '{}' not found".format(sdk_prop))
+                curr_collection = sdk_prop
+                current = match
+        return current
+
+    def _find_child_item(self, parent, kwargs):
+        return self._find_child(parent, self._child_path, kwargs)
+
+    def _find_child_collection(self, parent, kwargs):
+        # specific path will point to a child object, so the list that, omit the final step of the path
+        return self._find_child(parent, self._child_path[:-1], kwargs)
+
+    def _make_func_name(self, command):
+        if self._child_path:
+            return '{}_{}_{}'.format(command, self._parent_type, self._child_path[-2])
+        return '{}_{}'.format(command, self._parent_type)
+
+    def _register_func(self, command, func):
+        func_name = self._make_func_name(command)
+        setattr(sys.modules[__name__], func_name, func)
+        return func_name
+
+    def _get_command_type_property(self, name):
+        return self.group_kwargs['command_type'].settings.get(name, None)
+
+    def _parse_model(self, model_cls):
+        attr_map = model_cls.__dict__['_attribute_map']
+        validation = model_cls.__dict__.get('_validation', {})
+        prefix = self._model_prefix
+        property_map = {}
+        for key, data in attr_map.items():
+            data_type = data['type']
+            # ignore values if Swagger says they are readonly
+            if key in validation and validation[key].get('readonly'):
+                continue
+            # skip collections. They will be their own command groups
+            if data_type.startswith('[') and data_type.endswith(']'):
+                continue
+            if self.command_loader.get_models(data_type):
+                raise CLIError('TBD: Complex type {}'.format(data_type))
+            key = key if not prefix else '{}_{}'.format(prefix, key)
+            self._model_map[key] = {'dest': key, 'type': type}
+
+    def __init__(self, command_loader, group_name, **kwargs):
+        super(ArmCommandGroup, self).__init__(command_loader, group_name, **kwargs)
+        try:
+            path = self._get_command_type_property('path')
+        except (KeyError, AttributeError):
+            raise CLIError("command authoring error: ArmCommandGroup requires 'path' kwarg.")        
+
+        model = self._get_command_type_property('model')
+        self._model_map = {}
+        self._model_prefix = self._get_command_type_property('model_prefix')
+        if model:
+            self._parse_model(command_loader.get_models(model))
+
+        print(self._model_map)
+        # attributes
+        self._parent_provider = None
+        self._parent_type = None
+        self._parent_prop = None
+        self._child_path = []
+        self._key_to_dest_map = {}
+        self._dest_to_id_part_map = {}
+        self._parse_path(path)
+
+    def get_parent_prop_name(self, kwargs):
+        return kwargs.get(self._key_to_dest_map['None.{}'.format(self._parent_prop)])
+
+    def get_child_prop_name(self, kwargs):
+        return kwargs.get(self._key_to_dest_map[self._child_path[-1]])

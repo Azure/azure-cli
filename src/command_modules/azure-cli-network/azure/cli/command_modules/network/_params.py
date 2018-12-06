@@ -30,7 +30,8 @@ from azure.cli.command_modules.network._validators import (
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
-    validate_express_route_port, bandwidth_validator_factory)
+    validate_express_route_port, bandwidth_validator_factory,
+    get_header_configuration_validator)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -91,6 +92,7 @@ def load_arguments(self, _):
         c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
         c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.', min_api='2018-07-01')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('cache_result', arg_type=get_enum_type(['in', 'out', 'inout']), options_list='--cache', help='Cache the JSON object instead of sending off immediately.')
     # endregion
 
     # region ApplicationGateways
@@ -152,6 +154,8 @@ def load_arguments(self, _):
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
+    if self.supported_api_version(min_api='2018-10-01'):
+        ag_subresources.append({'name': 'rewrite-rule', 'display': 'rewrite rule', 'ref': 'rewrite_rule_sets'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
@@ -203,6 +207,32 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+
+    with self.argument_context('network application-gateway rewrite-rule') as c:
+        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'))
+        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'))
+        c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
+        c.argument('ruleset_name', help='Name of the rewrite rule set.')
+        c.argument('rule_name', help='Name of the rewrite rule.')
+        c.argument('gateway_name', help='Name of the application gateway.')
+
+    # from ._resources import app_gateway_rewrite_ruleset, app_gateway_rewrite_rule, app_gateway_rewrite_rule_condition
+    # for command in ['list', 'show', 'delete']:
+    #     with self.argument_context('network application-gateway rewrite-rule set {}'.format(command)) as c:
+    #         app_gateway_rewrite_ruleset.register_dests(c)
+
+    #     with self.argument_context('network application-gateway rewrite-rule {}'.format(command)) as c:
+    #         app_gateway_rewrite_rule.register_dests(c)
+
+    #     with self.argument_context('network application-gateway rewrite-rule condition {}'.format(command)) as c:
+    #         app_gateway_rewrite_rule_condition.register_dests(c)
+
+
+    with self.argument_context('network application-gateway rewrite-rule condition') as c:
+        c.argument('variable', help='The variable whose value is being evaluated.')
+        c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
+        c.argument('ignore_case', arg_type=get_three_state_flag(), help='Make comparison case-insensitive.')
+        c.argument('negate', arg_type=get_three_state_flag(), help='Check the negation of the condition.')
 
     with self.argument_context('network application-gateway rule create') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
@@ -1116,7 +1146,6 @@ def load_arguments(self, _):
         c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
         c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
         c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
-
     # endregion
 
     # region VirtualNetworkGatewayConnections

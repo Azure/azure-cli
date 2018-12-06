@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.cli.command_modules.network._util import _get_property, UpdateContext
+from azure.cli.command_modules.network._util import _get_property
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
@@ -42,7 +42,7 @@ def _get_from_collection(collection, value, key_name):
     return match
 
 
-def _upsert(parent, collection_name, obj_to_add, key_name):
+def _upsert(parent, collection_name, obj_to_add, key_name, warn=True):
     if not getattr(parent, collection_name, None):
         setattr(parent, collection_name, [])
     collection = getattr(parent, collection_name, None)
@@ -53,7 +53,8 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
             "Unable to resolve a value for key '{}' with which to match.".format(key_name))
     match = next((x for x in collection if getattr(x, key_name, None) == value), None)
     if match:
-        logger.warning("Item '%s' already exists. Replacing with new values.", value)
+        if warn:
+            logger.warning("Item '%s' already exists. Replacing with new values.", value)
         collection.remove(match)
 
     collection.append(obj_to_add)
@@ -484,6 +485,80 @@ def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_
         instance.include_path = include_path
     if include_query_string is not None:
         instance.include_query_string = include_query_string
+    return parent
+
+
+def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False, cache_result=None):
+    ApplicationGatewayRewriteRuleSet = cmd.get_models(
+        'ApplicationGatewayRewriteRuleSet')
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    new_set = ApplicationGatewayRewriteRuleSet(name=item_name)
+    _upsert(ag, 'rewrite_rule_sets', new_set, 'name')
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_rewrite_rule_set(instance, parent, item_name, cache_result=None):
+    return parent
+
+
+def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, parent_name, item_name, 
+                           sequence=None, request_headers=None, response_headers=None, no_wait=False, cache_result=None):
+    ApplicationGatewayRewriteRule, ApplicationGatewayRewriteRuleActionSet = cmd.get_models(
+        'ApplicationGatewayRewriteRule', 'ApplicationGatewayRewriteRuleActionSet')
+    if not request_headers and not response_headers:
+        raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    rule_set = next((x for x in ag.rewrite_rule_sets if x.name == parent_name), None)
+    if not rule_set:
+        raise CLIError("rule set '{}' not found.".format(parent_name))
+    new_rule = ApplicationGatewayRewriteRule(
+        name=item_name,
+        rule_sequence=sequence,
+        action_set=ApplicationGatewayRewriteRuleActionSet(
+            request_header_configurations=request_headers,
+            response_header_configurations=response_headers
+        )
+    )
+    _upsert(rule_set, 'rewrite_rules', new_rule, 'name')
+    _upsert(ag, 'rewrite_rule_sets', rule_set, 'name', warn=False)
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_rewrite_rule(instance, parent, parent_name, item_name,
+                           sequence=None, request_headers=None, response_headers=None, cache_result=None):
+    return parent
+
+
+def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, parent_name, item_name,
+                                     variable, no_wait=False, cache_result=False, pattern=None, ignore_case=None,
+                                     negate=None):
+    ApplicationGatewayRewriteRuleCondition = cmd.get_models(
+        'ApplicationGatewayRewriteRuleCondition')
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    rule_set = next((x for x in ag.rewrite_rule_sets if x.name == parent_name), None)
+    if not rule_set:
+        raise CLIError("rule set '{}' not found.".format(parent_name))
+    rule = next((x for x in rule_set.rewrite_rules if x.name == item_name), None)
+    if not rule:
+        raise CLIError("rule '{}' in rule set '{}' not found.".format(item_name, parent_name))
+    if not rule.conditions:
+        rule.conditions = []
+    new_condition = ApplicationGatewayRewriteRuleCondition(
+        variable=variable,
+        pattern=pattern,
+        ignore_case=ignore_case,
+        negate=negate
+    )
+    _upsert(rule, 'condition', new_condition, 'variable')
+    _upsert(rule_set, 'rewrite_rules', rule, 'name', warn=False)
+    _upsert(ag, 'rewrite_rule_sets', rule_set, 'name', warn=False)
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_rewrite_rule_condition(instance, parent, item_name, cache_result=None):
     return parent
 
 
@@ -1525,16 +1600,16 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
                          allow_global_reach=None, express_route_port=None,
                          allow_classic_operations=None):
 
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('allow_classic_operations', allow_classic_operations)
         c.set_param('tags', tags)
         c.set_param('allow_global_reach', allow_global_reach)
 
-    with UpdateContext(instance.sku) as c:
+    with cmd.update_context(instance.sku) as c:
         c.set_param('family', sku_family)
         c.set_param('tier', sku_tier)
 
-    with UpdateContext(instance.service_provider_properties) as c:
+    with cmd.update_context(instance.service_provider_properties) as c:
         c.set_param('peering_location', peering_location)
         c.set_param('service_provider_name', service_provider_name)
 
@@ -1629,7 +1704,7 @@ def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, sec
                                    route_filter, advertised_public_prefixes, customer_asn, routing_registry_name):
     if config:
         # update scenario
-        with UpdateContext(config) as c:
+        with cmd.update_context(config) as c:
             c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
             c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
             c.set_param('advertised_public_prefixes', advertised_public_prefixes)
@@ -1662,7 +1737,7 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
                                  legacy_mode=None):
 
     # update settings common to all peering types
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('peer_asn', peer_asn)
         c.set_param('vlan_id', vlan_id)
         c.set_param('shared_key', shared_key)
@@ -1676,7 +1751,7 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
                                                                       routing_registry_name)
     else:
         # IPv4 Microsoft Peering (or non-Microsoft Peering)
-        with UpdateContext(instance) as c:
+        with cmd.update_context(instance) as c:
             c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
             c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
 
@@ -1685,7 +1760,7 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
             instance.route_filter = RouteFilter(id=route_filter)
 
         try:
-            with UpdateContext(instance.microsoft_peering_config) as c:
+            with cmd.update_context(instance.microsoft_peering_config) as c:
                 c.set_param('advertised_public_prefixes', advertised_public_prefixes)
                 c.set_param('customer_asn', customer_asn)
                 c.set_param('routing_registry_name', routing_registry_name)
@@ -1789,7 +1864,7 @@ def create_express_route_port(cmd, resource_group_name, express_route_port_name,
 
 
 def update_express_route_port(instance, tags=None):
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.update_param('tags', tags, True)
     return instance
 
@@ -1942,7 +2017,7 @@ def set_lb_inbound_nat_rule(
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
 
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
         c.set_param('backend_port', backend_port)
@@ -1982,7 +2057,7 @@ def set_lb_inbound_nat_pool(
         instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
         frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port_range_start', frontend_port_range_start)
         c.set_param('frontend_port_range_end', frontend_port_range_end)
@@ -2089,7 +2164,7 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
                          idle_timeout=None, frontend_ip_configurations=None, enable_tcp_reset=None,
                          backend_address_pool=None):
     SubResource = cmd.get_models('SubResource')
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('allocated_outbound_ports', outbound_ports)
         c.set_param('idle_timeout_in_minutes', idle_timeout)
@@ -2116,7 +2191,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
 
 def set_lb_probe(instance, parent, item_name, protocol=None, port=None,
                  path=None, interval=None, threshold=None):
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('port', port)
         c.set_param('request_path', path)
@@ -2162,7 +2237,7 @@ def set_lb_rule(
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
         disable_outbound_snat=None):
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
         c.set_param('backend_port', backend_port)
@@ -2869,7 +2944,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     except AttributeError:
         pass
 
-    with UpdateContext(config) as c:
+    with cmd.update_context(config) as c:
         c.set_param('enabled', enabled if enabled is not None else config.enabled)
         c.set_param('storage_id', storage_account or config.storage_id)
     if retention is not None:
@@ -2910,7 +2985,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                 }
             }
         else:
-            with UpdateContext(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
                 # c.set_param('traffic_analytics_interval', traffic_analytics_interval)
@@ -3635,16 +3710,16 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
             instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = []
         instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
 
-    with UpdateContext(instance.vpn_client_configuration) as c:
+    with cmd.update_context(instance.vpn_client_configuration) as c:
         c.set_param('vpn_client_protocols', client_protocol)
         c.set_param('radius_server_address', radius_server)
         c.set_param('radius_server_secret', radius_secret)
 
-    with UpdateContext(instance.sku) as c:
+    with cmd.update_context(instance.sku) as c:
         c.set_param('name', sku)
         c.set_param('tier', sku)
 
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('gateway_default_site', SubResource(id=gateway_default_site) if gateway_default_site else None)
         c.set_param('vpn_type', vpn_type)
         c.set_param('tags', tags)
@@ -3847,7 +3922,7 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
                           enable_bgp=None, use_policy_based_traffic_selectors=None,
                           express_route_gateway_bypass=None):
 
-    with UpdateContext(instance) as c:
+    with cmd.update_context(instance) as c:
         c.set_param('routing_weight', routing_weight)
         c.set_param('shared_key', shared_key)
         c.set_param('tags', tags)

@@ -1493,3 +1493,22 @@ class WafConfigExclusionAction(argparse.Action):
             selector_match_operator=op,
             selector=selector
         ))
+
+def get_header_configuration_validator(dest):
+
+    def validator(cmd, namespace):
+
+        values = getattr(namespace, dest, None)
+        if not values:
+            return
+
+        results = []
+        for item in values:
+            key, value = item.split('=', 1)
+            results.append({
+                'header_name': key,
+                'header_value': value
+            })
+        setattr(namespace, dest, results)
+
+    return validator

@@ -189,6 +189,25 @@ class AzCliCommand(CLICommand):
         return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
                                    operation_group=operation_group)
 
+    def update_context(self, obj_inst):
+
+        class UpdateContext(object):
+            def __init__(self, instance):
+                self.instance = instance
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def set_param(self, prop, value, allow_clear=True):
+                if value == '' and allow_clear:
+                    setattr(self.instance, prop, None)
+                elif value is not None:
+                    setattr(self.instance, prop, value)
+        return UpdateContext(obj_inst)
+
 
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):

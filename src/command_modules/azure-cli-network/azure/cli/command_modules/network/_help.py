@@ -505,7 +505,80 @@ helps['network application-gateway redirect-config update'] = """
             az network application-gateway redirect-config update -g MyResourceGroup --gateway-name MyAppGateway \\
                 -n MyRedirectConfig --type Permanent --target-listener MyNewBackendListener
 """
+# endregion
 
+# region Application Gateway rewrite rules
+helps['network application-gateway rewrite-rule'] = """
+    short-summary: Manage rewrite rules of an application gateway.
+"""
+
+helps['network application-gateway rewrite-rule create'] = """
+    short-summary: Create a rewrite rule.
+"""
+
+helps['network application-gateway rewrite-rule delete'] = """
+    short-summary: Delete a rewrite rule.
+"""
+
+helps['network application-gateway rewrite-rule list'] = """
+    short-summary: List rewrite rules.
+"""
+
+helps['network application-gateway rewrite-rule show'] = """
+    short-summary: Get the details of a rewrite rule.
+"""
+
+helps['network application-gateway rewrite-rule update'] = """
+    short-summary: Update a rewrite rule.
+"""
+
+helps['network application-gateway rewrite-rule set'] = """
+    short-summary: Manage rewrite rulesets of an application gateway.
+"""
+
+helps['network application-gateway rewrite-rule set create'] = """
+    short-summary: Create a rewrite ruleset.
+"""
+
+helps['network application-gateway rewrite-rule set delete'] = """
+    short-summary: Delete a rewrite ruleset.
+"""
+
+helps['network application-gateway rewrite-rule set list'] = """
+    short-summary: List rewrite rulesets.
+"""
+
+helps['network application-gateway rewrite-rule set show'] = """
+    short-summary: Get the details of a rewrite ruleset.
+"""
+
+helps['network application-gateway rewrite-rule set update'] = """
+    short-summary: Update a rewrite ruleset.
+"""
+
+helps['network application-gateway rewrite-rule condition'] = """
+    short-summary: Manage rewrite rule conditions of an application gateway.
+"""
+
+helps['network application-gateway rewrite-rule condition create'] = """
+    short-summary: Create a rewrite rule condition.
+"""
+
+helps['network application-gateway rewrite-rule condition delete'] = """
+    short-summary: Delete a rewrite rule condition.
+"""
+
+helps['network application-gateway rewrite-rule condition list'] = """
+    short-summary: List rewrite rule conditions.
+"""
+
+helps['network application-gateway rewrite-rule condition show'] = """
+    short-summary: Get the details of a rewrite rule condition.
+"""
+
+helps['network application-gateway rewrite-rule condition update'] = """
+    short-summary: Update a rewrite rule condition.
+"""
 # endregion
 
 # region Application Gateway rules

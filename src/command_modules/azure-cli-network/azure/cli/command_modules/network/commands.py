@@ -6,7 +6,8 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
+from azure.cli.core.commands.arm import (
+    deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
@@ -339,15 +340,62 @@ def load_command_table(self, _):
     for kwargs in subresource_properties:
         alias = kwargs['name']
         subresource = kwargs['prop']
+        path = kwargs.get('path', None)
         create_validator = kwargs.get('validator', None)
         with self.command_group('network application-gateway {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('application_gateways', subresource))
-            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
+            g.command('list', list_network_resource_property('application_gateways', subresource, path))
+            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource, path))
+            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource, path), supports_no_wait=True)
             g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
             g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
+
+
+    ag_kwargs = {
+        'operations_tmpl': 'azure.cli.core.commands.arm#{}',
+        'client_factory': cf_application_gateways
+    }
+
+    app_gateway_rewrite_ruleset = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}',
+        model='ApplicationGatewayRewriteRuleSet',
+        model_prefix='ruleset',
+        min_api='2018-12-01',
+        **ag_kwargs
+    )
+    with self._arm_command_group('network application-gateway rewrite-rule set', app_gateway_rewrite_ruleset) as g:
+        g.create()
+        #g.update()
+        g.list()
+        g.show()
+        g.delete(confirmation=True)
+
+
+    app_gateway_rewrite_rule = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}/rewriteRules/{name:rule_name}',
+        min_api='2018-12-01',
+        #model='ApplicationGatewayRewriteRule',
+        #model_prefix='rule',
+        **ag_kwargs
+    )
+    with self._arm_command_group('network application-gateway rewrite-rule', app_gateway_rewrite_rule) as g:
+        g.list()
+        g.show()
+        g.delete()
+
+    app_gateway_rewrite_rule_condition = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}/rewriteRules/{name:rule_name}/conditions/{variable}',
+        min_api='2018-12-01',
+        model='ApplicationGatewayRewriteRuleCondition',
+        model_prefix='condition',
+        **ag_kwargs
+    )
+
+    with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:
+        g.list()
+        g.show()
+        g.delete()
 
     with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
         subresource = 'redirect_configurations'

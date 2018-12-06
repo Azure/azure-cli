@@ -405,6 +405,14 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
 
+    def _arm_command_group(self, group_name, command_type=None, **kwargs):
+        from azure.cli.core.commands.arm import ArmCommandGroup
+        if command_type:
+            kwargs['command_type'] = command_type
+        if 'deprecate_info' in kwargs:
+            kwargs['deprecate_info'].target = group_name
+        return ArmCommandGroup(self, group_name, **kwargs)
+
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
             kwargs['command_type'] = command_type
