@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.7
++++++
+* Minor fixes.
+
 2.2.6
 +++++
 * Minor fixes.
