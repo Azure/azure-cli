@@ -222,7 +222,7 @@ helps['aks create'] = """
           short-summary: Disable Kubernetes Role-Based Access Control.
         - name: --enable-rbac -r
           type: bool
-          short-summary: "Enable Kubernetes Role-Based Access Control. Default: enabled."
+          short-summary: "Enable Kubernetes Role-Based Access Control. Default: enabled. This parameter has been deprecated and will be removed in a future release. "
         - name: --max-pods -m
           type: int
           short-summary: The maximum number of pods deployable to a node.
