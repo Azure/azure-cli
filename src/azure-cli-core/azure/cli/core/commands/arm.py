@@ -7,16 +7,17 @@
 
 import argparse
 from collections import OrderedDict
+import copy
 import json
 import re
-import copy
 from six import string_types
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
+from azure.cli.core.util import (
+    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, _find_child_item)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -367,16 +368,6 @@ set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
 
 
-def _get_child(parent, collection_name, item_name, collection_key):
-    if not item_name:
-        raise CLIError("Name property for collection '{}' not provided. Check your input.".format(collection_name))
-    items = getattr(parent, collection_name)
-    result = next((x for x in items if getattr(x, collection_key, '').lower() == item_name.lower()), None)
-    if not result:
-        raise CLIError("Property '{}' does not exist for key '{}'.".format(item_name, collection_key))
-    return result
-
-
 def _get_operations_tmpl(cmd, custom_command=False):
     operations_tmpl = cmd.command_kwargs.get('operations_tmpl') or \
         cmd.command_kwargs.get(get_command_type_kwarg(custom_command)).settings['operations_tmpl']
@@ -495,6 +486,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         context_copy.cli_ctx = cmd.cli_ctx
         force_string = args.get('force_string', False)
         ordered_arguments = args.pop('ordered_arguments', [])
+        dest_names = child_arg_name.split('.')
+        child_names = [args[key] for key in dest_names]
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
@@ -503,12 +496,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
         if child_collection_prop_name:
             parent = getter(**getterargs)
-            instance = _get_child(
-                parent,
-                child_collection_prop_name,
-                args.get(child_arg_name),
-                child_collection_key
-            )
+            instance = _find_child_item(parent, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         else:
             parent = None
             instance = getter(**getterargs)
@@ -572,13 +560,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
 
         if child_collection_prop_name:
-            result = _get_child(
-                result,
-                child_collection_prop_name,
-                args.get(child_arg_name),
-                child_collection_key
-            )
-
+            result = _find_child_item(result, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         return result
 
     context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access

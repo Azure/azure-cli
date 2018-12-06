@@ -189,6 +189,29 @@ class AzCliCommand(CLICommand):
         return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
                                    operation_group=operation_group)
 
+    def update_context(self, obj_inst):
+        class UpdateContext(object):
+            def __init__(self, instance):
+                self.instance = instance
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def set_param(self, prop, value, allow_clear=True, curr_obj=None):
+                curr_obj = curr_obj or self.instance
+                if '.' in prop:
+                    prop, path = prop.split('.', 1)
+                    curr_obj = getattr(curr_obj, prop)
+                    self.set_param(path, value, allow_clear=allow_clear, curr_obj=curr_obj)
+                elif value == '' and allow_clear:
+                    setattr(curr_obj, prop, None)
+                elif value is not None:
+                    setattr(curr_obj, prop, value)
+        return UpdateContext(obj_inst)
+
 
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
