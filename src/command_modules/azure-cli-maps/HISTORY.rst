@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.3
++++++
+* Add support for the S1 SKU
+
 0.3.2
 +++++
 * Minor fixes

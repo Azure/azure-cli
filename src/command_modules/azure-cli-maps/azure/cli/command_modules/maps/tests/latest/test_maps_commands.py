@@ -21,7 +21,9 @@ class MapsScenarioTests(ScenarioTest):
             'name': self.create_random_name(prefix='cli-', length=20),
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
+            's1name1': self.create_random_name(prefix='cli-', length=20),
             'sku': 'S0',
+            'sku1': 'S1',
             'tags': tag_key + '=' + tag_value,
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
@@ -37,10 +39,24 @@ class MapsScenarioTests(ScenarioTest):
                                self.check('tags', None)
                            ]).get_output_in_json()
 
+        # Test to create a S1 Maps account.
+        account = self.cmd('az maps account create -n {s1name1} -g {rg} --sku {sku1} --accept-tos',
+                           checks=[
+                               self.check('name', '{name}'),
+                               self.check('resourceGroup', '{rg}'),
+                               self.check('sku.name', '{sku1}'),
+                               self.check('tags', None)
+                           ]).get_output_in_json()
+
+
         # Call create again, expect to get the same account.
         account_duplicated = self.cmd(
             'az maps account create -n {name} -g {rg} --sku {sku} --accept-tos').get_output_in_json()
         self.assertEqual(account, account_duplicated)
+
+        account_duplicated1 = self.cmd(
+            'az maps account create -n {s1name1} -g {rg} --sku {sku1} --accept-tos').get_output_in_json()
+        self.assertEqual(account, account_duplicated1)
 
         # Test 'az maps account update'
         # Test to add a new tag to an existing account.
@@ -51,6 +67,15 @@ class MapsScenarioTests(ScenarioTest):
                      self.check('resourceGroup', '{rg}'),
                      self.check('sku.name', '{sku}'),
                      self.check('tags', {tag_key: tag_value})
+                 ])
+
+        # Test changing SKU tier
+        self.cmd('az maps account update -n {s1name1} -g {rg} --sku {sku}',
+                 checks=[
+                     self.check('id', account['id']),
+                     self.check('name', '{s1name1}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('sku.name', '{sku}')
                  ])
 
         # Test 'az maps account show'.
@@ -147,8 +172,10 @@ class MapsScenarioTests(ScenarioTest):
         ])
 
         # Remove the rest of Maps accounts.
+        self.cmd('az maps account delete -n {s1name1} -g {rg}')
         exit_code = self.cmd('az maps account delete -n {name1} -g {rg1}').exit_code
         self.assertEqual(exit_code, 0)
         self.cmd('az maps account delete -n {name2} -g {rg}')
+
         self.cmd('az maps account list -g {rg}', checks=self.is_empty())
         self.cmd('az maps account list -g {rg1}', checks=self.is_empty())
