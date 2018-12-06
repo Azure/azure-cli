@@ -6,10 +6,10 @@ from __future__ import print_function
 
 from collections import Counter, OrderedDict
 
-from knack.log import get_logger
-
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+
+from knack.log import get_logger
 
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
@@ -967,7 +967,6 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
         instance.registration_virtual_networks = None
     elif registration_vnets:
         instance.registration_virtual_networks = registration_vnets
-
     return instance
 
 
