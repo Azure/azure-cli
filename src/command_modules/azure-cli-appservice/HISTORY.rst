@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.11
+++++++
+* webapp: add az webapp ssh
+
 0.2.10
 ++++++
 * webapp: az webapp up reliability fixes, where using the command to redeploy code to a newly created app using the same command was failing
