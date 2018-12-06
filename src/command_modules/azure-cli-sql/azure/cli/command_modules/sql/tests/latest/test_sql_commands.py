@@ -2568,7 +2568,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         edition = 'GeneralPurpose'
         family = 'Gen4'
         resource_group_1 = "cl_one"
-        collation = "Serbian_Cyrillic_100_CS_AS"
+        collation = "Serbian_Cyrillic_100_CS_AS" 
 
         user = admin_login
 
