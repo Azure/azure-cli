@@ -132,14 +132,6 @@ helps['storage account show-usage'] = """
     short-summary: Show the current count and limit of the storage accounts under the subscription.
 """
 
-helps['storage blob list'] = """
-    type: command
-    short-summary: List storage blobs in a container.
-    examples:
-        - name: List all storage blobs in a container.
-          text: az storage blob list -c MyContainer
-"""
-
 helps['storage account delete'] = """
     type: command
     short-summary: Delete a storage account.
@@ -205,6 +197,9 @@ helps['storage blob list'] = """
     parameters:
         - name: --include
           short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.'
+    examples:
+        - name: List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
+          text: az storage blob list -c MyContainer --prefix foo
 """
 
 helps['storage blob copy'] = """
