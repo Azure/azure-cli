@@ -21,6 +21,8 @@ class ResourceDeleteTests(ScenarioTest):
 
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
         self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
+
+        # to deal with latency caused by caching at ARM frontdoor, we loop till they are all gone
         for _ in range(30):
             time.sleep(10)
             leftovers = self.cmd('resource list --tag {}'.format(tag_name)).get_output_in_json()

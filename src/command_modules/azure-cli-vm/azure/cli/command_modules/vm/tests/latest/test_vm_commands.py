@@ -2206,7 +2206,6 @@ class VMSSNicScenarioTest(ScenarioTest):
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ]).get_output_in_json()
 
-
         self.kwargs['nic'] = nic_list[0].get('name')
         self.cmd('vmss nic show --resource-group {rg} --vmss-name {vmss} --instance-id {iid} -n {nic}', checks=[
             self.check('type(@)', 'object'),
