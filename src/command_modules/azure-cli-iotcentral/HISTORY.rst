@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.5
++++++
+* Update command was calling wrong api. Change api from creteOrUpdate to update
+
 0.1.4
 +++++
 * Add subdomain availability check when creating an IoT Central application. 
