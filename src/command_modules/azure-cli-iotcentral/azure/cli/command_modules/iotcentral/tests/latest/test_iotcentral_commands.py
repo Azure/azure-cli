@@ -28,20 +28,21 @@ class IoTCentralTest(ScenarioTest):
 
         # Test 'az iotcentral app create with template and display name'
         self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2} --template {3} --display-name \"{4}\"'
-            .format(template_app_name, rg, template_app_name, template, template_app_display_name), checks=[
-                self.check('resourceGroup', rg),
-                self.check('location', location),
-                self.check('subdomain', template_app_name),
-                self.check('displayName', template_app_display_name),
-                self.check('sku.name', 'S1'),
-                self.check('template', template)])
+                 .format(template_app_name, rg, template_app_name, template, template_app_display_name), checks=[
+                     self.check('resourceGroup', rg),
+                     self.check('location', location),
+                     self.check('subdomain', template_app_name),
+                     self.check('displayName', template_app_display_name),
+                     self.check('sku.name', 'S1'),
+                     self.check('template', template)])
         
         # Test 'az iotcentral app update'
-        self.cmd('iotcentral app update -n {0} -g {1} --set displayName={2} subdomain={3}'.format(app_name, rg, updatedName, updatedName), checks=[
-            self.check('resourceGroup', rg),
-            self.check('location', location),
-            self.check('subdomain', updatedName),
-            self.check('displayName', updatedName)])
+        self.cmd('iotcentral app update -n {0} -g {1} --set displayName={2} subdomain={3}'
+                 .format(app_name, rg, updatedName, updatedName), checks=[
+                     self.check('resourceGroup', rg),
+                     self.check('location', location),
+                     self.check('subdomain', updatedName),
+                     self.check('displayName', updatedName)])
 
         # Test 'az iotcentral app show'
         self.cmd('iotcentral app show -n {0} -g {1}'.format(app_name, rg), checks=[
