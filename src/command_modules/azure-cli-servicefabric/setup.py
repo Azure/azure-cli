@@ -37,7 +37,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-graphrbac==0.53.0',
     'azure-keyvault==1.1.0',
-    'azure-mgmt-network==2.3.0',
+    'azure-mgmt-network==2.4.0',
     'azure-mgmt-compute==4.3.1',
     'azure-mgmt-storage==3.1.0',
     'azure-mgmt-servicefabric==0.2.0',
