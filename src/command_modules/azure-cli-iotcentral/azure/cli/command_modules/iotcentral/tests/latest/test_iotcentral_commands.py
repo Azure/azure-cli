@@ -35,7 +35,7 @@ class IoTCentralTest(ScenarioTest):
                      self.check('displayName', template_app_display_name),
                      self.check('sku.name', 'S1'),
                      self.check('template', template)])
-        
+
         # Test 'az iotcentral app update'
         self.cmd('iotcentral app update -n {0} -g {1} --set displayName={2} subdomain={3}'
                  .format(app_name, rg, updatedName, updatedName), checks=[
