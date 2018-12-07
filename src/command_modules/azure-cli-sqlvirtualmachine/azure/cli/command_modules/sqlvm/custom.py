@@ -129,6 +129,16 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     Creates an availability group listener
     '''
 
+    if not is_valid_resource_id(subnet_resource_id):
+        raise CLIError("Invalid subnet resource id.")
+    if not is_valid_resource_id(load_balancer_resource_id):
+        raise CLIError("Invalid load balancer resource id.")
+    if public_ip_address_resource_id and not is_valid_resource_id(public_ip_address_resource_id):
+        raise CLIError("Invalid public IP address resource id.")
+    for sqlvm in sql_virtual_machine_instances:
+        if not is_valid_resource_id(sqlvm):
+            raise CLIError("Invalid SQL virtual machine resource id.")
+
     #Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
                                          subnet_resource_id=subnet_resource_id
@@ -136,10 +146,8 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
 
     #Create the load balancer configurations
     load_balancer_object = LoadBalancerConfiguration(private_ip_address=private_ip_object,
-                                                     public_ip_address_resource_id=public_ip_address_resource_id
-                                                        if is_valid_resource_id(public_ip_address_resource_id) else None,
-                                                     load_balancer_resource_id=load_balancer_resource_id
-                                                        if is_valid_resource_id(load_balancer_resource_id) else None,
+                                                     public_ip_address_resource_id=public_ip_address_resource_id,
+                                                     load_balancer_resource_id=load_balancer_resource_id,
                                                      probe_port=probe_port,
                                                      sql_virtual_machine_instances=sql_virtual_machine_instances)
 
@@ -155,21 +163,6 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     return client.get(resource_group_name, sql_virtual_machine_group_name, availability_group_listener_name)
 
 
-
-def sqlvm_aglistener_update(instance, sql_virtual_machine_instances=None):
-    '''
-    Updates an availability group listener
-    '''
-    print(instance.load_balancer_configurations[0].sql_virtual_machine_instances)
-    print(type(instance.load_balancer_configurations[0].sql_virtual_machine_instances))
-    if sql_virtual_machine_instances is not None:
-        #TODO: check if customer can just add virtual machine instance
-        print(type(sql_virtual_machine_instances))
-        instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sql_virtual_machine_instances)
-
-    return instance
-
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, line-too-long
 def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group_name,
                  sql_server_license_type='PAYG', sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
@@ -179,9 +172,8 @@ def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
-                 service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_user_name=None,
-                 sql_auth_update_password=None, sql_workload_type=None, disk_count=None, disk_configuration_type=None,
-                 enable_r_services=None, backup_permissions_for_azure_backup_svc=None, tags=None):
+                 service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
+                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -192,6 +184,9 @@ def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group
     virtual_machine_resource_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=sql_virtual_machine_name)
+
+    if sql_virtual_machine_group_resource_id and not is_valid_resource_id(sql_virtual_machine_group_resource_id):
+        raise CLIError("Invalid SQL virtual machine group resource id.")
 
     tags = tags or {}
 
@@ -239,27 +234,21 @@ def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group
 
     connectivity_object = SqlConnectivityUpdateSettings(port=port,
                                                         connectivity_type=connectivity_type,
-                                                        sql_auth_update_user_name=sql_auth_update_user_name,
+                                                        sql_auth_update_user_name=sql_auth_update_username,
                                                         sql_auth_update_password=sql_auth_update_password)
 
     workload_type_object = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
-    storage_settings_object = SqlStorageUpdateSettings(disk_count=disk_count,
-                                                       disk_configuration_type=disk_configuration_type)
-
-    additional_features_object = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services,
-                                                                        backup_permissions_for_azure_backup_svc=backup_permissions_for_azure_backup_svc)
+    additional_features_object = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
 
     server_configuration_object = ServerConfigurationsManagementSettings(sql_connectivity_update_settings=connectivity_object,
                                                                          sql_workload_type_update_settings=workload_type_object,
-                                                                         sql_storage_update_settings=storage_settings_object,
                                                                          additional_features_server_configurations=additional_features_object)
 
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
-                                     sql_virtual_machine_group_resource_id=sql_virtual_machine_group_resource_id
-                                                        if is_valid_resource_id(sql_virtual_machine_group_resource_id) else None,
+                                     sql_virtual_machine_group_resource_id=sql_virtual_machine_group_resource_id,
                                      wsfc_domain_credentials=wsfc_domain_credentials_object,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
@@ -280,8 +269,7 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
-                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, disk_count=None,
-                 disk_configuration_type=None, enable_r_services=None, backup_permissions_for_azure_backup_svc=None, tags=None):
+                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -335,14 +323,8 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
     if sql_workload_type is not None:
         instance.server_configurations_management_settings.sql_workload_type_update_settings = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
-    if (disk_count is not None or disk_configuration_type is not None):
-        instance.server_configurations_management_settings.sql_storage_update_settings = SqlStorageUpdateSettings(disk_count=disk_count,
-                                                                                                                  disk_configuration_type=disk_configuration_type)
-
-    if (enable_r_services is not None or backup_permissions_for_azure_backup_svc is not None):
-        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services,
-                                                                                                                                              backup_permissions_for_azure_backup_svc=
-                                                                                                                                              backup_permissions_for_azure_backup_svc)
+    if (enable_r_services is not None):
+        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
 
     #If none of the settings was modified, reset server_configurations_management_settings to be null
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
@@ -361,7 +343,7 @@ def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, cluster_
     '''
 
     if not (is_valid_resource_id(sql_virtual_machine_group_resource_id)):
-        raise CLIError("Invalid SQL virtual machine resource id.")
+        raise CLIError("Invalid SQL virtual machine group resource id.")
 
     instance.sql_virtual_machine_group_resource_id = sql_virtual_machine_group_resource_id
     instance.wsfc_domain_credentials = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
@@ -375,5 +357,34 @@ def remove_sqlvm_from_group(instance):
     Removes SQL virtual machine from SQL virtual machine group.
     '''
     instance.sql_virtual_machine_group_resource_id = None
+
+    return instance
+
+def add_sqlvm_to_aglistener(instance, sqlvm_resource_id):
+    '''
+    Add a SQL virtual machine to an availability group listener.
+    '''
+    if not (is_valid_resource_id(sqlvm_resource_id)):
+        raise CLIError("Invalid SQL virtual machine resource id.")
+
+    sqlvm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
+
+    if sqlvm_resource_id not in sqlvm_list:
+        instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sqlvm_resource_id)
+
+    return instance
+
+
+def remove_sqlvm_from_aglistener(instance, sqlvm_resource_id):
+    '''
+    Remove a SQL virtual machine from an availability group listener.
+    '''
+    if not (is_valid_resource_id(sqlvm_resource_id)):
+        raise CLIError("Invalid SQL virtual machine resource id.")
+
+    sqlvm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
+
+    if sqlvm_resource_id in sqlvm_list:
+        instance.load_balancer_configurations[0].sql_virtual_machine_instances.remove(sqlvm_resource_id)
 
     return instance

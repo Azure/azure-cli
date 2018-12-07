@@ -25,23 +25,39 @@ helps['sqlvm op'] = """
     """
 helps['sqlvm group create'] = """
     type: command
-    short-summary: Creates or updates a SQL virtual machine group.
+    short-summary: Creates a SQL virtual machine group.
     examples:
         - name: Create a SQL virtual machine group for SQL2016-WS2016 Enterprise virtual machines.
-        - text: >
-            az sqlvm group create -n sqlvmgroup -i SQL2016-WS2016 -s Enterprise -l eastus -g MyResourceGroup -f Domain.com -a testop@Domain.com -b testservice@Domain.com --sa-key '<PublicKey>' --sa-url 'https://storacc.blob.core.windows.net/'
+          text: >
+            az sqlvm group create -n sqlvmgroup -l eastus -g MyResourceGroup --image-offer SQL2016-WS2016 --image-sku Enterprise
+            --domain-fqdn Domain.com --operator-acc testop@Domain.com --service-acc testservice@Domain.com --sa-key '<PublicKey>' --sa-url 'https://storacc.blob.core.windows.net/'
+    """
+helps['sqlvm group update'] = """
+    type: command
+    short-summary: Updates a SQL virtual machine group.
+    examples:
+        - name: Update an empty SQL virtual machine group image sku to Developer.
+          text: >
+            az sqlvm group update -n sqlvmgroup -g MyResourceGroup -s Developer
     """
 helps['sqlvm aglistener create'] = """
     type: command
     short-summary: Creates or updates an availability group listener.
-    """
-helps['sqlvm aglistener update'] = """
-    type: command
-    short-summary: Updates an availability group listener.
+    examples:
+        - name: Create an availability group listener.
+          text: >
+            $sqlvm1 = az sqlvm show -g MyResourceGroup -n sqlvm1 | ConvertFrom-Json
+
+            $sqlvm2 = az sqlvm show -g MyResourceGroup -n sqlvm2 | ConvertFrom-Json
+
+            az sqlvm aglistener create -n aglistenertest -g MyResourceGroup --ag-name agname --group-name sqlvmgroup --ip-address 10.0.0.11
+            --lb-rid '/subscriptions/<yoursubscription>/resourceGroups/<yourrg>/providers/Microsoft.Network/loadBalancers/<lbname>' --probe-port 59999
+            --subnet-rid '/subscriptions/<yoursubscription>/resourceGroups/<yourrg>/providers/Microsoft.Network/virtualNetworks/<vnname>/subnets/<subnetname>'
+            --sqlvm-rids $sqlvm1.id $sqlvm2.id
     """
 helps['sqlvm create'] = """
     type: command
-    short-summary: Creates or updates a SQL virtual machine.
+    short-summary: Creates a SQL virtual machine.
     parameters:
         - name: --name -n
           short-summary: Name of the SQL virtual machine. The name of the new SQL virtual machine must be equal to the underlying virtual machine created from SQL marketplace image.
@@ -53,18 +69,18 @@ helps['sqlvm create'] = """
           text: >
             $sqlvmgroup = az sqlvm group show -n sqlvmgroup -g MyResourceGroup | ConvertFrom-Json
 
-            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --group-resource-id $sqlvmgroup.id --cluster-bootstrap-account-password
-            '<boostrappassword>' --cluster-operator-account-password '<operatorpassword>' --sql-service-account-password '<servicepassword>'
-        - name: Update SQL virtual machine auto backup settings.
-          text: >
-            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-time 2 --full-backup-window-hours 2
-            --storage-access-key '<storageKey>' --storage-account-url 'https://storageacc.blob.core.windows.net/' --retention-period 30 --log-backup-frequency 60
-        - name: Update SQL virtual machine auto patching settings.
-          text: >
-            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --day-of-week sunday --maintenance-window-duration 60 --maintenance-window-starting-hour 2
+            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --sqlvm-group-rid $sqlvmgroup.id --boostrap-acc-pwd
+            '<boostrappassword>' --operator-acc-pwd '<operatorpassword>' --service-acc-pwd '<servicepassword>'
         - name: Enable R services in SQL2016 onwards.
           text: >
             az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --enable-r-services true
+        - name: Create SQL virtual machine and configure auto backup settings.
+          text: >
+            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-time 2 --full-backup-window-hours 2
+            --storage-access-key '<storageKey>' --storage-account-url 'https://storageacc.blob.core.windows.net/' --retention-period 30 --log-backup-frequency 60
+        - name: Create SQL virtual machine and configure auto patching settings.
+          text: >
+            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --day-of-week sunday --maintenance-window-duration 60 --maintenance-window-starting-hour 2
     """
 helps['sqlvm update'] = """
     type: command
@@ -76,10 +92,33 @@ helps['sqlvm update'] = """
         - name: Remove a tag.
           text: >
             az sqlvm update -n sqlvm -g MyResourceGroup --remove tags.tagName
+        - name: Update SQL virtual machine auto backup settings.
+          text: >
+            az sqlvm update -n sqlvm -g MyResourceGroup --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-time 2 --full-backup-window-hours 2
+            --storage-access-key '<storageKey>' --storage-account-url 'https://storageacc.blob.core.windows.net/' --retention-period 30 --log-backup-frequency 60
+        - name: Disable SQL virtual machine auto backup settings.
+          text: >
+            az sqlvm update -n sqlvm -g MyResourceGroup --enable-auto-backup false
+        - name: Update SQL virtual machine auto patching settings.
+          text: >
+            az sqlvm update -n sqlvm -g MyResourceGroup --day-of-week sunday --maintenance-window-duration 60 --maintenance-window-starting-hour 2
+        - name: Disable SQL virtual machine auto patching settings.
+          text: >
+            az sqlvm update -n sqlvm -g MyResourceGroup --enable-auto-patching false
+        - name: Update a SQL virtual machine billing tag to AHUB.
+          text: >
+            az sqlvm update -n sqlvm -g MyResourceGroup --sql-server-license-type AHUB
     """
 helps['sqlvm add-to-group'] = """
     type: command
     short-summary: Adds SQL virtual machine to a SQL virtual machine group.
+    examples:
+        - name: Add SQL virtual machine to a group.
+          text: >
+            $sqlvmgroup = az sqlvm group show -n sqlvmgroup -g MyResourceGroup | ConvertFrom-Json
+
+            az sqlvm add-to-group -n sqlvm -g MyResourceGroup --group-resource-id $sqlvmgroup.id --cluster-bootstrap-account-password
+            '<boostrappassword>' --cluster-operator-account-password '<operatorpassword>' --sql-service-account-password '<servicepassword>'
     """
 helps['sqlvm remove-from-group'] = """
     type: command
@@ -88,5 +127,25 @@ helps['sqlvm remove-from-group'] = """
         - name: Remove SQL virtual machine from a group.
           text: >
             az sqlvm remove-from-group -n sqlvm -g MyResourceGroup
+    """
+helps['sqlvm aglistener add-sqlvm'] = """
+    type: command
+    short-summary: Add SQL virtual machine to an availability group listener.
+    examples:
+        - name: Add SQL virtual machine to a group.
+          text: >
+            $sqlvm = az sqlvm show -n sqlvm -g MyResourceGroup | ConvertFrom-Json
+
+            az sqlvm aglistener add-sqlvm -n aglistener -g MyResourceGroup --group-name sqlvmgroup --sqlvm-rid $sqlvm.id
+    """
+helps['sqlvm aglistener remove-sqlvm'] = """
+    type: command
+    short-summary: Remove SQL virtual machine from an availability group listener.
+    examples:
+        - name: Remove SQL virtual machine from an availability group listener.
+          text: >
+            $sqlvm = az sqlvm show -n sqlvm -g MyResourceGroup | ConvertFrom-Json
+
+            az sqlvm aglistener remove-sqlvm -n aglistener -g MyResourceGroup --group-name sqlvmgroup --sqlvm-rid $sqlvm.id
     """
 

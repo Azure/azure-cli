@@ -13,7 +13,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlWorkloadType,
     DiskConfigurationType,
     SqlImageSku,
-    DayOfWeek
+    DayOfWeek,
+    SqlVmGroupImageSku
 )
 
 from azure.cli.core.commands.parameters import (
@@ -44,27 +45,29 @@ def load_arguments(self, _):
         c.argument('sql_image_sku',
                    options_list=['--image-sku', '-s'],
                    help='SQL image sku.',
-                   arg_type=get_enum_type(SqlImageSku))
+                   arg_type=get_enum_type(SqlVmGroupImageSku))
 
     with self.argument_context('sqlvm group', arg_group='WSFC Domain Profile') as c:
         c.argument('domain_fqdn',
                    options_list=['--domain-fqdn', '-f'],
                    help='Fully qualified name of the domain.')
         c.argument('cluster_operator_account',
-                   options_list=['--operator-account', '-a'],
+                   options_list=['--operator-acc', '-p'],
                    help='Account name used for operating cluster i.e. will be part of administrators group on all the participating virtual machines in the cluster.')
         c.argument('sql_service_account',
-                   options_list=['--service-account', '-b'],
+                   options_list=['--service-acc', '-e'],
                    help='Account name under which SQL service will run on all participating SQL virtual machines in the cluster.')
         c.argument('storage_account_url',
-                   options_list=['--sa-url'],
+                   options_list=['--sa-url', '-u'],
                    help='Fully qualified ARM resource id of the witness storage account.')
         c.argument('storage_account_key',
-                   options_list=['--sa-key'],
+                   options_list=['--sa-key', '-k'],
                    help='Primary key of the witness storage account.')
         c.argument('cluster_bootstrap_account',
+                   options_list=['--bootstrap-acc'],
                    help='Account name used for creating cluster (at minimum needs permissions to \'Create Computer Objects\' in domain).')
         c.argument('file_share_witness_path',
+                   options_list=['--fsw-path'],
                    help='Optional path for fileshare witness.')
         c.argument('ou_path',
                    help='Organizational Unit path in which the nodes and cluster will be present.')
@@ -78,29 +81,38 @@ def load_arguments(self, _):
                    options_list=['--name', '-n'],
                    help='Name of the availability group listener.')
         c.argument('sql_virtual_machine_group_name',
-                   options_list=['--group-name', '-s'],
+                   options_list=['--group-name', '-r'],
                    help='Name of the SQL virtual machine group.')
         c.argument('port',
+                   options_list=['--port', '-p'],
                    help='Listener port.',
                    type=int)
         c.argument('availability_group_name',
+                   options_list=['--ag-name', '-a'],
                    help='Name of the availability group.')
+        c.argument('sqlvm_resource_id',
+                   options_list=['--sqlvm-rid', '-s'],
+                   help='Resource id of the SQL virtual machine.')
 
     with self.argument_context('sqlvm aglistener', arg_group='Load Balancer Configuration') as c:
         c.argument('ip_address',
+                   options_list=['--ip-address', '-i'],
                    help='Private IP address bound to the availability group listener.')
         c.argument('subnet_resource_id',
+                   options_list=['--subnet-rid', '-u'],
                    help='Subnet used to include private IP.')
         c.argument('public_ip_address_resource_id',
-                   options_list=['--public-ip-resource-id'],
+                   options_list=['--public-ip-rid', '-c'],
                    help='Resource id of the public IP.')
         c.argument('load_balancer_resource_id',
-                   help='Subnet used to include private IP.')
+                   options_list=['--lb-rid', '-b'],
+                   help='Resource id of the load balancer.')
         c.argument('probe_port',
+                   options_list=['--probe-port', '-e'],
                    help='Probe port.',
                    type=int)
         c.argument('sql_virtual_machine_instances',
-                   options_list=['--sqlvm-instances'],
+                   options_list=['--sqlvm-rids', '-l'],
                    nargs='+',
                    help='Space-separated list of SQL virtual machine instance resource id\'s that are enrolled into the availability group listener.')
 
@@ -113,18 +125,38 @@ def load_arguments(self, _):
         c.argument('sql_virtual_machine_name',
                    options_list=['--name', '-n'])
         c.argument('sql_virtual_machine_group_resource_id',
-                   options_list=['--group-resource-id'],
+                   options_list=['--sqlvm-group-rid'],
                    help='ARM resource id of the SQL virtual machine group this SQL virtual machine is or will be part of.')
         c.argument('sql_server_license_type',
                    help='SQL Server license type.',
+                   options_list=['--license-type'],
                    arg_type=get_enum_type(SqlServerLicenseType))
 
     with self.argument_context('sqlvm', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
+                   options_list=['--boostrap-acc-pwd'],
                    help='Cluster bootstrap account password.')
         c.argument('cluster_operator_account_password',
+                   options_list=['--operator-acc-pwd'],
                    help='Cluster operator account password.')
         c.argument('sql_service_account_password',
+                   options_list=['--service-acc-pwd'],
+                   help='SQL service account password.')
+
+    with self.argument_context('sqlvm add-to-group') as c:
+        c.argument('sql_virtual_machine_group_resource_id',
+                   options_list=['--sqlvm-group-rid', '-r'],
+                   help='ARM resource id of the SQL virtual machine group this SQL virtual machine is or will be part of.')
+
+    with self.argument_context('sqlvm add-to-group', arg_group='WSFC Domain Credentials') as c:
+        c.argument('cluster_bootstrap_account_password',
+                   options_list=['--boostrap-acc-pwd', '-b'],
+                   help='Cluster bootstrap account password.')
+        c.argument('cluster_operator_account_password',
+                   options_list=['--operator-acc-pwd', '-p'],
+                   help='Cluster operator account password.')
+        c.argument('sql_service_account_password',
+                   options_list=['--service-acc-pwd', '-s'],
                    help='SQL service account password.')
 
     with self.argument_context('sqlvm', arg_group='Auto Patching Settings') as c:
@@ -194,7 +226,7 @@ def load_arguments(self, _):
         c.argument('port',
                    help='SQL Server port.',
                    type=int)
-        c.argument('sql_auth_update_user_name',
+        c.argument('sql_auth_update_username',
                    help='SQL Server sysadmin login to create.')
         c.argument('sql_auth_update_password',
                    help='SQL Server sysadmin login password.')
@@ -212,10 +244,7 @@ def load_arguments(self, _):
                    help='Disk configuration to apply to SQL Server.',
                    arg_type=get_enum_type(DiskConfigurationType))
 
-    with self.argument_context('sqlvm', arg_group='Additional Features Server Configurations') as c:
+    with self.argument_context('sqlvm', arg_group='Additional Features') as c:
         c.argument('enable_r_services',
                    help='Enable or disable R services (SQL 2016 onwards).',
-                   arg_type=get_three_state_flag())
-        c.argument('backup_permissions_for_azure_backup_svc',
-                   help='Enable or disable Azure Backup service.',
                    arg_type=get_three_state_flag())
