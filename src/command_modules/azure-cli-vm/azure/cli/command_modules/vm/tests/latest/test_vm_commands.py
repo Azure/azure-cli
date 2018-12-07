@@ -2189,7 +2189,6 @@ class VMSSNicScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'iid': 0
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
@@ -2198,10 +2197,16 @@ class VMSSNicScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
+        
+        result = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['iid'] = result[0]['instanceId']
+
         nic_list = self.cmd('vmss nic list-vm-nics -g {rg} --vmss-name {vmss} --instance-id {iid}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ]).get_output_in_json()
+
+
         self.kwargs['nic'] = nic_list[0].get('name')
         self.cmd('vmss nic show --resource-group {rg} --vmss-name {vmss} --instance-id {iid} -n {nic}', checks=[
             self.check('type(@)', 'object'),
