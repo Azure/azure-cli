@@ -292,12 +292,12 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
 
         enable_auto_backup = enable_auto_backup if enable_auto_backup is False else True
         instance.auto_backup_settings = AutoBackupSettings(enable=enable_auto_backup,
-                                                           enable_encryption=enable_encryption,
+                                                           enable_encryption=enable_encryption if enable_auto_backup else None,
                                                            retention_period=retention_period,
                                                            storage_account_url=storage_account_url,
                                                            storage_access_key=storage_access_key,
                                                            password=backup_password,
-                                                           backup_system_dbs=backup_system_dbs,
+                                                           backup_system_dbs=backup_system_dbs if enable_auto_backup else None,
                                                            backup_schedule_type=backup_schedule_type,
                                                            full_backup_frequency=full_backup_frequency,
                                                            full_backup_start_time=full_backup_start_time,
