@@ -171,7 +171,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
                     ext_name = ext.name
-                    ext_dir = get_extension_path(ext_name)
+                    ext_dir = ext.path or get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
