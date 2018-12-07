@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.10
+++++++
+* webapp: add support for listing and restoring webapp snapshots
+
 0.2.9
 +++++
 * webapp: az webapp config container now honors --slot parameter

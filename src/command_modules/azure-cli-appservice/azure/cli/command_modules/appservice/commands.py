@@ -142,6 +142,10 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
 
+    with self.command_group('webapp config snapshot') as g:
+        g.custom_command('list', 'list_snapshots')
+        g.custom_command('restore', 'restore_snapshot')
+
     with self.command_group('webapp webjob continuous') as g:
         g.custom_command('list', 'list_continuous_webjobs', exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_continuous_webjob', exception_handler=ex_handler_factory())

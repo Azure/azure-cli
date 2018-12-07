@@ -235,6 +235,23 @@ type: command
 short-summary: Upload an SSL certificate to a web app.
 """
 
+helps['webapp config snapshot list'] = """
+type: command
+short-summary: List the restorable snapshots for a web app.
+"""
+
+helps['webapp config snapshot restore'] = """
+type: command
+short-summary: Restore a web app snapshot.
+examples:
+    - name: Restore web app files from a snapshot. Overwrites the web app's current files and settings.
+      text: >
+        az webapp config snapshot restore -g MyResourceGroup -n MySite --time 2018-12-11T23:34:16.8388367
+    - name: Restore a snapshot of web app SourceApp to web app TargetApp. Use --restore-content-only to not restore app settings. Overwrites TargetApp's files.
+      text: >
+        az webapp config snapshot restore -g TargetResourceGroup -n TargetApp --source-name SourceApp --source-resource-group OriginalResourceGroup --time 2018-12-11T23:34:16.8388367 --restore-content-only
+"""
+
 helps['webapp deployment'] = """
 type: group
 short-summary: Manage web app deployments.
