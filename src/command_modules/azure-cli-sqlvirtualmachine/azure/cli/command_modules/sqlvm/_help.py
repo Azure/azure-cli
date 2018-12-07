@@ -64,7 +64,7 @@ helps['sqlvm create'] = """
     examples:
         - name: Create a SQL virtual machine with AHUB billing tag.
           text: >
-            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --sql-server-license-type AHUB
+            az sqlvm create -n sqlvm -g MyResourceGroup -l eastus --license-type AHUB
         - name: Create a SQL virtual machine and join it with an existing SQL virtual machine group.
           text: >
             $sqlvmgroup = az sqlvm group show -n sqlvmgroup -g MyResourceGroup | ConvertFrom-Json
@@ -107,7 +107,7 @@ helps['sqlvm update'] = """
             az sqlvm update -n sqlvm -g MyResourceGroup --enable-auto-patching false
         - name: Update a SQL virtual machine billing tag to AHUB.
           text: >
-            az sqlvm update -n sqlvm -g MyResourceGroup --sql-server-license-type AHUB
+            az sqlvm update -n sqlvm -g MyResourceGroup --license-type AHUB
     """
 helps['sqlvm add-to-group'] = """
     type: command
