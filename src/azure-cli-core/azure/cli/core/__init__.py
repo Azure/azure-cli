@@ -18,6 +18,7 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
 
 logger = get_logger(__name__)
