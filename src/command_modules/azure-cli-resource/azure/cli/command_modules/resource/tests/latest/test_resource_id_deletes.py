@@ -23,5 +23,6 @@ class ResourceDeleteTests(ScenarioTest):
         self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
         self.cmd('resource wait --ids {} --deleted --timeout 300'.format(''.join(rsrc_list)))
 
+
 if __name__ == '__main__':
     unittest.main()

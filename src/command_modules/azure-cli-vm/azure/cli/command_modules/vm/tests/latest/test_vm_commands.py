@@ -2197,7 +2197,7 @@ class VMSSNicScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
-        
+
         result = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['iid'] = result[0]['instanceId']
 
