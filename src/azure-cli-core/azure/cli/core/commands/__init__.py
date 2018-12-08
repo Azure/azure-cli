@@ -207,14 +207,14 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         success = False
         if cache.cache_exists():
-            print("attempting to use cache")
+            logger.warning("attempting to use cache")
             success = cache.load_command_table(self.commands_loader, args) is not None
 
         if not success or not cache.cache_exists():
-            print("not using cache")
+            logger.warning("not using cache")
             self.commands_loader.load_command_table(args)
             if os.getenv('AZ_USE_CACHE', 'False').lower() == 'true':
-                print("persisting cache")
+                logger.warning("persisting cache")
                 cache.persist_command_table(self.commands_loader.cmd_to_loader_map)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,

@@ -16,7 +16,7 @@ CACHE_FILE = os.path.join(get_repo_root(), '.cache.txt')
 
 def cache_exists():
     use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'False').lower() == 'true'
-    print('use_cache is {}'.format(use_cache))
+    logger.debug('use_cache is {}'.format(use_cache))
     return use_cache
 
 def persist_command_table(cmd_to_loader_map):
