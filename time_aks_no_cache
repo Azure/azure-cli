@@ -1,0 +1,8 @@
+# https://serverfault.com/questions/273238/how-to-run-a-command-multiple-times-using-bash-shell
+AZ_USE_CACHE="FALSE"
+echo "Use cache is $AZ_USE_CACHE"
+number=$1
+for i in `seq $number`; do
+  azdev test AzureKubernetesServiceScenarioTest
+done
+
