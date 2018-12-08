@@ -2,7 +2,7 @@
 
 Release History
 ===============
-2.1.7:
+2.1.7
 +++++
 * add new command of `az resource wait`
 
