@@ -8,12 +8,16 @@ import timeit
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.extension import EXTENSIONS_DIR, get_extensions
+from automation.utilities.path import get_repo_root
+
 logger = get_logger(__name__)
 
 
-from automation.utilities.path import get_repo_root
 CACHE_FILE = os.path.join(get_repo_root(), '.cache.txt')
 VERSION_STR = "VERSION"
+EXTENSIONS_STR = "EXTENSIONS"
+EXTENSIONS_LIST = ["{}-{}".format(ext.name, ext.version) for ext in get_extensions()]
 
 
 # return true if the cache exists and caching is enabled.
@@ -23,10 +27,11 @@ def cache_exists():
     return use_cache
 
 
-def persist_command_table(cli_ctx, cmd_to_loader_map):
+def cache_command_table(cli_ctx, cmd_to_loader_map):
     try:
         with open(CACHE_FILE, 'w') as f_cache:
             f_cache.write("{},{}\n".format(VERSION_STR, cli_ctx.get_cli_version()))
+            f_cache.write("{},{}\n".format(EXTENSIONS_STR, ",".join(EXTENSIONS_LIST)))
             for cmd, loader in cmd_to_loader_map.items():
                 f_cache.write("{},{}\n".format(cmd, loader[0].__class__.__module__))
 
@@ -35,6 +40,12 @@ def persist_command_table(cli_ctx, cmd_to_loader_map):
 
     logger.debug("Updated command module index cache in %s", CACHE_FILE)
     return CACHE_FILE
+
+
+# clear the cache by deleting it.
+def clear_cache():
+    if os.path.isfile(CACHE_FILE):
+        os.remove(CACHE_FILE)
 
 
 # TODO: this needs to handle extensions as well....
@@ -46,13 +57,21 @@ def load_command_table(main_loader, args):
     cmd_to_mod_name = {}
     try:
         with open(CACHE_FILE, mode='r') as f_cache:
-            for idx, line in enumerate(f_cache):
+            for line in f_cache:
                 line_item = line.strip().split(",")
                 cmd_to_mod_name[line_item[0]] = line_item[1].split(".")[-1]
                 # check the CLI version
-                if idx == 0 and line_item[1] != current_cli_version:
-                    logger.debug("Command module index cache CLI version does not match current CLI version.")
+                if line_item[0] == VERSION_STR and line_item[1] != current_cli_version:
+                    logger.debug("Command index cache CLI version does not match current CLI version.")
                     return None
+                if line_item[0] == EXTENSIONS_STR: #todo: Consider optimizing this if the command is not an extension command.
+                    cached_extensions_set = set(line_item[1:])
+                    installed_extensions_set = set(EXTENSIONS_LIST)
+                    if cached_extensions_set != installed_extensions_set:
+                        msg = "Command index cache extensions list does not match installed extensions:" \
+                              "\n\tCached extensions %s\n\tInstalled extensions %s"
+                        logger.debug(msg, cached_extensions_set, installed_extensions_set)
+                        return None
     except IOError:
         return None
 

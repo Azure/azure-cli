@@ -215,7 +215,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self.commands_loader.load_command_table(args)
             if os.getenv('AZ_USE_CACHE', 'False').lower() == 'true':
                 logger.warning("persisting cache")
-                cache.persist_command_table(self.cli_ctx, self.commands_loader.cmd_to_loader_map)
+                cache.cache_command_table(self.cli_ctx, self.commands_loader.cmd_to_loader_map)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)

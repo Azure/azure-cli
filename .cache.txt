@@ -1,4 +1,5 @@
 VERSION,2.0.51
+EXTENSIONS,alias-0.5.2,aks-preview-0.1.0,storage-preview-0.1.7
 sf cluster show,azure.cli.command_modules.servicefabric
 sf cluster list,azure.cli.command_modules.servicefabric
 sf cluster create,azure.cli.command_modules.servicefabric
@@ -254,20 +255,20 @@ dla account compute-policy update,azure.cli.command_modules.dla
 dla account compute-policy list,azure.cli.command_modules.dla
 dla account compute-policy show,azure.cli.command_modules.dla
 dla account compute-policy delete,azure.cli.command_modules.dla
-storage account check-name,azure.cli.command_modules.storage
-storage account create,azure.cli.command_modules.storage
-storage account delete,azure.cli.command_modules.storage
-storage account show,azure.cli.command_modules.storage
-storage account list,azure.cli.command_modules.storage
-storage account show-usage,azure.cli.command_modules.storage
-storage account show-connection-string,azure.cli.command_modules.storage
-storage account update,azure.cli.command_modules.storage
-storage account keys renew,azure.cli.command_modules.storage
-storage account keys list,azure.cli.command_modules.storage
+storage account check-name,azext_storage_preview
+storage account create,azext_storage_preview
+storage account delete,azext_storage_preview
+storage account show,azext_storage_preview
+storage account list,azext_storage_preview
+storage account show-usage,azext_storage_preview
+storage account show-connection-string,azext_storage_preview
+storage account update,azext_storage_preview
+storage account keys renew,azext_storage_preview
+storage account keys list,azext_storage_preview
 storage account generate-sas,azure.cli.command_modules.storage
-storage account network-rule add,azure.cli.command_modules.storage
-storage account network-rule list,azure.cli.command_modules.storage
-storage account network-rule remove,azure.cli.command_modules.storage
+storage account network-rule add,azext_storage_preview
+storage account network-rule list,azext_storage_preview
+storage account network-rule remove,azext_storage_preview
 storage logging update,azure.cli.command_modules.storage
 storage logging show,azure.cli.command_modules.storage
 storage metrics update,azure.cli.command_modules.storage
@@ -301,7 +302,7 @@ storage blob incremental-copy start,azure.cli.command_modules.storage
 storage blob incremental-copy cancel,azure.cli.command_modules.storage
 storage blob service-properties delete-policy show,azure.cli.command_modules.storage
 storage blob service-properties delete-policy update,azure.cli.command_modules.storage
-storage blob service-properties show,azure.cli.command_modules.storage
+storage blob service-properties show,azext_storage_preview
 storage container list,azure.cli.command_modules.storage
 storage container delete,azure.cli.command_modules.storage
 storage container show,azure.cli.command_modules.storage
@@ -1388,7 +1389,7 @@ acs kubernetes browse,azure.cli.command_modules.acs
 acs kubernetes get-credentials,azure.cli.command_modules.acs
 acs kubernetes install-cli,azure.cli.command_modules.acs
 aks browse,azure.cli.command_modules.acs
-aks create,azure.cli.command_modules.acs
+aks create,azext_aks_preview
 aks delete,azure.cli.command_modules.acs
 aks disable-addons,azure.cli.command_modules.acs
 aks enable-addons,azure.cli.command_modules.acs
@@ -1399,12 +1400,12 @@ aks install-connector,azure.cli.command_modules.acs
 aks list,azure.cli.command_modules.acs
 aks remove-connector,azure.cli.command_modules.acs
 aks remove-dev-spaces,azure.cli.command_modules.acs
-aks scale,azure.cli.command_modules.acs
-aks show,azure.cli.command_modules.acs
-aks upgrade,azure.cli.command_modules.acs
+aks scale,azext_aks_preview
+aks show,azext_aks_preview
+aks upgrade,azext_aks_preview
 aks upgrade-connector,azure.cli.command_modules.acs
 aks use-dev-spaces,azure.cli.command_modules.acs
-aks wait,azure.cli.command_modules.acs
+aks wait,azext_aks_preview
 aks get-versions,azure.cli.command_modules.acs
 mariadb server create,azure.cli.command_modules.rdbms
 mariadb server restore,azure.cli.command_modules.rdbms
@@ -2247,3 +2248,15 @@ dms project task list,azure.cli.command_modules.dms
 dms project task show,azure.cli.command_modules.dms
 dms project task cancel,azure.cli.command_modules.dms
 dms project task check-name,azure.cli.command_modules.dms
+alias create,azext_alias
+alias export,azext_alias
+alias import,azext_alias
+alias list,azext_alias
+alias remove,azext_alias
+alias remove-all,azext_alias
+aks update,azext_aks_preview
+storage account management-policy show,azext_storage_preview
+storage account management-policy create,azext_storage_preview
+storage account management-policy update,azext_storage_preview
+storage account management-policy delete,azext_storage_preview
+storage blob service-properties update,azext_storage_preview
