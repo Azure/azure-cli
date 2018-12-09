@@ -7,37 +7,52 @@ import os
 import timeit
 
 from knack.log import get_logger
+from knack.util import CLIError
 logger = get_logger(__name__)
 
 
 from automation.utilities.path import get_repo_root
 CACHE_FILE = os.path.join(get_repo_root(), '.cache.txt')
+VERSION_STR = "VERSION"
 
 
+# return true if the cache exists and caching is enabled.
 def cache_exists():
     use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'False').lower() == 'true'
     logger.debug('use_cache is {}'.format(use_cache))
     return use_cache
 
-def persist_command_table(cmd_to_loader_map):
-    if not os.path.isfile(CACHE_FILE):
-        with open('.cache.txt', 'w') as f_cache:
+
+def persist_command_table(cli_ctx, cmd_to_loader_map):
+    try:
+        with open(CACHE_FILE, 'w') as f_cache:
+            f_cache.write("{},{}\n".format(VERSION_STR, cli_ctx.get_cli_version()))
             for cmd, loader in cmd_to_loader_map.items():
                 f_cache.write("{},{}\n".format(cmd, loader[0].__class__.__module__))
 
+    except IOError:
+        raise CLIError("Error: Failed to ")
+
+    logger.debug("Updated command module index cache in %s", CACHE_FILE)
     return CACHE_FILE
+
 
 # TODO: this needs to handle extensions as well....
 def load_command_table(main_loader, args):
     start_time = timeit.default_timer()
     from azure.cli.core.commands import _load_module_command_loader
 
+    current_cli_version = main_loader.cli_ctx.get_cli_version()
     cmd_to_mod_name = {}
     try:
         with open(CACHE_FILE, mode='r') as f_cache:
-            for line in f_cache:
+            for idx, line in enumerate(f_cache):
                 line_item = line.strip().split(",")
                 cmd_to_mod_name[line_item[0]] = line_item[1].split(".")[-1]
+                # check the CLI version
+                if idx == 0 and line_item[1] != current_cli_version:
+                    logger.debug("Command module index cache CLI version does not match current CLI version.")
+                    return None
     except IOError:
         return None
 
