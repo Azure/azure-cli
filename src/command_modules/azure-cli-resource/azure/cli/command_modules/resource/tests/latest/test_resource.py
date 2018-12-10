@@ -813,6 +813,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('account management-group delete -n ' + management_group_name)
 
     @record_only()
+    @unittest.skip('mock doesnt work when the subscription comes from --scope')
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
     def test_resource_policy_subscription_id(self, resource_group):
@@ -830,7 +831,6 @@ class PolicyScenarioTest(ScenarioTest):
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
-    @unittest.skip('to investigate why playback fails')
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
