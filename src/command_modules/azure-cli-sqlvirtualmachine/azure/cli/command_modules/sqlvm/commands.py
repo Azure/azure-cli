@@ -17,7 +17,6 @@ from ._format import (
 
 from ._util import (
     get_sqlvirtualmachine_availability_group_listeners_operations,
-    get_sqlvirtualmachine_operations,
     get_sqlvirtualmachine_sql_virtual_machine_groups_operations,
     get_sqlvirtualmachine_sql_virtual_machines_operations,
 )

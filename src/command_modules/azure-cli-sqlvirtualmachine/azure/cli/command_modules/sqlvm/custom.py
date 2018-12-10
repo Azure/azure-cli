@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from msrestazure.tools import is_valid_resource_id, resource_id
 from azure.cli.core.commands import LongRunningOperation
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.util import (
     sdk_no_wait, CLIError,
@@ -22,7 +22,6 @@ from azure.mgmt.sqlvirtualmachine.models import(
     KeyVaultCredentialSettings,
     SqlConnectivityUpdateSettings,
     SqlWorkloadTypeUpdateSettings,
-    SqlStorageUpdateSettings,
     AdditionalFeaturesServerConfigurations,
     ServerConfigurationsManagementSettings,
     SqlVirtualMachine
@@ -42,8 +41,8 @@ def sqlvm_list(
     return client.list()
 
 def sqlvm_group_list(
-    client,
-    resource_group_name=None):
+        client,
+        resource_group_name=None):
     '''
     Lists all SQL virtual machine groups in a resource group or subscription.
     '''
@@ -142,7 +141,7 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     #Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
                                          subnet_resource_id=subnet_resource_id
-                                            if is_valid_resource_id(subnet_resource_id) else None)
+                                         if is_valid_resource_id(subnet_resource_id) else None)
 
     #Create the load balancer configurations
     load_balancer_object = LoadBalancerConfiguration(private_ip_address=private_ip_object,
@@ -163,7 +162,7 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     return client.get(resource_group_name, sql_virtual_machine_group_name, availability_group_listener_name)
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements, line-too-long
+# pylint: disable=too-many-locals, too-many-statements, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group_name,
                  sql_server_license_type='PAYG', sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
                  cluster_operator_account_password=None, sql_service_account_password=None, enable_auto_patching=None,
@@ -263,6 +262,7 @@ def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
+# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
 def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
@@ -287,8 +287,8 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
                                                                maintenance_window_duration=maintenance_window_duration)
 
     if (enable_auto_backup is not None or enable_encryption or retention_period is not None or storage_account_url is not None or storage_access_key is not None
-        or backup_password is not None or backup_system_dbs or backup_schedule_type is not None or full_backup_frequency is not None or
-        full_backup_start_time is not None or full_backup_window_hours is not None or log_backup_frequency is not None):
+            or backup_password is not None or backup_system_dbs or backup_schedule_type is not None or full_backup_frequency is not None or
+            full_backup_start_time is not None or full_backup_window_hours is not None or log_backup_frequency is not None):
 
         enable_auto_backup = enable_auto_backup if enable_auto_backup is False else True
         instance.auto_backup_settings = AutoBackupSettings(enable=enable_auto_backup,
@@ -305,7 +305,7 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
                                                            log_backup_frequency=log_backup_frequency)
 
     if (enable_key_vault_credential is not None or credential_name is not None or azure_key_vault_url is not None or service_principal_name is not None
-        or service_principal_secret is not None):
+            or service_principal_secret is not None):
 
         enable_key_vault_credential = enable_key_vault_credential if enable_key_vault_credential is False else True
         instance.key_vault_credential_settings = KeyVaultCredentialSettings(enable=enable_key_vault_credential,
@@ -323,32 +323,32 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
     if sql_workload_type is not None:
         instance.server_configurations_management_settings.sql_workload_type_update_settings = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
-    if (enable_r_services is not None):
+    if enable_r_services is not None:
         instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
 
     #If none of the settings was modified, reset server_configurations_management_settings to be null
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
-        instance.server_configurations_management_settings.sql_workload_type_update_settings is None and
-        instance.server_configurations_management_settings.sql_storage_update_settings is None and
-        instance.server_configurations_management_settings.additional_features_server_configurations is None):
+            instance.server_configurations_management_settings.sql_workload_type_update_settings is None and
+            instance.server_configurations_management_settings.sql_storage_update_settings is None and
+            instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
     return instance
 
 
 def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, cluster_bootstrap_account_password,
-                 cluster_operator_account_password, sql_service_account_password):
+                       cluster_operator_account_password, sql_service_account_password):
     '''
     Add a SQL virtual machine to a SQL virtual machine group.
     '''
 
-    if not (is_valid_resource_id(sql_virtual_machine_group_resource_id)):
+    if not is_valid_resource_id(sql_virtual_machine_group_resource_id):
         raise CLIError("Invalid SQL virtual machine group resource id.")
 
     instance.sql_virtual_machine_group_resource_id = sql_virtual_machine_group_resource_id
     instance.wsfc_domain_credentials = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
-                                                                 cluster_operator_account_password=cluster_operator_account_password,
-                                                                 sql_service_account_password=sql_service_account_password)
+                                                             cluster_operator_account_password=cluster_operator_account_password,
+                                                             sql_service_account_password=sql_service_account_password)
     return instance
 
 
@@ -364,12 +364,12 @@ def add_sqlvm_to_aglistener(instance, sqlvm_resource_id):
     '''
     Add a SQL virtual machine to an availability group listener.
     '''
-    if not (is_valid_resource_id(sqlvm_resource_id)):
+    if not is_valid_resource_id(sqlvm_resource_id):
         raise CLIError("Invalid SQL virtual machine resource id.")
 
-    sqlvm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
+    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
 
-    if sqlvm_resource_id not in sqlvm_list:
+    if sqlvm_resource_id not in vm_list:
         instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sqlvm_resource_id)
 
     return instance
@@ -379,12 +379,12 @@ def remove_sqlvm_from_aglistener(instance, sqlvm_resource_id):
     '''
     Remove a SQL virtual machine from an availability group listener.
     '''
-    if not (is_valid_resource_id(sqlvm_resource_id)):
+    if not is_valid_resource_id(sqlvm_resource_id):
         raise CLIError("Invalid SQL virtual machine resource id.")
 
-    sqlvm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
+    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
 
-    if sqlvm_resource_id in sqlvm_list:
+    if sqlvm_resource_id in vm_list:
         instance.load_balancer_configurations[0].sql_virtual_machine_instances.remove(sqlvm_resource_id)
 
     return instance

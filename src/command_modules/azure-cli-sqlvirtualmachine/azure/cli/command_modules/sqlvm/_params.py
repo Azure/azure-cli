@@ -12,7 +12,6 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ConnectivityType,
     SqlWorkloadType,
     DiskConfigurationType,
-    SqlImageSku,
     DayOfWeek,
     SqlVmGroupImageSku
 )

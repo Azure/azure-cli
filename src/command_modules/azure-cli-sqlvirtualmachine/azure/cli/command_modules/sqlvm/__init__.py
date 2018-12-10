@@ -14,8 +14,8 @@ class SqlVmCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         sqlvm_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.sqlvm.custom#{}')
         super(SqlVmCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                custom_command_type=sqlvm_custom,
-                                                min_profile='2017-03-10-profile')
+                                                  custom_command_type=sqlvm_custom,
+                                                  min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.sqlvm.commands import load_command_table
