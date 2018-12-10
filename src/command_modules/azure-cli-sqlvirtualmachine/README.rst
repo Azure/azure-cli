@@ -1,2 +1,5 @@
-Microsoft Azure CLI 'SQL virtual machine' Command Module
+Microsoft Azure CLI 'SQLVM' Command Module
 ========================================
+
+This package is for the 'sqlvm' module.
+i.e. 'az sqlvm'
