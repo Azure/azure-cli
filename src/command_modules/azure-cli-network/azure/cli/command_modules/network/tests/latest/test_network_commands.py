@@ -1940,7 +1940,9 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'gw2_ip2': 'gw2ip2',
             'key': 'abc123',
             'conn12': 'vnet1to2',
-            'conn21': 'vnet2to1'
+            'conn21': 'vnet2to1',
+            'bgp_peer1': '10.52.255.253',
+            'bgp_peer2': '10.53.255.253'
         })
 
         # Create one VNet with two public IPs
@@ -1953,16 +1955,19 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network public-ip create -g {rg} -n {gw2_ip1}')
         self.cmd('network public-ip create -g {rg} -n {gw2_ip2}')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --bgp-peering-address {bgp_peer1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --bgp-peering-address {bgp_peer2} --no-wait')
 
         # wait for gateway completion to finish
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
 
+        # TODO: Re-enabled once issue https://github.com/Azure/azure-cli/issues/7977 is resolved
         # create and connect the VNet gateways
-        self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
-        self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
 class NetworkVpnGatewayScenarioTest(ScenarioTest):
