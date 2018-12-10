@@ -701,6 +701,8 @@ helps['storage logging update'] = """
           short-summary: 'The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.'
         - name: --retention
           short-summary: Number of days for which to retain logs. 0 to disable.
+        - name: --version
+          short-summary: Version of the logging schema.
 """
 
 helps['storage message'] = """
