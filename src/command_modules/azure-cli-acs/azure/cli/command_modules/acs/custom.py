@@ -2389,7 +2389,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
-        open_shift_version="v3.10",
+        open_shift_version="v3.11",
         fqdn=fqdn,
         network_profile=network_profile,
         auth_profile=auth_profile,
