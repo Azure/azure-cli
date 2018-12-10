@@ -126,6 +126,16 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
+    """Retrieves the bot's application's application settings. If called with '--msbot' flag, the operation outputs
+    a collection of data that can be piped into a .bot file.
+
+    This method is directly called via "bot show"
+    :param cmd:
+    :param client:
+    :param resource_group_name:
+    :param resource_name:
+    :param bot_json:
+    """
     raw_bot_properties = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -224,7 +234,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     os.mkdir(folder_path)
 
     logger.info('Creating Kudu client to download bot source.')
-    kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
+    kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
 
     logger.info('Downloading bot source. This operation may take seconds or minutes depending on the size of '
                 'your bot source and the download speed of your internet connection.')
@@ -495,7 +505,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     zip_filepath = BotPublishPrep.create_upload_zip(logger, code_dir, include_node_modules=False)
     logger.info('Zip file path created, at %s.', zip_filepath)
 
-    kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot)
+    kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
     output = kudu_client.publish(zip_filepath)
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
