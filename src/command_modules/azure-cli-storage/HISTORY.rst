@@ -3,6 +3,26 @@
 Release History
 ===============
 
+2.2.7
++++++
+* Minor fixes.
+
+2.2.6
++++++
+* Minor fixes.
+
+2.2.5
++++++
+* Improve handling of corner cases for storage copy commands.
+* Fix issue with `storage blob copy start-batch` not using login credentials when the destination and source accounts are the same.
+* `storage blob/file url`- fix bug with sas_token not being incorporated into url.
+* Warn users about future breaking change: `blob/container list` will output first 5000 results by default.
+
+2.2.4
++++++
+* Allow connection to storage services only with SAS and endpoints (without an account name or a key) as described in
+  `Configure Azure Storage connection strings <https://docs.microsoft.com/azure/storage/common/storage-configure-connection-string>`_.
+
 2.2.3
 +++++
 * Fix `az storage cors list` output formatting, all items show correct "Service" key

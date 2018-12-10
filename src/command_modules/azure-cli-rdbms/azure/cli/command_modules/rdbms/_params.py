@@ -23,7 +23,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     def _complex_params(command_group):
         with self.argument_context('{} server create'.format(command_group)) as c:
-            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku, typically, tier + family + cores, e.g. B_Gen5_1, GP_Gen5_8.')
+            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
 
             c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained.')
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable Geo-redundant or not for server backup.')
@@ -37,7 +37,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
-            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku, typically, tier + family + cores, e.g. B_Gen5_1, GP_Gen5_8.')
+            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
@@ -45,10 +45,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server georestore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
-            c.argument('sku_name', options_list=['--sku-name'], required=False, help='The name of the sku, typically, tier + family + cores, e.g. B_Gen5_1, GP_Gen5_8.')
+            c.argument('sku_name', options_list=['--sku-name'], required=False, help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
             c.argument('source_server', options_list=['--source-server', '-s'], required=True, help='The name or ID of the source server to restore from.')
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The max days of retention, unit is days.')
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable Geo-redundant or not for server backup.')
+
+        with self.argument_context('mysql server replica') as c:
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the master server to create replica for.')
 
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
@@ -99,14 +102,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
             c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
-    for scope in ['mysql server vnet-rule', 'postgres server vnet-rule']:
+    for scope in ['mariadb server vnet-rule', 'mysql server vnet-rule', 'postgres server vnet-rule']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('virtual_network_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the vnet rule.')
             c.argument('virtual_network_subnet_id', options_list=['--subnet'], help='Name or ID of the subnet that allows access to an Azure Postgres Server. If subnet name is provided, --vnet-name must be provided.')
             c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint', '-i'], help='Create vnet rule before virtual network has vnet service endpoint enabled', arg_type=get_three_state_flag())
 
-    for scope in ['postgres server vnet-rule create', 'postgres server vnet-rule update', 'mysql server vnet-rule create', 'mysql server vnet-rule update']:
+    for scope in ['mariadb server vnet-rule create', 'mariadb server vnet-rule update', 'postgres server vnet-rule create', 'postgres server vnet-rule update', 'mysql server vnet-rule create', 'mysql server vnet-rule update']:
         with self.argument_context(scope) as c:
             c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)
 
@@ -114,3 +117,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
+
+    with self.argument_context('mysql server replica list') as c:
+        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')

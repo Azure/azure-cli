@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.50"
+__version__ = "2.0.52"
 
 import os
 import sys
@@ -12,13 +12,13 @@ import timeit
 
 import six
 
-from knack.arguments import ArgumentsContext
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
 
 logger = get_logger(__name__)
@@ -110,7 +110,7 @@ class MainCommandsLoader(CLICommandsLoader):
         import traceback
         from azure.cli.core.commands import (
             _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
-        from azure.cli.core.extensions import (
+        from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
 
         def _update_command_table_from_modules(args):
@@ -242,13 +242,14 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            with ArgumentsContext(self, '') as c:
-                c.argument('resource_group_name', resource_group_name_type)
-                c.argument('location', get_location_type(self.cli_ctx))
-                c.argument('deployment_name', deployment_name_type)
-                c.argument('cmd', ignore_type)
-
             for loader in command_loaders:
+                # register global args
+                with loader.argument_context('') as c:
+                    c.argument('resource_group_name', resource_group_name_type)
+                    c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('deployment_name', deployment_name_type)
+                    c.argument('cmd', ignore_type)
+
                 loader.command_name = command
                 self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 loader.load_arguments(command)  # this adds entries to the argument registries
@@ -259,12 +260,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False):
+    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
+                 recommend_update=False):
         self.mod_name = mod_name
         self.suppress_extension_name = suppress_extension_name
         self.suppress_up_to_version = suppress_up_to_version
         self.reason = reason
         self.recommend_remove = recommend_remove
+        self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
         from pkg_resources import parse_version
@@ -278,6 +281,8 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
                          "to %s", ext.name, ext.version, self.mod_name)
             if self.recommend_remove:
                 logger.warning("Remove this extension with 'az extension remove --name %s'", ext.name)
+            if self.recommend_update:
+                logger.warning("Update this extension with 'az extension update --name %s'", ext.name)
         return should_suppress
 
 

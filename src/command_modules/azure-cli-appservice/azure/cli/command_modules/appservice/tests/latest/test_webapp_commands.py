@@ -97,7 +97,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '6.9.1'),
+            JMESPathCheck('[0].value', '8.11.1'),
         ]))
 
     @ResourceGroupPreparer()
@@ -160,11 +160,11 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-linux-cd'
+        webapp_name = self.create_random_name(prefix='webapp-linux-cd', length=24)
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
-        time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         if 'Hello world' not in str(r.content):
@@ -480,6 +480,43 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
+class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_slot(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
+        plan = self.create_random_name(prefix='plan-linux-multi', length=24)
+        config_file = os.path.join(TEST_DIR, 'sample-compose.yml')
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
+        slot_config_file = os.path.join(TEST_DIR, 'sample-compose-slot.yml')
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux --sku S1'.format(resource_group, plan))
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot))
+        self.cmd("webapp config container set -g {} -n {} --slot {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, slot, slot_config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(slot_webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello from a slot! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+
 class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):
@@ -668,7 +705,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         # reset
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheck("[?name=='s1']|[0]", None)
+            JMESPathCheck("[?name=='s1']|[0].value", 'slot')
         ])
 
 
@@ -702,7 +739,7 @@ class WebappSSLCertTest(ScenarioTest):
 
 
 class WebappUndeleteTest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer()
     def test_webapp_deleted_list(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
@@ -713,18 +750,6 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer()
-    def test_webapp_deleted_restore(self, resource_group):
-        plan = self.create_random_name(prefix='undelete-plan', length=24)
-        webapp_name = self.create_random_name(prefix='undelete-web', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
-        # A snapshot must be available to restore a deleted app. The app must exist for at least an hour prior to deletion to have a snapshot.
-        # Using a pre-configured deleted app in this test.
-        deleted_app_id = self.cmd('webapp deleted list -g {} -n {}'.format('nicking', 'nickingdeletedwordpress')).get_output_in_json()[0]['id']
-        self.cmd('webapp deleted restore --deleted-id {} -g {} -n {}'.format(deleted_app_id, resource_group, webapp_name))
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
@@ -935,11 +960,13 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
+
+    @record_only()
     @ResourceGroupPreparer()
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-triggered'
@@ -954,10 +981,11 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
+    @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
-        # recording this
+        # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'
         webjob_name = 'test-continuous'

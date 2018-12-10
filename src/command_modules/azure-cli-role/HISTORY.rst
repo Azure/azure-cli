@@ -2,8 +2,18 @@
 
 Release History
 ===============
+2.1.11
+++++++
+* support custom identifier for password credential 
+
+2.1.10
+++++++
+* `ad app update`: address a failure caused by updating immutable credentials
+* graph: output warnings to communicate breaking changes in the near future for "ad app/sp list"
+
 2.1.9
 ++++++
+* support API permission management, signed-in-user, and application password & certificate credential management
 * `ad sp create-for-rbac`: clarify the confusion between displayName and service principal name
 * support grant permissions to AAD apps
 

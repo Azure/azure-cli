@@ -72,7 +72,7 @@ def get_installed_cli_distributions():
 
 def get_az_version_string():
     import platform
-    from azure.cli.core.extensions import get_extensions, EXTENSIONS_DIR
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
 
     output = six.StringIO()
     installed_dists = get_installed_cli_distributions()
@@ -335,3 +335,12 @@ def can_launch_browser():
 
 def get_command_type_kwarg(custom_command=False):
     return 'custom_command_type' if custom_command else 'command_type'
+
+
+def reload_module(module):
+    # reloading the imported module to update
+    try:
+        from importlib import reload
+    except ImportError:
+        pass  # for python 2
+    reload(sys.modules[module])

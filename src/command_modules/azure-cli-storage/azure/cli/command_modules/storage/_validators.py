@@ -5,6 +5,7 @@
 
 # pylint: disable=protected-access
 
+from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -16,6 +17,7 @@ from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+logger = get_logger(__name__)
 
 
 # Utilities
@@ -104,9 +106,6 @@ def validate_client_parameters(cmd, namespace):
             account_key_args = [arg for arg in account_key_args if arg]
 
             if account_key_args:
-                from knack.log import get_logger
-
-                logger = get_logger(__name__)
                 logger.warning('In "login" auth mode, the following arguments are ignored: %s',
                                ' ,'.join(account_key_args))
             return
@@ -119,10 +118,7 @@ def validate_client_parameters(cmd, namespace):
         conn_dict = validate_key_value_pairs(n.connection_string)
         n.account_name = conn_dict.get('AccountName')
         n.account_key = conn_dict.get('AccountKey')
-        if not n.account_name or not n.account_key:
-            from knack.util import CLIError
-            raise CLIError('Connection-string: %s, is malformed. Some shell environments require the '
-                           'connection string to be surrounded by quotes.' % n.connection_string)
+        n.sas_token = conn_dict.get('SharedAccessSignature')
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
@@ -224,7 +220,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     from .util import create_short_lived_blob_sas, create_short_lived_file_sas
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
-        '\n\t   --source-uri' \
+        '\n\t   --source-uri [--source-sas]' \
         '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]' \
         '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]' \
         '\n\tOR --source-share --source-path' \
@@ -250,13 +246,15 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source in the form of an uri
     uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, source_sas, snapshot, share, path, source_account_name,
+        if any([container, blob, snapshot, share, path, source_account_name,
                 source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
-        else:
-            # simplest scenario--no further processing necessary
-            return
+        if source_sas:
+            source_sas = source_sas.lstrip('?')
+            uri = '{}{}{}'.format(uri, '?', source_sas)
+            namespace.copy_source = uri
+        return
 
     # ensure either a file or blob source is specified
     valid_blob_source = container and blob and not share and not path
@@ -325,6 +323,13 @@ def validate_blob_type(namespace):
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
 
 
+def validate_storage_data_plane_list(namespace):
+    if namespace.num_results is None:
+        logger.warning('In a future release, if --num-results is not provided, the CLI will output only the first '
+                       '5000 results to minimize wait times. Users will be able to use a --all flag for the old '
+                       'behavior.')
+
+
 def get_content_setting_validator(settings_class, update, guess_from_file=None):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
@@ -379,12 +384,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
 
         # if update, fill in any None values with existing
         if update:
-            new_props.content_type = new_props.content_type or props.content_type
-            new_props.content_disposition = new_props.content_disposition or props.content_disposition
-            new_props.content_encoding = new_props.content_encoding or props.content_encoding
-            new_props.content_language = new_props.content_language or props.content_language
-            new_props.content_md5 = new_props.content_md5 or props.content_md5
-            new_props.cache_control = new_props.cache_control or props.cache_control
+            for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language', 'content_md5',
+                         'cache_control']:
+                if getattr(new_props, attr) is None:
+                    setattr(new_props, attr, getattr(props, attr))
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
@@ -599,6 +602,7 @@ def validate_select(namespace):
         namespace.select = ','.join(namespace.select)
 
 
+# pylint: disable=too-many-statements
 def get_source_file_or_blob_service_client(cmd, namespace):
     """
     Create the second file service or blob service client for batch copy command, which is used to
@@ -608,7 +612,7 @@ def get_source_file_or_blob_service_client(cmd, namespace):
     """
     t_file_svc, t_block_blob_svc = cmd.get_models('file#FileService', 'blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
-                   '\n\t   --source-uri' + \
+                   '\n\t   --source-uri  [--source-sas]' + \
                    '\n\tOR --source-container' + \
                    '\n\tOR --source-container --source-account-name --source-account-key' + \
                    '\n\tOR --source-container --source-account-name --source-sas' + \
@@ -625,58 +629,47 @@ def get_source_file_or_blob_service_client(cmd, namespace):
 
     if source_uri and source_account:
         raise ValueError(usage_string)
+    if not source_uri and bool(source_container) == bool(source_share):  # must be container or share
+        raise ValueError(usage_string)
 
-    elif (not source_account) and (not source_uri):
+    if (not source_account) and (not source_uri):
         # Set the source_client to None if neither source_account or source_uri is given. This
         # indicates the command that the source files share or blob container is in the same storage
-        # account as the destination file share.
+        # account as the destination file share or blob container.
         #
         # The command itself should create the source service client since the validator can't
         # access the destination client through the namespace.
         #
         # A few arguments check will be made as well so as not to cause ambiguity.
-
-        if source_key:
-            raise ValueError('invalid usage: --source-account-key is set but --source-account-name'
-                             ' is missing.')
-
-        if source_container and source_share:
-            raise ValueError(usage_string)
-
-        if not source_container and not source_share:
-            raise ValueError(usage_string)
-
+        if source_key or source_sas:
+            raise ValueError('invalid usage: --source-account-name is missing; the source account is assumed to be the'
+                             ' same as the destination account. Do not provide --source-sas or --source-account-key')
         ns['source_client'] = None
 
-    elif source_account:
-        if source_container and source_share:
-            raise ValueError(usage_string)
+        if 'token_credential' not in ns:  # not using oauth
+            return
+        # oauth is only possible through destination, must still get source creds
+        source_account, source_key, source_sas = ns['account_name'], ns['account_key'], ns['sas_token']
 
+    if source_account:
         if not (source_key or source_sas):
-            # when either storage account key or SAS is given, try to fetch the key in the current
+            # when neither storage account key or SAS is given, try to fetch the key in the current
             # subscription
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
         if source_container:
-            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
-                                                                  t_block_blob_svc,
-                                                                  name=source_account,
-                                                                  key=source_key,
-                                                                  sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(
+                cmd.cli_ctx, t_block_blob_svc, name=source_account, key=source_key, sas_token=source_sas)
         elif source_share:
-            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
-                                                                  t_file_svc,
-                                                                  name=source_account,
-                                                                  key=source_key,
-                                                                  sas_token=source_sas)
-        else:
-            raise ValueError(usage_string)
-
+            ns['source_client'] = get_storage_data_service_client(
+                cmd.cli_ctx, t_file_svc, name=source_account, key=source_key, sas_token=source_sas)
     elif source_uri:
-        if source_sas or source_key or source_container or source_share:
+        if source_key or source_container or source_share:
             raise ValueError(usage_string)
 
         from .storage_url_helpers import StorageResourceIdentifier
+        if source_sas:
+            source_uri = '{}{}{}'.format(source_uri, '?', source_sas.lstrip('?'))
         identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, source_uri)
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
@@ -684,19 +677,24 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         elif identifier.blob or identifier.directory or \
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
-        elif identifier.container:
+
+        if identifier.sas_token:
+            ns['source_sas'] = identifier.sas_token
+        else:
+            source_key = _query_account_key(cmd.cli_ctx, identifier.account_name)
+
+        if identifier.container:
             ns['source_container'] = identifier.container
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx, t_block_blob_svc,
-                                                                      name=identifier.account_name,
-                                                                      sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(
+                    cmd.cli_ctx, t_block_blob_svc, name=identifier.account_name, key=source_key,
+                    sas_token=identifier.sas_token)
         elif identifier.share:
             ns['source_share'] = identifier.share
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
-                                                                      t_file_svc,
-                                                                      name=identifier.account_name,
-                                                                      sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(
+                    cmd.cli_ctx, t_file_svc, name=identifier.account_name, key=source_key,
+                    sas_token=identifier.sas_token)
 
 
 def add_progress_callback(cmd, namespace):

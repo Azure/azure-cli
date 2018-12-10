@@ -219,6 +219,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         renewed_keys = self.cmd('storage account keys renew -g {} -n {} --key primary'
                                 .format(resource_group, storage_account)).get_output_in_json()
+        print(renewed_keys)
+        print(original_keys)
         assert renewed_keys[0] != original_keys[0]
         assert renewed_keys[1] == original_keys[1]
 

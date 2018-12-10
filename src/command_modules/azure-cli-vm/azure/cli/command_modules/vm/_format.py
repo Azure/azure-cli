@@ -114,3 +114,12 @@ def get_vmss_table_output_transformer(loader, for_list=True):
     transform = transform.replace('$zone$', 'Zones: (!zones && \' \') || join(\' \', zones), '
                                   if loader.supported_api_version(min_api='2017-03-30') else ' ')
     return transform if not for_list else '[].' + transform
+
+
+def transform_vm_encryption_show_table_output(result):
+    from collections import OrderedDict
+    if result.get("status", []):
+        status_dict = result["status"][0]
+        return OrderedDict([("status", status_dict.get("displayStatus", "N/A")),
+                            ("message", status_dict.get("message", "N/A"))])
+    return result

@@ -14,7 +14,7 @@ def get_all_help(cli_ctx):
     invoker = cli_ctx.invocation
     help_ctx = cli_ctx.help_cls(cli_ctx)
     if not invoker:
-        raise CLIError("CLI context does not contain invocation.")
+        raise CLIError('CLI context does not contain invocation.')
 
     parser_keys = []
     parser_values = []
@@ -45,14 +45,21 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
                                      parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
+    invoker.commands_loader.skip_applicability = True
     invoker.commands_loader.load_command_table(None)
+
+    # turn off applicability check for all loaders
+    for loaders in invoker.commands_loader.cmd_to_loader_map.values():
+        for loader in loaders:
+            loader.skip_applicability = True
+
     for command in invoker.commands_loader.command_table:
         invoker.commands_loader.load_arguments(command)
-    invoker.parser.load_command_table(invoker.commands_loader)
 
     register_global_subscription_argument(cli_ctx)
     register_ids_argument(cli_ctx)  # global subscription must be registered first!
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
+    invoker.parser.load_command_table(invoker.commands_loader)
 
 
 def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):

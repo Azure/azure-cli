@@ -60,8 +60,8 @@ def get_vnet_validator(dest):
         names_or_ids = getattr(namespace, dest)
         ids = []
 
-        if names_or_ids == [""] or not names_or_ids:
-            names_or_ids = []
+        if names_or_ids == [''] or not names_or_ids:
+            return
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
@@ -179,11 +179,12 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_auth_cert(namespace):
-    namespace.cert_data = read_base_64_file(namespace.cert_data)
-
-
 def validate_cert(namespace):
+    if namespace.cert_data:
+        namespace.cert_data = read_base_64_file(namespace.cert_data)
+
+
+def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
@@ -192,7 +193,7 @@ def validate_cert(namespace):
     else:
         # cert supplied -- use HTTPS
         if not all(params):
-            raise argparse.ArgumentError(
+            raise CLIError(
                 None, 'To use SSL certificate, you must specify both the filename and password')
 
         # extract the certificate data from the provided file
@@ -609,22 +610,18 @@ def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: di
 
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-
     get_servers_validator(camel_case=True)(namespace)
 
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(cmd, namespace)
-
     validate_address_prefixes(namespace)
-
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
-
-    validate_cert(namespace)
-
+    validate_ssl_cert(namespace)
     validate_tags(namespace)
+    validate_custom_error_pages(namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -1266,3 +1263,38 @@ def validate_ag_address_pools(cmd, namespace):
                 child_name_1=item)
             ids.append(item)
     namespace.app_gateway_backend_address_pools = ids
+
+
+def validate_custom_error_pages(namespace):
+
+    if not namespace.custom_error_pages:
+        return
+
+    values = []
+    for item in namespace.custom_error_pages:
+        try:
+            (code, url) = item.split('=')
+            values.append({'statusCode': code, 'customErrorPageUrl': url})
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
+    namespace.custom_error_pages = values
+
+
+# pylint: disable=too-few-public-methods
+class WafConfigExclusionAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        cmd = namespace._cmd  # pylint: disable=protected-access
+        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
+        if not namespace.exclusions:
+            namespace.exclusions = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        try:
+            variable, op, selector = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
+        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
+            match_variable=variable,
+            selector_match_operator=op,
+            selector=selector
+        ))

@@ -10,7 +10,7 @@ from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core.extensions import EXTENSIONS_MOD_PREFIX
+from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 
@@ -100,8 +100,12 @@ def configure_common_settings(cli_ctx, client):
         client._client.add_header(header, value)  # pylint: disable=protected-access
 
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
-    client._client.add_header('CommandName',  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    client._client.add_header('CommandName',
                               "{}{}".format(cli_ctx.data['command'], command_name_suffix))
+    if cli_ctx.data.get('safe_params'):
+        client._client.add_header('ParameterSetName',
+                                  ' '.join(cli_ctx.data['safe_params']))
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 

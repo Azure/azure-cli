@@ -16,7 +16,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
@@ -163,13 +163,14 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
-        g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace)
+        g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
         g.command('delete', 'delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
         g.custom_command('list', 'list_snapshots')
         g.command('revoke-access', 'revoke_access')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot')
+        g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
@@ -193,7 +194,7 @@ def load_command_table(self, _):
         g.command('perform-maintenance', 'perform_maintenance', min_api='2017-03-30')
         g.command('redeploy', 'redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
-        g.command('restart', 'restart', supports_no_wait=True)
+        g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('start', 'start', supports_no_wait=True)
         g.command('stop', 'power_off', supports_no_wait=True)
@@ -225,7 +226,7 @@ def load_command_table(self, _):
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vm')
-        g.custom_show_command('show', 'show_vm_encryption_status')
+        g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.command('delete', 'delete', supports_no_wait=True)

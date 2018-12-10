@@ -253,6 +253,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='mariadb')
     def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
@@ -501,3 +502,104 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('type(@)', 'array')]).get_output_in_json()
 
         self.assertIsNotNone(result[0]['name'])
+
+
+class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+
+    @ResourceGroupPreparer(parameter_name='resource_group')
+    def test_mysql_replica_mgmt(self, resource_group):
+        self._test_replica_mgmt(resource_group, 'mysql')
+
+    def _test_replica_mgmt(self, resource_group, database_engine):
+        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
+                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
+
+        # create a server
+        result = self.cmd('{} server create -g {} --name {} -l brazilsouth '
+                          '--admin-user cloudsa --admin-password SecretPassword123 '
+                          '--sku-name GP_Gen4_2'
+                          .format(database_engine, resource_group, server),
+                          checks=[
+                              JMESPathCheck('name', server),
+                              JMESPathCheck('resourceGroup', resource_group),
+                              JMESPathCheck('sslEnforcement', 'Enabled'),
+                              JMESPathCheck('sku.name', 'GP_Gen4_2'),
+                              JMESPathCheck('replicationRole', 'None'),
+                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
+
+        from time import sleep
+        sleep(300)
+        # test replica create
+        self.cmd('{} server replica create -g {} -n {} '
+                 '--source-server {}'
+                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
+
+        # test show server with replication info
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Master'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test replica list
+        self.cmd('{} server replica list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # test replica stop
+        self.cmd('{} server replica stop -g {} -n {} --yes'
+                 .format(database_engine, resource_group, replicas[0]),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test show server with replication info, master becomes normal server
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test delete master server
+        self.cmd('{} server replica create -g {} -n {} '
+                 '--source-server {}'
+                 .format(database_engine, resource_group, replicas[1], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[1]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
+
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+        sleep(300)
+        # test show server with replication info, replica was auto stopped after master server deleted
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, replicas[1]),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # clean up servers
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())

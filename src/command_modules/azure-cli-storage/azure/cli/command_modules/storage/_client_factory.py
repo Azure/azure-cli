@@ -8,14 +8,17 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 
-NO_CREDENTIALS_ERROR_MESSAGE = """
-No credentials specified to access storage service. Please provide any of the following:
+MISSING_CREDENTIALS_ERROR_MESSAGE = """
+Missing credentials to access storage service. The following variations are accepted:
     (1) account name and key (--account-name and --account-key options or
         set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
-    (2) connection string (--connection-string option or
-        set AZURE_STORAGE_CONNECTION_STRING environment variable)
-    (3) account name and SAS token (--sas-token option used with either the --account-name
+    (2) account name and SAS token (--sas-token option used with either the --account-name
         option or AZURE_STORAGE_ACCOUNT environment variable)
+    (3) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
+        this will make calls to query for a storage account key using login credentials)
+    (4) connection string (--connection-string option or
+        set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
+        quoting to preserve literal character interpretation.
 """
 
 
@@ -37,7 +40,7 @@ def generic_data_service_factory(cli_ctx, service, name=None, key=None, connecti
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
         message = str(val_exception)
         if message == _ERROR_STORAGE_MISSING_INFO:
-            message = NO_CREDENTIALS_ERROR_MESSAGE
+            message = MISSING_CREDENTIALS_ERROR_MESSAGE
         from knack.util import CLIError
         raise CLIError(message)
 

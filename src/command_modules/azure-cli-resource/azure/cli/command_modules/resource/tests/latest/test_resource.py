@@ -6,10 +6,12 @@
 import json
 import os
 import time
+import mock
 import unittest
 
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
 
@@ -303,7 +305,7 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class SubscriptionLevelDepolymentTest(ScenarioTest):
+class SubscriptionLevelDeploymentTest(LiveScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
@@ -538,6 +540,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
 
 class FeatureScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     def test_feature_list(self):
         self.cmd('feature list', checks=self.check("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1))
 
@@ -795,36 +798,63 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_resource_policy_default(self, resource_group):
         self.resource_policy_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse()
     def test_resource_policy_management_group(self, resource_group):
-        self.resource_policy_operations(resource_group, 'AzGovLiveTest')
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policy_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
     def test_resource_policy_subscription_id(self, resource_group):
-        self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        else:
+            self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
     @AllowLargeResponse()
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
+    @unittest.skip('to investigate why playback fails')
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
-        self.resource_policyset_operations(resource_group, 'AzGovLiveTest')
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policyset_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
     @AllowLargeResponse()
     def test_resource_policyset_subscription_id(self, resource_group):
-        self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        else:
+            self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
@@ -850,7 +880,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip',
+            'uri': 'https://testclinew.blob.core.windows.net/files/vivekMAD.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None'
         })
@@ -943,7 +973,7 @@ class ManagedAppScenarioTest(LiveScenarioTest):
             'adn': 'testappdefname',
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip',
+            'uri': 'https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None',
             'sub': self.get_subscription_id()

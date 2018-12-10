@@ -13,7 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -34,7 +34,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'six',
-    'azure-mgmt-eventhub==2.1.0',
+    'azure-mgmt-eventhub==2.2.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

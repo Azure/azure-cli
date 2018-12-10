@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 
-from azure.cli.core.extensions.operations import (
+from azure.cli.core.extension.operations import (
     add_extension, remove_extension, list_extensions, show_extension,
     list_available_extensions, update_extension)
 

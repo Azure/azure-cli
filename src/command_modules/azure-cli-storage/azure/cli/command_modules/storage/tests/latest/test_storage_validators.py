@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+import mock
 from argparse import Namespace
 from six import StringIO
 
@@ -17,7 +18,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            ipv4_range_type, resource_type_type, services_type,
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client,
-                                                           validate_encryption_source,
+                                                           validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services)
 from azure.cli.testsdk import api_version_constraint
 
@@ -155,6 +156,12 @@ class TestStorageValidators(unittest.TestCase):
         self.assertIs(type(result), set)
         self.assertEqual(result, set('ab'))
 
+    def test_validate_source_uri(self):
+        ns = Namespace(copy_source='https://other_name.file.core.windows.net/share2',
+                       source_sas='some_sas_token')
+        validate_source_uri(MockCmd(self.cli), ns)
+        self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
+
 
 @api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestEncryptionValidators(unittest.TestCase):
@@ -219,7 +226,8 @@ class TestGetSourceClientValidator(unittest.TestCase):
         # source given in form of uri, source_container parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
                                     destination_container='container1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
+            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
         self.assertIsNone(ns.source_client)
 
@@ -242,7 +250,8 @@ class TestGetSourceClientValidator(unittest.TestCase):
         # source given in form of uri, source_share parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
                                     destination_share='share1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
+            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNone(ns.source_client)
 

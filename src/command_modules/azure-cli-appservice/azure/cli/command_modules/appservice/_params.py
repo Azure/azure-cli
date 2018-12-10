@@ -14,6 +14,9 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
+from ._validators import validate_timeout_value
+
+
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
     'LoginWithAzureActiveDirectory': BuiltInAuthenticationProvider.azure_active_directory,
@@ -176,6 +179,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -321,6 +325,11 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+
+    with self.argument_context('webapp up') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')

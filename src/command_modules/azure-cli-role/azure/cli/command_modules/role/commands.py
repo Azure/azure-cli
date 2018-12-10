@@ -23,6 +23,41 @@ def transform_assignment_list(result):
                          ('Scope', r['scope'])]) for r in result]
 
 
+def transform_graph_objects_with_cred(result):
+    # here we will convert utf16 encoded custom key id back to the plain text
+    # we will handle single object from "show" cmd, object list from "list" cmd, and cred object itself
+    if not result:
+        return result
+    from msrest.paging import Paged
+    from azure.graphrbac.models import PasswordCredential
+
+    def _patch_creds(creds):
+        for c in creds:
+            custom_key_id = getattr(c, 'custom_key_identifier', None)
+            if custom_key_id:
+                try:
+                    c.custom_key_identifier = custom_key_id.decode('utf-16')
+                except Exception:  # pylint: disable=broad-except
+                    c.custom_key_identifier = None
+        return creds
+
+    singular = False
+    if isinstance(result, Paged):
+        result = list(result)
+
+    if not isinstance(result, list):
+        singular = True
+        result = [result]
+
+    for r in result:
+        if getattr(r, 'password_credentials', None):
+            _patch_creds(r.password_credentials)
+
+        if isinstance(r, PasswordCredential):
+            _patch_creds([r])
+    return result[0] if singular else result
+
+
 def graph_err_handler(ex):
     from azure.graphrbac.models import GraphErrorException
     if isinstance(ex, GraphErrorException):
@@ -47,6 +82,10 @@ def get_graph_client_users(cli_ctx, _):
     return _graph_client_factory(cli_ctx).users
 
 
+def get_graph_client_signed_in_users(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).signed_in_user
+
+
 def get_graph_client_groups(cli_ctx, _):
     return _graph_client_factory(cli_ctx).groups
 
@@ -64,6 +103,11 @@ def load_command_table(self, _):
         client_factory=get_graph_client_groups
     )
 
+    signed_in_users_sdk = CliCommandType(
+        operations_tmpl='azure.graphrbac.operations.signed_in_user_operations#SignedInUserOperations.{}',
+        client_factory=get_graph_client_signed_in_users
+    )
+
     role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
 
     with self.command_group('role definition') as g:
@@ -79,23 +123,29 @@ def load_command_table(self, _):
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 
     with self.command_group('ad app', client_factory=get_graph_client_applications, resource_type=PROFILE_TYPE,
-                            exception_handler=graph_err_handler) as g:
+                            exception_handler=graph_err_handler, transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_apps')
         g.custom_show_command('show', 'show_application')
         g.custom_command('permission grant', 'grant_application')
-        g.custom_command('permission list', 'list_granted_application')
+        g.custom_command('permission list', 'list_permissions')
+        g.custom_command('permission add', 'add_permission')
+        g.custom_command('permission delete', 'delete_permission')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)
+        g.custom_command('credential reset', 'reset_service_principal_credential')
+        g.custom_command('credential list', 'list_service_principal_credentials')
+        g.custom_command('credential delete', 'delete_service_principal_credential')
 
     with self.command_group('ad app owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
         g.custom_command('add', 'add_application_owner')
         g.custom_command('remove', 'remove_application_owner')
 
-    with self.command_group('ad sp', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler) as g:
+    with self.command_group('ad sp', resource_type=PROFILE_TYPE, exception_handler=graph_err_handler,
+                            transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create', 'create_service_principal')
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_sps', client_factory=get_graph_client_service_principals)
@@ -105,7 +155,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_service_principal_owners')
 
     # RBAC related
-    with self.command_group('ad sp', exception_handler=graph_err_handler) as g:
+    with self.command_group('ad sp', exception_handler=graph_err_handler, transform=transform_graph_objects_with_cred) as g:
         g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
         g.custom_command('credential reset', 'reset_service_principal_credential')
         g.custom_command('credential list', 'list_service_principal_credentials')
@@ -118,12 +168,16 @@ def load_command_table(self, _):
         g.custom_command('get-member-groups', 'get_user_member_groups')
         g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
+    with self.command_group('ad signed-in-user', signed_in_users_sdk, exception_handler=graph_err_handler) as g:
+        g.command('show', 'get')
+        g.custom_command('list-owned-objects', 'list_owned_objects', client_factory=get_graph_client_signed_in_users)
+
     with self.command_group('ad group', role_group_sdk, exception_handler=graph_err_handler) as g:
-        g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('get-member-groups', 'get_member_groups')
         g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
+        g.custom_command('create', 'create_group')
 
     with self.command_group('ad group owner', exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_group_owners')
