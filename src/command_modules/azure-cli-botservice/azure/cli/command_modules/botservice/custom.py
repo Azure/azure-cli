@@ -214,9 +214,10 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
 
     if not file_save_path:
         file_save_path = os.getcwd()
-        logger.info('Parameter --file-save-path not provided, defaulting to current working directory, %s. '
+        logger.info('Parameter --save-path not provided, defaulting to current working directory, %s. '
                     'For more information, run \'az bot download -h\'', file_save_path)
 
+    file_save_path = file_save_path.strip()
     if not os.path.isdir(file_save_path):
         raise CLIError('Path name not valid')
 
@@ -373,6 +374,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         logger.warning('Parameter --code-dir not provided, defaulting to current working directory, %s. For more '
                        'information, run \'az bot prepare-publish -h\'', code_dir)
 
+    code_dir = code_dir.strip()
     if not os.path.isdir(code_dir):
         raise CLIError('Please supply a valid directory path containing your source code. '
                        'Path {0} does not exist.'.format(code_dir))
@@ -480,6 +482,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.info('Parameter --code-dir not provided, defaulting to current working directory, %s. '
                     'For more information, run \'az bot publish -h\'', code_dir)
 
+    code_dir = code_dir.strip()
     if not os.path.isdir(code_dir):
         raise CLIError('The path %s is not a valid directory. '
                        'Please supply a valid directory path containing your source code.' % code_dir)
